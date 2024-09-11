@@ -35,12 +35,12 @@ CodecVideoConfig::CodecVideoConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTy
         m_strImageAttr(strImageAttr),
         m_strFrameSize(strFrameSize)
 {
-    IMS_TRACE_D("+CodecVideoConfig Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecVideoConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecVideoConfig::~CodecVideoConfig()
 {
-    IMS_TRACE_D("~CodecVideoConfig", 0, 0, 0);
+    IMS_TRACE_I("~CodecVideoConfig", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CodecVideoConfig::Create(IN ICarrierConfig* piCc)
@@ -73,11 +73,11 @@ PUBLIC VIRTUAL void CodecVideoConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 
-    IMS_TRACE_D("channel(%d), ResolutionWidth(%d), ResolutionHeight(%d)", m_nChannel,
+    IMS_TRACE_D("Channel[%d], ResolutionWidth[%d], ResolutionHeight[%d]", m_nChannel,
             m_nResolutionWidth, m_nResolutionHeight);
-    IMS_TRACE_D("Framerate(%d), Bitrate(%d), PacketizationMode(%d)", m_nFramerate, m_nBitrate,
+    IMS_TRACE_D("Framerate[%d], Bitrate[%d], PacketizationMode[%d]", m_nFramerate, m_nBitrate,
             m_nPacketizationMode);
-    IMS_TRACE_D("SpropParameterSets (%s), VideoCodecImageAttr(%s), VideoCodecFrameSize(%s)",
+    IMS_TRACE_D("SpropParameterSets[%s], VideoCodecImageAttributes[%s], VideoCodecFrameSize[%s]",
             m_strSpropParameterSets.GetStr(), m_strImageAttr.GetStr(), m_strFrameSize.GetStr());
 }
 

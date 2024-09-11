@@ -29,12 +29,12 @@ CodecTelephoneEventConfig::CodecTelephoneEventConfig(
         m_nRedundancyCount(DEFAULT_REDUNDANT_COUNT),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_WB)
 {
-    IMS_TRACE_D("+CodecTelephoneEventConfig Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecTelephoneEventConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecTelephoneEventConfig::~CodecTelephoneEventConfig()
 {
-    IMS_TRACE_D("~CodecTelephoneEventConfig", 0, 0, 0);
+    IMS_TRACE_I("~CodecTelephoneEventConfig", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CodecTelephoneEventConfig::Create(IN ICarrierConfig* /* piCc */)
@@ -51,8 +51,8 @@ PUBLIC VIRTUAL void CodecTelephoneEventConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 
-    IMS_TRACE_D("strEvents(%s)", m_strEvents.GetStr(), 0, 0);
-    IMS_TRACE_D("nRedundancyCount(%d), nSamplingRate(%d)", m_nRedundancyCount, m_nSamplingRate, 0);
+    IMS_TRACE_D("StrEvents[%s], RedundancyCount[%d], SamplingRate[%d]", m_strEvents.GetStr(),
+            m_nRedundancyCount, m_nSamplingRate);
 }
 
 PUBLIC

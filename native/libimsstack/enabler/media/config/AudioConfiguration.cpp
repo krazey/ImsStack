@@ -45,7 +45,7 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
         m_objAudioCandidateAttribute(ImsVector<AString>())
 {
-    IMS_TRACE_D("+AudioConfiguration eSessionType(%d)", eSessionType, 0, 0);
+    IMS_TRACE_I("+AudioConfiguration - SessionType[%d]", eSessionType, 0, 0);
     m_objAudioCandidateAttribute.Push(DEFAULT_CANDIDATE_ATTRIBUTE);
 }
 
@@ -231,7 +231,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
     }
 
     // to avoid static analysis issue (not used variable and variable scope)
-    IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
+    IMS_TRACE_D("CreateCodecConfigs - NumOfCodec[%d]", nCodecCnt, 0, 0);
 
     return IMS_TRUE;
 }
@@ -240,24 +240,20 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
 {
     MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("m_nAudioPtime[%d], m_nAudioMaxPtime[%d], m_nAudioMaxRed[%d]", m_nAudioPtime,
-            m_nAudioMaxPtime, m_nAudioMaxRed);
-    IMS_TRACE_D("m_bAudioBwNegoOptionEnabled[%d], m_nAudioRtpDscp[%d], DTMFDuration[%d]",
-            m_bAudioBwNegoOptionEnabled, m_nAudioRtpDscp, m_nDtmfDuration);
-    IMS_TRACE_D("jitter_buffer_min[%d], jitter_buffer_max[%d], Evs_Supported[%d]",
-            m_nJitterBufferMinSize, m_nJitterBufferMaxSize, m_bEvsSupported);
-    IMS_TRACE_D("jitter_buffer_adjust_time[%d], jitter_buffer_step_size[%d]",
-            m_nJitterBufferAdjustTime, m_nJitterBufferStepSize, 0);
-    IMS_TRACE_D("m_bAudioRtcpxrEnabled[%d], m_bAudioRtcpxrStatisticsEnabled[%d]",
-            m_bAudioRtcpxrEnabled, m_bAudioRtcpxrStatisticsEnabled, 0);
-    IMS_TRACE_D("m_bAudioRtcpxrVoipMetricsEnabled[%d], m_bAudioRtcpxrPacketLossRleEnabled[%d], \
-            m_bAudioRtcpxrPacketDuplicateRleEnabled[%d]",
+    IMS_TRACE_D("Ptime[%d], MaxPtime[%d], MaxRedundancy[%d]", m_nAudioPtime, m_nAudioMaxPtime,
+            m_nAudioMaxRed);
+    IMS_TRACE_D("BandwidthNegoOption[%d], Dscp[%d], DtmfDuration[%d]", m_bAudioBwNegoOptionEnabled,
+            m_nAudioRtpDscp, m_nDtmfDuration);
+    IMS_TRACE_D("SupportEvs[%d], RtcpxrEnabled[%d], RtcpxrStatisticsEnabled[%d]", m_bEvsSupported,
+            m_bAudioRtcpxrEnabled, m_bAudioRtcpxrStatisticsEnabled);
+    IMS_TRACE_D("RtcpxrVoipMetricsEnabled[%d], RtcpxrPacketLossRleEnabled[%d], \
+            RtcpxrPacketDuplicateRleEnabled[%d]",
             m_bAudioRtcpxrVoipMetricsEnabled, m_bAudioRtcpxrPacketLossRleEnabled,
             m_bAudioRtcpxrPacketDuplicateRleEnabled);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {
-        IMS_TRACE_D("m_objAudioCandidateAttribute[%d] : [%s]", i,
+        IMS_TRACE_D("AudioCandidateAttribute[%d] : [%s]", i,
                 m_objAudioCandidateAttribute.GetAt(i).GetStr(), 0);
     }
     for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)

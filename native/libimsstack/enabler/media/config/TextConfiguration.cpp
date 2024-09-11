@@ -28,7 +28,7 @@ TextConfiguration::TextConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nTextDscp(DEFAULT_TEXT_DSCP),
         m_bTextCodecEmptyRedundantEnabled(DEFAULT_EMPTY_REDUNDANT)
 {
-    IMS_TRACE_I("+TextConfiguration eSessionType[%d]", eSessionType, 0, 0);
+    IMS_TRACE_I("+TextConfiguration - SessionType[%d]", eSessionType, 0, 0);
 }
 
 PUBLIC
@@ -42,7 +42,7 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_D("Create piCc is null", 0, 0, 0);
+        IMS_TRACE_D("Create - piCc is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -64,7 +64,7 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTCP_INACTIVITY);
 
-    IMS_TRACE_D("Create Text Configuration: rtpinactivity: %d rtcpinactivity: %d",
+    IMS_TRACE_D("Create - RtpInactivityTimerMillis[%d] RtcpInactivityTimerMillis[%d]",
             m_nRtpInactivityTimerMillis, m_nRtcpInactivityTimerMillis, 0);
 
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
@@ -96,7 +96,7 @@ IMS_BOOL TextConfiguration::Update(IN ICarrierConfig* piCc)
     Clear();
     if (!Create(piCc))
     {
-        IMS_TRACE_E(0, "Re-create TextConfiguration failure", 0, 0, 0);
+        IMS_TRACE_E(0, "Update - Re-create TextConfiguration failure", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -125,8 +125,8 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
 
     piCcBundle->ReleaseBundle();
 
-    IMS_TRACE_D("m_nT140PayloadType[%d], m_nRedPayloadType[%d]", m_nT140PayloadType,
-            m_nRedPayloadType, 0);
+    IMS_TRACE_D("CreateCodecConfigs - T140PayloadTypeNumber[%d], RedPayloadTypeNumber[%d]",
+            m_nT140PayloadType, m_nRedPayloadType, 0);
 
     IMS_UINT32 nCodecCnt = 0;
     if (m_nRedPayloadType > 0)
@@ -140,7 +140,7 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
     }
 
     // to avoid static analysis issue (not used variable and variable scope)
-    IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
+    IMS_TRACE_D("CreateCodecConfigs - NumOfCodec[%d]", nCodecCnt, 0, 0);
 
     return IMS_TRUE;
 }
@@ -149,13 +149,12 @@ PROTECTED VIRTUAL void TextConfiguration::ToDebugString() const
 {
     MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D(
-            "m_nT140PayloadType[%d], m_nRedPayloadType[%d], m_bTextCodecEmptyRedundantEnabled(%d)",
+    IMS_TRACE_D("T140PayloadTypeNumber[%d], RedPayloadTypeNumber[%d], "
+                "TextCodecEmptyRedundantEnabled[%d]",
             m_nT140PayloadType, m_nRedPayloadType, m_bTextCodecEmptyRedundantEnabled);
-    IMS_TRACE_D("m_nAsBandwidthKbps[%d], m_nRsBandwidthBps[%d], m_nRrBandwidthBps(%d)",
-            m_nAsBandwidthKbps, m_nRsBandwidthBps, m_nRrBandwidthBps);
-    IMS_TRACE_D(
-            "m_nTextDscp[%d], m_nRtpInactivityTimerMillis[%d], m_nRtcpInactivityTimerMillis[%d]",
+    IMS_TRACE_D("AsBandwidthKbps[%d], RsBandwidthBps[%d], RrBandwidthBps[%d]", m_nAsBandwidthKbps,
+            m_nRsBandwidthBps, m_nRrBandwidthBps);
+    IMS_TRACE_D("TextDscp[%d], RtpInactivityTimerMillis[%d], RtcpInactivityTimerMillis[%d]",
             m_nTextDscp, m_nRtpInactivityTimerMillis, m_nRtcpInactivityTimerMillis);
 
     for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)

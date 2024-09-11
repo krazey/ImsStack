@@ -40,12 +40,12 @@ CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadType
         m_nHevcProfile(DEFAULT_HEVC_PROFILE),
         m_nHevcLevel(DEFAULT_HEVC_LEVEL)
 {
-    IMS_TRACE_D("+CodecHevcConfig Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecHevcConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecHevcConfig::~CodecHevcConfig()
 {
-    IMS_TRACE_D("~CodecHevcConfig", 0, 0, 0);
+    IMS_TRACE_I("~CodecHevcConfig", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
@@ -115,7 +115,7 @@ PUBLIC VIRTUAL void CodecHevcConfig::ToDebugString() const
 {
     CodecVideoConfig::ToDebugString();
 
-    IMS_TRACE_D("m_nHevcProfile (%d), m_nHevcLevel(%d)", m_nHevcProfile, m_nHevcLevel, 0);
+    IMS_TRACE_D("HevcProfile[%d], HevcLevel[%d]", m_nHevcProfile, m_nHevcLevel, 0);
 }
 
 PUBLIC

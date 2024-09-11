@@ -26,21 +26,21 @@ CodecAmrConfig::CodecAmrConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_nOctetAlign(DEFAULT_OCTET_ALIGN),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_AMRWB)
 {
-    IMS_TRACE_D("+CodecAmrConfig Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecAmrConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
 {
-    IMS_TRACE_D("~CodecAmrConfig", 0, 0, 0);
+    IMS_TRACE_I("~CodecAmrConfig", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create - nCodec[%d, %s]", m_nCodec, ImsCodec::CodecToString(m_nCodec), 0);
+    IMS_TRACE_D("Create - Codec[%s]", ImsCodec::CodecToString(m_nCodec), 0, 0);
 
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - piCc is NULL or invalid codecIdx", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - piCc is NULL or invalid codec index", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -87,14 +87,14 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 
     m_nAmrModeSetList = 0;
     IMS_SINT32 nModeSetNum = objCodecAttributeModeset.GetSize();
-    IMS_TRACE_D("nModeSetNum: %d", nModeSetNum, 0, 0);
+    IMS_TRACE_D("Create - AmrModeSetList size[%d]", nModeSetNum, 0, 0);
 
     for (IMS_SINT32 i = 0; i < nModeSetNum; i++)
     {
         IMS_SINT32 nModeSet = objCodecAttributeModeset.GetAt(i);
         if (nModeSet < 0)
         {
-            IMS_TRACE_D("Invalid ModeSet value", 0, 0, 0);
+            IMS_TRACE_D("Create - Invalid ModeSet value", 0, 0, 0);
             break;
         }
         m_nAmrModeSetList = (m_nAmrModeSetList | (1 << nModeSet));
@@ -122,7 +122,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 PUBLIC VIRTUAL void CodecAmrConfig::ToDebugString() const
 {
     CodecAudioConfig::ToDebugString();
-    IMS_TRACE_D("SamplingRate(%d), OctetAlign(%d)", m_nSamplingRate, m_nOctetAlign, 0);
+    IMS_TRACE_D("SamplingRate[%d], OctetAlign[%d]", m_nSamplingRate, m_nOctetAlign, 0);
 }
 
 PUBLIC

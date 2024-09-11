@@ -198,7 +198,7 @@ public:
                 /* Actual configuration (acfg) negotiated */
                 m_strAcfg(AString::ConstNull()),
                 /* bool to check if acap is existed in pcfg */
-                m_bAcapInPcfg(IMS_FALSE){};
+                m_bAcapInPcfg(IMS_FALSE) {};
 
         inline ImsMap<IMS_SINT32, AString>& GetMapTcap() { return m_mapTcap; }
         inline ImsMap<IMS_SINT32, AString>& GetMapAcap() { return m_mapAcap; }
