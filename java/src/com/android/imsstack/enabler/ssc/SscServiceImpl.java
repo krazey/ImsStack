@@ -454,9 +454,8 @@ public class SscServiceImpl implements IUtInterface {
 
         if (action == SscConstant.ACTION_ERASURE) {
             if (!SscConfig.isCfActionErasureSupported(mSlotId)) {
-                ImsLog.e(mSlotId, "isCfActionErasureSupported is false");
-                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
-                return;
+                ImsLog.d(mSlotId, "isCfActionErasureSupported is false");
+                action = SscConstant.ACTION_DEACTIVATION;
             }
         }
 
