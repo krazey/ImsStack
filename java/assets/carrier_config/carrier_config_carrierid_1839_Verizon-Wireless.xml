@@ -68,6 +68,7 @@
     <int name="reg_retry_default_policy_int" value="1"/>
     <int name="volte_hys_time_sec_int" value="60"/>
     <int name="ereg_retry_max_cnt_int" value="1"/>
+    <int name="ereg_retry_timer_millis_int" value="2000"/>
     <int-array name="reg_permanent_err_max_cnt_int_array" num="1">
         <item value="2"/>
     </int-array>
