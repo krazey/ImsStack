@@ -16,32 +16,32 @@
 
 #include "ServiceTrace.h"
 
-#include "ProfileExtractor.h"
+#include "MediaSdpParser.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC ProfileExtractor::ProfileExtractor(IN const MEDIA_CONTENT_TYPE eType)
+PUBLIC MediaSdpParser::MediaSdpParser(IN const MEDIA_CONTENT_TYPE eType)
 {
-    IMS_TRACE_I("+ProfileExtractor() media type[%d]", eType, 0, 0);
+    IMS_TRACE_I("+MediaSdpParser() media type[%d]", eType, 0, 0);
     m_eType = eType;
 }
 
-PUBLIC VIRTUAL ProfileExtractor::~ProfileExtractor()
+PUBLIC VIRTUAL MediaSdpParser::~MediaSdpParser()
 {
-    IMS_TRACE_I("~ProfileExtractor() media type[%d]", m_eType, 0, 0);
+    IMS_TRACE_I("~MediaSdpParser() media type[%d]", m_eType, 0, 0);
 }
 
 PROTECTED
-void ProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
+void MediaSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile* pProfile)
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Extract() - media type[%d], invalid argument", m_eType, 0, 0);
+        IMS_TRACE_E(0, "Parse() - media type[%d], invalid argument", m_eType, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("Extract(), media type[%d]", m_eType, 0, 0);
+    IMS_TRACE_I("Parse(), media type[%d]", m_eType, 0, 0);
 
     // IP
     pProfile->SetIpAddress(pDescriptor->GetRemoteAddress());
@@ -57,7 +57,7 @@ void ProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
 
     pProfile->SetControlPort(nControlPort);
 
-    IMS_TRACE_I("Extract() - Ip[%s], Data Port[%d], Control Port[%d]",
+    IMS_TRACE_I("Parse() - Ip[%s], Data Port[%d], Control Port[%d]",
             pProfile->GetIpAddress().ToCharString(), pProfile->GetDataPort(),
             pProfile->GetControlPort());
 
@@ -66,7 +66,7 @@ void ProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
     pProfile->SetBandwidthRs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS));
     pProfile->SetBandwidthRr(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR));
 
-    IMS_TRACE_I("Extract() - AS[%d], RS[%d], RR[%d]", pProfile->GetBandwidthAs(),
+    IMS_TRACE_I("Parse() - AS[%d], RS[%d], RR[%d]", pProfile->GetBandwidthAs(),
             pProfile->GetBandwidthRs(), pProfile->GetBandwidthRr());
 
     // direction
@@ -74,7 +74,7 @@ void ProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
 
     if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
     {
-        IMS_TRACE_D("Extract() -  media type[%d], invalid direction", m_eType, 0, 0);
+        IMS_TRACE_D("Parse() -  media type[%d], invalid direction", m_eType, 0, 0);
         // check session level attribute Direction
         pProfile->SetDirection((MEDIA_DIRECTION)pSessionDescriptor->GetDirection());
 
@@ -84,11 +84,11 @@ void ProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
         }
     }
 
-    IMS_TRACE_I("Extract() - direction[%d]", pProfile->GetDirection(), 0, 0);
+    IMS_TRACE_I("Parse() - direction[%d]", pProfile->GetDirection(), 0, 0);
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::ExtractCapaNego(
+IMS_BOOL MediaSdpParser::ParseCapaNego(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     if (pDescriptor == IMS_NULL || pObjCapaNego == IMS_NULL)
@@ -96,23 +96,23 @@ IMS_BOOL ProfileExtractor::ExtractCapaNego(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("ExtractCapaNego() - media[%d]", m_eType, 0, 0);
+    IMS_TRACE_I("ParseCapaNego() - media[%d]", m_eType, 0, 0);
 
-    if (ExtractAcfg(pDescriptor, pObjCapaNego) == IMS_TRUE)
+    if (ParseAcfg(pDescriptor, pObjCapaNego) == IMS_TRUE)
     {
         return IMS_TRUE;
     }
 
     IMS_BOOL bRet = IMS_FALSE;
-    bRet = ExtractTcap(pDescriptor, pObjCapaNego);
-    bRet |= ExtractAcap(pDescriptor, pObjCapaNego);
-    bRet |= ExtractPcfg(pDescriptor, pObjCapaNego);
+    bRet = ParseTcap(pDescriptor, pObjCapaNego);
+    bRet |= ParseAcap(pDescriptor, pObjCapaNego);
+    bRet |= ParsePcfg(pDescriptor, pObjCapaNego);
 
     return bRet;
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::ExtractAcfg(
+IMS_BOOL MediaSdpParser::ParseAcfg(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     ImsList<AString> lstAcfgAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
@@ -120,7 +120,7 @@ IMS_BOOL ProfileExtractor::ExtractAcfg(
     if (lstAcfgAttr.GetSize() > 0)
     {
         pObjCapaNego->SetAcfg(lstAcfgAttr.GetAt(0));
-        IMS_TRACE_I("ExtractAcfg() - Answer Case, media[%d], acfg[%s]", m_eType,
+        IMS_TRACE_I("ParseAcfg() - Answer Case, media[%d], acfg[%s]", m_eType,
                 pObjCapaNego->GetAcfg().GetStr(), 0);
         return IMS_TRUE;
     }
@@ -129,7 +129,7 @@ IMS_BOOL ProfileExtractor::ExtractAcfg(
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::ExtractTcap(
+IMS_BOOL MediaSdpParser::ParseTcap(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     // Get transport capability(TCAP) list -"'number' SP 'Tcap'" pair
@@ -151,8 +151,7 @@ IMS_BOOL ProfileExtractor::ExtractTcap(
             if (j == 0)
             {
                 nTcapInitNum = lstSplitSpace.GetAt(j).ToInt32();
-                IMS_TRACE_I(
-                        "ExtractTcap() - media[%d], nTcapInitNum[%d]", m_eType, nTcapInitNum, 0);
+                IMS_TRACE_I("ParseTcap() - media[%d], nTcapInitNum[%d]", m_eType, nTcapInitNum, 0);
             }
             else
             {
@@ -160,7 +159,7 @@ IMS_BOOL ProfileExtractor::ExtractTcap(
                 // mapped - key : 'number' value:'Tcap'
                 strTcap.Sprintf("%s", lstSplitSpace.GetAt(j).GetStr());
                 pObjCapaNego->GetMapTcap().Add(nTcapInitNum, strTcap);
-                IMS_TRACE_I("ExtractTcap() - media[%d], add map[%d - %s]", m_eType, nTcapInitNum,
+                IMS_TRACE_I("ParseTcap() - media[%d], add map[%d - %s]", m_eType, nTcapInitNum,
                         strTcap.GetStr());
                 nTcapInitNum++;
             }
@@ -169,14 +168,14 @@ IMS_BOOL ProfileExtractor::ExtractTcap(
 
     if (pObjCapaNego->GetMapTcap().GetSize() == 0)
     {
-        IMS_TRACE_I("ExtractTcap() - media[%d], no tcap value in SDP", m_eType, 0, 0);
+        IMS_TRACE_I("ParseTcap() - media[%d], no tcap value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
     }
     return IMS_TRUE;
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::ExtractAcap(
+IMS_BOOL MediaSdpParser::ParseAcap(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     // Get attribute capability(ACAP) list -"'number' SP 'Acap'" pair
@@ -215,7 +214,7 @@ IMS_BOOL ProfileExtractor::ExtractAcap(
         // save Acap String...
         if (strAcap.GetLength() != 0)
         {
-            IMS_TRACE_I("ExtractAcap() - media[%d], add map[%d - %s]", m_eType, nAcapNum,
+            IMS_TRACE_I("ParseAcap() - media[%d], add map[%d - %s]", m_eType, nAcapNum,
                     strAcap.GetStr());
             pObjCapaNego->GetMapAcap().Add(nAcapNum, strAcap);
         }
@@ -223,7 +222,7 @@ IMS_BOOL ProfileExtractor::ExtractAcap(
 
     if (pObjCapaNego->GetMapAcap().GetSize() == 0)
     {
-        IMS_TRACE_I("ExtractAcap() - media[%d], no acap value in SDP", m_eType, 0, 0);
+        IMS_TRACE_I("ParseAcap() - media[%d], no acap value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
     }
 
@@ -233,7 +232,7 @@ IMS_BOOL ProfileExtractor::ExtractAcap(
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::ExtractPcfg(
+IMS_BOOL MediaSdpParser::ParsePcfg(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     // Get Potential configuration list (pcfg) -"'prio #' SP"t=Tcap #' SP 'a=Acap #'" pair
@@ -241,10 +240,10 @@ IMS_BOOL ProfileExtractor::ExtractPcfg(
 
     if (pObjCapaNego->GetListPcfg().GetSize() == 0)
     {
-        IMS_TRACE_I("ExtractPcfg() - media[%d], no pcfg value in SDP", m_eType, 0, 0);
+        IMS_TRACE_I("ParsePcfg() - media[%d], no pcfg value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("ExtractPcfg() - media[%d]", m_eType, 0, 0);
+    IMS_TRACE_I("ParsePcfg() - media[%d]", m_eType, 0, 0);
     return IMS_TRUE;
 }

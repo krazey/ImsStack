@@ -16,45 +16,44 @@
 
 #include "ServiceTrace.h"
 
-#include "text/TextProfileExtractor.h"
+#include "text/TextSdpParser.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC TextProfileExtractor::TextProfileExtractor() :
-        ProfileExtractor(MEDIA_TYPE_TEXT)
+PUBLIC TextSdpParser::TextSdpParser() :
+        MediaSdpParser(MEDIA_TYPE_TEXT)
 {
-    IMS_TRACE_I("+TextProfileExtractor()", 0, 0, 0);
+    IMS_TRACE_I("+TextSdpParser()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL TextProfileExtractor::~TextProfileExtractor()
+PUBLIC VIRTUAL TextSdpParser::~TextSdpParser()
 {
-    IMS_TRACE_I("~TextProfileExtractor()", 0, 0, 0);
+    IMS_TRACE_I("~TextSdpParser()", 0, 0, 0);
 }
 
-PUBLIC IMS_BOOL TextProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
+PUBLIC IMS_BOOL TextSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
         IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile)
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Extract() - invalid argument", 0, 0, 0);
+        IMS_TRACE_E(0, "Parse() - invalid argument", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("Extract()", 0, 0, 0);
+    IMS_TRACE_I("Parse()", 0, 0, 0);
 
-    ProfileExtractor::Extract(pSessionDescriptor, pDescriptor, pProfile);
-    ExtractPayloads(pDescriptor, pProfile);
+    MediaSdpParser::Parse(pSessionDescriptor, pDescriptor, pProfile);
+    ParsePayloads(pDescriptor, pProfile);
 
     return IMS_TRUE;
 }
 
 PRIVATE
-void TextProfileExtractor::ExtractPayloads(
-        IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile)
+void TextSdpParser::ParsePayloads(IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
-        IMS_TRACE_E(0, "ExtractPayloads() - invalid argument", 0, 0, 0);
+        IMS_TRACE_E(0, "ParsePayloads() - invalid argument", 0, 0, 0);
         return;
     }
 
@@ -71,19 +70,19 @@ void TextProfileExtractor::ExtractPayloads(
             continue;
         }
 
-        IMS_TRACE_I("ExtractPayloads() - At[%d]", i, 0, 0);
+        IMS_TRACE_I("ParsePayloads() - At[%d]", i, 0, 0);
 
         AString strCodecName = AString::ConstNull();
-        ExtractRtpMap(pSdpCodec, pPayload, strCodecName);
+        ParseRtpMap(pSdpCodec, pPayload, strCodecName);
 
         // check fmtp of t140 redundancy
         if (strCodecName.EqualsIgnoreCase("red"))
         {
-            ExtractFmtp(pSdpCodec->GetFormatSpecificParameter(), pPayload, lstMediaFormat);
+            ParseFmtp(pSdpCodec, pPayload, lstMediaFormat);
         }
         else if (!strCodecName.EqualsIgnoreCase("t140"))
         {
-            IMS_TRACE_E(0, "ExtractPayloads() - Invalid codec[%s]", strCodecName.GetStr(), 0, 0);
+            IMS_TRACE_E(0, "ParsePayloads() - Invalid codec[%s]", strCodecName.GetStr(), 0, 0);
             delete pPayload;
             continue;
         }
@@ -93,8 +92,8 @@ void TextProfileExtractor::ExtractPayloads(
 }
 
 PRIVATE
-void TextProfileExtractor::ExtractRtpMap(IN const SdpAvCodec* pSdpCodec,
-        OUT TextProfile::Payload* pPayload, OUT AString& strCodecName)
+void TextSdpParser::ParseRtpMap(IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload,
+        OUT AString& strCodecName)
 {
     if (pSdpCodec == IMS_NULL || pPayload == IMS_NULL)
     {
@@ -107,19 +106,20 @@ void TextProfileExtractor::ExtractRtpMap(IN const SdpAvCodec* pSdpCodec,
 
     pPayload->SetRtpMap(nPayloadTypeNumber, strCodecName, nSamplingRate);
 
-    IMS_TRACE_D("ExtractRtpMap() - Payload[%d], Codec[%s], Sampling rate[%d]", nPayloadTypeNumber,
+    IMS_TRACE_D("ParseRtpMap() - Payload[%d], Codec[%s], Sampling rate[%d]", nPayloadTypeNumber,
             strCodecName.GetStr(), nSamplingRate);
 }
 
 PRIVATE
-IMS_BOOL TextProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
+IMS_BOOL TextSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         OUT TextProfile::Payload* pPayload, IN const ImsList<SdpMediaFormat*>& lstMediaFormat)
 {
-    if (pPayload == IMS_NULL)
+    if (pPayload == IMS_NULL || pSdpCodec == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
+    AString strFmtp = pSdpCodec->GetFormatSpecificParameter();
     TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp();
 
     if (pRedFmtp == IMS_NULL)
@@ -127,12 +127,12 @@ IMS_BOOL TextProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("ExtractFmtp()", 0, 0, 0);
+    IMS_TRACE_I("ParseFmtp()", 0, 0, 0);
 
-    if (ExtractRedFmtp(strFmtp, pRedFmtp) == IMS_FALSE ||
-            ExtractRedSubPtExist(pRedFmtp->GetRedPayload(), lstMediaFormat) == IMS_FALSE)
+    if (ParseRedFmtp(strFmtp, pRedFmtp) == IMS_FALSE ||
+            ParseRedSubPtExist(pRedFmtp->GetRedPayload(), lstMediaFormat) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "ExtractFmtp() - cannot make red fmtp or No matched subtype", 0, 0, 0);
+        IMS_TRACE_E(0, "ParseFmtp() - cannot make red fmtp or No matched subtype", 0, 0, 0);
 
         delete pRedFmtp;
         return IMS_FALSE;
@@ -143,7 +143,7 @@ IMS_BOOL TextProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL TextProfileExtractor::ExtractRedFmtp(
+PRIVATE IMS_BOOL TextSdpParser::ParseRedFmtp(
         IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL || strFmtp.IsEmpty() == IMS_TRUE)
@@ -151,7 +151,7 @@ PRIVATE IMS_BOOL TextProfileExtractor::ExtractRedFmtp(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("ExtractRedFmtp()", 0, 0, 0);
+    IMS_TRACE_I("ParseRedFmtp()", 0, 0, 0);
 
     ImsList<AString> strArrTemp = strFmtp.Split('/');
     pFmtp->SetRedLevel(strArrTemp.GetSize());
@@ -174,13 +174,13 @@ PRIVATE IMS_BOOL TextProfileExtractor::ExtractRedFmtp(
         }
     }
 
-    IMS_TRACE_D("ExtractRedFmtp() Red Level[%d], Red Payload[%d]", pFmtp->GetRedLevel(),
+    IMS_TRACE_D("ParseRedFmtp() Red Level[%d], Red Payload[%d]", pFmtp->GetRedLevel(),
             pFmtp->GetRedPayload(), 0);
 
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL TextProfileExtractor::ExtractRedSubPtExist(
+PRIVATE IMS_BOOL TextSdpParser::ParseRedSubPtExist(
         IN const IMS_SINT32 nRedPayload, IN const ImsList<SdpMediaFormat*>& lstMediaFormat)
 {
     IMS_BOOL bRedSubPtExist = IMS_FALSE;
@@ -194,7 +194,7 @@ PRIVATE IMS_BOOL TextProfileExtractor::ExtractRedSubPtExist(
             continue;
         }
 
-        IMS_TRACE_D("ExtractRedSubPtExist() - Check RedSubPT, PT[%d] of PL[%d] / Red Payload[%d]",
+        IMS_TRACE_D("ParseRedSubPtExist() - Check RedSubPT, PT[%d] of PL[%d] / Red Payload[%d]",
                 pSdpCodec->GetPayloadType(), i, nRedPayload);
 
         if (pSdpCodec->GetPayloadType() == nRedPayload)
@@ -203,7 +203,7 @@ PRIVATE IMS_BOOL TextProfileExtractor::ExtractRedSubPtExist(
         }
     }
 
-    IMS_TRACE_I("ExtractRedSubPtExist() - RedSubPtExist[%d]", bRedSubPtExist, 0, 0);
+    IMS_TRACE_I("ParseRedSubPtExist() - RedSubPtExist[%d]", bRedSubPtExist, 0, 0);
 
     return bRedSubPtExist;
 }

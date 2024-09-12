@@ -16,23 +16,23 @@
 
 #include "ServiceTrace.h"
 
-#include "audio/AudioProfileExtractor.h"
+#include "audio/AudioSdpParser.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC AudioProfileExtractor::AudioProfileExtractor() :
-        ProfileExtractor(MEDIA_TYPE_AUDIO)
+PUBLIC AudioSdpParser::AudioSdpParser() :
+        MediaSdpParser(MEDIA_TYPE_AUDIO)
 {
-    IMS_TRACE_I("+AudioProfileExtractor()", 0, 0, 0);
+    IMS_TRACE_I("+AudioSdpParser()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioProfileExtractor::~AudioProfileExtractor()
+PUBLIC VIRTUAL AudioSdpParser::~AudioSdpParser()
 {
-    IMS_TRACE_I("~AudioProfileExtractor()", 0, 0, 0);
+    IMS_TRACE_I("~AudioSdpParser()", 0, 0, 0);
 }
 
 PUBLIC
-IMS_BOOL AudioProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
+IMS_BOOL AudioSdpParser::Parse(IN ISessionDescriptor* pSessionDescriptor,
         IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -40,23 +40,22 @@ IMS_BOOL AudioProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescripto
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("Extract()", 0, 0, 0);
+    IMS_TRACE_I("Parse()", 0, 0, 0);
 
-    ProfileExtractor::Extract(pSessionDescriptor, pDescriptor, pProfile);
+    MediaSdpParser::Parse(pSessionDescriptor, pDescriptor, pProfile);
 
-    ExtractCapaNego(pDescriptor, &(pProfile->GetCapaNego()));
-    ExtractPayloads(pDescriptor, pProfile);
-    ExtractPtime(pDescriptor, pProfile);
-    ExtractMaxPtime(pDescriptor, pProfile);
-    ExtractRtcpXr(pDescriptor, pProfile);
-    ExtractAnbr(pDescriptor, pProfile);
+    ParseCapaNego(pDescriptor, &(pProfile->GetCapaNego()));
+    ParsePayloads(pDescriptor, pProfile);
+    ParsePtime(pDescriptor, pProfile);
+    ParseMaxPtime(pDescriptor, pProfile);
+    ParseRtcpXr(pDescriptor, pProfile);
+    ParseAnbr(pDescriptor, pProfile);
 
     return IMS_TRUE;
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractPayloads(
-        IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
+void AudioSdpParser::ParsePayloads(IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
@@ -65,54 +64,65 @@ void AudioProfileExtractor::ExtractPayloads(
 
     ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
 
+    IMS_TRACE_I("ParsePayloads() - payload size[%d]", lstMediaFormat.GetSize(), 0, 0);
+
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
         SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
-        AudioProfile::Payload* pPayload = new AudioProfile::Payload();
-
-        if (pSdpCodec == IMS_NULL || pPayload == IMS_NULL)
-        {
-            return;
-        }
-
-        IMS_TRACE_I("ExtractPayload() - At[%d]", i, 0, 0);
-
-        AString strCodecName = AString::ConstNull();
-        IMS_SINT32 nPayloadTypeNumber = -1;
-        ExtractRtpMap(pSdpCodec, pPayload, nPayloadTypeNumber, strCodecName);
-        IMS_BOOL bIsPcm =
-                (nPayloadTypeNumber == 0 || nPayloadTypeNumber == 8) ? IMS_TRUE : IMS_FALSE;
-
-        if (strCodecName.EqualsIgnoreCase("AMR-WB") || strCodecName.EqualsIgnoreCase("AMR") ||
-                strCodecName.EqualsIgnoreCase("EVS"))
-        {
-            ExtractFmtp(pSdpCodec->GetFormatSpecificParameter(), pPayload, strCodecName);
-        }
-        else if (strCodecName.EqualsIgnoreCase("telephone-event"))
-        {
-            ExtractTelephoneEventFmtp(pSdpCodec->GetFormatSpecificParameter(), pPayload);
-        }
-        else if (bIsPcm)
-        {
-            IMS_TRACE_D("ExtractPayloads() - do nothing PCM case, codec[%s]", strCodecName.GetStr(),
-                    0, 0);
-        }
-        else
-        {
-            IMS_TRACE_E(0, "ExtractPayloads() - NOT SUPPORTED audio codec[%s]",
-                    strCodecName.GetStr(), 0, 0);
-            delete pPayload;
-            continue;
-        }
-
-        if (pPayload != IMS_NULL)
-        {
-            pProfile->GetPayloadList().Append(pPayload);
-        }
+        ParsePayload(pSdpCodec, pProfile);
     }
 }
 
-PRIVATE void AudioProfileExtractor::ExtractRtpMap(IN const SdpAvCodec* pSdpCodec,
+PRIVATE
+void AudioSdpParser::ParsePayload(IN const SdpAvCodec* pSdpCodec, OUT AudioProfile* pProfile)
+{
+    if (pSdpCodec == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    AudioProfile::Payload* pPayload = new AudioProfile::Payload();
+
+    if (pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I("ParsePayload()", 0, 0, 0);
+
+    AString strCodecName = AString::ConstNull();
+    IMS_SINT32 nPayloadTypeNumber = -1;
+    ParseRtpMap(pSdpCodec, pPayload, nPayloadTypeNumber, strCodecName);
+    IMS_BOOL bIsPcm = (nPayloadTypeNumber == 0 || nPayloadTypeNumber == 8) ? IMS_TRUE : IMS_FALSE;
+
+    if (strCodecName.EqualsIgnoreCase("AMR-WB") || strCodecName.EqualsIgnoreCase("AMR") ||
+            strCodecName.EqualsIgnoreCase("EVS"))
+    {
+        ParseFmtp(pSdpCodec, pPayload, strCodecName);
+    }
+    else if (strCodecName.EqualsIgnoreCase("telephone-event"))
+    {
+        ParseTelephoneEventFmtp(pSdpCodec, pPayload);
+    }
+    else if (bIsPcm)
+    {
+        IMS_TRACE_D("ParsePayload() - do nothing PCM case, codec[%s]", strCodecName.GetStr(), 0, 0);
+    }
+    else
+    {
+        IMS_TRACE_E(
+                0, "ParsePayload() - NOT SUPPORTED audio codec[%s]", strCodecName.GetStr(), 0, 0);
+        delete pPayload;
+        return;
+    }
+
+    if (pPayload != IMS_NULL)
+    {
+        pProfile->GetPayloadList().Append(pPayload);
+    }
+}
+
+PRIVATE void AudioSdpParser::ParseRtpMap(IN const SdpAvCodec* pSdpCodec,
         OUT AudioProfile::Payload* pPayload, OUT IMS_SINT32& nPayloadTypeNumber,
         OUT AString& strCodecName)
 {
@@ -132,22 +142,23 @@ PRIVATE void AudioProfileExtractor::ExtractRtpMap(IN const SdpAvCodec* pSdpCodec
             ? 1
             : 0;
 
-    IMS_TRACE_D("ExtractRtpMap() - Payload[%d], Codec[%s]", nPayloadTypeNumber,
-            strCodecName.GetStr(), 0);
-    IMS_TRACE_D("ExtractRtpMap() - Sampling rate[%d], Channel[%d]", nSamplingRate, nChannel, 0);
+    IMS_TRACE_D(
+            "ParseRtpMap() - Payload[%d], Codec[%s]", nPayloadTypeNumber, strCodecName.GetStr(), 0);
+    IMS_TRACE_D("ParseRtpMap() - Sampling rate[%d], Channel[%d]", nSamplingRate, nChannel, 0);
 
     pPayload->SetRtpMap(nPayloadTypeNumber, strCodecName, nSamplingRate, nChannel);
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
+IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         OUT AudioProfile::Payload* pPayload, IN const AString& strCodecName)
 {
-    if (pPayload == IMS_NULL)
+    if (pPayload == IMS_NULL || pSdpCodec == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
+    AString strFmtp = pSdpCodec->GetFormatSpecificParameter();
     AudioProfile::AudioFmtp* pFmtp = IMS_NULL;
     IMS_BOOL bIsEvs = IMS_FALSE;
 
@@ -162,8 +173,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
     }
     else
     {
-        IMS_TRACE_E(
-                0, "ExtractFmtp() - NOT SUPPORTED audio codec[%s]", strCodecName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "ParseFmtp() - NOT SUPPORTED audio codec[%s]", strCodecName.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -186,8 +196,8 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
         if (objSplitEqual.GetSize() < 2)
         {
             const AString& strTmp = objSplitColon.GetAt(i);
-            IMS_TRACE_D("ExtractFmtp() - Invalid fmtp parameter(%s) at index[%d]", strTmp.GetStr(),
-                    i, 0);
+            IMS_TRACE_D(
+                    "ParseFmtp() - Invalid fmtp parameter(%s) at index[%d]", strTmp.GetStr(), i, 0);
             continue;
         }
 
@@ -196,15 +206,15 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
             continue;
         }
 
-        if (ExtractAudioBaseFmtp(objSplitEqual, pFmtp) == IMS_FALSE)
+        if (ParseAudioBaseFmtp(objSplitEqual, pFmtp) == IMS_FALSE)
         {
             if (bIsEvs)
             {
-                ExtractEvsFmtp(objSplitEqual, static_cast<AudioProfile::EvsFmtp*>(pFmtp));
+                ParseEvsFmtp(objSplitEqual, static_cast<AudioProfile::EvsFmtp*>(pFmtp));
             }
             else
             {
-                ExtractAmrFmtp(objSplitEqual, static_cast<AudioProfile::AmrFmtp*>(pFmtp));
+                ParseAmrFmtp(objSplitEqual, static_cast<AudioProfile::AmrFmtp*>(pFmtp));
             }
         }
     }
@@ -221,7 +231,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtp(IN const AString& strFmtp,
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractAudioBaseFmtp(
+IMS_BOOL AudioSdpParser::ParseAudioBaseFmtp(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -229,23 +239,23 @@ IMS_BOOL AudioProfileExtractor::ExtractAudioBaseFmtp(
         return IMS_FALSE;
     }
 
-    if (ExtractFmtpModeSet(objSplitEqual, pFmtp))
+    if (ParseModeSet(objSplitEqual, pFmtp))
     {
         return IMS_TRUE;
     }
-    if (ExtractFmtpModeChangeCapability(objSplitEqual, pFmtp))
+    if (ParseModeChangeCapability(objSplitEqual, pFmtp))
     {
         return IMS_TRUE;
     }
-    if (ExtractFmtpModeChangePeriod(objSplitEqual, pFmtp))
+    if (ParseModeChangePeriod(objSplitEqual, pFmtp))
     {
         return IMS_TRUE;
     }
-    if (ExtractFmtpModeChangeNeighbor(objSplitEqual, pFmtp))
+    if (ParseModeChangeNeighbor(objSplitEqual, pFmtp))
     {
         return IMS_TRUE;
     }
-    if (ExtractFmtpMaxRed(objSplitEqual, pFmtp))
+    if (ParseMaxRed(objSplitEqual, pFmtp))
     {
         return IMS_TRUE;
     }
@@ -254,7 +264,7 @@ IMS_BOOL AudioProfileExtractor::ExtractAudioBaseFmtp(
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractAmrFmtp(
+void AudioSdpParser::ParseAmrFmtp(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AmrFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -262,11 +272,11 @@ void AudioProfileExtractor::ExtractAmrFmtp(
         return;
     }
 
-    ExtractFmtpOctetAlign(objSplitEqual, pFmtp);
+    ParseOctetAlign(objSplitEqual, pFmtp);
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractEvsFmtp(
+void AudioSdpParser::ParseEvsFmtp(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -274,54 +284,54 @@ void AudioProfileExtractor::ExtractEvsFmtp(
         return;
     }
 
-    if (ExtractFmtpDtx(objSplitEqual, pFmtp))
+    if (ParseDtx(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpHfOnly(objSplitEqual, pFmtp))
+    if (ParseHfOnly(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpEvsSwitchMode(objSplitEqual, pFmtp))
+    if (ParseEvsSwitchMode(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpBr(objSplitEqual, pFmtp))
+    if (ParseBr(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpBw(objSplitEqual, pFmtp))
+    if (ParseBw(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpCmr(objSplitEqual, pFmtp))
+    if (ParseCmr(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpChAwMode(objSplitEqual, pFmtp))
+    if (ParseChAwMode(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpBrSend(objSplitEqual, pFmtp))
+    if (ParseBrSend(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpBrRecv(objSplitEqual, pFmtp))
+    if (ParseBrRecv(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpBwSend(objSplitEqual, pFmtp))
+    if (ParseBwSend(objSplitEqual, pFmtp))
     {
         return;
     }
-    if (ExtractFmtpBwRecv(objSplitEqual, pFmtp))
+    if (ParseBwRecv(objSplitEqual, pFmtp))
     {
         return;
     }
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpModeSet(
+IMS_BOOL AudioSdpParser::ParseModeSet(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -340,7 +350,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeSet(
         }
         pFmtp->SetShowModeSet(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpModeSet() - modset list[%d], visible[%d]", pFmtp->GetModeSetList(),
+        IMS_TRACE_D("ParseModeSet() - modset list[%d], visible[%d]", pFmtp->GetModeSetList(),
                 pFmtp->IsModeSetVisible(), 0);
 
         return IMS_TRUE;
@@ -350,7 +360,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeSet(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangeCapability(
+IMS_BOOL AudioSdpParser::ParseModeChangeCapability(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -363,7 +373,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangeCapability(
         pFmtp->SetModeChangeCapability((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowModeChangeCapability(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpModeChangeCapability() - mode-change-capability[%d], visible[%d]",
+        IMS_TRACE_D("ParseModeChangeCapability() - mode-change-capability[%d], visible[%d]",
                 pFmtp->GetModeChangeCapability(), pFmtp->IsModeChangeCapabilityVisible(), 0);
 
         return IMS_TRUE;
@@ -373,7 +383,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangeCapability(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangePeriod(
+IMS_BOOL AudioSdpParser::ParseModeChangePeriod(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -386,7 +396,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangePeriod(
         pFmtp->SetModeChangePeriod((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowModeChangePeriod(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpModeChangePeriod() - mode-change-period[%d], visible[%d]",
+        IMS_TRACE_D("ParseModeChangePeriod() - mode-change-period[%d], visible[%d]",
                 pFmtp->GetModeChangePeriod(), pFmtp->IsModeChangePeriodVisible(), 0);
 
         return IMS_TRUE;
@@ -396,7 +406,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangePeriod(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangeNeighbor(
+IMS_BOOL AudioSdpParser::ParseModeChangeNeighbor(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -409,7 +419,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangeNeighbor(
         pFmtp->SetModeChangeNeighbor((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowModeChangeNeighbor(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpModeChangeNeighbor() - mode-change-neighbor[%d], visible[%d]",
+        IMS_TRACE_D("ParseModeChangeNeighbor() - mode-change-neighbor[%d], visible[%d]",
                 pFmtp->GetModeChangeNeighbor(), pFmtp->IsModeChangeNeighborVisible(), 0);
 
         return IMS_TRUE;
@@ -419,7 +429,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpModeChangeNeighbor(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpMaxRed(
+IMS_BOOL AudioSdpParser::ParseMaxRed(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -432,7 +442,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpMaxRed(
         pFmtp->SetMaxRed((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowMaxRed(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpMaxRed() - max-red[%d], visible[%d]", pFmtp->GetMaxRed(),
+        IMS_TRACE_D("ParseMaxRed() - max-red[%d], visible[%d]", pFmtp->GetMaxRed(),
                 pFmtp->IsMaxRedVisible(), 0);
 
         return IMS_TRUE;
@@ -442,7 +452,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpMaxRed(
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractFmtpOctetAlign(
+void AudioSdpParser::ParseOctetAlign(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AmrFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -454,12 +464,12 @@ void AudioProfileExtractor::ExtractFmtpOctetAlign(
     {
         pFmtp->SetOctetAlign((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
 
-        IMS_TRACE_D("ExtractFmtpOctetAlign() - octet-align[%d]", pFmtp->GetOctetAlign(), 0, 0);
+        IMS_TRACE_D("ParseOctetAlign() - octet-align[%d]", pFmtp->GetOctetAlign(), 0, 0);
     }
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpDtx(
+IMS_BOOL AudioSdpParser::ParseDtx(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -467,12 +477,12 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpDtx(
         return IMS_FALSE;
     }
 
-    if (objSplitEqual.GetAt(0).Equals("ExtractFmtpDtx") == IMS_TRUE)
+    if (objSplitEqual.GetAt(0).Equals("dtx") == IMS_TRUE)
     {
         pFmtp->SetDtx((IMS_BOOL)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowDtx(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpDtx() - ExtractFmtpDtx[%d], visible[%d]", pFmtp->IsDtxEnabled(),
+        IMS_TRACE_D("ParseDtx() - dtx[%d], visible[%d]", pFmtp->IsDtxEnabled(),
                 pFmtp->IsDtxVisible(), 0);
 
         return IMS_TRUE;
@@ -482,7 +492,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpDtx(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpHfOnly(
+IMS_BOOL AudioSdpParser::ParseHfOnly(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -495,7 +505,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpHfOnly(
         pFmtp->SetHfOnly((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowHfOnly(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpHfOnly() - hf-only[%d], visible[%d]", pFmtp->GetHfOnly(),
+        IMS_TRACE_D("ParseHfOnly() - hf-only[%d], visible[%d]", pFmtp->GetHfOnly(),
                 pFmtp->IsHfOnlyVisible(), 0);
 
         return IMS_TRUE;
@@ -505,7 +515,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpHfOnly(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpEvsSwitchMode(
+IMS_BOOL AudioSdpParser::ParseEvsSwitchMode(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -518,7 +528,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpEvsSwitchMode(
         pFmtp->SetEvsModeSwitch((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowEvsModeSwitch(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpEvsSwitchMode() - evs-mode-switch[%d], visible[%d]",
+        IMS_TRACE_D("ParseEvsSwitchMode() - evs-mode-switch[%d], visible[%d]",
                 pFmtp->GetEvsModeSwitch(), pFmtp->IsEvsModeSwitchVisible(), 0);
 
         return IMS_TRUE;
@@ -528,7 +538,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpEvsSwitchMode(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpBr(
+IMS_BOOL AudioSdpParser::ParseBr(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -579,8 +589,8 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBr(
             }
         }
 
-        IMS_TRACE_D("ExtractFmtpBr() - br[%d], visible[%d]", pFmtp->GetBrList(),
-                pFmtp->IsBrListVisible(), 0);
+        IMS_TRACE_D(
+                "ParseBr() - br[%d], visible[%d]", pFmtp->GetBrList(), pFmtp->IsBrListVisible(), 0);
 
         return IMS_TRUE;
     }
@@ -589,7 +599,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBr(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpBw(
+IMS_BOOL AudioSdpParser::ParseBw(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -642,8 +652,8 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBw(
             }
         }
 
-        IMS_TRACE_D("ExtractFmtpBw() - bw[%d], visible[%d]", pFmtp->GetBwList(),
-                pFmtp->IsBwListVisible(), 0);
+        IMS_TRACE_D(
+                "ParseBw() - bw[%d], visible[%d]", pFmtp->GetBwList(), pFmtp->IsBwListVisible(), 0);
 
         return IMS_TRUE;
     }
@@ -652,7 +662,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBw(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpCmr(
+IMS_BOOL AudioSdpParser::ParseCmr(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -665,8 +675,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpCmr(
         pFmtp->SetCmr((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowCmr(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpCmr() - cmr[%d], visible[%d]", pFmtp->GetCmr(),
-                pFmtp->IsCmrVisible(), 0);
+        IMS_TRACE_D("ParseCmr() - cmr[%d], visible[%d]", pFmtp->GetCmr(), pFmtp->IsCmrVisible(), 0);
 
         return IMS_TRUE;
     }
@@ -675,7 +684,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpCmr(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpChAwMode(
+IMS_BOOL AudioSdpParser::ParseChAwMode(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -685,22 +694,11 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpChAwMode(
 
     if (objSplitEqual.GetAt(0).Equals("ch-aw-recv") == IMS_TRUE)
     {
-        // pFmtp->SetChAwRecv((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetReceivedChAwRecv((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetChAwRecv(pFmtp->GetReceivedChAwRecv());
         pFmtp->SetShowChannelAwMode(IMS_TRUE);
-        /*
-                    if ((pFmtp->GetChAwRecv() == 0) || (pFmtp->GetChAwRecv() == 2) ||
-            (pFmtp->GetChAwRecv()
-            == 3)
-                        || (pFmtp->GetChAwRecv() == 5) || (pFmtp->GetChAwRecv() == 7) ||
-            (pFmtp->GetChAwRecv() == -1)) { pFmtp->SetShowChannelAwMode(IMS_TRUE); } else {
-                        pFmtp->SetChAwRecv(0);
-                        pFmtp->SetShowChannelAwMode(IMS_FALSE);
-                    }
-        */
 
-        IMS_TRACE_D("ExtractFmtpChAwMode() - ch-aw-recv[%d], visible[%d]", pFmtp->GetChAwRecv(),
+        IMS_TRACE_D("ParseChAwMode() - ch-aw-recv[%d], visible[%d]", pFmtp->GetChAwRecv(),
                 pFmtp->IsChannelAwModeVisible(), 0);
 
         return IMS_TRUE;
@@ -710,7 +708,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpChAwMode(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpBrSend(
+IMS_BOOL AudioSdpParser::ParseBrSend(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -762,7 +760,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBrSend(
             }
         }
 
-        IMS_TRACE_D("ExtractFmtpBrSend() - br-send[%d]", pFmtp->GetBrRecv(), 0, 0);
+        IMS_TRACE_D("ParseBrSend() - br-send[%d]", pFmtp->GetBrRecv(), 0, 0);
 
         return IMS_TRUE;
     }
@@ -771,7 +769,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBrSend(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpBrRecv(
+IMS_BOOL AudioSdpParser::ParseBrRecv(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -822,7 +820,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBrRecv(
             }
         }
 
-        IMS_TRACE_D("ExtractFmtpBrRecv() - br-recv[%d]", pFmtp->GetBrSend(), 0, 0);
+        IMS_TRACE_D("ParseBrRecv() - br-recv[%d]", pFmtp->GetBrSend(), 0, 0);
 
         return IMS_TRUE;
     }
@@ -831,7 +829,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBrRecv(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpBwSend(
+IMS_BOOL AudioSdpParser::ParseBwSend(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -884,7 +882,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBwSend(
             }
         }
 
-        IMS_TRACE_D("ExtractFmtpBwSend() - bw-send[%d]", pFmtp->GetBwRecv(), 0, 0);
+        IMS_TRACE_D("ParseBwSend() - bw-send[%d]", pFmtp->GetBwRecv(), 0, 0);
 
         return IMS_TRUE;
     }
@@ -893,7 +891,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBwSend(
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpBwRecv(
+IMS_BOOL AudioSdpParser::ParseBwRecv(
         IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
@@ -945,7 +943,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBwRecv(
             }
         }
 
-        IMS_TRACE_D("ExtractFmtpBwRecv() - bw-recv[%d]", pFmtp->GetBwSend(), 0, 0);
+        IMS_TRACE_D("ParseBwRecv() - bw-recv[%d]", pFmtp->GetBwSend(), 0, 0);
 
         return IMS_TRUE;
     }
@@ -954,7 +952,7 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpBwRecv(
 }
 
 PRIVATE
-void AudioProfileExtractor::SetEvsBrVisible(OUT AudioProfile::EvsFmtp* pFmtp)
+void AudioSdpParser::SetEvsBrVisible(OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -971,7 +969,7 @@ void AudioProfileExtractor::SetEvsBrVisible(OUT AudioProfile::EvsFmtp* pFmtp)
 }
 
 PRIVATE
-void AudioProfileExtractor::SetEvsBwVisible(OUT AudioProfile::EvsFmtp* pFmtp)
+void AudioSdpParser::SetEvsBwVisible(OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -988,14 +986,15 @@ void AudioProfileExtractor::SetEvsBwVisible(OUT AudioProfile::EvsFmtp* pFmtp)
 }
 
 PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractTelephoneEventFmtp(
-        IN const AString& strFmtp, OUT AudioProfile::Payload* pPayload)
+IMS_BOOL AudioSdpParser::ParseTelephoneEventFmtp(
+        IN const SdpAvCodec* pSdpCodec, OUT AudioProfile::Payload* pPayload)
 {
-    if (pPayload == IMS_NULL)
+    if (pPayload == IMS_NULL || pSdpCodec == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
+    AString strFmtp = pSdpCodec->GetFormatSpecificParameter();
     AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
 
     if (pFmtp == IMS_NULL)
@@ -1003,9 +1002,9 @@ IMS_BOOL AudioProfileExtractor::ExtractTelephoneEventFmtp(
         return IMS_FALSE;
     }
 
-    //[RFC4733] For backward compatibility, if no "events" parameter is received,
-    // the sender SHOULD assume support for the DTMF events 0-15 but for no other events.
-    pFmtp->SetEvents((strFmtp != IMS_NULL && strFmtp.GetLength() > 0) ? strFmtp : "0-15");
+    IMS_TRACE_D("ParseTelephoneEventFmtp() - strFmtp[%s]", strFmtp.GetStr(), 0, 0);
+
+    ParseEvents(strFmtp, pFmtp);
 
     pPayload->SetFmtp(pFmtp);
 
@@ -1013,8 +1012,23 @@ IMS_BOOL AudioProfileExtractor::ExtractTelephoneEventFmtp(
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractPtime(
-        IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
+void AudioSdpParser::ParseEvents(
+        IN const AString& strFmtp, OUT AudioProfile::TelephoneEventFmtp* pFmtp)
+{
+    if (pFmtp == IMS_NULL)
+    {
+        return;
+    }
+
+    //[RFC4733] For backward compatibility, if no "events" parameter is received,
+    // the sender SHOULD assume support for the DTMF events 0-15 but for no other events.
+    pFmtp->SetEvents((strFmtp != IMS_NULL && strFmtp.GetLength() > 0) ? strFmtp : "0-15");
+
+    IMS_TRACE_D("ParseEvents() - events[%s]", pFmtp->GetEvents().GetStr(), 0, 0);
+}
+
+PRIVATE
+void AudioSdpParser::ParsePtime(IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
@@ -1022,11 +1036,12 @@ void AudioProfileExtractor::ExtractPtime(
     }
 
     pProfile->SetPtime(pDescriptor->GetAttributeInt(SdpAttribute::PTIME));
+
+    IMS_TRACE_D("ParsePtime() - ptime[%d]", pProfile->GetPtime(), 0, 0);
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractMaxPtime(
-        IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
+void AudioSdpParser::ParseMaxPtime(IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
@@ -1034,11 +1049,12 @@ void AudioProfileExtractor::ExtractMaxPtime(
     }
 
     pProfile->SetMaxPtime(pDescriptor->GetAttributeInt(SdpAttribute::MAXPTIME));
+
+    IMS_TRACE_D("ParseMaxPtime() - maxptime[%d]", pProfile->GetMaxPtime(), 0, 0);
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractRtcpXr(
-        IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
+void AudioSdpParser::ParseRtcpXr(IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
@@ -1047,10 +1063,13 @@ void AudioProfileExtractor::ExtractRtcpXr(
 
     ImsList<AString> lstRtcpXrAttr = pDescriptor->GetAttributes(SdpAttribute::RTCP_XR);
 
-    if (lstRtcpXrAttr.GetSize() > 0)
+    if (lstRtcpXrAttr.GetSize() == 0)
     {
-        pProfile->SetSupportRtcpXr(IMS_TRUE);
+        IMS_TRACE_D("ParseRtcpXr() - No Rtcp-Xr Attributes", 0, 0, 0);
+        return;
     }
+
+    pProfile->SetSupportRtcpXr(IMS_TRUE);
 
     for (IMS_UINT32 i = 0; i < lstRtcpXrAttr.GetSize(); i++)
     {
@@ -1073,11 +1092,17 @@ void AudioProfileExtractor::ExtractRtcpXr(
             pProfile->GetRtcpXrAttr().SetSupportPacketDuplicatedRle(IMS_TRUE);
         }
     }
+
+    IMS_TRACE_D("ParseRtcpXr() - support[%d], stat-summary[%d], voip-metrics[%d]",
+            pProfile->IsRtcpXrSupported(), pProfile->GetRtcpXrAttr().IsStatisticMetricsSupported(),
+            pProfile->GetRtcpXrAttr().IsVoipMetricsSupported());
+    IMS_TRACE_D("ParseRtcpXr() - pkt-loss-rle[%d], pkt-dup-rle[%d]",
+            pProfile->GetRtcpXrAttr().IsPacketLossRleSupported(),
+            pProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported(), 0);
 }
 
 PRIVATE
-void AudioProfileExtractor::ExtractAnbr(
-        IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
+void AudioSdpParser::ParseAnbr(IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
@@ -1087,5 +1112,5 @@ void AudioProfileExtractor::ExtractAnbr(
     pProfile->SetAnbr(
             (pDescriptor->GetAttribute(SdpAttribute::ANBR).IsEmpty()) ? IMS_TRUE : IMS_FALSE);
 
-    IMS_TRACE_D("ExtractAnbr() - anbr[%d]", pProfile->IsAnbrSupported(), 0, 0);
+    IMS_TRACE_D("ParseAnbr() - anbr[%d]", pProfile->IsAnbrSupported(), 0, 0);
 }

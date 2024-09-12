@@ -33,7 +33,7 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC
 AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         BaseNego(nSlotId, MEDIA_TYPE_AUDIO),
-        m_pProfileExtractor(std::make_unique<AudioProfileExtractor>())
+        m_pSdpParser(std::make_unique<AudioSdpParser>())
 {
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
@@ -81,8 +81,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
     // Make a destination profile from SDP
     objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
-    if (m_pProfileExtractor->Extract(
-                pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) != IMS_TRUE)
+    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
+            IMS_TRUE)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -568,8 +568,8 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
-    if (m_pProfileExtractor->Extract(
-                pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) != IMS_TRUE)
+    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
@@ -625,8 +625,8 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
-    if (m_pProfileExtractor->Extract(
-                pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) != IMS_TRUE)
+    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
