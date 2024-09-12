@@ -81,8 +81,8 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
     pNegotiatedProfile->SetCandidateAttr(pLocalProfile->GetCandidateAttr());
     NegotiateBandwidth(
             pLocalProfile, pPeerProfile, pNegotiatedProfile, pNegotiatedPayload, pConfig);
-    NegotiateRtcpInterval(
-            pNegotiatedProfile, pConfig->GetRtcpInterval(), pConfig->GetRtcpLiveInterval());
+    NegotiateRtcpInterval(pNegotiatedProfile, pConfig->GetRtcpIntervalOnHold(),
+            pConfig->GetRtcpIntervalOnActive());
 
     return IMS_TRUE;
 }
@@ -879,7 +879,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
 
 PRIVATE
 void AudioProfileNegotiator::NegotiateRtcpInterval(IN AudioProfile* pNegotiatedProfile,
-        IN IMS_SINT32 nRtcpInterval, IN IMS_SINT32 nRtcpLiveInterval)
+        IN IMS_SINT32 nRtcpIntervalOnHold, IN IMS_SINT32 nRtcpIntervalOnActive)
 {
     if (pNegotiatedProfile == IMS_NULL)
     {
@@ -893,12 +893,12 @@ void AudioProfileNegotiator::NegotiateRtcpInterval(IN AudioProfile* pNegotiatedP
     }
     else
     {
-        pNegotiatedProfile->SetRtcpInterval(nRtcpInterval);
+        pNegotiatedProfile->SetRtcpInterval(nRtcpIntervalOnHold);
 
         if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE &&
-                nRtcpLiveInterval > 0)
+                nRtcpIntervalOnActive > 0)
         {
-            pNegotiatedProfile->SetRtcpInterval(nRtcpLiveInterval);
+            pNegotiatedProfile->SetRtcpInterval(nRtcpIntervalOnActive);
         }
     }
 

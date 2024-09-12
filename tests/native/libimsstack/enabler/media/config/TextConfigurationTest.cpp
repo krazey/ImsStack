@@ -101,12 +101,12 @@ TEST_F(TextConfigurationTest, GetConfigTextPort)
 
 TEST_F(TextConfigurationTest, GetConfigTextRtcpInterval)
 {
-    IMS_SINT32 nTextRtcpLiveInterval = 0;
-    IMS_SINT32 nTextRtcpInterval = 3;
+    IMS_SINT32 nTextRtcpIntervalOnActive = 0;
+    IMS_SINT32 nTextRtcpIntervalOnHold = 3;
 
     ImsVector<IMS_SINT32> objTextRtcpInterval;
-    objTextRtcpInterval.Push(nTextRtcpLiveInterval);
-    objTextRtcpInterval.Push(nTextRtcpInterval);
+    objTextRtcpInterval.Push(nTextRtcpIntervalOnActive);
+    objTextRtcpInterval.Push(nTextRtcpIntervalOnHold);
 
     ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY))
@@ -115,8 +115,8 @@ TEST_F(TextConfigurationTest, GetConfigTextRtcpInterval)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), nTextRtcpLiveInterval);
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), nTextRtcpInterval);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnActive(), nTextRtcpIntervalOnActive);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnHold(), nTextRtcpIntervalOnHold);
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextBandwidth)

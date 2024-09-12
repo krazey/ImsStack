@@ -28,8 +28,8 @@ MediaConfiguration::MediaConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nPortRtp(DEFAULT_RTP_PORT),
         m_nPortRtpEnd(DEFAULT_RTP_PORT_END),
         m_nPortRtcp(DEFAULT_RTCP_PORT),
-        m_nRtcpLiveInterval(DEFAULT_RTCP_INVERVAL_LIVE),
-        m_nRtcpInterval(DEFAULT_RTCP_INVERVAL),
+        m_nRtcpIntervalOnActive(DEFAULT_RTCP_INVERVAL_ACTIVE),
+        m_nRtcpIntervalOnHold(DEFAULT_RTCP_INVERVAL_HOLD),
         m_nAsBandwidthKbps(DEFAULT_AS),
         m_nRsBandwidthBps(DEFAULT_RS),
         m_nRrBandwidthBps(DEFAULT_RR),
@@ -147,8 +147,8 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* pi
 
 PROTECTED VIRTUAL void MediaConfiguration::ToDebugString() const
 {
-    IMS_TRACE_D("SessionType[%d], RtcpLiveInterval[%d], RtcpInterval[%d]",
-            (IMS_SINT32)m_eSessionType, m_nRtcpLiveInterval, m_nRtcpInterval);
+    IMS_TRACE_D("SessionType[%d], RtcpIntervalOnActive[%d], RtcpIntervalOnHold[%d]",
+            (IMS_SINT32)m_eSessionType, m_nRtcpIntervalOnActive, m_nRtcpIntervalOnHold);
     IMS_TRACE_D("RtpPortStart[%d], RtpPortEnd[%d], RtcpPort[%d]", m_nPortRtp, m_nPortRtpEnd,
             m_nPortRtcp);
     IMS_TRACE_D("AsBandwidthKbps[%d], RsBandwidthBps[%d], RrBandwidthBps[%d]", m_nAsBandwidthKbps,
@@ -312,11 +312,11 @@ void MediaConfiguration::SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_
     ImsVector<IMS_SINT32> objRtcpInterval = piCc->GetIntArray(pszKey);
     if (!objRtcpInterval.IsEmpty())
     {
-        m_nRtcpLiveInterval = objRtcpInterval.GetAt(0);
+        m_nRtcpIntervalOnActive = objRtcpInterval.GetAt(0);
 
         if (objRtcpInterval.GetSize() > 1)
         {
-            m_nRtcpInterval = objRtcpInterval.GetAt(1);
+            m_nRtcpIntervalOnHold = objRtcpInterval.GetAt(1);
         }
     }
 }
@@ -346,15 +346,15 @@ IMS_SINT32 MediaConfiguration::GetPortRtcp() const
 }
 
 PUBLIC
-IMS_SINT32 MediaConfiguration::GetRtcpLiveInterval() const
+IMS_SINT32 MediaConfiguration::GetRtcpIntervalOnActive() const
 {
-    return m_nRtcpLiveInterval;
+    return m_nRtcpIntervalOnActive;
 }
 
 PUBLIC
-IMS_SINT32 MediaConfiguration::GetRtcpInterval() const
+IMS_SINT32 MediaConfiguration::GetRtcpIntervalOnHold() const
 {
-    return m_nRtcpInterval;
+    return m_nRtcpIntervalOnHold;
 }
 
 PUBLIC

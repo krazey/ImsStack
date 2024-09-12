@@ -118,7 +118,7 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
         pProfile->SetBandwidthAs(pConfig->GetAsBandwidthKbps());
         pProfile->SetBandwidthRr(pConfig->GetRrBandwidthBps());
         pProfile->SetBandwidthRs(pConfig->GetRsBandwidthBps());
-        pProfile->SetRtcpInterval(pConfig->GetRtcpInterval());
+        pProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnHold());
 
         IMS_TRACE_I("CreateProfile() - direction[%d], rtcp Interval[%d]", pProfile->GetDirection(),
                 pProfile->GetRtcpInterval(), 0);
@@ -919,7 +919,7 @@ PRIVATE void MediaProfileFactory::SetVideoCodecPayload(IN CodecVideoConfig* pCod
         if (pVideoConfig->IsVideoAvpfTrrEnabled() == IMS_TRUE)
         {
             pPayload->GetRtcpFbAttr().SetTrrSupported(IMS_TRUE);
-            pPayload->GetRtcpFbAttr().SetTrrInt(pVideoConfig->GetRtcpInterval() * 1000);
+            pPayload->GetRtcpFbAttr().SetTrrInt(pVideoConfig->GetRtcpIntervalOnHold() * 1000);
         }
 
         if (pVideoConfig->IsVideoAvpfNackEnabled() == IMS_TRUE)
@@ -996,7 +996,8 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfTrr(
         if (pVideoConfig->IsVideoAvpfTrrEnabled() == IMS_TRUE)
         {
             AString strTemp = AString::ConstEmpty();
-            strTemp.Sprintf("%s %d", "rtcp-fb:* trr-int", pVideoConfig->GetRtcpInterval() * 1000);
+            strTemp.Sprintf(
+                    "%s %d", "rtcp-fb:* trr-int", pVideoConfig->GetRtcpIntervalOnHold() * 1000);
             pVideoProfile->GetCapaNego().GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfTrr() - Acap[%d][%s]", nAcap,

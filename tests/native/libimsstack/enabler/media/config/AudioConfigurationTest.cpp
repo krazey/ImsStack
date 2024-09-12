@@ -312,12 +312,12 @@ TEST_F(AudioConfigurationTest, GetAudioPort)
 
 TEST_F(AudioConfigurationTest, GetAudioRtcpInterval)
 {
-    IMS_SINT32 nAudioRtcpLiveInterval = 7;
-    IMS_SINT32 nAudioRtcpInterval = 8;
+    IMS_SINT32 nAudioRtcpIntervalOnActive = 7;
+    IMS_SINT32 nAudioRtcpIntervalOnHold = 8;
 
     ImsVector<IMS_SINT32> objAudioRtcpInterval;
-    objAudioRtcpInterval.Push(nAudioRtcpLiveInterval);
-    objAudioRtcpInterval.Push(nAudioRtcpInterval);
+    objAudioRtcpInterval.Push(nAudioRtcpIntervalOnActive);
+    objAudioRtcpInterval.Push(nAudioRtcpIntervalOnHold);
 
     ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY))
@@ -326,8 +326,8 @@ TEST_F(AudioConfigurationTest, GetAudioRtcpInterval)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), nAudioRtcpLiveInterval);
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), nAudioRtcpInterval);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnActive(), nAudioRtcpIntervalOnActive);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnHold(), nAudioRtcpIntervalOnHold);
 }
 
 TEST_F(AudioConfigurationTest, GetAudioBandwidth)

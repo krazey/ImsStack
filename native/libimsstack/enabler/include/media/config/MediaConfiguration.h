@@ -97,17 +97,17 @@ public:
      */
     virtual IMS_SINT32 GetPortRtcp() const;
     /**
-     * @brief Get the rtcp interval in live state
+     * @brief Get the rtcp interval in active state
      *
-     * @return IMS_SINT32 Return the rtcp interval
+     * @return IMS_SINT32 Return the rtcp interval. The timer for this interval runs in seconds.
      */
-    virtual IMS_SINT32 GetRtcpLiveInterval() const;
+    virtual IMS_SINT32 GetRtcpIntervalOnActive() const;
     /**
      * @brief Get the rtcp interval in hold state
      *
-     * @return IMS_SINT32 Return the rtcp interval
+     * @return IMS_SINT32 Return the rtcp interval. The timer for this interval runs in seconds.
      */
-    virtual IMS_SINT32 GetRtcpInterval() const;
+    virtual IMS_SINT32 GetRtcpIntervalOnHold() const;
     /**
      * @brief Get the as bandwidth kbps
      *
@@ -193,8 +193,8 @@ public:
     static const IMS_SINT32 DEFAULT_RTP_PORT = 50010;
     static const IMS_SINT32 DEFAULT_RTP_PORT_END = 50060;
     static const IMS_SINT32 DEFAULT_RTCP_PORT = 50011;
-    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_LIVE = 5;
-    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL = 5;
+    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_ACTIVE = 5;
+    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_HOLD = 5;
     static const IMS_SINT32 DEFAULT_AS = 41;
     static const IMS_SINT32 DEFAULT_RS = 600;
     static const IMS_SINT32 DEFAULT_RR = 2000;
@@ -206,8 +206,8 @@ protected:
     IMS_SINT32 m_nPortRtp;
     IMS_SINT32 m_nPortRtpEnd;
     IMS_SINT32 m_nPortRtcp;
-    IMS_SINT32 m_nRtcpLiveInterval;
-    IMS_SINT32 m_nRtcpInterval;
+    IMS_SINT32 m_nRtcpIntervalOnActive;
+    IMS_SINT32 m_nRtcpIntervalOnHold;
     IMS_SINT32 m_nAsBandwidthKbps;
     IMS_SINT32 m_nRsBandwidthBps;
     IMS_SINT32 m_nRrBandwidthBps;

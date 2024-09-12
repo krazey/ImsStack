@@ -83,8 +83,8 @@ private:
     IMS_BOOL MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig, IN AudioProfile* pLocalProfile,
             IN AudioProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
             OUT AudioProfile* pNegotiatedProfile);
-    void NegotiateRtcpInterval(OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nRtcpInterval,
-            IN IMS_SINT32 nRtcpLiveInterval);
+    void NegotiateRtcpInterval(OUT AudioProfile* pNegotiatedProfile,
+            IN IMS_SINT32 nRtcpIntervalOnHold, IN IMS_SINT32 nRtcpIntervalOnActive);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             OUT IMS_UINT32* pBandwidthNegoList, OUT IMS_UINT32* pBitrateNegoList,
             OUT IMS_UINT32* pModeSetNegoList);

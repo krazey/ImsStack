@@ -51,8 +51,8 @@ static const IMS_SINT32 DEFAULT_RR_VIDEO = VideoConfiguration::DEFAULT_RR_VIDEO;
 static const IMS_SINT32 DEFAULT_RTP_INACTIVITY = MediaConfiguration::DEFAULT_RTP_INACTIVITY;
 static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = MediaConfiguration::DEFAULT_RTCP_INACTIVITY;
 
-class VideoConfigurationTest : public ::testing::Test {
-
+class VideoConfigurationTest : public ::testing::Test
+{
 public:
     VideoConfiguration* m_pConfig;
     MockICarrierConfig* m_pMockICarrierConfig;
@@ -267,12 +267,12 @@ TEST_F(VideoConfigurationTest, GetVideoPort)
 
 TEST_F(VideoConfigurationTest, GetVideoRtcpInterval)
 {
-    IMS_SINT32 nVideoRtcpLiveInterval = 30;
-    IMS_SINT32 nVideoRtcpInterval = 15;
+    IMS_SINT32 nVideoRtcpIntervalOnActive = 30;
+    IMS_SINT32 nVideoRtcpIntervalOnHold = 15;
 
     ImsVector<IMS_SINT32> objVideoRtcpInterval;
-    objVideoRtcpInterval.Push(nVideoRtcpLiveInterval);
-    objVideoRtcpInterval.Push(nVideoRtcpInterval);
+    objVideoRtcpInterval.Push(nVideoRtcpIntervalOnActive);
+    objVideoRtcpInterval.Push(nVideoRtcpIntervalOnHold);
 
     ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY))
@@ -281,8 +281,8 @@ TEST_F(VideoConfigurationTest, GetVideoRtcpInterval)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), nVideoRtcpLiveInterval);
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), nVideoRtcpInterval);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnActive(), nVideoRtcpIntervalOnActive);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnHold(), nVideoRtcpIntervalOnHold);
 }
 
 TEST_F(VideoConfigurationTest, GetConfigVideoBandwidth)

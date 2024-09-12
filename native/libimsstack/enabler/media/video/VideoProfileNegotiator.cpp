@@ -98,12 +98,12 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
         }
         else
         {
-            pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpInterval());
+            pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnHold());
 
             if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE &&
-                    pConfig->GetRtcpLiveInterval() > 0)
+                    pConfig->GetRtcpIntervalOnActive() > 0)
             {
-                pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpLiveInterval());
+                pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnActive());
             }
         }
 

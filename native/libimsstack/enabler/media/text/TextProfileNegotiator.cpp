@@ -298,7 +298,14 @@ void TextProfileNegotiator::NegotiateRtcpInterval(
     }
     else
     {
-        pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpInterval());
+        pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnHold());
+
+        // TODO : need to check RtcpIntervalOnActive is needed for TextSession
+        if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE &&
+                pConfig->GetRtcpIntervalOnActive() > 0)
+        {
+            pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnActive());
+        }
     }
 }
 

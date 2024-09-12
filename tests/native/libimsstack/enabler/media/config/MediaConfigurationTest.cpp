@@ -22,8 +22,9 @@
 static const IMS_SINT32 DEFAULT_RTP_PORT = MediaConfiguration::DEFAULT_RTP_PORT;
 static const IMS_SINT32 DEFAULT_RTP_PORT_END = MediaConfiguration::DEFAULT_RTP_PORT_END;
 static const IMS_SINT32 DEFAULT_RTCP_PORT = MediaConfiguration::DEFAULT_RTCP_PORT;
-static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_LIVE = MediaConfiguration::DEFAULT_RTCP_INVERVAL_LIVE;
-static const IMS_SINT32 DEFAULT_RTCP_INVERVAL = MediaConfiguration::DEFAULT_RTCP_INVERVAL;
+static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_ACTIVE =
+        MediaConfiguration::DEFAULT_RTCP_INVERVAL_ACTIVE;
+static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_HOLD = MediaConfiguration::DEFAULT_RTCP_INVERVAL_HOLD;
 static const IMS_SINT32 DEFAULT_AS = MediaConfiguration::DEFAULT_AS;
 static const IMS_SINT32 DEFAULT_RS = MediaConfiguration::DEFAULT_RS;
 static const IMS_SINT32 DEFAULT_RR = MediaConfiguration::DEFAULT_RR;
@@ -46,8 +47,8 @@ TEST_F(MediaConfigurationTest, GetConfigAudio)
     EXPECT_EQ(m_pConfig->GetPortRtp(), DEFAULT_RTP_PORT);
     EXPECT_EQ(m_pConfig->GetPortRtpEnd(), DEFAULT_RTP_PORT_END);
     EXPECT_EQ(m_pConfig->GetPortRtcp(), DEFAULT_RTCP_PORT);
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), DEFAULT_RTCP_INVERVAL_LIVE);
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), DEFAULT_RTCP_INVERVAL);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnActive(), DEFAULT_RTCP_INVERVAL_ACTIVE);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnHold(), DEFAULT_RTCP_INVERVAL_HOLD);
     EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(), DEFAULT_AS);
     EXPECT_EQ(m_pConfig->GetRsBandwidthBps(), DEFAULT_RS);
     EXPECT_EQ(m_pConfig->GetRrBandwidthBps(), DEFAULT_RR);
@@ -64,8 +65,8 @@ TEST_F(MediaConfigurationTest, GetConfigVideo)
     EXPECT_EQ(m_pConfig->GetPortRtp(), DEFAULT_RTP_PORT);
     EXPECT_EQ(m_pConfig->GetPortRtpEnd(), DEFAULT_RTP_PORT_END);
     EXPECT_EQ(m_pConfig->GetPortRtcp(), DEFAULT_RTCP_PORT);
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), DEFAULT_RTCP_INVERVAL_LIVE);
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), DEFAULT_RTCP_INVERVAL);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnActive(), DEFAULT_RTCP_INVERVAL_ACTIVE);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnHold(), DEFAULT_RTCP_INVERVAL_HOLD);
     EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(), DEFAULT_AS);
     EXPECT_EQ(m_pConfig->GetRsBandwidthBps(), DEFAULT_RS);
     EXPECT_EQ(m_pConfig->GetRrBandwidthBps(), DEFAULT_RR);
@@ -82,8 +83,8 @@ TEST_F(MediaConfigurationTest, GetConfigText)
     EXPECT_EQ(m_pConfig->GetPortRtp(), DEFAULT_RTP_PORT);
     EXPECT_EQ(m_pConfig->GetPortRtpEnd(), DEFAULT_RTP_PORT_END);
     EXPECT_EQ(m_pConfig->GetPortRtcp(), DEFAULT_RTCP_PORT);
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), DEFAULT_RTCP_INVERVAL_LIVE);
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), DEFAULT_RTCP_INVERVAL);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnActive(), DEFAULT_RTCP_INVERVAL_ACTIVE);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnHold(), DEFAULT_RTCP_INVERVAL_HOLD);
     EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(), DEFAULT_AS);
     EXPECT_EQ(m_pConfig->GetRsBandwidthBps(), DEFAULT_RS);
     EXPECT_EQ(m_pConfig->GetRrBandwidthBps(), DEFAULT_RR);
