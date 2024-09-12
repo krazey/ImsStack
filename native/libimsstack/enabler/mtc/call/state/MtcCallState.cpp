@@ -630,14 +630,6 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
 }
 
 PROTECTED
-void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
-{
-    IMS_BOOL bEarly =
-            !m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_200);
-    m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly);
-}
-
-PROTECTED
 IMS_RESULT MtcCallState::SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession)
 {
     if (!piMtcSession)
