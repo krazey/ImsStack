@@ -32,9 +32,12 @@ import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.IndentingPrintWriter;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 public class RcsFeatureImpl extends RcsFeature {
     private final IContext mIContext;
-
+    private final Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
     public RcsFeatureImpl(IContext iContext) {
         super(iContext.getExecutor());
         mIContext = iContext;
@@ -54,7 +57,7 @@ public class RcsFeatureImpl extends RcsFeature {
             @NonNull CapabilityExchangeEventListener listener) {
         logi("createCapabilityExchangeImpl");
         return new RcsCapExchangeImpl(listener, mIContext.getSlotId(), mIContext.getContext(),
-                mIContext.getExecutor());
+                mIContext.getExecutor(), mCallbackExecutor);
     }
 
     @Override

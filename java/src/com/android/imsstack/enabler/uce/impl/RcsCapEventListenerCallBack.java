@@ -24,7 +24,6 @@ import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.enabler.uce.interf.RemoteOptionsCallback;
 import com.android.imsstack.enabler.uce.interf.UceEventListener;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Set;
@@ -32,14 +31,13 @@ import java.util.concurrent.Executor;
 
 public class RcsCapEventListenerCallBack implements UceEventListener {
     private static final String LOG_TAG = RcsCapEventListenerCallBack.class.getSimpleName();
-    private CapabilityExchangeEventListener mEventListener = null;
-    private MessageExecutor mMessageExecutor;
-    private Executor mRequestExecutor;
-
-    private RcsCapOptionsRequestCallback mRcsOptionsRequestCallback;
+    private final CapabilityExchangeEventListener mEventListener;
+    private final Executor mMessageExecutor;
+    private final Executor mRequestExecutor;
+    private final RcsCapOptionsRequestCallback mRcsOptionsRequestCallback;
 
     public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
-            MessageExecutor messageExecutor, Executor requestExecutor) {
+            Executor messageExecutor, Executor requestExecutor) {
         mEventListener = listener;
         mMessageExecutor = messageExecutor;
         mRequestExecutor = requestExecutor;
@@ -49,7 +47,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
 
     @VisibleForTesting
     public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
-            MessageExecutor messageExecutor, Executor requestExecutor,
+            Executor messageExecutor, Executor requestExecutor,
             RcsCapOptionsRequestCallback rcsOptionsRequestCallback) {
         mEventListener = listener;
         mMessageExecutor = messageExecutor;

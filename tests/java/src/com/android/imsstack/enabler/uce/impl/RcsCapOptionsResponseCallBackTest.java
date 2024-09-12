@@ -19,13 +19,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.telephony.ims.ImsException;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
-
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,66 +31,63 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class RcsCapOptionsResponseCallBackTest {
-    @Mock
-    private RcsCapabilityExchangeImplBase.OptionsResponseCallback mOptionsResponseCallback;
-    private MessageExecutor mMessageExecutor;
-    private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack,
-            mRcsCapOptionsResponseCallBackNull;
+    @Mock private RcsCapabilityExchangeImplBase.OptionsResponseCallback mOptionsResponseCallback;
+    private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+    private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBackNull;
+
     @Before
     public void setUp() {
-        mOptionsResponseCallback = Mockito.mock(
-                RcsCapabilityExchangeImplBase.OptionsResponseCallback.class);
-        mMessageExecutor = new MessageExecutor("ResponseCallBackTest");
-        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(mMessageExecutor);
+        MockitoAnnotations.initMocks(this);
+        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(mExecutor);
         mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
-        mRcsCapOptionsResponseCallBackNull = new RcsCapOptionsResponseCallBack(mMessageExecutor);
+        mRcsCapOptionsResponseCallBackNull = new RcsCapOptionsResponseCallBack(mExecutor);
         mRcsCapOptionsResponseCallBackNull.setCallBack(null);
     }
+
+    @After
+    public void tearDown() {
+        mOptionsResponseCallback = null;
+        mRcsCapOptionsResponseCallBack = null;
+    }
+
+    private final Executor mExecutor = (r) -> r.run();
+
     @Test
     public void onCommandErrorOptionsTest() throws ImsException {
         mRcsCapOptionsResponseCallBackNull.setCallBack(null);
         mRcsCapOptionsResponseCallBackNull.onCommandError(1);
-        verify(mOptionsResponseCallback, Mockito.times(0)).onCommandError(1);
+        verify(mOptionsResponseCallback, never()).onCommandError(1);
         mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
         mRcsCapOptionsResponseCallBack.onCommandError(1);
-        verify(mOptionsResponseCallback, Mockito.timeout(100).times(1)).onCommandError(1);
+        verify(mOptionsResponseCallback).onCommandError(1);
         doThrow(ImsException.class).when(mOptionsResponseCallback).onCommandError(1);
         mRcsCapOptionsResponseCallBack.onCommandError(1);
-        reset(mOptionsResponseCallback);
     }
+
     @Test
     public void onNetworkResponseOptionsTest() throws ImsException {
-        List<String> capa = readCapabilities();
+        List<String> capability = readCapabilities();
         mRcsCapOptionsResponseCallBackNull.setCallBack(null);
-        mRcsCapOptionsResponseCallBackNull.onNetworkResponse(200, "OK", capa);
-        verify(mOptionsResponseCallback, Mockito.times(0)).onNetworkResponse(
-                anyInt(), anyString(), any());
+        mRcsCapOptionsResponseCallBackNull.onNetworkResponse(200, "OK", capability);
+        verify(mOptionsResponseCallback, never())
+                .onNetworkResponse(anyInt(), anyString(), any());
         mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
-        mRcsCapOptionsResponseCallBack.onNetworkResponse(200, "OK", capa);
-        verify(mOptionsResponseCallback, Mockito.timeout(100).times(1)).onNetworkResponse(
-                anyInt(), anyString(), any());
-        doThrow(ImsException.class).when(mOptionsResponseCallback).onNetworkResponse(anyInt(),
-                anyString(), any());
-        mRcsCapOptionsResponseCallBack.onNetworkResponse(200, "OK", capa);
-        reset(mOptionsResponseCallback);
+        mRcsCapOptionsResponseCallBack.onNetworkResponse(200, "OK", capability);
+        verify(mOptionsResponseCallback).onNetworkResponse(anyInt(), anyString(), any());
+        doThrow(ImsException.class)
+                .when(mOptionsResponseCallback)
+                .onNetworkResponse(anyInt(), anyString(), any());
+        mRcsCapOptionsResponseCallBack.onNetworkResponse(200, "OK", capability);
     }
-    public List<String> readCapabilities() {
-        List<String> capabilities = new ArrayList();
-        capabilities.add("Audio");
-        capabilities.add("Video");
-        return capabilities;
-    }
-    @After
-    public void cleanUp() {
-        mOptionsResponseCallback = null;
-        mMessageExecutor = null;
-        mRcsCapOptionsResponseCallBack = null;
+
+    private static List<String> readCapabilities() {
+        return List.of("Audio", "Video");
     }
 }

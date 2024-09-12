@@ -28,7 +28,6 @@ import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallBack;
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.enabler.uce.interf.UceManager;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Collection;
@@ -36,15 +35,14 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
-    private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
-    private int mSlotId = -1;
+    private final CapabilityExchangeEventListener mCapabilityExchangeEventListener;
+    private final int mSlotId;
     private final Executor mCapExchangeExecutor;
-    private final MessageExecutor mCallBackExecutor = new MessageExecutor("CallBackExecutor");
-    private IUceApi mUceApi = null;
-    private Context mContext = null;
-    private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
-    private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
-    private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+    private final IUceApi mUceApi;
+    private final Context mContext;
+    private final RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
+    private final RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
+    private final RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
 
     /**
      * Create a new RcsCapabilityExchangeImplBase instance.
@@ -52,12 +50,14 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
      * @param listener used by the framework to listen to events from the vendor RCS stack
      * @param slotId The slot ID associated with the RcsFeature.
      * @param context The context that is used in the ImsService.
+     * @param executor The executor that will handle request from framework to stack.
+     * @param messageExecutor The executor on which the callback methods will be invoked.
      */
     public RcsCapExchangeImpl(
             CapabilityExchangeEventListener listener,
             int slotId,
             Context context,
-            Executor executor) {
+            Executor executor, Executor messageExecutor) {
         mCapabilityExchangeEventListener = listener;
         mSlotId = slotId;
         mContext = context;
@@ -65,13 +65,14 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
         mUceApi = UceManager.create(mContext, mSlotId);
         RcsCapEventListenerCallBack event =
                 new RcsCapEventListenerCallBack(
-                        mCapabilityExchangeEventListener, mCallBackExecutor, mCapExchangeExecutor);
+                        mCapabilityExchangeEventListener, messageExecutor, mCapExchangeExecutor);
+
         if (mUceApi != null) {
             mUceApi.setListener(event);
         }
-        mRcsCapPublishResponseCallBack = new RcsCapPublishResponseCallBack(mCallBackExecutor);
-        mRcsCapSubscribeResponseCallBack = new RcsCapSubscribeResponseCallBack(mCallBackExecutor);
-        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(mCallBackExecutor);
+        mRcsCapPublishResponseCallBack = new RcsCapPublishResponseCallBack(messageExecutor);
+        mRcsCapSubscribeResponseCallBack = new RcsCapSubscribeResponseCallBack(messageExecutor);
+        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(messageExecutor);
     }
 
     @VisibleForTesting
@@ -84,7 +85,7 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
             RcsCapOptionsResponseCallBack optionsResponse,
             RcsCapPublishResponseCallBack rcsCapPublishResponseCallBack,
             Executor capExchangeExecutor,
-            MessageExecutor callBackExecutor) {
+            Executor callBackExecutor) {
         mCapabilityExchangeEventListener = listener;
         mSlotId = slotId;
         mContext = context;

@@ -83,7 +83,6 @@ public class RcsCapExchangeImplTest {
 
     @After
     public void tearDown() {
-
         mRcsCapExchangeImpl = null;
     }
 

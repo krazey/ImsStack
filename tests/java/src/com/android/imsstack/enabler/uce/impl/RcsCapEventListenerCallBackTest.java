@@ -20,13 +20,13 @@ import static com.android.imsstack.enabler.uce.interf.UceApiConstant.CAPABILITY_
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.net.Uri;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 
 import com.android.imsstack.enabler.uce.interf.RemoteOptionsCallback;
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +34,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
@@ -52,17 +51,15 @@ public class RcsCapEventListenerCallBackTest {
     @Mock Executor mMessageExecutorRequest;
     @Mock RcsCapOptionsRequestCallback mRcsCapOptionsRequestCallback;
 
-    private MessageExecutor mMessageExecutor;
     private RcsCapEventListenerCallBack mRcsCapEventListenerCallBack;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mMessageExecutor = new MessageExecutor("RcsUceCAllBack");
         mRcsCapEventListenerCallBack =
                 new RcsCapEventListenerCallBack(
                         mListener,
-                        mMessageExecutor,
+                        mExecutor,
                         mMessageExecutorRequest,
                         mRcsCapOptionsRequestCallback);
     }
@@ -70,19 +67,18 @@ public class RcsCapEventListenerCallBackTest {
     @After
     public void tearDown() throws Exception {
         mRcsCapEventListenerCallBack = null;
-        mMessageExecutor = null;
     }
+
+    private final Executor mExecutor = (r) -> r.run();
 
     @Test
     public void onRequestPublishCapabilitiesTest() throws ImsException {
         int publishTriggerType = CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED;
         mRcsCapEventListenerCallBack.onRequestPublishCapabilities(publishTriggerType);
-        Mockito.verify(mListener, Mockito.timeout(100).times(1))
-                .onRequestPublishCapabilities(publishTriggerType);
+        verify(mListener).onRequestPublishCapabilities(publishTriggerType);
         publishTriggerType = CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD;
         mRcsCapEventListenerCallBack.onRequestPublishCapabilities(publishTriggerType);
-        Mockito.verify(mListener, Mockito.timeout(100).times(1))
-                .onRequestPublishCapabilities(publishTriggerType);
+        verify(mListener).onRequestPublishCapabilities(publishTriggerType);
         doThrow(ImsException.class)
                 .when(mListener)
                 .onRequestPublishCapabilities(publishTriggerType);
@@ -92,11 +88,9 @@ public class RcsCapEventListenerCallBackTest {
     @Test
     public void onPublishUpdatedTest() throws ImsException {
         mRcsCapEventListenerCallBack.onPublishUpdated(200, null, 0, null);
-        Mockito.verify(mListener, Mockito.timeout(100).times(1))
-                .onPublishUpdated(200, null, 0, null);
+        verify(mListener).onPublishUpdated(200, null, 0, null);
         mRcsCapEventListenerCallBack.onPublishUpdated(200, "", 400, "Bad reason");
-        Mockito.verify(mListener, Mockito.timeout(100).times(1))
-                .onPublishUpdated(200, "", 400, "Bad reason");
+        verify(mListener).onPublishUpdated(200, "", 400, "Bad reason");
         doThrow(ImsException.class).when(mListener).onPublishUpdated(200, null, 0, null);
         mRcsCapEventListenerCallBack.onPublishUpdated(200, null, 0, null);
     }
@@ -104,7 +98,7 @@ public class RcsCapEventListenerCallBackTest {
     @Test
     public void onUnPublishTest() throws ImsException {
         mRcsCapEventListenerCallBack.onUnPublish();
-        Mockito.verify(mListener, Mockito.timeout(100).times(1)).onUnpublish();
+        verify(mListener).onUnpublish();
         doThrow(ImsException.class).when(mListener).onUnpublish();
         mRcsCapEventListenerCallBack.onUnPublish();
     }
@@ -116,8 +110,8 @@ public class RcsCapEventListenerCallBackTest {
         remoteCapabilities.add(FEATURE_VIDEO);
         mRcsCapEventListenerCallBack.onRemoteCapabilityRequest(
                 Uri.parse(TEST_PHONE_NUMBER), remoteCapabilities, callback);
-        Mockito.verify(mRcsCapOptionsRequestCallback).setCallBack(callback);
-        Mockito.verify(mListener, Mockito.timeout(100))
+        verify(mRcsCapOptionsRequestCallback).setCallBack(callback);
+        verify(mListener)
                 .onRemoteCapabilityRequest(
                         Uri.parse(TEST_PHONE_NUMBER),
                         remoteCapabilities,

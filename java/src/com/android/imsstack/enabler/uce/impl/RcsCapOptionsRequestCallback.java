@@ -26,9 +26,9 @@ import java.util.concurrent.Executor;
 
 public class RcsCapOptionsRequestCallback implements OptionsRequestCallback {
 
-    private RemoteOptionsCallback mRemoteOptionsCallback = null;
     private static final String LOG_TAG = RcsCapOptionsRequestCallback.class.getSimpleName();
-    private Executor mMessageExecutor;
+    private RemoteOptionsCallback mRemoteOptionsCallback = null;
+    private final Executor mMessageExecutor;
 
     public RcsCapOptionsRequestCallback(Executor executor) {
         mMessageExecutor = executor;

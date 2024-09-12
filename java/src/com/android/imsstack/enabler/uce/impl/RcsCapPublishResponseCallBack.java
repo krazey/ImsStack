@@ -22,15 +22,16 @@ import android.util.Log;
 
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.enabler.uce.interf.PublishResponse;
-import com.android.imsstack.util.MessageExecutor;
+
+import java.util.concurrent.Executor;
 
 public class RcsCapPublishResponseCallBack implements PublishResponse {
 
     private static final String LOG_TAG = RcsCapPublishResponseCallBack.class.getSimpleName();
     private PublishResponseCallback mPublishResponseCallBack;
-    private MessageExecutor mMessageExecutor;
+    private final Executor mMessageExecutor;
 
-    public RcsCapPublishResponseCallBack(MessageExecutor messageExecutor) {
+    public RcsCapPublishResponseCallBack(Executor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 

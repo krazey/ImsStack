@@ -22,17 +22,17 @@ import android.util.Log;
 
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.enabler.uce.interf.OptionsResponse;
-import com.android.imsstack.util.MessageExecutor;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class RcsCapOptionsResponseCallBack implements OptionsResponse {
 
     private static final String LOG_TAG = RcsCapOptionsResponseCallBack.class.getSimpleName();
     private OptionsResponseCallback mOptionsResponseCallBack;
-    private MessageExecutor mMessageExecutor;
+    private final Executor mMessageExecutor;
 
-    public RcsCapOptionsResponseCallBack(MessageExecutor messageExecutor) {
+    public RcsCapOptionsResponseCallBack(Executor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 
