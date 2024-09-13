@@ -183,7 +183,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     }
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_FALSE);
     OnStarted(piSession);
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
 
@@ -253,8 +253,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
         return CallStateName::TERMINATING;
     }
 
-    RunMedia(piSession, piMessage);
-
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
@@ -325,7 +324,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
         return CallStateName::TERMINATING;
     }
 
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
@@ -482,7 +481,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
@@ -573,7 +572,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     }
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }

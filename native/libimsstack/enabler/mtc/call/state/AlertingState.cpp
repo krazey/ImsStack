@@ -111,7 +111,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
-    RunMedia(GetISession(), IMS_NULL);
+    m_objContext.GetMediaManager().Run(GetISession(), IMS_NULL, IMS_FALSE);
 
     return GetStateName();
 }
@@ -194,7 +194,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
         return CallStateName::TERMINATING;
     }
 
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_FALSE);
     m_objContext.GetUiNotifier().SendStarted();
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
 

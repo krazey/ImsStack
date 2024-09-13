@@ -182,7 +182,6 @@ protected:
 
     void InitMediaSession();
     IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
-    void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
 
     IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
