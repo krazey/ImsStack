@@ -119,7 +119,7 @@
     <int name="audio_ptime_millis_int" value="20"/>
     <int name="audio_maxptime_millis_int" value="240"/>
     <boolean name="audio_show_codec_attribute_modeset_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_dtx_bool" value="true"/>
+    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
     <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
