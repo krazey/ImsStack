@@ -185,6 +185,9 @@ protected:
 
     void UpdateRegistrationMode() const;
     IMS_BOOL IsServiceBlockedByMenu() const;
+    IMS_BOOL IsRttSupported() const;
+    IMS_BOOL IsCombinedAttached() const;
+    IMS_BOOL IsDeregRequiredForTty() const;
 
 protected:
     IAosAppContext* m_piAppContext;
