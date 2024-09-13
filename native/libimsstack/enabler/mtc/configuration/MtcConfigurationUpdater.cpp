@@ -113,8 +113,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
                     ImsVoice::KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING_INT);
     objItems.nPolicyOfLocalNumbers =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT);
-    objItems.bDefaultEpsBearerContextUsageRestrictionOnCellular = piCc->GetBoolean(CarrierConfig::
-                    ImsVoice::KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL);
     objItems.nSilentRedialInterval =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT);
     objItems.nCallTypeAfterAudioAndVideoCallMerged = piCc->GetInt(
@@ -340,8 +338,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT);
     objItems.bReleaseEmergencyPdnWithEmergencyCallFail = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL);
-    objItems.nPolicyForAlertNotUsingPreconditionMechanism = piCc->GetInt(
-            CarrierConfig::Assets::KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT);
     objItems.bRequiredCdmalessFeatureTag =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
     objItems.bEmergencyCallCurrentLocationDiscoverySupported = piCc->GetBoolean(

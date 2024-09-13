@@ -223,7 +223,6 @@
     <boolean name="one_way_video_call_by_remote_end_supported_bool" value="false"/>
     <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
     <boolean name="call_mergeable_on_conference_on_hold_bool" value="true"/>
-    <int name="policy_for_alert_not_using_precondition_mechanism_int" value="0"/>
     <boolean name="check_ui_condition_for_incoming_resume_bool" value="true"/>
 
     <!-- MTC terminate reason -->
