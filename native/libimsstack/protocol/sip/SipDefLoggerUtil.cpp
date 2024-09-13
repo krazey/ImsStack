@@ -23,7 +23,7 @@ SipDefLoggerUtil::SipDefLoggerUtil() {}
 SipDefLoggerUtil::~SipDefLoggerUtil() {}
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
-void SipDefLoggerUtil::DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* /*pszFile*/,
+SIP_VOID SipDefLoggerUtil::DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* /*pszFile*/,
         SIP_UINT16 /*nLine*/, const SIP_CHAR* pszFormat, ...)
 {
     if (TraceService::GetTraceService()->GetTrace()->IsTraceEnabled(
@@ -38,4 +38,10 @@ void SipDefLoggerUtil::DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* /*pszFile*/
                 nCategory, strTag, (nModule), pszFormat, args);
         va_end(args);
     }
+}
+
+SIP_VOID SipDefLoggerUtil::DumpAssertLog(
+        const SIP_CHAR* pszCondition, const SIP_CHAR* pszModule, SIP_UINT16 nLine)
+{
+    TraceService_Assert(pszCondition, pszModule, nLine);
 }

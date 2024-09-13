@@ -26,8 +26,10 @@ public:
     ~SipDefLoggerUtil();
 
 public:
-    void DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,
+    SIP_VOID DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,
             const SIP_CHAR* pszFormat, ...) override;
+    SIP_VOID DumpAssertLog(
+            const SIP_CHAR* pszCondition, const SIP_CHAR* pszModule, SIP_UINT16 nLine) override;
 };
 
 #endif  //__SIP_DEF_LOGGER_UTIL_H__
