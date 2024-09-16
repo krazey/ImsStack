@@ -55,25 +55,84 @@ TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
 
-    AStringBuffer objValue(256);
+    AStringBuffer objBuffer(256);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
     pHeader->SetNameSpace("Namespace");
 
-    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
     pHeader->SetRPriority("ResourcePriority");
 
-    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_STREQ("Namespace.ResourcePriority", objValue.GetCharString());
+    EXPECT_STREQ("Namespace.ResourcePriority", objBuffer.GetCharString());
     EXPECT_STREQ("Namespace.ResourcePriority", &(aBuffer[0]));
 
     pHeader->SipDelete();
+
+    // ACCEPT_RESOURCE_PRIORITY header tests
+    SipResourcePriorityHeader* pAcceptResourcePriorityHeader =
+            reinterpret_cast<SipResourcePriorityHeader*>(SipResourcePriorityHeader::GetNewObj(
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+    ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    objBuffer = AString::ConstNull();
+
+    /* Empty header allowed */
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->IsValidHeader());
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
+
+    /* Only namespace present, fail */
+    pAcceptResourcePriorityHeader->SetNameSpace("namespace");
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->IsValidHeader());
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
+    pAcceptResourcePriorityHeader->SipDelete();
+    pAcceptResourcePriorityHeader = nullptr;
+
+    pAcceptResourcePriorityHeader = reinterpret_cast<SipResourcePriorityHeader*>(
+            SipResourcePriorityHeader::GetNewObj(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+    ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
+    /* Only r-priority present, fail */
+    pAcceptResourcePriorityHeader->SetRPriority("r-priority");
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->IsValidHeader());
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    objBuffer = AString::ConstNull();
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
+    pAcceptResourcePriorityHeader->SipDelete();
+    pAcceptResourcePriorityHeader = nullptr;
+
+    pAcceptResourcePriorityHeader = reinterpret_cast<SipResourcePriorityHeader*>(
+            SipResourcePriorityHeader::GetNewObj(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+    ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
+    /* namespace and r-priority present, success */
+    pAcceptResourcePriorityHeader->SetNameSpace("namespace");
+    pAcceptResourcePriorityHeader->SetRPriority("r-priority");
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->IsValidHeader());
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    objBuffer = AString::ConstNull();
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
+
+    EXPECT_STREQ("namespace.r-priority", &(aBuffer[0]));
+    EXPECT_STREQ("namespace.r-priority", objBuffer.GetCharString());
+    pAcceptResourcePriorityHeader->SipDelete();
 }
 
 TEST_F(SipResourcePriorityHeaderTest, DecodeHdr)
@@ -92,6 +151,40 @@ TEST_F(SipResourcePriorityHeaderTest, DecodeHdr)
     EXPECT_STREQ("ResourcePriority", pHeader->GetResourcePriority());
 
     pHeader->SipDelete();
+
+    // ACCEPT_RESOURCE_PRIORITY header tests
+    SipResourcePriorityHeader* pAcceptResourcePriorityHeader =
+            reinterpret_cast<SipResourcePriorityHeader*>(SipResourcePriorityHeader::GetNewObj(
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+    ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
+
+    /* Empty header allowed */
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->DecodeHdr(nullptr, 0));
+
+    /* Only namespace present, fail */
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->DecodeHdr("namespace", 9));
+
+    /* Only namespace(DOT) without r-priority, fail */
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->DecodeHdr("namespace.", 10));
+    pAcceptResourcePriorityHeader->SipDelete();
+    pAcceptResourcePriorityHeader = nullptr;
+
+    pAcceptResourcePriorityHeader = reinterpret_cast<SipResourcePriorityHeader*>(
+            SipResourcePriorityHeader::GetNewObj(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+    ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
+    /* Only (DOT)r-priority present, fail */
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->DecodeHdr(".r-priority", 11));
+    pAcceptResourcePriorityHeader->SipDelete();
+    pAcceptResourcePriorityHeader = nullptr;
+
+    pAcceptResourcePriorityHeader = reinterpret_cast<SipResourcePriorityHeader*>(
+            SipResourcePriorityHeader::GetNewObj(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+    ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
+    /* Both namespace and r-priority present, success */
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->DecodeHdr("namespace.r-priority", 20));
+    EXPECT_STREQ("namespace", pAcceptResourcePriorityHeader->GetNameSpace());
+    EXPECT_STREQ("r-priority", pAcceptResourcePriorityHeader->GetResourcePriority());
+    pAcceptResourcePriorityHeader->SipDelete();
 }
 
 }  // namespace android

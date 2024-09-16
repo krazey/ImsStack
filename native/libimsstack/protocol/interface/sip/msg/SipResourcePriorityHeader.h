@@ -26,7 +26,7 @@ private:
 
 public:
     /*constructor*/
-    SipResourcePriorityHeader();
+    explicit SipResourcePriorityHeader(SIP_INT32 eHdrType);
     SipResourcePriorityHeader(const SipResourcePriorityHeader& objHeader);
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
@@ -47,11 +47,7 @@ public:
 
     inline const SIP_CHAR* GetResourcePriority() const { return m_pszRPriority; }
 
-    inline SIP_BOOL IsValidHeader() const override
-    {
-        return ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL)) ? SIP_FALSE
-                                                                              : SIP_TRUE;
-    }
+    SIP_BOOL IsValidHeader() const override;
 
 private:
     ~SipResourcePriorityHeader();
