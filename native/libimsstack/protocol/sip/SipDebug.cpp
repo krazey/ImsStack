@@ -18,7 +18,7 @@
 #include "platform/SipString.h"
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
-void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
+SIP_VOID SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
         const SIP_CHAR* pszFormat, ...)
 {
     SipUtil* pUtil = SipUtil_GetInstance();
@@ -49,4 +49,16 @@ void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 
     {
         delete[] pszTempFilename;
     }
+}
+
+SIP_VOID SIP_ASSERT_LOG(const SIP_CHAR* pszCondition, const SIP_CHAR* pszModule, SIP_UINT16 nLine)
+{
+    SipUtil* pUtil = SipUtil_GetInstance();
+
+    if (pUtil == SIP_NULL)
+    {
+        return;
+    }
+
+    pUtil->GetLogger()->DumpAssertLog(pszCondition, pszModule, nLine);
 }
