@@ -28,7 +28,7 @@ import java.util.List;
 
 public class RcsCapOptionsResponseCallBack implements OptionsResponse {
 
-    private static final String LOG_TAG = "OptionsResponseCallBack";
+    private static final String LOG_TAG = RcsCapOptionsResponseCallBack.class.getSimpleName();
     private OptionsResponseCallback mOptionsResponseCallBack;
     private MessageExecutor mMessageExecutor;
 

@@ -30,7 +30,7 @@ import java.util.List;
 
 public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
 
-    private static final String LOG_TAG = "SubscribeResponseCallBack";
+    private static final String LOG_TAG = RcsCapSubscribeResponseCallBack.class.getSimpleName();
     private SubscribeResponseCallback mSubscribeResponseCallBack;
     private MessageExecutor mMessageExecutor;
 

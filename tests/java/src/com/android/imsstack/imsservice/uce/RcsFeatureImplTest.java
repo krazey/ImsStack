@@ -66,6 +66,7 @@ public class RcsFeatureImplTest {
     @Mock private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
     @Mock private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
     @Mock private IUceApi mUceApi;
+    @Mock private MessageExecutor mMessageExecutor;
 
     private MessageExecutor mExecutor = null;
     private ImsContext mImsContext;
@@ -75,6 +76,7 @@ public class RcsFeatureImplTest {
     private static class CapabilityCallback extends IImsCapabilityCallback.Stub {
         boolean mIsOnCapabilitiesStatusChanged = false;
         boolean mIsOnChangeCapabilityConfigurationError = false;
+
         @Override
         public void onQueryCapabilityConfiguration(int capability, int radioTech, boolean enabled)
                 throws RemoteException {
@@ -122,29 +124,36 @@ public class RcsFeatureImplTest {
     }
 
     @Test
-    public void  queryCapabilityConfiguration() {
-        boolean flag =  mFeature.queryCapabilityConfiguration(
-                ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
+    public void queryCapabilityConfiguration() {
+        boolean flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
 
         assertTrue(flag);
 
-        flag =  mFeature.queryCapabilityConfiguration(ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
+        flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
         assertFalse(flag);
 
-        flag =  mFeature.queryCapabilityConfiguration(ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
+        flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
         assertFalse(flag);
 
-        flag =  mFeature.queryCapabilityConfiguration(ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
+        flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         assertTrue(flag);
     }
 
     @Test
     public void changeEnabledCapabilities() throws RemoteException {
-        //Carrier Configuration stubbing
+        // Carrier Configuration stubbing
         mCapabilityExchangeEventListener = Mockito.mock(CapabilityExchangeEventListener.class);
 
         PersistableBundle bundle = new PersistableBundle();
@@ -153,14 +162,16 @@ public class RcsFeatureImplTest {
         when(ccmp.getConfigForSubId(anyInt(), any())).thenReturn(bundle);
 
         // CapabilityChangeRequest can not be mocked It is a final class.
-        CapabilityChangeRequest request =  new CapabilityChangeRequest();
-        request.addCapabilitiesToEnableForTech(RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE,
+        CapabilityChangeRequest request = new CapabilityChangeRequest();
+        request.addCapabilitiesToEnableForTech(
+                RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
-        request.addCapabilitiesToEnableForTech(RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE,
+        request.addCapabilitiesToEnableForTech(
+                RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         CapabilityCallback capabilityCallback = new CapabilityCallback();
         mFeature.addCapabilityCallback(capabilityCallback);
-        //verify API changeEnabledCapabilities call
+        // verify API changeEnabledCapabilities call
         mFeature.changeEnabledCapabilities(request, null);
         Assert.assertTrue(capabilityCallback.mIsOnCapabilitiesStatusChanged);
         Assert.assertFalse(capabilityCallback.mIsOnChangeCapabilityConfigurationError);
@@ -191,9 +202,16 @@ public class RcsFeatureImplTest {
         @Override
         public RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
                 CapabilityExchangeEventListener listener) {
-            return new RcsCapExchangeImpl(mCapabilityExchangeEventListener, TestAppContext.SLOT0,
-                    mMockContext, mUceApi, mRcsCapSubscribeResponseCallBack,
-                    mRcsCapOptionsResponseCallBack, mRcsCapPublishResponseCallBack);
+            return new RcsCapExchangeImpl(
+                    mCapabilityExchangeEventListener,
+                    TestAppContext.SLOT0,
+                    mMockContext,
+                    mUceApi,
+                    mRcsCapSubscribeResponseCallBack,
+                    mRcsCapOptionsResponseCallBack,
+                    mRcsCapPublishResponseCallBack,
+                    mExecutor,
+                    mMessageExecutor);
         }
     }
 }

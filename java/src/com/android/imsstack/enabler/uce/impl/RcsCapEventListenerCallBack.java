@@ -28,17 +28,18 @@ import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 public class RcsCapEventListenerCallBack implements UceEventListener {
-    private static final String LOG_TAG = "RcsCapEventListenerCallBack";
+    private static final String LOG_TAG = RcsCapEventListenerCallBack.class.getSimpleName();
     private CapabilityExchangeEventListener mEventListener = null;
     private MessageExecutor mMessageExecutor;
-    private MessageExecutor mRequestExecutor;
+    private Executor mRequestExecutor;
 
     private RcsCapOptionsRequestCallback mRcsOptionsRequestCallback;
 
     public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
-            MessageExecutor messageExecutor, MessageExecutor requestExecutor) {
+            MessageExecutor messageExecutor, Executor requestExecutor) {
         mEventListener = listener;
         mMessageExecutor = messageExecutor;
         mRequestExecutor = requestExecutor;
@@ -48,7 +49,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
 
     @VisibleForTesting
     public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
-            MessageExecutor messageExecutor, MessageExecutor requestExecutor,
+            MessageExecutor messageExecutor, Executor requestExecutor,
             RcsCapOptionsRequestCallback rcsOptionsRequestCallback) {
         mEventListener = listener;
         mMessageExecutor = messageExecutor;
