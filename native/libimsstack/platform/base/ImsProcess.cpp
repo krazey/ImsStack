@@ -19,7 +19,7 @@
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_FWK__;
+__IMS_TRACE_TAG_BASE__;
 
 #define IMS_FRAMEWORK_THREAD "Framework"
 

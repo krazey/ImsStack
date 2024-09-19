@@ -56,10 +56,6 @@
 //// protocol/sdp -> sdp
 #define __IMS_TRACE_TAG_SDP__          __IMS_TRACE_TAG__(SDP)
 
-//// FWK
-//// platform -> base
-#define __IMS_TRACE_TAG_FWK__          __IMS_TRACE_TAG__(FWK)
-
 //// AOS
 //// enabler -> aos
 #define __IMS_TRACE_TAG_AOS__          __IMS_TRACE_TAG__(AOS)
