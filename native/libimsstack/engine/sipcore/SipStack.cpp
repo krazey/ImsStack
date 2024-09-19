@@ -4246,7 +4246,7 @@ GLOBAL void DisplayTxnKey(IN const ::SipTxnKey* pTxnKey)
     };
 
     IMS_TRACE_I("\tCall-ID: %s", GetLogString(pTxnKey->GetCallId(), acCallId, 11, '@'), 0, 0);
-    IMS_TRACE_D("___ TRANSACTION INFO. - E ___\r\n", 0, 0, 0);
+    IMS_TRACE_D("___ TRANSACTION INFO. - E ___", 0, 0, 0);
 }
 
 GLOBAL void FreeTxnKey(IN ::SipTxnKey*& pTxnKey)
