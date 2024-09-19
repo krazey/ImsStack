@@ -460,6 +460,12 @@ void AosSubscription::PrintRegInfo(IN ImsList<IRegInfoContact*>& objRegInfo)
         strLog.Append("]\n");
     }
 
+    if (strLog.GetLength() > 0)
+    {
+        // Remove line-feed (LF)
+        strLog.Chop(1);
+    }
+
     A_IMS_TRACE_D(AOSTAG, "PrintRegInfo :: %s", strLog.GetStr(), 0, 0);
 }
 
