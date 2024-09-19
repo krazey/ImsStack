@@ -22,7 +22,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsUtil::OsUtil() :

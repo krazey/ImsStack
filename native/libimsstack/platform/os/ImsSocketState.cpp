@@ -18,7 +18,7 @@
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 GLOBAL void ImsSocketState_ExitInstance()
 {

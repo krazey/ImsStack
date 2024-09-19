@@ -36,9 +36,9 @@
 //// platform -> base
 #define __IMS_TRACE_TAG_BASE__         __IMS_TRACE_TAG__(BASE)
 
-//// ADAPT
+//// IPL (ImsStack Porting Layer)
 //// platform -> os
-#define __IMS_TRACE_TAG_ADAPT__        __IMS_TRACE_TAG__(ADAPT)
+#define __IMS_TRACE_TAG_IPL__          __IMS_TRACE_TAG__(IPL)
 
 //// CONF
 //// config

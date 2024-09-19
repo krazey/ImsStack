@@ -23,7 +23,7 @@
 #include "network/OsIpSecSa.h"
 #include "network/OsIpSecSp.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsIpSecPolicy::OsIpSecPolicy(IN IMS_SINT32 nId) :

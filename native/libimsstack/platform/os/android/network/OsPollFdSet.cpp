@@ -20,7 +20,7 @@
 #include "ServiceTrace.h"
 #include "network/OsPollFdSet.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 class PollFds
 {

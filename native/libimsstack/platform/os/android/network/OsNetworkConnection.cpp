@@ -29,7 +29,7 @@
 #include "network/OsNetworkConstants.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 // NR / LTE
 #define UTRAN_ANI_ITEM_SIZE        4
