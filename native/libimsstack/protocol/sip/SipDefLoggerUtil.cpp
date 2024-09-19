@@ -23,19 +23,19 @@ SipDefLoggerUtil::SipDefLoggerUtil() {}
 SipDefLoggerUtil::~SipDefLoggerUtil() {}
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
-SIP_VOID SipDefLoggerUtil::DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* /*pszFile*/,
-        SIP_UINT16 /*nLine*/, const SIP_CHAR* pszFormat, ...)
+SIP_VOID SipDefLoggerUtil::DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,
+        const SIP_CHAR* pszFormat, ...)
 {
     if (TraceService::GetTraceService()->GetTrace()->IsTraceEnabled(
                 nCategory, __IMS_TRACE_MODULE__))
     {
         va_list args;
         va_start(args, pszFormat);
-        const SIP_CHAR* strTag = __IMS_TRACE_NAME__;
+        const SIP_CHAR* pszTag = __IMS_TRACE_NAME__;
         SIP_UINT32 nModule = __IMS_TRACE_MODULE__;
 
         TraceService::GetTraceService()->GetTrace()->OutV(
-                nCategory, strTag, (nModule), pszFormat, args);
+                nCategory, pszTag, nModule, pszFile, nLine, pszFormat, args);
         va_end(args);
     }
 }
