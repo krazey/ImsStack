@@ -35,20 +35,10 @@ SIP_VOID SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_IN
     vsnprintf(szTemp, DEBUG_MSG_MAX_SIZE, pszFormat, args);
     va_end(args);
 
-    SIP_CHAR* pszTempFilename = SipPf_Strdup(pszFilename);
-
-    const SIP_CHAR* pTemp =
-            (pszTempFilename != SIP_NULL) ? SipPf_StripFileName(pszTempFilename) : "xxx";
-
     SIP_CHAR szFrmtString[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
-    SipPf_Snprintf(szFrmtString, DEBUG_MSG_MAX_SIZE, "[%s:%d] %s", pTemp, nLine, szTemp);
+    SipPf_Snprintf(szFrmtString, DEBUG_MSG_MAX_SIZE, "%s", szTemp);
 
-    pUtil->GetLogger()->DumpLog(nCategory, SIP_NULL, nLine, szFrmtString);
-
-    if (pszTempFilename != SIP_NULL)
-    {
-        delete[] pszTempFilename;
-    }
+    pUtil->GetLogger()->DumpLog(nCategory, pszFilename, nLine, szFrmtString);
 }
 
 SIP_VOID SIP_ASSERT_LOG(const SIP_CHAR* pszCondition, const SIP_CHAR* pszModule, SIP_UINT16 nLine)
