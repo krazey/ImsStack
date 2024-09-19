@@ -2812,6 +2812,12 @@ PROTECTED VIRTUAL IMS_UINT32 AosApplication::UpdateConnectedServices(
         }
     }
 
+    if (strLog.GetLength() > 0)
+    {
+        // Remove line-feed (LF)
+        strLog.Chop(1);
+    }
+
     A_IMS_TRACE_I(APPID, "connected :: %s", strLog.GetStr(), 0, 0);
 
     for (nAt = 0; nAt < objHandles.GetSize(); ++nAt)
