@@ -83,6 +83,11 @@ public:
         ON_CALL(objLocationProperties, GetVerticalAccuracy)
                 .WillByDefault(ReturnRef(strVerticalAccuracy));
     }
+
+    void AssertXmlStringEquality(IN AString strActual, IN AString strExpected)
+    {
+        EXPECT_STREQ(strActual.Replace("\n", "").GetStr(), strExpected.Replace("\n", "").GetStr());
+    }
 };
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithoutPositionFailsWhenCountryUnknown)
@@ -124,7 +129,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutPosition)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionFailsWhenPositionUnknown)
@@ -176,7 +181,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithNoMethod)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPosition)
@@ -218,7 +223,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPosition)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithNoUnknownCountry)
@@ -263,12 +268,12 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithNoUnknownCountry)
     const AString strUnknownCountry = "ZZ";
     ON_CALL(objLocationProperties, GetCountry).WillByDefault(ReturnRef(strUnknownCountry));
     ASSERT_TRUE(pCreator->CreateWithPosition("entity_uri", objContent));
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 
     const AString strEmptyCountry = "";
     ON_CALL(objLocationProperties, GetCountry).WillByDefault(ReturnRef(strEmptyCountry));
     ASSERT_TRUE(pCreator->CreateWithPosition("entity_uri", objContent));
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithUnknownCountry)
@@ -313,7 +318,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithUnknownCountry)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithConfidence)
@@ -356,7 +361,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithConfidence)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryFailsWhenPositionUnknown)
@@ -405,7 +410,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoMethod)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountry)
@@ -444,7 +449,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountry)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoUnknownCountry)
@@ -484,12 +489,12 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoUnknownCoun
     AString strUnknownCountry = "ZZ";
     ON_CALL(objLocationProperties, GetCountry).WillByDefault(ReturnRef(strUnknownCountry));
     ASSERT_TRUE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 
     AString strEmptyCountry = "";
     ON_CALL(objLocationProperties, GetCountry).WillByDefault(ReturnRef(strEmptyCountry));
     ASSERT_TRUE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithUnknownCountry)
@@ -531,7 +536,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithUnknownCountr
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithConfidence)
@@ -571,7 +576,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithConfidence)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicFailsWhenPositionUnknown)
@@ -617,7 +622,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithNoMethod)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivic)
@@ -653,7 +658,7 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivic)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithConfidence)
@@ -690,5 +695,5 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithConfidence)
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
             "</presence>";
-    EXPECT_EQ(objContent.ToString().Replace("\n", ""), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
