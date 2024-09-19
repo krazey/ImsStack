@@ -18,6 +18,7 @@
 
 #include "SipConfiguration.h"
 #include "SipDatatypes.h"
+#include "SipMap.h"
 #include "SipRefBase.h"
 #include "msg/SipAcceptHeader.h"
 #include "msg/SipAcceptResourcePriorityHeader.h"
@@ -58,7 +59,7 @@
 class SipHeaders
 {
 private:
-    SipHeaderBase* m_HeaderArray[SipHeaderBase::TYPE_END + SIP_ONE];
+    SipMap<SIP_INT32, SipHeaderBase*> m_objHeaders;
 
 public:
     SipHeaders();
@@ -87,16 +88,8 @@ public:
     static SIP_BOOL SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos);
 
 private:
-    inline SipHeaderBase* GetHeader(SIP_INT32 eHdrType) { return m_HeaderArray[eHdrType]; }
-    inline SIP_VOID SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader)
-    {
-        if (m_HeaderArray[eHdrType] != SIP_NULL)
-        {
-            m_HeaderArray[eHdrType]->SipDelete();
-        }
-
-        m_HeaderArray[eHdrType] = pHeader;
-    }
+    SipHeaderBase* GetHeader(SIP_INT32 eHdrType);
+    SIP_VOID SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader);
 
     SipHeaderBase* GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHeader = SIP_NULL);
 

@@ -140,9 +140,9 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SIP_NULL                                     //    SipHeaderBase::TYPE_END //120
 };
 
-SipHeaders::SipHeaders()
+SipHeaders::SipHeaders() :
+        m_objHeaders(SipMap<SIP_INT32, SipHeaderBase*>())
 {
-    memset(m_HeaderArray, SIP_NULL, (SipHeaderBase::TYPE_END + SIP_ONE) * sizeof(SipHeaderBase*));
 }
 
 SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
@@ -242,6 +242,30 @@ SipHeaderBase* SipHeaders::GetHdrObj(SIP_INT32 eHdrType)
         return pHeader;
     }
     return SIP_NULL;
+}
+
+SipHeaderBase* SipHeaders::GetHeader(SIP_INT32 eHdrType)
+{
+    SIP_SLONG nIndex = m_objHeaders.GetIndexOfKey(eHdrType);
+
+    return (nIndex != -1) ? m_objHeaders.GetValueAt(nIndex) : SIP_NULL;
+}
+
+SIP_VOID SipHeaders::SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader)
+{
+    SIP_SLONG nIndex = m_objHeaders.GetIndexOfKey(eHdrType);
+
+    if (nIndex != -1)
+    {
+        SipHeaderBase* pHdr = m_objHeaders.GetValueAt(nIndex);
+        if (pHdr != SIP_NULL)
+        {
+            pHdr->SipDelete();
+        }
+        m_objHeaders.RemoveAt(nIndex);
+    }
+
+    m_objHeaders.Add(eHdrType, pHeader);
 }
 
 SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHeader /* = SIP_NULL */)
