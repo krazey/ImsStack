@@ -33,7 +33,7 @@
 #include "SipTxnContextData.h"
 #include "SipUtils.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipClientTransactionState::SipClientTransactionState(IN IMS_SINT32 nSlotId) :

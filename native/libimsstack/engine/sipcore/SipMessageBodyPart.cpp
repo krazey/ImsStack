@@ -19,7 +19,7 @@
 #include "SipPrivate.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipMessageBodyPart::SipMessageBodyPart(IN IMS_BOOL bSdpBody /*= IMS_FALSE*/) :

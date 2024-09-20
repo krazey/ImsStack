@@ -20,7 +20,7 @@
 #include "SipPortManager.h"
 #include "SipRtConfigHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipRtConfigHelper::SipRtConfigHelper() :

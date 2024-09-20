@@ -31,7 +31,7 @@
 #include "msg/SipMsgUtil.h"
 #include "txn/SipTimeoutData.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 extern void SipStackTxnLayer_Initialize();
 extern SIP_VOID Sip_Cbk_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 eTimerType);

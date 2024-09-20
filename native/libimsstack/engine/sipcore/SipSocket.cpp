@@ -27,7 +27,7 @@
 #include "SipRtConfigUtils.h"
 #include "SipSocket.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipSocket::SipSocket(

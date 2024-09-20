@@ -22,7 +22,7 @@
 #include "SipStackState.h"
 #include "SipTransactionTimer.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipTransactionTimer::SipTransactionTimer(
