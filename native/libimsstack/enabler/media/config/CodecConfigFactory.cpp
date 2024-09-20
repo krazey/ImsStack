@@ -38,33 +38,33 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         case ImsCodec::AUDIO_AMR:
         case ImsCodec::AUDIO_AMR_WB:
         {
-            CodecAmrConfig* pAMRConfig = new CodecAmrConfig(nCodec, nPayloadTypeNum);
+            CodecAmrConfig* pAmrConfig = new CodecAmrConfig(nCodec, nPayloadTypeNum);
 
-            if (pAMRConfig == IMS_NULL || !pAMRConfig->Create(piCc))
+            if (pAmrConfig == IMS_NULL || !pAmrConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateAudioPayloadConfig - AMRConfig Create failure", 0, 0, 0);
+                IMS_TRACE_D("CreateAudioPayloadConfig - AmrConfig Create failure", 0, 0, 0);
 
-                delete pAMRConfig;
+                delete pAmrConfig;
                 return IMS_NULL;
             }
 
-            pCodecConfig = pAMRConfig;
+            pCodecConfig = pAmrConfig;
         }
         break;
         case ImsCodec::AUDIO_PCMA:
         case ImsCodec::AUDIO_PCMU:
         {
-            CodecPcmConfig* pPCMConfig = new CodecPcmConfig(nCodec, nPayloadTypeNum);
+            CodecPcmConfig* pPcmConfig = new CodecPcmConfig(nCodec, nPayloadTypeNum);
 
-            if (pPCMConfig == IMS_NULL || !pPCMConfig->Create(piCc))
+            if (pPcmConfig == IMS_NULL || !pPcmConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateAudioPayloadConfig - PCMConfig Create failure", 0, 0, 0);
+                IMS_TRACE_D("CreateAudioPayloadConfig - PcmConfig Create failure", 0, 0, 0);
 
-                delete pPCMConfig;
+                delete pPcmConfig;
                 return IMS_NULL;
             }
 
-            pCodecConfig = pPCMConfig;
+            pCodecConfig = pPcmConfig;
         }
         break;
         case ImsCodec::AUDIO_TELEPHONE_EVENT:
@@ -87,17 +87,17 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         break;
         case ImsCodec::AUDIO_EVS:
         {
-            CodecEvsConfig* pEVSConfig = new CodecEvsConfig(nCodec, nPayloadTypeNum);
+            CodecEvsConfig* pEvsConfig = new CodecEvsConfig(nCodec, nPayloadTypeNum);
 
-            if (pEVSConfig == IMS_NULL || !pEVSConfig->Create(piCc))
+            if (pEvsConfig == IMS_NULL || !pEvsConfig->Create(piCc))
             {
-                IMS_TRACE_D("CreateAudioPayloadConfig - EVSConfig Create failure", 0, 0, 0);
+                IMS_TRACE_D("CreateAudioPayloadConfig - EvsConfig Create failure", 0, 0, 0);
 
-                delete pEVSConfig;
+                delete pEvsConfig;
                 return IMS_NULL;
             }
 
-            pCodecConfig = pEVSConfig;
+            pCodecConfig = pEvsConfig;
         }
         break;
     }

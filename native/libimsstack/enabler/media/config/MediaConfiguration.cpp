@@ -169,24 +169,24 @@ PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* p
         case ImsCodec::AUDIO_AMR:
         case ImsCodec::AUDIO_AMR_WB:
         {
-            CodecAmrConfig* pAMRConfig = IMS_NULL;
-            pAMRConfig = reinterpret_cast<CodecAmrConfig*>(pCodecConfig);
+            CodecAmrConfig* pAmrConfig = IMS_NULL;
+            pAmrConfig = reinterpret_cast<CodecAmrConfig*>(pCodecConfig);
 
-            if (pAMRConfig)
+            if (pAmrConfig)
             {
-                pAMRConfig->ToDebugString();
+                pAmrConfig->ToDebugString();
             }
         }
         break;
         case ImsCodec::AUDIO_PCMA:
         case ImsCodec::AUDIO_PCMU:
         {
-            CodecPcmConfig* pPCMConfig = IMS_NULL;
-            pPCMConfig = reinterpret_cast<CodecPcmConfig*>(pCodecConfig);
+            CodecPcmConfig* pPcmConfig = IMS_NULL;
+            pPcmConfig = reinterpret_cast<CodecPcmConfig*>(pCodecConfig);
 
-            if (pPCMConfig)
+            if (pPcmConfig)
             {
-                pPCMConfig->ToDebugString();
+                pPcmConfig->ToDebugString();
             }
         }
         break;
@@ -204,12 +204,12 @@ PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* p
         break;
         case ImsCodec::AUDIO_EVS:
         {
-            CodecEvsConfig* pEVSConfig = IMS_NULL;
-            pEVSConfig = reinterpret_cast<CodecEvsConfig*>(pCodecConfig);
+            CodecEvsConfig* pEvsConfig = IMS_NULL;
+            pEvsConfig = reinterpret_cast<CodecEvsConfig*>(pCodecConfig);
 
-            if (pEVSConfig)
+            if (pEvsConfig)
             {
-                pEVSConfig->ToDebugString();
+                pEvsConfig->ToDebugString();
             }
         }
         break;
