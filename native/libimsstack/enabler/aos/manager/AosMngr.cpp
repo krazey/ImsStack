@@ -26,7 +26,7 @@
 
 #include "manager/AosMngr.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosMngr::AosMngr(IN IMS_SINT32 nSlotId) :

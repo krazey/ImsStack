@@ -26,7 +26,7 @@
 #include "provider/AosUtil.h"
 #include "external/AosService.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 #define TO_BOOLEAN(n) ((n) > 0)

@@ -45,7 +45,7 @@
 #include "provider/AosStaticProfile.h"
 #include "app/AosApplication.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPID m_strTag.GetStr()
 

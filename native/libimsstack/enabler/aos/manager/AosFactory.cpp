@@ -21,7 +21,7 @@
 #include "manager/AosMngrAdaptor.h"
 #include "manager/AosFactory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PRIVATE GLOBAL AosFactory* AosFactory::m_gpAosFactory = IMS_NULL;
 

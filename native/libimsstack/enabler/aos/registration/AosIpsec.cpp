@@ -24,7 +24,7 @@
 #include "IIpSecPolicy.h"
 #include "ImsIpSecType.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AosIpsec");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 

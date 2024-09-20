@@ -22,7 +22,7 @@
 #include "interface/IAosNConfigurationListener.h"
 #include "provider/AosNConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define LOGTAG m_strLogTag.GetStr()
 
