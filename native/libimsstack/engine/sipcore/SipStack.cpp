@@ -1232,54 +1232,46 @@ GLOBAL ImsList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
         return objParams;
     }
 
-    SipParameterList* pUriParamList = pSipUri->GetUriParamList();
+    IMS_UINT32 nParamCount = pSipUri->GetUriParamCount();
 
-    if (pUriParamList != IMS_NULL)
+    for (IMS_UINT32 i = 0; i < nParamCount; ++i)
     {
-        IMS_UINT32 nParamCount = pUriParamList->GetCount();
+        SipNameValue* pNameVal = pSipUri->GetUriParam(i);
 
-        for (IMS_UINT32 i = 0; i < nParamCount; ++i)
+        if (pNameVal == IMS_NULL)
         {
-            SipNameValue* pNameVal = pUriParamList->GetParam(i);
-
-            if (pNameVal == IMS_NULL)
-            {
-                continue;
-            }
-
-            SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
-
-            if (pParameter == IMS_NULL)
-            {
-                pUriParamList->SipDelete();
-                pSipUri->SipDelete();
-                SipPrivate::SetLastError(SipError::PARSING_ERROR);
-                return objParams;
-            }
-
-            if (pNameVal->m_valueList.IsEmpty())
-            {
-                objParams.Append(pParameter);
-                continue;
-            }
-
-            IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
-
-            for (IMS_UINT32 j = 0; j < nValueCount; ++j)
-            {
-                IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
-
-                if (pszValue != IMS_NULL)
-                {
-                    AString strValue(pszValue);
-                    pParameter->AddValues(strValue);
-                }
-            }
-
-            objParams.Append(pParameter);
+            continue;
         }
 
-        pUriParamList->SipDelete();
+        SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
+
+        if (pParameter == IMS_NULL)
+        {
+            pSipUri->SipDelete();
+            SipPrivate::SetLastError(SipError::PARSING_ERROR);
+            return objParams;
+        }
+
+        if (pNameVal->m_valueList.IsEmpty())
+        {
+            objParams.Append(pParameter);
+            continue;
+        }
+
+        IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
+
+        for (IMS_UINT32 j = 0; j < nValueCount; ++j)
+        {
+            IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
+
+            if (pszValue != IMS_NULL)
+            {
+                AString strValue(pszValue);
+                pParameter->AddValues(strValue);
+            }
+        }
+
+        objParams.Append(pParameter);
     }
 
     pSipUri->SipDelete();
@@ -2584,20 +2576,16 @@ GLOBAL AString GetParameter(
             return AString::ConstNull();
         }
 
-        SipParameterList* pParamList = pSipUri->GetUriParamList();
-
-        if (pParamList == IMS_NULL)
+        if (pSipUri->GetUriParamCount() == 0)
         {
             pSipUri->SipDelete();
             return AString::ConstNull();
         }
 
-        IMS_CHAR* pszValue = pParamList->GetParamValue(strName.GetStr(), nIndex);
+        IMS_CHAR* pszValue = pSipUri->GetUriParamValue(strName.GetStr(), nIndex);
         AString strValue(pszValue);
 
         DeleteStackString(pszValue);
-
-        pParamList->SipDelete();
         pSipUri->SipDelete();
 
         return strValue;
@@ -3012,54 +3000,38 @@ GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strNam
 
         IMS_UINT32 nCount = pSipUri->GetUriParamCount();
 
-        if (nCount > 0)
+        for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            SipParameterList* pParamList = pSipUri->GetUriParamList();
+            SipNameValue* pNameVal = pSipUri->GetUriParam(i);
 
-            for (IMS_UINT32 i = 0; i < nCount; ++i)
+            if (pNameVal == SIP_NULL)
             {
-                SipNameValue* pNameVal = pParamList->GetParam(i);
-
-                if (pNameVal == SIP_NULL)
-                {
-                    continue;
-                }
-
-                if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
-                {
-                    pParamList->SipDelete();
-                    pSipUri->SipDelete();
-                    return IMS_TRUE;
-                }
+                continue;
             }
 
-            pParamList->SipDelete();
+            if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
+            {
+                pSipUri->SipDelete();
+                return IMS_TRUE;
+            }
         }
 
         nCount = pSipUri->GetHdrParamCount();
 
-        if (nCount > 0)
+        for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            SipParameterList* pParamList = pSipUri->GetHdrParamList();
+            SipNameValue* pNameVal = pSipUri->GetHdrParam(i);
 
-            for (IMS_UINT32 i = 0; i < nCount; ++i)
+            if (pNameVal == SIP_NULL)
             {
-                SipNameValue* pNameVal = pParamList->GetParam(i);
-
-                if (pNameVal == SIP_NULL)
-                {
-                    continue;
-                }
-
-                if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
-                {
-                    pParamList->SipDelete();
-                    pSipUri->SipDelete();
-                    return IMS_TRUE;
-                }
+                continue;
             }
 
-            pParamList->SipDelete();
+            if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
+            {
+                pSipUri->SipDelete();
+                return IMS_TRUE;
+            }
         }
 
         pSipUri->SipDelete();
@@ -4539,19 +4511,11 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
         return IMS_FALSE;
     }
 
-    SipParameterList* pHdrParamList = pSipUri->GetHdrParamList();
-
-    if (pHdrParamList == IMS_NULL)
-    {
-        pSipUri->SipDelete();
-        return IMS_TRUE;
-    }
-
-    IMS_UINT32 nListCount = pHdrParamList->GetCount();
+    IMS_UINT32 nListCount = pSipUri->GetHdrParamCount();
 
     for (IMS_UINT32 i = 0; i < nListCount; ++i)
     {
-        SipNameValue* pNmVl = pHdrParamList->GetParam(i);
+        SipNameValue* pNmVl = pSipUri->GetHdrParam(i);
 
         if (pNmVl == IMS_NULL)
         {
@@ -4560,7 +4524,6 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
 
         if (pNmVl->m_valueList.IsEmpty())
         {
-            pHdrParamList->SipDelete();
             pSipUri->SipDelete();
             return IMS_FALSE;
         }
@@ -4580,14 +4543,12 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
             if (!objHeaders.Append(pHeader))
             {
                 delete pHeader;
-                pHdrParamList->SipDelete();
                 pSipUri->SipDelete();
                 return IMS_FALSE;
             }
         }
     }
 
-    pHdrParamList->SipDelete();
     pSipUri->SipDelete();
 
     return IMS_TRUE;

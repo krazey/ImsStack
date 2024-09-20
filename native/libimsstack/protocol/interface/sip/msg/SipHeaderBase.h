@@ -174,7 +174,7 @@ public:
         return EncodeHdr(ppMsgBuffCurrPos, bParams);
     }
     SIP_BOOL DecodeHeaderParameters(
-            const SIP_CHAR* pStart, const SIP_CHAR* pEnd, const SIP_CHAR cDelimeter);
+            const SIP_CHAR* pStart, const SIP_CHAR* pEnd, const SIP_CHAR cDelimiter);
     virtual SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     inline SIP_INT32 GetHdrType() const { return m_eHdrType; }
     inline SIP_VOID SetHdrType(SIP_INT32 eHdrType) { m_eHdrType = eHdrType; }
