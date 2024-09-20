@@ -29,7 +29,7 @@
 
 #include "GeolocationPidfCreator.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Geolocation");
+__IMS_TRACE_TAG_BASE__;
 
 #define DEFAULT_TUPLE_ID "VoLte"
 

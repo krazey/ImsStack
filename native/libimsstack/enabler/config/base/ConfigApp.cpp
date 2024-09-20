@@ -23,7 +23,7 @@
 
 #include "base/ConfigApp.h"
 
-__IMS_TRACE_TAG_USER_DECL__("ConfigApp");
+__IMS_TRACE_TAG_CONF__;
 
 PUBLIC
 ConfigApp::ConfigApp(IN const AString& strAppName) :

@@ -28,7 +28,7 @@
 #include "EnablerThread.h"
 #include "GeolocationHelper.h"
 
-__IMS_TRACE_TAG_USER_DECL__("EnablerThread");
+__IMS_TRACE_TAG_BASE__;
 
 PUBLIC
 EnablerThread::EnablerThread(IN EnablerFactory* pEnablerFactory, IN IMS_SINT32 nSlotId) :

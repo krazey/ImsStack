@@ -26,7 +26,7 @@
 #include "JniUceService.h"
 #include "JniSipControllerService.h"
 
-__IMS_TRACE_TAG_USER_DECL__("CoreInterfaceFactory");
+__IMS_TRACE_TAG_USER_DECL__("JNI");
 
 PUBLIC GLOBAL BaseService* CoreInterfaceFactory::GetInterface(IN IMS_SINT32 nInterfaceType,
         IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId)

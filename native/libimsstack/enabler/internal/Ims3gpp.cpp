@@ -24,7 +24,7 @@
 
 #include "Ims3gpp.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Ims3gpp");
+__IMS_TRACE_TAG_BASE__;
 
 PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_ACTION[] = "action";
 PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_ALTERNATIVE_SERVICE[] = "alternative-service";

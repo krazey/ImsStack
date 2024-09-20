@@ -18,7 +18,7 @@
 
 #include "BaseService.h"
 
-__IMS_TRACE_TAG_USER_DECL__("BaseService");
+__IMS_TRACE_TAG_USER_DECL__("JNI");
 
 PUBLIC
 BaseService::BaseService(IN IMS_SINT32 nSlotId) :
