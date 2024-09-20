@@ -24,7 +24,7 @@
 #include "SipSocket.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipKeepAliveHelper::SipKeepAliveHelper(IN IMS_SINT32 nSlotId) :

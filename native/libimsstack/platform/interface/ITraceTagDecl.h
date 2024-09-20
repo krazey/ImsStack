@@ -40,8 +40,12 @@
 //// config
 #define __IMS_TRACE_TAG_CONF__         __IMS_TRACE_TAG__(CONF)
 
+//// SIP.CORE
+//// engine -> sipcore
+#define __IMS_TRACE_TAG_SIP_CORE__     __IMS_TRACE_TAG__(SIP_CORE)
+
 //// SIP
-//// engine -> sipcore, protocol/sip -> sip
+//// protocol/sip -> sip
 #define __IMS_TRACE_TAG_SIP__          __IMS_TRACE_TAG__(SIP)
 
 //// XML

@@ -35,7 +35,7 @@
 #include "SipTransport.h"
 #include "SipWakeLock.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE
 SipMessageHandler::SipMessageHandler() {}

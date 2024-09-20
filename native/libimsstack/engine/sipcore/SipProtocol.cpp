@@ -25,7 +25,7 @@
 #include "SipPrivate.h"
 #include "SipProtocol.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 /**
  * Creates and opens a SIP Connection.

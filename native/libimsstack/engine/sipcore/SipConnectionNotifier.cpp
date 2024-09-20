@@ -37,7 +37,7 @@
 #include "SipStreamSocket.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 // 3 fix it
 PRIVATE GLOBAL IMS_SINT32* SipConnectionNotifier::s_pGlobalSystemPort = IMS_NULL;

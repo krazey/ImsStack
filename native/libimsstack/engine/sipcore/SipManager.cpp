@@ -30,7 +30,7 @@
 #include "SipUtils.h"
 #include "StaticSip.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE
 SipManager::SipManager() :

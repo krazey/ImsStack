@@ -20,7 +20,7 @@
 #include "SipIpSecState.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE
 SipIpSecState::SecurityAssociation::SecurityAssociation() :

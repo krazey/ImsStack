@@ -26,7 +26,7 @@
 #include "SipStackTransaction.h"
 #include "SipTxnContextData.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE
 SipStackState::SipStackState() :

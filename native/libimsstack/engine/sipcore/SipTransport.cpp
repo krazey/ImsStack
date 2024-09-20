@@ -33,7 +33,7 @@
 #include "SipTransport.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipTransport::SipTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType) :
