@@ -42,8 +42,8 @@ public:
 
     //// For a large TEXT message (SDP, SIP, XML, ...)
     virtual void OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
-            IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
-            IN IMS_BOOL bBinaryBody = IMS_FALSE) = 0;
+            IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText,
+            IN IMS_UINT32 nTextSize) = 0;
 
     //// For checking Trace-enabed
     virtual IMS_BOOL IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule) = 0;
