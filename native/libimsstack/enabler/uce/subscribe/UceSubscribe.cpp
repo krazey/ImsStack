@@ -40,7 +40,7 @@
 #include "IUceJniThread.h"
 #include "JniEnablerConnector.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 BEGIN_STATE_MAP(UceSubscribe)
 STATE_ENTRY(ON)
