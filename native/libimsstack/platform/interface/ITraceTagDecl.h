@@ -21,16 +21,12 @@
 ////
 
 //// IMS ("ims" package)
-//// engine -> connection/service, etc...
-#define __IMS_TRACE_TAG_IMS__          __IMS_TRACE_TAG__(IMS)
-
-//// IMS ("ims" package)
 //// engine -> registration
 #define __IMS_TRACE_TAG_REG__          __IMS_TRACE_TAG__(REG)
 
-//// CORE, CORE.MEDIA ("ims.core", "ims.core.media" package)
-//// engine -> core, core/media
-#define __IMS_TRACE_TAG_IMS_CORE__     __IMS_TRACE_TAG__(CORE)
+//// IMS.CORE ("ims", "ims.core", "ims.core.media" package)
+//// engine -> service, core, core/media
+#define __IMS_TRACE_TAG_IMS_CORE__     __IMS_TRACE_TAG__(IMS_CORE)
 
 //// PLATFORM
 //// platform -> base

@@ -154,15 +154,15 @@ private:
 
 #if ((__IMS_TRACE_MEM__ & IMS_TRACE_OPT_MEM) == IMS_TRACE_OPT_MEM)
 
-#define IMS_TRACE_MEM(TAG, FORMAT, A1, A2, A3)                                           \
-    do                                                                                   \
-    {                                                                                    \
-        TraceService* pTs = TraceService::GetTraceService();                             \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, IMS_TRACE_MODULE_IMS))        \
-        {                                                                                \
-            pTs->GetTrace()->Out(ITrace::CAT_D, TAG, IMS_TRACE_MODULE_IMS, __IMS_FILE__, \
-                    __IMS_LINE__, FORMAT, A1, A2, A3);                                   \
-        }                                                                                \
+#define IMS_TRACE_MEM(TAG, FORMAT, A1, A2, A3)                                            \
+    do                                                                                    \
+    {                                                                                     \
+        TraceService* pTs = TraceService::GetTraceService();                              \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, IMS_TRACE_MODULE_BASE))        \
+        {                                                                                 \
+            pTs->GetTrace()->Out(ITrace::CAT_D, TAG, IMS_TRACE_MODULE_BASE, __IMS_FILE__, \
+                    __IMS_LINE__, FORMAT, A1, A2, A3);                                    \
+        }                                                                                 \
     } while (0)
 
 #else
