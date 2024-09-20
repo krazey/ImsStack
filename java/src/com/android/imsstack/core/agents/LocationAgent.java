@@ -618,7 +618,7 @@ public class LocationAgent implements LocationInterface {
                 }
             }
         } else if (LocationApi.isLocationFromFlp(location)) {
-            method = "DBH";     // Device-Based Hybrid
+            method = "Hybrid_A-GPS";
         }
 
         ImsLog.d(mSlotId, method + " :: accuracy=" + location.getAccuracy()
