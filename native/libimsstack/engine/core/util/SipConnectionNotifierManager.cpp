@@ -49,7 +49,7 @@
 #include "util/SipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 class SipServerConnectionListenerProxy : public EngineActivity, public ISipServerConnectionListener
 {

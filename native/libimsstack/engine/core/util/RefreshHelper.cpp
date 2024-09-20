@@ -25,7 +25,7 @@
 #include "util/IRefreshable.h"
 #include "util/RefreshHelper.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 RefreshHelper::RefreshHelper(IN IRefreshable* piRefreshable, IN IMS_BOOL bRepeatable) :

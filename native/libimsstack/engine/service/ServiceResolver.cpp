@@ -21,7 +21,7 @@
 #include "ServiceManager.h"
 #include "ServiceResolver.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC GLOBAL IRegBinding* ServiceResolver::GetRegBinding(
         IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId)

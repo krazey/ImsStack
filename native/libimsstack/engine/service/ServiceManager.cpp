@@ -20,7 +20,7 @@
 #include "Service.h"
 #include "ServiceManager.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 ServiceManager::ServiceManager() :

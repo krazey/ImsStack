@@ -51,7 +51,7 @@
 #include "util/PreferenceHeader.h"
 #include "util/UserAgentHeader.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 Service::Service(IN const AString& strScheme, IN const AString& strAppId,
