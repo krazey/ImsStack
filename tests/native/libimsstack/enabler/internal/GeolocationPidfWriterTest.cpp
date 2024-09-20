@@ -86,6 +86,30 @@ TEST_F(GeolocationPidfWriterTest, WriteNestedElements)
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
+TEST_F(GeolocationPidfWriterTest, WriteAppendedElements)
+{
+    PidfLoXml objElement{};
+    // clang-format off
+    objElement.Append(
+        new Tuple{"id", {
+            new Method{"method"},
+            new UsageRules{},
+        }}
+    );
+    objElement.Append(new Geopriv{});
+    // clang-format on
+    ByteArray objContent = objElement.Write();
+
+    const AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                "<tuple id=\"id\">"
+                                "<gp:method>method</gp:method>"
+                                "<gp:usage-rules/>"
+                                "</tuple>"
+                                "<gp:geopriv>"
+                                "</gp:geopriv>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
 TEST_F(GeolocationPidfWriterTest, WritePidfLoXml)
 {
     ByteArray objContent = PidfLoXml{}.Write();

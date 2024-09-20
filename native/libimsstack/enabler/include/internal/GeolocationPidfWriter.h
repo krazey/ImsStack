@@ -34,15 +34,18 @@ public:
     virtual ~Element();
 
     virtual void Write(IN_OUT IXmlStreamWriter& objWriter) const;
+    virtual void Append(IN Element* pElement);
+
+    static Element* const s_pEmptyElement;
 
 protected:
-    explicit inline Element(IN const std::vector<Element*>& lstChildren) :
+    explicit inline Element(IN std::initializer_list<Element*> lstChildren) :
             m_lstChildren(lstChildren)
     {
     }
 
 private:
-    const std::vector<Element*> m_lstChildren;
+    std::vector<Element*> m_lstChildren;
 };
 
 class PidfLoXml : public Element
@@ -292,8 +295,10 @@ private:
 class CivicAddress : public Element
 {
 public:
-    inline CivicAddress(IN const AString& strCountry, IN const AString& strState,
-            IN const AString& strCity, IN const AString& strPostal) :
+    inline CivicAddress(IN const AString& strCountry,
+            IN const AString& strState = AString::ConstNull(),
+            IN const AString& strCity = AString::ConstNull(),
+            IN const AString& strPostal = AString::ConstNull()) :
             Element({}),
             m_strCountry(strCountry),
             m_strState(strState),
