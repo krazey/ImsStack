@@ -36,7 +36,7 @@
 
 using namespace android;
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_USER_DECL__("JNI");
 
 #define JNI_IMS_OK    (0)
 #define JNI_IMS_ERROR (-1)

@@ -26,7 +26,7 @@
 #include "device/OsCarrierConfig.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 using namespace android;
 using namespace android::os;

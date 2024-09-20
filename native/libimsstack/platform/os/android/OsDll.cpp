@@ -22,7 +22,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC GLOBAL void* OsDll::LoadLibrary(IN const IMS_CHAR* pszName)
 {

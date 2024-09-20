@@ -27,23 +27,22 @@ LOCAL void osMutex_TraceError(IN const IMS_CHAR* pszTag, IN IMS_SINT32 nError)
     switch (nError)
     {
         case EINVAL:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: invalid parameter",
-                    _TRACE_S_(pszTag));
+            (void)ALOG(
+                    LOG_ERROR, IMS_LOG_TAG, "[IPL] mutex_%s: invalid parameter", _TRACE_S_(pszTag));
             break;
         case EDEADLK:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: deadlock",
-                    _TRACE_S_(pszTag));
+            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "[IPL] mutex_%s: deadlock", _TRACE_S_(pszTag));
             break;
         case EPERM:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: invalid permission",
+            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "[IPL] mutex_%s: invalid permission",
                     _TRACE_S_(pszTag));
             break;
         case EBUSY:
-            (void)ALOG(LOG_DEBUG, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: busy", _TRACE_S_(pszTag));
+            (void)ALOG(LOG_DEBUG, IMS_LOG_TAG, "[IPL] mutex_%s: busy", _TRACE_S_(pszTag));
             break;
         default:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: error=%d",
-                    _TRACE_S_(pszTag), nError);
+            (void)ALOG(
+                    LOG_ERROR, IMS_LOG_TAG, "[IPL] mutex_%s: error=%d", _TRACE_S_(pszTag), nError);
             break;
     }
 }

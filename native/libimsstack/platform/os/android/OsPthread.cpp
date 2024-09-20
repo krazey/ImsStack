@@ -26,7 +26,7 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 LOCAL
 void osPthread_Run(IN OsPthread* pThread)
