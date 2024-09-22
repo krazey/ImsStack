@@ -71,7 +71,8 @@ PUBLIC VIRTUAL void AlertingState::OnExit()
 PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
     IMS_TRACE_D("HandleUserAlert", 0, 0, 0);
-    if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE) == IMS_FAILURE)
+    if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE, IsRprRequired()) ==
+            IMS_FAILURE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
@@ -97,7 +98,9 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
         m_pUdpKeepAliveSender->Stop();
     }
 
-    if (bCallTypeChanged)
+    if (bCallTypeChanged &&
+            m_objContext.GetMediaManager().GetNegotiationState(&pSession->GetISession()) ==
+                    NegotiationState::STATE_NEGOTIATED)
     {
         if (SendEarlyUpdate(UpdateType::NORMAL, pSession) == IMS_FAILURE)
         {

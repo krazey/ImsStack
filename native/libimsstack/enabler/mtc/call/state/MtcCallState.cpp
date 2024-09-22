@@ -684,13 +684,6 @@ void MtcCallState::SendIncomingUpdateToUi(IN CallType eCallType)
 }
 
 PROTECTED
-IMS_BOOL MtcCallState::IsRprSupported() const
-{
-    return m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-            MtcExtensionSet::OPTION_TAG_RPR);
-}
-
-PROTECTED
 IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const
 {
     if (IsPreviewOfAnswer(piSession, piMessage))
@@ -1071,4 +1064,27 @@ IMS_BOOL MtcCallState::IsNeedToSendLocalResourceConfirmation(IN ISession* piSess
 
     return objPreconditionManager.IsLocalResourceConfirmationRequired(piSession) &&
             objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession);
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsRprRequired() const
+{
+    if (!m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
+                MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetSession()->GetExtensionSet().IsRequiredOnRemote(
+                MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Is(Feature::PRACK_SUPPORTED_FOR_18X))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }

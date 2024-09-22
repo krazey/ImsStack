@@ -45,7 +45,7 @@ public:
      * @param bUserAlert
      * @return
      */
-    virtual IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert) = 0;
+    virtual IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable) = 0;
 
     /**
      * @brief Sends

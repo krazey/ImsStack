@@ -19,6 +19,8 @@
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
 #include "call/TestMtcPendingOperationHolder.h"
+#include "call/extension/MockIMtcExtension.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/state/AlertingState.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallState.h"
@@ -143,6 +145,19 @@ protected:
                 AddValueIfNotExists(&objIMessage, _, ISipHeader::ACCEPT, strEmptyHeaderName))
                 .WillByDefault(Return(IMS_SUCCESS));
     }
+
+    MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag,
+            IN const IMS_BOOL& bIsAvailableOnRemote, IN const IMS_BOOL& bIsRequiredOnRemote)
+    {
+        ImsList<IMtcExtension*> objExtensions;
+        MockIMtcExtension* pExtension = new MockIMtcExtension();
+        ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
+        ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(bIsAvailableOnRemote));
+        ON_CALL(*pExtension, IsRequiredOnRemote).WillByDefault(Return(bIsRequiredOnRemote));
+        objExtensions.Append(pExtension);
+        MtcExtensionSet objMtcExtensionSet(objCallContext, objExtensions);
+        return objMtcExtensionSet;
+    }
 };
 
 TEST_F(AlertingStateTest, OnEnterStartsKeepAlive)
@@ -161,11 +176,15 @@ TEST_F(AlertingStateTest, OnExitStopsKeepAlive)
     pAlertingState->OnExit();
 }
 
-TEST_F(AlertingStateTest, HandleUserAlertSendsProvisonalResponseAndStartAlertingTimer)
+TEST_F(AlertingStateTest,
+        HandleUserAlertSendsProvisonalResponseReliablyAndStartAlertingTimerIf100relIsOnlyInSupprtedHeader)
 {
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
-    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE))
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_FALSE))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
@@ -177,7 +196,10 @@ TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFail
 {
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
-    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE))
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_FALSE))
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
 
@@ -185,6 +207,39 @@ TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFail
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
 
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->HandleUserAlert());
+}
+
+TEST_F(AlertingStateTest,
+        HandleUserAlertSendsProvisonalResponseReliablyIf100relIsInSupprtedAndRequireHeader)
+{
+    IMS_SINT32 nAnyTime = 60;
+    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
+}
+
+TEST_F(AlertingStateTest,
+        HandleUserAlertSendsProvisonalResponseWithReliableParamAsTrueIfConfigurationOn)
+{
+    IMS_SINT32 nAnyTime = 60;
+    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationManager, IsPrackSupportedFor18x).WillByDefault(Return(IMS_TRUE));
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
 }
 
 TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
@@ -217,6 +272,10 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
     CallType eCurrentCallType = CallType::VT;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eCurrentCallType));
 
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
@@ -236,6 +295,25 @@ TEST_F(AlertingStateTest, AcceptStopsKeepAlive)
     EXPECT_CALL(*pUdpKeepAliveSender, Stop);
 
     pAlertingState->Accept(eAcceptCallType, objMediaInfo);
+}
+
+TEST_F(AlertingStateTest, AcceptDifferentCallTypeWithOutNegoInvokesAccept)
+{
+    CallType eAcceptCallType = CallType::VOIP;
+    CallType eCurrentCallType = CallType::VT;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eCurrentCallType));
+
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE, IMS_FALSE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_IDLE));
+
+    EXPECT_CALL(objTimerWrapper, StopAll);
+    EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectInvokesRejectIncoming)

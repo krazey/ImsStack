@@ -538,7 +538,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
                     m_objContext.GetConfigurationProxy(), m_objContext.GetUpdatingInfo()))
         {
             // re-INVITE for update call type is just received.
-            m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE);
+            m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE, IsRprRequired());
 
             // No QoS wait timer is used for Upgrade media.
             // And, TIMER_CONVERT_USER_RESPONSE is started when the precondition negotiation is

@@ -279,9 +279,10 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (IsRprSupported())
+    if (m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
+                MtcExtensionSet::OPTION_TAG_RPR))
     {
-        if (m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
+        if (m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE, IMS_TRUE) == IMS_FAILURE)
         {
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         }
