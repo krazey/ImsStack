@@ -24,14 +24,12 @@
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
 #include "ISubscriberConfig.h"
-#include "IXmlStreamWriter.h"
 #include "MtcDef.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "TextParser.h"
-#include "XmlFactory.h"
 #include "call/IMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -213,16 +211,13 @@ PUBLIC
 ByteArray MtcLocationObject::CreateCallComposerLocationBody(
         IN const AString& strLatitude, IN const AString& strLongitude) const
 {
-    XmlFactory* pXmlFactory = XmlFactory::GetInstance();
-    IXmlStreamWriter* pWriter = pXmlFactory->CreateStreamWriter();
-
     const IMS_SINT32 eNamespaces = Presence::Namespace::DM | Presence::Namespace::GP |
             Presence::Namespace::GML | Presence::Namespace::GS;
 
     AString strEntityUri = GetEntityUri(*m_objContext.GetSubscriberConfig());
 
     // clang-format off
-    PidfLoXml{
+    return PidfLoXml{
         new Presence{eNamespaces, strEntityUri, {
             new Person{CreatePersonId(), {
                 new Geopriv{
@@ -233,22 +228,8 @@ ByteArray MtcLocationObject::CreateCallComposerLocationBody(
                 },
             }},
         }},
-    }.Write(*pWriter);
+    }.Write();
     // clang-format on
-
-    ByteArray objContent;
-
-    IMS_CHAR* pszXml = pWriter->Flush();
-    if (pszXml != IMS_NULL)
-    {
-        objContent.Attach(reinterpret_cast<IMS_BYTE*>(pszXml), pWriter->GetContentLength());
-        objContent.Detach();
-        IMS_MEM_Free(pszXml);
-    }
-
-    pWriter->Close();
-    pXmlFactory->DestroyStreamWriter(pWriter);
-    return objContent;
 }
 
 PRIVATE

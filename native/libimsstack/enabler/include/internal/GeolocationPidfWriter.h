@@ -18,6 +18,7 @@
 #define GEOLOCATION_PIDF_WRITER_H_
 
 #include "AString.h"
+#include "ByteArray.h"
 #include "ImsTypeDef.h"
 #include <initializer_list>
 #include <vector>
@@ -53,6 +54,13 @@ public:
     }
 
     void Write(IN_OUT IXmlStreamWriter& objWriter) const override;
+
+    /**
+     * Convenience function that uses `Write(IN_OUT IXmlStreamWriter& objWriter)` internally.
+     *
+     * @return PIDF-LO XML. Empty if it fails.
+     */
+    ByteArray Write() const;
 };
 
 class Presence : public Element

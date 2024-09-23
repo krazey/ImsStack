@@ -55,20 +55,25 @@ public:
         objContent.Detach();
         IMS_MEM_Free(pszXml);
 
-        return objContent.ToString().Replace("\n", "");
+        return objContent.ToString();
+    }
+
+    void AssertXmlStringEquality(IN AString strActual, IN AString strExpected)
+    {
+        EXPECT_STREQ(strActual.Replace("\n", "").GetStr(), strExpected.Replace("\n", "").GetStr());
     }
 };
 
 TEST_F(GeolocationPidfWriterTest, WriteNestedElements)
 {
     // clang-format off
-    PidfLoXml{
+    ByteArray objContent = PidfLoXml{
         new Tuple{"id", {
             new Method{"method"},
             new UsageRules{},
         }},
         new Geopriv{},
-    }.Write(*pWriter);
+    }.Write();
     // clang-format on
 
     const AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -78,15 +83,15 @@ TEST_F(GeolocationPidfWriterTest, WriteNestedElements)
                                 "</tuple>"
                                 "<gp:geopriv>"
                                 "</gp:geopriv>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePidfLoXml)
 {
-    PidfLoXml{}.Write(*pWriter);
+    ByteArray objContent = PidfLoXml{}.Write();
 
     const AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithNone)
@@ -95,7 +100,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithNone)
 
     const AString strExpected = "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" entity=\"uri\">"
                                 "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithDm)
@@ -106,7 +111,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithDm)
             "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
             "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" entity=\"uri\">"
             "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithGp)
@@ -116,7 +121,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithGp)
     const AString strExpected = "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
                                 "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" entity=\"uri\">"
                                 "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithGml)
@@ -126,7 +131,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithGml)
     const AString strExpected = "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
                                 "xmlns:gml=\"http://www.opengis.net/gml\" entity=\"uri\">"
                                 "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithGs)
@@ -136,7 +141,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithGs)
     const AString strExpected = "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
                                 "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" entity=\"uri\">"
                                 "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithCl)
@@ -147,7 +152,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithCl)
             "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"uri\">"
             "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithCon)
@@ -157,7 +162,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithCon)
     const AString strExpected = "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
                                 "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"uri\">"
                                 "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithAll)
@@ -172,7 +177,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithAll)
                                 "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
                                 "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"uri\">"
                                 "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithCountry)
@@ -185,7 +190,7 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithCountry)
             "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"uri\">"
             "</presence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WritePerson)
@@ -194,7 +199,7 @@ TEST_F(GeolocationPidfWriterTest, WritePerson)
 
     const AString strExpected = "<dm:person id=\"id\">"
                                 "</dm:person>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteDevice)
@@ -203,7 +208,7 @@ TEST_F(GeolocationPidfWriterTest, WriteDevice)
 
     const AString strExpected = "<dm:device id=\"id\">"
                                 "</dm:device>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteTuple)
@@ -212,7 +217,7 @@ TEST_F(GeolocationPidfWriterTest, WriteTuple)
 
     const AString strExpected = "<tuple id=\"id\">"
                                 "</tuple>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteStatus)
@@ -221,7 +226,7 @@ TEST_F(GeolocationPidfWriterTest, WriteStatus)
 
     const AString strExpected = "<status>"
                                 "</status>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteGeopriv)
@@ -230,7 +235,7 @@ TEST_F(GeolocationPidfWriterTest, WriteGeopriv)
 
     const AString strExpected = "<gp:geopriv>"
                                 "</gp:geopriv>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteLocationInfo)
@@ -239,7 +244,7 @@ TEST_F(GeolocationPidfWriterTest, WriteLocationInfo)
 
     const AString strExpected = "<gp:location-info>"
                                 "</gp:location-info>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteUsageRules)
@@ -247,7 +252,7 @@ TEST_F(GeolocationPidfWriterTest, WriteUsageRules)
     UsageRules{}.Write(*pWriter);
 
     const AString strExpected = "<gp:usage-rules/>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteMethod)
@@ -255,14 +260,14 @@ TEST_F(GeolocationPidfWriterTest, WriteMethod)
     Method{"method"}.Write(*pWriter);
 
     const AString strExpected = "<gp:method>method</gp:method>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteMethodEmpty)
 {
     Method{""}.Write(*pWriter);
 
-    EXPECT_TRUE(GetResultString(pWriter).GetLength() <= 0);
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteTimestamp)
@@ -270,14 +275,14 @@ TEST_F(GeolocationPidfWriterTest, WriteTimestamp)
     Timestamp{"timestamp"}.Write(*pWriter);
 
     const AString strExpected = "<dm:timestamp>timestamp</dm:timestamp>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteTimestampEmpty)
 {
     Timestamp{""}.Write(*pWriter);
 
-    EXPECT_TRUE(GetResultString(pWriter).GetLength() <= 0);
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteDeviceId)
@@ -285,14 +290,14 @@ TEST_F(GeolocationPidfWriterTest, WriteDeviceId)
     DeviceId{"id"}.Write(*pWriter);
 
     const AString strExpected = "<dm:deviceID>id</dm:deviceID>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteDeviceIdEmpty)
 {
     DeviceId{""}.Write(*pWriter);
 
-    EXPECT_TRUE(GetResultString(pWriter).GetLength() <= 0);
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCircle)
@@ -303,7 +308,7 @@ TEST_F(GeolocationPidfWriterTest, WriteCircle)
                                 "<gml:pos>lat long</gml:pos><gs:radius "
                                 "uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:radius>"
                                 "</gs:Circle>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCircleEmptyPos)
@@ -311,7 +316,7 @@ TEST_F(GeolocationPidfWriterTest, WriteCircleEmptyPos)
     Circle{"", "long", "radius"}.Write(*pWriter);
     Circle{"lat", "", "radius"}.Write(*pWriter);
 
-    EXPECT_TRUE(GetResultString(pWriter).GetLength() <= 0);
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCircleEmptyRadius)
@@ -321,7 +326,7 @@ TEST_F(GeolocationPidfWriterTest, WriteCircleEmptyRadius)
     const AString strExpected = "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">"
                                 "<gml:pos>lat long</gml:pos>"
                                 "</gs:Circle>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteEllipsoid)
@@ -337,7 +342,7 @@ TEST_F(GeolocationPidfWriterTest, WriteEllipsoid)
             "uom=\"urn:ogc:def:uom:EPSG::9001\">vaccu</gs:verticalAxis><gs:orientation "
             "uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
             "</gs:Ellipsoid>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteEllipsoidEmptyPos)
@@ -346,7 +351,7 @@ TEST_F(GeolocationPidfWriterTest, WriteEllipsoidEmptyPos)
     Ellipsoid{"lat", "", "alt", "radius", "vaccu"}.Write(*pWriter);
     Ellipsoid{"lat", "long", "", "radius", "vaccu"}.Write(*pWriter);
 
-    EXPECT_TRUE(GetResultString(pWriter).GetLength() <= 0);
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteEllipsoidEmptyRadius)
@@ -356,7 +361,7 @@ TEST_F(GeolocationPidfWriterTest, WriteEllipsoidEmptyRadius)
     const AString strExpected = "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
                                 "<gml:pos>lat long alt</gml:pos>"
                                 "</gs:Ellipsoid>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteEllipsoidEmptyVerticalAccuracy)
@@ -366,7 +371,7 @@ TEST_F(GeolocationPidfWriterTest, WriteEllipsoidEmptyVerticalAccuracy)
     const AString strExpected = "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
                                 "<gml:pos>lat long alt</gml:pos>"
                                 "</gs:Ellipsoid>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteConfidence)
@@ -374,14 +379,14 @@ TEST_F(GeolocationPidfWriterTest, WriteConfidence)
     Confidence{"confidence"}.Write(*pWriter);
 
     const AString strExpected = "<con:confidence pdf=\"normal\">confidence</con:confidence>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteConfidenceEmpty)
 {
     Confidence{""}.Write(*pWriter);
 
-    EXPECT_TRUE(GetResultString(pWriter).GetLength() <= 0);
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCivicAddress)
@@ -394,14 +399,14 @@ TEST_F(GeolocationPidfWriterTest, WriteCivicAddress)
                                 "<cl:A2>city</cl:A2>"
                                 "<cl:PC>postal</cl:PC>"
                                 "</cl:civicAddress>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmpty)
 {
     CivicAddress{"", "", "", ""}.Write(*pWriter);
 
-    EXPECT_TRUE(GetResultString(pWriter).GetLength() <= 0);
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyCountry)
@@ -413,7 +418,7 @@ TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyCountry)
                                 "<cl:A2>city</cl:A2>"
                                 "<cl:PC>postal</cl:PC>"
                                 "</cl:civicAddress>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyState)
@@ -425,7 +430,7 @@ TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyState)
                                 "<cl:A2>city</cl:A2>"
                                 "<cl:PC>postal</cl:PC>"
                                 "</cl:civicAddress>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyCity)
@@ -437,7 +442,7 @@ TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyCity)
                                 "<cl:A1>state</cl:A1>"
                                 "<cl:PC>postal</cl:PC>"
                                 "</cl:civicAddress>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyPostal)
@@ -449,5 +454,5 @@ TEST_F(GeolocationPidfWriterTest, WriteCivicAddressEmptyPostal)
                                 "<cl:A1>state</cl:A1>"
                                 "<cl:A2>city</cl:A2>"
                                 "</cl:civicAddress>";
-    EXPECT_EQ(GetResultString(pWriter), strExpected);
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
