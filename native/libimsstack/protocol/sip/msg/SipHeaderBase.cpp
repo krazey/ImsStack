@@ -250,7 +250,7 @@ SIP_BOOL SipHeaderBase::IsValidHeader() const
     {
         return SIP_TRUE;
     }
-    return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+    return IsEmptyHeaderBodyAllowed();
 }
 
 SIP_BOOL SipHeaderBase::SetValue(const SIP_CHAR* pszValue)
@@ -304,7 +304,7 @@ SIP_BOOL SipHeaderBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     if (m_pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Empty header body", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+        return IsEmptyHeaderBodyAllowed();
     }
 
     objBuffer += m_pszValue;
@@ -317,7 +317,7 @@ SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP
     if (m_pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No header Value to encode", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+        return IsEmptyHeaderBodyAllowed();
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszValue);
@@ -353,7 +353,7 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "zero length buffer", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+        return IsEmptyHeaderBodyAllowed();
     }
 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
@@ -395,6 +395,12 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     return SIP_TRUE;
 }
 
+SIP_BOOL SipHeaderBase::IsEmptyHeaderBodyAllowed() const
+{
+    return IsHeaderTypeValid(m_eHdrType) ? gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED]
+                                         : SIP_FALSE;
+}
+
 SIP_BOOL SipHeaderBase::IsHeaderTypeValid(SIP_INT32 eHdrType)
 {
     return ((eHdrType > TYPE_INVALID) && eHdrType < SipHeaderBase::TYPE_END) ? SIP_TRUE : SIP_FALSE;
@@ -402,7 +408,8 @@ SIP_BOOL SipHeaderBase::IsHeaderTypeValid(SIP_INT32 eHdrType)
 
 SIP_BOOL SipHeaderBase::IsMultiValueHeader(SIP_INT32 eHdrType)
 {
-    return gHeaderAttributes[eHdrType][HEADER_MULTI_VALUE_ALLOWED];
+    return IsHeaderTypeValid(eHdrType) ? gHeaderAttributes[eHdrType][HEADER_MULTI_VALUE_ALLOWED]
+                                       : SIP_TRUE;
 }
 
 SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)

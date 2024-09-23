@@ -18,8 +18,6 @@
 #include "msg/SipResourcePriorityHeader.h"
 #include "platform/SipString.h"
 
-extern SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIBUTE_END];
-
 SipResourcePriorityHeader::SipResourcePriorityHeader(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),
         m_pszNameSpace(SIP_NULL),
@@ -94,7 +92,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
     if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[GetHdrType()][HEADER_EMPTY_BODY_ALLOWED];
+        return IsEmptyHeaderBodyAllowed();
     }
 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;

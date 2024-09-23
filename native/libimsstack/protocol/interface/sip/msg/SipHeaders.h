@@ -20,7 +20,6 @@
 #include "SipDatatypes.h"
 #include "SipMap.h"
 #include "SipRefBase.h"
-#include "msg/SipAcceptHeader.h"
 #include "msg/SipAuthBase.h"
 #include "msg/SipAuthInfoHeader.h"
 #include "msg/SipContentTypeHeader.h"

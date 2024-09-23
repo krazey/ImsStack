@@ -431,7 +431,7 @@ TEST_F(SipMessageTest, DecMultiPartBody)
 
     const SIP_CHAR* pContentTypeValue = "multipart/mixed;boundary=\"abcxz\"";
 
-    SipContentTypeHeader* pContentTypeHdr = new SipContentTypeHeader();
+    SipContentTypeHeader* pContentTypeHdr = new SipContentTypeHeader(SipHeaderBase::CONTENT_TYPE);
     ASSERT_TRUE(pContentTypeHdr != nullptr);
 
     EXPECT_EQ(SIP_TRUE,

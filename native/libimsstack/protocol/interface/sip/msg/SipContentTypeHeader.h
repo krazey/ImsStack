@@ -28,7 +28,7 @@ private:
 
 public:
     /*constructor*/
-    SipContentTypeHeader();
+    explicit SipContentTypeHeader(SIP_INT32 eHdrType);
     SipContentTypeHeader(const SipContentTypeHeader& objHeader);
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);

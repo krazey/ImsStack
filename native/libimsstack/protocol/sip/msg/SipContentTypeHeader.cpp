@@ -18,8 +18,8 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-SipContentTypeHeader::SipContentTypeHeader() :
-        SipHeaderBase(SipHeaderBase::CONTENT_TYPE),
+SipContentTypeHeader::SipContentTypeHeader(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType),
         m_pszMType(SIP_NULL),
         m_pszMSubType(SIP_NULL)
 {
@@ -46,10 +46,17 @@ SipContentTypeHeader::~SipContentTypeHeader()
 
 SIP_BOOL SipContentTypeHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
+    if ((m_pszMType == SIP_NULL) && (m_pszMSubType == SIP_NULL))
+    {
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "No media type and media subtype", SIP_ZERO, SIP_ZERO);
+        return IsEmptyHeaderBodyAllowed();
+    }
+
     if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
     {
         SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "Missing media type or sub-type", SIP_ZERO, SIP_ZERO);
+                ESIPTRACE_MODENCODER, "Missing media type or media subtype", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -63,9 +70,17 @@ SIP_BOOL SipContentTypeHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams
 SIP_BOOL SipContentTypeHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
+    if ((m_pszMType == SIP_NULL) && (m_pszMSubType == SIP_NULL))
+    {
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "No media type and media subtype", SIP_ZERO, SIP_ZERO);
+        return IsEmptyHeaderBodyAllowed();
+    }
+
     if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing MType or MSubType", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Missing media type or media subtype", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -109,7 +124,7 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
     if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
+        return IsEmptyHeaderBodyAllowed();
     }
 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
@@ -118,7 +133,7 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
     /*Find the SLASH*/
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SLASH missing in Accept", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SLASH missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -145,6 +160,13 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
         return SIP_FALSE;
     }
 
+    if (IsValidHeader() == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Invalid media type or media subtype", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     if (pTempNext != SIP_NULL)
     {
         return DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI);
@@ -154,20 +176,32 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
 
 SIP_BOOL SipContentTypeHeader::IsValidHeader() const
 {
+    if ((m_pszMType == SIP_NULL) && (m_pszMSubType == SIP_NULL))
+    {
+        return IsEmptyHeaderBodyAllowed();
+    }
+
     if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
     {
         return SIP_FALSE;
     }
+
+    if ((GetHdrType() == SipHeaderBase::ACCEPT) && (SipPf_Strcmp(m_pszMType, "*") == 0) &&
+            (SipPf_Strcmp(m_pszMSubType, "*") != 0))
+    {
+        return SIP_FALSE;
+    }
+
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipContentTypeHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
+SipHeaderBase* SipContentTypeHeader::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
         return new SipContentTypeHeader(*reinterpret_cast<SipContentTypeHeader*>(pHeader));
     }
-    return new SipContentTypeHeader();
+    return new SipContentTypeHeader(eHeaderType);
 }
 
 SIP_CHAR* SipContentTypeHeader::StripDQUOTE(const SIP_CHAR* pszStr)
