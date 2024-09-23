@@ -17,28 +17,29 @@
 #define INTERFACE_TRACE_TAG_DECL_H_
 
 ////
-// TRACE MODULE DEFINITIONS FOR FRAMEWORK & ENABLERS
+// TRACE MODULE DEFINITIONS
 ////
 
-//// IMS ("ims" package)
+//// IPL (ImsStack Porting Layer)
+//// platform -> os
+#define __IMS_TRACE_TAG_IPL__          __IMS_TRACE_TAG__(IPL)
+
+//// BASE
+//// All the base components
+//// platform -> base
+#define __IMS_TRACE_TAG_BASE__         __IMS_TRACE_TAG__(BASE)
+
+//// CONF
+//// config
+#define __IMS_TRACE_TAG_CONF__         __IMS_TRACE_TAG__(CONF)
+
+//// REG ("ims" package)
 //// engine -> registration
 #define __IMS_TRACE_TAG_REG__          __IMS_TRACE_TAG__(REG)
 
 //// IMS.CORE ("ims", "ims.core", "ims.core.media" package)
 //// engine -> service, core, core/media
 #define __IMS_TRACE_TAG_IMS_CORE__     __IMS_TRACE_TAG__(IMS_CORE)
-
-//// PLATFORM
-//// platform -> base
-#define __IMS_TRACE_TAG_BASE__         __IMS_TRACE_TAG__(BASE)
-
-//// IPL (ImsStack Porting Layer)
-//// platform -> os
-#define __IMS_TRACE_TAG_IPL__          __IMS_TRACE_TAG__(IPL)
-
-//// CONF
-//// config
-#define __IMS_TRACE_TAG_CONF__         __IMS_TRACE_TAG__(CONF)
 
 //// SIP.CORE
 //// engine -> sipcore
@@ -74,12 +75,12 @@
 //// enabler -> uce
 #define __IMS_TRACE_TAG_UCE__          __IMS_TRACE_TAG__(UCE)
 
-//// SIP_DELEGATE
-//// enabler -> sipdelegate
-#define __IMS_TRACE_TAG_SIP_DELEGATE__ __IMS_TRACE_TAG__(SIP_DELEGATE)
-
 //// MEDIA
 //// enabler -> media
 #define __IMS_TRACE_TAG_MEDIA__        __IMS_TRACE_TAG__(MEDIA)
+
+//// SIP_DELEGATE
+//// enabler -> sipdelegate
+#define __IMS_TRACE_TAG_SIP_DELEGATE__ __IMS_TRACE_TAG__(SIP_DELEGATE)
 
 #endif
