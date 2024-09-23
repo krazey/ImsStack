@@ -39,7 +39,7 @@ public:
 
     SIP_BOOL SetParams(const SIP_CHAR* pszName, const SIP_CHAR* pszVal, SIP_BOOL bIsFeatureParam);
 
-    SIP_BOOL FindElement(const SIP_CHAR* pszName, SipNameValue*& pNmvl, SIP_UINT32& nPos);
+    SIP_BOOL FindElement(const SIP_CHAR* pszName, SipNameValue*& pNameValue, SIP_UINT32& nPos);
 
     SIP_CHAR* GetAuthValue(const SIP_CHAR* pszName);
 

@@ -75,7 +75,7 @@ protected:
 
         pMessage = new SipMessage();
         ASSERT_TRUE(pMessage != nullptr);
-        EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+        EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
         pTranspHandler = new SipTransportHandler();
         ASSERT_TRUE(pTranspHandler != nullptr);
@@ -162,7 +162,7 @@ Content-Length: 0\r\n\
     SipMessage* pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     /* pTranspParam null, fail */
     EXPECT_EQ(SIP_FALSE,
@@ -405,7 +405,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -554,7 +554,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -616,7 +616,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -683,7 +683,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);

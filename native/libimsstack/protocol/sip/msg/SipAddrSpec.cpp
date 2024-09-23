@@ -113,7 +113,8 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pszUser != SIP_NULL)
     {
-        SIP_CHAR* pszTempUser = SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, SIP_USER);
+        SIP_CHAR* pszTempUser =
+                SipPercentEncoding::DoPercentEncoding_UserAndHeader(m_pszUser, SIP_USER);
         objBuffer += pszTempUser;
         delete[] pszTempUser;
 
@@ -121,7 +122,8 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
         {
             objBuffer += COLON;
 
-            SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
+            SIP_CHAR* pszTempPassword =
+                    SipPercentEncoding::DoPercentEncoding_Password(m_pszPassword);
             objBuffer += pszTempPassword;
             delete[] pszTempPassword;
         }
@@ -139,7 +141,7 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
         }
         else
         {
-            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPerEnc_Host(m_pszHost);
+            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPercentEncoding_Host(m_pszHost);
             objBuffer += pszTempHost;
             delete[] pszTempHost;
         }
@@ -207,7 +209,8 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
        userinfo = ( user / telephone-subscriber ) [ ":" password ] "@"  */
     if (m_pszUser != SIP_NULL)
     {
-        SIP_CHAR* pszTempUser = SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, SIP_USER);
+        SIP_CHAR* pszTempUser =
+                SipPercentEncoding::DoPercentEncoding_UserAndHeader(m_pszUser, SIP_USER);
         SipPf_Strcpy(*ppCurrPos, pszTempUser);
         delete[] pszTempUser;
 
@@ -218,7 +221,8 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             /*encode the password*/
             SIP_ENC_COLON(*ppCurrPos);
 
-            SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
+            SIP_CHAR* pszTempPassword =
+                    SipPercentEncoding::DoPercentEncoding_Password(m_pszPassword);
             SipPf_Strcpy(*ppCurrPos, pszTempPassword);
             delete[] pszTempPassword;
 
@@ -247,7 +251,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
         /*Do Percent Encoding if Required*/
         else
         {
-            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPerEnc_Host(m_pszHost);
+            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPercentEncoding_Host(m_pszHost);
             SipPf_Strcpy(*ppCurrPos, pszTempHost);
             SipEnc_UpdateCurrPos(ppCurrPos);
             delete[] pszTempHost;
@@ -311,7 +315,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+SIP_BOOL SipUri::DecodeUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /* check for userinfo = ( user / telephone-subscriber ) [ ":" password ] "@" */
 
@@ -345,7 +349,7 @@ SIP_BOOL SipUri::DecUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+SIP_BOOL SipUri::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /*hostport = host [ ":" port ]
       host = hostname   /   IPv4address   /   IPv6reference
@@ -455,7 +459,7 @@ SIP_BOOL SipUri::DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /* Decode user:password part in SIP URI */
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, ATRATE) == SIP_TRUE)
     {
-        if (DecUserInfo(pStartPt, pTempPos) == SIP_FALSE)
+        if (DecodeUserInfo(pStartPt, pTempPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "User Info Decode Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -513,7 +517,7 @@ SIP_BOOL SipUri::DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     SetComponentType(IParameterComponent::NORMAL);
     /* Decode host:port part in SIP URI */
-    if (DecHostPort(pStartPt, pEndPt) == SIP_FALSE)
+    if (DecodeHostPort(pStartPt, pEndPt) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Host port Decode Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;

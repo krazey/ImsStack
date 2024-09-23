@@ -160,7 +160,7 @@ Content-Length: 0\r\n\
 
     SipMessage* pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     SIP_UINT16 nError = 0;
     SipTxnKey* pTxnKey = SIP_NULL;
@@ -216,7 +216,7 @@ Content-Length: 0\r\n\
 
     SipMessage* pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->Decode(pRespMsg, nLength));
 
     /* Passing invalig arguments, fail */
     EXPECT_EQ(SIP_FALSE,
@@ -269,7 +269,7 @@ Content-Length: 0\r\n\
 
     SipMessage* pAckSipMessage = new SipMessage();
     ASSERT_TRUE(pAckSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pAckSipMessage->DecCompleteMsg(pAckMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pAckSipMessage->Decode(pAckMsg, nLength));
 
     /* No matching Invite transaction for ACK, retransmission message */
     EXPECT_EQ(SIP_TRUE,
@@ -293,7 +293,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
 
@@ -325,7 +325,7 @@ Content-Length: 0\r\n\
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->Decode(pRespMsg, nLength));
 
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
@@ -352,7 +352,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     /* Pass valid arguments, success */
     EXPECT_EQ(SIP_TRUE,
@@ -378,7 +378,7 @@ Content-Length: 0\r\n\
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->Decode(pRespMsg, nLength));
 
     /* Pass valid arguments, success */
     EXPECT_EQ(SIP_TRUE,
@@ -408,7 +408,7 @@ Content-Length: 0\r\n\
 
     pAckSipMessage = new SipMessage();
     ASSERT_TRUE(pAckSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pAckSipMessage->DecCompleteMsg(pAckMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pAckSipMessage->Decode(pAckMsg, nLength));
 
     EXPECT_TRUE(pTxn != nullptr);
 
@@ -440,7 +440,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     nError = 0;
     pTxnKey = SIP_NULL;
@@ -470,7 +470,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
 
@@ -498,7 +498,7 @@ Content-Length: 0\r\n\
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->Decode(pRespMsg, nLength));
 
     /* Pass valid arguments, success */
     EXPECT_EQ(SIP_TRUE,
@@ -524,7 +524,7 @@ Content-Length: 0\r\n\
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->Decode(pRespMsg, nLength));
 
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
@@ -560,7 +560,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     nError = 0;
     pTxnKey = SIP_NULL;
@@ -590,7 +590,7 @@ Content-Length: 0\r\n\
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->Decode(pRespMsg, nLength));
 
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
@@ -614,7 +614,7 @@ Content-Length: 0\r\n\
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->Decode(pRespMsg, nLength));
 
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
@@ -684,7 +684,7 @@ Content-Length: 0\r\n\
 
     SipMessage* pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,

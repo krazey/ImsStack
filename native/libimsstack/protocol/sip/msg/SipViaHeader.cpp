@@ -177,9 +177,9 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_VOID SipViaHeader::SetProtocolName(const SIP_CHAR* pszProtocolNm)
+SIP_VOID SipViaHeader::SetProtocolName(const SIP_CHAR* pszProtocolName)
 {
-    SetCharVar(pszProtocolNm, m_pszProtocolName);
+    SetCharVar(pszProtocolName, m_pszProtocolName);
 }
 
 SIP_VOID SipViaHeader::SetProtocolVer(const SIP_CHAR* pszProtocolVer)
@@ -207,7 +207,7 @@ SIP_BOOL SipViaHeader::SetBranchParam(const SIP_CHAR* pszBranch)
     return AddParam("branch", pszBranch);
 }
 
-SIP_BOOL SipViaHeader::DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /*hostport = host [ COLON port ]
       host = hostname   /   IPv4address   /   IPv6reference
@@ -360,7 +360,7 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pTempPre = pEndPt;
     }
 
-    if (DecHostPort(pStartPt, pTempPre) == SIP_FALSE)
+    if (DecodeHostPort(pStartPt, pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Host Port Decoding Fail in via",
                 SIP_ZERO, SIP_ZERO);

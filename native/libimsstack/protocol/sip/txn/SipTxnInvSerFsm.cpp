@@ -226,7 +226,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
             return SIP_FALSE;
         }
 
-        pTxn->IncrDurationExpired(nDurationTH);
+        pTxn->IncreaseDurationExpired(nDurationTH);
     }
 
     pTxn->SetMaxDuration(nDurationTH);
@@ -258,7 +258,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend2xxSuccessRespEvt(
     {
         pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
         pTxn->SetMaxDuration(nDurationTH);
-        pTxn->IncrDurationExpired(nDurationTH);
+        pTxn->IncreaseDurationExpired(nDurationTH);
         pTxn->SetTxnState(SipTxn::INV_SER_COMPLETED_ST);
     }
     else
@@ -300,7 +300,7 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
     if (nDurationExpired == 0)
     {
         // Timer T1 already fired.
-        pTxn->IncrDurationExpired(nT1Val);
+        pTxn->IncreaseDurationExpired(nT1Val);
         nDurationExpired = nT1Val;
     }
 
@@ -337,8 +337,8 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
                             SIP_ZERO, SIP_ZERO);
                     return SIP_FALSE;
                 }
-                pTxn->IncrTxnCount();
-                pTxn->IncrDurationExpired(nDuration);
+                pTxn->IncreaseTxnCount();
+                pTxn->IncreaseDurationExpired(nDuration);
                 pTxn->SetCurrentDuration(nDuration);
             }
         }
@@ -428,7 +428,7 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
     if (nDurationExpired == 0)
     {
         // Timer T1 already fired.
-        pTxn->IncrDurationExpired(nT1Val);
+        pTxn->IncreaseDurationExpired(nT1Val);
         nDurationExpired = nT1Val;
     }
 
@@ -476,8 +476,8 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
         {
             return SIP_FALSE;
         }
-        pTxn->IncrTxnCount();
-        pTxn->IncrDurationExpired(nDuration);
+        pTxn->IncreaseTxnCount();
+        pTxn->IncreaseDurationExpired(nDuration);
         pTxn->SetCurrentDuration(nDuration);
     }
 

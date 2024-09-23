@@ -29,7 +29,7 @@ SipTxn::SipTxn() :
         m_pTranspInfo(SIP_NULL),
         m_pUserData(SIP_NULL),
         m_nTxnState(SIP_ZERO),
-        m_nReTxCount(SIP_ZERO),
+        m_nRetransmissionCount(SIP_ZERO),
         m_eTimerType(SipTxn::TIMER_TYPE_INVALID),
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
@@ -46,7 +46,7 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
         m_pTranspInfo(SIP_NULL),
         m_pUserData(SIP_NULL),
         m_nTxnState(SIP_ZERO),
-        m_nReTxCount(SIP_ZERO),
+        m_nRetransmissionCount(SIP_ZERO),
         m_eTimerType(SipTxn::TIMER_TYPE_INVALID),
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
@@ -79,7 +79,7 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
 
     /* IDLE State */
     m_nTxnState = SIP_ZERO;
-    m_nReTxCount = SIP_ZERO;
+    m_nRetransmissionCount = SIP_ZERO;
 }
 
 SipTxn::~SipTxn()
@@ -607,17 +607,17 @@ SIP_BOOL SipTxn::IsTxnTerminated()
 
 SIP_VOID SipTxn::InitRetransmissionInfo()
 {
-    m_nReTxCount = SIP_ZERO;
+    m_nRetransmissionCount = SIP_ZERO;
     m_nMaxDuration = SIP_ZERO;
     m_nDurationExpired = SIP_ZERO;
     m_nCurrentDuration = SIP_ZERO;
 }
 
-SIP_VOID SipTxn::SetRespCode(SIP_UINT16 nRespCode)
+SIP_VOID SipTxn::SetResponseCode(SIP_UINT16 nRespCode)
 {
     if (m_pTxnKey != SIP_NULL)
     {
-        m_pTxnKey->SetRespCode(nRespCode);
+        m_pTxnKey->SetResponseCode(nRespCode);
     }
 }
 

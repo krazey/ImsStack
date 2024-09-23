@@ -21,22 +21,22 @@
 SipNameValue::SipNameValue() :
         m_pszName(SIP_NULL),
         m_valueList(SipVector<SIP_CHAR*>()),
-        m_ePrmType(SipParameters::GENERIC),
-        m_Sep(',')
+        m_eParamType(SipParameters::GENERIC),
+        m_Separator(',')
 {
 }
 
-SipNameValue::SipNameValue(const SipNameValue& objNmVl) :
-        m_pszName(SipPf_Strdup(objNmVl.m_pszName)),
+SipNameValue::SipNameValue(const SipNameValue& objNameValue) :
+        m_pszName(SipPf_Strdup(objNameValue.m_pszName)),
         m_valueList(SipVector<SIP_CHAR*>()),
-        m_ePrmType(objNmVl.m_ePrmType),
-        m_Sep(objNmVl.m_Sep)
+        m_eParamType(objNameValue.m_eParamType),
+        m_Separator(objNameValue.m_Separator)
 {
-    SIP_UINT32 nSize = objNmVl.m_valueList.GetSize();
+    SIP_UINT32 nSize = objNameValue.m_valueList.GetSize();
 
     for (SIP_UINT32 unCount = SIP_ZERO; unCount < nSize; unCount++)
     {
-        SIP_CHAR* pszElement = objNmVl.m_valueList.GetAt(unCount);
+        SIP_CHAR* pszElement = objNameValue.m_valueList.GetAt(unCount);
 
         if (pszElement == SIP_NULL)
         {
@@ -81,13 +81,14 @@ SIP_BOOL SipNameValue::Encode(
                                 (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))))
         {
             SIP_CHAR* pszValue = m_valueList.GetAt(SIP_ZERO);
-            SIP_CHAR* pszTempValue = SipPercentEncoding::DoPerEnc_Param(m_pszName, pszValue);
+            SIP_CHAR* pszTempValue =
+                    SipPercentEncoding::DoPercentEncoding_Param(m_pszName, pszValue);
             objBuffer += pszTempValue;
             delete[] pszTempValue;
         }
         else
         {
-            if (m_ePrmType == SipParameters::FEATURE)
+            if (m_eParamType == SipParameters::FEATURE)
             {
                 objBuffer += DQUOTE;
             }
@@ -111,13 +112,13 @@ SIP_BOOL SipNameValue::Encode(
                 // Condition to prevent last put of separator
                 if (nIndex < (nSize - SIP_ONE))
                 {
-                    objBuffer += m_Sep;
+                    objBuffer += m_Separator;
                 }
 
                 nIndex++;
             }
 
-            if (m_ePrmType == SipParameters::FEATURE)
+            if (m_eParamType == SipParameters::FEATURE)
             {
                 objBuffer += DQUOTE;
             }
@@ -148,14 +149,15 @@ SIP_BOOL SipNameValue::Encode(
                                 (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))))
         {
             SIP_CHAR* pszValue = m_valueList.GetAt(SIP_ZERO);
-            SIP_CHAR* pszTempValue = SipPercentEncoding::DoPerEnc_Param(m_pszName, pszValue);
+            SIP_CHAR* pszTempValue =
+                    SipPercentEncoding::DoPercentEncoding_Param(m_pszName, pszValue);
             SipPf_Strcpy(*ppCurrPos, pszTempValue);
             SipEnc_UpdateCurrPos(ppCurrPos);
             delete[] pszTempValue;
         }
         else
         {
-            if (m_ePrmType == SipParameters::FEATURE)
+            if (m_eParamType == SipParameters::FEATURE)
             {
                 **ppCurrPos = DQUOTE;
                 (*ppCurrPos)++;
@@ -180,13 +182,13 @@ SIP_BOOL SipNameValue::Encode(
                 /*Condition to prevent last put of separator*/
                 if (sLocalCount < (nCount - SIP_ONE))
                 {
-                    **ppCurrPos = m_Sep;
+                    **ppCurrPos = m_Separator;
                     (*ppCurrPos)++;
                 }
                 sLocalCount++;
             }
 
-            if (m_ePrmType == SipParameters::FEATURE)
+            if (m_eParamType == SipParameters::FEATURE)
             {
                 **ppCurrPos = DQUOTE;
                 (*ppCurrPos)++;
@@ -291,18 +293,18 @@ SIP_BOOL SipNameValue::Decode(
 }
 
 SipParameters::SipParameters() :
-        m_objPrmList(SipVector<SipNameValue*>())
+        m_objNameValueList(SipVector<SipNameValue*>())
 {
 }
 
 SipParameters::SipParameters(const SipParameters& objParameters) :
-        m_objPrmList(SipVector<SipNameValue*>())
+        m_objNameValueList(SipVector<SipNameValue*>())
 {
-    SIP_UINT32 nSize = objParameters.m_objPrmList.GetSize();
+    SIP_UINT32 nSize = objParameters.m_objNameValueList.GetSize();
 
     for (SIP_UINT32 unCount = SIP_ZERO; unCount < nSize; unCount++)
     {
-        SipNameValue* pElement = objParameters.m_objPrmList.GetAt(unCount);
+        SipNameValue* pElement = objParameters.m_objNameValueList.GetAt(unCount);
 
         if (pElement != SIP_NULL)
         {
@@ -310,7 +312,7 @@ SipParameters::SipParameters(const SipParameters& objParameters) :
 
             if (pNameValue != SIP_NULL)
             {
-                m_objPrmList.Add(pNameValue);
+                m_objNameValueList.Add(pNameValue);
             }
         }
     }
@@ -321,12 +323,12 @@ SipParameters::~SipParameters() {}
 SIP_BOOL SipParameters::Encode(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
         IParameterComponent* pParameterComponent) const
 {
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nSize = m_objNameValueList.GetSize();
     SIP_UINT32 nIndex = SIP_ZERO;
 
     while (nIndex < nSize)
     {
-        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+        SipNameValue* pNameValue = m_objNameValueList.GetAt(nIndex);
 
         objBuffer += cDelimiter;
 
@@ -346,12 +348,12 @@ SIP_BOOL SipParameters::Encode(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
 SIP_BOOL SipParameters::Encode(
         SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter, IParameterComponent* pParameterComponent) const
 {
-    SIP_UINT32 nCount = m_objPrmList.GetSize();
+    SIP_UINT32 nCount = m_objNameValueList.GetSize();
     SIP_UINT32 nIndex = SIP_ZERO;
 
     while (nIndex < nCount)
     {
-        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+        SipNameValue* pNameValue = m_objNameValueList.GetAt(nIndex);
 
         *(*ppCurrPos) = cDelimiter;
         (*ppCurrPos)++;
@@ -403,7 +405,7 @@ SIP_BOOL SipParameters::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
             return SIP_FALSE;
         }
 
-        if (m_objPrmList.Add(pNameValue) < SIP_ZERO)
+        if (m_objNameValueList.Add(pNameValue) < SIP_ZERO)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODDECODER, "Decode: Append in list Failed", SIP_ZERO, SIP_ZERO);
@@ -435,14 +437,14 @@ SIP_BOOL SipParameters::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
         return SIP_FALSE;
     }
 
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nSize = m_objNameValueList.GetSize();
     SipNameValue* pNameValue = SIP_NULL;
     SIP_BOOL bFound = SIP_FALSE;
     SIP_UINT32 nIndex = SIP_ZERO;
 
     while (nIndex < nSize)
     {
-        pNameValue = m_objPrmList.GetAt(nIndex);
+        pNameValue = m_objNameValueList.GetAt(nIndex);
         if (SipPf_Strcmp(pNameValue->m_pszName, pszName) == SIP_ZERO)
         {
             bFound = SIP_TRUE;
@@ -469,7 +471,7 @@ SIP_BOOL SipParameters::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
 
     if (bFound == SIP_FALSE)
     {
-        m_objPrmList.Add(pNameValue);
+        m_objNameValueList.Add(pNameValue);
     }
 
     return SIP_TRUE;
@@ -483,16 +485,16 @@ SIP_VOID SipParameters::RemoveParam(const SIP_CHAR* pszName)
         return;
     }
 
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nSize = m_objNameValueList.GetSize();
     SIP_UINT32 nIndex = SIP_ZERO;
 
     while (nIndex < nSize)
     {
-        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+        SipNameValue* pNameValue = m_objNameValueList.GetAt(nIndex);
         if (SipPf_Strcmp(pNameValue->m_pszName, pszName) == 0)
         {
             pNameValue->SipDelete();
-            m_objPrmList.RemoveAt(nIndex);
+            m_objNameValueList.RemoveAt(nIndex);
             return;
         }
         nIndex++;
@@ -553,11 +555,11 @@ SIP_BOOL SipParameters::SetParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
 SIP_BOOL SipParameters::FindElement(
         const SIP_CHAR* pszName, SipNameValue*& pNameValue, SIP_INT32& nPos) const
 {
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nSize = m_objNameValueList.GetSize();
 
     for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
     {
-        SipNameValue* pElement = m_objPrmList.GetAt(nIndex);
+        SipNameValue* pElement = m_objNameValueList.GetAt(nIndex);
         if (SipPf_Stricmp(pszName, pElement->m_pszName) == 0)
         {
             nPos = nIndex;

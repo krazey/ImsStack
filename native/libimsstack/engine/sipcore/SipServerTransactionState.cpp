@@ -316,7 +316,8 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     then stack drop the message by returning ignore request */
     if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN))
     {
-        if (objMethod.Equals(SipMethod::ACK) && (m_pTxnKey->GetRespCode() >= SipStatusCode::SC_300))
+        if (objMethod.Equals(SipMethod::ACK) &&
+                (m_pTxnKey->GetResponseCode() >= SipStatusCode::SC_300))
         {
             IMS_TRACE_I("__UAS__ :: ___ ACK (%s) TO UNSUCCESSFUL FINAL RESPONSE ___",
                     SipDebug::GetCharA1(m_pTxnKey->GetCallId(), 8, '@'), 0, 0);
@@ -325,7 +326,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
             if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
             {
                 SipMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
-                pMessageTracker->NotifyMessageReceived(objMethod, m_pTxnKey->GetRespCode(),
+                pMessageTracker->NotifyMessageReceived(objMethod, m_pTxnKey->GetResponseCode(),
                         AString(static_cast<const IMS_CHAR*>(m_pTxnKey->GetCallId())));
             }
             return SipPrivate::MESSAGE_DISCARDED;

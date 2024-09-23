@@ -33,12 +33,12 @@ SipAuthBase::SipAuthBase(const SipAuthBase& objHeader) :
 
     for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
     {
-        SipNameValue* pTempNmVl = objHeader.m_objAuthList.GetAt(nCount);
+        SipNameValue* pTempNameValue = objHeader.m_objAuthList.GetAt(nCount);
 
-        if (pTempNmVl != SIP_NULL)
+        if (pTempNameValue != SIP_NULL)
         {
-            SipNameValue* pNmVl = new SipNameValue(*pTempNmVl);
-            m_objAuthList.Add(pNmVl);
+            SipNameValue* pNameValue = new SipNameValue(*pTempNameValue);
+            m_objAuthList.Add(pNameValue);
         }
     }
 }
@@ -128,9 +128,9 @@ SIP_BOOL SipAuthBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_T
 SIP_BOOL SipAuthBase::SetParams(
         const SIP_CHAR* pszName, const SIP_CHAR* pszVal, SIP_BOOL bIsFeatureParam)
 {
-    SipNameValue* pNV = new SipNameValue();
+    SipNameValue* pNameValue = new SipNameValue();
 
-    if (pNV == SIP_NULL)
+    if (pNameValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -138,14 +138,14 @@ SIP_BOOL SipAuthBase::SetParams(
 
     if (bIsFeatureParam == SIP_TRUE)
     {
-        pNV->m_ePrmType = SipParameters::FEATURE;
+        pNameValue->m_eParamType = SipParameters::FEATURE;
     }
 
-    pNV->m_pszName = SipPf_Strdup(pszName);
-    if (pNV->m_pszName == SIP_NULL)
+    pNameValue->m_pszName = SipPf_Strdup(pszName);
+    if (pNameValue->m_pszName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
-        pNV->SipDelete();
+        pNameValue->SipDelete();
         return SIP_FALSE;
     }
 
@@ -153,27 +153,28 @@ SIP_BOOL SipAuthBase::SetParams(
     if (pszTempVal == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
-        pNV->SipDelete();
+        pNameValue->SipDelete();
         return SIP_FALSE;
     }
 
-    pNV->m_valueList.Add(pszTempVal);
-    m_objAuthList.Add(pNV);
+    pNameValue->m_valueList.Add(pszTempVal);
+    m_objAuthList.Add(pNameValue);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAuthBase::FindElement(const SIP_CHAR* pszName, SipNameValue*& pNmvl, SIP_UINT32& nPos)
+SIP_BOOL SipAuthBase::FindElement(
+        const SIP_CHAR* pszName, SipNameValue*& pNameValue, SIP_UINT32& nPos)
 {
     SIP_UINT32 nSize = m_objAuthList.GetSize();
 
     for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
     {
-        SipNameValue* pNmVl = m_objAuthList.GetAt(nIndex);
-        if (SipPf_Stricmp(pszName, pNmVl->m_pszName) == 0)
+        SipNameValue* pTempNameValue = m_objAuthList.GetAt(nIndex);
+        if (SipPf_Stricmp(pszName, pTempNameValue->m_pszName) == 0)
         {
             nPos = nIndex;
-            pNmvl = pNmVl;
+            pNameValue = pTempNameValue;
             return SIP_TRUE;
         }
     }
@@ -187,15 +188,15 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
         return SIP_NULL;
     }
 
-    SipNameValue* pNmVl = SIP_NULL;
+    SipNameValue* pTempNameValue = SIP_NULL;
     SIP_UINT32 nPos = SIP_ZERO;
-    SIP_BOOL bStatus = FindElement(pszName, pNmVl, nPos);
-    if ((bStatus == SIP_FALSE) || (pNmVl == SIP_NULL))
+    SIP_BOOL bStatus = FindElement(pszName, pTempNameValue, nPos);
+    if ((bStatus == SIP_FALSE) || (pTempNameValue == SIP_NULL))
     {
         return SIP_NULL;
     }
 
-    const SipVector<SIP_CHAR*>& valueList = pNmVl->m_valueList;
+    const SipVector<SIP_CHAR*>& valueList = pTempNameValue->m_valueList;
     if (valueList.IsEmpty() == SIP_TRUE)
     {
         return SIP_NULL;
@@ -203,7 +204,7 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
 
     SIP_CHAR* pszVal = SIP_NULL;
     SIP_CHAR* pszElement = valueList.GetAt(SIP_ZERO);
-    if (pNmVl->m_ePrmType == SipParameters::FEATURE)
+    if (pTempNameValue->m_eParamType == SipParameters::FEATURE)
     {
         int nLen = SIP_ZERO;
         if (pszElement != SIP_NULL)
@@ -272,23 +273,23 @@ SIP_BOOL SipAuthBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             pTempNext = pEndPt;
         }
 
-        SipNameValue* pNmVl = new SipNameValue();
-        if (pNmVl == SIP_NULL)
+        SipNameValue* pTempNameValue = new SipNameValue();
+        if (pTempNameValue == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pNmVl->Decode(pStartPt, pTempPre) == SIP_FALSE)
+        if (pTempNameValue->Decode(pStartPt, pTempPre) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value decode Fail", SIP_ZERO, SIP_ZERO);
-            pNmVl->SipDelete();
+            pTempNameValue->SipDelete();
             return SIP_FALSE;
         }
-        if (m_objAuthList.Add(pNmVl) < 0)
+        if (m_objAuthList.Add(pTempNameValue) < 0)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list fail", SIP_ZERO, SIP_ZERO);
-            pNmVl->SipDelete();
+            pTempNameValue->SipDelete();
             return SIP_FALSE;
         }
         /*Update the Start point to the start of next Name Value Pair*/

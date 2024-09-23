@@ -23,21 +23,21 @@ class SipStatusLine : public SipRefBase
 private:
     SIP_CHAR* m_pszSipVersion;
     SIP_CHAR* m_pszStatusCode;
-    SIP_CHAR* m_pszRsnPhrase;
+    SIP_CHAR* m_pszReasonPhrase;
 
 public:
     /*constructor*/
     SipStatusLine() :
             m_pszSipVersion(SIP_NULL),
             m_pszStatusCode(SIP_NULL),
-            m_pszRsnPhrase(SIP_NULL)
+            m_pszReasonPhrase(SIP_NULL)
     {
     }
 
-    SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszRsnPhrase);
+    SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszReasonPhrase);
 
     SipStatusLine(const SIP_CHAR* pszSipVersion, const SIP_CHAR* pszStatusCode,
-            const SIP_CHAR* pszRsnPhrase);
+            const SIP_CHAR* pszReasonPhrase);
 
     SipStatusLine(const SipStatusLine& objHeader);
 
@@ -49,7 +49,7 @@ public:
 
     SIP_VOID SetStatusCode(const SIP_CHAR* pszStatusCode);
     SIP_VOID SetSipVersion(const SIP_CHAR* pszVer);
-    SIP_VOID SetRsnPhrase(const SIP_CHAR* pszRsnPhrase);
+    SIP_VOID SetReasonPhrase(const SIP_CHAR* pszReasonPhrase);
 
     /*Get methods*/
     inline const SIP_CHAR* GetStatusCode() const { return m_pszStatusCode; }
@@ -60,7 +60,7 @@ public:
 
     inline const SIP_CHAR* GetSipVersion() const { return m_pszSipVersion; }
 
-    inline const SIP_CHAR* GetRsnPhrase() const { return m_pszRsnPhrase; }
+    inline const SIP_CHAR* GetReasonPhrase() const { return m_pszReasonPhrase; }
 
 private:
     ~SipStatusLine();

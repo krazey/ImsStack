@@ -350,7 +350,7 @@ stack user must process this request and can decide whether to ignore or not
                 0);
 
         pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
-        pTxnKey->SetRespCode(200);
+        pTxnKey->SetResponseCode(200);
         *ppTxnKey = pTxnKey;
         return SIP_TRUE;
     }
@@ -478,10 +478,10 @@ stack user must process this request and can decide whether to ignore or not
 
         SipPf_Memset(pSipBuffer, 0x00, nSipBufferLen);
 
-        if (objTxnInfo.m_pSendSipMsg->EncodeMsg(
+        if (objTxnInfo.m_pSendSipMsg->Encode(
                     &pSipBuffer, &nSipBufferLen, pUserData->GetMsgOptions()) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage:EncodeMsg Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage:Encode Fail", SIP_ZERO, SIP_ZERO);
             objTxnHandler.OnSendTranspError(pTxnKey);
             pTxnKey->SipDelete();
             return SIP_TRUE;

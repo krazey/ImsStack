@@ -67,7 +67,8 @@ SIP_CHAR* SipPercentEncoding::DoPercentDecoding(SIP_CHAR* pszString)
     return pszDecodedString;
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pszString, const SIP_CHAR* pType)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_UserAndHeader(
+        SIP_CHAR* pszString, const SIP_CHAR* pType)
 {
     /**
      * user = 1*( unreserved / escaped / user-unreserved )
@@ -118,7 +119,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pszString, const 
     return pszReturnString;
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_Password(SIP_CHAR* pszString)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Password(SIP_CHAR* pszString)
 {
     /**
      * password = *( unreserved / escaped / "&" / "=" / "+" / "$"/ "," )
@@ -164,7 +165,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_Password(SIP_CHAR* pszString)
     return pszReturnString;
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_Host(SIP_CHAR* pszString)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Host(SIP_CHAR* pszString)
 {
     // host = hostname /  IPv4address /  IPv6reference
     // host : 1*(ALPHANUM , "." , ":" , "[" , "]" , "-")
@@ -196,7 +197,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_Host(SIP_CHAR* pszString)
     return pszReturnString;
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_TokenParam(SIP_CHAR* pszString)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_TokenParam(SIP_CHAR* pszString)
 {
     // token = 1*( alphanum / "-" / "." / "!" / "%" / "*" / "_" / "+" / "`" / "'" / "~" )
     SIP_CHAR* pCurrPt = pszString;
@@ -226,7 +227,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_TokenParam(SIP_CHAR* pszString)
     return pszReturnString;
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_TtlParam(SIP_CHAR* pszString)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_TtlParam(SIP_CHAR* pszString)
 {
     // ttl = 1*3DIGIT     ; 0 to 255
     SIP_CHAR* pCurrPt = pszString;
@@ -256,38 +257,38 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_TtlParam(SIP_CHAR* pszString)
     return pszReturnString;
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_MddrParam(SIP_CHAR* pszString)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_MddrParam(SIP_CHAR* pszString)
 {
     // "maddr="   host
-    return DoPerEnc_Host(pszString);
+    return DoPercentEncoding_Host(pszString);
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_OtherParam(SIP_CHAR* pszString)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_OtherParam(SIP_CHAR* pszString)
 {
     // other-param : ( param-unreserved / unreserved /  escaped )
     // param-unreserved = "[" / "]" / "/" / ":" / "&" / "+"/ "$"
-    return DoPerEnc_TokenParam(pszString);
+    return DoPercentEncoding_TokenParam(pszString);
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_Param(SIP_CHAR* pszName, SIP_CHAR* pszValue)
+SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Param(SIP_CHAR* pszName, SIP_CHAR* pszValue)
 {
     if ((SipPf_Stricmp(pszName, SIP_USER_PRM) == 0) || (SipPf_Stricmp(pszName, SIP_METHOD) == 0) ||
             (SipPf_Stricmp(pszName, SIP_TRNSPORT_PRM) == 0) ||
             (SipPf_Stricmp(pszName, SIP_LR_PRM) == 0))
     {
-        return DoPerEnc_TokenParam(pszValue);
+        return DoPercentEncoding_TokenParam(pszValue);
     }
     else if (SipPf_Stricmp(pszName, SIP_MADDR_PRM) == 0)
     {
-        return DoPerEnc_MddrParam(pszValue);
+        return DoPercentEncoding_MddrParam(pszValue);
     }
     else if (SipPf_Stricmp(pszName, SIP_TTL_PRM) == 0)
     {
-        return DoPerEnc_TtlParam(pszValue);
+        return DoPercentEncoding_TtlParam(pszValue);
     }
     else if (SipPf_Stricmp(pszName, SIP_HEADERS) == 0)
     {
-        return DoPerEnc_UserAndHeader(pszValue, SIP_HEADERS);
+        return DoPercentEncoding_UserAndHeader(pszValue, SIP_HEADERS);
     }
-    return DoPerEnc_OtherParam(pszValue);
+    return DoPercentEncoding_OtherParam(pszValue);
 }

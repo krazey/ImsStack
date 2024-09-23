@@ -182,12 +182,12 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
     if (nDurationExpired == 0)
     {
         // Timer T1 already fired.
-        pTxn->IncrDurationExpired(nT1Val);
+        pTxn->IncreaseDurationExpired(nT1Val);
         nDurationExpired = nT1Val;
     }
 
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
-    SIP_UINT16 nReTxCount = pTxn->GetReTxCount();
+    SIP_UINT16 nReTxCount = pTxn->GetRetransmissionCount();
     SIP_UINT32 nDuration = SIP_ZERO;
     SIP_UINT32 nMaxDuration = pTxn->GetMaxDuration();
 
@@ -234,8 +234,8 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "StartTxnTimer A:Failed \n", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pTxn->IncrTxnCount();
-        pTxn->IncrDurationExpired(nDuration);
+        pTxn->IncreaseTxnCount();
+        pTxn->IncreaseDurationExpired(nDuration);
         pTxn->SetCurrentDuration(nDuration);
     }
 

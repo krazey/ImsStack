@@ -557,7 +557,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
 
             if (nStatusCode != SipStatusCode::SC_INVALID)
             {
-                m_pTxnKey->SetRespCode(static_cast<SIP_UINT16>(nStatusCode));
+                m_pTxnKey->SetResponseCode(static_cast<SIP_UINT16>(nStatusCode));
             }
         }
     }

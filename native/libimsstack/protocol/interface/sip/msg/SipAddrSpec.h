@@ -48,9 +48,9 @@ private:
     // each node consists of a SipNameValue obj for one header
     SipParameters* m_pUriHdrParams;
 
-    SIP_BOOL DecUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-    SIP_BOOL DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
     ~SipUri();
 

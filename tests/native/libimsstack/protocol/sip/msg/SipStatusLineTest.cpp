@@ -51,7 +51,7 @@ TEST_F(SipStatusLineTest, EncodeStatusLine)
     EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
 
     /* Status code, reason phrase present and sip version absent, fail */
-    pStatusLine->SetRsnPhrase("Session Progress");
+    pStatusLine->SetReasonPhrase("Session Progress");
 
     EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
 
@@ -114,7 +114,7 @@ TEST_F(SipStatusLineTest, DecodeStatusLine)
     EXPECT_EQ(480, pStatusLine->GetStatusCodeAsInt());
     EXPECT_STREQ("480", pStatusLine->GetStatusCode());
     EXPECT_STREQ("SIP/2.0", pStatusLine->GetSipVersion());
-    EXPECT_STREQ("Unavailable", pStatusLine->GetRsnPhrase());
+    EXPECT_STREQ("Unavailable", pStatusLine->GetReasonPhrase());
     pStatusLine->SipDelete();
 }
 

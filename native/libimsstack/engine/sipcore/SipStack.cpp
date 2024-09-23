@@ -764,7 +764,7 @@ GLOBAL IMS_BOOL DecodeMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen
             return IMS_FALSE;
         }
     }
-    else if (pMessage->DecCompleteMsg(pszSipBuffer, nBuffLen) == SIP_FALSE)
+    else if (pMessage->Decode(pszSipBuffer, nBuffLen) == SIP_FALSE)
     {
         pMessage->SipDelete();
         pMessage = IMS_NULL;
@@ -839,7 +839,8 @@ GLOBAL IMS_BOOL DecodeMessageBody(IN ::SipMessage* pMessage)
         IMS_CHAR* pszCompBodyEnd = pszCompBodyStart + objBodyPart.GetLength() - 1;
         IMS_UINT32 nCompLength = objBodyPart.GetLength();
 
-        if (pMessage->DecMultiPartBody(pszCompBodyStart, pszCompBodyEnd, nCompLength) == SIP_FALSE)
+        if (pMessage->DecodeMultiPartBody(pszCompBodyStart, pszCompBodyEnd, nCompLength) ==
+                SIP_FALSE)
         {
             IMS_TRACE_E(0, "Decoding uncompressed body part failed", 0, 0, 0);
             return IMS_FALSE;
@@ -915,7 +916,7 @@ GLOBAL IMS_BOOL EncodeMessage(IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions,
         nMsgOptions |= SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     }
 
-    if (pMessage->EncodeMsg(reinterpret_cast<SIP_CHAR**>(&pBuffer),
+    if (pMessage->Encode(reinterpret_cast<SIP_CHAR**>(&pBuffer),
                 reinterpret_cast<SIP_UINT32*>(&nBuffLen), nMsgOptions) == SIP_FALSE)
     {
         IMS_TRACE_D("EncodeMessage is failed", 0, 0, 0);
@@ -2810,7 +2811,7 @@ GLOBAL SipStatusCode GetStatusCodeEx(IN ::SipMessage* pMessage)
     }
 
     IMS_SINT32 nStatusCode = SipStatusCode::SC_INVALID;
-    const IMS_CHAR* pszReasonPhrase = pStatusLine->GetRsnPhrase();
+    const IMS_CHAR* pszReasonPhrase = pStatusLine->GetReasonPhrase();
     const IMS_CHAR* pszStatusCode = pStatusLine->GetStatusCode();
 
     if (pszStatusCode != IMS_NULL)
@@ -4018,7 +4019,7 @@ GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN ::SipTxnKey* pTxnKey)
     AString strViaBranch(TxnKey_GetViaBranch(pTxnKey));
 
     return new sipcore::SipTxnKey(
-            objMethod, pTxnKey->GetRespCode(), strViaBranch, pTxnKey->GetCSeqNum());
+            objMethod, pTxnKey->GetResponseCode(), strViaBranch, pTxnKey->GetCSeqNum());
 }
 
 GLOBAL IMS_BOOL CompareTxnKeys(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey2)

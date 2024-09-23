@@ -44,7 +44,7 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
     if (nDurationExpired == 0)
     {
         // Timer T1 already fired.
-        pTxn->IncrDurationExpired(nT1Val);
+        pTxn->IncreaseDurationExpired(nT1Val);
         nDurationExpired = nT1Val;
     }
 
@@ -109,8 +109,8 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
                     "NonInvCli_Recv2xx6xxResp:StartTxnTimer E, Failed\n", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pTxn->IncrTxnCount();
-        pTxn->IncrDurationExpired(nDuration);
+        pTxn->IncreaseTxnCount();
+        pTxn->IncreaseDurationExpired(nDuration);
         pTxn->SetCurrentDuration(nDuration);
     }
 

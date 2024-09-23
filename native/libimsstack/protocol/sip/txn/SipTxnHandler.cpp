@@ -685,11 +685,11 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnSend(IN SIP_INT32 eTxnType, IN Si
     {
         nEvent = GetInvSerFsmEvt(nStatusCode);
 
-        pTxn->SetRespCode(nStatusCode);
+        pTxn->SetResponseCode(nStatusCode);
 
         if (pOutTxnKey != SIP_NULL)
         {
-            pOutTxnKey->SetRespCode(nStatusCode);
+            pOutTxnKey->SetResponseCode(nStatusCode);
         }
     }
     else
@@ -816,7 +816,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
 
             if (pInviteTxnKey != SIP_NULL)
             {
-                pTxnKey->SetRespCode(pInviteTxnKey->GetRespCode());
+                pTxnKey->SetResponseCode(pInviteTxnKey->GetResponseCode());
             }
         }
     }

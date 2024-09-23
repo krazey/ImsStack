@@ -20,25 +20,25 @@
 #include "msg/SipStatusLine.h"
 #include "platform/SipString.h"
 
-SipStatusLine::SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszRsnPhrase) :
+SipStatusLine::SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszReasonPhrase) :
         m_pszSipVersion(SipPf_Strdup(SIP_SIPVER)),
         m_pszStatusCode(SipPf_Strdup(pszStatusCode)),
-        m_pszRsnPhrase(SipPf_Strdup(pszRsnPhrase))
+        m_pszReasonPhrase(SipPf_Strdup(pszReasonPhrase))
 {
 }
 
 SipStatusLine::SipStatusLine(const SIP_CHAR* pszSipVersion, const SIP_CHAR* pszStatusCode,
-        const SIP_CHAR* pszRsnPhrase) :
+        const SIP_CHAR* pszReasonPhrase) :
         m_pszSipVersion(SipPf_Strdup(pszSipVersion)),
         m_pszStatusCode(SipPf_Strdup(pszStatusCode)),
-        m_pszRsnPhrase(SipPf_Strdup(pszRsnPhrase))
+        m_pszReasonPhrase(SipPf_Strdup(pszReasonPhrase))
 {
 }
 
 SipStatusLine::SipStatusLine(const SipStatusLine& objHeader) :
         m_pszSipVersion(SipPf_Strdup(objHeader.m_pszSipVersion)),
         m_pszStatusCode(SipPf_Strdup(objHeader.m_pszStatusCode)),
-        m_pszRsnPhrase(SipPf_Strdup(objHeader.m_pszRsnPhrase))
+        m_pszReasonPhrase(SipPf_Strdup(objHeader.m_pszReasonPhrase))
 {
 }
 
@@ -52,9 +52,9 @@ SipStatusLine::~SipStatusLine()
     {
         delete[] m_pszStatusCode;
     }
-    if (m_pszRsnPhrase != SIP_NULL)
+    if (m_pszReasonPhrase != SIP_NULL)
     {
-        delete[] m_pszRsnPhrase;
+        delete[] m_pszReasonPhrase;
     }
 }
 
@@ -66,7 +66,7 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Status code missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    if (m_pszRsnPhrase == SIP_NULL)
+    if (m_pszReasonPhrase == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Reason Phrase missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -93,7 +93,7 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
     /* Put a space */
     SIP_ENC_SP(*ppCurrPos);
 
-    SipPf_Strcpy(*ppCurrPos, m_pszRsnPhrase);
+    SipPf_Strcpy(*ppCurrPos, m_pszReasonPhrase);
     /*Update the Msg Buffer's current position*/
     SipEnc_UpdateCurrPos(ppCurrPos);
 
@@ -110,9 +110,9 @@ SIP_VOID SipStatusLine::SetSipVersion(const SIP_CHAR* pszVer)
     SetCharVar(pszVer, m_pszSipVersion);
 }
 
-SIP_VOID SipStatusLine::SetRsnPhrase(const SIP_CHAR* pszRsnPhrase)
+SIP_VOID SipStatusLine::SetReasonPhrase(const SIP_CHAR* pszReasonPhrase)
 {
-    SetCharVar(pszRsnPhrase, m_pszRsnPhrase);
+    SetCharVar(pszReasonPhrase, m_pszReasonPhrase);
 }
 
 SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16* pnStatusCode) const
@@ -171,8 +171,8 @@ SIP_BOOL SipStatusLine::DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nD
 
     /*Update the start point to the start of reason phrase*/
     pStartPt = pTempLoc + SIP_TWO;
-    m_pszRsnPhrase = SipCreateString(pStartPt, pEndPt);
-    if (m_pszRsnPhrase == SIP_NULL)
+    m_pszReasonPhrase = SipCreateString(pStartPt, pEndPt);
+    if (m_pszReasonPhrase == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipStatusLine::DecodeStatusLine: No Reason phrase present in response line",

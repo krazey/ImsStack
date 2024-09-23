@@ -459,7 +459,7 @@ SipMsgBody* SipMessage::GetMsgBody(SIP_UINT32 nPos)
     return (m_pMsgBodyList != SIP_NULL) ? m_pMsgBodyList->GetBodyByIndex(nPos) : SIP_NULL;
 }
 
-SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
+SIP_BOOL SipMessage::Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
         SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions)
 {
     SIP_CHAR* pCurrPos = *ppSipMsgBuffer;
@@ -622,7 +622,7 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMessage::DecMultiPartBody(
+SIP_BOOL SipMessage::DecodeMultiPartBody(
         const SIP_CHAR* pBuffStart, const SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen)
 {
     (void)nMsgBuffLen;  // unused as of now
@@ -989,11 +989,11 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsg
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
+SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
 {
     if ((pMsgBuff == SIP_NULL) || (nMsgBuffLen == SIP_ZERO))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Invalid input", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Invalid input", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1008,8 +1008,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
 
     if (pStartPt >= pEndPt)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg:Invalid SIP message", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Invalid SIP message", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1017,8 +1016,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
 
     if (pStartPt >= pEndPt)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg:Invalid SIP message", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Invalid SIP message", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1030,8 +1028,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
 
     if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg:Incomplete Message", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Incomplete Message", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1043,8 +1040,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
     /*Find the first token*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg:Invalid Start Line", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Invalid Start Line", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1056,15 +1052,15 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
         m_pReqLine = new SipRequestLine();
         if (m_pReqLine == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Memory Allocation fail",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode:Memory Allocation fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (m_pReqLine->DecodeRequestLine(pStartPt, nDecLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Req Line Decoding fail",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode:Req Line Decoding fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -1073,15 +1069,15 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
         m_pStatusLine = new SipStatusLine();
         if (m_pStatusLine == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Memory Allocation fail",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode:Memory Allocation fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (m_pStatusLine->DecodeStatusLine(pStartPt, nDecLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Status Line Decoding fail",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode:Status Line Decoding fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -1114,7 +1110,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
         if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecCompleteMsg:Incomplete Message", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODDECODER, "Decode:Incomplete Message", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -1264,8 +1260,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
     /*Check for Header end completion*/
     if (bHdrEnd != SIP_TRUE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg:Incomplete Message", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Incomplete Message", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1281,8 +1276,8 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
             /*Compare Both the methods*/
             if ((SipPf_Stricmp(pszMethod_ReqLine, pszMethod_CSeq)))
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Cseq Method Mismatch",
-                        SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODDECODER, "Decode:Cseq Method Mismatch", SIP_ZERO, SIP_ZERO);
 
                 pCSeq->SipDelete();
                 return SIP_FALSE;
@@ -1319,15 +1314,14 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
 
     if (nContentLen > (pEndPt - pStartPt))
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecCompleteMsg:Incomplete Message", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Incomplete Message", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (HasHeader(SipHeaderBase::CONTENT_TYPE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecCompleteMsg:Message body present without content type", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode:Message body present without content type",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1342,8 +1336,8 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
     m_pMsgBodyList = new SipMsgBodyList();
     if (m_pMsgBodyList == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Memory Allocation failed", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Decode:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1360,7 +1354,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
                 if (m_pMsgBodyList->DecodeSingleBody(pStartPt, pEndPt) == SIP_FALSE)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                            "DecCompleteMsg, GZIP Decoding single body failed", SIP_ZERO, SIP_ZERO);
+                            "Decode, GZIP Decoding single body failed", SIP_ZERO, SIP_ZERO);
                     m_pMsgBodyList->SipDelete();
                     m_pMsgBodyList = SIP_NULL;
                     return SIP_FALSE;
@@ -1397,8 +1391,8 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
     {
         if (m_pMsgBodyList->DecodeSingleBody(pStartPt, pEndPt) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Decode single body fail",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode:Decode single body fail", SIP_ZERO, SIP_ZERO);
             m_pMsgBodyList->SipDelete();
             m_pMsgBodyList = SIP_NULL;
             return SIP_FALSE;
@@ -1420,8 +1414,8 @@ SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuf
 
         if (m_pMsgBodyList->DecodeMIMEBody(pStartPt, pEndPt, pszBoundary) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecCompleteMsg:Decode MIME body fail",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode:Decode MIME body fail", SIP_ZERO, SIP_ZERO);
             delete[] pszBoundary;
             m_pMsgBodyList->SipDelete();
             m_pMsgBodyList = SIP_NULL;

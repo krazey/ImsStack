@@ -37,7 +37,7 @@ private:
 
     SIP_INT32 m_eHostType;
 
-    SIP_BOOL DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 public:
     /*constructor*/

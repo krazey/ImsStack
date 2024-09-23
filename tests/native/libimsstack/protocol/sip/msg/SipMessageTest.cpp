@@ -217,7 +217,7 @@ TEST_F(SipMessageTest, SetStatusLine)
 
     EXPECT_EQ(100, pStatusLine->GetStatusCodeAsInt());
     EXPECT_STREQ("SIP/2.0", pStatusLine->GetSipVersion());
-    EXPECT_STREQ("Trying", pStatusLine->GetRsnPhrase());
+    EXPECT_STREQ("Trying", pStatusLine->GetReasonPhrase());
 
     pStatusLine->SipDelete();
 }
@@ -423,9 +423,9 @@ TEST_F(SipMessageTest, SetHdrList_GetHdrList)
     pHeaderList->SipDelete();
 }
 
-TEST_F(SipMessageTest, DecMultiPartBody)
+TEST_F(SipMessageTest, DecodeMultiPartBody)
 {
-    EXPECT_EQ(SIP_FALSE, pMessage->DecMultiPartBody(nullptr, nullptr, 0));
+    EXPECT_EQ(SIP_FALSE, pMessage->DecodeMultiPartBody(nullptr, nullptr, 0));
 
     FillMandatoryHeaders();
 
@@ -455,7 +455,7 @@ Test message body 2\r\n\
 
     SIP_UINT32 nLen = SipPf_Strlen(pMimeBody);
 
-    EXPECT_EQ(SIP_TRUE, pMessage->DecMultiPartBody(pMimeBody, pMimeBody + nLen, nLen));
+    EXPECT_EQ(SIP_TRUE, pMessage->DecodeMultiPartBody(pMimeBody, pMimeBody + nLen, nLen));
     EXPECT_EQ(2, pMessage->GetMsgBodyCount());
 
     pMessage->RemoveAllMessageBodies();
@@ -776,17 +776,17 @@ TEST_F(SipMessageTest, EncodeMsgAndDecCompleteMessage)
     SIP_UINT32 sipMsgLength = 0;
 
     /* No request line or status line, fail */
-    EXPECT_EQ(SIP_FALSE, pMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_FALSE, pMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     FillRequestLine();
 
     /* Invalid message type, fail */
-    EXPECT_EQ(SIP_FALSE, pMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_FALSE, pMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     pMessage->SetMessageType(SipMessage::REQ_TYPE);
 
     /* No headers, fail */
-    EXPECT_EQ(SIP_FALSE, pMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_FALSE, pMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     EXPECT_EQ(SIP_FALSE, pMessage->AppendMessageBody(nullptr));
 
@@ -796,15 +796,15 @@ TEST_F(SipMessageTest, EncodeMsgAndDecCompleteMessage)
     memset(pBuff, 0, BUFFER_SIZE);
 
     /* Valid msg type and request line, mandatory headers included. success */
-    EXPECT_EQ(SIP_TRUE, pMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_TRUE, pMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     SipMessage* pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
     /* Empty buffer, fail */
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(nullptr, 0));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(nullptr, 0));
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pBuff, sipMsgLength));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pBuff, sipMsgLength));
 
     pDecodeMessage->SipDelete();
 
@@ -825,7 +825,7 @@ Messages-Waiting: yes\r\n";
 
     EXPECT_EQ(SIP_FALSE, pDecodeMessage->HasMandatoryHdrs());
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     EXPECT_EQ(SIP_TRUE, pDecodeMessage->HasMandatoryHdrs());
 
@@ -851,7 +851,7 @@ Messages-Waiting: yes\r\n";
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_TRUE, pCopyMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     pCopyMessage->SipDelete();
 
@@ -873,7 +873,7 @@ gzip message body\r\n";
 
     EXPECT_EQ(SIP_FALSE, pDecodeMessage->HasMandatoryHdrs());
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     EXPECT_EQ(SIP_TRUE, pDecodeMessage->HasMandatoryHdrs());
 
@@ -898,7 +898,7 @@ gzip message body\r\n";
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_TRUE, pCopyMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     pCopyMessage->SipDelete();
 
@@ -916,7 +916,7 @@ Messages-Waiting: No\r\n";
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pCopyMessage = new SipMessage(*pDecodeMessage);
     ASSERT_TRUE(pCopyMessage != nullptr);
@@ -933,7 +933,7 @@ Messages-Waiting: No\r\n";
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_TRUE, pCopyMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     EXPECT_STREQ(pBuff, pMsg);
 
@@ -965,7 +965,7 @@ Test message body 2\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pCopyMessage = new SipMessage(*pDecodeMessage);
     ASSERT_TRUE(pCopyMessage != nullptr);
@@ -1003,7 +1003,7 @@ Test message body 2\r\n\
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_TRUE, pCopyMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     const SIP_CHAR* pContentLengthLastHdr = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
@@ -1054,7 +1054,7 @@ Content-Type: application/body2\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     EXPECT_EQ(200, pDecodeMessage->GetStatusCode());
     EXPECT_EQ(200, pDecodeMessage->GetStatusCode());
@@ -1095,7 +1095,7 @@ Content-Type: application/body2\r\n\
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
+    EXPECT_EQ(SIP_TRUE, pCopyMessage->Encode(&pBuff, &sipMsgLength, 0));
 
     EXPECT_STREQ(pBuff, pMsg);
 
@@ -1119,7 +1119,7 @@ Content-Length: 0\r\n\
 
     EXPECT_EQ(0, pDecodeMessage->GetBadHeaderCount());
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     EXPECT_EQ(2, pDecodeMessage->GetBadHeaderCount());
 
@@ -1173,7 +1173,7 @@ Content-Length: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1183,7 +1183,7 @@ Content-Length: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1193,7 +1193,7 @@ Content-Length: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1203,7 +1203,7 @@ Content-Length: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1214,7 +1214,7 @@ Via: SIP/2.0/TCP host;branch=test-br";
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1225,7 +1225,7 @@ Via: SIP/2.0/TCP host;branch=test-br\r\n";
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1245,7 +1245,7 @@ Content-Length: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1272,7 +1272,7 @@ Content-Type: application/body2\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1299,7 +1299,7 @@ Content-Type: application/body2\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1317,7 +1317,7 @@ Content-Length: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
     EXPECT_EQ(SIP_FALSE, pDecodeMessage->HasMandatoryHdrs());
 
     pDecodeMessage->SipDelete();
@@ -1336,7 +1336,7 @@ Messages-Waiting: yes\r\n";
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1357,7 +1357,7 @@ l: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1370,7 +1370,7 @@ l: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1380,7 +1380,7 @@ l: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -1390,7 +1390,7 @@ l: 0\r\n\
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 }

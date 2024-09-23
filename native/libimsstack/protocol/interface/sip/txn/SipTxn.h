@@ -223,7 +223,7 @@ private:
     SIP_UINT16 m_nTxnState;
 
     /* Counter for Number of Retransmissions */
-    SIP_UINT16 m_nReTxCount;
+    SIP_UINT16 m_nRetransmissionCount;
 
     /* Transaction Related Timers */
     /* Type of Timer Started */
@@ -265,7 +265,7 @@ public:
     SipTransportInfo* GetTranspInfo();
     inline SIP_UINT16 GetTxnState() const { return m_nTxnState; }
 
-    inline SIP_UINT16 GetReTxCount() const { return m_nReTxCount; }
+    inline SIP_UINT16 GetRetransmissionCount() const { return m_nRetransmissionCount; }
 
     inline SIP_UINT32 GetDurationExpired() const { return m_nDurationExpired; }
 
@@ -287,9 +287,12 @@ public:
     inline SIP_VOID SetTimerId(SIP_VOID* pvTimerId) { m_pvTimerId = pvTimerId; }
     SIP_VOID SetUserData(ISipUserData* pUserData);
     /* Increment Txn Count by one*/
-    inline SIP_VOID IncrTxnCount() { m_nReTxCount = m_nReTxCount + SIP_ONE; }
+    inline SIP_VOID IncreaseTxnCount()
+    {
+        m_nRetransmissionCount = m_nRetransmissionCount + SIP_ONE;
+    }
 
-    inline SIP_VOID IncrDurationExpired(SIP_UINT32 nDuration)
+    inline SIP_VOID IncreaseDurationExpired(SIP_UINT32 nDuration)
     {
         m_nDurationExpired = m_nDurationExpired + nDuration;
     }
@@ -298,7 +301,7 @@ public:
 
     SIP_VOID InitRetransmissionInfo();
 
-    SIP_VOID SetRespCode(SIP_UINT16 nRespCode);
+    SIP_VOID SetResponseCode(SIP_UINT16 nRespCode);
 
 private:
     virtual ~SipTxn();
