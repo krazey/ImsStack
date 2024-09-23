@@ -59,11 +59,12 @@ public:
      * @param nNegoId The identification to represent the dialog of the session and it will be the
      * id for the AudioMediaSession instance
      * @param pConfig The configuration instance
+     * @param eServiceType The service type for this call - default, emergency
      * @return IMS_BOOL Returns IMS_TRUE when the session created successfully, IMS_FALSE when it is
      * failed with invalid arguments
      */
-    IMS_BOOL CreateSession(
-            IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId, AudioConfiguration* pConfig);
+    IMS_BOOL CreateSession(IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId,
+            AudioConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType);
 
     /**
      * @brief Send openSession message from the given id of the AudioMediaSession instance

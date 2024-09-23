@@ -43,7 +43,8 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_bAudioRtcpxrPacketLossRleEnabled(DEFAULT_RTCPXR_PACKET_LOSS_RLE),
         m_bAudioRtcpxrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
-        m_objAudioCandidateAttribute(ImsVector<AString>())
+        m_objAudioCandidateAttribute(ImsVector<AString>()),
+        m_objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>())
 {
     IMS_TRACE_I("+AudioConfiguration - SessionType[%d]", eSessionType, 0, 0);
     m_objAudioCandidateAttribute.Push(DEFAULT_CANDIDATE_ATTRIBUTE);
@@ -76,6 +77,9 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RS_BANDWIDTH_BPS_INT, DEFAULT_RS);
     m_nRrBandwidthBps =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RR_BANDWIDTH_BPS_INT, DEFAULT_RR);
+
+    m_objAudioInactivityCallEndReasons = piCc->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY);
 
     m_nRtpInactivityTimerMillis =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT,
@@ -256,6 +260,11 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
         IMS_TRACE_D("AudioCandidateAttribute[%d] : [%s]", i,
                 m_objAudioCandidateAttribute.GetAt(i).GetStr(), 0);
     }
+    for (IMS_UINT32 i = 0; i < m_objAudioInactivityCallEndReasons.GetSize(); i++)
+    {
+        IMS_TRACE_D("AudioInactivityCallEndReasons[%d] : [%d]", i,
+                m_objAudioInactivityCallEndReasons.GetAt(i), 0);
+    }
     for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)
     {
         ToDebugStringCodecs(m_objCodecConfigs.GetAt(i));
@@ -382,4 +391,22 @@ PUBLIC
 const ImsVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
 {
     return m_objAudioCandidateAttribute;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const
+{
+    IMS_TRACE_D("IsAudioInactivityCallEndReason()", 0, 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_objAudioInactivityCallEndReasons.GetSize(); i++)
+    {
+        IMS_TRACE_D("IsAudioInactivityCallEndReason() - value: %d reason: %d",
+                m_objAudioInactivityCallEndReasons.GetAt(i), nReason, 0);
+        if (m_objAudioInactivityCallEndReasons.GetAt(i) == nReason)
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }

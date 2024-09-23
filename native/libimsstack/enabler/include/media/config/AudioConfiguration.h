@@ -161,6 +161,17 @@ public:
      * @return const ImsVector<AString>& Return audio-candidate-attribute
      */
     const ImsVector<AString>& GetAudioCandidateAttribute() const;
+    /**
+     * @brief Get the call end reasons after the expiry of the inactivity timer
+     *
+     * RTCP_INACTIVITY_ON_HOLD = 0,
+     * RTCP_INACTIVITY_ON_CONNECTED = 1,
+     * RTP_INACTIVITY_ON_CONNECTED = 2,
+     * E911_RTCP_INACTIVITY_ON_CONNECTED = 3,
+     * E911_RTP_INACTIVITY_ON_CONNECTED = 4
+     * @return IMS_BOOL Return the result whether input value is included in array
+     */
+    virtual IMS_BOOL IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const;
 
 public:
     enum
@@ -215,6 +226,7 @@ private:
     IMS_BOOL m_bAudioRtcpxrPacketDuplicateRleEnabled;
     IMS_SINT32 m_nDtmfDuration;
     ImsVector<AString> m_objAudioCandidateAttribute;
+    ImsVector<IMS_SINT32> m_objAudioInactivityCallEndReasons;
 };
 
 #endif

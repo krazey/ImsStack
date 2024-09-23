@@ -46,6 +46,7 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_nLocalPort(0),
         m_nNetworkToneTimer(0),
         m_nRtpInactivityTimer(0),
+        m_nRtcpInactivityTimer(0),
         m_bAnbrEnabled(IMS_FALSE),
         m_piNetworkToneWaitTimer(IMS_NULL)
 {
@@ -128,6 +129,22 @@ void AudioMediaSession::StopTimer()
     m_piNetworkToneWaitTimer->KillTimer();
     TimerService::GetTimerService()->DestroyTimer(m_piNetworkToneWaitTimer);
     m_piNetworkToneWaitTimer = IMS_NULL;
+}
+
+PUBLIC
+void AudioMediaSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
+{
+    IMS_TRACE_D("SetServiceType - ServiceType[%d]", eServiceType, 0, 0);
+    m_eServiceType = eServiceType;
+}
+
+/* testing purpose*/
+PUBLIC
+MEDIA_SERVICE_TYPE AudioMediaSession::GetServiceType()
+{
+    IMS_TRACE_D("GetServiceType - ServiceType[%d]", m_eServiceType, 0, 0);
+
+    return m_eServiceType;
 }
 
 PUBLIC
@@ -498,24 +515,23 @@ PUBLIC
 IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
         IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp)
 {
-    IMS_SINT32 nRtpInactivity = 0;
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - ActiveSession[%d] EnableRtcp[%d]", bActiveSession,
+            bEnableRtcp, 0);
 
-    if (GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0)
-    {
-        nRtpInactivity = GetInactivityTimer(NETWORK_TONE_INACTIVITY);
-    }
-    else
-    {
-        nRtpInactivity = (bActiveSession) ? m_pConfig->GetRtpInactivityTimerMillis() : 0;
-        m_nRtpInactivityTimer = nRtpInactivity;
-    }
+    m_nRtcpInactivityTimer = bEnableRtcp ? GetRtcpInactivityTimer(bActiveSession) : 0;
 
-    m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{nRtpInactivity});
-    m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-            (bEnableRtcp) ? m_pConfig->GetRtcpInactivityTimerMillis() : 0);
+    m_nRtpInactivityTimer = GetRtpInactivityTimer(bActiveSession);
 
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], RtpInactivity[%d], "
-                "RtcpInactivity[%d]",
+    IMS_SINT32 nRtpInactivityValue = GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0
+            ? GetInactivityTimer(NETWORK_TONE_INACTIVITY)
+            : m_nRtpInactivityTimer;
+
+    m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
+            std::vector<int32_t>{nRtpInactivityValue});
+    m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(m_nRtcpInactivityTimer);
+
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - ActiveSession[%d], "
+                "RtpInactivity[%d], RtcpInactivity[%d]",
             bActiveSession,
             (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
                     ? -1
@@ -885,10 +901,57 @@ IMS_SINT32 AudioMediaSession::GetInactivityTimer(IN InactivitytimerType eType)
         case RTP_INACTIVITY:
             return m_nRtpInactivityTimer;
         case RTCP_INACTIVITY:
-            return m_objMediaQualityThreshold.getRtcpInactivityTimerMillis();
+            return m_nRtcpInactivityTimer;
         case NETWORK_TONE_INACTIVITY:
             return m_nNetworkToneTimer;
         default:
             return -1;
     }
+}
+
+PRIVATE
+IMS_SINT32 AudioMediaSession::GetRtpInactivityTimer(IN IMS_BOOL bActiveSession)
+{
+    IMS_TRACE_D("GetRtpInactivityTimer() - ActiveSession[%d] ServiceType[%d]", bActiveSession,
+            m_eServiceType, 0);
+
+    IMS_SINT32 nRtpTimer = 0;
+
+    if (bActiveSession)
+    {
+        IMS_SINT32 nType = (m_eServiceType == MEDIA_SERVICE_EMERGENCY)
+                ? E911_RTP_INACTIVITY_ON_CONNECTED
+                : RTP_INACTIVITY_ON_CONNECTED;
+
+        if (m_pConfig->IsAudioInactivityCallEndReason(nType))
+        {
+            nRtpTimer = m_pConfig->GetRtpInactivityTimerMillis();
+        }
+    }
+
+    IMS_TRACE_D("GetRtpInactivityTimer() - RtpTimer[%d]", nRtpTimer, 0, 0);
+    return nRtpTimer;
+}
+
+PRIVATE
+IMS_SINT32 AudioMediaSession::GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession)
+{
+    IMS_TRACE_D("GetRtcpInactivityTimer() - ActiveSession[%d] ServiceType[%d]", bActiveSession,
+            m_eServiceType, 0);
+
+    IMS_SINT32 nType = RTCP_INACTIVITY_ON_HOLD;
+
+    if (bActiveSession)
+    {
+        nType = (m_eServiceType == MEDIA_SERVICE_EMERGENCY) ? E911_RTCP_INACTIVITY_ON_CONNECTED
+                                                            : RTCP_INACTIVITY_ON_CONNECTED;
+    }
+
+    IMS_SINT32 nRtcpTimer = (m_pConfig->IsAudioInactivityCallEndReason(nType))
+            ? m_pConfig->GetRtcpInactivityTimerMillis()
+            : 0;
+    // TODO : Need to set RtcpTimer with Rtcp_on_hold timer when hold later
+    IMS_TRACE_D("GetRtcpInactivityTimer() - RtcpTimer[%d]", nRtcpTimer, 0, 0);
+
+    return nRtcpTimer;
 }

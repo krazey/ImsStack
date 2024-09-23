@@ -78,11 +78,11 @@ IMS_BOOL AudioController::SendDtmf(IN IMS_CHAR cDtmfCode)
 }
 
 PUBLIC
-IMS_BOOL AudioController::CreateSession(
-        IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId, AudioConfiguration* pConfig)
+IMS_BOOL AudioController::CreateSession(IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId,
+        AudioConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType)
 {
-    IMS_TRACE_D("CreateSession() - nNegoId[%" PFLS_x "], audio list size[%d]", nNegoId,
-            m_listAudioSession.GetSize(), 0);
+    IMS_TRACE_D("CreateSession() - NegoId[%" PFLS_x "], audio list size[%d] ServiceType[%d]",
+            nNegoId, m_listAudioSession.GetSize(), eServiceType);
 
     if (pListener == IMS_NULL || pConfig == IMS_NULL)
     {
@@ -91,6 +91,7 @@ IMS_BOOL AudioController::CreateSession(
     }
 
     AudioMediaSession* pAudioSession = new AudioMediaSession();
+    pAudioSession->SetServiceType(eServiceType);
     pAudioSession->SetNegoId(nNegoId);
     pAudioSession->SetMediaSessionListener(pListener);
     pAudioSession->SetConfig(pConfig);

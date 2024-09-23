@@ -144,7 +144,8 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
     if (pAudioNego != IMS_NULL)
     {
         m_objAudioController.CreateSession(this, nMediaNego,
-                MediaConfigUtil::GetAudioConfig(m_nSlotId, m_pEnvironment->eServiceType));
+                MediaConfigUtil::GetAudioConfig(m_nSlotId, m_pEnvironment->eServiceType),
+                m_pEnvironment->eServiceType);
     }
 
     VideoNego* pVideoNego = pMediaNego->GetVideoNego();

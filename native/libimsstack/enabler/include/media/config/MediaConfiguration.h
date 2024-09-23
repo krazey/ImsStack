@@ -135,7 +135,7 @@ public:
     /**
      * @brief Get the rtcp inactivity timer in milli seconds unit
      *
-     * @return IMS_SINT32  Return the rtp inactivitity timer
+     * @return IMS_SINT32 Return the rtcp inactivitity timer
      */
     virtual IMS_SINT32 GetRtcpInactivityTimerMillis() const;
 

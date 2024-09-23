@@ -77,6 +77,21 @@ public:
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     /**
+     * @brief Set the service type
+     *
+     * @param eServiceType The service type of the current call - default, emergency,
+     * For testing purpose
+     */
+    void SetServiceType(MEDIA_SERVICE_TYPE eServiceType);
+
+    /**
+     * @brief Get the service type
+     *
+     * @return MEDIA_SERVICE_TYPE The service type of the current call - default, emergency
+     */
+    MEDIA_SERVICE_TYPE GetServiceType();
+
+    /**
      * @brief Set the negotiation id
      *
      * @param nNegoId The unique identification of the AudioMediaSession instance
@@ -229,6 +244,8 @@ private:
     void NetworkToneTimerExpired();
     IMS_RESULT StartTimer(IN IMS_SINT32 nDuration);
     void StopTimer();
+    IMS_SINT32 GetRtpInactivityTimer(IN IMS_BOOL bActiveSession);
+    IMS_SINT32 GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession);
 
 protected:
     AudioConfiguration* m_pConfig;
@@ -238,8 +255,10 @@ protected:
     ImsList<IMS_UINTP> m_listNegoId;
     IMS_SINT32 m_nNetworkToneTimer;
     IMS_SINT32 m_nRtpInactivityTimer;
+    IMS_SINT32 m_nRtcpInactivityTimer;
     IMS_BOOL m_bAnbrEnabled;
     ITimer* m_piNetworkToneWaitTimer;
+    MEDIA_SERVICE_TYPE m_eServiceType;
 };
 
 #endif
