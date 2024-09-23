@@ -143,22 +143,26 @@ TEST_F(MessageFormatterTest, FormStartMessageFailureCase)
     EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
-TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
+TEST_F(MessageFormatterTest, FormStartMessageWithoutGeolocation)
 {
     ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
             .WillByDefault(Return(IMS_FALSE));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
-    EXPECT_EQ(nResult, IMS_SUCCESS);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::GEOLOCATION), _)).Times(0);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::GEOLOCATION_ROUTING), _)).Times(0);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
 
+TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
+{
+    ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
             .WillByDefault(Return(IMS_TRUE));
 
-    nResult = pFormatter->FormStartMessage(CallType::VOIP);
-
-    EXPECT_EQ(nResult, IMS_SUCCESS);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormStartMessageWithoutCallComposerElements)

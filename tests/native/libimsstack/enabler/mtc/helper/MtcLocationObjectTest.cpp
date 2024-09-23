@@ -371,7 +371,7 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageDoesNothingIfContentEmpty)
 
     EXPECT_CALL(objMessage, AddHeader(_, _)).Times(0);
     EXPECT_CALL(objMessage, GetMessage).Times(0);
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objEmptyContent, IMS_FALSE);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_FALSE, objEmptyContent);
 }
 
 TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeolocationRouting)
@@ -396,7 +396,7 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeo
             SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
                     AString("render;handling=optional")));
 
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_FALSE);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_FALSE, objContent);
 }
 
 TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolocationRouting)
@@ -421,7 +421,7 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolo
             SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
                     AString("render;handling=optional")));
 
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_TRUE);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_TRUE, objContent);
 }
 
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsEmptyIfNoCreator)
