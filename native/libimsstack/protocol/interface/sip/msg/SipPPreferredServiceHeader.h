@@ -22,7 +22,7 @@ class SipPPreferredServiceHeader : public SipHeaderBase
 {
 public:
     /*constructor*/
-    SipPPreferredServiceHeader();
+    explicit SipPPreferredServiceHeader(SIP_INT32 eHdrType);
     SipPPreferredServiceHeader(const SipPPreferredServiceHeader& objHeader);
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);

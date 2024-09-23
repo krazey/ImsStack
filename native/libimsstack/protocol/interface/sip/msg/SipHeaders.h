@@ -34,7 +34,6 @@
 #include "msg/SipInfoBase.h"
 #include "msg/SipIntegerHeader.h"
 #include "msg/SipMsgBody.h"
-#include "msg/SipPAssertedServiceHeader.h"
 #include "msg/SipPChargingVectorHeader.h"
 #include "msg/SipPPreferredServiceHeader.h"
 #include "msg/SipPrivacyHeader.h"
