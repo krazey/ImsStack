@@ -1523,16 +1523,16 @@ public class CarrierConfig {
                 switch (token) {
                     case "MANUFACTURER": // FALL-THROUGH
                     case "MANUFACTURE":
-                        sb.append(Build.MANUFACTURER);
+                        sb.append(Build.MANUFACTURER.replaceAll("\\s", ""));
                         break;
                     case "MODEL":
-                        sb.append(Build.MODEL);
+                        sb.append(Build.MODEL.replaceAll("\\s", ""));
                         break;
                     case "AV":
-                        sb.append(Build.VERSION.RELEASE);
+                        sb.append(Build.VERSION.RELEASE.replaceAll("\\s", ""));
                         break;
                     case "BUILD":
-                        sb.append(Build.ID);
+                        sb.append(Build.ID.replaceAll("\\s", ""));
                         break;
                     case "IMEI":
                         sb.append(getImei(slotId));
