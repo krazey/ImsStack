@@ -728,6 +728,10 @@ public abstract class Apn extends Handler implements IApn {
 
         @Override
         public void onAvailable(Network network) {
+            if (mNetwork != null && !mNetwork.equals(network)) {
+                onLost(mNetwork);
+            }
+
             cacheLinkProperties(network);
 
             mNetwork = network;

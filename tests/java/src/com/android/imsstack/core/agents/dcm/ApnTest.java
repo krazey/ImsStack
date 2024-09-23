@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -861,6 +862,29 @@ public class ApnTest {
         assertEquals(0, callback2.getEvents());
         callback1 = null;
         callback2 = null;
+    }
+
+    @Test
+    public void testImsNetworkCallback_onAvailable_withChangedNetwork() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_AVAILABLE, mMockMsgProc);
+        mApn.registerHandler(Apn.EVENT_NETWORK_LOST, mMockMsgProc);
+        LinkProperties linkProperties = new LinkProperties();
+        when(mConnectivityManagerProxy.getLinkProperties(any(Network.class)))
+                .thenReturn(linkProperties);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+
+        // first onAvailable is called and handle EVENT_NETWORK_AVAILABLE
+        callback.onAvailable(mMockNetwork);
+
+        // onAvailable is called with changed Network again
+        Network mockNewNetwork = mock(Network.class);
+        callback.onAvailable(mockNewNetwork);
+        mTestableLooper.processAllMessages();
+
+        // verify whether handle EVENT_NETWORK_LOST and EVENT_NETWORK_AVAILABLE
+        verify(mMockMsgProc, times(3)).procMsg(any(Message.class));
     }
 
     @Test
