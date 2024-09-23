@@ -57,8 +57,7 @@ private:
             IN const IMS_CHAR* pszFormat, ...) override;
     //// For a large TEXT message (HTTP, MSRP, SDP, SIP, XML, ...)
     void OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType, IN const IMS_CHAR* pszDescription,
-            IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
-            IN IMS_BOOL bBinaryBody = IMS_FALSE) override;
+            IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize) override;
 
     static void HideArgs(
             IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer, IN IMS_SINT32 nIgnore = 2);
@@ -66,7 +65,7 @@ private:
 private:
     enum
     {
-        END_SIZE = 16,
+        END_SIZE = 15,
         START_SIZE = 17,
         MAX_SPARE_SIZE = 128,
         MAX_TEXT_SIZE = 4096

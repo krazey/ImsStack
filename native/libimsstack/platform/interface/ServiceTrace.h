@@ -173,9 +173,9 @@ private:
 
 #define IMS_TRACE_EV(VA_FORMAT) TraceService::GetTraceService()->GetTrace()->OutE VA_FORMAT
 
-#define IMS_TRACE_SIP(DESC, TEXT, SIZE, BODY)                                                    \
+#define IMS_TRACE_SIP(DESC, TEXT, SIZE)                                                          \
     TraceService::GetTraceService()->GetTrace()->OutText(IMS_TRACE_MODULE_SIP, ITrace::TEXT_SIP, \
-            DESC, reinterpret_cast<const IMS_CHAR*>(TEXT), SIZE, BODY)
+            DESC, reinterpret_cast<const IMS_CHAR*>(TEXT), SIZE)
 
 #define IMS_TRACE_SDP(DESC, TEXT, SIZE)                                                          \
     TraceService::GetTraceService()->GetTrace()->OutText(IMS_TRACE_MODULE_SDP, ITrace::TEXT_SDP, \
