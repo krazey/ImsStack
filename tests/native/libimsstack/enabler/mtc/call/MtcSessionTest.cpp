@@ -137,6 +137,7 @@ protected:
 
         objCallInfo.ePeerType = ePeerType;
         pMtcSession = new MtcSession(objContext, objSession, eCallType, pMessageSender);
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(pMtcSession));
     }
 
     void SetUpForSetSdp(IN NegotiationState eNegoState, IN IMS_RESULT eFormResult)
