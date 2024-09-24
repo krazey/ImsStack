@@ -17,22 +17,22 @@
 #include "ServiceTrace.h"
 
 #include "config/TextConfiguration.h"
-#include "text/TextSdpNegotiator.h"
+#include "text/TextProfileNegotiator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC TextSdpNegotiator::TextSdpNegotiator() :
-        SdpNegotiator(MEDIA_TYPE_TEXT)
+PUBLIC TextProfileNegotiator::TextProfileNegotiator() :
+        MediaProfileNegotiator(MEDIA_TYPE_TEXT)
 {
-    IMS_TRACE_I("+TextSdpNegotiator()", 0, 0, 0);
+    IMS_TRACE_I("+TextProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL TextSdpNegotiator::~TextSdpNegotiator()
+PUBLIC VIRTUAL TextProfileNegotiator::~TextProfileNegotiator()
 {
-    IMS_TRACE_I("~TextSdpNegotiator()", 0, 0, 0);
+    IMS_TRACE_I("~TextProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
+PUBLIC IMS_BOOL TextProfileNegotiator::Negotiate(IN TextProfile* pLocalProfile,
         IN TextProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
         OUT TextProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig)
 {
@@ -82,7 +82,7 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
 }
 
 PRIVATE
-IMS_BOOL TextSdpNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
+IMS_BOOL TextProfileNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
         IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
         OUT TextProfile** pNegotiatedProfile)
 {
@@ -123,7 +123,7 @@ IMS_BOOL TextSdpNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
 }
 
 PRIVATE
-IMS_BOOL TextSdpNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
+IMS_BOOL TextProfileNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
         IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
 {
     IMS_BOOL bRet = IMS_FALSE;
@@ -156,7 +156,7 @@ IMS_BOOL TextSdpNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
     return bRet;
 }
 PRIVATE
-void TextSdpNegotiator::AppendT140Payload(
+void TextProfileNegotiator::AppendT140Payload(
         IN TextProfile::Payload* pPayload, OUT TextProfile* pNegotiatedProfile)
 {
     TextProfile::Payload* pT140 = new TextProfile::Payload();
@@ -178,7 +178,7 @@ void TextSdpNegotiator::AppendT140Payload(
 }
 
 PRIVATE
-void TextSdpNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
+void TextProfileNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
         IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
@@ -200,7 +200,7 @@ void TextSdpNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
 }
 
 PRIVATE
-void TextSdpNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
+void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
         IN TextProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
         OUT TextProfile* pNegotiatedProfile)
 {
@@ -283,7 +283,7 @@ void TextSdpNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
 }
 
 PRIVATE
-void TextSdpNegotiator::NegotiateRtcpInterval(
+void TextProfileNegotiator::NegotiateRtcpInterval(
         OUT TextProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig)
 {
     if (pNegotiatedProfile == IMS_NULL || pConfig == IMS_NULL)
@@ -302,7 +302,7 @@ void TextSdpNegotiator::NegotiateRtcpInterval(
     }
 }
 
-PRIVATE IMS_BOOL TextSdpNegotiator::FindT140InProfile(
+PRIVATE IMS_BOOL TextProfileNegotiator::FindT140InProfile(
         IN TextProfile* pProfile, IN TextProfile::Payload* pPayload)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
@@ -363,7 +363,7 @@ PRIVATE IMS_BOOL TextSdpNegotiator::FindT140InProfile(
     return IMS_FALSE;
 }
 
-PRIVATE MEDIA_DIRECTION TextSdpNegotiator::UpdateDirectionToMine(
+PRIVATE MEDIA_DIRECTION TextProfileNegotiator::UpdateDirectionToMine(
         IN MEDIA_DIRECTION ePeerDirection, IN MEDIA_DIRECTION eLocalDirection)
 {
     if (ePeerDirection < MEDIA_DIRECTION_INACTIVE || ePeerDirection > MEDIA_DIRECTION_SEND_RECEIVE)

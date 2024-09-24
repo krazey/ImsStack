@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef VIDEO_SDP_NEGOTIATOR_H_
-#define VIDEO_SDP_NEGOTIATOR_H_
+#ifndef VIDEO_PROFILE_NEGOTIATOR_H_
+#define VIDEO_PROFILE_NEGOTIATOR_H_
 
-#include "SdpNegotiator.h"
+#include "MediaProfileNegotiator.h"
 #include "video/VideoProfileUtil.h"
 
 class MediaConfiguration;
 
-class VideoSdpNegotiator : public SdpNegotiator
+/**
+ * This class is to generate a negotiated video profile by negotiating a local video profile and a
+ * peer video profile
+ */
+class VideoProfileNegotiator : public MediaProfileNegotiator
 {
 public:
-    VideoSdpNegotiator();
-    virtual ~VideoSdpNegotiator();
+    VideoProfileNegotiator();
+    virtual ~VideoProfileNegotiator();
 
     IMS_BOOL Negotiate(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile,
             IN MediaConfiguration* pConfig);
+
     /**
      * @brief Get the Negotiated video resolution
      *

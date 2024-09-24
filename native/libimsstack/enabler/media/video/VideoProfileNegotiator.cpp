@@ -22,22 +22,22 @@
 #include "config/VideoConfiguration.h"
 #include "video/VideoNegoAvc.h"
 #include "video/VideoNegoHevc.h"
-#include "video/VideoSdpNegotiator.h"
+#include "video/VideoProfileNegotiator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC VideoSdpNegotiator::VideoSdpNegotiator() :
-        SdpNegotiator(MEDIA_TYPE_VIDEO)
+PUBLIC VideoProfileNegotiator::VideoProfileNegotiator() :
+        MediaProfileNegotiator(MEDIA_TYPE_VIDEO)
 {
-    IMS_TRACE_I("+VideoSdpNegotiator()", 0, 0, 0);
+    IMS_TRACE_I("+VideoProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL VideoSdpNegotiator::~VideoSdpNegotiator()
+PUBLIC VIRTUAL VideoProfileNegotiator::~VideoProfileNegotiator()
 {
-    IMS_TRACE_I("~VideoSdpNegotiator()", 0, 0, 0);
+    IMS_TRACE_I("~VideoProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
+PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
         OUT VideoProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig)
 {
@@ -162,7 +162,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
 }
 
 PRIVATE
-void VideoSdpNegotiator::ResetNegotiatedProfile(
+void VideoProfileNegotiator::ResetNegotiatedProfile(
         IN const VideoProfile* pLocalProfile, OUT VideoProfile** pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL)
@@ -177,7 +177,7 @@ void VideoSdpNegotiator::ResetNegotiatedProfile(
 }
 
 PRIVATE
-void VideoSdpNegotiator::NegotiateAvpf(IN VideoProfile* pLocalProfile,
+void VideoProfileNegotiator::NegotiateAvpf(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, OUT VideoProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
@@ -234,7 +234,7 @@ void VideoSdpNegotiator::NegotiateAvpf(IN VideoProfile* pLocalProfile,
 }
 
 PRIVATE
-void VideoSdpNegotiator::NegotiateTransportType(OUT VideoProfile* pNegotiatedProfile)
+void VideoProfileNegotiator::NegotiateTransportType(OUT VideoProfile* pNegotiatedProfile)
 {
     if (pNegotiatedProfile == IMS_NULL)
     {
@@ -249,7 +249,7 @@ void VideoSdpNegotiator::NegotiateTransportType(OUT VideoProfile* pNegotiatedPro
 }
 
 PRIVATE
-IMS_BOOL VideoSdpNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile,
+IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, OUT VideoProfile* pNegotiatedProfile,
         OUT VideoProfile::Payload** pNegotiatedPayload, OUT IMS_SINT32* nNegotiatedMaxFrameRate,
         OUT IMS_SINT32* nNegotiatedMaxAs)
@@ -377,7 +377,7 @@ IMS_BOOL VideoSdpNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile,
 }
 
 PRIVATE
-IMS_BOOL VideoSdpNegotiator::NegotiateAvc(IN VideoProfile::Payload* pLocalPayload,
+IMS_BOOL VideoProfileNegotiator::NegotiateAvc(IN VideoProfile::Payload* pLocalPayload,
         IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload,
         IN IMS_UINT32 nLocalIndex, IN VideoProfile* pLocalProfile,
         OUT VideoProfile* pNegotiatedProfile, OUT VideoProfile::Payload** pTempPayload,
@@ -505,7 +505,7 @@ IMS_BOOL VideoSdpNegotiator::NegotiateAvc(IN VideoProfile::Payload* pLocalPayloa
 }
 
 PRIVATE
-IMS_BOOL VideoSdpNegotiator::NegotiateHevc(IN VideoProfile::Payload* pLocalPayload,
+IMS_BOOL VideoProfileNegotiator::NegotiateHevc(IN VideoProfile::Payload* pLocalPayload,
         IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload,
         IN VideoProfile* pLocalProfile, OUT VideoProfile* pNegotiatedProfile,
         OUT VideoProfile::Payload** pTempPayload, OUT VideoProfile::Payload** pMatchedPeerPayload)
@@ -596,7 +596,7 @@ IMS_BOOL VideoSdpNegotiator::NegotiateHevc(IN VideoProfile::Payload* pLocalPaylo
 }
 
 PRIVATE
-VideoProfile::Payload* VideoSdpNegotiator::SetClosestPayload(IN VideoProfile* pLocalProfile,
+VideoProfile::Payload* VideoProfileNegotiator::SetClosestPayload(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pNegotiatedProfile, IN VideoProfile::Payload* pTempPayload,
         IN VideoProfile::Payload* pMatchedPeerPayload)
 {
@@ -638,7 +638,7 @@ VideoProfile::Payload* VideoSdpNegotiator::SetClosestPayload(IN VideoProfile* pL
 }
 
 PRIVATE
-IMS_BOOL VideoSdpNegotiator::SetClosestAvc(
+IMS_BOOL VideoProfileNegotiator::SetClosestAvc(
         IN VideoProfile* pLocalProfile, OUT VideoProfile::Payload* pNegoPayload)
 {
     if (pLocalProfile == IMS_NULL || pNegoPayload == IMS_NULL)
@@ -688,7 +688,7 @@ IMS_BOOL VideoSdpNegotiator::SetClosestAvc(
 }
 
 PRIVATE
-IMS_BOOL VideoSdpNegotiator::SetClosestHevc(
+IMS_BOOL VideoProfileNegotiator::SetClosestHevc(
         IN VideoProfile::Payload* pMatchedPeerPayload, OUT VideoProfile::Payload* pNegoPayload)
 {
     if (pMatchedPeerPayload == IMS_NULL || pNegoPayload == IMS_NULL)
@@ -713,7 +713,7 @@ IMS_BOOL VideoSdpNegotiator::SetClosestHevc(
 }
 
 PRIVATE
-void VideoSdpNegotiator::NegotiateRtcpFb(OUT VideoProfile* pNegotiatedProfile,
+void VideoProfileNegotiator::NegotiateRtcpFb(OUT VideoProfile* pNegotiatedProfile,
         IN VideoProfile::Payload* pLocalPayload, IN VideoProfile::Payload* pPeerPayload,
         OUT VideoProfile::Payload* pNegoPayload)
 {
@@ -773,7 +773,7 @@ void VideoSdpNegotiator::NegotiateRtcpFb(OUT VideoProfile* pNegotiatedProfile,
 }
 
 PRIVATE
-IMS_BOOL VideoSdpNegotiator::SetNegotiatedPayloadIndex(OUT VideoProfile* pLocalProfile,
+IMS_BOOL VideoProfileNegotiator::SetNegotiatedPayloadIndex(OUT VideoProfile* pLocalProfile,
         OUT VideoProfile* pPeerProfile, IN IMS_SINT32 nLocalIndex, IN IMS_SINT32 nPeerIndex)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL)
@@ -793,7 +793,7 @@ IMS_BOOL VideoSdpNegotiator::SetNegotiatedPayloadIndex(OUT VideoProfile* pLocalP
 }
 
 PRIVATE
-void VideoSdpNegotiator::NegotiatePayloadNumber(
+void VideoProfileNegotiator::NegotiatePayloadNumber(
         OUT VideoProfile* pLocalProfile, IN VideoProfile::Payload* pPeerPayload)
 {
     if (pLocalProfile == IMS_NULL || pPeerPayload == IMS_NULL)
@@ -812,7 +812,7 @@ void VideoSdpNegotiator::NegotiatePayloadNumber(
 }
 
 PRIVATE
-void VideoSdpNegotiator::SetMaxFrameRate(
+void VideoProfileNegotiator::SetMaxFrameRate(
         IN IMS_SINT32 nFrameRate, OUT IMS_SINT32* nNegotiatedMaxFrameRate)
 {
     if (nFrameRate > *nNegotiatedMaxFrameRate)
@@ -822,7 +822,7 @@ void VideoSdpNegotiator::SetMaxFrameRate(
 }
 
 PRIVATE
-void VideoSdpNegotiator::SetMaxAs(IN IMS_SINT32 nAS, OUT IMS_SINT32* nNegotiatedMaxAs)
+void VideoProfileNegotiator::SetMaxAs(IN IMS_SINT32 nAS, OUT IMS_SINT32* nNegotiatedMaxAs)
 {
     if (nAS > *nNegotiatedMaxAs)
     {
@@ -831,7 +831,7 @@ void VideoSdpNegotiator::SetMaxAs(IN IMS_SINT32 nAS, OUT IMS_SINT32* nNegotiated
 }
 
 PRIVATE
-IMS_SINT32 VideoSdpNegotiator::FindPayloadIndexFromProfile(
+IMS_SINT32 VideoProfileNegotiator::FindPayloadIndexFromProfile(
         IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
@@ -857,7 +857,7 @@ IMS_SINT32 VideoSdpNegotiator::FindPayloadIndexFromProfile(
 }
 
 PUBLIC
-MEDIA_DIRECTION VideoSdpNegotiator::UpdateDirectionToMine(
+MEDIA_DIRECTION VideoProfileNegotiator::UpdateDirectionToMine(
         IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase)
 {
     IMS_TRACE_D("UpdateDirectionToMine() - ePeerDir[%d], eSrcDir[%d], bIsMtCase[%d]", ePeerDir,
@@ -897,7 +897,7 @@ MEDIA_DIRECTION VideoSdpNegotiator::UpdateDirectionToMine(
     return eNegotiatedDir;
 }
 
-PRIVATE IMS_BOOL VideoSdpNegotiator::MakeNegotiatedCapaNegoProfile(
+PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedCapaNegoProfile(
         IN VideoProfile::CapaNego* pLocalCapaNego, IN VideoProfile::CapaNego* pPeerCapaNego,
         OUT VideoProfile::CapaNego* pNegotiatedCapaNego)
 {
@@ -1098,7 +1098,7 @@ PRIVATE IMS_BOOL VideoSdpNegotiator::MakeNegotiatedCapaNegoProfile(
 }
 
 PUBLIC
-VIDEO_RESOLUTION VideoSdpNegotiator::GetNegotiatedResolution(
+VIDEO_RESOLUTION VideoProfileNegotiator::GetNegotiatedResolution(
         IN MediaBaseProfile::BasePayload* pPayload)
 {
     if (pPayload == IMS_NULL)
@@ -1126,8 +1126,9 @@ VIDEO_RESOLUTION VideoSdpNegotiator::GetNegotiatedResolution(
     return VIDEO_RESOLUTION_NOT_USED;
 }
 
-PRIVATE IMS_BOOL VideoSdpNegotiator::MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
-        IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload** pNegoPayload)
+PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedPayload(
+        IN VideoProfile::Payload* pLocalPayload, IN VideoProfile::Payload* pPeerPayload,
+        OUT VideoProfile::Payload** pNegoPayload)
 {
     if (pLocalPayload == IMS_NULL || pPeerPayload == IMS_NULL)
     {
@@ -1141,7 +1142,7 @@ PRIVATE IMS_BOOL VideoSdpNegotiator::MakeNegotiatedPayload(IN VideoProfile::Payl
 }
 
 PRIVATE
-VIDEO_RESOLUTION VideoSdpNegotiator::GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel)
+VIDEO_RESOLUTION VideoProfileNegotiator::GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel)
 {
     IMS_TRACE_D("GetAvcMaxResolutionFromLevel() - Level[%d]", nLevel, 0, 0);
 

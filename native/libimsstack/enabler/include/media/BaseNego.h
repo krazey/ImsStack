@@ -26,7 +26,7 @@
 #include "config/MediaConfiguration.h"
 
 class SdpGenerator;
-class SdpNegotiator;
+class MediaProfileNegotiator;
 
 class BaseNego : public ImsSlot
 {
@@ -233,7 +233,7 @@ protected:
     MediaConfiguration* m_pConfig;
     MediaEnvironment* m_pEnvironment;
     std::shared_ptr<SdpGenerator> m_pSdpGenerator;
-    std::shared_ptr<SdpNegotiator> m_pSdpNegotiator;
+    std::shared_ptr<MediaProfileNegotiator> m_pProfileNegotiator;
 };
 
 #endif

@@ -16,20 +16,20 @@
 
 #include "ServiceTrace.h"
 
-#include "SdpNegotiator.h"
+#include "MediaProfileNegotiator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC SdpNegotiator::SdpNegotiator(IN const MEDIA_CONTENT_TYPE eType) :
+PUBLIC MediaProfileNegotiator::MediaProfileNegotiator(IN const MEDIA_CONTENT_TYPE eType) :
         m_eType(eType),
         m_bIsOfferReceived(IMS_FALSE)
 {
 }
 
-PUBLIC VIRTUAL SdpNegotiator::~SdpNegotiator() {}
+PUBLIC VIRTUAL MediaProfileNegotiator::~MediaProfileNegotiator() {}
 
 PROTECTED
-IMS_BOOL SdpNegotiator::NegotiateIpPort(IN MediaBaseProfile* pLocalProfile,
+IMS_BOOL MediaProfileNegotiator::NegotiateIpPort(IN MediaBaseProfile* pLocalProfile,
         IN MediaBaseProfile* pPeerProfile, OUT MediaBaseProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)

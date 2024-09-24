@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef TEXT_SDP_NEGOTIATOR_H_
-#define TEXT_SDP_NEGOTIATOR_H_
+#ifndef TEXT_PROFILE_NEGOTIATOR_H_
+#define TEXT_PROFILE_NEGOTIATOR_H_
 
-#include "SdpNegotiator.h"
+#include "MediaProfileNegotiator.h"
 #include "text/TextProfileUtil.h"
 
 class MediaConfiguration;
 
-class TextSdpNegotiator : public SdpNegotiator
+/**
+ * This class is to generate a negotiated text profile by negotiating a local text profile and a
+ * peer text profile
+ */
+class TextProfileNegotiator : public MediaProfileNegotiator
 {
 public:
-    TextSdpNegotiator();
-    virtual ~TextSdpNegotiator();
+    TextProfileNegotiator();
+    virtual ~TextProfileNegotiator();
 
     IMS_BOOL Negotiate(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT TextProfile* pNegotiatedProfile,

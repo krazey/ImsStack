@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef SDP_NEGOTIATOR_H_
-#define SDP_NEGOTIATOR_H_
+#ifndef MEDIA_PROFILE_NEGOTIATOR_H_
+#define MEDIA_PROFILE_NEGOTIATOR_H_
 
 #include "ISessionDescriptor.h"
 #include "media/IMediaDescriptor.h"
 
 #include "MediaBaseProfile.h"
 
-class SdpNegotiator
+/**
+ * This class is to generate a negotiated profile by negotiating a local profile and a peer profile
+ */
+class MediaProfileNegotiator
 {
 public:
-    explicit SdpNegotiator(IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
-    virtual ~SdpNegotiator();
+    explicit MediaProfileNegotiator(IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
+    virtual ~MediaProfileNegotiator();
 
 protected:
     IMS_BOOL NegotiateIpPort(IN MediaBaseProfile* pLocalProfile, IN MediaBaseProfile* pPeerProfile,
