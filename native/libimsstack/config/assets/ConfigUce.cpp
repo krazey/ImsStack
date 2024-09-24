@@ -52,7 +52,7 @@ PUBLIC GLOBAL const IMS_CHAR ConfigUce::APP_CONFIG[] = {
         "[Reg_0]\n"
         "service_id=" CONFIG_SERVICE_NAME "\n"
         "header_count=1\n"
-        "header_0=Supported: path\n"
+        "header_0=Supported: path, eventlist\n"
         "\n"
         "[Write]\n"
         "header_names=\n"
