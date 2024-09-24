@@ -167,9 +167,11 @@ PRIVATE GLOBAL void NormalDialingPlan::FormTelUriAsLocal(IN IMtcContext& objCont
         return;
     }
 
+    AccessNetworkInfo objAni;
     strNumber.Append(";phone-context=");
-    strNumber.Append(objIdentityProxy.GetPhoneContext(
-            ConvertDialingPolicy(GetLocalNumberPolicy(objContext)), objContext.GetSlotId()));
+    strNumber.Append(
+            objIdentityProxy.GetPhoneContext(ConvertDialingPolicy(GetLocalNumberPolicy(objContext)),
+                    objContext.GetSlotId(), &GetAccessNetworkInfo(objContext, objAni)));
 }
 
 PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsVisualSeparator(IN IMS_CHAR ch)

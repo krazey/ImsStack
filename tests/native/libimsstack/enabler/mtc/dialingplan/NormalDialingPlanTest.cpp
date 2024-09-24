@@ -17,7 +17,10 @@
 #include "CarrierConfig.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockINetworkConnection.h"
+#include "PlatformContext.h"
 #include "ServiceNetworkPolicy.h"
+#include "TestNetworkService.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MockImsIdentityProxy.h"
@@ -58,7 +61,11 @@ protected:
     MockIMtcContext objContext;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
+    MockIMtcService objService;
     MockImsIdentityProxy objIdentityProxy;
+    MockIMtcAosConnector objAosConnector;
+    MockINetworkConnection objNetworkConnection;
+    TestNetworkService objNetworkService;
     AString strNumber;
     Scheme eScheme;
 
@@ -66,15 +73,25 @@ protected:
     {
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetServiceByType).WillByDefault(Return(&objService));
+
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+
+        ON_CALL(objAosConnector, GetConnectionType).WillByDefault(Return(NetworkPolicy::APN_IMS));
+
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_NETWORK, &objNetworkService);
+        objNetworkService.SetConnection(&objNetworkConnection);
 
         ON_CALL(*pConfigurationManager, GetCountryCode).WillByDefault(Return(ANY_COUNTRY_CODE));
-        ON_CALL(*pConfigurationManager, GetRequestUriType)
-                .WillByDefault(Return(CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL));
         ON_CALL(*pConfigurationManager, GetPolicyOfLocalNumbers)
                 .WillByDefault(Return(0));  // LocalNumberPolicy::HOME
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_NETWORK, IMS_NULL);
+    }
 
     IMS_CHAR* GetTranslatedUri()
     {
@@ -115,72 +132,155 @@ TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsOriginalStringWithAquotIfAd
     EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 }
 
-TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsTelUriByConfigurationOrRequestType)
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsTelUriIfSchemeIsUnknownAndTelConfigured)
 {
-    AString strAnyPhoneContext("anyPhoneContext");
-
-    // local number
     strNumber = "12345";
-    AString strExpectedUri("<tel:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
     eScheme = Scheme::UNKNOWN;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<tel:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
 
     ON_CALL(objIdentityProxy,
             GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
             .WillByDefault(Return(strAnyPhoneContext));
-    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
-
-    // global number
-    strNumber = "+12345";
-    strExpectedUri = "tel:" + strNumber;
-    eScheme = Scheme::TEL;
+    ON_CALL(*pConfigurationManager, GetRequestUriType)
+            .WillByDefault(Return(CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL));
 
     EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 }
 
-TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriByConfigurationOrRequestType)
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsTelUriAsLocalNumber)
 {
-    MockIMtcService objService;
-    MockIMtcAosConnector objAosConnector;
-    ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL)).WillByDefault(Return(&objService));
-    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
-    ON_CALL(objAosConnector, GetConnectionType).WillByDefault(Return(NetworkPolicy::APN_IMS));
-    ON_CALL(*pConfigurationManager, GetRequestUriType)
-            .WillByDefault(Return(CarrierConfig::Ims::REQUEST_URI_FORMAT_SIP));
-
+    strNumber = "12345";
+    eScheme = Scheme::TEL;
     AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<tel:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
     ON_CALL(objIdentityProxy,
             GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
             .WillByDefault(Return(strAnyPhoneContext));
 
-    // non-number cases
-    strNumber = "+123:456";
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsTelUriAsGeoLocalNumber)
+{
+    strNumber = "12345";
+    eScheme = Scheme::TEL;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<tel:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(objIdentityProxy, GetPhoneContext(ImsIdentity::DIALING_POLICY_GEO_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+    ON_CALL(*pConfigurationManager, GetPolicyOfLocalNumbers)
+            .WillByDefault(Return(1));  // LocalNumberPolicy::GEO
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsTelUriAsGlobalNumber)
+{
+    strNumber = "+12345";
+    eScheme = Scheme::TEL;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("tel:" + strNumber);
+
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriIfSchemeIsUnknownAndSipConfigured)
+{
+    strNumber = "12345";
+    eScheme = Scheme::UNKNOWN;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+    ON_CALL(*pConfigurationManager, GetRequestUriType)
+            .WillByDefault(Return(CarrierConfig::Ims::REQUEST_URI_FORMAT_SIP));
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriAsLocalNumber)
+{
+    strNumber = "12345";
     eScheme = Scheme::SIP;
-    AString strExpectedUri(
-            "sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ";user=phone");
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
     ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
             .WillByDefault(Return(strExpectedUri));
-    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriAsGeoLocalNumber)
+{
+    strNumber = "12345";
+    eScheme = Scheme::SIP;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(objIdentityProxy, GetPhoneContext(ImsIdentity::DIALING_POLICY_GEO_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+            .WillByDefault(Return(strExpectedUri));
+    ON_CALL(*pConfigurationManager, GetPolicyOfLocalNumbers)
+            .WillByDefault(Return(1));  // LocalNumberPolicy::GEO
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriForNonNumberReturnsSipUriAsLocalNumber)
+{
     strNumber = "123:456";
-    strExpectedUri = "sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ";user=phone";
+    eScheme = Scheme::SIP;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
     ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
             .WillByDefault(Return(strExpectedUri));
-    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 
-    // global number
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriForNonNumberWithPlusReturnsSipUriAsLocalNumber)
+{
     strNumber = "+123-456";
-    AString strAnyHomeDomainName("anyDomain");
-    strExpectedUri = "sip:" + strNumber + "@" + strAnyHomeDomainName + ";user=phone";
+    eScheme = Scheme::SIP;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
     ON_CALL(objIdentityProxy, CreateSipUserId(strNumber, SLOT_ID, _, _))
             .WillByDefault(Return(strExpectedUri));
-    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 
-    // local number
-    strNumber = "12345";
-    strExpectedUri = "<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">";
-    eScheme = Scheme::UNKNOWN;
-    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriAsGlobalNumber)
+{
+    strNumber = "+123-456";
+    eScheme = Scheme::SIP;
+    AString strAnyHomeDomainName("anyDomain");
+    AString strExpectedUri = "sip:" + strNumber + "@" + strAnyHomeDomainName + ";user=phone";
+
+    ON_CALL(objIdentityProxy, CreateSipUserId(strNumber, SLOT_ID, _, _))
             .WillByDefault(Return(strExpectedUri));
+
     EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 }
 

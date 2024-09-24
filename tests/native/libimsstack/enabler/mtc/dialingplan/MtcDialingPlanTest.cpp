@@ -15,13 +15,19 @@
  */
 
 #include "MockIMtcContext.h"
+#include "MockIMtcService.h"
+#include "MockINetworkConnection.h"
 #include "MockIPhoneInfoSubscriber.h"
+#include "PlatformContext.h"
+#include "ServiceNetworkPolicy.h"
+#include "TestNetworkService.h"
 #include "call/IMtcCall.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/ImsIdentityProxy.h"
 #include "dialingplan/MockImsIdentityProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
+#include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>
 
 namespace android
@@ -54,10 +60,14 @@ class MtcDialingPlanTest : public ::testing::Test
 public:
     TestMtcDialingPlan* pDialingPlan;
     MockIMtcContext objContext;
+    MockIMtcService objService;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     MockISubscriberInfo objSubscriberInfo;
     MockImsIdentityProxy* pIdentityProxy;
+    MockIMtcAosConnector objAosConnector;
+    MockINetworkConnection objNetworkConnection;
+    TestNetworkService objNetworkService;
     CallInfo objCallInfo;
 
 protected:
@@ -67,6 +77,15 @@ protected:
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(0));
+        ON_CALL(objContext, GetServiceByType).WillByDefault(Return(&objService));
+
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+
+        ON_CALL(objAosConnector, GetConnectionType).WillByDefault(Return(NetworkPolicy::APN_IMS));
+
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_NETWORK, &objNetworkService);
+        objNetworkService.SetConnection(&objNetworkConnection);
 
         pDialingPlan = new TestMtcDialingPlan(objContext, objSubscriberInfo);
         pIdentityProxy = new MockImsIdentityProxy();
