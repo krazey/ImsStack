@@ -18,8 +18,10 @@
 #include "msg/SipResourcePriorityHeader.h"
 #include "platform/SipString.h"
 
-SipResourcePriorityHeader::SipResourcePriorityHeader() :
-        SipHeaderBase(SipHeaderBase::RESOURCE_PRIORITY),
+extern SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIBUTE_END];
+
+SipResourcePriorityHeader::SipResourcePriorityHeader(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType),
         m_pszNameSpace(SIP_NULL),
         m_pszRPriority(SIP_NULL)
 {
@@ -92,7 +94,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
     if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
+        return gHeaderAttributes[GetHdrType()][HEADER_EMPTY_BODY_ALLOWED];
     }
 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
@@ -126,12 +128,28 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipResourcePriorityHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
+SIP_BOOL SipResourcePriorityHeader::IsValidHeader() const
+{
+    if (GetHdrType() == SipHeaderBase::RESOURCE_PRIORITY)
+    {
+        return ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL)) ? SIP_FALSE
+                                                                              : SIP_TRUE;
+    }
+
+    if (((m_pszNameSpace == SIP_NULL) && (m_pszRPriority == SIP_NULL)) ||
+            ((m_pszNameSpace != SIP_NULL) && (m_pszRPriority != SIP_NULL)))
+    {
+        return SIP_TRUE;
+    }
+    return SIP_FALSE;
+}
+
+SipHeaderBase* SipResourcePriorityHeader::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
         return new SipResourcePriorityHeader(
                 *reinterpret_cast<SipResourcePriorityHeader*>(pHeader));
     }
-    return new SipResourcePriorityHeader();
+    return new SipResourcePriorityHeader(eHeaderType);
 }
