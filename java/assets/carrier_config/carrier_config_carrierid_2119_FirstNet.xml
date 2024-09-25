@@ -31,6 +31,7 @@
     <boolean name="location_allow_mock_location_update_bool" value="true"/>
     <int name="location_acquisition_policy_int" value="86672"/>
     <int name="location_address_resolution_time_millis_int" value="3000"/>
+    <int name="location_geodetic_shape_int" value="1"/>
     <int name="location_validity_period_min_int" value="30"/>
     <int name="location_tolerable_distance_int" value="150"/>
 
