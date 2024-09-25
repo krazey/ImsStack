@@ -905,132 +905,140 @@ const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_OTHER_FAILURES_STRING[] =
         "wfc_err_other_failures_string";
 // }
 // Mtc
-const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[] =
-        "check_conference_event_package_version_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL[] =
-        "conference_refer_to_uri_source_paid_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT[] =
-        "conference_drop_refer_to_uri_source_type_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[] =
-        "enable_fake_qos_call_flow_on_wifi_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT[] =
-        "media_type_for_offerless_invite_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT[] =
-        "media_type_for_offerless_reinvite_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "check_conference_event_package_version_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "conference_refer_to_uri_source_paid_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT[] =
+        KEY_IMS_VOICE_PREFIX "conference_drop_refer_to_uri_source_type_int";
+const IMS_CHAR CarrierConfig::ImsWfc::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[] =
+        KEY_IMS_WFC_PREFIX "enable_fake_qos_call_flow_on_wifi_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT[] =
+        KEY_IMS_VOICE_PREFIX "media_type_for_offerless_invite_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT[] =
+        KEY_IMS_VOICE_PREFIX "media_type_for_offerless_reinvite_int";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL[] =
-                "support_video_call_upgrade_regardless_of_feature_tags_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[] =
-        "oip_type_for_unavailable_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL[] =
-        "enable_oip_header_policy_fallback_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[] =
-        "emergency_rtt_guard_timer_millis_int";
+        CarrierConfig::ImsVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL[] =
+                KEY_IMS_VT_PREFIX "support_video_call_upgrade_regardless_of_feature_tags_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[] =
+        KEY_IMS_VOICE_PREFIX "oip_type_for_unavailable_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "enable_oip_header_policy_fallback_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[] =
+        KEY_IMS_EMERGENCY_PREFIX "emergency_rtt_guard_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX
+        "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_PREALERTING_TIMER_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "prealerting_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT[] =
+        KEY_IMS_VOICE_PREFIX "policy_for_tcall_timer_expiry_of_volte_call_int";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT[] = KEY_IMS_EMERGENCY_PREFIX
+        "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
+const IMS_CHAR CarrierConfig::ImsWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[] =
+        KEY_IMS_WFC_PREFIX "policy_for_tcall_timer_expiry_of_vowifi_call_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "carrier_specific_sip_headers_string_array";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL[] =
-                "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_PREALERTING_TIMER_MILLIS_INT[] =
-        "prealerting_timer_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT[] =
-        "policy_for_tcall_timer_expiry_of_volte_call_int";
-const IMS_CHAR
-        CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT[] =
-                "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[] =
-        "policy_for_tcall_timer_expiry_of_vowifi_call_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY[] =
-        "carrier_specific_sip_headers_string_array";
-const IMS_CHAR
-        CarrierConfig::Assets::KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL[] =
-                "check_avchange_feature_for_call_converting_capability_bool";
-const IMS_CHAR CarrierConfig::Assets::
+        CarrierConfig::ImsVt::KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL[] =
+                KEY_IMS_VT_PREFIX "check_avchange_feature_for_call_converting_capability_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL[] =
-                "support_registration_recovery_for_failure_of_session_refresh_bool";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[] =
-                "policy_for_call_maintaining_on_registration_suspended_int_array";
-const IMS_CHAR CarrierConfig::Assets::
+                KEY_IMS_VOICE_PREFIX
+        "support_registration_recovery_for_failure_of_session_refresh_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[] = KEY_IMS_VOICE_PREFIX
+        "policy_for_call_maintaining_on_registration_suspended_int_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY[] =
-                "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL[] =
-        "use_mcid_supplementary_service_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL[] =
-        "use_mmc_supplementary_service_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[] =
-        "use_lte_preferred_status_for_service_capability_bool";
+                KEY_IMS_EMERGENCY_PREFIX
+        "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "use_mcid_supplementary_service_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "use_mmc_supplementary_service_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "use_lte_preferred_status_for_service_capability_bool";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[] =
-                "allow_incoming_hold_request_during_conference_call_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL[] =
-        "ignore_180_after_183_response_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL[] =
-        "add_replace_header_for_conference_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY[] =
-        "vilte_to_volte_retry_failure_response_code_int_array";
+        CarrierConfig::ImsVoice::KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[] =
+                KEY_IMS_VOICE_PREFIX "allow_incoming_hold_request_during_conference_call_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "ignore_180_after_183_response_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "add_replace_header_for_conference_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY[] =
+        KEY_IMS_VT_PREFIX "vilte_to_volte_retry_failure_response_code_int_array";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[] =
-                "use_emergency_number_translation_in_roaming_status_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL[] =
-        "ignore_prack_delivery_failure_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL[] =
-        "support_video_call_only_in_vops_off_status_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL[] =
-        "block_wifi_emergency_call_if_not_provisioned_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY[] =
-        "registration_disconnect_reason_to_ignore_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[] =
-        "wifi_emergency_18x_timer_millis_int";
+        CarrierConfig::ImsEmergency::KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "use_emergency_number_translation_in_roaming_status_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "ignore_prack_delivery_failure_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL[] =
+        KEY_IMS_VT_PREFIX "support_video_call_only_in_vops_off_status_bool";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL[] =
-                "use_carrier_specific_contact_header_for_options_response_bool";
-const IMS_CHAR CarrierConfig::Assets::
+        CarrierConfig::ImsEmergency::KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "block_wifi_emergency_call_if_not_provisioned_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "registration_disconnect_reason_to_ignore_int_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[] =
+        KEY_IMS_EMERGENCY_PREFIX "wifi_emergency_18x_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL[] = KEY_IMS_VOICE_PREFIX
+        "use_carrier_specific_contact_header_for_options_response_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL[] =
-                "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
-const IMS_CHAR CarrierConfig::Assets::
+                KEY_IMS_VOICE_PREFIX
+        "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL[] =
-                "enable_registration_recovery_when_call_rejected_by_server_error_bool";
-const IMS_CHAR
-        CarrierConfig::Assets::KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[] =
-                "enable_registration_recovery_when_call_retry_unavailable_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[] =
-        "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL[] =
-        "check_server_outage_reason_for_vxlte_call_bool";
-const IMS_CHAR CarrierConfig::Assets::
+                KEY_IMS_VOICE_PREFIX
+        "enable_registration_recovery_when_call_rejected_by_server_error_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[] = KEY_IMS_VOICE_PREFIX
+        "enable_registration_recovery_when_call_retry_unavailable_bool";
+const IMS_CHAR CarrierConfig::ImsWfc::KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[] =
+        KEY_IMS_WFC_PREFIX "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "check_server_outage_reason_for_vxlte_call_bool";
+const IMS_CHAR CarrierConfig::ImsVt::
         KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[] =
-                "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
+                KEY_IMS_VT_PREFIX
+        "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT[] =
-                "maximum_wait_timer_for_geolocation_pidf_info_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL[] =
-        "maintain_multiple_early_sessions_by_forking_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL[] =
-        "stop_ringback_timer_by_183_with_sdp_body_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[] =
-        "information_level_of_geolocation_pidf_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY[] =
-        "message_type_support_geolocation_pidf_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[] =
-        "incoming_resume_event_support_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[] =
-        "sip_status_code_for_rejecting_call_type_change_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =
-        "initialize_p_early_media_when_no_header_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
-        "policy_for_local_ringback_tone_with_180_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[] =
-        "eps_fallback_watchdog_time_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[] =
-        "send_udp_keep_alive_interval_time_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[] =
-        "call_reject_code_for_not_acceptable_call_type_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[] =
-        "release_emergency_pdn_with_emergency_call_fail_bool";
+        CarrierConfig::ImsVoice::KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT[] =
+                KEY_IMS_VOICE_PREFIX "maximum_wait_timer_for_geolocation_pidf_info_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "maintain_multiple_early_sessions_by_forking_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "stop_ringback_timer_by_183_with_sdp_body_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[] =
+        KEY_IMS_PREFIX "information_level_of_geolocation_pidf_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "message_type_support_geolocation_pidf_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "incoming_resume_event_support_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[] =
+        KEY_IMS_VOICE_PREFIX "sip_status_code_for_rejecting_call_type_change_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "initialize_p_early_media_when_no_header_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
+        KEY_IMS_VOICE_PREFIX "policy_for_local_ringback_tone_with_180_response_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "eps_fallback_watchdog_time_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "send_udp_keep_alive_interval_time_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[] =
+        KEY_IMS_VOICE_PREFIX "call_reject_code_for_not_acceptable_call_type_int";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[] =
-                "emergency_call_current_location_discovery_supported_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL[] =
-        "check_ui_condition_for_incoming_resume_bool";
+        CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "release_emergency_pdn_with_emergency_call_fail_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "emergency_call_current_location_discovery_supported_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "check_ui_condition_for_incoming_resume_bool";
 
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

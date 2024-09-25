@@ -257,7 +257,7 @@ public class ImsCallContextTest extends ImsStackTest {
         Assert.assertFalse(mImsCallContext.isLocationRequiredForCall());
 
         when(mMockCarrierConfig
-            .getInt(CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+            .getInt(CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         Assert.assertTrue(mImsCallContext.isLocationRequiredForCall());
     }
@@ -300,7 +300,7 @@ public class ImsCallContextTest extends ImsStackTest {
         Assert.assertNull(mImsCallContext.getCallLocationPolicy());
 
         when(mMockCarrierConfig
-            .getInt(CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+            .getInt(CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         Assert.assertNotNull(mImsCallContext.getCallLocationPolicy());
     }

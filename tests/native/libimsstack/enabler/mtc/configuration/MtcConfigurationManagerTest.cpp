@@ -764,92 +764,92 @@ TEST_F(MtcConfigurationManagerTest, GetPolicyForEmergencyUrnEscvMappingReturnsVa
 TEST_F(MtcConfigurationManagerTest, IsCheckConferenceEventPackageVersionReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsCheckConferenceEventPackageVersion(),
-            GetBool(CarrierConfig::Assets::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsConferenceReferToUriSourcePaidReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsConferenceReferToUriSourcePaid(),
-            GetBool(CarrierConfig::Assets::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         GetConferenceDropReferToUriSourceTypeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetConferenceDropReferToUriSourceType(),
-            GetInt(CarrierConfig::Assets::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsEnableFakeQosCallFlowOnWifiReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsEnableFakeQosCallFlowOnWifi(),
-            GetBool(CarrierConfig::Assets::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL));
+            GetBool(CarrierConfig::ImsWfc::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetMediaTypeForOfferlessInviteReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetMediaTypeForOfferlessInvite(),
-            GetInt(CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetMediaTypeForOfferlessReinviteReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetMediaTypeForOfferlessReinvite(),
-            GetInt(CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsSupportVideoCallUpgradeRegardlessOfFeatureTagsReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsSupportVideoCallUpgradeRegardlessOfFeatureTags(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVt::
                             KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetOipTypeForUnavailableReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetOipTypeForUnavailable(),
-            GetInt(CarrierConfig::Assets::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsEnableOipHeaderPolicyFallBackReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsEnableOipHeaderPolicyFallBack(),
-            GetBool(CarrierConfig::Assets::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetEmergencyRttGuardTimerReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetEmergencyRttGuardTimer(),
-            GetInt(CarrierConfig::Assets::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT));
+            GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsRetryEmergencyCallOverEmergencyPdnWithNextPcscfReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsEmergency::
                             KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetPreAlertingTimerReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetPreAlertingTimer(),
-            GetInt(CarrierConfig::Assets::KEY_PREALERTING_TIMER_MILLIS_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_PREALERTING_TIMER_MILLIS_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         GetPolicyForTcallTimerExpiryOfVolteCallReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetPolicyForTcallTimerExpiryOfVolteCall(),
-            GetInt(CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         GetPolicyForTcallTimerExpiryOfVolteEmergencyCallReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetPolicyForTcallTimerExpiryOfVolteEmergencyCall(),
-            GetInt(CarrierConfig::Assets::
+            GetInt(CarrierConfig::ImsEmergency::
                             KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT));
 }
 
@@ -857,7 +857,7 @@ TEST_F(MtcConfigurationManagerTest,
         GetPolicyForTcallTimerExpiryOfVowifiCallReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetPolicyForTcallTimerExpiryOfVowifiCall(),
-            GetInt(CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT));
+            GetInt(CarrierConfig::ImsWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsCarrierSpecificSipHeaderReturnsValueInCarrierConfig)
@@ -873,7 +873,7 @@ TEST_F(MtcConfigurationManagerTest, IsCarrierSpecificSipHeaderReturnsValueInCarr
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetStringArray(CarrierConfig::Assets::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY))
+            GetStringArray(CarrierConfig::ImsVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY))
             .WillByDefault(Return(objArray));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
@@ -888,7 +888,7 @@ TEST_F(MtcConfigurationManagerTest,
         IsCheckAvchangeFeatureForCallConvertingCapabilityReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsCheckAvchangeFeatureForCallConvertingCapability(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVt::
                             KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL));
 }
 
@@ -896,7 +896,7 @@ TEST_F(MtcConfigurationManagerTest,
         IsSupportRegistrationRecoveryForFailureOfSessionRefreshReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsSupportRegistrationRecoveryForFailureOfSessionRefresh(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVoice::
                             KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL));
 }
 
@@ -908,7 +908,7 @@ TEST_F(MtcConfigurationManagerTest,
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
+            GetIntArray(CarrierConfig::ImsVoice::
                             KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
@@ -929,7 +929,7 @@ TEST_F(MtcConfigurationManagerTest,
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
+            GetIntArray(CarrierConfig::ImsEmergency::
                             KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
@@ -944,20 +944,20 @@ TEST_F(MtcConfigurationManagerTest,
 TEST_F(MtcConfigurationManagerTest, IsUseMcidSupplementaryServiceReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsUseMcidSupplementaryService(),
-            GetBool(CarrierConfig::Assets::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsUseMmcSupplementaryServiceReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsUseMmcSupplementaryService(),
-            GetBool(CarrierConfig::Assets::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsUseLtePreferredStatusForServiceCapabilityReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsUseLtePreferredStatusForServiceCapability(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVoice::
                             KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL));
 }
 
@@ -965,20 +965,20 @@ TEST_F(MtcConfigurationManagerTest,
         IsAllowIncomingHoldRequestDuringConferenceCallReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsAllowIncomingHoldRequestDuringConferenceCall(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVoice::
                             KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsIgnore180After183ResponseReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsIgnore180After183Response(),
-            GetBool(CarrierConfig::Assets::KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsAddReplaceHeaderForConferenceReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsAddReplaceHeaderForConference(),
-            GetBool(CarrierConfig::Assets::KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
@@ -989,8 +989,8 @@ TEST_F(MtcConfigurationManagerTest,
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY))
+            GetIntArray(
+                    CarrierConfig::ImsVt::KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
@@ -1004,28 +1004,29 @@ TEST_F(MtcConfigurationManagerTest,
         IsUseEmergencyNumberTranslationInRoamingStatusReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsUseEmergencyNumberTranslationInRoamingStatus(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsEmergency::
                             KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsIgnorePrackDeliveryFailureReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsIgnorePrackDeliveryFailure(),
-            GetBool(CarrierConfig::Assets::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsSupportVideoCallOnlyInVopsOffStatusReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsSupportVideoCallOnlyInVopsOffStatus(),
-            GetBool(CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL));
+            GetBool(CarrierConfig::ImsVt::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsBlockWifiEmergencyCallIfNotProvisionedReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsBlockWifiEmergencyCallIfNotProvisioned(),
-            GetBool(CarrierConfig::Assets::KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL));
+            GetBool(CarrierConfig::ImsEmergency::
+                            KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
@@ -1036,8 +1037,8 @@ TEST_F(MtcConfigurationManagerTest,
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(
-                    CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::
+                            KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
@@ -1051,14 +1052,14 @@ TEST_F(MtcConfigurationManagerTest,
 TEST_F(MtcConfigurationManagerTest, GetWifiEmergency18xTimerReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetWifiEmergency18xTimer(),
-            GetInt(CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT));
+            GetInt(CarrierConfig::ImsEmergency::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsUseCarrierSpecificContactHeaderForOptionsResponseReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsUseCarrierSpecificContactHeaderForOptionsResponse(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVoice::
                             KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL));
 }
 
@@ -1066,7 +1067,7 @@ TEST_F(MtcConfigurationManagerTest,
         IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistrationReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVoice::
                             KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL));
 }
 
@@ -1074,7 +1075,7 @@ TEST_F(MtcConfigurationManagerTest,
         IsEnableRegistrationRecoveryWhenCallRejectedByServerErrorReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsEnableRegistrationRecoveryWhenCallRejectedByServerError(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVoice::
                             KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL));
 }
 
@@ -1082,7 +1083,7 @@ TEST_F(MtcConfigurationManagerTest,
         IsEnableRegistrationRecoveryWhenCallRetryUnavailableReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsEnableRegistrationRecoveryWhenCallRetryUnavailable(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVoice::
                             KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL));
 }
 
@@ -1090,7 +1091,7 @@ TEST_F(MtcConfigurationManagerTest,
         IsRejectVowifiVoiceCallWhenVowifiSettingOffReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsRejectVowifiVoiceCallWhenVowifiSettingOff(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsWfc::
                             KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL));
 }
 
@@ -1098,14 +1099,14 @@ TEST_F(MtcConfigurationManagerTest,
         IsCheckServerOutageReasonForVxlteCallReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsCheckServerOutageReasonForVxlteCall(),
-            GetBool(CarrierConfig::Assets::KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionTypeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL));
 }
 
@@ -1113,7 +1114,7 @@ TEST_F(MtcConfigurationManagerTest,
         GetMaximumWaitTimerForGeolocationPidfInfoReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetMaximumWaitTimerForGeolocationPidfInfo(),
-            GetInt(CarrierConfig::Assets::
+            GetInt(CarrierConfig::ImsVoice::
                             KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT));
 }
 
@@ -1121,13 +1122,13 @@ TEST_F(MtcConfigurationManagerTest,
         IsMaintainMultipleEarlySessionsByForkingReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsMaintainMultipleEarlySessionsByForking(),
-            GetBool(CarrierConfig::Assets::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsStopRingbackTimerBy183WithSdpBodyReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsStopRingbackTimerBy183WithSdpBody(),
-            GetBool(CarrierConfig::Assets::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetInformationLevelOfGeolocationPidfReturnsValueInCarrierConfig)
@@ -1140,7 +1141,7 @@ TEST_F(MtcConfigurationManagerTest, GetInformationLevelOfGeolocationPidfReturnsV
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY))
+            GetIntArray(CarrierConfig::Ims::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
@@ -1165,7 +1166,8 @@ TEST_F(MtcConfigurationManagerTest, IsMessageTypeSupportGeolocationPidfReturnsVa
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY))
+            GetIntArray(
+                    CarrierConfig::ImsVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
@@ -1183,41 +1185,41 @@ TEST_F(MtcConfigurationManagerTest, IsMessageTypeSupportGeolocationPidfReturnsVa
 TEST_F(MtcConfigurationManagerTest, IsInitializePemWhenNoHeaderReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsInitializePemWhenNoHeader(),
-            GetBool(CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         GetPolicyForLocalRingbackToneWith180ResponseReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetPolicyForLocalRingbackToneWith180Response(),
-            GetInt(CarrierConfig::Assets::
+            GetInt(CarrierConfig::ImsVoice::
                             KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetEpsFallbackWatchdogTimeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetEpsFallbackWatchdogTime(),
-            GetInt(CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetSendUdpKeepAliveIntervalTimeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetSendUdpKeepAliveIntervalTime(),
-            GetInt(CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         GetCallRejectCodeForNotAcceptableCallTypeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetCallRejectCodeForNotAcceptableCallType(),
-            GetInt(CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,
         IsReleaseEmergencyPdnWithEmergencyCallFailReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsReleaseEmergencyPdnWithEmergencyCallFail(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsEmergency::
                             KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL));
 }
 
@@ -1231,14 +1233,14 @@ TEST_F(MtcConfigurationManagerTest,
         IsEmergencyCallCurrentLocationDiscoverySupportedReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsEmergencyCallCurrentLocationDiscoverySupported(),
-            GetBool(CarrierConfig::Assets::
+            GetBool(CarrierConfig::ImsEmergency::
                             KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsCheckUiConditionForIncomingResumeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsCheckUiConditionForIncomingResume(),
-            GetBool(CarrierConfig::Assets::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL));
+            GetBool(CarrierConfig::ImsVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL));
 }
 
 }  // namespace android

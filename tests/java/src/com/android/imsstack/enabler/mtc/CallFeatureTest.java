@@ -74,7 +74,7 @@ public class CallFeatureTest {
         assertFalse(CallFeature.isCallHoldUsingInactive(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL))
+                CarrierConfig.ImsVoice.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isIncomingResumeEventSupported(SLOT_ID));
@@ -123,28 +123,28 @@ public class CallFeatureTest {
         assertFalse(CallFeature.isDynamicVideoQualitySupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL))
+                CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_LOCAL_END_SUPPORTED_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isOneWayVideoCallByLocalEndSupported(SLOT_ID));
         assertFalse(CallFeature.isOneWayVideoCallByLocalEndSupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_REMOTE_END_SUPPORTED_BOOL))
+                CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isOneWayVideoCallByRemoteEndSupported(SLOT_ID));
         assertFalse(CallFeature.isOneWayVideoCallByRemoteEndSupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL))
+                CarrierConfig.ImsVoice.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
         assertFalse(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
+                CarrierConfig.ImsVoice.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isCallMergeableOnConferenceOnHold(SLOT_ID));

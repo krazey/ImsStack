@@ -113,9 +113,9 @@ public class MtcCallManagerTest extends ImsStackTest {
         doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
         doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
         doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
         doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
 
         mTestMtcCallManager.init();
 
@@ -129,9 +129,9 @@ public class MtcCallManagerTest extends ImsStackTest {
         doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
         doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
         doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
         doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
 
         mTestMtcCallManager.init();
         mTestMtcCallManager.addListener(mMockCallStateListener);

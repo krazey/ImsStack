@@ -243,7 +243,7 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesMtcSessionRejectIfRejectCodeIsNot20
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
+            GetInt(CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
                     _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
@@ -259,7 +259,7 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
+            GetInt(CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
                     _))
             .WillByDefault(Return(200));
 
@@ -852,7 +852,7 @@ TEST_F(UpdatingStateTest,
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
+            GetInt(CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
                     _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
@@ -872,7 +872,7 @@ TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateReceivedRejectsIfResponseFailed
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
+            GetInt(CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
                     _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
@@ -1026,7 +1026,7 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNegoFailed)
 TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfResponseFailed)
 {
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
+            GetInt(CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
                     _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));

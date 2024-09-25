@@ -26,7 +26,7 @@
     <boolean name="use_tuple_element_for_geolocation_pidf_bool" value="true"/>
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
     <boolean name="hide_mac_address_in_pani_header_bool" value="true"/>
-    <int name="sip_status_code_for_rejecting_call_type_change_int" value="200"/>
+    <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="200"/>
     <int name="location_policy_update_type_int" value="2"/>
     <boolean name="location_allow_mock_location_update_bool" value="true"/>
     <int name="location_acquisition_policy_int" value="86672"/>
@@ -229,72 +229,72 @@
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="10000"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="20000"/>
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="0"/>
-    <boolean name="check_conference_event_package_version_bool" value="true"/>
-    <boolean name="conference_refer_to_uri_source_paid_bool" value="true"/>
-    <int name="conference_drop_refer_to_uri_source_type_int" value="1"/>
-    <boolean name="enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
-    <int name="media_type_for_offerless_reinvite_int" value="0"/>
-    <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
-    <int name="oip_type_for_unavailable_int" value="1"/>
-    <boolean name="enable_oip_header_policy_fallback_bool" value="true"/>
-    <int name="emergency_rtt_guard_timer_millis_int" value="-1"/>
-    <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
-    <int name="prealerting_timer_millis_int" value="-1"/>
-    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
-    <int name="policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
-    <int name="policy_for_tcall_timer_expiry_of_vowifi_call_int" value="4"/>
-    <string-array name="carrier_specific_sip_headers_string_array" num="0">
+    <boolean name="imsvoice.check_conference_event_package_version_bool" value="true"/>
+    <boolean name="imsvoice.conference_refer_to_uri_source_paid_bool" value="true"/>
+    <int name="imsvoice.conference_drop_refer_to_uri_source_type_int" value="1"/>
+    <boolean name="imswfc.enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
+    <int name="imsvoice.media_type_for_offerless_reinvite_int" value="0"/>
+    <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
+    <int name="imsvoice.oip_type_for_unavailable_int" value="1"/>
+    <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
+    <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="-1"/>
+    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
+    <int name="imsvoice.prealerting_timer_millis_int" value="-1"/>
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
+    <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
+    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="4"/>
+    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="0">
     </string-array>
-    <boolean name="check_avchange_feature_for_call_converting_capability_bool" value="false"/>
-    <boolean name="support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
-    <int-array name="policy_for_call_maintaining_on_registration_suspended_int_array" num="5">
+    <boolean name="imsvt.check_avchange_feature_for_call_converting_capability_bool" value="false"/>
+    <boolean name="imsvoice.support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
+    <int-array name="imsvoice.policy_for_call_maintaining_on_registration_suspended_int_array" num="5">
         <item value="0"/> <!-- index 0 : NO_SERVICE -->
         <item value="0"/> <!-- index 1 : CS_CALL -->
         <item value="1"/> <!-- index 2 : LOW_BATTERY -->
         <item value="0"/> <!-- index 3 : NO_LTE_COVERAGE -->
         <item value="2"/> <!-- index 4 : INSTANTAENOUS_OFFLINE -->
     </int-array>
-    <int-array name="policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array" num="0">
+    <int-array name="imsemergency.policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array" num="0">
     </int-array>
-    <boolean name="use_mcid_supplementary_service_bool" value="false"/>
-    <boolean name="use_mmc_supplementary_service_bool" value="false"/>
-    <boolean name="use_lte_preferred_status_for_service_capability_bool" value="false"/>
-    <boolean name="allow_incoming_hold_request_during_conference_call_bool" value="false"/>
-    <boolean name="ignore_180_after_183_response_bool" value="false"/>
-    <boolean name="add_replace_header_for_conference_bool" value="false"/>
-    <int-array name="vilte_to_volte_retry_failure_response_code_int_array" num="0">
+    <boolean name="imsvoice.use_mcid_supplementary_service_bool" value="false"/>
+    <boolean name="imsvoice.use_mmc_supplementary_service_bool" value="false"/>
+    <boolean name="imsvoice.use_lte_preferred_status_for_service_capability_bool" value="false"/>
+    <boolean name="imsvoice.allow_incoming_hold_request_during_conference_call_bool" value="false"/>
+    <boolean name="imsvoice.ignore_180_after_183_response_bool" value="false"/>
+    <boolean name="imsvoice.add_replace_header_for_conference_bool" value="false"/>
+    <int-array name="imsvt.vilte_to_volte_retry_failure_response_code_int_array" num="0">
     </int-array>
-    <boolean name="use_emergency_number_translation_in_roaming_status_bool" value="false"/>
-    <boolean name="ignore_prack_delivery_failure_bool" value="false"/>
-    <boolean name="support_video_call_only_in_vops_off_status_bool" value="false"/>
-    <boolean name="block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
-    <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
+    <boolean name="imsemergency.use_emergency_number_translation_in_roaming_status_bool" value="false"/>
+    <boolean name="imsvoice.ignore_prack_delivery_failure_bool" value="false"/>
+    <boolean name="imsvt.support_video_call_only_in_vops_off_status_bool" value="false"/>
+    <boolean name="imsemergency.block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
+    <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">
         <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
-    <int name="wifi_emergency_18x_timer_millis_int" value="-1"/>
-    <boolean name="use_carrier_specific_contact_header_for_options_response_bool" value="false"/>
-    <boolean name="use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="false"/>
-    <boolean name="enable_registration_recovery_when_call_rejected_by_server_error_bool" value="false"/>
-    <boolean name="enable_registration_recovery_when_call_retry_unavailable_bool" value="false"/>
-    <boolean name="reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="false"/>
-    <boolean name="check_server_outage_reason_for_vxlte_call_bool" value="false"/>
-    <boolean name="set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="false"/>
-    <int name="maximum_wait_timer_for_geolocation_pidf_info_millis_int" value="-1"/>
-    <boolean name="maintain_multiple_early_sessions_by_forking_bool" value="true"/>
-    <boolean name="stop_ringback_timer_by_183_with_sdp_body_bool" value="false"/>
-    <int-array name="information_level_of_geolocation_pidf_int_array" num="4">
+    <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
+    <boolean name="imsvoice.use_carrier_specific_contact_header_for_options_response_bool" value="false"/>
+    <boolean name="imsvoice.use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="false"/>
+    <boolean name="imsvoice.enable_registration_recovery_when_call_rejected_by_server_error_bool" value="false"/>
+    <boolean name="imsvoice.enable_registration_recovery_when_call_retry_unavailable_bool" value="false"/>
+    <boolean name="imswfc.reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="false"/>
+    <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="false"/>
+    <boolean name="imsvt.set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="false"/>
+    <int name="imsvoice.maximum_wait_timer_for_geolocation_pidf_info_millis_int" value="-1"/>
+    <boolean name="imsvoice.maintain_multiple_early_sessions_by_forking_bool" value="true"/>
+    <boolean name="imsvoice.stop_ringback_timer_by_183_with_sdp_body_bool" value="false"/>
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
         <item value="1"/> <!-- EMERGENCY_LTE-->
         <item value="1"/> <!-- EMERGENCY_WIFI -->
         <item value="0"/> <!-- NORMAL_LTE -->
         <item value="2"/> <!-- NORMAL_WIFI -->
     </int-array>
-    <int-array name="message_type_support_geolocation_pidf_int_array" num="2">
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="2">
         <item value="0"/> <!-- INVITE -->
         <item value="1"/> <!-- PROVISIONAL_RESPONSE -->
     </int-array>
-    <boolean name="initialize_p_early_media_when_no_header_bool" value="false"/>
-    <int name="policy_for_local_ringback_tone_with_180_response_int" value="1"/>
-    <boolean name="suppinfo_cdiv_cause_required_bool" value="true"/>
+    <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="false"/>
+    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
+    <boolean name="imsvoice.suppinfo_cdiv_cause_required_bool" value="true"/>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">

@@ -20,8 +20,8 @@
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="true"/>
 
     <!-- Mtc Assets -->
-    <int name="geolocation_policy_for_location_based_call_int" value="9"/>
-    <int-array name="location_based_number_list_int_array" num="11">
+    <int name="ims.geolocation_policy_for_location_based_call_int" value="9"/>
+    <int-array name="imsvoice.location_based_number_list_int_array" num="11">
         <item value="112"/>
         <item value="15"/>
         <item value="17"/>

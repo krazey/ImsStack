@@ -25,8 +25,8 @@
     <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="true"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
     <boolean name="support_local_session_timer_bool" value="true"/>
-    <boolean name="support_ecbm_for_volte_bool" value="true"/>
-    <boolean name="support_ecbm_for_vowifi_bool" value="true"/>
+    <boolean name="imsemergency.support_ecbm_for_volte_bool" value="true"/>
+    <boolean name="imsemergency.support_ecbm_for_vowifi_bool" value="true"/>
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
     <int name="location_policy_update_type_int" value="1"/>
     <int name="location_acquisition_policy_int" value="131328"/>
@@ -160,8 +160,8 @@
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>
-    <boolean name="maintain_multiple_early_sessions_by_forking_bool" value="false"/>
-    <boolean name="stop_ringback_timer_by_183_with_sdp_body_bool" value="true"/>
+    <boolean name="imsvoice.maintain_multiple_early_sessions_by_forking_bool" value="false"/>
+    <boolean name="imsvoice.stop_ringback_timer_by_183_with_sdp_body_bool" value="true"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="-1"/>
@@ -169,7 +169,7 @@
     <int name="imsvoice.ringing_timer_millis_int" value="55000"/>
     <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
     <int name="imsvoice.18x_timer_millis_int" value="32000"/>
-    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
     <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="600"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
@@ -179,50 +179,50 @@
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="300"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="5"/>
-    <int name="policy_for_local_ringback_tone_with_180_response_int" value="2"/>
+    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="2"/>
     <int name="imsvoice.call_max_count_int" value="2"/>
     <int name="imsvt.convert_remote_response_timer_millis_int" value="60000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="55000"/>
-    <int name="sip_status_code_for_rejecting_call_type_change_int" value="603"/>
-    <boolean name="set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="true"/>
-    <boolean name="check_server_outage_reason_for_vxlte_call_bool" value="true"/>
-    <string-array name="carrier_specific_sip_headers_string_array" num="3">
+    <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="603"/>
+    <boolean name="imsvt.set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="true"/>
+    <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="true"/>
+    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="3">
         <item value="P-Com.ServiceType"/>
         <item value="P-Com.E911ServiceType"/>
         <item value="Reason.User.SessionExpired"/>
     </string-array>
-    <boolean name="block_wifi_emergency_call_if_not_provisioned_bool" value="true"/>
-    <boolean name="support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
-    <int name="oip_type_for_unavailable_int" value="1"/>
-    <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
-    <int name="media_type_for_offerless_invite_int" value="1"/>
-    <int name="media_type_for_offerless_reinvite_int" value="1"/>
-    <boolean name="support_video_call_only_in_vops_off_status_bool" value="true"/>
-    <boolean name="reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="true"/>
-    <boolean name="ignore_180_after_183_response_bool" value="false"/>
+    <boolean name="imsemergency.block_wifi_emergency_call_if_not_provisioned_bool" value="true"/>
+    <boolean name="imsvoice.support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
+    <int name="imsvoice.oip_type_for_unavailable_int" value="1"/>
+    <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
+    <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
+    <int name="imsvoice.media_type_for_offerless_reinvite_int" value="1"/>
+    <boolean name="imsvt.support_video_call_only_in_vops_off_status_bool" value="true"/>
+    <boolean name="imswfc.reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="true"/>
+    <boolean name="imsvoice.ignore_180_after_183_response_bool" value="false"/>
     <int name="imsvt.policy_for_text_with_video_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
-    <int name="maximum_wait_timer_for_geolocation_pidf_info_millis_int" value="2000"/>
-    <int-array name="vilte_to_volte_retry_failure_response_code_int_array" num="0"></int-array>
-    <boolean name="enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
+    <int name="imsvoice.maximum_wait_timer_for_geolocation_pidf_info_millis_int" value="2000"/>
+    <int-array name="imsvt.vilte_to_volte_retry_failure_response_code_int_array" num="0"></int-array>
+    <boolean name="imswfc.enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
     <int name="imsvoice.policy_qos_precondition_mechanism_while_call_modification_int" value="0"/>
     <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <boolean name="use_carrier_specific_contact_header_for_options_response_bool" value="true"/>
-    <boolean name="use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
-    <int name="eps_fallback_watchdog_time_millis_int" value="6000"/>
-    <int name="send_udp_keep_alive_interval_time_millis_int" value="2000"/>
-    <int name="call_reject_code_for_not_acceptable_call_type_int" value="603"/>
-    <boolean name="one_way_video_call_by_local_end_supported_bool" value="false"/>
-    <boolean name="one_way_video_call_by_remote_end_supported_bool" value="false"/>
-    <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
-    <boolean name="call_mergeable_on_conference_on_hold_bool" value="true"/>
-    <boolean name="check_ui_condition_for_incoming_resume_bool" value="true"/>
+    <boolean name="imsvoice.use_carrier_specific_contact_header_for_options_response_bool" value="true"/>
+    <boolean name="imsvoice.use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
+    <int name="imsvoice.eps_fallback_watchdog_time_millis_int" value="6000"/>
+    <int name="imsvoice.send_udp_keep_alive_interval_time_millis_int" value="2000"/>
+    <int name="imsvoice.call_reject_code_for_not_acceptable_call_type_int" value="603"/>
+    <boolean name="imsvt.one_way_video_call_by_local_end_supported_bool" value="false"/>
+    <boolean name="imsvt.one_way_video_call_by_remote_end_supported_bool" value="false"/>
+    <boolean name="imsvoice.notify_conf_state_when_anonymous_user_bool" value="true"/>
+    <boolean name="imsvoice.call_mergeable_on_conference_on_hold_bool" value="true"/>
+    <boolean name="imsvoice.check_ui_condition_for_incoming_resume_bool" value="true"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>
@@ -253,23 +253,23 @@
     <!-- MTC conference call -->
     <string name="imsvoice.conference_factory_uri_string">sip:confserver@vzims.com</string>
     <int name="imsvoice.conference_subscribe_type_int" value="0"/>
-    <boolean name="check_conference_event_package_version_bool" value="true"/>
-    <boolean name="conference_refer_to_uri_source_paid_bool" value="true"/>
-    <int name="conference_drop_refer_to_uri_source_type_int" value="1"/>
+    <boolean name="imsvoice.check_conference_event_package_version_bool" value="true"/>
+    <boolean name="imsvoice.conference_refer_to_uri_source_paid_bool" value="true"/>
+    <int name="imsvoice.conference_drop_refer_to_uri_source_type_int" value="1"/>
     <int name="imsvoice.conference_sip_flow_order_int" value="0"/>
     <boolean name="video_hold_with_direction_inactive_bool" value="true"/>
     <boolean name="text_hold_with_direction_inactive_bool" value="true"/>
-    <boolean name="incoming_resume_event_support_bool" value="true"/>
+    <boolean name="imsvoice.incoming_resume_event_support_bool" value="true"/>
     <boolean name="imsvoice.support_conference_refer_subscribe_bool" value="true"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="0"/>
 
     <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
 
     <!-- MTC emergency call -->
-    <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
+    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
-    <int name="emergency_rtt_guard_timer_millis_int" value="-1"/>
-    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="-1"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
 
     <!-- Mts -->
     <boolean name="sms_use_dialed_number_for_request_uri_bool" value="true"/>

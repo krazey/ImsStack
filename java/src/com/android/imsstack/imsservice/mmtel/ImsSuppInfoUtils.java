@@ -44,7 +44,7 @@ public final class ImsSuppInfoUtils {
     public static void addCallExtraForApp(ICallContext context,
             final SuppInfo suppInfo, ImsCallProfile outProfile) {
         if (getConfigInterface(context.getSlotId()).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)) {
+                .getBoolean(CarrierConfig.ImsVoice.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)) {
             setCallExtraInt(suppInfo, SuppInfo.TYPE_CDIV_CAUSE,
                     ImsCallUtils.EXTRA_CDIV_CAUSE, outProfile);
         }
