@@ -137,8 +137,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsSupportVideoCallOnlyInVopsOffStatus();
         case Feature::BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED:
             return m_pManager->IsBlockWifiEmergencyCallIfNotProvisioned();
-        case Feature::SUPPORT_CANID_INFO:
-            return m_pManager->IsSupportCanidInfo();
         case Feature::USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE:
             return m_pManager->IsUseCarrierSpecificContactHeaderForOptionsResponse();
         case Feature::USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION:

@@ -838,13 +838,6 @@ public:
      *
      * @return
      */
-    virtual IMS_BOOL IsSupportCanidInfo() const = 0;
-
-    /**
-     * @brief Checks
-     *
-     * @return
-     */
     virtual IMS_BOOL IsUseCarrierSpecificContactHeaderForOptionsResponse() const = 0;
 
     /**

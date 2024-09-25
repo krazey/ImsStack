@@ -708,12 +708,6 @@ IMS_SINT32 MtcConfigurationManager::GetWifiEmergency18xTimer() const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsSupportCanidInfo() const
-{
-    return m_objCarrierConfig.bSupportCanidInfo;
-}
-
-PUBLIC
 IMS_BOOL MtcConfigurationManager::IsUseCarrierSpecificContactHeaderForOptionsResponse() const
 {
     return m_objCarrierConfig.bUseCarrierSpecificContactHeaderForOptionsResponse;

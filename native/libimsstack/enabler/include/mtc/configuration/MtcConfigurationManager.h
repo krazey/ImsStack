@@ -151,7 +151,6 @@ public:
     IMS_BOOL IsBlockWifiEmergencyCallIfNotProvisioned() const override;
     IMS_BOOL IsRegistrationDisconnectReasonToIgnore(IN IMS_SINT32 nReason) const override;
     IMS_SINT32 GetWifiEmergency18xTimer() const override;
-    IMS_BOOL IsSupportCanidInfo() const override;
     IMS_BOOL IsUseCarrierSpecificContactHeaderForOptionsResponse() const override;
     IMS_BOOL IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration() const override;
     IMS_BOOL IsEnableRegistrationRecoveryWhenCallRejectedByServerError() const override;

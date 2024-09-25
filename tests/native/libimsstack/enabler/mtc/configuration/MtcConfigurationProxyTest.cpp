@@ -184,9 +184,6 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, IsBlockWifiEmergencyCallIfNotProvisioned).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED));
 
-    EXPECT_CALL(*pConfigManager, IsSupportCanidInfo).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_CANID_INFO));
-
     EXPECT_CALL(*pConfigManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
             .WillOnce(Return(bValue));
     EXPECT_EQ(

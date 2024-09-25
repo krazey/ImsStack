@@ -297,8 +297,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY);
     objItems.nWifiEmergency18xTimer =
             piCc->GetInt(CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT);
-    objItems.bSupportCanidInfo =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CANID_INFO_BOOL);
     objItems.bUseCarrierSpecificContactHeaderForOptionsResponse = piCc->GetBoolean(CarrierConfig::
                     Assets::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL);
     objItems.bUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration = piCc->GetBoolean(

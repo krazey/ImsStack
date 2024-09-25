@@ -1054,12 +1054,6 @@ TEST_F(MtcConfigurationManagerTest, GetWifiEmergency18xTimerReturnsValueInCarrie
             GetInt(CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT));
 }
 
-TEST_F(MtcConfigurationManagerTest, IsSupportCanidInfoReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->IsSupportCanidInfo(),
-            GetBool(CarrierConfig::Assets::KEY_SUPPORT_CANID_INFO_BOOL));
-}
-
 TEST_F(MtcConfigurationManagerTest,
         IsUseCarrierSpecificContactHeaderForOptionsResponseReturnsValueInCarrierConfig)
 {
