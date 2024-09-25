@@ -271,6 +271,10 @@ public final class SscConfig {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL);
     }
 
+    static boolean isCfnrTimerSupported(int slotId) {
+        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_SUPPORT_CFNR_TIMER_BOOL);
+    }
+
     static boolean isCfQueryAllAndCfAllConditionalSupported(int slotId) {
         return getBoolean(slotId,
                 CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL);

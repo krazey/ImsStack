@@ -654,6 +654,7 @@
     <int name="ut_max_retry_count_int" value="0"/>
     <int name="ut_temporary_block_timer_min_int" value="1"/>
     <boolean name="ut_support_cf_action_erasure_bool" value="true"/>
+    <boolean name="ut_support_cfnr_timer_bool" value="true"/>
     <boolean name="ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
     <int name="ut_oir_network_default_operation_int" value="0"/>
     <boolean name="ut_oir_tir_always_temporary_mode_bool" value="true"/>

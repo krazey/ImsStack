@@ -162,6 +162,8 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getIntArray(
             CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
             .thenReturn(mServerBasedServices);
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CFNR_TIMER_BOOL)))
+                .thenReturn(true);
 
         when(mContext.getSharedPreferences(anyString(), anyInt()))
                 .thenReturn(mMockSharedPreferences);
@@ -1001,6 +1003,25 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testUpdateCallForward_Cfnr_CfnrTimerNotSupported() {
+        mIsTimerInCfnr = false;
+        int tId = 1;
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CFNR_TIMER_BOOL))).thenReturn(false);
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, 0, 20);
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFNR);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
     public void testUpdateCallForward_CfnrWithTimer() {
         mIsTimerInCfnr = true;
         int tId = 1;
@@ -1008,7 +1029,25 @@ public class SscServiceImplTest {
         mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFNR, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFNR);
 
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateCallForward_CfnrWithTimer_CfnrTimerNotSupported() {
+        mIsTimerInCfnr = true;
+        int tId = 1;
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CFNR_TIMER_BOOL))).thenReturn(false);
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, 0, 20);
+        processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNR);
 
