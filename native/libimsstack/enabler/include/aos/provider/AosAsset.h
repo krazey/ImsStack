@@ -50,6 +50,7 @@ public:
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
+            bSupportVideoForEmergencyReg(IMS_FALSE),
             bUseAwtWhenInitRegWithNextPcscf(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
             bUseSecurityServerPortInInitReg(IMS_FALSE),
@@ -127,6 +128,7 @@ public:
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatForReg;
+    IMS_BOOL bSupportVideoForEmergencyReg;
     IMS_BOOL bUseAwtWhenInitRegWithNextPcscf;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMS_BOOL bUseSecurityServerPortInInitReg;

@@ -93,11 +93,18 @@ TEST_F(AosHandleEmergencyMtcTest, InitializeServiceFeature_Test)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoSupportedForEmergencyReg())
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
     InitializeServiceFeature();
     EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::MMTEL));
+    EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::VIDEO));
     EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::TEXT));
 
     InitializeServiceFeature();
     EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::MMTEL));
+    EXPECT_FALSE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::VIDEO));
     EXPECT_FALSE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::TEXT));
 }
