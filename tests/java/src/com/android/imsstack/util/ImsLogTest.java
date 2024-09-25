@@ -62,6 +62,19 @@ public class ImsLogTest {
         ImsLog.e(SLOT0, LOG_MESSAGE + ": e");
         ImsLog.e(LOG_MESSAGE + ": e w/ exception", throwable);
         ImsLog.e(SLOT0, LOG_MESSAGE + ": e w/ exception", throwable);
+
+        ImsLog.v(this, LOG_MESSAGE + ": v");
+        ImsLog.v(this, SLOT0, LOG_MESSAGE + ": v");
+        ImsLog.d(this, LOG_MESSAGE + ": d");
+        ImsLog.d(this, SLOT0, LOG_MESSAGE + ": d");
+        ImsLog.i(this, LOG_MESSAGE + ": i");
+        ImsLog.i(this, SLOT0, LOG_MESSAGE + ": i");
+        ImsLog.w(this, LOG_MESSAGE + ": w");
+        ImsLog.w(this, SLOT0, LOG_MESSAGE + ": w");
+        ImsLog.e(this, LOG_MESSAGE + ": e");
+        ImsLog.e(this, SLOT0, LOG_MESSAGE + ": e");
+        ImsLog.e(this, LOG_MESSAGE + ": e w/ exception", throwable);
+        ImsLog.e(this, SLOT0, LOG_MESSAGE + ": e w/ exception", throwable);
     }
 
     @Test
@@ -91,6 +104,19 @@ public class ImsLogTest {
         ImsLog.e(SLOT0, LOG_MESSAGE_DISABLED + ": e");
         ImsLog.e(LOG_MESSAGE_DISABLED + ": e w/ exception", throwable);
         ImsLog.e(SLOT0, LOG_MESSAGE_DISABLED + ": e w/ exception", throwable);
+
+        ImsLog.v(this, LOG_MESSAGE_DISABLED + ": v");
+        ImsLog.v(this, SLOT0, LOG_MESSAGE_DISABLED + ": v");
+        ImsLog.d(this, LOG_MESSAGE_DISABLED + ": d");
+        ImsLog.d(this, SLOT0, LOG_MESSAGE_DISABLED + ": d");
+        ImsLog.i(this, LOG_MESSAGE_DISABLED + ": i");
+        ImsLog.i(this, SLOT0, LOG_MESSAGE_DISABLED + ": i");
+        ImsLog.w(this, LOG_MESSAGE_DISABLED + ": w");
+        ImsLog.w(this, SLOT0, LOG_MESSAGE_DISABLED + ": w");
+        ImsLog.e(this, LOG_MESSAGE_DISABLED + ": e");
+        ImsLog.e(this, SLOT0, LOG_MESSAGE_DISABLED + ": e");
+        ImsLog.e(this, LOG_MESSAGE_DISABLED + ": e w/ exception", throwable);
+        ImsLog.e(this, SLOT0, LOG_MESSAGE_DISABLED + ": e w/ exception", throwable);
     }
 
     @Test

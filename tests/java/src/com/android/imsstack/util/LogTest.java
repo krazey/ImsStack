@@ -63,6 +63,13 @@ public class LogTest {
         Log.i(TAG, LOG_MESSAGE + ": i");
         Log.v(TAG, LOG_MESSAGE + ": v");
         Log.w(TAG, LOG_MESSAGE + ": w");
+
+        Log.d(this, LOG_MESSAGE + ": d");
+        Log.e(this, LOG_MESSAGE + ": e");
+        Log.e(this, LOG_MESSAGE + ": e w/ exception", throwable);
+        Log.i(this, LOG_MESSAGE + ": i");
+        Log.v(this, LOG_MESSAGE + ": v");
+        Log.w(this, LOG_MESSAGE + ": w");
     }
 
     @Test
