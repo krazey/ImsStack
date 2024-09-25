@@ -159,7 +159,7 @@ void CurrentLocationDiscoveryController::SetLocationInformation()
         return;
     }
 
-    MtcLocationObject(m_objContext).SetLocationToMessage(*piMessage);
+    MtcLocationObject(m_objContext).SetLocationToMessage(*piMessage, IMS_TRUE);
 }
 
 PRIVATE

@@ -395,7 +395,7 @@ PROTECTED VIRTUAL void MessageFormatter::SetLocation()
         return;
     }
 
-    MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage);
+    MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage, IMS_TRUE);
 }
 
 /* -------------------------------------------------------------------------------------------------

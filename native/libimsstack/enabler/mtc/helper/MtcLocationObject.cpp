@@ -151,7 +151,7 @@ PUBLIC GLOBAL MtcLocationProperties* MtcLocationObject::GetLocationFromMessage(
 
 PUBLIC
 void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
-        IN const ByteArray& objContent, IN IMS_BOOL bGeolocationRouting)
+        IN IMS_BOOL bGeolocationRouting, IN const ByteArray& objContent)
 {
     if (objContent.GetLength() <= 0)
     {
