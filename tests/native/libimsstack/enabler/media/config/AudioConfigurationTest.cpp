@@ -374,3 +374,26 @@ TEST_F(AudioConfigurationTest, GetAudioInactivityTimer)
     EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(), nRtpInactivityTimerMillis);
     EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(), nRtcpInactivityTimerMillis);
 }
+
+TEST_F(AudioConfigurationTest, testIsAudioInactivityCallEndReason)
+{
+    ImsVector<IMS_SINT32> objCallEndReasons;
+    objCallEndReasons.Push((IMS_SINT32)RTCP_INACTIVITY_ON_HOLD);
+    objCallEndReasons.Push((IMS_SINT32)RTP_INACTIVITY_ON_CONNECTED);
+    objCallEndReasons.Push((IMS_SINT32)E911_RTP_INACTIVITY_ON_CONNECTED);
+
+    ON_CALL(*m_pMockICarrierConfig,
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY))
+            .WillByDefault(Return(objCallEndReasons));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->IsAudioInactivityCallEndReason(RTCP_INACTIVITY_ON_HOLD), IMS_TRUE);
+    EXPECT_EQ(m_pConfig->IsAudioInactivityCallEndReason(RTCP_INACTIVITY_ON_CONNECTED), IMS_FALSE);
+    EXPECT_EQ(m_pConfig->IsAudioInactivityCallEndReason(RTP_INACTIVITY_ON_CONNECTED), IMS_TRUE);
+    EXPECT_EQ(m_pConfig->IsAudioInactivityCallEndReason(E911_RTCP_INACTIVITY_ON_CONNECTED),
+            IMS_FALSE);
+    EXPECT_EQ(
+            m_pConfig->IsAudioInactivityCallEndReason(E911_RTP_INACTIVITY_ON_CONNECTED), IMS_TRUE);
+}

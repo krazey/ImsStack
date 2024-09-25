@@ -37,3 +37,12 @@ TEST_F(AudioMediaSessionTest, testSetGetInactivityTimer)
     EXPECT_EQ(m_pAudioMediaSession->GetInactivityTimer(NETWORK_TONE_INACTIVITY), INACTIVITY_TIME);
     m_pAudioMediaSession->SetNetworkToneTimer(0);
 }
+
+TEST_F(AudioMediaSessionTest, testSetServiceType)
+{
+    m_pAudioMediaSession->SetServiceType(MEDIA_SERVICE_DEFAULT);
+    EXPECT_EQ(m_pAudioMediaSession->GetServiceType(), MEDIA_SERVICE_DEFAULT);
+
+    m_pAudioMediaSession->SetServiceType(MEDIA_SERVICE_EMERGENCY);
+    EXPECT_EQ(m_pAudioMediaSession->GetServiceType(), MEDIA_SERVICE_EMERGENCY);
+}

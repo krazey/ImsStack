@@ -85,7 +85,8 @@ protected:
 
 TEST_F(AudioControllerTest, testCreateSessionFail)
 {
-    EXPECT_EQ(m_pController->CreateSession(nullptr, 10000, nullptr), IMS_FALSE);
+    EXPECT_EQ(m_pController->CreateSession(nullptr, 10000, nullptr, MEDIA_SERVICE_DEFAULT),
+            IMS_FALSE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 0);
 }
 
@@ -103,7 +104,9 @@ TEST_F(AudioControllerTest, testUpdateLocalAddressFail)
 TEST_F(AudioControllerTest, testOpenSessionFail)
 {
     IMS_UINTP negoId = 1000;
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
     IpAddress objIpAddr(LOCAL_IP);
@@ -119,7 +122,9 @@ TEST_F(AudioControllerTest, testCloseSessionFail)
 TEST_F(AudioControllerTest, testModifySessionSendDtmf)
 {
     IMS_UINTP negoId = 1000;
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(negoId), IMS_TRUE);
@@ -134,7 +139,9 @@ TEST_F(AudioControllerTest, testModifySessionSendDtmf)
 TEST_F(AudioControllerTest, testAddSession)
 {
     IMS_UINTP negoId = 1000;
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
@@ -142,7 +149,8 @@ TEST_F(AudioControllerTest, testAddSession)
 
     EXPECT_EQ(m_pController->AddSession(2000, ACCESS_NETWORK, m_pAudioNego), IMS_FALSE);
 
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, 2000, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, 2000, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 2);
 
     EXPECT_EQ(m_pController->AddSession(2000, ACCESS_NETWORK, m_pAudioNego), IMS_TRUE);
@@ -151,7 +159,9 @@ TEST_F(AudioControllerTest, testAddSession)
 TEST_F(AudioControllerTest, testConfirmSession)
 {
     IMS_UINTP negoId = 1000;
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
@@ -159,7 +169,8 @@ TEST_F(AudioControllerTest, testConfirmSession)
 
     EXPECT_EQ(m_pController->ConfirmSession(2000), IMS_FALSE);
 
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, 2000, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, 2000, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 2);
 
     EXPECT_EQ(m_pController->ConfirmSession(2000), IMS_TRUE);
@@ -169,7 +180,9 @@ TEST_F(AudioControllerTest, testUpdateQualityThreshold)
 {
     IMS_UINTP negoId = 1000;
 
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, nullptr), IMS_FALSE);
@@ -185,8 +198,12 @@ TEST_F(AudioControllerTest, testInactivityTimer)
     IMS_UINT32 inactivityTime2 = 2222;
     IMS_UINT32 inactivityTime3 = 3333;
 
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId1, m_pConfig), IMS_TRUE);
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId2, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId1, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId2, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 2);
 
     m_pController->SetNetworkToneTimer(negoId1, inactivityTime1);
