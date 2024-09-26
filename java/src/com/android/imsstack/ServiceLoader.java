@@ -63,7 +63,7 @@ public class ServiceLoader {
         if (mJniReady) {
             return;
         }
-        Log.i(Log.TAG, "ServiceLoader: initJni");
+        Log.i(this, "initJni");
         NativeCommands.setDeviceConfig(AppContext.getInstance());
         JniImsProxy.init();
         mJniReady = true;
@@ -77,7 +77,7 @@ public class ServiceLoader {
             return;
         }
 
-        Log.i(Log.TAG, "ServiceLoader: init");
+        Log.i(this, "init");
 
         Context context = AppContext.getInstance();
         ImsLog.init();
@@ -97,7 +97,7 @@ public class ServiceLoader {
      * @param slotId The slot-id to be started.
      */
     public void start(int slotId) {
-        Log.i(Log.TAG, "ServiceLoader: started on slot" + slotId);
+        Log.i(this, "Started on slot" + slotId);
 
         Context context = AppContext.getInstance();
         ImsServiceRegistry.getInstance(slotId).getMmTelFeatureRegistry().initUserSettings();
@@ -124,7 +124,7 @@ public class ServiceLoader {
      * @param slotId The slot-id to be stopped.
      */
     public void stop(int slotId) {
-        Log.i(Log.TAG, "ServiceLoader: stopped on slot" + slotId);
+        Log.i(this, "Stopped on slot" + slotId);
 
         ImsStackRegistry.setImsServiceState(slotId, false);
 

@@ -141,7 +141,7 @@ public final class AgentFactory {
             return;
         }
 
-        Log.i(Log.TAG, "createAgents");
+        Log.i(this, "createAgents");
 
         if (mDefaultSystemCallAgent == null) {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
@@ -159,7 +159,7 @@ public final class AgentFactory {
      * Destroys the default agents.
      */
     public void destroyAgents() {
-        Log.i(Log.TAG, "destroyAgents");
+        Log.i(this, "destroyAgents");
 
         Collection<IAgent> agentList = reverseCollection(mAgents.values());
         for (IAgent agent : agentList) {
@@ -180,7 +180,7 @@ public final class AgentFactory {
      * @param context A {@link Context} object.
      */
     public void initAgents(Context context) {
-        Log.i(Log.TAG, "initAgents");
+        Log.i(this, "initAgents");
 
         if (mDefaultSystemCallAgent == null) {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
@@ -209,7 +209,7 @@ public final class AgentFactory {
             return;
         }
 
-        Log.i(Log.TAG, "createAgentsForSlot" + slotId);
+        Log.i(this, "createAgentsForSlot" + slotId);
 
         mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
 
@@ -232,7 +232,7 @@ public final class AgentFactory {
      * @param slotId A slot id.
      */
     public void destroyAgentsForSlot(int slotId) {
-        Log.i(Log.TAG, "destroyAgentsForSlot" + slotId);
+        Log.i(this, "destroyAgentsForSlot" + slotId);
 
         Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
@@ -261,7 +261,7 @@ public final class AgentFactory {
      * @param slotId A slot id.
      */
     public void initAgentsForSlot(Context context, int slotId) {
-        Log.i(Log.TAG, "initAgentsForSlot" + slotId);
+        Log.i(this, "initAgentsForSlot" + slotId);
 
         SystemCallAgent sca = mSystemCallAgents.get(slotId);
 

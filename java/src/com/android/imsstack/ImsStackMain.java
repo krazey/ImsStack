@@ -46,7 +46,6 @@ import com.android.imsstack.util.Log;
  * A main entry point of starting and stopping the ImsStack core component.
  */
 public class ImsStackMain {
-    private static final String TAG = ImsStackMain.class.getSimpleName();
     private static final int DEFAULT_SIM_COUNT = 2;
 
     private final ServiceLoader mServiceLoader = new ServiceLoader();
@@ -71,7 +70,7 @@ public class ImsStackMain {
         boolean debugEnabled = ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED, 0);
         Log.init(ImsUtils.hexStringToInt(logOptions), debugEnabled);
-        Log.i(TAG, "start");
+        Log.i(this, "start");
 
         DeviceConfig.init(AppContext.getInstance());
         mActiveSimCount = DeviceConfig.getActiveSimCount();
@@ -110,7 +109,7 @@ public class ImsStackMain {
     private void onStart() {
         Log.setDebuggable();
 
-        Log.i(TAG, "onStart");
+        Log.i(this, "onStart");
 
         for (int i = 0; i < mActiveSimCount; ++i) {
             int subId = MSimUtils.getSubId(i);
@@ -121,7 +120,7 @@ public class ImsStackMain {
             if (simState == Sim.STATE_LOADED
                     || simState == Sim.STATE_LOCKED
                     || simState == Sim.STATE_ABSENT) {
-                Log.d(TAG, "SimState: onStart");
+                Log.d(this, "SimState: onStart");
                 processSimState(i, subId, simState);
             }
         }
@@ -136,11 +135,11 @@ public class ImsStackMain {
         int subId = Sim.getExtraSubscriptionIndex(intent);
         int simState = Sim.getSimStateFromTelephonySimState(Sim.getExtraSimState(intent));
 
-        Log.w(TAG, "handleSimStateChanged: state=" + Sim.stateToString(simState)
+        Log.w(this, "handleSimStateChanged: state=" + Sim.stateToString(simState)
                 + ", slotId=" + slotId + ", subId=" + subId + ", userUnlocked=" + userUnlocked);
 
         if (slotId == MSimUtils.INVALID_SLOT_ID) {
-            Log.e(TAG, "Invalid slotId!!!");
+            Log.e(this, "Invalid slotId!!!");
             return;
         }
 
@@ -178,12 +177,12 @@ public class ImsStackMain {
 
         if (simState == Sim.STATE_LOADED) {
             if (!isCarrierConfigLoaded(subId)) {
-                Log.d(TAG, "SimState: wait for CarrierConfigChanged on LOADED in slot" + slotId);
+                Log.d(this, "SimState: wait for CarrierConfigChanged on LOADED in slot" + slotId);
                 return;
             }
         } else if (simState == Sim.STATE_ABSENT) {
             if (oldSimState == Sim.STATE_LOCKED || oldSimState == Sim.STATE_LOADED) {
-                Log.d(TAG, "SimState: wait for CarrierConfigChanged on ABSENT in slot" + slotId);
+                Log.d(this, "SimState: wait for CarrierConfigChanged on ABSENT in slot" + slotId);
                 return;
             }
 
@@ -199,14 +198,14 @@ public class ImsStackMain {
 
         boolean carrierChanged = CarrierInfo.getInstance().updateCarrierId(slotId);
 
-        Log.i(TAG, "SimState: carrierChanged=" + carrierChanged + ", " + slotState.toString());
+        Log.i(this, "SimState: carrierChanged=" + carrierChanged + ", " + slotState.toString());
 
         Context context = AppContext.getInstance();
 
         if (!carrierChanged) {
             if (slotState.isServiceStarted()) {
                 if (slotState.isCarrierConfigChanged()) {
-                    Log.d(TAG, "SimState: carrier-config is changed while running.");
+                    Log.d(this, "SimState: carrier-config is changed while running.");
                     ServiceCaps.updateServiceCapabilities(context, slotId, subId);
                     ServiceLoader.updateCarrierConfig(slotId);
                 }
@@ -220,7 +219,7 @@ public class ImsStackMain {
                 SimCarrierId carrierId = CarrierInfo.getInstance().getCarrierId(slotId);
 
                 if (simState == Sim.STATE_ABSENT && carrierId.isSimAbsent()) {
-                    Log.i(TAG, "SimState: Postpone service restart until SIM is reinserted.");
+                    Log.i(this, "SimState: Postpone service restart until SIM is reinserted.");
                     return;
                 }
 
@@ -235,7 +234,7 @@ public class ImsStackMain {
 
     private void handleCarrierConfigChanged(int slotId,
             int subId, int carrierId, int specificCarrierId) {
-        Log.d(TAG, "handleCarrierConfigChanged :: slotId=" + slotId + ", subId=" + subId
+        Log.d(this, "handleCarrierConfigChanged :: slotId=" + slotId + ", subId=" + subId
                 + ", carrierId=" + carrierId + ", specificCarrierId=" + specificCarrierId);
 
         ImsCarrierResolver.Carrier carrier =
@@ -279,7 +278,7 @@ public class ImsStackMain {
         int activeSimCount = intent.getIntExtra(
                 TelephonyManager.EXTRA_ACTIVE_SIM_SUPPORTED_COUNT, 0);
 
-        Log.d(TAG, "handleMultiSimConfigChanged :: " + mActiveSimCount + " >> " + activeSimCount);
+        Log.d(this, "handleMultiSimConfigChanged :: " + mActiveSimCount + " >> " + activeSimCount);
 
         if (activeSimCount > 0) {
             mActiveSimCount = activeSimCount;
@@ -311,7 +310,7 @@ public class ImsStackMain {
     }
 
     private void startVoLteService(int slotId) {
-        Log.i(TAG, "startVoLteService(" + slotId + ")");
+        Log.i(this, "startVoLteService(" + slotId + ")");
 
         ImsServiceController.start(AppContext.getInstance(), slotId);
 
@@ -321,7 +320,7 @@ public class ImsStackMain {
     }
 
     private void stopVoLteService(int slotId) {
-        Log.i(TAG, "stopVoLteService(" + slotId + ")");
+        Log.i(this, "stopVoLteService(" + slotId + ")");
 
         if (ImsTestMode.getInstance().getTestMode(slotId).isGenericTestMode()) {
             ImsTestHelper.getInstance().cleanup();
@@ -348,10 +347,10 @@ public class ImsStackMain {
         boolean deviceWfcEnabled = resources.getBoolean(
                 com.android.internal.R.bool.config_device_wfc_ims_available);
 
-        Log.i(TAG, "CarrierConfig(" + phoneId + ") - voLteEnabled=" + voLteEnabled
+        Log.i(this, "CarrierConfig(" + phoneId + ") - voLteEnabled=" + voLteEnabled
                 + ", vtEnabled=" + vtEnabled + ", wfcEnabled=" + wfcEnabled
                 + ", identifiedCarrier=" + ccmp.isConfigForIdentifiedCarrier(b));
-        Log.i(TAG, "Device(" + phoneId + ") - voLteEnabled=" + deviceVoLteEnabled
+        Log.i(this, "Device(" + phoneId + ") - voLteEnabled=" + deviceVoLteEnabled
                 + ", vtEnabled=" + deviceVtEnabled + ", wfcEnabled=" + deviceWfcEnabled);
     }
 
@@ -362,7 +361,7 @@ public class ImsStackMain {
                 subId, CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL));
     }
 
-    private static ImsCarrierResolver.Carrier resolveImsCarrier(int slotId,
+    private ImsCarrierResolver.Carrier resolveImsCarrier(int slotId,
             int carrierId, int specificCarrierId) {
         int testCarrierId = ImsPrivateProperties.Persistent.getInt(
                 ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, slotId);
@@ -370,13 +369,13 @@ public class ImsStackMain {
                 ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID, slotId);
 
         if (testCarrierId > 0) {
-            Log.d(TAG, "resolveImsCarrier: testCarrierId=" + testCarrierId
+            Log.d(this, "resolveImsCarrier: testCarrierId=" + testCarrierId
                     + ", carrierId=" + carrierId);
             carrierId = testCarrierId;
         }
 
         if (testSpecificCarrierId > 0) {
-            Log.d(TAG, "resolveImsCarrier: testSpecificCarrierId=" + testSpecificCarrierId
+            Log.d(this, "resolveImsCarrier: testSpecificCarrierId=" + testSpecificCarrierId
                     + ", specificCarrierId=" + specificCarrierId);
             specificCarrierId = testSpecificCarrierId;
         }
@@ -387,7 +386,7 @@ public class ImsStackMain {
                 .build();
         ImsCarrierResolver.Carrier carrier = ImsCarrierResolver.getCarrierFromCarrierId(scid);
 
-        Log.d(TAG, "resolveImsCarrier: " + carrier.toString());
+        Log.d(this, "resolveImsCarrier: " + carrier.toString());
 
         return carrier;
     }
@@ -503,7 +502,7 @@ public class ImsStackMain {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            Log.d(Log.TAG, "ImsStackApp: " + Log.lastSubString(action, "."));
+            Log.d(this, "ImsStackApp: " + Log.lastSubString(action, "."));
 
             if (TelephonyManager.ACTION_SIM_APPLICATION_STATE_CHANGED.equals(action)) {
                 handleSimStateChanged(intent);

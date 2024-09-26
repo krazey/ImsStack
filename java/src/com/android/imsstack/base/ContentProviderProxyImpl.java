@@ -88,7 +88,7 @@ public class ContentProviderProxyImpl implements ContentProviderProxy {
             try {
                 return Settings.Global.getInt(mContext.getContentResolver(), key, defaultValue);
             } catch (SecurityException e) {
-                Log.e(Log.TAG, "Global#getInt: " + key + ", exception=" + e, e);
+                Log.e(this, "Global#getInt: " + key + ", exception=" + e, e);
                 return defaultValue;
             }
         }
@@ -99,7 +99,7 @@ public class ContentProviderProxyImpl implements ContentProviderProxy {
                 String value = Settings.Global.getString(mContext.getContentResolver(), key);
                 return value != null ? value : defaultValue;
             } catch (SecurityException e) {
-                Log.e(Log.TAG, "Global#getString " + key + ", exception=" + e, e);
+                Log.e(this, "Global#getString " + key + ", exception=" + e, e);
                 return defaultValue;
             }
         }
@@ -116,7 +116,7 @@ public class ContentProviderProxyImpl implements ContentProviderProxy {
             try {
                 return Settings.Secure.getInt(mContext.getContentResolver(), key, defaultValue);
             } catch (SecurityException e) {
-                Log.e(Log.TAG, "Secure#getInt: " + key + ", exception=" + e, e);
+                Log.e(this, "Secure#getInt: " + key + ", exception=" + e, e);
                 return defaultValue;
             }
         }
@@ -127,7 +127,7 @@ public class ContentProviderProxyImpl implements ContentProviderProxy {
                 String value = Settings.Secure.getString(mContext.getContentResolver(), key);
                 return value != null ? value : defaultValue;
             } catch (SecurityException e) {
-                Log.e(Log.TAG, "Secure#getString: " + key + ", exception=" + e, e);
+                Log.e(this, "Secure#getString: " + key + ", exception=" + e, e);
                 return defaultValue;
             }
         }
@@ -144,7 +144,7 @@ public class ContentProviderProxyImpl implements ContentProviderProxy {
             try {
                 return Settings.System.getInt(mContext.getContentResolver(), key, defaultValue);
             } catch (SecurityException e) {
-                Log.e(Log.TAG, "System#getInt: " + key + ", exception=" + e, e);
+                Log.e(this, "System#getInt: " + key + ", exception=" + e, e);
                 return defaultValue;
             }
         }
@@ -155,7 +155,7 @@ public class ContentProviderProxyImpl implements ContentProviderProxy {
                 String value = Settings.System.getString(mContext.getContentResolver(), key);
                 return value != null ? value : defaultValue;
             } catch (SecurityException e) {
-                Log.e(Log.TAG, "System#getString: " + key + ", exception=" + e, e);
+                Log.e(this, "System#getString: " + key + ", exception=" + e, e);
                 return defaultValue;
             }
         }
