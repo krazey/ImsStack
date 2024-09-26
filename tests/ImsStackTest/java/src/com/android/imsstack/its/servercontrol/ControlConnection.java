@@ -19,6 +19,7 @@ import com.android.imsstack.its.core.agents.WifiAgent;
 import com.android.imsstack.util.Log;
 
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.CompletableFuture;
@@ -47,7 +48,7 @@ public final class ControlConnection {
      * @param serverIp The IP address of the server to connect to.
      * @throws RuntimeException If Wi-Fi is not enabled or any other error occurs during connection.
      */
-    public ControlConnection(String serverIp) {
+    public ControlConnection(InetAddress serverIp) {
         mConnectionFuture = connectToServer(serverIp);
     }
 
@@ -96,7 +97,7 @@ public final class ControlConnection {
      * @param serverIp The IP address of the server to connect to.
      * @return A {@code CompletableFuture<Void>} which completes once the connection is established.
      */
-    private CompletableFuture<Void> connectToServer(String serverIp) {
+    private CompletableFuture<Void> connectToServer(InetAddress serverIp) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         if (!WifiAgent.getInstance().isWifiConnected()) {

@@ -80,6 +80,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -164,6 +165,21 @@ public class ImsStackTestBase {
                 }
             }
         }
+    }
+
+    /**
+     * Retrieves the P-CSCF addresses.
+     *
+     * @return An unmodifiable list of InetAddresses representing the P-CSCF addresses.
+     * @throws IllegalStateException if the P-CSCF addresses have not been initialized.
+     */
+    @NonNull
+    public static List<InetAddress> getPcscfAddresses() {
+        if (sPcscfAddresses.isEmpty()) {
+            throw new IllegalStateException("P-CSCF addresses have not been initialized.");
+        }
+
+        return Collections.unmodifiableList(sPcscfAddresses);
     }
 
     /**
