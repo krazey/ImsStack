@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef PROFILE_EXTRACTOR_H_
-#define PROFILE_EXTRACTOR_H_
+#ifndef MEDIA_SDP_PARSER_H_
+#define MEDIA_SDP_PARSER_H_
 
 #include "ISessionDescriptor.h"
 #include "media/IMediaDescriptor.h"
@@ -23,24 +23,35 @@
 
 #include "MediaBaseProfile.h"
 
-class ProfileExtractor
+/**
+ * This class is to generate a peer profile by parsing SDP media attributes from the MediaDescriptor
+ * and the SessionDescriptor
+ */
+class MediaSdpParser
 {
 public:
-    explicit ProfileExtractor(IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
-    virtual ~ProfileExtractor();
+    explicit MediaSdpParser(IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
+    virtual ~MediaSdpParser();
 
 protected:
-    void Extract(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
+    /**
+     * @brief Parse the SDP media attributes from the MediaDescriptor and the SessionDescriptor
+     *
+     * @param pSessionDescriptor The SDP descriptor instance to parse the session level SDP
+     * @param pDescriptor The SDP descriptor instance to parse the media level SDP
+     * @param pProfile The Profile to be set attribute by parsing media/session level SDP
+     */
+    void Parse(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT MediaBaseProfile* pProfile);
-    IMS_BOOL ExtractCapaNego(
+    IMS_BOOL ParseCapaNego(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL ExtractAcfg(
+    IMS_BOOL ParseAcfg(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL ExtractTcap(
+    IMS_BOOL ParseTcap(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL ExtractAcap(
+    IMS_BOOL ParseAcap(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL ExtractPcfg(
+    IMS_BOOL ParsePcfg(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
 
 private:

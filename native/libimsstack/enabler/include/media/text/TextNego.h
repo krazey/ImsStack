@@ -22,7 +22,7 @@
 #include "config/TextConfiguration.h"
 #include "text/TextDef.h"
 #include "text/TextProfileUtil.h"
-#include "text/TextProfileExtractor.h"
+#include "text/TextSdpParser.h"
 #include "text/TextSdpGenerator.h"
 #include "text/TextProfileNegotiator.h"
 
@@ -85,7 +85,7 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    std::unique_ptr<TextProfileExtractor> m_pProfileExtractor;
+    std::unique_ptr<TextSdpParser> m_pSdpParser;
 };
 
 #endif

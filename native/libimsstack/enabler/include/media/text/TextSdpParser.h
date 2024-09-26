@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-#ifndef TEXT_PROFILE_EXTRACTOR_H_
-#define TEXT_PROFILE_EXTRACTOR_H_
+#ifndef TEXT_SDP_PARSER_H_
+#define TEXT_SDP_PARSER_H_
 
-#include "ProfileExtractor.h"
+#include "MediaSdpParser.h"
 #include "text/TextProfileUtil.h"
 
-class TextProfileExtractor : public ProfileExtractor
+/**
+ * This class is to generate a peer text profile by parsing SDP media attributes from the
+ * MediaDescriptor and the SessionDescriptor
+ */
+class TextSdpParser : public MediaSdpParser
 {
 public:
-    explicit TextProfileExtractor();
-    virtual ~TextProfileExtractor();
+    explicit TextSdpParser();
+    virtual ~TextSdpParser();
 
-    IMS_BOOL Extract(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
+    IMS_BOOL Parse(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT TextProfile* pProfile);
 
 private:
-    void ExtractPayloads(IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile);
-    void ExtractRtpMap(IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload,
+    void ParsePayloads(IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile);
+    void ParseRtpMap(IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload,
             OUT AString& strCodecName);
-    IMS_BOOL ExtractFmtp(IN const AString& strFmtp, OUT TextProfile::Payload* pPayload,
+    IMS_BOOL ParseFmtp(IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload,
             IN const ImsList<SdpMediaFormat*>& lstMediaFormat);
-    IMS_BOOL ExtractRedFmtp(IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp);
-    IMS_BOOL ExtractRedSubPtExist(
+    IMS_BOOL ParseRedFmtp(IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp);
+    IMS_BOOL ParseRedSubPtExist(
             IN const IMS_SINT32 nRedPayload, IN const ImsList<SdpMediaFormat*>& lstMediaFormat);
 };
 

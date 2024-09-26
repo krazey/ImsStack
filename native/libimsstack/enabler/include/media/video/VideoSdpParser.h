@@ -14,59 +14,63 @@
  * limitations under the License.
  */
 
-#ifndef VIDEO_PROFILE_EXTRACTOR_H_
-#define VIDEO_PROFILE_EXTRACTOR_H_
+#ifndef VIDEO_SDP_PARSER_H_
+#define VIDEO_SDP_PARSER_H_
 
-#include "ProfileExtractor.h"
+#include "MediaSdpParser.h"
 #include "video/VideoProfileUtil.h"
 
-class VideoProfileExtractor : public ProfileExtractor
+/**
+ * This class is to generate a peer video profile by parsing SDP media attributes from the
+ * MediaDescriptor and the SessionDescriptor
+ */
+class VideoSdpParser : public MediaSdpParser
 {
 public:
-    explicit VideoProfileExtractor();
-    virtual ~VideoProfileExtractor();
+    explicit VideoSdpParser();
+    virtual ~VideoSdpParser();
 
-    IMS_BOOL Extract(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
+    IMS_BOOL Parse(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT VideoProfile* pProfile);
 
 private:
-    void ExtractTranportType(IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
+    void ParseTranportType(IN const IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
     void SetAvpfSupport(OUT VideoProfile* pProfile);
-    void ExtractPayloads(IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
-    void ExtractRtpMap(IN const SdpAvCodec* pSdpCodec, OUT VideoProfile::Payload* pPayload);
+    void ParsePayloads(IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
+    void ParseRtpMap(IN const SdpAvCodec* pSdpCodec, OUT VideoProfile::Payload* pPayload);
     VIDEO_CODEC SetCodec(IN VideoProfile::Payload* pPayload);
     IMS_BOOL IsValidCodec(IN const VIDEO_CODEC eVideoCodec);
-    AString ExtractImageAttr(IN const SdpAvCodec* pSdpCodec,
+    AString ParseImageAttr(IN const SdpAvCodec* pSdpCodec,
             IN const ImsList<AString>& objImageAttributes, OUT VideoProfile::Payload* pPayload);
-    AString ExtractFrameSize(IN const SdpAvCodec* pSdpCodec,
-            IN const ImsList<AString>& objFrameSizes, OUT VideoProfile::Payload* pPayload);
-    void ExtractCvo(IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
-    IMS_BOOL ExtractFmtp(IN const AString& strFmtp, OUT VideoProfile::Payload* pPayload,
+    AString ParseFrameSize(IN const SdpAvCodec* pSdpCodec, IN const ImsList<AString>& objFrameSizes,
+            OUT VideoProfile::Payload* pPayload);
+    void ParseCvo(IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
+    IMS_BOOL ParseFmtp(IN const SdpAvCodec* pSdpCodec, OUT VideoProfile::Payload* pPayload,
             IN const VIDEO_CODEC eVideoCodec);
-    IMS_BOOL ExtractVideoBaseFmtp(
+    IMS_BOOL ParseVideoBaseFmtp(
             IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::VideoFmtp* pFmtp);
-    void ExtractAvcFmtp(IN const ImsList<AString>& objSplitEqual, IN const AString& strSpropParam,
+    void ParseAvcFmtp(IN const ImsList<AString>& objSplitEqual, IN const AString& strSpropParam,
             OUT VideoProfile::AvcFmtp* pFmtp);
-    void ExtractHevcFmtp(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps,
+    void ParseHevcFmtp(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps,
             OUT AString& strSps, OUT AString& strPps, OUT VideoProfile::HevcFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpPacketizationMode(
+    IMS_BOOL ParsePacketizationMode(
             IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::VideoFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpProfileLevelId(
+    IMS_BOOL ParseProfileLevelId(
             IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::AvcFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpSpropParameterSets(IN const ImsList<AString>& objSplitEqual,
+    IMS_BOOL ParseSpropParameterSets(IN const ImsList<AString>& objSplitEqual,
             IN const AString& strSpropParam, OUT VideoProfile::AvcFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpProfileId(
+    IMS_BOOL ParseProfileId(
             IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::HevcFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpLevelId(
+    IMS_BOOL ParseLevelId(
             IN const ImsList<AString>& objSplitEqual, OUT VideoProfile::HevcFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpVps(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps);
-    IMS_BOOL ExtractFmtpSps(IN const ImsList<AString>& objSplitEqual, OUT AString& strSps);
-    IMS_BOOL ExtractFmtpPps(IN const ImsList<AString>& objSplitEqual, OUT AString& strPps);
-    void ExtractFmtpSpropParam(IN const AString& strVps, IN const AString& strSps,
+    IMS_BOOL ParseVps(IN const ImsList<AString>& objSplitEqual, OUT AString& strVps);
+    IMS_BOOL ParseSps(IN const ImsList<AString>& objSplitEqual, OUT AString& strSps);
+    IMS_BOOL ParsePps(IN const ImsList<AString>& objSplitEqual, OUT AString& strPps);
+    void ParseSpropParam(IN const AString& strVps, IN const AString& strSps,
             IN const AString& strPps, OUT VideoProfile::VideoFmtp* pFmtp);
-    void ExtractResolution(OUT VideoProfile::Payload* pPayload, AString& strImageAttr,
+    void ParseResolution(OUT VideoProfile::Payload* pPayload, AString& strImageAttr,
             AString& strFrameSize, VIDEO_CODEC eVideoCodec);
-    void ExtractAvpfAttribute(IN SdpAvCodec* pSdpCodec, IN VideoProfile::Payload* pPayload,
+    void ParseAvpfAttribute(IN SdpAvCodec* pSdpCodec, IN VideoProfile::Payload* pPayload,
             OUT VideoProfile* pProfile);
     IMS_BOOL IsAvpfSupported(IN VideoProfile* pProfile);
     IMS_BOOL GetCorrectImageIndex(IN IMS_SINT32 nPayloadTypeNum, IN ImsList<AString> objAttributes,
