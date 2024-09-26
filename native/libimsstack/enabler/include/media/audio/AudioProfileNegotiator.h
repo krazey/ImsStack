@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef AUDIO_SDP_NEGOTIATOR_H_
-#define AUDIO_SDP_NEGOTIATOR_H_
+#ifndef AUDIO_PROFILE_NEGOTIATOR_H_
+#define AUDIO_PROFILE_NEGOTIATOR_H_
 
-#include "SdpNegotiator.h"
+#include "MediaProfileNegotiator.h"
 #include "audio/AudioProfileUtil.h"
 
 class MediaConfiguration;
 
-class AudioSdpNegotiator : public SdpNegotiator
+/**
+ * This class is to generate a negotiated audio profile by negotiating a local audio profile and a
+ * peer audio profile
+ */
+class AudioProfileNegotiator : public MediaProfileNegotiator
 {
 public:
-    AudioSdpNegotiator();
-    virtual ~AudioSdpNegotiator();
+    AudioProfileNegotiator();
+    virtual ~AudioProfileNegotiator();
 
     IMS_BOOL Negotiate(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile,

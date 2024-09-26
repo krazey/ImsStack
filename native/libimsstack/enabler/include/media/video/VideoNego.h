@@ -23,7 +23,7 @@
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileExtractor.h"
 #include "video/VideoSdpGenerator.h"
-#include "video/VideoSdpNegotiator.h"
+#include "video/VideoProfileNegotiator.h"
 #include "video/VideoProfileUtil.h"
 
 class VideoNego : public BaseNego

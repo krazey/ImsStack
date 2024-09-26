@@ -34,7 +34,7 @@ PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
-    m_pSdpNegotiator = std::make_shared<TextSdpNegotiator>();
+    m_pProfileNegotiator = std::make_shared<TextProfileNegotiator>();
 }
 
 PUBLIC
@@ -64,7 +64,7 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
 {
     // Handling exception case
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pSdpNegotiator == IMS_NULL)
+            m_pProfileNegotiator == IMS_NULL)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -88,7 +88,7 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
     objOaModel.pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
-    if (std::static_pointer_cast<TextSdpNegotiator>(m_pSdpNegotiator)
+    if (std::static_pointer_cast<TextProfileNegotiator>(m_pProfileNegotiator)
                     ->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
                             GetNegotiatedProfile(&objOaModel), m_pConfig) != IMS_TRUE)
     {
@@ -396,7 +396,7 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pSdpNegotiator == IMS_NULL)
+            m_pProfileNegotiator == IMS_NULL)
     {
         return MEDIA_DIRECTION_INVALID;
     }
@@ -421,7 +421,7 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
     pNewOaModel->pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
-    if (std::static_pointer_cast<TextSdpNegotiator>(m_pSdpNegotiator)
+    if (std::static_pointer_cast<TextProfileNegotiator>(m_pProfileNegotiator)
                     ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
                             GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
     {
@@ -441,7 +441,8 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
 PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_pSdpNegotiator == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
+            m_pProfileNegotiator == IMS_NULL)
     {
         return MEDIA_DIRECTION_INVALID;
     }
@@ -478,7 +479,7 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
     pNewOaModel->pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
-    if (std::static_pointer_cast<TextSdpNegotiator>(m_pSdpNegotiator)
+    if (std::static_pointer_cast<TextProfileNegotiator>(m_pProfileNegotiator)
                     ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
                             IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
     {

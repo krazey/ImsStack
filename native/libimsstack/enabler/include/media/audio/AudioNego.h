@@ -23,7 +23,7 @@
 #include "audio/AudioProfileExtractor.h"
 #include "audio/AudioProfileUtil.h"
 #include "audio/AudioSdpGenerator.h"
-#include "audio/AudioSdpNegotiator.h"
+#include "audio/AudioProfileNegotiator.h"
 #include "config/AudioConfiguration.h"
 
 /**

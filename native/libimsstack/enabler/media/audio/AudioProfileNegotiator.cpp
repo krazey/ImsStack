@@ -20,7 +20,7 @@
 #include "audio/AudioDef.h"
 #include "audio/AudioNegoAmr.h"
 #include "audio/AudioNegoEvs.h"
-#include "audio/AudioSdpNegotiator.h"
+#include "audio/AudioProfileNegotiator.h"
 
 #define EVS_NEGO_RETRY_COUNT 2
 #define RETURN_MODE_MATCHED  IMS_FALSE
@@ -28,19 +28,19 @@
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC AudioSdpNegotiator::AudioSdpNegotiator() :
-        SdpNegotiator(MEDIA_TYPE_AUDIO)
+PUBLIC AudioProfileNegotiator::AudioProfileNegotiator() :
+        MediaProfileNegotiator(MEDIA_TYPE_AUDIO)
 {
-    IMS_TRACE_I("+AudioSdpNegotiator()", 0, 0, 0);
+    IMS_TRACE_I("+AudioProfileNegotiator()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioSdpNegotiator::~AudioSdpNegotiator()
+PUBLIC VIRTUAL AudioProfileNegotiator::~AudioProfileNegotiator()
 {
-    IMS_TRACE_I("~AudioSdpNegotiator()", 0, 0, 0);
+    IMS_TRACE_I("~AudioProfileNegotiator()", 0, 0, 0);
 }
 
 PUBLIC
-IMS_BOOL AudioSdpNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
+IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
         OUT AudioProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig)
 {
@@ -88,7 +88,7 @@ IMS_BOOL AudioSdpNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 }
 
 PRIVATE
-void AudioSdpNegotiator::ResetNegotiatedProfile(
+void AudioProfileNegotiator::ResetNegotiatedProfile(
         IN const AudioProfile* pLocalProfile, OUT AudioProfile** pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL)
@@ -101,7 +101,7 @@ void AudioSdpNegotiator::ResetNegotiatedProfile(
 }
 
 PRIVATE
-AudioProfile::Payload* AudioSdpNegotiator::NegotiatePayload(IN AudioProfile* pLocalProfile,
+AudioProfile::Payload* AudioProfileNegotiator::NegotiatePayload(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
@@ -140,7 +140,7 @@ AudioProfile::Payload* AudioSdpNegotiator::NegotiatePayload(IN AudioProfile* pLo
 }
 
 PRIVATE
-AudioProfile::Payload* AudioSdpNegotiator::NegotiateAudioPayload(IN AudioProfile* pLocalProfile,
+AudioProfile::Payload* AudioProfileNegotiator::NegotiateAudioPayload(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
@@ -198,7 +198,7 @@ AudioProfile::Payload* AudioSdpNegotiator::NegotiateAudioPayload(IN AudioProfile
 }
 
 PRIVATE
-AudioProfile::Payload* AudioSdpNegotiator::NegotiateAmr(IN AudioProfile* pLocalProfile,
+AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
         IN IMS_UINT32 nPayloadIndex, IN IMS_UINT32 nNegoModeSetList,
         IN IMS_UINT32 nNegoDefaultRtpModeSet)
@@ -257,7 +257,7 @@ AudioProfile::Payload* AudioSdpNegotiator::NegotiateAmr(IN AudioProfile* pLocalP
 }
 
 PRIVATE
-AudioProfile::AmrFmtp* AudioSdpNegotiator::NegotiateAmrFmtp(IN AudioProfile* pLocalProfile,
+AudioProfile::AmrFmtp* AudioProfileNegotiator::NegotiateAmrFmtp(IN AudioProfile* pLocalProfile,
         IN AudioProfile::Payload* pDestPayload, IN IMS_UINT32 nNegoModeSetList,
         IN IMS_UINT32 nNegoDefaultRtpModeSet, OUT IMS_SINT32& nSrcPayloadIndex)
 {
@@ -290,7 +290,7 @@ AudioProfile::AmrFmtp* AudioSdpNegotiator::NegotiateAmrFmtp(IN AudioProfile* pLo
 }
 
 PRIVATE
-AudioProfile::Payload* AudioSdpNegotiator::NegotiateEvs(IN AudioProfile* pLocalProfile,
+AudioProfile::Payload* AudioProfileNegotiator::NegotiateEvs(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
         IN IMS_UINT32 nPayloadIndex, IN IMS_UINT32 nBandwidthNegoList,
         IN IMS_UINT32 nBitrateNegoList, IN IMS_UINT32 nModeSetNegoList)
@@ -345,7 +345,7 @@ AudioProfile::Payload* AudioSdpNegotiator::NegotiateEvs(IN AudioProfile* pLocalP
     return pEvs;
 }
 PRIVATE
-AudioProfile::EvsFmtp* AudioSdpNegotiator::NegotiateEvsFmtp(IN AudioProfile* pLocalProfile,
+AudioProfile::EvsFmtp* AudioProfileNegotiator::NegotiateEvsFmtp(IN AudioProfile* pLocalProfile,
         IN AudioProfile::Payload* pDestPayload, IN IMS_UINT32 nBandwidthNegoList,
         IN IMS_UINT32 nBitrateNegoList, IN IMS_UINT32 nModeSetNegoList,
         OUT IMS_SINT32& nSrcPayloadIndex)
@@ -387,7 +387,7 @@ AudioProfile::EvsFmtp* AudioSdpNegotiator::NegotiateEvsFmtp(IN AudioProfile* pLo
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateUniDirectionBrBw(OUT AudioProfile::EvsFmtp* pEvsFmtp,
+void AudioProfileNegotiator::NegotiateUniDirectionBrBw(OUT AudioProfile::EvsFmtp* pEvsFmtp,
         IN IMS_UINT32 nBandwidthNegoList, IN IMS_UINT32 nBitrateNegoList)
 {
     if (pEvsFmtp == IMS_NULL)
@@ -414,7 +414,7 @@ void AudioSdpNegotiator::NegotiateUniDirectionBrBw(OUT AudioProfile::EvsFmtp* pE
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateCmr(
+void AudioProfileNegotiator::NegotiateCmr(
         IN AudioProfile::EvsFmtp* pSrcFmtp, OUT AudioProfile::EvsFmtp* pEvsFmtp)
 {
     if (pSrcFmtp == IMS_NULL || pEvsFmtp == IMS_NULL)
@@ -450,7 +450,7 @@ void AudioSdpNegotiator::NegotiateCmr(
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateModeSet(OUT AudioProfile::EvsFmtp* pEvsFmtp)
+void AudioProfileNegotiator::NegotiateModeSet(OUT AudioProfile::EvsFmtp* pEvsFmtp)
 {
     if (pEvsFmtp == IMS_NULL)
     {
@@ -473,7 +473,7 @@ void AudioSdpNegotiator::NegotiateModeSet(OUT AudioProfile::EvsFmtp* pEvsFmtp)
 }
 
 PRIVATE
-AudioProfile::Payload* AudioSdpNegotiator::NegotiatePcm(IN AudioProfile* pLocalProfile,
+AudioProfile::Payload* AudioProfileNegotiator::NegotiatePcm(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
         IN IMS_UINT32 nPayloadIndex)
 {
@@ -513,8 +513,9 @@ AudioProfile::Payload* AudioSdpNegotiator::NegotiatePcm(IN AudioProfile* pLocalP
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::NegotiateTelephoneEventPayload(IN IMS_SINT32 nNegotiatedSamplingRate,
-        IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile)
+IMS_BOOL AudioProfileNegotiator::NegotiateTelephoneEventPayload(
+        IN IMS_SINT32 nNegotiatedSamplingRate, IN AudioProfile* pPeerProfile,
+        OUT AudioProfile* pNegotiatedProfile)
 {
     if (nNegotiatedSamplingRate == 0 || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -555,8 +556,9 @@ IMS_BOOL AudioSdpNegotiator::NegotiateTelephoneEventPayload(IN IMS_SINT32 nNegot
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateTelephoneEvent8000Payload(IN IMS_SINT32 nNegotiatedSamplingRate,
-        IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile)
+void AudioProfileNegotiator::NegotiateTelephoneEvent8000Payload(
+        IN IMS_SINT32 nNegotiatedSamplingRate, IN AudioProfile* pPeerProfile,
+        OUT AudioProfile* pNegotiatedProfile)
 {
     if (pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -595,7 +597,7 @@ void AudioSdpNegotiator::NegotiateTelephoneEvent8000Payload(IN IMS_SINT32 nNegot
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::NegotiateDirection(IN AudioProfile* pLocalProfile,
+IMS_BOOL AudioProfileNegotiator::NegotiateDirection(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
@@ -617,7 +619,7 @@ IMS_BOOL AudioSdpNegotiator::NegotiateDirection(IN AudioProfile* pLocalProfile,
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateRtcpXr(
+void AudioProfileNegotiator::NegotiateRtcpXr(
         IN AudioProfile* pLocalProfile, OUT AudioProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
@@ -636,7 +638,7 @@ void AudioSdpNegotiator::NegotiateRtcpXr(
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiatePtime(
+void AudioProfileNegotiator::NegotiatePtime(
         OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nLocalPtime)
 {
     if (pNegotiatedProfile == IMS_NULL)
@@ -652,7 +654,7 @@ void AudioSdpNegotiator::NegotiatePtime(
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateMaxPtime(
+void AudioProfileNegotiator::NegotiateMaxPtime(
         OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nLocalMaxPtime)
 {
     if (pNegotiatedProfile == IMS_NULL)
@@ -668,8 +670,8 @@ void AudioSdpNegotiator::NegotiateMaxPtime(
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateAnbr(IN IMS_BOOL nSupportAnbrLocal, IN IMS_BOOL nSupportAnbrPeer,
-        OUT AudioProfile* pNegotiatedProfile)
+void AudioProfileNegotiator::NegotiateAnbr(IN IMS_BOOL nSupportAnbrLocal,
+        IN IMS_BOOL nSupportAnbrPeer, OUT AudioProfile* pNegotiatedProfile)
 {
     if (pNegotiatedProfile == IMS_NULL)
     {
@@ -686,7 +688,7 @@ void AudioSdpNegotiator::NegotiateAnbr(IN IMS_BOOL nSupportAnbrLocal, IN IMS_BOO
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateBandwidth(IN AudioProfile* pLocalProfile,
+void AudioProfileNegotiator::NegotiateBandwidth(IN AudioProfile* pLocalProfile,
         IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile,
         IN AudioProfile::Payload* pNegotiatedPayload, IN MediaConfiguration* pConfig)
 {
@@ -711,7 +713,7 @@ void AudioSdpNegotiator::NegotiateBandwidth(IN AudioProfile* pLocalProfile,
 }
 
 PRIVATE
-IMS_SINT32 AudioSdpNegotiator::NegotiateAs(
+IMS_SINT32 AudioProfileNegotiator::NegotiateAs(
         IN AudioProfile::Payload* pNegotiatedPayload, IN IMS_BOOL bIpv6)
 {
     if (pNegotiatedPayload == IMS_NULL)
@@ -754,7 +756,7 @@ IMS_SINT32 AudioSdpNegotiator::NegotiateAs(
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig,
+IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig,
         IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
         IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT AudioProfile* pNegotiatedProfile)
 {
@@ -876,7 +878,7 @@ IMS_BOOL AudioSdpNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* pCon
 }
 
 PRIVATE
-void AudioSdpNegotiator::NegotiateRtcpInterval(IN AudioProfile* pNegotiatedProfile,
+void AudioProfileNegotiator::NegotiateRtcpInterval(IN AudioProfile* pNegotiatedProfile,
         IN IMS_SINT32 nRtcpInterval, IN IMS_SINT32 nRtcpLiveInterval)
 {
     if (pNegotiatedProfile == IMS_NULL)
@@ -905,7 +907,7 @@ void AudioSdpNegotiator::NegotiateRtcpInterval(IN AudioProfile* pNegotiatedProfi
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile,
+IMS_BOOL AudioProfileNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile,
         IN AudioProfile::Payload* pDstPayload, OUT IMS_UINT32* pBandwidthNegoList,
         OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList)
 {
@@ -1028,7 +1030,7 @@ IMS_BOOL AudioSdpNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile,
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::FindAmrInProfile(IN AudioProfile* pProfile,
+IMS_BOOL AudioProfileNegotiator::FindAmrInProfile(IN AudioProfile* pProfile,
         IN AudioProfile::Payload* pPayload, OUT IMS_UINT32* pnNegoModeSetList,
         OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
 {
@@ -1056,7 +1058,7 @@ IMS_BOOL AudioSdpNegotiator::FindAmrInProfile(IN AudioProfile* pProfile,
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
+IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
         IN AudioProfile::Payload* pPayload, IN IMS_BOOL bReturnMode,
         OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
 {
@@ -1158,7 +1160,7 @@ IMS_BOOL AudioSdpNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::FindPcmInProfile(
+IMS_BOOL AudioProfileNegotiator::FindPcmInProfile(
         IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
@@ -1204,7 +1206,7 @@ IMS_BOOL AudioSdpNegotiator::FindPcmInProfile(
 }
 
 PRIVATE
-IMS_SINT32 AudioSdpNegotiator::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
+IMS_SINT32 AudioProfileNegotiator::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
         IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bReturnMode, OUT IMS_UINT32* nNegoModeSet,
         OUT IMS_UINT32* nNegoDefaultRtpModeSet)
 {
@@ -1278,7 +1280,7 @@ IMS_SINT32 AudioSdpNegotiator::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
+IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
         IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
         OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
 {
@@ -1517,7 +1519,7 @@ IMS_BOOL AudioSdpNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFm
 }
 
 PRIVATE
-IMS_BOOL AudioSdpNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
+IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
         IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
         OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
 {
@@ -1658,8 +1660,9 @@ IMS_BOOL AudioSdpNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* 
     return IMS_TRUE;
 }
 
-PRIVATE IMS_SINT32 AudioSdpNegotiator::FindPayloadIndexFromProfile(IN const AString& strCodecName,
-        IN AudioProfile* pLocalProfile, IN AudioProfile::Payload* pDstPayload)
+PRIVATE IMS_SINT32 AudioProfileNegotiator::FindPayloadIndexFromProfile(
+        IN const AString& strCodecName, IN AudioProfile* pLocalProfile,
+        IN AudioProfile::Payload* pDstPayload)
 {
     if (pLocalProfile == IMS_NULL || pDstPayload == IMS_NULL)
     {
@@ -1685,7 +1688,7 @@ PRIVATE IMS_SINT32 AudioSdpNegotiator::FindPayloadIndexFromProfile(IN const AStr
     return nRetIndex;
 }
 
-PRIVATE IMS_SINT32 AudioSdpNegotiator::FindMatchedPayloadIndexFromProfile(
+PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
         IN const AString& strCodecName, IN AudioProfile* pLocalProfile,
         IN AudioProfile::Payload* pDstPayload, IN IMS_BOOL bReturnMode)
 {
@@ -1889,7 +1892,7 @@ PRIVATE IMS_SINT32 AudioSdpNegotiator::FindMatchedPayloadIndexFromProfile(
 }
 
 PRIVATE
-MEDIA_DIRECTION AudioSdpNegotiator::UpdateDirectionToMine(
+MEDIA_DIRECTION AudioProfileNegotiator::UpdateDirectionToMine(
         IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir)
 {
     if (ePeerDir < MEDIA_DIRECTION_INACTIVE || ePeerDir > MEDIA_DIRECTION_SEND_RECEIVE)

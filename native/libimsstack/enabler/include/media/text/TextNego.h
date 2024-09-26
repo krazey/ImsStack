@@ -24,7 +24,7 @@
 #include "text/TextProfileUtil.h"
 #include "text/TextProfileExtractor.h"
 #include "text/TextSdpGenerator.h"
-#include "text/TextSdpNegotiator.h"
+#include "text/TextProfileNegotiator.h"
 
 /**
  * @brief The class to negotiate and form the SDP attribute belong to the m=text line
