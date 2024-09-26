@@ -76,6 +76,64 @@ public final class Log {
     }
 
     /**
+     * Prints the debug level log for the specified object.
+     */
+    public static void d(Object o, String msg) {
+        if (isLogEnabled(TRACE_OPTION_D)) {
+            android.util.Log.d(TAG, msg + getClassName(o));
+        }
+    }
+
+    /**
+     * Prints the error level log for the specified object.
+     */
+    public static void e(Object o, String msg) {
+        if (isLogEnabled(TRACE_OPTION_E)) {
+            android.util.Log.e(TAG, msg + getClassName(o));
+        }
+    }
+
+    /**
+     * Prints the error level log for the specified object.
+     */
+    public static void e(Object o, String msg, Throwable t) {
+        if (isLogEnabled(TRACE_OPTION_E)) {
+            android.util.Log.e(TAG, msg + getClassName(o), t);
+        }
+    }
+
+    /**
+     * Prints the information level log for the specified object.
+     */
+    public static void i(Object o, String msg) {
+        if (isLogEnabled(TRACE_OPTION_I)) {
+            android.util.Log.i(TAG, msg + getClassName(o));
+        }
+    }
+
+    /**
+     * Prints the verbose level log for the specified object.
+     */
+    public static void v(Object o, String msg) {
+        if (isLogEnabled(TRACE_OPTION_D)) {
+            android.util.Log.v(TAG, msg + getClassName(o));
+        }
+    }
+
+    /**
+     * Prints the warning level log for the specified object.
+     */
+    public static void w(Object o, String msg) {
+        if (isLogEnabled(TRACE_OPTION_I)) {
+            android.util.Log.w(TAG, msg + getClassName(o));
+        }
+    }
+
+    private static String getClassName(Object o) {
+        return o == null ? "" : " [@" + o.getClass().getSimpleName();
+    }
+
+    /**
      * Prints the debug level log.
      */
     public static void d(String tag, String msg) {
