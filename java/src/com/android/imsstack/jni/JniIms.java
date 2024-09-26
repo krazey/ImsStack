@@ -223,7 +223,7 @@ public class JniIms {
         JniImsListener listener = getListener(nativeObject);
 
         if (listener == null) {
-            Log.d(Log.TAG, "No listener :: nativeObject=" + nativeObject);
+            Log.d(this, "No listener :: nativeObject=" + nativeObject);
             return ERROR_NO_LISTENER;
         }
 
@@ -244,7 +244,7 @@ public class JniIms {
         JniSystemListener listener = getSystemListener(nativeObject);
 
         if (listener == null) {
-            Log.d(Log.TAG, "No listener :: nativeObject=" + nativeObject);
+            Log.d(this, "No listener :: nativeObject=" + nativeObject);
             return RESULT_FAILURE;
         }
 

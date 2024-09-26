@@ -80,13 +80,13 @@ public final class CarrierInfo {
         final SimCarrierId oldCid = mSimCarrierIds.get(slotId);
 
         if (oldCid == null) {
-            Log.e(Log.TAG, "Invalid slot: " + slotId);
+            Log.e(this, "Invalid slot: " + slotId);
             return false;
         }
 
         final SimCarrierId newCid = getCarrierIdFromSim(slotId);
 
-        Log.i(Log.TAG, "CarrierId: old=" + oldCid + ", new=" + newCid);
+        Log.i(this, "CarrierId: old=" + oldCid + ", new=" + newCid);
 
         mSimCarrierIds.put(slotId, newCid);
 

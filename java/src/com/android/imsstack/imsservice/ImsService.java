@@ -45,14 +45,14 @@ public class ImsService extends android.telephony.ims.ImsService {
     public void onCreate() {
         super.onCreate();
 
-        logi("ImsService created");
+        logi(this, "onCreate");
 
         ImsServiceController.create(getApplicationContext());
     }
 
     @Override
     public void onDestroy() {
-        logi("ImsService destroy...");
+        logi(this, "onDestroy");
 
         ImsServiceController.destroy(getApplicationContext());
 
@@ -71,11 +71,11 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public ImsFeatureConfiguration querySupportedImsFeatures() {
         if (!isImsControllerReady()) {
-            logi("querySupportedImsFeatures :: not-ready");
+            logi(this, "querySupportedImsFeatures: not-ready");
             return super.querySupportedImsFeatures();
         }
 
-        logi("querySupportedImsFeatures");
+        logi(this, "querySupportedImsFeatures");
 
         // It will return the supported features by this ImsService.
         // Generally, the features are the same as defined in AndroidManifest.xml.
@@ -96,7 +96,7 @@ public class ImsService extends android.telephony.ims.ImsService {
         //TODO uncomment below statements for SIP Delegate Support.
         //logi("getImsServiceCapabilities:CAPABILITY_SIP_DELEGATE_CREATION");
         //return CAPABILITY_SIP_DELEGATE_CREATION;
-        logi("getImsServiceCapabilities");
+        logi(this, "getImsServiceCapabilities");
         return super.getImsServiceCapabilities();
 
         // TODO: Replace above return statement with below for Simultaneous calling support.
@@ -106,17 +106,17 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public void readyForFeatureCreation() {
-        logi("readyForFeatureCreation");
+        logi(this, "readyForFeatureCreation");
     }
 
     @Override
     public void enableIms(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("enableIms :: not-ready, slotId=" + slotId);
+            logi(this, "enableIms: not-ready, slotId=" + slotId);
             return;
         }
 
-        logi("enableIms :: slotId=" + slotId);
+        logi(this, "enableIms: slotId=" + slotId);
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
@@ -128,11 +128,11 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public void disableIms(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("disableIms :: not-ready, slotId=" + slotId);
+            logi(this, "disableIms: not-ready, slotId=" + slotId);
             return;
         }
 
-        logi("disableIms :: slotId=" + slotId);
+        logi(this, "disableIms: slotId=" + slotId);
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
@@ -143,12 +143,12 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public MmTelFeature createMmTelFeature(int slotId) {
-        logi("createMmTelFeature :: slotId=" + slotId);
+        logi(this, "createMmTelFeature: slotId=" + slotId);
 
         ImsServiceController isc = ImsServiceController.getInstance();
 
         if (isc == null) {
-            logi("No ImsServiceController");
+            logi(this, "No ISC");
             return null;
         }
 
@@ -157,12 +157,12 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public RcsFeature createRcsFeature(int slotId) {
-        logi("createRcsFeature for slot : " + slotId);
+        logi(this, "createRcsFeature for slot" + slotId);
 
         ImsServiceController isc = ImsServiceController.getInstance();
 
         if (isc == null) {
-            logi("No ImsServiceController");
+            logi(this, "No ISC");
             return null;
         }
 
@@ -172,14 +172,14 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public ImsConfigImplBase getConfig(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("getConfig :: not-ready, slotId=" + slotId);
+            logi(this, "getConfig: not-ready, slotId=" + slotId);
             return null;
         }
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
         if (isr == null) {
-            logi("getConfig :: Service is down for phone" + slotId);
+            logi(this, "getConfig: Service is down for phone" + slotId);
             return null;
         }
 
@@ -189,14 +189,14 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public ImsRegistrationImplBase getRegistration(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("getRegistration :: not-ready, slotId=" + slotId);
+            logi(this, "getRegistration: not-ready, slotId=" + slotId);
             return null;
         }
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
         if (isr == null) {
-            logi("getRegistration :: Service is down for phone" + slotId);
+            logi(this, "getRegistration: Service is down for phone" + slotId);
             return null;
         }
 
@@ -205,24 +205,24 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public @Nullable SipTransportImplBase getSipTransport(int slotId) {
-        logi("getSipTransport :: slotId=" + slotId);
+        logi(this, "getSipTransport: slotId=" + slotId);
 
         if (!ImsServiceController.isReady()) {
-            logi("getSipTransport :: not-ready, slotId=" + slotId);
+            logi(this, "getSipTransport: not-ready, slotId=" + slotId);
             return null;
         }
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
         if (isr == null) {
-            logi("getSipTransport :: Service is down for phone" + slotId);
+            logi(this, "getSipTransport: Service is down for phone" + slotId);
             return null;
         }
         return isr.getSipTransport();
     }
 
-    private static void logi(String s) {
-        Log.i(Log.TAG, "[GII-IMPL] " + s);
+    private static void logi(Object o, String s) {
+        Log.i(o, "[GII-IMPL] " + s);
     }
 
     @Override

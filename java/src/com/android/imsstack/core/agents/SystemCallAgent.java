@@ -181,7 +181,7 @@ public final class SystemCallAgent implements SystemCallInterface {
                 record = Collections.unmodifiableList(sim.getIsimImpu());
             }
 
-            Log.d(Log.TAG, "ISIM" + mSlotId + " record: fileId=" + Integer.toHexString(fileId)
+            Log.d(this, "ISIM" + mSlotId + " record: fileId=" + Integer.toHexString(fileId)
                     + ", name=" + Sim.isimFileIdToString(fileId)
                     + ", record=" + record);
         }
