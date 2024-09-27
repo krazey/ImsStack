@@ -126,7 +126,6 @@ public:
             bSessionTimerSupported(IMS_TRUE),
             bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType(IMS_FALSE),
             bStopRingbackTimerBy183WithSdpBody(IMS_FALSE),
-            bSupportCanidInfo(IMS_FALSE),
             bSupportConferenceReferSubscribe(IMS_TRUE),
             bSupportEarlySession(IMS_FALSE),
             bSupportRegistrationRecoveryForFailureOfSessionRefresh(IMS_FALSE),
@@ -279,7 +278,6 @@ public:
     IMS_BOOL bSessionTimerSupported;
     IMS_BOOL bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType;
     IMS_BOOL bStopRingbackTimerBy183WithSdpBody;
-    IMS_BOOL bSupportCanidInfo;
     IMS_BOOL bSupportConferenceReferSubscribe;
     IMS_BOOL bSupportEarlySession;
     IMS_BOOL bSupportRegistrationRecoveryForFailureOfSessionRefresh;

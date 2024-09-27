@@ -980,7 +980,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNO
         "registration_disconnect_reason_to_ignore_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[] =
         "wifi_emergency_18x_timer_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CANID_INFO_BOOL[] = "support_canid_info_bool";
 const IMS_CHAR
         CarrierConfig::Assets::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL[] =
                 "use_carrier_specific_contact_header_for_options_response_bool";
