@@ -102,6 +102,17 @@ TEST_F(SipPPreferredServiceHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
+
+    /* Decode complete value of SipHeaderBase::P_ASSERTED_SERVICE header */
+    pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+            SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
+    pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_STREQ(pValue, &(aBuffer[0]));
+    pHeader->SipDelete();
 }
 
 }  // namespace android

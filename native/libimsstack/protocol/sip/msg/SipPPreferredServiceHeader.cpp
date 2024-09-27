@@ -18,8 +18,8 @@
 #include "msg/SipPPreferredServiceHeader.h"
 #include "platform/SipString.h"
 
-SipPPreferredServiceHeader::SipPPreferredServiceHeader() :
-        SipHeaderBase(SipHeaderBase::P_PREFERRED_SERVICE)
+SipPPreferredServiceHeader::SipPPreferredServiceHeader(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType)
 {
 }
 
@@ -113,12 +113,12 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipPPreferredServiceHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
+SipHeaderBase* SipPPreferredServiceHeader::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
         return new SipPPreferredServiceHeader(
                 *reinterpret_cast<SipPPreferredServiceHeader*>(pHeader));
     }
-    return new SipPPreferredServiceHeader();
+    return new SipPPreferredServiceHeader(eHeaderType);
 }
