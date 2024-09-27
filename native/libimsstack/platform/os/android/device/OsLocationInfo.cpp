@@ -248,6 +248,8 @@ AString OsLocationInfo::GetCountryIso(IN IMS_BOOL bFromUicc /*= IMS_FALSE*/) con
         piSubsInfo->GetSimCountryIso(strCountry);
     }
 
+    strCountry = strCountry.MakeUpper();
+
     return strCountry;
 }
 

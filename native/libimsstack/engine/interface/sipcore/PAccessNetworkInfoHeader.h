@@ -84,8 +84,7 @@ private:
             IN IMS_SINT32 nSlotId, IN const AccessNetworkInfo& objAni, OUT AString& strHeader);
     static void RefineMacAddressAsInvalid(IN_OUT AccessNetworkInfo& objAni);
     static void AddLocalTimezone(IN_OUT AString& strHeader);
-    static void AddCountryParameter(
-            IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc);
+    static void AddCountryParameter(IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader);
     static void SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
             IN_OUT ISipMessage*& piSipMsg);
     static void SetPrivateHeaderForPlci(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
