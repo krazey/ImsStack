@@ -21,36 +21,36 @@
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::ALLOW
-        SipEventHeader::GetNewObj,                       //    SipHeaderBase::ALLOW_EVENTS
-        SipAuthBase::GetNewObj,                          //    SipHeaderBase::AUTHORIZATION
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CALL_ID
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_WILD
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_ANY
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CONTENT_DISPOSITION
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CONTENT_ENCODING
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::CONTENT_LENGTH
-        SipContentTypeHeader::GetNewObj,                 //    SipHeaderBase::CONTENT_TYPE //10
-        SipCSeqHeader::GetNewObj,                        //    SipHeaderBase::CSEQ
-        SipEventHeader::GetNewObj,                       //    SipHeaderBase::EVENT
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::EXPIRES_DATE
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::EXPIRES_SEC
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::EXPIRES_ANY
-        SipAcceptHeader::GetNewObj,                      //    SipHeaderBase::ACCEPT
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MIN_EXPIRES //added
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::FROM
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MAX_FORWARDS
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::MIME_VERSION,//20
-        SipPrivacyHeader::GetNewObj,                     //    SipHeaderBase::PRIVACY,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_PREFERRED_IDENTITY,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_ASSERTED_IDENTITY,
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MIN_SE,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::PATH,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_ASSOCIATED_URI,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_CALLED_PARTY_ID,
-        SipPVisitedNetworkIdHeader::GetNewObj,           //    SipHeaderBase::P_VISITED_NETWORK_ID,
-        SipPChargingFunctionAddressesHeader::GetNewObj,  //    SipHeaderBase::P_CHRG_FUN_ADDR,
+        SipHeaderBase::GetNewObj,                //    SipHeaderBase::ALLOW
+        SipEventHeader::GetNewObj,               //    SipHeaderBase::ALLOW_EVENTS
+        SipAuthBase::GetNewObj,                  //    SipHeaderBase::AUTHORIZATION
+        SipHeaderBase::GetNewObj,                //    SipHeaderBase::CALL_ID
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::CONTACT
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::CONTACT_WILD
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::CONTACT_ANY
+        SipHeaderBase::GetNewObj,                //    SipHeaderBase::CONTENT_DISPOSITION
+        SipHeaderBase::GetNewObj,                //    SipHeaderBase::CONTENT_ENCODING
+        SipIntegerHeader::GetNewObj,             //    SipHeaderBase::CONTENT_LENGTH
+        SipContentTypeHeader::GetNewObj,         //    SipHeaderBase::CONTENT_TYPE //10
+        SipCSeqHeader::GetNewObj,                //    SipHeaderBase::CSEQ
+        SipEventHeader::GetNewObj,               //    SipHeaderBase::EVENT
+        SipIntegerHeader::GetNewObj,             //    SipHeaderBase::EXPIRES_DATE
+        SipIntegerHeader::GetNewObj,             //    SipHeaderBase::EXPIRES_SEC
+        SipIntegerHeader::GetNewObj,             //    SipHeaderBase::EXPIRES_ANY
+        SipAcceptHeader::GetNewObj,              //    SipHeaderBase::ACCEPT
+        SipIntegerHeader::GetNewObj,             //    SipHeaderBase::MIN_EXPIRES //added
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::FROM
+        SipIntegerHeader::GetNewObj,             //    SipHeaderBase::MAX_FORWARDS
+        SipHeaderBase::GetNewObj,                //    SipHeaderBase::MIME_VERSION,//20
+        SipPrivacyHeader::GetNewObj,             //    SipHeaderBase::PRIVACY,
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::P_PREFERRED_IDENTITY,
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::P_ASSERTED_IDENTITY,
+        SipIntegerHeader::GetNewObj,             //    SipHeaderBase::MIN_SE,
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::PATH,
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::P_ASSOCIATED_URI,
+        SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::P_CALLED_PARTY_ID,
+        SipPVisitedNetworkIdHeader::GetNewObj,   //    SipHeaderBase::P_VISITED_NETWORK_ID,
+        SipPChargingVectorHeader::GetNewObj,     //    SipHeaderBase::P_CHRG_FUN_ADDR,
         SipHeaderBase::GetNewObj,                //    SipHeaderBase::P_ACCESS_NETWORK_INFO,//30
         SipPChargingVectorHeader::GetNewObj,     //    SipHeaderBase::P_CHARGING_VECTOR,
         SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::SERVICE_ROUTE,
@@ -119,7 +119,6 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SipNameAddrHeader::GetNewObj,            //    SipHeaderBase::REPLY_TO,
         SIP_NULL,                                //    SipHeaderBase::RESPONSE_KEY,
         SipUserAgentHeader::GetNewObj,           //    SipHeaderBase::SERVER,
-                                                 //    Server header same as user agent syntax
         SipHeaderBase::GetNewObj,                //    SipHeaderBase::SUBJECT,
         SipHeaderBase::GetNewObj,                //    SipHeaderBase::SUPPRESS_IF_MATCH,
         SipHeaderBase::GetNewObj,                //    SipHeaderBase::TARGET_DIALOG,//100

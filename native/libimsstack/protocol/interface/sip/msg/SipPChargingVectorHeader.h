@@ -25,7 +25,7 @@ private:
 
 public:
     /*constructor*/
-    SipPChargingVectorHeader();
+    explicit SipPChargingVectorHeader(SIP_INT32 eHdrType);
     SipPChargingVectorHeader(const SipPChargingVectorHeader& objHeader);
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);

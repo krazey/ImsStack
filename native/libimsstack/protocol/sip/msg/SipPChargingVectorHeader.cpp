@@ -18,8 +18,8 @@
 #include "msg/SipPChargingVectorHeader.h"
 #include "platform/SipString.h"
 
-SipPChargingVectorHeader::SipPChargingVectorHeader() :
-        SipHeaderBase(SipHeaderBase::P_CHARGING_VECTOR),
+SipPChargingVectorHeader::SipPChargingVectorHeader(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType),
         m_pChargingVectorList(SIP_NULL)
 {
 }
@@ -122,7 +122,8 @@ SIP_BOOL SipPChargingVectorHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT3
         return SIP_FALSE;
     }
     // charge vector should be icid-value
-    if (SipPf_Stricmp("icid-value", m_pChargingVectorList->m_pszName) != SIP_ZERO)
+    if ((GetHdrType() == SipHeaderBase::P_CHARGING_VECTOR) &&
+            (SipPf_Stricmp("icid-value", m_pChargingVectorList->m_pszName) != SIP_ZERO))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful", SIP_ZERO, SIP_ZERO);
@@ -132,11 +133,11 @@ SIP_BOOL SipPChargingVectorHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT3
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipPChargingVectorHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
+SipHeaderBase* SipPChargingVectorHeader::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
         return new SipPChargingVectorHeader(*reinterpret_cast<SipPChargingVectorHeader*>(pHeader));
     }
-    return new SipPChargingVectorHeader();
+    return new SipPChargingVectorHeader(eHeaderType);
 }
