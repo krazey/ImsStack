@@ -64,7 +64,7 @@ public class Scenario {
          * @param methodOrCode SIP method or response code for the client.
          * @return Builder instance for method chaining.
          */
-        public Builder setClientMessage(String methodOrCode) {
+        public Builder addClientMessage(String methodOrCode) {
             mMessages.add(new ClientMessage.Builder()
                     .setMethodOrCode(methodOrCode)
                     .build());
@@ -77,7 +77,7 @@ public class Scenario {
          * @param methodOrCode SIP method or response code for the server.
          * @return Builder instance for method chaining.
          */
-        public Builder setServerMessage(String methodOrCode) {
+        public Builder addServerMessage(String methodOrCode) {
             mMessages.add(new ServerMessage.Builder()
                     .setMethodOrCode(methodOrCode)
                     .build());
@@ -90,7 +90,7 @@ public class Scenario {
          * @param sipMessage A detailed SipMessage instance.
          * @return Builder instance for method chaining.
          */
-        public Builder setMessage(SipMessage sipMessage) {
+        public Builder addMessage(SipMessage sipMessage) {
             mMessages.add(sipMessage);
             return this;
         }

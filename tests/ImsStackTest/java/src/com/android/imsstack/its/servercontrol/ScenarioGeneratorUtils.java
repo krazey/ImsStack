@@ -71,16 +71,16 @@ public class ScenarioGeneratorUtils {
     }
 
     /**
-     * Adds a custom SipMessage to the scenario.
+     * Adds a custom {@code SipMessage} to the scenario.
      *
      * @param sipMessage Custom SipMessage instance.
      */
     public void addMessage(SipMessage sipMessage) {
-        mScenarioBuilder.setMessage(sipMessage);
+        mScenarioBuilder.addMessage(sipMessage);
     }
 
     /**
-     * Adds multiple custom SipMessages to the scenario.
+     * Adds multiple custom {@code SipMessage}s to the scenario.
      *
      * @param sipMessages List of custom SipMessage instances.
      */
@@ -98,7 +98,7 @@ public class ScenarioGeneratorUtils {
     }
 
     private void addClientMessage(String sipMethodOrResponseCode) {
-        mScenarioBuilder.setClientMessage(sipMethodOrResponseCode);
+        mScenarioBuilder.addClientMessage(sipMethodOrResponseCode);
     }
 
     private void addServerMessage(String sipMethodOrResponseCode, String sdpValue, String xmlValue,
