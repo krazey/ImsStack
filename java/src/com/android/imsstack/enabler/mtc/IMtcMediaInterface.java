@@ -105,4 +105,11 @@ public interface IMtcMediaInterface {
      * @param bitsPerSecond This value is the bitrate requested by the other party UE.
      */
     void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond);
+
+    /**
+     * A notification is sent when an incoming audio dtmf is received.
+     * @param dtmfDigit Received incoming dtmf digit
+     * @param durationMs Dtmf tone playback time
+     */
+    void onNotifyIncomingDtmfReceived(int dtmfDigit, int durationMs);
 }

@@ -4585,6 +4585,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mCallback.invokeSendAnbrQuery(mediaType, direction, bitsPerSecond);
         }
 
+        @Override
+        public void onNotifyIncomingDtmfReceived(MtcCall call, int numDtmfDigit) {
+            if (!call.equals(mCall)) {
+                return;
+            }
+
+            logi("onNotifyIncomingDtmfReceived");
+            mCallback.invokeDtmfReceived(
+                    ImsCallSessionImpl.this, ImsCallUtils.convertIntToDtmfDigit(numDtmfDigit));
+        }
+
         private void clearTransferRequestedSessionEctDetails() {
             if (mTransferRequestedSession != null) {
                 mTransferRequestedSession.mTransferTargetNumber = null;

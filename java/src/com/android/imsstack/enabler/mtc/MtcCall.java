@@ -285,6 +285,15 @@ public class MtcCall extends Call implements ConferenceTracker {
                 int bitsPerSecond) {
             // no-op
         }
+
+        /**
+         * A notification is sent when an incoming audio dtmf is received.
+         * @param call the object of this {@code MtcCall}
+         * @param numDtmfDigit Incoming audio dtmf digit
+         */
+        public void onNotifyIncomingDtmfReceived(MtcCall call, int numDtmfDigit) {
+            // no-op
+        }
     }
 
     /**
@@ -315,6 +324,11 @@ public class MtcCall extends Call implements ConferenceTracker {
         public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
             Message.obtain(mHandler, MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED, mediaType, direction,
                     bitsPerSecond).sendToTarget();
+        }
+
+        @Override
+        public void onNotifyIncomingDtmfReceived(int dtmfDigit) {
+            Message.obtain(mHandler, MSG_AUDIO_INCOMING_DTMF_RECEIVED, dtmfDigit).sendToTarget();
         }
     }
 
@@ -364,7 +378,7 @@ public class MtcCall extends Call implements ConferenceTracker {
      * Internal messages
      * Requests from application : 101 ~
      * Requests from native : 201 ~
-     * Requests from MtcCall : 301 ~
+     * Requests from MediaEnabler : 301 ~
      */
     /** Args: Parcel */
     private static final int MSG_SEND_REQUEST = 101;
@@ -382,11 +396,13 @@ public class MtcCall extends Call implements ConferenceTracker {
     private static final int MSG_CALL_RESUME_FAILED = 205;
     private static final int MSG_CALL_TERMINATED = 206;
 
+    /** From MediaEnabler */
     private static final int MSG_AUDIO_SESSION_OPENED = 301;
     private static final int MSG_AUDIO_SESSION_CLOSED = 302;
     private static final int MSG_AUDIO_QUALITY_CHANGED = 303;
     private static final int MSG_AUDIO_RTP_EXTENSION_RECEIVED = 304;
     private static final int MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED = 305;
+    private static final int MSG_AUDIO_INCOMING_DTMF_RECEIVED = 306;
 
     private final MessageHandler mHandler;
     private final JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
@@ -1726,6 +1742,10 @@ public class MtcCall extends Call implements ConferenceTracker {
                 case MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED: {
                     listener.onTriggerAnbrQueryReceived(MtcCall.this, msg.arg1, msg.arg2,
                             (int) msg.obj);
+                    break;
+                }
+                case MSG_AUDIO_INCOMING_DTMF_RECEIVED: {
+                    listener.onNotifyIncomingDtmfReceived(MtcCall.this, (int) msg.obj);
                     break;
                 }
                 default:
