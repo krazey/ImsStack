@@ -134,12 +134,12 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
 
     private static int[] getLocationBasedNumbersFromConfig(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getIntArray(CarrierConfig.Assets.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY);
+                .getIntArray(CarrierConfig.ImsVoice.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY);
     }
 
     private static int getGeolocationPolicy(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig().getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT);
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT);
     }
 
     private boolean isLocationRequiredForECallOnly() {

@@ -143,7 +143,7 @@
     <int-array name="imsuce.reattempt_registration_subscribe_response_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <int name="sip_status_code_for_rejecting_call_type_change_int" value="200"/>
+    <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="200"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="2"/>
@@ -169,12 +169,12 @@
     <int name="imsvoice.mo_call_request_timeout_millis_int" value="8000"/>
     <int name="imsvt.convert_remote_response_timer_millis_int" value="40000"/>
     <int name="imsvoice.policy_of_local_numbers_int" value="2"/>
-    <boolean name="enable_oip_header_policy_fallback_bool" value="true"/>
+    <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
     <int-array name="imsvoice.short_call_code_int_array" num="2">
         <item value="611"/>
         <item value="411"/>
     </int-array>
-    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="1"/>
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="1"/>
     <int-array name="imsvoice.reject_code_for_csfb_int_array" num="43">
         <item value="300"/>
         <item value="301"/>
@@ -222,11 +222,11 @@
     </int-array>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="4"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="1"/>
-    <boolean name="initialize_p_early_media_when_no_header_bool" value="true"/>
-    <int name="policy_for_local_ringback_tone_with_180_response_int" value="1"/>
+    <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="true"/>
+    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="4"/>
-    <int name="prealerting_timer_millis_int" value="7000"/>
-    <int name="media_type_for_offerless_invite_int" value="1"/>
+    <int name="imsvoice.prealerting_timer_millis_int" value="7000"/>
+    <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
     <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="false"/>
@@ -247,9 +247,9 @@
     <int name="imsemergency.emergency_18x_timer_millis_int" value="25000"/>
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="1"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="true"/>
-    <int name="emergency_rtt_guard_timer_millis_int" value="180000"/>
-    <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
-    <int name="wifi_emergency_18x_timer_millis_int" value="25000"/>
+    <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="180000"/>
+    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
+    <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="25000"/>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">

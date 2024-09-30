@@ -86,7 +86,7 @@ public class ImsSuppInfoUtilsTest {
     public void test_addCallExtraForApp() {
         mSuppInfo.addService_int(SuppInfo.TYPE_CDIV_CAUSE, 1);
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)).thenReturn(true);
+                CarrierConfig.ImsVoice.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)).thenReturn(true);
         ImsSuppInfoUtils.addCallExtraForApp(mMockContext, mSuppInfo, mCallProfile);
         assertEquals(1, mCallProfile.getCallExtraInt(ImsCallUtils.EXTRA_CDIV_CAUSE));
 

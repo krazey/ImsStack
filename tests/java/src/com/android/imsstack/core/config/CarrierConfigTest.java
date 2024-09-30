@@ -93,7 +93,7 @@ public class CarrierConfigTest {
         assertNull(mCarrierConfig.getString(
                 CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING));
         assertNull(mCarrierConfig.getStringArray(
-                CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
+                CarrierConfig.ImsVoice.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
         assertEquals(-1L, mCarrierConfig.getLong(KEY_TEST_LONG));
         assertNull(mCarrierConfig.getLongArray(KEY_TEST_BOOL_ARRAY));
         assertNull(mCarrierConfig.getBundle(
@@ -117,7 +117,7 @@ public class CarrierConfigTest {
         assertEquals(CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING, mCarrierConfig.getString(
                 CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING));
         assertTrue(Arrays.equals(CARRIER_SPECIFIC_SIP_HEADERS, mCarrierConfig.getStringArray(
-                CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY)));
+                CarrierConfig.ImsVoice.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY)));
         assertEquals(TEST_LONG, mCarrierConfig.getLong(KEY_TEST_LONG));
         assertTrue(Arrays.equals(TEST_LONG_LIST, mCarrierConfig.getLongArray(KEY_TEST_LONG_ARRAY)));
         assertNotNull(mCarrierConfig.getBundle(
@@ -216,7 +216,7 @@ public class CarrierConfigTest {
         assertEquals(null, CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING));
         assertEquals("null", CarrierConfig.getValue(config,
-                CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
+                CarrierConfig.ImsVoice.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
         assertEquals("-1", CarrierConfig.getValue(config, KEY_TEST_LONG));
         assertEquals("null", CarrierConfig.getValue(config, KEY_TEST_LONG_ARRAY));
         assertEquals("0.0", CarrierConfig.getValue(config, KEY_TEST_DOUBLE));
@@ -236,7 +236,7 @@ public class CarrierConfigTest {
         assertNotEquals(null, CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING));
         assertNotEquals("null", CarrierConfig.getValue(config,
-                CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
+                CarrierConfig.ImsVoice.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
         assertNotEquals("-1", CarrierConfig.getValue(config, KEY_TEST_LONG));
         assertNotEquals("null", CarrierConfig.getValue(config, KEY_TEST_LONG_ARRAY));
         assertNotEquals("0.0", CarrierConfig.getValue(config, KEY_TEST_DOUBLE));
@@ -404,7 +404,7 @@ public class CarrierConfigTest {
                 PCSCF_DISCOVERY_METHOD_LIST);
         b.putString(CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING,
                 CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING);
-        b.putStringArray(CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+        b.putStringArray(CarrierConfig.ImsVoice.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                 CARRIER_SPECIFIC_SIP_HEADERS);
         b.putLong(KEY_TEST_LONG, TEST_LONG);
         b.putLongArray(KEY_TEST_LONG_ARRAY, TEST_LONG_LIST);

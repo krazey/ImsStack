@@ -392,7 +392,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
      * @return whether emergency callback mode for VoLTE is supported or not.
      */
     public static boolean isEcbmSupportedForVolte(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
     }
 
     /**
@@ -402,7 +402,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
      * @return whether emergency callback mode for VoWIFI is supported or not.
      */
     public static boolean isEcbmSupportedForVowifi(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
     }
 
     private static boolean getBoolean(int slotId, String key) {

@@ -99,7 +99,7 @@
     </pbundle>
 
     <!-- Mtc -->
-    <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
+    <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">
         <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
 
@@ -215,7 +215,7 @@
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>
-    <boolean name="maintain_multiple_early_sessions_by_forking_bool" value="true"/>
+    <boolean name="imsvoice.maintain_multiple_early_sessions_by_forking_bool" value="true"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsvt.video_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
@@ -233,7 +233,7 @@
     <int name="imsvoice.session_expires_timer_sec_int" value="3600"/>
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="90"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="0"/>
-    <int name="policy_for_local_ringback_tone_with_180_response_int" value="2"/>
+    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="2"/>
     <int name="imsvoice.call_max_count_int" value="2"/>
 
     <!-- MTC conference call -->
@@ -242,15 +242,15 @@
     <string name="video_conference_factory_uri_string">sip:vt-conference@lguplus.co.kr</string>
     -->
     <int name="imsvoice.conference_subscribe_type_int" value="1"/>
-    <boolean name="check_conference_event_package_version_bool" value="true"/>
-    <boolean name="conference_refer_to_uri_source_paid_bool" value="true"/>
-    <int name="conference_drop_refer_to_uri_source_type_int" value="1"/>
+    <boolean name="imsvoice.check_conference_event_package_version_bool" value="true"/>
+    <boolean name="imsvoice.conference_refer_to_uri_source_paid_bool" value="true"/>
+    <int name="imsvoice.conference_drop_refer_to_uri_source_type_int" value="1"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="2"/>
-    <boolean name="add_replace_header_for_conference_bool" value="false"/>
+    <boolean name="imsvoice.add_replace_header_for_conference_bool" value="false"/>
     <!-- TODO: default value must be true -->
-    <boolean name="allow_incoming_hold_request_during_conference_call_bool" value="false"/>
+    <boolean name="imsvoice.allow_incoming_hold_request_during_conference_call_bool" value="false"/>
 
-    <string-array name="carrier_specific_sip_headers_string_array" num="2">
+    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="2">
         <item value="P-SKT-BYE-CAUSE"/>
         <item value="P-TTA-VoLTE-Info"/>
     </string-array>

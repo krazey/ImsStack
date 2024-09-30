@@ -81,9 +81,9 @@
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="0"/>
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="10000"/>
-    <boolean name="enable_oip_header_policy_fallback_bool" value="true"/>
-    <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
-    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="0"/>
-    <int name="policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
-    <int name="eps_fallback_watchdog_time_millis_int" value="0"/>
+    <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
+    <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="0"/>
+    <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
+    <int name="imsvoice.eps_fallback_watchdog_time_millis_int" value="0"/>
 </carrier_config>

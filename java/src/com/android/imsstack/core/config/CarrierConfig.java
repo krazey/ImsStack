@@ -335,6 +335,11 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_preferred_accesstype_feature_tag_int";
         public static final String KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "registration_permanent_error_code_int_array";
+        // Mtc
+        public static final String KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY =
+                KEY_PREFIX + "information_level_of_geolocation_pidf_int_array";
+        public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT =
+                KEY_PREFIX + "geolocation_policy_for_location_based_call_int";
 
         private Ims() {}
     }
@@ -393,6 +398,30 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_18x_timer_millis_int";
         public static final String KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT =
                 KEY_PREFIX + "policy_for_emergency_urn_escv_mapping_int";
+        public static final String KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL =
+                KEY_PREFIX + "enable_oip_header_policy_fallback_bool";
+        public static final String KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL =
+                KEY_PREFIX + "support_ecbm_for_volte_bool";
+        public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
+                KEY_PREFIX + "support_ecbm_for_vowifi_bool";
+        public static final String KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT =
+                KEY_PREFIX + "emergency_rtt_guard_timer_millis_int";
+        public static final String KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL =
+                KEY_PREFIX + "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
+        public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT =
+                KEY_PREFIX + "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
+        public static final String KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY =
+                KEY_PREFIX + "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
+        public static final String KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL =
+                KEY_PREFIX + "use_emergency_number_translation_in_roaming_status_bool";
+        public static final String KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL =
+                KEY_PREFIX + "block_wifi_emergency_call_if_not_provisioned_bool";
+        public static final String KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT =
+                KEY_PREFIX + "wifi_emergency_18x_timer_millis_int";
+        public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL =
+                KEY_PREFIX + "release_emergency_pdn_with_emergency_call_fail_bool";
+        public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
+                KEY_PREFIX + "emergency_call_current_location_discovery_supported_bool";
 
         private ImsEmergency() {}
     }
@@ -583,6 +612,86 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_reject_reason_phrase_vowifi_off_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING =
                 KEY_PREFIX + "call_reject_reason_phrase_user_reject_string";
+        public static final String KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL =
+                KEY_PREFIX + "check_conference_event_package_version_bool";
+        public static final String KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL =
+                KEY_PREFIX + "conference_refer_to_uri_source_paid_bool";
+        public static final String KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT =
+                KEY_PREFIX + "conference_drop_refer_to_uri_source_type_int";
+        public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT =
+                KEY_PREFIX + "media_type_for_offerless_invite_int";
+        public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT =
+                KEY_PREFIX + "media_type_for_offerless_reinvite_int";
+        public static final String KEY_OIP_TYPE_FOR_UNAVAILABLE_INT =
+                KEY_PREFIX + "oip_type_for_unavailable_int";
+        public static final String KEY_PREALERTING_TIMER_MILLIS_INT =
+                KEY_PREFIX + "prealerting_timer_millis_int";
+        public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT =
+                KEY_PREFIX + "policy_for_tcall_timer_expiry_of_volte_call_int";
+        public static final String KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY =
+                KEY_PREFIX + "carrier_specific_sip_headers_string_array";
+        public static final String KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL =
+                KEY_PREFIX + "support_registration_recovery_for_failure_of_session_refresh_bool";
+        public static final String KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY =
+                KEY_PREFIX + "policy_for_call_maintaining_on_registration_suspended_int_array";
+        public static final String KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL =
+                KEY_PREFIX + "use_mcid_supplementary_service_bool";
+        public static final String KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL =
+                KEY_PREFIX + "use_mmc_supplementary_service_bool";
+        public static final String KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL =
+                KEY_PREFIX + "use_lte_preferred_status_for_service_capability_bool";
+        public static final String KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL =
+                KEY_PREFIX + "allow_incoming_hold_request_during_conference_call_bool";
+        public static final String KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL =
+                KEY_PREFIX + "ignore_180_after_183_response_bool";
+        public static final String KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL =
+                KEY_PREFIX + "add_replace_header_for_conference_bool";
+        public static final String KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL =
+                KEY_PREFIX + "ignore_prack_delivery_failure_bool";
+        public static final String KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY =
+                KEY_PREFIX + "registration_disconnect_reason_to_ignore_int_array";
+        public static final String KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL =
+                KEY_PREFIX + "use_carrier_specific_contact_header_for_options_response_bool";
+        public static final String KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL =
+                KEY_PREFIX + "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
+        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL =
+                KEY_PREFIX + "enable_registration_recovery_when_call_rejected_by_server_error_bool";
+        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL =
+                KEY_PREFIX + "enable_registration_recovery_when_call_retry_unavailable_bool";
+        public static final String KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL =
+                KEY_PREFIX + "check_server_outage_reason_for_vxlte_call_bool";
+        public static final String KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT =
+                KEY_PREFIX + "maximum_wait_timer_for_geolocation_pidf_info_millis_int";
+        public static final String KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL =
+                KEY_PREFIX + "maintain_multiple_early_sessions_by_forking_bool";
+        public static final String KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL =
+                KEY_PREFIX + "stop_ringback_timer_by_183_with_sdp_body_bool";
+        public static final String KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY =
+                KEY_PREFIX + "message_type_support_geolocation_pidf_int_array";
+        public static final String KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL =
+                KEY_PREFIX + "incoming_resume_event_support_bool";
+        public static final String KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT =
+                KEY_PREFIX + "sip_status_code_for_rejecting_call_type_change_int";
+        public static final String KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL =
+                KEY_PREFIX + "initialize_p_early_media_when_no_header_bool";
+        public static final String KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT =
+                KEY_PREFIX + "policy_for_local_ringback_tone_with_180_response_int";
+        public static final String KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT =
+                KEY_PREFIX + "eps_fallback_watchdog_time_millis_int";
+        public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =
+                KEY_PREFIX + "send_udp_keep_alive_interval_time_millis_int";
+        public static final String KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT =
+                KEY_PREFIX + "call_reject_code_for_not_acceptable_call_type_int";
+        public static final String KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL =
+                KEY_PREFIX + "suppinfo_cdiv_cause_required_bool";
+        public static final String KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL =
+                KEY_PREFIX + "notify_conf_state_when_anonymous_user_bool";
+        public static final String KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY =
+                KEY_PREFIX + "location_based_number_list_int_array";
+        public static final String KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL =
+                KEY_PREFIX + "call_mergeable_on_conference_on_hold_bool";
+        public static final String KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL =
+                KEY_PREFIX + "check_ui_condition_for_incoming_resume_bool";
         // Media
         public static final String KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY =
                 KEY_PREFIX + "audio_jitter_buffer_size_int_array";
@@ -609,6 +718,20 @@ public class CarrierConfig {
                 KEY_PREFIX + "allow_text_with_video_bool";
         public static final String KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT =
                 KEY_PREFIX + "minimum_battery_level_for_limit_video_call_int";
+        public static final String KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL =
+                KEY_PREFIX + "support_video_call_upgrade_regardless_of_feature_tags_bool";
+        public static final String KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL =
+                KEY_PREFIX + "check_avchange_feature_for_call_converting_capability_bool";
+        public static final String KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY =
+                KEY_PREFIX + "vilte_to_volte_retry_failure_response_code_int_array";
+        public static final String KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL =
+                KEY_PREFIX + "support_video_call_only_in_vops_off_status_bool";
+        public static final String KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL =
+                KEY_PREFIX + "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
+        public static final String KEY_ONE_WAY_VIDEO_CALL_BY_LOCAL_END_SUPPORTED_BOOL =
+                KEY_PREFIX + "one_way_video_call_by_local_end_supported_bool";
+        public static final String KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL =
+                KEY_PREFIX + "one_way_video_call_by_remote_end_supported_bool";
         // Media
         public static final String KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY =
                 KEY_PREFIX + "video_rtcp_interval_int_array";
@@ -638,6 +761,12 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_private_header_int";
         public static final String KEY_COUNTRY_CODE_INT =
                 KEY_PREFIX + "country_code_int";
+        public static final String KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL =
+                KEY_PREFIX + "enable_fake_qos_call_flow_on_wifi_bool";
+        public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT =
+                KEY_PREFIX + "policy_for_tcall_timer_expiry_of_vowifi_call_int";
+        public static final String KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL =
+                KEY_PREFIX + "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
 
         private ImsWfc() {}
     }
@@ -671,10 +800,6 @@ public class CarrierConfig {
                 "support_country_param_in_pani_header_bool";
         public static final String KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL =
                 "support_local_session_timer_bool";
-        public static final String KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL =
-                "support_ecbm_for_volte_bool";
-        public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
-                "support_ecbm_for_vowifi_bool";
         public static final String KEY_LOCATION_POLICY_UPDATE_TYPE_INT =
                 "location_policy_update_type_int";
         public static final String KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL =
@@ -933,131 +1058,6 @@ public class CarrierConfig {
         public static final String KEY_WFC_ERR_OTHER_FAILURES_STRING =
                 "wfc_err_other_failures_string";
         // }
-        // Mtc
-        public static final String KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL =
-                "check_conference_event_package_version_bool";
-        public static final String KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL =
-                "conference_refer_to_uri_source_paid_bool";
-        public static final String KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT =
-                "conference_drop_refer_to_uri_source_type_int";
-        public static final String KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL =
-                "enable_fake_qos_call_flow_on_wifi_bool";
-        public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT =
-                "media_type_for_offerless_invite_int";
-        public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT =
-                "media_type_for_offerless_reinvite_int";
-        public static final String KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL =
-                "support_video_call_upgrade_regardless_of_feature_tags_bool";
-        public static final String KEY_OIP_TYPE_FOR_UNAVAILABLE_INT =
-                "oip_type_for_unavailable_int";
-        public static final String KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL =
-                "enable_oip_header_policy_fallback_bool";
-        public static final String KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT =
-                "emergency_rtt_guard_timer_millis_int";
-        public static final String KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL =
-                "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
-        public static final String KEY_PREALERTING_TIMER_MILLIS_INT =
-                "prealerting_timer_millis_int";
-        public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT =
-                "policy_for_tcall_timer_expiry_of_volte_call_int";
-        public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT =
-                "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
-        public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT =
-                "policy_for_tcall_timer_expiry_of_vowifi_call_int";
-        public static final String KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY =
-                "carrier_specific_sip_headers_string_array";
-        public static final String KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL =
-                "check_avchange_feature_for_call_converting_capability_bool";
-        public static final String KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL =
-                "support_registration_recovery_for_failure_of_session_refresh_bool";
-        public static final String KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY =
-                "policy_for_call_maintaining_on_registration_suspended_int_array";
-        public static final String KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY =
-                "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
-        public static final String KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL =
-                "use_mcid_supplementary_service_bool";
-        public static final String KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL =
-                "use_mmc_supplementary_service_bool";
-        public static final String KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL =
-                "use_lte_preferred_status_for_service_capability_bool";
-        public static final String KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL =
-                "allow_incoming_hold_request_during_conference_call_bool";
-        public static final String KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL =
-                "ignore_180_after_183_response_bool";
-        public static final String KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL =
-                "add_replace_header_for_conference_bool";
-        public static final String KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY =
-                "vilte_to_volte_retry_failure_response_code_int_array";
-        public static final String KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL =
-                "use_emergency_number_translation_in_roaming_status_bool";
-        public static final String KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL =
-                "ignore_prack_delivery_failure_bool";
-        public static final String KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL =
-                "support_video_call_only_in_vops_off_status_bool";
-        public static final String KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL =
-                "block_wifi_emergency_call_if_not_provisioned_bool";
-        public static final String KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY =
-                "registration_disconnect_reason_to_ignore_int_array";
-        public static final String KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT =
-                "wifi_emergency_18x_timer_millis_int";
-        public static final String KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL =
-                "use_carrier_specific_contact_header_for_options_response_bool";
-        public static final String KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL =
-                "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
-        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL =
-                "enable_registration_recovery_when_call_rejected_by_server_error_bool";
-        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL =
-                "enable_registration_recovery_when_call_retry_unavailable_bool";
-        public static final String KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL =
-                "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
-        public static final String KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL =
-                "check_server_outage_reason_for_vxlte_call_bool";
-        public static final String KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL =
-                "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
-        public static final String KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT =
-                "maximum_wait_timer_for_geolocation_pidf_info_millis_int";
-        public static final String KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL =
-                "maintain_multiple_early_sessions_by_forking_bool";
-        public static final String KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL =
-                "stop_ringback_timer_by_183_with_sdp_body_bool";
-        public static final String KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY =
-                "information_level_of_geolocation_pidf_int_array";
-        public static final String KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY =
-                "message_type_support_geolocation_pidf_int_array";
-        public static final String KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL =
-                "incoming_resume_event_support_bool";
-        public static final String KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT =
-                "sip_status_code_for_rejecting_call_type_change_int";
-        public static final String KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL =
-                "initialize_p_early_media_when_no_header_bool";
-        public static final String KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT =
-                "policy_for_local_ringback_tone_with_180_response_int";
-        public static final String KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT =
-                "eps_fallback_watchdog_time_millis_int";
-        public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =
-                "send_udp_keep_alive_interval_time_millis_int";
-        public static final String KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT =
-                "call_reject_code_for_not_acceptable_call_type_int";
-        public static final String KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL =
-                "suppinfo_cdiv_cause_required_bool";
-        public static final String KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL =
-                "one_way_video_call_by_local_end_supported_bool";
-        public static final String KEY_ONE_WAY_VIDEO_BY_REMOTE_END_SUPPORTED_BOOL =
-                "one_way_video_call_by_remote_end_supported_bool";
-        public static final String KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL =
-                "notify_conf_state_when_anonymous_user_bool";
-        public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT =
-                "geolocation_policy_for_location_based_call_int";
-        public static final String KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY =
-                "location_based_number_list_int_array";
-        public static final String KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL =
-                "call_mergeable_on_conference_on_hold_bool";
-        public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL =
-                "release_emergency_pdn_with_emergency_call_fail_bool";
-        public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
-                "emergency_call_current_location_discovery_supported_bool";
-        public static final String KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL =
-                "check_ui_condition_for_incoming_resume_bool";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =

@@ -204,7 +204,7 @@ public class MergeProxyTest extends ImsStackTest {
 
         //NotifySessionMergeStarted and NotifySessionMerged()
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
+                CarrierConfig.ImsVoice.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
                 .thenReturn(false);
         mMtcConferencelistenerProxy.onCallMerged(mMockMtcConference, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo, mMockUsersInfo);
@@ -262,7 +262,7 @@ public class MergeProxyTest extends ImsStackTest {
         mIsHoldCalled = false;
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
+                CarrierConfig.ImsVoice.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
                 .thenReturn(false)
                 .thenReturn(true);
         clearInvocations(mMockFgCall);

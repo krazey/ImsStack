@@ -58,7 +58,7 @@ public final class CallFeature {
 
     public static boolean isIncomingResumeEventSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL);
     }
 
     public static boolean isSrvccSupported(int slotId) {
@@ -99,22 +99,23 @@ public final class CallFeature {
 
     public static boolean isOneWayVideoCallByLocalEndSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL);
+                .getBoolean(CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_LOCAL_END_SUPPORTED_BOOL);
     }
 
     public static boolean isOneWayVideoCallByRemoteEndSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_REMOTE_END_SUPPORTED_BOOL);
+                .getBoolean(
+                    CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL);
     }
 
     public static boolean isNotifyConfStateWhenAnonymousUser(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL);
     }
 
     public static boolean isCallMergeableOnConferenceOnHold(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL);
     }
 
     /**

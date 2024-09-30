@@ -139,7 +139,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
         IMS_SINT32 nRejectCode =
                 ConfigService::GetConfigService()
                         ->GetCarrierConfig(m_objContext.GetSlotId())
-                        ->GetInt(CarrierConfig::Assets::
+                        ->GetInt(CarrierConfig::ImsVoice::
                                         KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
         if (nRejectCode == SipStatusCode::SC_200)
         {
