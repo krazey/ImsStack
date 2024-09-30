@@ -20,7 +20,6 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
-#include "ServiceUtil.h"
 
 #include "private/SipConfigV.h"
 
@@ -59,17 +58,17 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
         return IMS_FALSE;
     }
 
-    if (SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(nSlotId, pSipProfile))
-    {
-        AddLocalTimezone(strHeader);
-    }
-
     if (IsAccessNetworkTypeWiFi(objAni))
     {
         if (SipConfigProxy::IsCountryParameterSupportedInPaniHeader(nSlotId, pSipProfile))
         {
-            AddCountryParameter(nSlotId, strHeader, IMS_FALSE);
+            AddCountryParameter(nSlotId, strHeader);
         }
+    }
+
+    if (SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(nSlotId, pSipProfile))
+    {
+        AddLocalTimezone(strHeader);
     }
 
     return IMS_TRUE;
@@ -220,7 +219,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddLocalTimezone(IN_OUT AString& s
 }
 
 PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddCountryParameter(
-        IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc)
+        IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader)
 {
     AString strCountry(AString::ConstEmpty());
 
@@ -233,22 +232,6 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddCountryParameter(
     if (piLocation != IMS_NULL)
     {
         strCountry = piLocation->GetCountry();
-    }
-
-    if ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ"))
-    {
-        if (bUseUicc)
-        {
-            ISubscriberInfo* piSubsInfo =
-                    PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
-
-            if (piSubsInfo != IMS_NULL)
-            {
-                // location information from mcc/mnc in uicc.
-                // it could be different from user's location.
-                piSubsInfo->GetSimCountryIso(strCountry);
-            }
-        }
     }
 
     if ((strCountry.GetLength() > 0) && !strCountry.Equals("ZZ"))

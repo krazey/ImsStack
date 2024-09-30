@@ -959,7 +959,8 @@ public class LocationAgent implements LocationInterface {
         TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
                 TelephonyInterface.class, mSlotId);
 
-        String countryCode = (telephony != null) ? telephony.getNetworkCountryIso() : "";
+        String countryCode =
+                (telephony != null) ? telephony.getNetworkCountryIso().toUpperCase(Locale.US) : "";
 
         // From attached mobile network
         if (!TextUtils.isEmpty(countryCode)
@@ -976,7 +977,8 @@ public class LocationAgent implements LocationInterface {
 
             // From USIM
             if (mPolicy.hasPolicy(LocationPolicy.POLICY_UPDATE_COUNTRY_FROM_USIM)) {
-                countryCode = (telephony != null) ? telephony.getSimCountryIso() : "";
+                countryCode = (telephony != null)
+                        ? telephony.getSimCountryIso().toUpperCase(Locale.US) : "";
 
                 if (!TextUtils.isEmpty(countryCode)
                         && !GeocoderProxy.UNKNOWN_COUNTRY.equals(countryCode)) {
@@ -992,7 +994,8 @@ public class LocationAgent implements LocationInterface {
         TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
                 TelephonyInterface.class, mSlotId);
 
-        String countryCode = (telephony != null) ? telephony.getNetworkCountryIso() : "";
+        String countryCode =
+                (telephony != null) ? telephony.getNetworkCountryIso().toUpperCase(Locale.US) : "";
 
         // From attached mobile network
         if (!TextUtils.isEmpty(countryCode)

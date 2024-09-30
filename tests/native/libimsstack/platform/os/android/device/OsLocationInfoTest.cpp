@@ -248,4 +248,23 @@ TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)
     EXPECT_EQ(objOsLocationInfo.GetLastKnownCountry(), strUiccCountry);
 }
 
+TEST_F(OsLocationInfoTest, ReturnCountryInCapitalWhenItIsInLowercase)
+{
+    OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
+    AString strNetworkCountry("us");
+
+    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strNetworkCountry](AString& strCountry)
+                    {
+                        strCountry = strNetworkCountry;
+                        return IMS_TRUE;
+                    }));
+
+    // Set the country code returned by GetNetworkCountryIso()
+    objOsLocationInfo.SetDefaultLocationProperties();
+
+    EXPECT_EQ(objOsLocationInfo.GetLastKnownCountry(), "US");
+}
+
 }  // namespace android
