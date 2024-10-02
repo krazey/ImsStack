@@ -172,6 +172,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRequiredCdmalessFeatureTag, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallCurrentLocationDiscoverySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCheckUiConditionForIncomingResume, (), (const, override));
+    MOCK_METHOD(AString, GetPEmergencyInfoHeaderInInvite, (), (const, override));
 };
 
 #endif

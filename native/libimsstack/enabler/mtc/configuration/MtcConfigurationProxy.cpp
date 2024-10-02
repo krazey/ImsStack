@@ -370,6 +370,8 @@ const AString MtcConfigurationProxy::GetStr(
                     static_cast<TerminateType>(nAdditionalInfo));
         case Feature::CALL_REJECT_REASON_PHRASE:
             return m_pManager->GetCallRejectReasonPhrase(static_cast<RejectType>(nAdditionalInfo));
+        case Feature::P_EMERGENCY_INFO_HEADER_IN_INVITE:
+            return m_pManager->GetPEmergencyInfoHeaderInInvite();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return AString::ConstNull();

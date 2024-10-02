@@ -342,4 +342,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
                     ImsEmergency::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL);
     objItems.bCheckUiConditionForIncomingResume = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL);
+    objItems.strPEmergencyInfoHeaderInInvite = piCc->GetString(
+            CarrierConfig::ImsEmergency::KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING);
 }

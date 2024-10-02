@@ -295,6 +295,7 @@
     <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="false"/>
     <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
     <boolean name="imsvoice.suppinfo_cdiv_cause_required_bool" value="true"/>
+    <string name="imsemergency.p_emergency_info_header_in_invite_string">IEEE-802.11b; I-wlan-node-id=#AID#</string>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">

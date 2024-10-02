@@ -340,6 +340,12 @@ IMS_SINT32 MtcConfigurationManager::GetCallMaxCount() const
 }
 
 PUBLIC
+AString MtcConfigurationManager::GetPEmergencyInfoHeaderInInvite() const
+{
+    return m_objCarrierConfig.strPEmergencyInfoHeaderInInvite;
+}
+
+PUBLIC
 AString MtcConfigurationManager::GetCallTerminateReasonHeader(IN TerminateType eType) const
 {
     IMS_UINT32 nIndex = static_cast<IMS_UINT32>(eType);

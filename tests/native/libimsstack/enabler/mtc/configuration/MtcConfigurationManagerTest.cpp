@@ -1243,4 +1243,11 @@ TEST_F(MtcConfigurationManagerTest, IsCheckUiConditionForIncomingResumeReturnsVa
             GetBool(CarrierConfig::ImsVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL));
 }
 
+TEST_F(MtcConfigurationManagerTest, GetPEmergencyInfoHeaderInInviteReturnsValueInCarrierConfig)
+{
+    EXPECT_STREQ(pManager->GetPEmergencyInfoHeaderInInvite().GetStr(),
+            GetStr(CarrierConfig::ImsEmergency::KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING)
+                    .GetStr());
+}
+
 }  // namespace android

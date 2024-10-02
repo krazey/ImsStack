@@ -282,6 +282,7 @@ public:
         static const IMS_CHAR KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[];
         static const IMS_CHAR KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[];
+        static const IMS_CHAR KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING[];
 
         // Preferred Emergency Registration Type
         enum
