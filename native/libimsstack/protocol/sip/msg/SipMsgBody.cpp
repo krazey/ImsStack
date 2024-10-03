@@ -185,7 +185,7 @@ SipHeaderBase* SipMIMEHdrs::GetNewMIMEHdrObj(SIP_INT32 eHdrType)
             {
                 m_pContentType->SipDelete();
             }
-            m_pContentType = new SipContentTypeHeader();
+            m_pContentType = new SipContentTypeHeader(SipHeaderBase::CONTENT_TYPE);
             return m_pContentType;
 
         case SipHeaderBase::CONTENT_ENCODING:

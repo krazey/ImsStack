@@ -22,8 +22,6 @@
 extern SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(
         SIP_INT32, SipHeaderBase*);
 
-extern SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIBUTE_END];
-
 SipHeaderList::SipHeaderList(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),
         m_headerList(SipVector<SipHeaderBase*>())
@@ -199,7 +197,7 @@ SIP_BOOL SipHeaderList::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[GetHdrType()][HEADER_EMPTY_BODY_ALLOWED];
+        return IsEmptyHeaderBodyAllowed();
     }
 
     if (GetHdrType() == SipHeaderBase::AUTHENTICATION_INFO)

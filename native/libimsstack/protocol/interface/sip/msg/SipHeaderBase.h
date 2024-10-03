@@ -217,6 +217,7 @@ public:
 
 protected:
     virtual ~SipHeaderBase();
+    SIP_BOOL IsEmptyHeaderBodyAllowed() const;
     static SIP_BOOL FindComment(const SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
             const SIP_CHAR*& pszCommentStart, const SIP_CHAR*& pszCommentEnd);
 

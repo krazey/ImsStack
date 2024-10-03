@@ -37,7 +37,7 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SipIntegerHeader::GetNewObj,             // SipHeaderBase::EXPIRES_DATE
         SipIntegerHeader::GetNewObj,             // SipHeaderBase::EXPIRES_SEC
         SipIntegerHeader::GetNewObj,             // SipHeaderBase::EXPIRES_ANY
-        SipAcceptHeader::GetNewObj,              // SipHeaderBase::ACCEPT
+        SipContentTypeHeader::GetNewObj,         // SipHeaderBase::ACCEPT
         SipIntegerHeader::GetNewObj,             // SipHeaderBase::MIN_EXPIRES
         SipNameAddrHeader::GetNewObj,            // SipHeaderBase::FROM
         SipIntegerHeader::GetNewObj,             // SipHeaderBase::MAX_FORWARDS

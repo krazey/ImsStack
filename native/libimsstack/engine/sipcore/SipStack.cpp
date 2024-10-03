@@ -1066,7 +1066,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
                 // Multiple message bodies
                 else
                 {
-                    pContentType = new SipContentTypeHeader();
+                    pContentType = new SipContentTypeHeader(SipHeaderBase::CONTENT_TYPE);
                     pContentType->SetMediaType(Sip::STR_MULTIPART);
                     pContentType->SetSubMediaType(Sip::STR_MIXED);
 
