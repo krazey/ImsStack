@@ -225,7 +225,7 @@ public class TelephonyAgent implements TelephonyInterface {
         final String eNumber = PhoneNumberUtils.stripSeparators(number);
         boolean isEmergencyNumber = tmp.isEmergencyNumber(eNumber);
 
-        ImsLog.d(mSlotId, "isEmergencyNumber: " + isEmergencyNumber
+        ImsLog.d(this, mSlotId, "isEmergencyNumber: " + isEmergencyNumber
                 + " (number=" + number + ", eNumber=" + eNumber + ")");
 
         return isEmergencyNumber;
@@ -244,7 +244,7 @@ public class TelephonyAgent implements TelephonyInterface {
         if (MSimUtils.isValidSubId(subId)) {
             TelephonyManagerProxy tmp = mTelephonyManagerProxies.get(subId);
             if (tmp == null) {
-                ImsLog.i(mSlotId, "TelephonyManager created for sub" + subId);
+                ImsLog.i(this, mSlotId, "TelephonyManager created for sub" + subId);
                 tmp = AppContext.getTelephonyManagerProxy(subId);
                 mTelephonyManagerProxies.put(subId, tmp);
             }

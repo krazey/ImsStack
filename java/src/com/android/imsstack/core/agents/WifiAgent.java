@@ -107,7 +107,7 @@ public class WifiAgent implements WifiInterface {
     @Override
     public int getIfaceId() {
         if (mNetwork == null) {
-            ImsLog.w("Wifi: Network is not available.");
+            logw(this, "Network is not available.");
             return -1;
         }
 
@@ -153,8 +153,7 @@ public class WifiAgent implements WifiInterface {
             }
         }
 
-        ImsLog.d("Wifi: ipVersion=" + ipVersion
-                + ", ipv4=" + ipv4Address + ", ipv6=" + ipv6Address);
+        logd(this, "ipVersion=" + ipVersion + ", ipv4=" + ipv4Address + ", ipv6=" + ipv6Address);
 
         if (ipVersion == EIpVersion.IPV6.getInt()) {
             return ipv6Address;
@@ -172,7 +171,7 @@ public class WifiAgent implements WifiInterface {
     @Override
     public String[] getHostByName(int ipVersion, String host) {
         if (mNetwork == null) {
-            ImsLog.w("Wifi: Network is not available.");
+            logw(this, "Network is not available.");
             return null;
         }
 
@@ -181,11 +180,11 @@ public class WifiAgent implements WifiInterface {
         try {
             inetAddrs = mNetwork.getAllByName(host);
         } catch (UnknownHostException e) {
-            ImsLog.e("Wifi: UnknownHostException:" + e.toString());
+            loge(this, "UnknownHostException:" + e.toString());
         }
 
         if (inetAddrs == null || inetAddrs.length == 0) {
-            ImsLog.w("Wifi: InetAddress[] is null or zero-length.");
+            logw(this, "InetAddress[] is null or zero-length.");
             return null;
         }
 
@@ -205,7 +204,7 @@ public class WifiAgent implements WifiInterface {
             }
         }
 
-        ImsLog.i("Wifi: getHostByName - ipVersion=" + ipVersion + ", size=" + ipAddrs.size());
+        logi(this, "getHostByName - ipVersion=" + ipVersion + ", size=" + ipAddrs.size());
 
         if (ipAddrs.isEmpty()) {
             return null;
@@ -242,14 +241,14 @@ public class WifiAgent implements WifiInterface {
 
     @Override
     public boolean bindSocket(FileDescriptor sockFd) {
-        ImsLog.d("Wifi#bindSocket: network=" + mNetwork);
+        logd(this, "bindSocket - network=" + mNetwork);
 
         if (mNetwork != null && sockFd != null) {
             try {
                 mNetwork.bindSocket(sockFd);
                 return true;
             } catch (IOException e) {
-                ImsLog.e("Wifi#bindSocket: " + e.toString());
+                loge(this, "bindSocket - " + e.toString());
             }
         }
 
@@ -276,7 +275,7 @@ public class WifiAgent implements WifiInterface {
 
     private void setWifiEnabled(boolean enabled) {
         if (mIsWifiEnabled != enabled) {
-            ImsLog.d("Wifi#setWifiEnabled: " + mIsWifiEnabled + " >> " + enabled);
+            logd(this, "setWifiEnabled: " + mIsWifiEnabled + " >> " + enabled);
             mIsWifiEnabled = enabled;
 
             if (isWifiServiceRequested()) {
@@ -292,7 +291,7 @@ public class WifiAgent implements WifiInterface {
 
     private void setWifiConnected(boolean connected) {
         if (mIsWifiConnected != connected) {
-            ImsLog.d("Wifi#setWifiConnected: " + mIsWifiConnected + " >> " + connected);
+            logd(this, "setWifiConnected: " + mIsWifiConnected + " >> " + connected);
             mIsWifiConnected = connected;
 
             if (isWifiServiceRequested()) {
@@ -311,7 +310,7 @@ public class WifiAgent implements WifiInterface {
     }
 
     private void setWifiServiceRequested(boolean serviceRequested) {
-        ImsLog.d("Wifi#setWifiServiceRequested: " + serviceRequested);
+        logd(this, "setWifiServiceRequested: " + serviceRequested);
         mIsWifiServiceRequested = serviceRequested;
     }
 
@@ -335,7 +334,7 @@ public class WifiAgent implements WifiInterface {
                     ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
                 @Override
                 public void onLost(@NonNull Network network) {
-                    ImsLog.i("Wifi#onLost: network=" + network);
+                    logi(this, "onLost - network=" + network);
                     setWifiConnected(false);
                     mNetwork = null;
                     mLinkProperties = null;
@@ -345,7 +344,7 @@ public class WifiAgent implements WifiInterface {
                 @Override
                 public void onLinkPropertiesChanged(@NonNull Network network,
                         @NonNull LinkProperties linkProperties) {
-                    ImsLog.i("Wifi#onLinkPropertiesChanged: network=" + network);
+                    logi(this, "onLinkPropertiesChanged - network=" + network);
                     mNetwork = network;
                     mLinkProperties = linkProperties;
                     setWifiConnected(true);
@@ -354,7 +353,7 @@ public class WifiAgent implements WifiInterface {
                 @Override
                 public void onCapabilitiesChanged(@NonNull Network network,
                         @NonNull NetworkCapabilities networkCapabilities) {
-                    ImsLog.d("Wifi#onCapabilitiesChanged: network=" + network);
+                    logd(this, "onCapabilitiesChanged - network=" + network);
                     mWifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
                 }
             };
@@ -384,6 +383,22 @@ public class WifiAgent implements WifiInterface {
         return AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
     }
 
+    private static void logd(Object o, String s) {
+        ImsLog.d(o, "Wifi: " + s);
+    }
+
+    private static void loge(Object o, String s) {
+        ImsLog.e(o, "Wifi: " + s);
+    }
+
+    private static void logi(Object o, String s) {
+        ImsLog.i(o, "Wifi: " + s);
+    }
+
+    private static void logw(Object o, String s) {
+        ImsLog.w(o, "Wifi: " + s);
+    }
+
     private class WifiBroadcastReceiver extends BroadcastReceiver {
         public void register() {
             IntentFilter filter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -398,7 +413,7 @@ public class WifiAgent implements WifiInterface {
         @Override
         public synchronized void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            ImsLog.i("Wifi: " + ImsLog.lastSubString(action, "."));
+            logi(this, ImsLog.lastSubString(action, "."));
 
             if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
                 int wifiState = intent.getIntExtra(

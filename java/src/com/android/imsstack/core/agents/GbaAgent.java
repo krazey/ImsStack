@@ -50,12 +50,12 @@ public class GbaAgent implements GbaInterface {
 
     @Override
     public void init(Context context) {
-        ImsLog.d(mSlotId, "init");
+        ImsLog.d(this, mSlotId, "init");
     }
 
     @Override
     public void cleanup() {
-        ImsLog.d(mSlotId, "clean up");
+        ImsLog.d(this, mSlotId, "clean up");
 
         if (mExecutorService != null) {
             mExecutorService.shutdown();
@@ -66,9 +66,9 @@ public class GbaAgent implements GbaInterface {
     @Override
     public GbaCredentials getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
             String securityProtocol, boolean forceBootStrapping) {
-        ImsLog.d(mSlotId, "appType : " + appType + ",gbaMode : " + gbaMode + ", isTls : " + isTls
-                + ", nafFqdn : " + nafFqdn + ", Protocol : " + securityProtocol
-                + ", forceBootStrapping : " + forceBootStrapping);
+        ImsLog.d(this, mSlotId, "appType: " + appType + ", gbaMode: " + gbaMode
+                + ", isTls: " + isTls + ", nafFqdn: " + nafFqdn + ", protocol: " + securityProtocol
+                + ", forceBootStrapping: " + forceBootStrapping);
 
         Uri nafUri = getNafUri(gbaMode, isTls, nafFqdn);
         GbaCredentials credentials = null;
@@ -76,19 +76,19 @@ public class GbaAgent implements GbaInterface {
             credentials = requestTelephonyGbaAuthentication(appType, nafUri, securityProtocol,
                     forceBootStrapping).get(30L, TimeUnit.SECONDS);
         } catch (CancellationException e) {
-            ImsLog.e(mSlotId, "CancellationException");
+            ImsLog.e(this, mSlotId, "CancellationException");
             credentials = new GbaCredentials(GBA_FAILURE_REASON_CANCELLATION_EXCEPTION);
         } catch (ExecutionException e) {
-            ImsLog.e(mSlotId, "ExecutionException");
+            ImsLog.e(this, mSlotId, "ExecutionException");
             credentials = new GbaCredentials(GBA_FAILURE_REASON_EXECUTION_EXCEPTION);
         } catch (InterruptedException e) {
-            ImsLog.e(mSlotId, "InterruptedException");
+            ImsLog.e(this, mSlotId, "InterruptedException");
             credentials = new GbaCredentials(GBA_FAILURE_REASON_INTERRUPTED_EXCEPTION);
         } catch (TimeoutException e) {
-            ImsLog.e(mSlotId, "TimeoutException");
+            ImsLog.e(this, mSlotId, "TimeoutException");
             credentials = new GbaCredentials(GBA_FAILURE_REASON_TIMEOUT);
         } catch (IllegalArgumentException e) {
-            ImsLog.e(mSlotId, "IllegalArgumentException : securityProtocol is not supported");
+            ImsLog.e(this, mSlotId, "IllegalArgumentException: securityProtocol is not supported");
             credentials = new GbaCredentials(GBA_FAILURE_REASON_TLS_CIPHERSUITE_NOT_SUPPORTED);
         }
 
@@ -120,7 +120,7 @@ public class GbaAgent implements GbaInterface {
                     @Override
                     public void onKeysAvailable(byte[] gbaKey, String transactionId) {
                         if (gbaKey == null || TextUtils.isEmpty(transactionId)) {
-                            ImsLog.e(mSlotId, "onKeysAvailable with wrong value");
+                            ImsLog.e(this, mSlotId, "onKeysAvailable with wrong value");
                             credentialsFuture.complete(
                                     new GbaCredentials(GBA_FAILURE_REASON_KEY_INVALID));
                         } else {
@@ -131,7 +131,7 @@ public class GbaAgent implements GbaInterface {
 
                     @Override
                     public void onAuthenticationFailure(int reason) {
-                        ImsLog.e(mSlotId, "reason : " + reason);
+                        ImsLog.e(this, mSlotId, "onAuthenticationFailure: " + reason);
                         credentialsFuture.complete(new GbaCredentials(reason));
                     }
                 });

@@ -85,7 +85,6 @@ public class BatteryStateAgent implements BatteryStateInterface {
 
     @Override
     public void cleanup() {
-        ImsLog.d("");
         uninstallBatteryChangedReceiver();
         mHandler.removeCallbacksAndMessages(null);
         mBatteryStateReceiver.unregister();
@@ -134,7 +133,7 @@ public class BatteryStateAgent implements BatteryStateInterface {
             mLevel = INVALID_BATTERY_LEVEL;
         }
 
-        ImsLog.i("BatteryState: status=" + mStatus
+        ImsLog.i(this, "BatteryState: status=" + mStatus
                 + ", plugged=" + mPlugged + ", level=" + mLevel);
     }
 
@@ -173,7 +172,7 @@ public class BatteryStateAgent implements BatteryStateInterface {
     private void installBatteryChangedReceiver() {
         if (mBatteryChangedReceiverInstaller == null) {
             mBatteryChangedReceiverInstaller = () -> {
-                ImsLog.d("BatteryChangedReceiverInstaller is run...");
+                ImsLog.d(this, "BatteryChangedReceiverInstaller is run");
                 AppContext.getInstance().getBroadcastReceiverProxy()
                         .registerReceiver(mBatteryChangedReceiver,
                                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED), mHandler);
@@ -182,7 +181,7 @@ public class BatteryStateAgent implements BatteryStateInterface {
                     DELAY_INSTALL_BATTERY_CHANGED_RECEIVER);
             stopPollingTimer();
         } else {
-            ImsLog.d("BatteryChangedReceiver is already installed");
+            ImsLog.d(this, "BatteryChangedReceiver is already installed");
         }
     }
 
@@ -196,13 +195,13 @@ public class BatteryStateAgent implements BatteryStateInterface {
             }
             mBatteryChangedReceiverInstaller = null;
         } else {
-            ImsLog.d("BatteryChangedReceiver is already uninstalled");
+            ImsLog.d(this, "BatteryChangedReceiver is already uninstalled");
         }
     }
 
     private void startPollingTimer(long interval) {
         if (mPollingTimerId != TimerInterface.INVALID_TID) {
-            ImsLog.i("BatteryState: Polling timer is already started");
+            ImsLog.i(this, "Polling timer is already started");
             return;
         }
 
@@ -212,13 +211,13 @@ public class BatteryStateAgent implements BatteryStateInterface {
             mPollingTimerId = timer.startTimer(interval, mTimerListener);
         }
 
-        ImsLog.i("BatteryState: Polling timer is started - tid="
+        ImsLog.i(this, "Polling timer is started - tid="
                 + mPollingTimerId + ", interval=" + interval);
     }
 
     private void stopPollingTimer() {
         if (mPollingTimerId == TimerInterface.INVALID_TID) {
-            ImsLog.i("BatteryState: Polling timer is already stopped");
+            ImsLog.i(this, "Polling timer is already stopped");
             return;
         }
 
@@ -229,7 +228,7 @@ public class BatteryStateAgent implements BatteryStateInterface {
         }
 
         mPollingTimerId = TimerInterface.INVALID_TID;
-        ImsLog.i("BatteryState: Polling timer is stopped");
+        ImsLog.i(this, "Polling timer is stopped");
     }
 
     private long getPollingInterval(int level) {
@@ -254,7 +253,7 @@ public class BatteryStateAgent implements BatteryStateInterface {
         @Override
         public void onTimerExpired(long tid) {
             if (mPollingTimerId == tid) {
-                ImsLog.i("BatteryState: Polling timer is expired.");
+                ImsLog.i(this, "Polling timer is expired.");
                 mPollingTimerId = TimerInterface.INVALID_TID;
                 startListeningForBatteryState(getBatteryLevel());
             }
@@ -265,7 +264,7 @@ public class BatteryStateAgent implements BatteryStateInterface {
         @Override
         public synchronized void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            ImsLog.i(ImsLog.lastSubString(action, "."));
+            ImsLog.i(this, ImsLog.lastSubString(action, "."));
 
             if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 updateBatteryStates(intent);
@@ -292,7 +291,7 @@ public class BatteryStateAgent implements BatteryStateInterface {
         @Override
         public synchronized void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            ImsLog.i(ImsLog.lastSubString(action, "."));
+            ImsLog.i(this, ImsLog.lastSubString(action, "."));
 
             if (Intent.ACTION_BATTERY_LOW.equals(action)) {
                 installBatteryChangedReceiver();

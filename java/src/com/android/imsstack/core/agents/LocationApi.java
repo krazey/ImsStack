@@ -104,7 +104,7 @@ public final class LocationApi {
             return;
         }
 
-        logi("start - 0x" + Integer.toHexString(mFlag));
+        logi(this, "start - 0x" + Integer.toHexString(mFlag));
 
         addFlag(FLAG_LOCATION_API_READY);
 
@@ -123,7 +123,7 @@ public final class LocationApi {
 
         clearFlag(FLAG_LOCATION_API_READY);
 
-        logi("stop - 0x" + Integer.toHexString(mFlag));
+        logi(this, "stop - 0x" + Integer.toHexString(mFlag));
 
         if (mListenerPool != null) {
             mListenerPool.notifyServiceDisconnectedForLocationManagerApi();
@@ -243,16 +243,16 @@ public final class LocationApi {
         return AppContext.getInstance().getSystemServiceProxy(LocationManagerProxy.class);
     }
 
-    private static void log(String s) {
-        ImsLog.d("[LocationApi] " + s);
+    private static void log(Object o, String s) {
+        ImsLog.d(o, "LocationApi: " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[LocationApi] " + s);
+        ImsLog.e(null, "LocationApi: " + s);
     }
 
-    private static void logi(String s) {
-        ImsLog.i("[LocationApi] " + s);
+    private static void logi(Object o, String s) {
+        ImsLog.i(o, "LocationApi: " + s);
     }
 
     private static class ListenerPool {
@@ -281,7 +281,7 @@ public final class LocationApi {
             synchronized (mListeners) {
                 mListeners.remove(listener);
 
-                log("LP - listeners=" + mListeners.size());
+                log(this, "LP - listeners=" + mListeners.size());
             }
         }
 
@@ -301,7 +301,7 @@ public final class LocationApi {
 
             clear();
 
-            log("LP - notifyServiceDisconnectedForLocationManagerApi");
+            log(this, "LP - notifyServiceDisconnectedForLocationManagerApi");
 
             for (LocationApi.Listener listener : listeners) {
                 LocationManagerApi.removeUpdates(listener);
@@ -370,7 +370,7 @@ public final class LocationApi {
             LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
-                logi("LM :: requestLocationUpdates - " + request);
+                logi(null, "LM: requestLocationUpdates - " + request);
                 lmp.requestLocationUpdates(provider, request, executor, listener);
                 return true;
             } catch (SecurityException e) {
