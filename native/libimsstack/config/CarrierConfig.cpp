@@ -1122,6 +1122,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[]
         "text_rtp_inactivity_timer_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[] =
         "text_rtcp_inactivity_timer_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[] =
+        "incoming_dtmf_tone_play_support_bool";
 
 // Mts
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] = "sms_request_uri_type_int";

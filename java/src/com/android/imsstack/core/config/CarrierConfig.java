@@ -1154,6 +1154,8 @@ public class CarrierConfig {
                 "text_rtcp_inactivity_timer_millis_int";
         public static final String KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL =
                 "dynamic_video_quality_supported_bool";
+        public static final String KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL =
+                "incoming_dtmf_tone_play_support_bool";
 
         // TODO Media additional for CallFeature
         public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
