@@ -425,6 +425,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsWfcErrorMessageSupported(IN IMS_SIN
     }
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVideoSupportedForEmergencyReg() const
+{
+    return m_objAsset.bSupportVideoForEmergencyReg;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -1325,6 +1330,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatForReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
+    m_objAsset.bSupportVideoForEmergencyReg =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL);
     m_objAsset.bUseAwtWhenInitRegWithNextPcscf =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::

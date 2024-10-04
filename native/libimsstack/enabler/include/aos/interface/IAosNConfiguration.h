@@ -488,6 +488,13 @@ public:
     virtual IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const = 0;
 
     /**
+     * @brief Flag specifying if video feature tag is supported for emergency registration.
+     *
+     * @return IMS_TRUE if required, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsVideoSupportedForEmergencyReg() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5

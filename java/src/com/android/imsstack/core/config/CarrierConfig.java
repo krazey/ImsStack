@@ -872,6 +872,8 @@ public class CarrierConfig {
                 "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
                 "support_verstat_for_reg_bool";
+        public static final String KEY_SUPPORT_VIDEO_FOR_EREG_BOOL =
+                "support_video_for_ereg_bool";
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
                         "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";

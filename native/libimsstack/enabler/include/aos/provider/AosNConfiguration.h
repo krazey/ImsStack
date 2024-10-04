@@ -99,6 +99,7 @@ public:
     IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
     IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
+    IMS_BOOL IsVideoSupportedForEmergencyReg() const override;
 
     IMS_UINT32 GetRegistrationRetryBaseTime() override;
     IMS_UINT32 GetRegistrationRetryMaxTime() override;
