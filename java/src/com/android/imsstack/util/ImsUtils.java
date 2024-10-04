@@ -65,7 +65,7 @@ public final class ImsUtils {
             } catch (RuntimeException rethrown) {
                 throw rethrown;
             } catch (Exception e) {
-                Log.e(Log.TAG, "close: " + e);
+                Log.e(ImsUtils.class, "close: " + e);
             }
         }
     }

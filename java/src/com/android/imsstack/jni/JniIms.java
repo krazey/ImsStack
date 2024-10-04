@@ -280,11 +280,11 @@ public class JniIms {
 
     static {
         try {
-            Log.i(Log.TAG, "Loading library... start");
+            Log.i(JniIms.class, "Loading library... start");
             System.loadLibrary("imsstack");
-            Log.i(Log.TAG, "Loading library... end");
+            Log.i(JniIms.class, "Loading library... end");
         } catch (UnsatisfiedLinkError e) {
-            Log.e(Log.TAG, "Loading library failed: libimsstack");
+            Log.e(JniIms.class, "Loading library failed: libimsstack");
             e.printStackTrace();
         }
     }

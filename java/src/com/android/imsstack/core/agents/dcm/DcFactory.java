@@ -104,7 +104,7 @@ public final class DcFactory {
             return;
         }
 
-        Log.i(Log.TAG, "createDcAgents: slot" + slotId);
+        Log.i(DcFactory.class, "createDcAgents: slot" + slotId);
 
         agents.put(IDcUtils.class, new DcUtils(slotId));
         agents.put(IDcSettings.class, new DcSettings(slotId));
@@ -119,7 +119,7 @@ public final class DcFactory {
      * @param slotId A slot id.
      */
     public static void initDcAgents(Context context, int slotId) {
-        Log.i(Log.TAG, "initDcAgents: slot" + slotId);
+        Log.i(DcFactory.class, "initDcAgents: slot" + slotId);
 
         Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
 
@@ -138,7 +138,7 @@ public final class DcFactory {
      * @param slotId A slot id.
      */
     public static void cleanUpDcAgents(int slotId) {
-        Log.i(Log.TAG, "cleanUpDcAgents: slot" + slotId);
+        Log.i(DcFactory.class, "cleanUpDcAgents: slot" + slotId);
 
         Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
 

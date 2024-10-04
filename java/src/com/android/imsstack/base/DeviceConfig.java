@@ -36,7 +36,7 @@ public class DeviceConfig {
         TelephonyManagerProxy tmp = appContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         sActiveSimCount = tmp.getActiveModemCount();
         sSupportedSimCount = tmp.getSupportedModemCount();
-        Log.d(Log.TAG, "DeviceConfig: activeSimCount=" + sActiveSimCount
+        Log.d(DeviceConfig.class, "DeviceConfig: activeSimCount=" + sActiveSimCount
                 + ", supportedSimCount=" + sSupportedSimCount);
     }
 

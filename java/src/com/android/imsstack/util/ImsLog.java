@@ -36,77 +36,77 @@ public final class ImsLog {
     /** Sends a {@link Log#VERBOSE} log message with a specified object. */
     public static void v(Object o, String log) {
         if (isLoggable(Log.TRACE_OPTION_D)) {
-            Log.v(Log.TAG, getMessage(o, log));
+            Log.v(null, getMessage(o, log));
         }
     }
 
     /** Sends a {@link Log#VERBOSE} log message with a specified object and a slot id. */
     public static void v(Object o, int slotId, String log) {
         if (isLoggable(Log.TRACE_OPTION_D)) {
-            Log.v(Log.TAG, getMessage(o, "[s" + slotId + "] " + log));
+            Log.v(null, getMessage(o, "[s" + slotId + "] " + log));
         }
     }
 
     /** Sends a {@link Log#DEBUG} log message with a specified object. */
     public static void d(Object o, String log) {
         if (isLoggable(Log.TRACE_OPTION_D)) {
-            Log.d(Log.TAG, getMessage(o, log));
+            Log.d(null, getMessage(o, log));
         }
     }
 
     /** Sends a {@link Log#DEBUG} log message with a specified object and a slot id. */
     public static void d(Object o, int slotId, String log) {
         if (isLoggable(Log.TRACE_OPTION_D)) {
-            Log.d(Log.TAG, getMessage(o, "[s" + slotId + "] " + log));
+            Log.d(null, getMessage(o, "[s" + slotId + "] " + log));
         }
     }
 
     /** Sends a {@link Log#INFO} log message with a specified object. */
     public static void i(Object o, String log) {
         if (isLoggable(Log.TRACE_OPTION_I)) {
-            Log.i(Log.TAG, getMessage(o, log));
+            Log.i(null, getMessage(o, log));
         }
     }
 
     /** Sends a {@link Log#INFO} log message with a slot id. */
     public static void i(Object o, int slotId, String log) {
         if (isLoggable(Log.TRACE_OPTION_I)) {
-            Log.i(Log.TAG, getMessage(o, "[s" + slotId + "] " + log));
+            Log.i(null, getMessage(o, "[s" + slotId + "] " + log));
         }
     }
 
     /** Sends a {@link Log#WARN} log message with a specified object. */
     public static void w(Object o, String log) {
         if (isLoggable(Log.TRACE_OPTION_E)) {
-            Log.w(Log.TAG, getMessage(o, log));
+            Log.w(null, getMessage(o, log));
         }
     }
 
     /** Sends a {@link Log#WARN} log message with a specified object and a slot id. */
     public static void w(Object o, int slotId, String log) {
         if (isLoggable(Log.TRACE_OPTION_E)) {
-            Log.w(Log.TAG, getMessage(o, "[s" + slotId + "] " + log));
+            Log.w(null, getMessage(o, "[s" + slotId + "] " + log));
         }
     }
 
     /** Sends a {@link Log#ERROR} log message with a specified object. */
     public static void e(Object o, String log) {
         if (isLoggable(Log.TRACE_OPTION_E)) {
-            Log.e(Log.TAG, getMessage(o, log));
+            Log.e(null, getMessage(o, log));
         }
     }
 
     /** Sends a {@link Log#ERROR} log message with a specified object and slot id. */
     public static void e(Object o, int slotId, String log) {
         if (isLoggable(Log.TRACE_OPTION_E)) {
-            Log.e(Log.TAG, getMessage(o, "[s" + slotId + "] " + log));
+            Log.e(null, getMessage(o, "[s" + slotId + "] " + log));
         }
     }
 
     /** Sends a {@link Log#ERROR} log message with a specified object and an exception. */
     public static void e(Object o, String log, Throwable t) {
         if (isLoggable(Log.TRACE_OPTION_E)) {
-            Log.e(Log.TAG, getMessage(o, log), t);
+            Log.e(null, getMessage(o, log), t);
         }
     }
 
@@ -116,7 +116,7 @@ public final class ImsLog {
      */
     public static void e(Object o, int slotId, String log, Throwable t) {
         if (isLoggable(Log.TRACE_OPTION_E)) {
-            Log.e(Log.TAG, getMessage(o, "[s" + slotId + "] " + log), t);
+            Log.e(null, getMessage(o, "[s" + slotId + "] " + log), t);
         }
     }
 
@@ -210,7 +210,8 @@ public final class ImsLog {
         int option = Log.getLogOptions();
         boolean debugOn = Log.isImsDebugEnabled();
 
-        Log.d(Log.TAG, "ImsLog: option=0x" + Integer.toHexString(option) + ", debug=" + debugOn);
+        Log.d(ImsLog.class, "ImsLog: option=0x" + Integer.toHexString(option)
+                + ", debug=" + debugOn);
 
         setLogOption(option);
 
@@ -352,7 +353,7 @@ public final class ImsLog {
         clearOption(OPT_CONFIGURABLE_ALL);
         setOption(option);
 
-        Log.w(Log.TAG, "LOG is " + (isLogEnabled() ? "ON" : "OFF")
+        Log.w(ImsLog.class, "LOG is " + (isLogEnabled() ? "ON" : "OFF")
                 + "; D=" + isOptionEnabled(Log.TRACE_OPTION_D)
                 + ", E=" + isOptionEnabled(Log.TRACE_OPTION_E)
                 + ", I=" + isOptionEnabled(Log.TRACE_OPTION_I)

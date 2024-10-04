@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 public class RcsCapEventListenerCallBack implements UceEventListener {
-    private static final String LOG_TAG = RcsCapEventListenerCallBack.class.getSimpleName();
     private final CapabilityExchangeEventListener mEventListener;
     private final Executor mMessageExecutor;
     private final Executor mRequestExecutor;
@@ -84,15 +83,15 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
      */
     public void onRequestPublishCapabilities(int publishTriggerType) {
         if (mEventListener == null) {
-            Log.d(LOG_TAG, "mEventListener is null");
+            Log.d(this, "EventListener is null");
             return;
         }
         postAndRunTask(() -> {
             try {
                 mEventListener.onRequestPublishCapabilities(publishTriggerType);
-                Log.d(LOG_TAG, "onRequestPublishCapabilities is sent to framework");
+                Log.d(this, "onRequestPublishCapabilities is sent to framework");
             } catch (ImsException e) {
-                Log.e(LOG_TAG, "onRequestPublishCapabilities Exception = " + e.getMessage());
+                Log.e(this, "onRequestPublishCapabilities Exception = " + e.getMessage());
             }
         });
     }
@@ -114,18 +113,18 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
     @Override
     public void onPublishUpdated(int reasonCode, String reasonPharse,
             int reasonHeaderCause, String reasonHeadertext) {
-        Log.i(LOG_TAG, "onPublishUpdated ");
+        Log.i(this, "onPublishUpdated ");
         if (mEventListener == null) {
-            Log.d(LOG_TAG, "mEventListener is null ");
+            Log.d(this, "EventListener is null ");
             return;
         }
         postAndRunTask(() -> {
             try {
                 mEventListener.onPublishUpdated(reasonCode, reasonPharse,
                         reasonHeaderCause, reasonHeadertext);
-                Log.d(LOG_TAG, "onPublishUpdated sent to framework");
+                Log.d(this, "onPublishUpdated sent to framework");
             } catch (ImsException e) {
-                Log.e(LOG_TAG, "onPublishUpdated Exception = " + e.getMessage());
+                Log.e(this, "onPublishUpdated Exception = " + e.getMessage());
             }
         });
     }
@@ -137,15 +136,15 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
     @Override
     public void onUnPublish() {
         if (mEventListener == null) {
-            Log.d(LOG_TAG, "mEventListener is null ");
+            Log.d(this, "EventListener is null ");
             return;
         }
         postAndRunTask(() -> {
             try {
                 mEventListener.onUnpublish();
-                Log.d(LOG_TAG, "onUnPublish  sent to framework");
+                Log.d(this, "onUnPublish  sent to framework");
             } catch (ImsException e) {
-                Log.e(LOG_TAG, "onUnPublish Exception = " + e.getMessage());
+                Log.e(this, "onUnPublish Exception = " + e.getMessage());
             }
         });
     }
@@ -165,7 +164,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
     public void onRemoteCapabilityRequest(Uri contactUri, Set<String> remoteCapabilities,
             RemoteOptionsCallback remoteOptionsCallback) {
         if (mEventListener == null) {
-            Log.d(LOG_TAG, "mEventListener is null");
+            Log.d(this, "EventListener is null");
             return;
         }
         mRcsOptionsRequestCallback.setCallBack(remoteOptionsCallback);
@@ -173,9 +172,9 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
             try {
                 mEventListener.onRemoteCapabilityRequest(
                         contactUri, remoteCapabilities, mRcsOptionsRequestCallback);
-                Log.d(LOG_TAG, "onRemoteCapabilityRequest is sent to framework");
+                Log.d(this, "onRemoteCapabilityRequest is sent to framework");
             } catch (ImsException e) {
-                Log.e(LOG_TAG, "onRemoteCapabilityRequest Exception = " + e.getMessage());
+                Log.e(this, "onRemoteCapabilityRequest Exception = " + e.getMessage());
             }
         });
     }
@@ -184,7 +183,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
         if (mMessageExecutor != null) {
             mMessageExecutor.execute(task);
         } else {
-            Log.d(LOG_TAG, "MessageExecutor object is null");
+            Log.d(this, "MessageExecutor object is null");
         }
     }
 }
