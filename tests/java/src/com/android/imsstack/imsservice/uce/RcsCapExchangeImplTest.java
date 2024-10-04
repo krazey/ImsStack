@@ -27,9 +27,9 @@ import android.telephony.ims.stub.RcsCapabilityExchangeImplBase.PublishResponseC
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase.SubscribeResponseCallback;
 
 import com.android.imsstack.base.TestAppContext;
-import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallBack;
-import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallBack;
-import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallBack;
+import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallback;
+import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallback;
+import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallback;
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.util.MessageExecutor;
 
@@ -53,11 +53,11 @@ public class RcsCapExchangeImplTest {
     private static final String VIDEO = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video";
     @Mock Context mContext;
     @Mock PublishResponseCallback mPublishResponseCallback;
-    @Mock RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
-    @Mock RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
+    @Mock RcsCapPublishResponseCallback mRcsCapPublishResponseCallback;
+    @Mock RcsCapSubscribeResponseCallback mRcsCapSubscribeResponseCallback;
     @Mock SubscribeResponseCallback mSubscribeResponseCallback;
     @Mock RcsCapabilityExchangeImplBase.OptionsResponseCallback mOptionCallback;
-    @Mock RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+    @Mock RcsCapOptionsResponseCallback mRcsCapOptionsResponseCallback;
     @Mock private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
     @Mock private IUceApi mUceApi;
     @Mock private MessageExecutor mMessageExecutor;
@@ -74,9 +74,9 @@ public class RcsCapExchangeImplTest {
                         TestAppContext.SLOT0,
                         mContext,
                         mUceApi,
-                        mRcsCapSubscribeResponseCallBack,
-                        mRcsCapOptionsResponseCallBack,
-                        mRcsCapPublishResponseCallBack,
+                        mRcsCapSubscribeResponseCallback,
+                        mRcsCapOptionsResponseCallback,
+                        mRcsCapPublishResponseCallback,
                         mExecutor,
                         mMessageExecutor);
     }
@@ -94,7 +94,7 @@ public class RcsCapExchangeImplTest {
         uris.add(Uri.parse(TEST_PHONE_NUMBER));
         mRcsCapExchangeImpl.subscribeForCapabilities(uris, mSubscribeResponseCallback);
         verify(mUceApi).setListener(anyObject());
-        verify(mUceApi).subscribeCapabilities(uris, mRcsCapSubscribeResponseCallBack);
+        verify(mUceApi).subscribeCapabilities(uris, mRcsCapSubscribeResponseCallback);
     }
 
     // Test case to test publishCapability request
@@ -103,7 +103,7 @@ public class RcsCapExchangeImplTest {
         String pidf = getpidf();
         mRcsCapExchangeImpl.publishCapabilities(pidf, mPublishResponseCallback);
         verify(mUceApi).setListener(anyObject());
-        verify(mUceApi).publishCapabilities(pidf, mRcsCapPublishResponseCallBack);
+        verify(mUceApi).publishCapabilities(pidf, mRcsCapPublishResponseCallback);
     }
 
     // Test case to test sendOptionsCapabilityRequest request
@@ -117,7 +117,7 @@ public class RcsCapExchangeImplTest {
         verify(mUceApi).setListener(anyObject());
         verify(mUceApi, times(1))
                 .sendOptionsCapabilityRequest(
-                        contactUri, myCapabilities, mRcsCapOptionsResponseCallBack);
+                        contactUri, myCapabilities, mRcsCapOptionsResponseCallback);
     }
 
     public String getpidf() {

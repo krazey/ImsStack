@@ -26,13 +26,13 @@ import com.android.imsstack.enabler.uce.interf.OptionsResponse;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public class RcsCapOptionsResponseCallBack implements OptionsResponse {
+public class RcsCapOptionsResponseCallback implements OptionsResponse {
 
-    private static final String LOG_TAG = RcsCapOptionsResponseCallBack.class.getSimpleName();
+    private static final String LOG_TAG = RcsCapOptionsResponseCallback.class.getSimpleName();
     private OptionsResponseCallback mOptionsResponseCallBack;
     private final Executor mMessageExecutor;
 
-    public RcsCapOptionsResponseCallBack(Executor messageExecutor) {
+    public RcsCapOptionsResponseCallback(Executor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 
@@ -42,7 +42,7 @@ public class RcsCapOptionsResponseCallBack implements OptionsResponse {
      *
      * @param optionsCallback Tha callback of Options callback
      */
-    public void setCallBack(OptionsResponseCallback optionsCallback) {
+    public void setCallback(OptionsResponseCallback optionsCallback) {
         mOptionsResponseCallBack = optionsCallback;
     }
 

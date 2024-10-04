@@ -36,70 +36,70 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
-public class RcsCapPublishResponseCallBackTest {
+public class RcsCapPublishResponseCallbackTest {
     @Mock private RcsCapabilityExchangeImplBase.PublishResponseCallback mPublishResponseCallback;
-    private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
-    private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBackNull;
+    private RcsCapPublishResponseCallback mRcsCapPublishResponseCallback;
+    private RcsCapPublishResponseCallback mRcsCapPublishResponseCallbackNull;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mRcsCapPublishResponseCallBack = new RcsCapPublishResponseCallBack(mExecutor);
-        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
-        mRcsCapPublishResponseCallBackNull = new RcsCapPublishResponseCallBack(mExecutor);
-        mRcsCapPublishResponseCallBackNull.setCallBack(null);
+        mRcsCapPublishResponseCallback = new RcsCapPublishResponseCallback(mExecutor);
+        mRcsCapPublishResponseCallback.setCallback(mPublishResponseCallback);
+        mRcsCapPublishResponseCallbackNull = new RcsCapPublishResponseCallback(mExecutor);
+        mRcsCapPublishResponseCallbackNull.setCallback(null);
     }
 
     @After
     public void tearDown() {
         mPublishResponseCallback = null;
-        mRcsCapPublishResponseCallBack = null;
+        mRcsCapPublishResponseCallback = null;
     }
 
     private final Executor mExecutor = (r) -> r.run();
 
     @Test
     public void onCommandErrorPublishTest() throws ImsException {
-        mRcsCapPublishResponseCallBackNull.setCallBack(null);
-        mRcsCapPublishResponseCallBackNull.onCommandError(1);
+        mRcsCapPublishResponseCallbackNull.setCallback(null);
+        mRcsCapPublishResponseCallbackNull.onCommandError(1);
         verify(mPublishResponseCallback, never()).onCommandError(1);
 
-        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
-        mRcsCapPublishResponseCallBack.onCommandError(1);
+        mRcsCapPublishResponseCallback.setCallback(mPublishResponseCallback);
+        mRcsCapPublishResponseCallback.onCommandError(1);
         verify(mPublishResponseCallback).onCommandError(1);
 
         doThrow(ImsException.class).when(mPublishResponseCallback).onCommandError(1);
-        mRcsCapPublishResponseCallBack.onCommandError(1);
+        mRcsCapPublishResponseCallback.onCommandError(1);
     }
 
     @Test
     public void onNetworkResponsePublishTest() throws ImsException {
-        mRcsCapPublishResponseCallBackNull.setCallBack(null);
-        mRcsCapPublishResponseCallBackNull.onNetworkResponse(200, "OK");
+        mRcsCapPublishResponseCallbackNull.setCallback(null);
+        mRcsCapPublishResponseCallbackNull.onNetworkResponse(200, "OK");
         verify(mPublishResponseCallback, never()).onNetworkResponse(anyInt(), anyString());
-        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
-        mRcsCapPublishResponseCallBack.onNetworkResponse(200, "OK");
+        mRcsCapPublishResponseCallback.setCallback(mPublishResponseCallback);
+        mRcsCapPublishResponseCallback.onNetworkResponse(200, "OK");
         verify(mPublishResponseCallback).onNetworkResponse(200, "OK");
 
         doThrow(ImsException.class)
                 .when(mPublishResponseCallback)
                 .onNetworkResponse(anyInt(), anyString());
-        mRcsCapPublishResponseCallBack.onNetworkResponse(200, "OK");
+        mRcsCapPublishResponseCallback.onNetworkResponse(200, "OK");
     }
 
     @Test
     public void onNetworkResponseReasonPublishTest() throws ImsException {
-        mRcsCapPublishResponseCallBackNull.setCallBack(null);
-        mRcsCapPublishResponseCallBackNull.onNetworkResponse(200, "OK", 100, "Reason");
+        mRcsCapPublishResponseCallbackNull.setCallback(null);
+        mRcsCapPublishResponseCallbackNull.onNetworkResponse(200, "OK", 100, "Reason");
         verify(mPublishResponseCallback, never())
                 .onNetworkResponse(anyInt(), anyString(), anyInt(), anyString());
-        mRcsCapPublishResponseCallBack.setCallBack(mPublishResponseCallback);
-        mRcsCapPublishResponseCallBack.onNetworkResponse(200, "OK", 100, "Reason");
+        mRcsCapPublishResponseCallback.setCallback(mPublishResponseCallback);
+        mRcsCapPublishResponseCallback.onNetworkResponse(200, "OK", 100, "Reason");
         verify(mPublishResponseCallback).onNetworkResponse(200, "OK", 100, "Reason");
 
         doThrow(ImsException.class)
                 .when(mPublishResponseCallback)
                 .onNetworkResponse(anyInt(), anyString(), anyInt(), anyString());
-        mRcsCapPublishResponseCallBack.onNetworkResponse(200, "OK", 100, "Reason");
+        mRcsCapPublishResponseCallback.onNetworkResponse(200, "OK", 100, "Reason");
     }
 }

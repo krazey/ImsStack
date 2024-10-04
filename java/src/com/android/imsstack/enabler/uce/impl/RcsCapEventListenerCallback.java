@@ -29,13 +29,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-public class RcsCapEventListenerCallBack implements UceEventListener {
+public class RcsCapEventListenerCallback implements UceEventListener {
     private final CapabilityExchangeEventListener mEventListener;
     private final Executor mMessageExecutor;
     private final Executor mRequestExecutor;
     private final RcsCapOptionsRequestCallback mRcsOptionsRequestCallback;
 
-    public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
+    public RcsCapEventListenerCallback(CapabilityExchangeEventListener listener,
             Executor messageExecutor, Executor requestExecutor) {
         mEventListener = listener;
         mMessageExecutor = messageExecutor;
@@ -45,7 +45,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
     }
 
     @VisibleForTesting
-    public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
+    public RcsCapEventListenerCallback(CapabilityExchangeEventListener listener,
             Executor messageExecutor, Executor requestExecutor,
             RcsCapOptionsRequestCallback rcsOptionsRequestCallback) {
         mEventListener = listener;
@@ -56,7 +56,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
 
     /**
      * Trigger the framework to provide a capability update using
-     * {@link IUceApi##publishCapabilities}.
+     * {@link IUceApi#publishCapabilities}.
      *
      * CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 0 (The reason for the request is unknown)
      * CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 1 (When the Entity Tag (ETag) is  expiring)
@@ -107,7 +107,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
      * network provided no reason with the sip code, the string should be empty.
      * @param reasonHeaderCause : The “cause” parameter of the “reason” header
      * included in the SIP message.
-     * @param reasonHeadertext: reasonHeaderText The “text” parameter of the “reason” header
+     * @param reasonHeadertext : reasonHeaderText The “text” parameter of the “reason” header
      * included in the SIP message.
      */
     @Override
@@ -167,7 +167,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
             Log.d(this, "EventListener is null");
             return;
         }
-        mRcsOptionsRequestCallback.setCallBack(remoteOptionsCallback);
+        mRcsOptionsRequestCallback.setCallback(remoteOptionsCallback);
         postAndRunTask(() -> {
             try {
                 mEventListener.onRemoteCapabilityRequest(

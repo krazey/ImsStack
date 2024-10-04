@@ -28,13 +28,13 @@ import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
+public class RcsCapSubscribeResponseCallback implements SubscribeResponse {
 
-    private static final String LOG_TAG = RcsCapSubscribeResponseCallBack.class.getSimpleName();
+    private static final String LOG_TAG = RcsCapSubscribeResponseCallback.class.getSimpleName();
     private SubscribeResponseCallback mSubscribeResponseCallBack;
     private final Executor mMessageExecutor;
 
-    public RcsCapSubscribeResponseCallBack(Executor messageExecutor) {
+    public RcsCapSubscribeResponseCallback(Executor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 
@@ -44,7 +44,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      *
      * @param subscribeCallback The callback of the subscribe request
      */
-    public void setCallBack(SubscribeResponseCallback subscribeCallback) {
+    public void setCallback(SubscribeResponseCallback subscribeCallback) {
         mSubscribeResponseCallBack = subscribeCallback;
     }
 
@@ -52,7 +52,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      * Notify the framework of the latest XML PIDF documents included in the network response
      * for the requested contacts' capabilities requested by the Framework.
      * The expected format for the PIDF XML is defined in RFC3861. Each XML document must be an
-     * "application/pidf+xml" object and start with a root <presence> element. For NOTIFY
+     * "application/pidf+xml" object and start with a root presence element. For NOTIFY
      * responses that contain RLMI information and potentially multiple PIDF XMLs, each
      * PIDF XML should be separated and added as a separate item in the List. This should be
      * called every time a new NOTIFY event is received with new capability information.

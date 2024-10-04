@@ -25,13 +25,13 @@ import com.android.imsstack.enabler.uce.interf.PublishResponse;
 
 import java.util.concurrent.Executor;
 
-public class RcsCapPublishResponseCallBack implements PublishResponse {
+public class RcsCapPublishResponseCallback implements PublishResponse {
 
-    private static final String LOG_TAG = RcsCapPublishResponseCallBack.class.getSimpleName();
+    private static final String LOG_TAG = RcsCapPublishResponseCallback.class.getSimpleName();
     private PublishResponseCallback mPublishResponseCallBack;
     private final Executor mMessageExecutor;
 
-    public RcsCapPublishResponseCallBack(Executor messageExecutor) {
+    public RcsCapPublishResponseCallback(Executor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 
@@ -41,7 +41,7 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
      *
      * @param publishCallback The callback of publish request
      */
-    public void setCallBack(PublishResponseCallback publishCallback) {
+    public void setCallback(PublishResponseCallback publishCallback) {
         mPublishResponseCallBack = publishCallback;
     }
 

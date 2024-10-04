@@ -39,103 +39,103 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
-public class RcsCapSubscribeResponseCallBackTest {
+public class RcsCapSubscribeResponseCallbackTest {
     private static final String TEST_PHONE_NUMBER = "+123456789";
     @Mock
     private RcsCapabilityExchangeImplBase.SubscribeResponseCallback mSubscribeResponseCallback;
 
-    private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
-    private RcsCapSubscribeResponseCallBack mRcsSubscribeResponseCallBackNull;
+    private RcsCapSubscribeResponseCallback mRcsCapSubscribeResponseCallback;
+    private RcsCapSubscribeResponseCallback mRcsSubscribeResponseCallbackNull;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mRcsCapSubscribeResponseCallBack = new RcsCapSubscribeResponseCallBack(mExecutor);
-        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
-        mRcsSubscribeResponseCallBackNull = new RcsCapSubscribeResponseCallBack(mExecutor);
-        mRcsSubscribeResponseCallBackNull.setCallBack(null);
+        mRcsCapSubscribeResponseCallback = new RcsCapSubscribeResponseCallback(mExecutor);
+        mRcsCapSubscribeResponseCallback.setCallback(mSubscribeResponseCallback);
+        mRcsSubscribeResponseCallbackNull = new RcsCapSubscribeResponseCallback(mExecutor);
+        mRcsSubscribeResponseCallbackNull.setCallback(null);
     }
 
     @After
     public void tearDown() {
         mSubscribeResponseCallback = null;
-        mRcsCapSubscribeResponseCallBack = null;
+        mRcsCapSubscribeResponseCallback = null;
     }
 
     private final Executor mExecutor = (r) -> r.run();
 
     @Test
     public void onCommandErrorSubscribeTest() throws ImsException {
-        mRcsSubscribeResponseCallBackNull.setCallBack(null);
-        mRcsSubscribeResponseCallBackNull.onCommandError(1);
+        mRcsSubscribeResponseCallbackNull.setCallback(null);
+        mRcsSubscribeResponseCallbackNull.onCommandError(1);
         verify(mSubscribeResponseCallback, never()).onCommandError(1);
-        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
-        mRcsCapSubscribeResponseCallBack.onCommandError(1);
+        mRcsCapSubscribeResponseCallback.setCallback(mSubscribeResponseCallback);
+        mRcsCapSubscribeResponseCallback.onCommandError(1);
         verify(mSubscribeResponseCallback).onCommandError(1);
         doThrow(ImsException.class).when(mSubscribeResponseCallback).onCommandError(1);
-        mRcsCapSubscribeResponseCallBack.onCommandError(1);
+        mRcsCapSubscribeResponseCallback.onCommandError(1);
     }
 
     @Test
     public void onNetworkResponseSubscribeTest() throws ImsException {
-        mRcsSubscribeResponseCallBackNull.setCallBack(null);
-        mRcsSubscribeResponseCallBackNull.onNetworkResponse(200, "OK");
+        mRcsSubscribeResponseCallbackNull.setCallback(null);
+        mRcsSubscribeResponseCallbackNull.onNetworkResponse(200, "OK");
         verify(mSubscribeResponseCallback, never())
                 .onNetworkResponse(anyInt(), anyString());
-        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
-        mRcsCapSubscribeResponseCallBack.onNetworkResponse(200, "OK");
+        mRcsCapSubscribeResponseCallback.setCallback(mSubscribeResponseCallback);
+        mRcsCapSubscribeResponseCallback.onNetworkResponse(200, "OK");
         verify(mSubscribeResponseCallback).onNetworkResponse(200, "OK");
         doThrow(ImsException.class)
                 .when(mSubscribeResponseCallback)
                 .onNetworkResponse(anyInt(), anyString());
-        mRcsCapSubscribeResponseCallBack.onNetworkResponse(200, "OK");
+        mRcsCapSubscribeResponseCallback.onNetworkResponse(200, "OK");
     }
 
     @Test
     public void onNetworkResponseTest() throws ImsException {
-        mRcsSubscribeResponseCallBackNull.setCallBack(null);
-        mRcsSubscribeResponseCallBackNull.onNetworkResponse(200, "OK", 0, null);
+        mRcsSubscribeResponseCallbackNull.setCallback(null);
+        mRcsSubscribeResponseCallbackNull.onNetworkResponse(200, "OK", 0, null);
         verify(mSubscribeResponseCallback, never())
                 .onNetworkResponse(anyInt(), anyString(), anyInt(), anyString());
-        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
-        mRcsCapSubscribeResponseCallBack.onNetworkResponse(200, "OK", 400, "Bad Request");
+        mRcsCapSubscribeResponseCallback.setCallback(mSubscribeResponseCallback);
+        mRcsCapSubscribeResponseCallback.onNetworkResponse(200, "OK", 400, "Bad Request");
         verify(mSubscribeResponseCallback).onNetworkResponse(200, "OK", 400, "Bad Request");
         doThrow(ImsException.class)
                 .when(mSubscribeResponseCallback)
                 .onNetworkResponse(anyInt(), anyString(), anyInt(), anyString());
-        mRcsCapSubscribeResponseCallBack.onNetworkResponse(200, "OK", 400, "Bad Request");
+        mRcsCapSubscribeResponseCallback.onNetworkResponse(200, "OK", 400, "Bad Request");
     }
 
     @Test
     public void onNotifyCapabilitiesUpdateSubscribeTest() throws ImsException {
         List<String> pidfs = new ArrayList();
         pidfs.add(readPidf());
-        mRcsSubscribeResponseCallBackNull.setCallBack(null);
-        mRcsSubscribeResponseCallBackNull.onNotifyCapabilitiesUpdate(pidfs);
+        mRcsSubscribeResponseCallbackNull.setCallback(null);
+        mRcsSubscribeResponseCallbackNull.onNotifyCapabilitiesUpdate(pidfs);
         verify(mSubscribeResponseCallback, never()).onNotifyCapabilitiesUpdate(pidfs);
-        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
-        mRcsCapSubscribeResponseCallBack.onNotifyCapabilitiesUpdate(pidfs);
+        mRcsCapSubscribeResponseCallback.setCallback(mSubscribeResponseCallback);
+        mRcsCapSubscribeResponseCallback.onNotifyCapabilitiesUpdate(pidfs);
         verify(mSubscribeResponseCallback).onNotifyCapabilitiesUpdate(pidfs);
-        mRcsCapSubscribeResponseCallBack.onNotifyCapabilitiesUpdate(null);
+        mRcsCapSubscribeResponseCallback.onNotifyCapabilitiesUpdate(null);
         verify(mSubscribeResponseCallback).onNotifyCapabilitiesUpdate(null);
         doThrow(ImsException.class)
                 .when(mSubscribeResponseCallback)
                 .onNotifyCapabilitiesUpdate(pidfs);
-        mRcsCapSubscribeResponseCallBack.onNotifyCapabilitiesUpdate(pidfs);
+        mRcsCapSubscribeResponseCallback.onNotifyCapabilitiesUpdate(pidfs);
     }
 
     @Test
     public void onTerminatedSubscribeTest() throws ImsException {
-        mRcsSubscribeResponseCallBackNull.setCallBack(null);
-        mRcsSubscribeResponseCallBackNull.onTerminated("terminatedReason", 1200);
+        mRcsSubscribeResponseCallbackNull.setCallback(null);
+        mRcsSubscribeResponseCallbackNull.onTerminated("terminatedReason", 1200);
         verify(mSubscribeResponseCallback, never()).onTerminated("terminatedReason", 1200);
-        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
-        mRcsCapSubscribeResponseCallBack.onTerminated("terminatedReason", 1200);
+        mRcsCapSubscribeResponseCallback.setCallback(mSubscribeResponseCallback);
+        mRcsCapSubscribeResponseCallback.onTerminated("terminatedReason", 1200);
         verify(mSubscribeResponseCallback).onTerminated("terminatedReason", 1200);
         doThrow(ImsException.class)
                 .when(mSubscribeResponseCallback)
                 .onTerminated("terminatedReason", 1200);
-        mRcsCapSubscribeResponseCallBack.onTerminated("terminatedReason", 1200);
+        mRcsCapSubscribeResponseCallback.onTerminated("terminatedReason", 1200);
     }
 
     @Test
@@ -143,17 +143,17 @@ public class RcsCapSubscribeResponseCallBackTest {
         List<Pair<Uri, String>> terminatedReasons = new ArrayList<Pair<Uri, String>>();
         Uri uri = Uri.parse(TEST_PHONE_NUMBER);
         terminatedReasons.add(new Pair<>(uri, "terminatedReason"));
-        mRcsSubscribeResponseCallBackNull.setCallBack(null);
-        mRcsSubscribeResponseCallBackNull.onResourceTerminated(terminatedReasons);
+        mRcsSubscribeResponseCallbackNull.setCallback(null);
+        mRcsSubscribeResponseCallbackNull.onResourceTerminated(terminatedReasons);
         verify(mSubscribeResponseCallback, never())
                 .onResourceTerminated(terminatedReasons);
-        mRcsCapSubscribeResponseCallBack.setCallBack(mSubscribeResponseCallback);
-        mRcsCapSubscribeResponseCallBack.onResourceTerminated(terminatedReasons);
+        mRcsCapSubscribeResponseCallback.setCallback(mSubscribeResponseCallback);
+        mRcsCapSubscribeResponseCallback.onResourceTerminated(terminatedReasons);
         verify(mSubscribeResponseCallback).onResourceTerminated(terminatedReasons);
         doThrow(ImsException.class)
                 .when(mSubscribeResponseCallback)
                 .onResourceTerminated(terminatedReasons);
-        mRcsCapSubscribeResponseCallBack.onResourceTerminated(terminatedReasons);
+        mRcsCapSubscribeResponseCallback.onResourceTerminated(terminatedReasons);
     }
 
     private static String readPidf() {

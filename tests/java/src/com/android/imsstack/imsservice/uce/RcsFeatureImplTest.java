@@ -36,9 +36,9 @@ import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
 
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.TestAppContext;
-import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallBack;
-import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallBack;
-import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallBack;
+import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallback;
+import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallback;
+import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallback;
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.util.Log;
@@ -59,9 +59,9 @@ public class RcsFeatureImplTest {
     private static final int STATE_READY = 2;
 
     @Mock private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
-    @Mock private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
-    @Mock private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
-    @Mock private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+    @Mock private RcsCapPublishResponseCallback mRcsCapPublishResponseCallback;
+    @Mock private RcsCapSubscribeResponseCallback mRcsCapSubscribeResponseCallback;
+    @Mock private RcsCapOptionsResponseCallback mRcsCapOptionsResponseCallback;
     @Mock private IUceApi mUceApi;
     @Mock private Executor mMessageExecutor;
 
@@ -197,9 +197,9 @@ public class RcsFeatureImplTest {
                     TestAppContext.SLOT0,
                     mTestAppContext.getContext(),
                     mUceApi,
-                    mRcsCapSubscribeResponseCallBack,
-                    mRcsCapOptionsResponseCallBack,
-                    mRcsCapPublishResponseCallBack,
+                    mRcsCapSubscribeResponseCallback,
+                    mRcsCapOptionsResponseCallback,
+                    mRcsCapPublishResponseCallback,
                     mExecutor,
                     mMessageExecutor);
         }

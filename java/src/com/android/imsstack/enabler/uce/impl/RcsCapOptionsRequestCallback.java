@@ -39,7 +39,7 @@ public class RcsCapOptionsRequestCallback implements OptionsRequestCallback {
      * the network back to the framework.
      * @param remoteOptionsCallback The callback of option request
      */
-    public void setCallBack(RemoteOptionsCallback remoteOptionsCallback) {
+    public void setCallback(RemoteOptionsCallback remoteOptionsCallback) {
         mRemoteOptionsCallback = remoteOptionsCallback;
     }
 

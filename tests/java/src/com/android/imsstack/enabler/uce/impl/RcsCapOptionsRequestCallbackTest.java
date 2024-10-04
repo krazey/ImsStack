@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
-public class RcsCapOptionsRequestCallBackTest {
+public class RcsCapOptionsRequestCallbackTest {
 
     private static final String FEATURE_VIDEO = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video";
     @Mock RemoteOptionsCallback mRemoteOptionsCallback;
@@ -48,7 +48,7 @@ public class RcsCapOptionsRequestCallBackTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mRcsCapOptionsRequestCallback = new RcsCapOptionsRequestCallback(mExecutor);
-        mRcsCapOptionsRequestCallback.setCallBack(mRemoteOptionsCallback);
+        mRcsCapOptionsRequestCallback.setCallback(mRemoteOptionsCallback);
     }
 
     @After

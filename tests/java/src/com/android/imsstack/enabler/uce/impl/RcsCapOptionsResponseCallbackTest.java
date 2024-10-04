@@ -37,54 +37,54 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
-public class RcsCapOptionsResponseCallBackTest {
+public class RcsCapOptionsResponseCallbackTest {
     @Mock private RcsCapabilityExchangeImplBase.OptionsResponseCallback mOptionsResponseCallback;
-    private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
-    private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBackNull;
+    private RcsCapOptionsResponseCallback mRcsCapOptionsResponseCallback;
+    private RcsCapOptionsResponseCallback mRcsCapOptionsResponseCallbackNull;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(mExecutor);
-        mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
-        mRcsCapOptionsResponseCallBackNull = new RcsCapOptionsResponseCallBack(mExecutor);
-        mRcsCapOptionsResponseCallBackNull.setCallBack(null);
+        mRcsCapOptionsResponseCallback = new RcsCapOptionsResponseCallback(mExecutor);
+        mRcsCapOptionsResponseCallback.setCallback(mOptionsResponseCallback);
+        mRcsCapOptionsResponseCallbackNull = new RcsCapOptionsResponseCallback(mExecutor);
+        mRcsCapOptionsResponseCallbackNull.setCallback(null);
     }
 
     @After
     public void tearDown() {
         mOptionsResponseCallback = null;
-        mRcsCapOptionsResponseCallBack = null;
+        mRcsCapOptionsResponseCallback = null;
     }
 
     private final Executor mExecutor = (r) -> r.run();
 
     @Test
     public void onCommandErrorOptionsTest() throws ImsException {
-        mRcsCapOptionsResponseCallBackNull.setCallBack(null);
-        mRcsCapOptionsResponseCallBackNull.onCommandError(1);
+        mRcsCapOptionsResponseCallbackNull.setCallback(null);
+        mRcsCapOptionsResponseCallbackNull.onCommandError(1);
         verify(mOptionsResponseCallback, never()).onCommandError(1);
-        mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
-        mRcsCapOptionsResponseCallBack.onCommandError(1);
+        mRcsCapOptionsResponseCallback.setCallback(mOptionsResponseCallback);
+        mRcsCapOptionsResponseCallback.onCommandError(1);
         verify(mOptionsResponseCallback).onCommandError(1);
         doThrow(ImsException.class).when(mOptionsResponseCallback).onCommandError(1);
-        mRcsCapOptionsResponseCallBack.onCommandError(1);
+        mRcsCapOptionsResponseCallback.onCommandError(1);
     }
 
     @Test
     public void onNetworkResponseOptionsTest() throws ImsException {
         List<String> capability = readCapabilities();
-        mRcsCapOptionsResponseCallBackNull.setCallBack(null);
-        mRcsCapOptionsResponseCallBackNull.onNetworkResponse(200, "OK", capability);
+        mRcsCapOptionsResponseCallbackNull.setCallback(null);
+        mRcsCapOptionsResponseCallbackNull.onNetworkResponse(200, "OK", capability);
         verify(mOptionsResponseCallback, never())
                 .onNetworkResponse(anyInt(), anyString(), any());
-        mRcsCapOptionsResponseCallBack.setCallBack(mOptionsResponseCallback);
-        mRcsCapOptionsResponseCallBack.onNetworkResponse(200, "OK", capability);
+        mRcsCapOptionsResponseCallback.setCallback(mOptionsResponseCallback);
+        mRcsCapOptionsResponseCallback.onNetworkResponse(200, "OK", capability);
         verify(mOptionsResponseCallback).onNetworkResponse(anyInt(), anyString(), any());
         doThrow(ImsException.class)
                 .when(mOptionsResponseCallback)
                 .onNetworkResponse(anyInt(), anyString(), any());
-        mRcsCapOptionsResponseCallBack.onNetworkResponse(200, "OK", capability);
+        mRcsCapOptionsResponseCallback.onNetworkResponse(200, "OK", capability);
     }
 
     private static List<String> readCapabilities() {
