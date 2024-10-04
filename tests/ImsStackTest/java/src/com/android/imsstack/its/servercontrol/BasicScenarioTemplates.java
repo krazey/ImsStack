@@ -23,13 +23,13 @@ package com.android.imsstack.its.servercontrol;
 public class BasicScenarioTemplates {
     public static final String NORMAL_REGISTRATION_W_SUBSCRIPTION =
             ">REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE";
-    public static final String MO_VOICE_CALL = """
+    public static final String MO_VOICE_CALL_CONNECTED = """
             >INVITE | <183-INVITE s-copy | >PRACK | <200-PRACK | <180-INVITE | <200-INVITE d-3000
             | >ACK
             """;
-    public static final String MT_VOICE_CALL = """
-            <INVITE-REGISTER s-audio_amr_wb_only d-3000 | <183-INVITE s-copy | >PRACK | <200-PRACK
-            | <180-INVITE | <200-INVITE d-3000 | <ACK-200
+    public static final String MT_VOICE_CALL_ALERTED = """
+            <INVITE-REGISTER s-audio_amr_wb_only d-3000 | >183 | <PRACK-183 | >200
+            | >180 | <PRACK-180 | >200
             """;
 
     /**
