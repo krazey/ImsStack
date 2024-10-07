@@ -60,6 +60,13 @@ public class CallTestBase extends ImsStackTestBase {
         }
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
                 false);
+        mConfig.putBoolean(CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
                 true);
     }

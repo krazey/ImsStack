@@ -45,7 +45,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class SampleCallTest extends CallTestBase {
-    private static final int DEFAULT_CALL_INITIATED_TIMER_IN_MILLIS = 10000;
     private TestCall mCall = null;
 
     @Before
@@ -299,7 +298,8 @@ public class SampleCallTest extends CallTestBase {
 
         mCall.startVoiceCall();
         mCall.expect().initiated();
-        logi(this, "testCallRuleCheck expecting initiated");
+
+        logi(this, "testMoCallAudioOnlyWithoutPrecondition expecting initiated");
         mCall.expectWithin(2000).nothing();
         mCall.terminate(ImsReasonInfo.CODE_USER_TERMINATED);
         mCall.expect().terminated(
