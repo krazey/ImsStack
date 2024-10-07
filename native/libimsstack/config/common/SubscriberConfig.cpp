@@ -469,7 +469,10 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
         AString strTemp;
         strAnonymousUserId.SplitF('@', strTemp, strHomeDomainName, IMS_FALSE);
         strAnonymousUserId.SplitF(':', strTemp, strPrivateUserId, IMS_FALSE);
-        objPublicUserIds.AddElement(strAnonymousUserId);
+
+        AString strPublicUserId;
+        strPublicUserId.Sprintf("\"Anonymous\" <%s>", strAnonymousUserId.GetStr());
+        objPublicUserIds.AddElement(strPublicUserId);
     }
 
     UpdatePrivateUserId(pSubsInfo, strPrivateUserId);
@@ -1608,7 +1611,7 @@ void SubscriberConfig::UpdatePublicUserIds(
         }
 
         AString strScheme = AString::ConstNull();
-        IMS_SINT32 nStartIndex = strUserId.StartsWith('<') ? 1 : 0;
+        IMS_SINT32 nStartIndex = strUserId.GetIndexOf('<') + 1;
 
         if (strUserId.GetLength() >= (4 + nStartIndex))
         {

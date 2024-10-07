@@ -755,6 +755,9 @@ TEST_F(SubscriberConfigTest, FakeSubscriber)
     strImpu.SplitF('@', strTemp, strDomain, IMS_FALSE);
     strImpu.SplitF(':', strTemp, strImpi, IMS_FALSE);
 
+    AString strPublicUserId;
+    strPublicUserId.Sprintf("\"Anonymous\" <%s>", strImpu.GetStr());
+
     AString strId("fake");
     AString strConfName = "subscriber_" + strId;
     SubscriberConfig objSubscriberConfig(IMS_SLOT_0, strConfName);
@@ -775,9 +778,9 @@ TEST_F(SubscriberConfigTest, FakeSubscriber)
     EXPECT_EQ(objSubscriberConfig.GetIndexOfPrimaryPublicUserId(), 0);
     EXPECT_EQ(objSubscriberConfig.GetPhoneContext(), strDomain);
     EXPECT_EQ(objSubscriberConfig.GetPrivateUserId(), strImpi);
-    EXPECT_EQ(objSubscriberConfig.GetPublicUserId(), strImpu);
+    EXPECT_EQ(objSubscriberConfig.GetPublicUserId(), strPublicUserId);
     EXPECT_EQ(objSubscriberConfig.GetPublicUserIds().GetCount(), 1);
-    EXPECT_EQ(objSubscriberConfig.GetPublicUserId(IImsSubscriberInfo::IMPU_SIP), strImpu);
+    EXPECT_EQ(objSubscriberConfig.GetPublicUserId(IImsSubscriberInfo::IMPU_SIP), strPublicUserId);
     EXPECT_TRUE(objSubscriberConfig.GetPublicUserId(IImsSubscriberInfo::IMPU_TEL).IsEmpty());
     EXPECT_EQ(objSubscriberConfig.GetScscfAddress(), strDomain);
 }
