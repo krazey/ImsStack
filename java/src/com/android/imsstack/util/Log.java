@@ -130,78 +130,28 @@ public final class Log {
     }
 
     private static String getClassName(Object o) {
+        if (o instanceof Class<?>) {
+            Class<?> cls = (Class<?>) o;
+            return " [@" + cls.getSimpleName();
+        }
         return o == null ? "" : " [@" + o.getClass().getSimpleName();
-    }
-
-    /**
-     * Prints the debug level log.
-     */
-    public static void d(String tag, String msg) {
-        if (isLogEnabled(TRACE_OPTION_D)) {
-            android.util.Log.d(tag, msg);
-        }
-    }
-
-    /**
-     * Prints the error level log.
-     */
-    public static void e(String tag, String msg) {
-        if (isLogEnabled(TRACE_OPTION_E)) {
-            android.util.Log.e(tag, msg);
-        }
-    }
-
-    /**
-     * Prints the error level log.
-     */
-    public static void e(String tag, String msg, Throwable t) {
-        if (isLogEnabled(TRACE_OPTION_E)) {
-            android.util.Log.e(tag, msg, t);
-        }
-    }
-
-    /**
-     * Prints the information level log.
-     */
-    public static void i(String tag, String msg) {
-        if (isLogEnabled(TRACE_OPTION_I)) {
-            android.util.Log.i(tag, msg);
-        }
-    }
-
-    /**
-     * Prints the verbose level log.
-     */
-    public static void v(String tag, String msg) {
-        if (isLogEnabled(TRACE_OPTION_D)) {
-            android.util.Log.v(tag, msg);
-        }
-    }
-
-    /**
-     * Prints the warning level log.
-     */
-    public static void w(String tag, String msg) {
-        if (isLogEnabled(TRACE_OPTION_I)) {
-            android.util.Log.w(tag, msg);
-        }
     }
 
     /**
      * Prints the debug level log when the debug mode is enabled.
      */
-    public static void dc(String tag, String msg) {
+    public static void dc(Object o, String msg) {
         if (isDebuggable()) {
-            d(tag, msg);
+            d(o, msg);
         }
     }
 
     /**
      * Prints the verbose level log when the debug mode is enabled.
      */
-    public static void vc(String tag, String msg) {
+    public static void vc(Object o, String msg) {
         if (isDebuggable()) {
-            v(tag, msg);
+            v(o, msg);
         }
     }
 

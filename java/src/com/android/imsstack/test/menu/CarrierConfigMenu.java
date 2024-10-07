@@ -482,12 +482,12 @@ public class CarrierConfigMenu extends AppCompatActivity {
 
                 if (pb != null) {
                     Set<String> keys = pb.keySet();
-                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - starts");
+                    Log.i(this, "CarrierConfig(" + mSlotId + ") - starts");
                     for (String key : keys) {
-                        Log.i(Log.TAG, "CarrierConfig: " + key
+                        Log.i(this, "CarrierConfig: " + key
                                 + "=" + CarrierConfig.getValue(pb, key));
                     }
-                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - ends");
+                    Log.i(this, "CarrierConfig(" + mSlotId + ") - ends");
                 }
             }
             return true;

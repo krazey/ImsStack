@@ -150,7 +150,7 @@ public final class CarrierInfo {
     /** Sets the current operator/country string. */
     public static void setSimOperatorCountry(
             String operator, String operatorSub, String country, int slotId) {
-        Log.i(Log.TAG, "CarrierInfo(" + slotId + "): "
+        Log.i(CarrierInfo.class, "CarrierInfo(" + slotId + "): "
                 + "op=" + operator + ", opSub=" + operatorSub + ", co=" + country);
 
         operator = emptyIfNull(operator);

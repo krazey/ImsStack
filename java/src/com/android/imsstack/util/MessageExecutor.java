@@ -62,8 +62,8 @@ public class MessageExecutor extends Handler implements Executor {
         HandlerThread thread = new HandlerThread(name);
         thread.start();
         Looper looper = thread.getLooper();
-        Log.d(Log.TAG, "createLooper: name=" + name + ", tid=" + thread.getThreadId()
-                + " [@" + MessageExecutor.class.getSimpleName());
+        Log.d(MessageExecutor.class, "createLooper: name=" + name
+                + ", tid=" + thread.getThreadId());
         return looper;
     }
 }

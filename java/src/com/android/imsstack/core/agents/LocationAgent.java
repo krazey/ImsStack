@@ -240,8 +240,6 @@ public class LocationAgent implements LocationInterface {
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     public LocationAgent(int slotId) {
-        ImsLog.d(this, slotId, "LocationAgent" + slotId);
-
         mSlotId = slotId;
         mLocationApi = LocationApi.getInstance();
         mHandler = new Handler(AppContext.getInstance().getMainLooper());
