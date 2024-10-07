@@ -26,6 +26,7 @@ struct CarrierConfigItems
 public:
     CarrierConfigItems() :
             strConferenceFactoryUri(AString::ConstEmpty()),
+            strPEmergencyInfoHeaderInInvite(AString::ConstEmpty()),
             objCallRejectReasonPhrases(ImsVector<AString>()),
             objCallTerminateReasonHeaders(ImsVector<AString>()),
             objCarrierSpecificSipHeaders(ImsVector<AString>()),
@@ -174,6 +175,7 @@ public:
 
 public:
     AString strConferenceFactoryUri;
+    AString strPEmergencyInfoHeaderInInvite;
 
     ImsVector<AString> objCallRejectReasonPhrases;
     ImsVector<AString> objCallTerminateReasonHeaders;

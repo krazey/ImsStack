@@ -497,6 +497,9 @@ TEST_F(MtcConfigurationProxyTest, GetStrWithIntArgReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetCallRejectReasonPhrase(static_cast<RejectType>(nArg)))
             .WillOnce(Return(strValue));
     EXPECT_EQ(strValue, pConfig->GetStr(Feature::CALL_REJECT_REASON_PHRASE, nArg));
+
+    EXPECT_CALL(*pConfigManager, GetPEmergencyInfoHeaderInInvite()).WillOnce(Return(strValue));
+    EXPECT_EQ(strValue, pConfig->GetStr(Feature::P_EMERGENCY_INFO_HEADER_IN_INVITE, nArg));
 }
 
 TEST_F(MtcConfigurationProxyTest, ReturnsDefaultValueForInvalidFeature)

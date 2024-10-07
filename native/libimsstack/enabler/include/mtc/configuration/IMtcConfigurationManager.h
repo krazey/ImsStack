@@ -985,6 +985,13 @@ public:
      * @return
      */
     virtual IMS_BOOL IsCheckUiConditionForIncomingResume() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual AString GetPEmergencyInfoHeaderInInvite() const = 0;
 };
 
 #endif
