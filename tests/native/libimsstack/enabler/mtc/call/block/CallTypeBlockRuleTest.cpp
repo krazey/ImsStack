@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "MockISession.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -25,7 +26,6 @@
 #include "call/block/MockIMtcBlockRule.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockISession.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

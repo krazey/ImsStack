@@ -27,6 +27,7 @@
 #include "MtcDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
+#include "SipAddress.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialogevent/DialogInfo.h"
@@ -40,7 +41,6 @@
 #include "helper/IMtcAosConnector.h"
 #include "helper/IMtcAosStateListener.h"
 #include "registration/SipUrnHelper.h"
-#include "sipcore/SipAddress.h"
 #include <memory>
 #include <utility>
 

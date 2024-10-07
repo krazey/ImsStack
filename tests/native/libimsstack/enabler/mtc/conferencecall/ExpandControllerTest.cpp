@@ -16,8 +16,10 @@
 
 #include "CarrierConfig.h"
 #include "ImsList.h"
+#include "MockICoreService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
@@ -38,11 +40,9 @@
 #include "conferencecall/MockIConferenceReference.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
-#include "sipcore/SipStatusCode.h"
 #include <gtest/gtest.h>
 #include <memory>
 

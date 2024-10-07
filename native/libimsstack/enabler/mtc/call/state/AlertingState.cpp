@@ -16,6 +16,7 @@
 
 #include "IMessage.h"
 #include "ISession.h"
+#include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -34,7 +35,6 @@
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "sipcore/ISipHeader.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
 #include "utility/IMessageUtils.h"

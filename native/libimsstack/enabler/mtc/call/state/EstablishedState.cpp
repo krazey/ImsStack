@@ -15,8 +15,10 @@
  */
 
 #include "IMessage.h"
+#include "ISipClientConnection.h"
 #include "ISipServerConnection.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
@@ -39,8 +41,6 @@
 #include "helper/OperationAsyncRunner.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "sipcore/ISipClientConnection.h"
-#include "sipcore/SipStatusCode.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
 #include "utility/IMessageUtils.h"

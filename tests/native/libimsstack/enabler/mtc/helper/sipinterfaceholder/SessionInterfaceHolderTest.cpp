@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+#include "MockICoreService.h"
 #include "MockIOsFactory.h"
+#include "MockIReference.h"
+#include "MockISession.h"
+#include "MockISipServerConnection.h"
 #include "PlatformContext.h"
-#include "core/MockICoreService.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
-#include "sipcore/MockISipServerConnection.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;

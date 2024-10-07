@@ -15,10 +15,17 @@
  */
 
 #include "IIpcan.h"
+#include "IReference.h"
+#include "ISipClientConnection.h"
+#include "ISipConnection.h"
+#include "ISipServerConnection.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "MediaDef.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipClientConnection.h"
+#include "MockISipServerConnection.h"
 #include "MtcDef.h"
 #include "aos/ImsAosReason.h"
 #include "call/IMtcCall.h"
@@ -31,18 +38,11 @@
 #include "conferencecall/ConferenceDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IReference.h"
-#include "core/MockISession.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "sipcore/ISipClientConnection.h"
-#include "sipcore/ISipConnection.h"
-#include "sipcore/ISipServerConnection.h"
-#include "sipcore/MockISipClientConnection.h"
-#include "sipcore/MockISipServerConnection.h"
 #include <gtest/gtest.h>
 
 LOCAL CallStateName INITIAL_CALL_STATE = CallStateName::IDLE;

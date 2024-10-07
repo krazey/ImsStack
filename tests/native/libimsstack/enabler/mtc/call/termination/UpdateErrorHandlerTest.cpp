@@ -18,21 +18,21 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "ImsTypeDef.h"
+#include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "MockISipMessage.h"
 #include "PlatformContext.h"
 #include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "TestConfigService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
-#include "core/MockIMessage.h"
 #include "helper/IPassiveTimerHolder.h"
-#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockIMtcAosConnector.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "utility/MockIMessageUtils.h"
-#include <gtest/gtest.h>
 #include <array>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

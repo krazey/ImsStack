@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IImsRadio.h"
 #include "MockIMtsTrafficListener.h"
 #include "MockITimer.h"
 #include "MtsTraffic.h"
 #include "PlatformContext.h"
 #include "TestTimerService.h"
+#include <gtest/gtest.h>
 
 namespace android
 {
@@ -74,8 +74,7 @@ TEST_F(MtsTrafficTest, ImsRadio_OnConnectionFailed)
 TEST_F(MtsTrafficTest, ImsRadio_OnConnectionSetupPrepared)
 {
     EXPECT_CALL(objMockMtsTrafficListener,
-            Traffic_OnConnectionSetupPrepared(
-                    IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
+            Traffic_OnConnectionSetupPrepared(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
             .Times(1);
     pMtsTraffic->ImsRadio_OnConnectionSetupPrepared();
 }

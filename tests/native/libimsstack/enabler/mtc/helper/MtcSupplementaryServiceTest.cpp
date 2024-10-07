@@ -19,15 +19,15 @@
 #include "ISipHeader.h"
 #include "ImsList.h"
 #include "ImsMap.h"
+#include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
+#include "MockISipMessage.h"
 #include "MtcDef.h"
 #include "SipHeaderName.h"
 #include "call/MockIMtcCallContext.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockIMessage.h"
 #include "helper/MtcSupplementaryService.h"
-#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

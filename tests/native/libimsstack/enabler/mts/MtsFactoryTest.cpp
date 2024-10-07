@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
 #include "ImsIdentity.h"
 #include "ImsTypeDef.h"
@@ -23,6 +22,7 @@
 #include "MtsFactory.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

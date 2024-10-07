@@ -18,10 +18,10 @@
 #include "ByteArray.h"
 #include "ImsList.h"
 #include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MtcDef.h"
 #include "SipHeaderName.h"
 #include "call/MockIMtcCallContext.h"
-#include "core/MockIMessageBodyPart.h"
 #include "utility/CallComposerUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>

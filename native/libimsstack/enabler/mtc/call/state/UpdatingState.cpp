@@ -17,8 +17,10 @@
 #include "CarrierConfig.h"
 #include "ICarrierConfig.h"
 #include "IMessage.h"
+#include "ISession.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
@@ -30,12 +32,10 @@
 #include "call/termination/UpdateErrorHandler.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

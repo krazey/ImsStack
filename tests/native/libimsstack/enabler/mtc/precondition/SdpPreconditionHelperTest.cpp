@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "core/MockISession.h"
-#include "core/media/IMedia.h"
+#include "MockISession.h"
+#include "media/IMedia.h"
 #include "media/MockIMedia.h"
 #include "media/MockIMediaDescriptor.h"
 #include "precondition/MockQosStatusTable.h"

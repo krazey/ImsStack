@@ -15,6 +15,7 @@
  */
 
 #include "MockIMtcService.h"
+#include "MockISipKeepAliveHelper.h"
 #include "PlatformContext.h"
 #include "TestTimerService.h"
 #include "call/MockIMtcCallContext.h"
@@ -22,7 +23,6 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "sipcore/MockISipKeepAliveHelper.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;

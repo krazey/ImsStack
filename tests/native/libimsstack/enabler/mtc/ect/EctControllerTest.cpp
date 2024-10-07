@@ -17,6 +17,7 @@
 #include "MockIMtcContext.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
+#include "SipStatusCode.h"
 #include "TestTimerService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
@@ -26,7 +27,6 @@
 #include "ect/EctController.h"
 #include "ect/EctFactory.h"
 #include "ect/MockIEctControllerListener.h"
-#include "sipcore/SipStatusCode.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;

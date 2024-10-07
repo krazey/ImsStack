@@ -15,16 +15,16 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IMessage.h"
 #include "IMtcContext.h"
 #include "INetworkWatcher.h"
+#include "ISession.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCallManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessage.h"
-#include "core/ISession.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "precondition/IMtcPreconditionManager.h"

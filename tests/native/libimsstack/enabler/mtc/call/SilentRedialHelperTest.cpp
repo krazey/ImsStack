@@ -16,6 +16,7 @@
 
 #include "CallReasonInfo.h"
 #include "MockIMtcCallController.h"
+#include "MockISession.h"
 #include "MockITimer.h"
 #include "MtcDef.h"
 #include "PlatformContext.h"
@@ -28,7 +29,6 @@
 #include "call/SilentRedialHelper.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockISession.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"

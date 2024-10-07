@@ -15,9 +15,13 @@
  */
 
 #include "CarrierConfig.h"
+#include "ISipHeader.h"
 #include "ImsMap.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "MtcDef.h"
 #include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
@@ -41,17 +45,13 @@
 #include "conferencecall/MockIConferenceSubscriptionListener.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
-#include "sipcore/ISipHeader.h"
 #include "utility/MockIMessageUtils.h"
-#include <vector>
 #include <gtest/gtest.h>
+#include <vector>
 
 using ::testing::_;
 using ::testing::AnyOf;

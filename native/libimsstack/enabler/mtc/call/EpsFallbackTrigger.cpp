@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "IImsAosInfo.h"
 #include "INetworkWatcher.h"
+#include "ISession.h"
 #include "ImsTypeDef.h"
 #include "ServiceImsRadio.h"
 #include "ServiceTimer.h"
@@ -26,7 +27,6 @@
 #include "call/IMtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
 #include "helper/IMtcAosConnector.h"
 #include "precondition/IMtcPreconditionManager.h"
 
