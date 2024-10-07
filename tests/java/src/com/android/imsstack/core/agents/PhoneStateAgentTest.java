@@ -409,6 +409,7 @@ public class PhoneStateAgentTest {
     @Test
     @SmallTest
     public void testCsCallStateChangedWhenSim1LoadedAndSim2Absent() {
+        when(mSimInterface.getSimCardState()).thenReturn(Sim.STATE_PRESENT);
         when(mSimInterface.getSimState()).thenReturn(Sim.STATE_LOADED);
         SubscriptionManagerProxy smp =
                 mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);

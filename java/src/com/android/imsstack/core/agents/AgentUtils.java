@@ -33,6 +33,10 @@ public final class AgentUtils {
 
         for (int i = 0; i < activeSimCount; ++i) {
             SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, i);
+            int simCardState = (sim != null) ? sim.getSimCardState() : Sim.STATE_ABSENT;
+            if (simCardState != Sim.STATE_PRESENT) {
+                continue;
+            }
             int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
             if (simState != Sim.STATE_ABSENT) {
                 allSimAbsent = false;
@@ -54,8 +58,13 @@ public final class AgentUtils {
 
         for (int i = 0; i < activeSimCount; ++i) {
             SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, i);
+            int simCardState = (sim != null) ? sim.getSimCardState() : Sim.STATE_ABSENT;
+            if (simCardState != Sim.STATE_PRESENT) {
+                continue;
+            }
             int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
-            if (simState != Sim.STATE_ABSENT && simState != Sim.STATE_LOCKED) {
+            if (simState != Sim.STATE_ABSENT
+                    && simState != Sim.STATE_LOCKED) {
                 allSimAbsentOrLocked = false;
                 break;
             }
