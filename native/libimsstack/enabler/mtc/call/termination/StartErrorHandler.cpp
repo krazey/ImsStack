@@ -104,7 +104,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
     if (m_objContext.GetCallInfo().bEmergency)
     {
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
     }
 
     Feature eFeature = m_objContext.GetService().IsWlanIpCanType()

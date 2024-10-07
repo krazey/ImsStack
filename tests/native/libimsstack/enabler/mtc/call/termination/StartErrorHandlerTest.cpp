@@ -190,8 +190,10 @@ TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByTransactionTimeout
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objMtcService, IsEmergency()).Times(1).WillOnce(Return(IMS_FALSE));
 
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }
 
 TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByNullIMessageOfEcc)
@@ -204,7 +206,8 @@ TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByNullIMessageOfEcc)
             .WillByDefault(Return(2));
 
     CallReasonInfo objResult = pHandler->Handle(IMS_NULL);
-    EXPECT_TRUE(objResult == CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+    EXPECT_TRUE(objResult ==
+            CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
