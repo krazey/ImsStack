@@ -61,31 +61,12 @@ public final class ControlConnection {
     }
 
     /**
-     * Sends a control command to the server and receives a response asynchronously.
+     * Sends a control command to the server.
      *
      * @param command The control command to be sent to the server.
-     * @throws RuntimeException If the socket is not connected or if an error occurs during
-     *                          communication.
      */
-    public CompletableFuture<Void> sendControlCommand(String command) {
-        return mConnectionFuture.thenAcceptAsync(v -> {
-            if (mSocket == null || !mSocket.isConnected()) {
-                throw new RuntimeException("Socket is not connected.");
-            }
-
-            try (PrintWriter out = new PrintWriter(mSocket.getOutputStream(), true);
-                    BufferedReader in =
-                            new BufferedReader(new InputStreamReader(mSocket.getInputStream()))) {
-                out.println(command);
-                out.flush();
-                String failureReport = in.readLine();
-                if (failureReport != null && mFailureHandler != null) {
-                    mFailureHandler.handleFailure(failureReport);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Error during communication : " + e.getMessage());
-            }
-        }, EXECUTOR_SERVICE);
+    public void sendControlCommand(String command) {
+        var unused = sendControlCommandAsync(command);
     }
 
     /**
@@ -129,5 +110,33 @@ public final class ControlConnection {
         }
 
         return future;
+    }
+
+    /**
+     * Sends a control command to the server and receives a response asynchronously.
+     *
+     * @param command The control command to be sent to the server.
+     * @throws RuntimeException If the socket is not connected or if an error occurs during
+     *                          communication.
+     */
+    private CompletableFuture<Void> sendControlCommandAsync(String command) {
+        return mConnectionFuture.thenAcceptAsync(v -> {
+            if (mSocket == null || !mSocket.isConnected()) {
+                throw new RuntimeException("Socket is not connected.");
+            }
+
+            try (PrintWriter out = new PrintWriter(mSocket.getOutputStream(), true);
+                    BufferedReader in =
+                            new BufferedReader(new InputStreamReader(mSocket.getInputStream()))) {
+                out.println(command);
+                out.flush();
+                String failureReport = in.readLine();
+                if (failureReport != null && mFailureHandler != null) {
+                    mFailureHandler.handleFailure(failureReport);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error during communication : " + e.getMessage());
+            }
+        }, EXECUTOR_SERVICE);
     }
 }
