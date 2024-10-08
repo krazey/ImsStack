@@ -21,4 +21,7 @@
         <item value="1"/>
     </int-array>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+
+    <!-- Mtc -->
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="120000"/>
 </carrier_config>

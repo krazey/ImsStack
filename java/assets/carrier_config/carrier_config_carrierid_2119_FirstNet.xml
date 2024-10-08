@@ -223,7 +223,7 @@
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
     <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="false"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="10000"/>
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="10000"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="180000"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="20000"/>
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="0"/>
     <boolean name="imsvoice.check_conference_event_package_version_bool" value="true"/>
