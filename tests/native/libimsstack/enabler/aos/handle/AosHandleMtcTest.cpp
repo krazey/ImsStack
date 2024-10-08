@@ -54,10 +54,26 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+#define DECLARE_USING(Base)       \
+    using Base::IsBlockForMobile; \
+    using Base::IsBlockForWifi;
+
+class TestAosHandleMtc : public AosHandleMtc
+{
+public:
+    DECLARE_USING(AosHandleMtc)
+
+    inline TestAosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
+            AosHandleMtc(piAppContext, strAppId, strServiceId, nServiceType)
+    {
+    }
+};
+
 class AosHandleMtcTest : public ::testing::Test
 {
 public:
-    AosHandleMtc* m_pAosHandleMtc;
+    TestAosHandleMtc* m_pAosHandleMtc;
 
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
@@ -144,8 +160,8 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &m_objTestImsRadioService);
 
-        m_pAosHandleMtc = new AosHandleMtc(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                strAppId, strServiceId, nServiceType);
+        m_pAosHandleMtc = new TestAosHandleMtc(
+                &m_objMockIAosAppContext, strAppId, strServiceId, nServiceType);
 
         ASSERT_TRUE(m_pAosHandleMtc != nullptr);
 
@@ -174,16 +190,6 @@ protected:
     void SetCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandleMtc->m_objCapabilities = objNewCapabilities;
-    }
-
-    IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock)
-    {
-        return m_pAosHandleMtc->IsBlockForMobile(nBlock);
-    }
-
-    IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock)
-    {
-        return m_pAosHandleMtc->IsBlockForWifi(nBlock);
     }
 
     void SetHoldingVopsState(IN IMS_UINT32 nState)
@@ -930,21 +936,21 @@ TEST_F(AosHandleMtcTest, InitializeHoldingBlocksPolicy_Test)
 
     InitializeHoldingBlocksPolicy();
 
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOPS));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_SSAC));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_3G));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_SSAC));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_3G));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOPS));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_SSAC));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_3G));
-    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_SSAC));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_3G));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 }
 
 TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
@@ -1457,17 +1463,17 @@ TEST_F(AosHandleMtcTest, Init_CleanUp_Test)
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeatureTag(
             FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE));
 
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOPS));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOPS));
-    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForWifi(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandleMtc->IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 
     EXPECT_FALSE(IsVopsIgnoredForVolteEnabled());
 
