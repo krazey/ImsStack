@@ -1430,7 +1430,7 @@ TEST_F(MessageUtilsTest, GetCallTypeReturnsVideoRtt)
     EXPECT_EQ(objMessageUtils.GetCallType(piMessage, piSession, IMS_FALSE), CallType::VIDEO_RTT);
 }
 
-TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithNegoSdpIsTrue)
+TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithActiveMediaOnly)
 {
     // bNegoSdp=false case is done by GetCallType
     MockISipMessageBodyPart objBodyPart;
