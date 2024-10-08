@@ -487,31 +487,31 @@ public:
     virtual IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets call type from the IMessage.
      *
-     * @param piMessage
-     * @param piSession
-     * @param bPeerView
-     * @return
+     * It checks IMedia from the ISession first if the message contains SDP.
+     * If the message doesn't contain SDP, the media from the other source of the message
+     * (e.g. header fields) could be returned.
+     *
+     * @param piMessage IMessage to check.
+     * @param piSession ISession of the call.
+     * @param bCheckRemote Check the remote media instead of the local if true.
+     * @return Call type.
      */
     virtual CallType GetCallType(
-            IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView) = 0;
+            IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bCheckRemote) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets call type from the current IMedia of the ISession.
      *
-     * @param piSession
-     * @param bNegoSdp
-     * @param bPeerView
-     * @param bCheckPort
-     * @param //
-     * @param change
-     * @param of
-     * @return
+     * @param piSession ISession of the call.
+     * @param bActiveMediaOnly Deleted or rejected media is ignored if true.
+     * @param bCheckRemote Check the remote media instead of the local if true.
+     * @param bIgnorePort0 Ignore media with port 0 if true.
+     * @return Call type.
      */
-    virtual CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp,
-            IN IMS_BOOL bPeerView,
-            IN IMS_BOOL bCheckPort = IMS_TRUE) = 0;  // TODO: change name of bPeerView
+    virtual CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bActiveMediaOnly,
+            IN IMS_BOOL bCheckRemote, IN IMS_BOOL bIgnorePort0 = IMS_TRUE) = 0;
 
     /**
      * @brief Checks
