@@ -17,18 +17,15 @@
 #ifndef MEDIA_PROFILE_GENERATOR_H_
 #define MEDIA_PROFILE_GENERATOR_H_
 
-class CodecConfig;
-class CodecAudioConfig;
-class CodecVideoConfig;
-class AudioConfiguration;
-class MediaConfiguration;
-class MediaEnvironment;
-class MediaResourceManager;
-class VideoConfiguration;
+#include "MediaBaseProfile.h"
 
 #include "audio/AudioProfile.h"
 #include "text/TextProfile.h"
 #include "video/VideoProfile.h"
+
+class CodecConfig;
+class MediaConfiguration;
+class MediaEnvironment;
 
 /**
  * This class is to generate a MediaBaseProfile by using the MediaEnvironment and
@@ -52,6 +49,7 @@ public:
     MediaBaseProfile* Generate(IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig,
             IN IMS_SINT32 nSlotId);
 
+protected:
     /**
      * @brief set each media(audio/text/video) profile
      *
@@ -65,33 +63,11 @@ public:
             IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment,
             IN IMS_SINT32 nSlotId) = 0;
 
-protected:
     void SetCommonProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
             IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId);
-
-private:
-    MediaBaseProfile* CreateCodecPayloads(
-            IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreateAmrPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreateEvsPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreateTelephoneEventPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreatePcmPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    VideoProfile::Payload* CreateAvcPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    VideoProfile::Payload* CreateHevcPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    void SetAudioCodecFmtp(IN CodecAudioConfig* pCodecConfig, IN AudioConfiguration* pAudioConfig,
-            OUT AudioProfile::AudioFmtp* pFmtp);
-    void SetVideoCodecFmtp(IN CodecVideoConfig* pCodecConfig, IN VideoConfiguration* pVideoConfig,
-            OUT VideoProfile::VideoFmtp* pFmtp);
-    void SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,
-            IN VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload);
-    TextProfile::Payload* CreateT140Payload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    MediaBaseProfile* SetPayloads(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
+    virtual void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) = 0;
 
 protected:
     MEDIA_CONTENT_TYPE m_eType;

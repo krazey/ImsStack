@@ -20,7 +20,8 @@
 #include "MediaProfileGenerator.h"
 #include "video/VideoProfileUtil.h"
 
-class MediaConfiguration;
+class CodecVideoConfig;
+class VideoConfiguration;
 
 /**
  * This class is to generate a video profile by parsing a video configuration
@@ -31,10 +32,19 @@ public:
     VideoProfileGenerator();
     virtual ~VideoProfileGenerator();
 
+protected:
     VideoProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
             IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId) override;
-
-protected:
+    void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) override;
+    VideoProfile::Payload* CreateAvcPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    VideoProfile::Payload* CreateHevcPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    void SetVideoCodecFmtp(IN CodecVideoConfig* pCodecConfig, IN VideoConfiguration* pVideoConfig,
+            OUT VideoProfile::VideoFmtp* pFmtp);
+    void SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,
+            IN VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload);
     IMS_SINT32 SetTransportCapability(OUT VideoProfile* pVideoProfile);
     IMS_SINT32 SetAttributeCapability(
             OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig);

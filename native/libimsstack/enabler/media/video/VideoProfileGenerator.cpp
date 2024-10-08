@@ -15,15 +15,13 @@
  */
 
 #include "ServiceTrace.h"
-#include "offeranswer/SdpAvCodec.h"
-#include "offeranswer/SdpMediaFormatParameter.h"
-#include "offeranswer/SdpRtcpFeedback.h"
 
-#include "MediaProfileUtil.h"
+#include "config/CodecAvcConfig.h"
+#include "config/CodecHevcConfig.h"
+#include "config/ImsCodec.h"
 #include "config/VideoConfiguration.h"
-#include "video/VideoNegoAvc.h"
-#include "video/VideoNegoHevc.h"
 #include "video/VideoProfileGenerator.h"
+#include "video/VideoProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -38,7 +36,7 @@ PUBLIC VIRTUAL VideoProfileGenerator::~VideoProfileGenerator()
     IMS_TRACE_I("~VideoProfileGenerator()", 0, 0, 0);
 }
 
-PUBLIC
+PROTECTED
 VideoProfile* VideoProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
         IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
 {
@@ -73,7 +71,7 @@ VideoProfile* VideoProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
 
     SetMaxProfileFrameRate(static_cast<VideoProfile*>(pProfile));
 
-    IMS_TRACE_D("SetProfile - SupportAvpf[%d], SupportCapaNegoForAvpf[%d]",
+    IMS_TRACE_D("SetProfile() - SupportAvpf[%d], SupportCapaNegoForAvpf[%d]",
             pVideoProfile->IsAvpfSupported(), pVideoProfile->IsCapaNegoForAvpfSupported(), 0);
 
     return pVideoProfile;
@@ -93,6 +91,227 @@ PROTECTED IMS_SINT32 VideoProfileGenerator::SetTransportCapability(OUT VideoProf
     }
 
     return nTcap;
+}
+
+PROTECTED
+void VideoProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
+        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+{
+    if (pProfile == IMS_NULL || pConfig == IMS_NULL || pCodecConfig == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("CreateCodecPayloads() - codec[%s]", ImsCodec::CodecToString(nCodec), 0, 0);
+
+    if (nCodec > ImsCodec::VIDEO_NONE && nCodec < ImsCodec::VIDEO_MAX)
+    {
+        VideoProfile::Payload* pTempPayload = IMS_NULL;
+
+        if (nCodec == ImsCodec::VIDEO_AVC)
+        {
+            pTempPayload = CreateAvcPayload(pCodecConfig, pConfig);
+        }
+        else if (nCodec == ImsCodec::VIDEO_HEVC)
+        {
+            pTempPayload = CreateHevcPayload(pCodecConfig, pConfig);
+        }
+
+        if (pTempPayload != IMS_NULL)
+        {
+            static_cast<VideoProfile*>(pProfile)->GetPayloadList().Append(pTempPayload);
+        }
+    }
+}
+
+PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateAvcPayload(
+        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+{
+    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    IMS_TRACE_I("CreateAvcPayload()", 0, 0, 0);
+
+    CodecAvcConfig* pAvcConfig = static_cast<CodecAvcConfig*>(pCodecConfig);
+    VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
+    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+
+    if (pAvcConfig->GetProfileLevelId() == AString::ConstEmpty())
+    {
+        IMS_TRACE_D("CreateAvcPayload() - ProfileLevelId is empty, delete pAvcFmtp", 0, 0, 0);
+        delete pAvcFmtp;
+
+        return IMS_NULL;
+    }
+
+    SetVideoCodecFmtp(pAvcConfig, pVideoConfig, pAvcFmtp);
+
+    pAvcFmtp->SetProfile(
+            VideoProfileUtil::GetAvcProfileFromProfileLevelId(pAvcConfig->GetProfileLevelId()));
+    pAvcFmtp->SetLevel(
+            VideoProfileUtil::GetAvcLevelFromProfileLevelId(pAvcConfig->GetProfileLevelId()));
+    IMS_TRACE_I("CreateAvcPayload() - Profile[%d], Level[%d]", pAvcFmtp->GetProfile(),
+            pAvcFmtp->GetLevel(), 0);
+
+    const IMS_CHAR* pbAvc4SpropParameterSets;
+    pbAvc4SpropParameterSets = pAvcConfig->GetSpropParameterSets().GetStr();
+
+    /** TODO: later sprop need to find a way to get SpropPramaterSets
+    pbAvc4SpropParameterSets = GetAvcSpropParameterSets(
+            pAvcFmtp->GetResolution(), pAvcFmtp->GetProfile(), pAvcFmtp->GetLevel());
+    */
+
+    IMS_TRACE_I("CreateAvcPayload() - SpropParameterSets[%s]", pbAvc4SpropParameterSets, 0, 0);
+
+    if (pAvcConfig->GetProfileLevelId().GetLength() != 0)
+    {
+        pAvcFmtp->SetProfileLevelId(pAvcConfig->GetProfileLevelId());
+        pAvcFmtp->SetShowProfileLevelId(IMS_TRUE);
+    }
+
+    if (pAvcConfig->GetIncludeSpropParameterSets())
+    {
+        pAvcFmtp->SetSpropParam(pbAvc4SpropParameterSets);
+        pAvcFmtp->SetShowSpropParam(IMS_TRUE);
+    }
+
+    VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
+    pAvcPayload->SetFmtp(pAvcFmtp);
+
+    SetVideoCodecPayload(pAvcConfig, pVideoConfig, pAvcPayload);
+
+    return pAvcPayload;
+}
+
+PROTECTED VideoProfile::Payload* VideoProfileGenerator::CreateHevcPayload(
+        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+{
+    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    IMS_TRACE_I("CreateHevcPayload()", 0, 0, 0);
+
+    CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
+    VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
+    VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
+
+    SetVideoCodecFmtp(pHevcConfig, pVideoConfig, pHevcFmtp);
+
+    if (pHevcConfig->GetHevcProfile() != -1)
+    {
+        pHevcFmtp->SetProfile(static_cast<VIDEO_PROFILE_HEVC>(pHevcConfig->GetHevcProfile()));
+        pHevcFmtp->SetShowProfile(IMS_TRUE);
+    }
+
+    if (pHevcConfig->GetHevcLevel() != -1)
+    {
+        pHevcFmtp->SetLevel(pHevcConfig->GetHevcLevel());
+        pHevcFmtp->SetShowLevel(IMS_TRUE);
+    }
+
+    if (pHevcConfig->GetSpropParameterSets().GetLength() != 0)
+    {
+        pHevcFmtp->SetSpropParam(pHevcConfig->GetSpropParameterSets());
+        pHevcFmtp->SetShowSpropParam(IMS_TRUE);
+    }
+
+    VideoProfile::Payload* pHevcPayload = new VideoProfile::Payload();
+    pHevcPayload->SetFmtp(pHevcFmtp);
+
+    SetVideoCodecPayload(pHevcConfig, pVideoConfig, pHevcPayload);
+
+    return pHevcPayload;
+}
+
+PROTECTED void VideoProfileGenerator::SetVideoCodecFmtp(IN CodecVideoConfig* pCodecConfig,
+        IN VideoConfiguration* pVideoConfig, OUT VideoProfile::VideoFmtp* pFmtp)
+{
+    if (pCodecConfig == IMS_NULL || pVideoConfig == IMS_NULL || pFmtp == IMS_NULL)
+    {
+        return;
+    }
+
+    pFmtp->SetFramerate(pCodecConfig->GetFramerate());
+    pFmtp->SetResolution(VideoProfileUtil::GetResolutionFromWidthHeight(
+            pCodecConfig->GetResolutionWidth(), pCodecConfig->GetResolutionHeight()));
+    pFmtp->SetBitrate(pCodecConfig->GetBitrate());
+    pFmtp->SetAs(pVideoConfig->GetAsBandwidthKbps());
+
+    if (pCodecConfig->GetPacketizationMode() != -1)
+    {
+        pFmtp->SetPacketizationMode(pCodecConfig->GetPacketizationMode());
+        pFmtp->SetShowPacketizationMode(IMS_TRUE);
+    }
+
+    IMS_TRACE_D("SetVideoCodecFmtp() - FrameRate[%d], Resolution[%d], Bitrate[%d]",
+            pFmtp->GetFramerate(), pFmtp->GetResolution(), pFmtp->GetBitrate());
+    IMS_TRACE_D("SetVideoCodecFmtp() - AS[%d], PacketizationMode[%d]", pFmtp->GetAs(),
+            pFmtp->GetPacketizationMode(), 0);
+}
+
+PROTECTED void VideoProfileGenerator::SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,
+        IN VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload)
+{
+    if (pCodecConfig == IMS_NULL || pVideoConfig == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    pPayload->SetRtpMap(pCodecConfig->GetPayloadType(),
+            ImsCodec::CodecToString(pCodecConfig->GetCodec()), pVideoConfig->GetVideoSamplingRate(),
+            pCodecConfig->GetChannel());
+
+    if (pCodecConfig->GetImageAttr().GetLength() != 0)
+    {
+        pPayload->SetIncludeImageAttr(IMS_TRUE);
+        pPayload->SetImageAttr(pCodecConfig->GetImageAttr());
+    }
+    else if (pCodecConfig->GetFrameSize().GetLength() != 0)
+    {
+        pPayload->SetIncludeFrameSize(IMS_TRUE);
+    }
+
+    if (pVideoConfig->IsVideoAvpfEnabled() == IMS_TRUE)
+    {
+        if (pVideoConfig->IsVideoAvpfTrrEnabled() == IMS_TRUE)
+        {
+            pPayload->GetRtcpFbAttr().SetTrrSupported(IMS_TRUE);
+            pPayload->GetRtcpFbAttr().SetTrrInt(pVideoConfig->GetRtcpIntervalOnHold() * 1000);
+        }
+
+        if (pVideoConfig->IsVideoAvpfNackEnabled() == IMS_TRUE)
+        {
+            pPayload->GetRtcpFbAttr().SetNackSupported(IMS_TRUE);
+        }
+
+        if (pVideoConfig->IsVideoAvpfTmmbrEnabled() == IMS_TRUE)
+        {
+            pPayload->GetRtcpFbAttr().SetTmmbrSupported(IMS_TRUE);
+            pPayload->GetRtcpFbAttr().SetTmmbrSmaxPr(40);
+        }
+
+        if (pVideoConfig->IsVideoAvpfPliEnabled() == IMS_TRUE)
+        {
+            pPayload->GetRtcpFbAttr().SetPliSupported(IMS_TRUE);
+        }
+
+        if (pVideoConfig->IsVideoAvpfFirEnabled() == IMS_TRUE)
+        {
+            pPayload->GetRtcpFbAttr().SetFirSupported(IMS_TRUE);
+        }
+
+        IMS_TRACE_I("SetVideoCodecPayload() AVPF. TRR[%d], NACK[%d], TMMBR[%d]",
+                pPayload->GetRtcpFbAttr().IsTrrSupported(),
+                pPayload->GetRtcpFbAttr().IsNackSupported(),
+                pPayload->GetRtcpFbAttr().IsTmmbrSupported());
+        IMS_TRACE_I("SetVideoCodecPayload() AVPF. PLI[%d], FIR[%d]",
+                pPayload->GetRtcpFbAttr().IsPliSupported(),
+                pPayload->GetRtcpFbAttr().IsFirSupported(), 0);
+    }
 }
 
 PROTECTED IMS_SINT32 VideoProfileGenerator::SetAttributeCapability(

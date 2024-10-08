@@ -20,7 +20,8 @@
 #include "MediaProfileGenerator.h"
 #include "audio/AudioProfileUtil.h"
 
-class MediaConfiguration;
+class CodecAudioConfig;
+class AudioConfiguration;
 
 /**
  * This class is to generate an audio profile by parsing an audio configuration
@@ -31,8 +32,21 @@ public:
     AudioProfileGenerator();
     virtual ~AudioProfileGenerator();
 
+protected:
     AudioProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
             IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId) override;
+    void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) override;
+    void SetAudioCodecFmtp(IN CodecAudioConfig* pCodecConfig, IN AudioConfiguration* pAudioConfig,
+            OUT AudioProfile::AudioFmtp* pFmtp);
+    AudioProfile::Payload* CreateAmrPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    AudioProfile::Payload* CreateEvsPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    AudioProfile::Payload* CreateTelephoneEventPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    AudioProfile::Payload* CreatePcmPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
 };
 
 #endif

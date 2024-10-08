@@ -20,7 +20,8 @@
 #include "MediaProfileGenerator.h"
 #include "text/TextProfileUtil.h"
 
-class MediaConfiguration;
+class CodecTextConfig;
+class TextConfiguration;
 
 /**
  * This class is to generate a text profile by parsing a text configuration
@@ -31,7 +32,12 @@ public:
     TextProfileGenerator();
     virtual ~TextProfileGenerator();
 
+protected:
     TextProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
             IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId) override;
+    void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) override;
+    TextProfile::Payload* CreateT140Payload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
 };
 #endif
