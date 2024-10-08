@@ -28,6 +28,7 @@
 #include "video/VideoNego.h"
 #include "video/VideoNegoAvc.h"
 #include "video/VideoNegoHevc.h"
+#include "video/VideoProfileGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -38,6 +39,7 @@ PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<VideoSdpGenerator>();
     m_pProfileNegotiator = std::make_shared<VideoProfileNegotiator>();
+    m_pProfileGenerator = std::make_shared<VideoProfileGenerator>();
 }
 
 PUBLIC

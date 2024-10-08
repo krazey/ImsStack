@@ -24,6 +24,7 @@
 #include "audio/AudioNego.h"
 #include "audio/AudioNegoAmr.h"
 #include "audio/AudioNegoEvs.h"
+#include "audio/AudioProfileGenerator.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"
@@ -38,6 +39,7 @@ AudioNego::AudioNego(IMS_SINT32 nSlotId) :
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
     m_pProfileNegotiator = std::make_shared<AudioProfileNegotiator>();
+    m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
 }
 
 PUBLIC

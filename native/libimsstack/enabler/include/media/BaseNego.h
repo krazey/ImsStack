@@ -27,6 +27,7 @@
 
 class SdpGenerator;
 class MediaProfileNegotiator;
+class MediaProfileGenerator;
 
 class BaseNego : public ImsSlot
 {
@@ -144,11 +145,9 @@ public:
      * @brief Create a base local/peer/negotiate profile with given configuration
      *
      * @param pEnvironment The MediaEnvironment
-     * @param pType The media type to form, audio/video/text defined in MEDIA_CONTENT_TYPE
      * @param pConfig The configuration to create media profile
      */
-    void CreateProfiles(IN MediaEnvironment* pEnvironment, IN MEDIA_CONTENT_TYPE pType,
-            IN MediaConfiguration* pConfig);
+    void CreateProfiles(IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig);
 
     /**
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
@@ -234,6 +233,7 @@ protected:
     MediaEnvironment* m_pEnvironment;
     std::shared_ptr<SdpGenerator> m_pSdpGenerator;
     std::shared_ptr<MediaProfileNegotiator> m_pProfileNegotiator;
+    std::shared_ptr<MediaProfileGenerator> m_pProfileGenerator;
 };
 
 #endif
