@@ -532,9 +532,13 @@ TEST_F(MergeControllerTest, StartFailedNotifiesFailureAndClearsQueueIfInCreating
     ON_CALL(*pMockQueue, GetTypeOfCurrentOperation)
             .WillByDefault(Return(CONTROL_OPERATION_CREATE_CONFERENCE_CALL));
 
+    MockIConferenceControllerListener objListener;
+    pController->SetListener(&objListener);
+
     EXPECT_CALL(
             *pMockNotifier, NotifyMergeFailed(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, -1)));
     EXPECT_CALL(*pMockQueue, Clear());
+    EXPECT_CALL(objListener, OnClosed(pController));
 
     const CallType eAnyType = CallType::VOIP;
     const IMS_BOOL bAnyEmergency = IMS_FALSE;
