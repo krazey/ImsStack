@@ -86,3 +86,22 @@ function get_test_name() {
 
     echo "$TEST_NAME"
 }
+
+function its() {
+    command=$(get_its_test_name "$@")
+
+    clear
+    echo "> atest -c ImsStackTest:$command"
+    atest -c ImsStackTest:$command
+}
+
+function get_its_test_name() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: its <TestPath.TestName> or its <TestPath.TestName#TestMethod>"
+        exit 1
+    fi
+
+    TEST_NAME="com.android.imsstack.its.tests.$1"
+
+    echo "$TEST_NAME"
+}
