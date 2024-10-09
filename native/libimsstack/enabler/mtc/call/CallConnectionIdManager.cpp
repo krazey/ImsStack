@@ -96,7 +96,7 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnTotalCallStateChanged(IN State eS
         return;
     }
 
-    IMS_SINT32 nSize = (IMS_SINT32)(m_objCallKeyConnections.GetSize());
+    IMS_SINT32 nSize = static_cast<IMS_SINT32>(m_objCallKeyConnections.GetSize());
     IMS_TRACE_D("OnTotalCallStateChanged IDLE - size[%d]", nSize, 0, 0);
     for (IMS_SINT32 i = nSize - 1; i >= 0; i--)
     {

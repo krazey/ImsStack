@@ -440,7 +440,7 @@ PRIVATE
 void MtcPreconditionManager::DestroyAllQosInfo()
 {
     IMS_TRACE_D("DestroyAllQosInfo", 0, 0, 0);
-    for (IMS_UINT32 index = m_objQosInfos.GetSize(); index > 0; index--)
+    for (IMS_UINT32 index = static_cast<IMS_SINT32>(m_objQosInfos.GetSize()); index > 0; index--)
     {
         QosInfo* pInfo = m_objQosInfos.GetValueAt(index - 1);
         m_objQosInfos.RemoveAt(index - 1);

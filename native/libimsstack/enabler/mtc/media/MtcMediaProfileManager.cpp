@@ -123,7 +123,7 @@ void MtcMediaProfileManager::DestroyMediaProfile(
 PUBLIC
 void MtcMediaProfileManager::DestroyAllMediaProfiles(IN IMediaSession* piMediaSession)
 {
-    for (IMS_UINT32 i = m_objMediaProfiles.GetSize(); i > 0; i--)
+    for (IMS_UINT32 i = static_cast<IMS_SINT32>(m_objMediaProfiles.GetSize()); i > 0; i--)
     {
         const ISession* piSession = m_objMediaProfiles.GetKeyAt(i - 1);
         DestroyMediaProfile(piSession, piMediaSession);
