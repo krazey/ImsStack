@@ -6300,22 +6300,23 @@ PRIVATE
 IMS_BOOL AosRegistration::IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt)
 {
     IMS_SINT32 nExpireTime = GetRegExpires();
+    IMS_SINT32 nActualWaitTime = static_cast<IMS_SINT32>(nAwt);
 
-    if (nExpireTime > 0 && nAwt > 0)
+    if (nExpireTime > 0 && nActualWaitTime > 0)
     {
         IMS_SINT32 nRemainTime;
 
         if (nExpireTime > 1200)
         {
-            nRemainTime = 600 - nAwt;
+            nRemainTime = 600 - nActualWaitTime;
         }
         else
         {
-            nRemainTime = (nExpireTime / 2) - nAwt;
+            nRemainTime = (nExpireTime / 2) - nActualWaitTime;
         }
 
         A_IMS_TRACE_I(REGID, "IsRegExpiredDuringAwt :: Expire(%d) , AWT(%d) , Remain(%d)",
-                nExpireTime, nAwt, nRemainTime);
+                nExpireTime, nActualWaitTime, nRemainTime);
 
         if (nRemainTime <= 0)
         {
