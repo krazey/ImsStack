@@ -22,12 +22,28 @@
 
 #include "MediaBaseProfile.h"
 
+const AString SEMICOLON = ";";
+const AString COMMA = ",";
+
+/**
+ * This class is to generate a Sdp by adding media attributes from media profile to the
+ * MediaDescriptor and the SessionDescriptor
+ */
 class SdpGenerator
 {
 public:
     explicit SdpGenerator(IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
     virtual ~SdpGenerator();
-
+    /**
+     * @brief generate a Sdp by adding media attributes from media profile to the MediaDescriptor
+     *        and the SessionDescriptor
+     *
+     * @param pSessionDescriptor The SDP descriptor instance to add the session level SDP attrubites
+     * @param pDescriptor The SDP descriptor instance to add the media level SDP attributes
+     * @param pBaseProfile The Profile to be used to add the media/session level SDP attributes
+     * @return IMS_BOOL returns IMS_TRUE when generating the SDP is  successful, otherwise returns
+     *                  IMS_FALSE
+     */
     virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) = 0;
 
@@ -39,6 +55,7 @@ protected:
     IMS_SINT32 GenerateDirection(OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);
     void GenerateSessionLevelDirection(
             OUT ISessionDescriptor* pSessionDescriptor, IN IMS_SINT32 nDirection);
+    void AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator);
 
 private:
     void ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDescriptor);

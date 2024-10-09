@@ -22,8 +22,6 @@
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
 #include "audio/AudioNego.h"
-#include "audio/AudioNegoAmr.h"
-#include "audio/AudioNegoEvs.h"
 #include "audio/AudioProfileGenerator.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"

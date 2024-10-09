@@ -113,6 +113,14 @@ void SdpGenerator::GenerateSessionLevelDirection(
     }
 }
 
+PROTECTED void SdpGenerator::AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator)
+{
+    if (str.GetLength() > 0)
+    {
+        str.Append(separator);
+    }
+}
+
 PRIVATE void SdpGenerator::ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDescriptor)
 {
     if (pDescriptor == IMS_NULL)

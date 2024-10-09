@@ -18,8 +18,6 @@
 
 #include "MediaProfileUtil.h"
 #include "audio/AudioDef.h"
-#include "audio/AudioNegoAmr.h"
-#include "audio/AudioNegoEvs.h"
 #include "audio/AudioProfileNegotiator.h"
 
 #define EVS_NEGO_RETRY_COUNT 2
