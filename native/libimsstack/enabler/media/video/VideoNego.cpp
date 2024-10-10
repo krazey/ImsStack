@@ -26,8 +26,6 @@
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "video/VideoNego.h"
-#include "video/VideoNegoAvc.h"
-#include "video/VideoNegoHevc.h"
 #include "video/VideoProfileGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;

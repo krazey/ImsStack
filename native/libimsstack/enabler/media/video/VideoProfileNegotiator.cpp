@@ -21,8 +21,6 @@
 
 #include "MediaProfileUtil.h"
 #include "config/VideoConfiguration.h"
-#include "video/VideoNegoAvc.h"
-#include "video/VideoNegoHevc.h"
 #include "video/VideoProfileNegotiator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
