@@ -303,8 +303,7 @@ TEST_F(OsCarrierConfigTest, GetBooleanArray)
 
     OsCarrierConfig objOsCarrierConfig(IMS_SLOT_0);
 
-    EXPECT_EQ(ImsVector<IMS_BOOL>(), objOsCarrierConfig.GetBooleanArray(KEY_VALUE_BOOL_ARRAY));
-
+    EXPECT_TRUE(objOsCarrierConfig.GetBooleanArray(KEY_VALUE_BOOL_ARRAY).IsEmpty());
     EXPECT_CALL(m_objSystem, GetCarrierConfig(_, _)).Times(1);
 
     objOsCarrierConfig.LoadConfig();
