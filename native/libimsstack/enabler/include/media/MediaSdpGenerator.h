@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SDP_GENERATOR_H_
-#define SDP_GENERATOR_H_
+#ifndef MEDIA_SDP_GENERATOR_H_
+#define MEDIA_SDP_GENERATOR_H_
 
 #include "ISessionDescriptor.h"
 #include "media/IMediaDescriptor.h"
@@ -29,11 +29,12 @@ const AString COMMA = ",";
  * This class is to generate a Sdp by adding media attributes from media profile to the
  * MediaDescriptor and the SessionDescriptor
  */
-class SdpGenerator
+class MediaSdpGenerator
 {
 public:
-    explicit SdpGenerator(IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
-    virtual ~SdpGenerator();
+    explicit MediaSdpGenerator(IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
+    virtual ~MediaSdpGenerator();
+
     /**
      * @brief generate a Sdp by adding media attributes from media profile to the MediaDescriptor
      *        and the SessionDescriptor

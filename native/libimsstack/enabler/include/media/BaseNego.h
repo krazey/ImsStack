@@ -25,7 +25,7 @@
 #include "MediaEnvironment.h"
 #include "config/MediaConfiguration.h"
 
-class SdpGenerator;
+class MediaSdpGenerator;
 class MediaProfileNegotiator;
 class MediaProfileGenerator;
 
@@ -231,7 +231,7 @@ protected:
     ImsList<OaModel*> m_listOaModel;
     MediaConfiguration* m_pConfig;
     MediaEnvironment* m_pEnvironment;
-    std::shared_ptr<SdpGenerator> m_pSdpGenerator;
+    std::shared_ptr<MediaSdpGenerator> m_pSdpGenerator;
     std::shared_ptr<MediaProfileNegotiator> m_pProfileNegotiator;
     std::shared_ptr<MediaProfileGenerator> m_pProfileGenerator;
 };

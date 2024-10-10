@@ -17,22 +17,22 @@
 #include "ServiceTrace.h"
 
 #include "MediaNegoUtil.h"
-#include "SdpGenerator.h"
+#include "MediaSdpGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC SdpGenerator::SdpGenerator(IN const MEDIA_CONTENT_TYPE eType) :
+PUBLIC MediaSdpGenerator::MediaSdpGenerator(IN const MEDIA_CONTENT_TYPE eType) :
         m_eType(eType)
 {
 }
 
-PUBLIC VIRTUAL SdpGenerator::~SdpGenerator()
+PUBLIC VIRTUAL MediaSdpGenerator::~MediaSdpGenerator()
 {
-    IMS_TRACE_I("~SdpGenerator()", 0, 0, 0);
+    IMS_TRACE_I("~MediaSdpGenerator()", 0, 0, 0);
 }
 
 PROTECTED
-void SdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDescriptor,
+void MediaSdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile)
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -58,7 +58,7 @@ void SdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDesc
 }
 
 PROTECTED
-void SdpGenerator::GenerateRtpMap(
+void MediaSdpGenerator::GenerateRtpMap(
         OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
 {
     IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
@@ -82,7 +82,7 @@ void SdpGenerator::GenerateRtpMap(
 }
 
 PROTECTED
-IMS_SINT32 SdpGenerator::GenerateDirection(
+IMS_SINT32 MediaSdpGenerator::GenerateDirection(
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -99,7 +99,7 @@ IMS_SINT32 SdpGenerator::GenerateDirection(
 }
 
 PROTECTED
-void SdpGenerator::GenerateSessionLevelDirection(
+void MediaSdpGenerator::GenerateSessionLevelDirection(
         OUT ISessionDescriptor* pSessionDescriptor, IN IMS_SINT32 nDirection)
 {
     if (pSessionDescriptor == IMS_NULL)
@@ -113,7 +113,7 @@ void SdpGenerator::GenerateSessionLevelDirection(
     }
 }
 
-PROTECTED void SdpGenerator::AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator)
+PROTECTED void MediaSdpGenerator::AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator)
 {
     if (str.GetLength() > 0)
     {
@@ -121,7 +121,7 @@ PROTECTED void SdpGenerator::AppendSeparatorIfNotEmpty(OUT AString& str, IN AStr
     }
 }
 
-PRIVATE void SdpGenerator::ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDescriptor)
+PRIVATE void MediaSdpGenerator::ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDescriptor)
 {
     if (pDescriptor == IMS_NULL)
     {
@@ -134,7 +134,7 @@ PRIVATE void SdpGenerator::ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDes
     pDescriptor->SetBandwidthInfo(strEmptyList);
 }
 
-PRIVATE void SdpGenerator::SetSdpSessionIpAddress(
+PRIVATE void MediaSdpGenerator::SetSdpSessionIpAddress(
         OUT ISessionDescriptor* pSessionDescriptor, IN MediaBaseProfile* pProfile)
 {
     if (pSessionDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -153,7 +153,7 @@ PRIVATE void SdpGenerator::SetSdpSessionIpAddress(
     }
 }
 
-PRIVATE void SdpGenerator::SetSdpMediaDescription(
+PRIVATE void MediaSdpGenerator::SetSdpMediaDescription(
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -189,7 +189,7 @@ PRIVATE void SdpGenerator::SetSdpMediaDescription(
             nSdpMediaType, pProfile->GetDataPort(), pProfile->GetTransportType().GetStr());
 }
 
-PRIVATE void SdpGenerator::SetSdpMediaBandwidth(
+PRIVATE void MediaSdpGenerator::SetSdpMediaBandwidth(
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)

@@ -25,7 +25,7 @@
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC AudioSdpGenerator::AudioSdpGenerator() :
-        SdpGenerator(MEDIA_TYPE_AUDIO)
+        MediaSdpGenerator(MEDIA_TYPE_AUDIO)
 {
     IMS_TRACE_I("+AudioSdpGenerator()", 0, 0, 0);
 }

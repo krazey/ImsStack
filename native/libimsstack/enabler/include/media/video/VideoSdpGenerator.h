@@ -17,7 +17,7 @@
 #ifndef VIDEO_SDP_GENERATOR_H_
 #define VIDEO_SDP_GENERATOR_H_
 
-#include "SdpGenerator.h"
+#include "MediaSdpGenerator.h"
 #include "video/VideoProfile.h"
 
 class SdpAvCodec;
@@ -26,7 +26,7 @@ class SdpAvCodec;
  * This class is to generate a video Sdp by adding video attributes from video profile to the
  * MediaDescriptor and the SessionDescriptor
  */
-class VideoSdpGenerator : public SdpGenerator
+class VideoSdpGenerator : public MediaSdpGenerator
 {
 public:
     VideoSdpGenerator();

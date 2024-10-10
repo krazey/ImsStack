@@ -17,14 +17,14 @@
 #ifndef AUDIO_SDP_GENERATOR_H_
 #define AUDIO_SDP_GENERATOR_H_
 
-#include "SdpGenerator.h"
+#include "MediaSdpGenerator.h"
 #include "audio/AudioProfile.h"
 
 /**
  * This class is to generate an audio Sdp by adding audio attributes from audio profile to the
  * MediaDescriptor and the SessionDescriptor
  */
-class AudioSdpGenerator : public SdpGenerator
+class AudioSdpGenerator : public MediaSdpGenerator
 {
 public:
     AudioSdpGenerator();

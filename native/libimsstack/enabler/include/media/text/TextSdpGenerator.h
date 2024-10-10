@@ -17,9 +17,13 @@
 #ifndef TEXT_SDP_GENERATOR_H_
 #define TEXT_SDP_GENERATOR_H_
 
-#include "SdpGenerator.h"
+#include "MediaSdpGenerator.h"
 
-class TextSdpGenerator : public SdpGenerator
+/**
+ * This class is to generate a text Sdp by adding text attributes from text profile to the
+ * MediaDescriptor and the SessionDescriptor
+ */
+class TextSdpGenerator : public MediaSdpGenerator
 {
 public:
     TextSdpGenerator();

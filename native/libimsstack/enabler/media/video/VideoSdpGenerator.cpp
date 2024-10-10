@@ -25,7 +25,7 @@
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoSdpGenerator::VideoSdpGenerator() :
-        SdpGenerator(MEDIA_TYPE_VIDEO)
+        MediaSdpGenerator(MEDIA_TYPE_VIDEO)
 {
     IMS_TRACE_I("+VideoSdpGenerator()", 0, 0, 0);
 }
