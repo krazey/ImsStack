@@ -18,26 +18,8 @@
 #include "ImsService.h"
 #include "ImsMessageDef.h"
 
-enum
-{
-    STATE_NOTREADY = 0,
-    STATE_READY
-};
-
 namespace android
 {
-
-class TestImsActivity : public ImsActivity
-{
-public:
-    inline TestImsActivity() :
-            ImsActivity()
-    {
-    }
-    inline ~TestImsActivity() {}
-
-    IMS_BOOL DispatchMessage(IN ImsMessage& /*objMsg*/) { return IMS_TRUE; }
-};
 
 class TestImsService : public ImsService
 {
@@ -50,16 +32,41 @@ public:
     inline TestImsService() :
             ImsService(AString::ConstNull())
     {
+        SetState(STATE_NOTREADY);
     }
     inline ~TestImsService() {}
 
-    IMS_BOOL TestDispatchMsg(IN ImsMessage& /*objMsg*/) { return IMS_TRUE; }
+    inline IMS_BOOL StateNotReady_OnMessage(IN ImsMessage& objMsg)
+    {
+        if (objMsg.GetName() == MSG1)
+        {
+            SetState(STATE_READY);
+        }
+        return IMS_TRUE;
+    }
 
-    IMS_BOOL TestSetState(IN IMS_UINT32 nState) { return SetState(nState); }
+    inline IMS_BOOL StateReady_OnMessage(IN ImsMessage& objMsg)
+    {
+        if (objMsg.GetName() == MSG2)
+        {
+            SetState(STATE_NOTREADY);
+        }
+        return IMS_TRUE;
+    }
 
-    IMS_UINT32 TestGetState() { return GetState(); }
+    inline IMS_BOOL TestDispatchMessage(IN ImsMessage& objMsg) { return DispatchMessage(objMsg); }
+    inline IMS_UINT32 TestGetState() { return GetState(); }
+    inline IMS_UINT32 TestGetOldState() { return GetOldState(); }
 
-    IMS_UINT32 TestGetOldState() { return GetOldState(); }
+public:
+    enum
+    {
+        STATE_NOTREADY = 0,
+        STATE_READY
+    };
+
+    static constexpr IMS_SINT32 MSG1 = 1;
+    static constexpr IMS_SINT32 MSG2 = 2;
 };
 
 BEGIN_STATE_MAP(TestImsService)
@@ -68,13 +75,13 @@ STATE_ENTRY(STATE_READY)
 END_STATE_MAP()
 
 BEGIN_STATE_MSG_MAP(TestImsService, STATE_NOTREADY)
-STATE_MSG_ENTRY(1, &TestImsService::TestDispatchMsg)
-STATE_MSG_ENTRY(2, &TestImsService::TestDispatchMsg)
+STATE_MSG_ENTRY(MSG1, &TestImsService::StateNotReady_OnMessage)
+STATE_MSG_ENTRY(MSG2, &TestImsService::StateNotReady_OnMessage)
 END_STATE_MSG_MAP()
 
 BEGIN_STATE_MSG_MAP(TestImsService, STATE_READY)
-STATE_MSG_ENTRY(1, &TestImsService::TestDispatchMsg)
-STATE_MSG_ENTRY(2, &TestImsService::TestDispatchMsg)
+STATE_MSG_ENTRY(MSG1, &TestImsService::StateReady_OnMessage)
+STATE_MSG_ENTRY(MSG2, &TestImsService::StateReady_OnMessage)
 END_STATE_MSG_MAP()
 
 class ImsServiceTest : public ::testing::Test
@@ -99,29 +106,32 @@ protected:
     }
 };
 
-TEST_F(ImsServiceTest, StateTest)
-{
-    EXPECT_EQ(m_pService->TestGetOldState(), IMS_INVALID_STATE);
-    EXPECT_EQ(m_pService->TestGetState(), IMS_INVALID_STATE);
-    EXPECT_EQ(m_pService->TestSetState(STATE_NOTREADY), IMS_TRUE);
-    EXPECT_EQ(m_pService->TestGetOldState(), IMS_INVALID_STATE);
-    EXPECT_EQ(m_pService->TestGetState(), STATE_NOTREADY);
-}
-
 TEST_F(ImsServiceTest, DispatchMessage)
 {
-    TestImsActivity* pTestActivity = DYNAMIC_CAST(TestImsActivity*, m_pService);
-    ImsMessage objMsg(0, 0, 0);
-    EXPECT_EQ(pTestActivity->DispatchMessage(objMsg), IMS_FALSE);
-    EXPECT_EQ(m_pService->TestSetState(STATE_NOTREADY), IMS_TRUE);
+    ImsMessage objMsg(IMS_INVALID_MSG, 0, 0);
+    EXPECT_FALSE(m_pService->TestDispatchMessage(objMsg));
+    EXPECT_EQ(m_pService->TestGetState(), TestImsService::STATE_NOTREADY);
+    EXPECT_EQ(m_pService->TestGetOldState(), IMS_INVALID_STATE);
 
-    ImsMessage objMsg1(1, 0, 0);
-    EXPECT_EQ(pTestActivity->DispatchMessage(objMsg1), IMS_FALSE);
-    EXPECT_EQ(m_pService->TestSetState(STATE_READY), IMS_TRUE);
-    EXPECT_EQ(m_pService->TestGetOldState(), STATE_NOTREADY);
+    ImsMessage objMsg1(TestImsService::MSG1, 0, 0);
+    EXPECT_TRUE(m_pService->TestDispatchMessage(objMsg1));
+    EXPECT_EQ(m_pService->TestGetState(), TestImsService::STATE_READY);
+    EXPECT_EQ(m_pService->TestGetOldState(), TestImsService::STATE_NOTREADY);
 
-    ImsMessage objMsg2(2, 0, 0);
-    EXPECT_EQ(pTestActivity->DispatchMessage(objMsg2), IMS_FALSE);
+    // Same state.
+    EXPECT_TRUE(m_pService->TestDispatchMessage(objMsg1));
+    EXPECT_EQ(m_pService->TestGetState(), TestImsService::STATE_READY);
+    EXPECT_EQ(m_pService->TestGetOldState(), TestImsService::STATE_NOTREADY);
+
+    ImsMessage objMsg2(TestImsService::MSG2, 0, 0);
+    EXPECT_TRUE(m_pService->TestDispatchMessage(objMsg2));
+    EXPECT_EQ(m_pService->TestGetState(), TestImsService::STATE_NOTREADY);
+    EXPECT_EQ(m_pService->TestGetOldState(), TestImsService::STATE_READY);
+
+    // Same state.
+    EXPECT_TRUE(m_pService->TestDispatchMessage(objMsg2));
+    EXPECT_EQ(m_pService->TestGetState(), TestImsService::STATE_NOTREADY);
+    EXPECT_EQ(m_pService->TestGetOldState(), TestImsService::STATE_READY);
 }
 
 }  // namespace android

@@ -39,9 +39,9 @@ protected:
     inline IMS_UINT32 GetState() { return m_nState; }
     inline IMS_UINT32 GetOldState() { return m_nOldState; }
 
-private:
-    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override final;
 
+private:
     IMS_BOOL OnStateMsgProcess(IN ImsMessage& objMsg);
 
 private:
