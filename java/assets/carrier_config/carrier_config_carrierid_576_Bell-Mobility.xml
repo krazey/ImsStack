@@ -25,6 +25,7 @@
     </int-array>
     <boolean name="ims_dereg_on_3g_network_bool" value="true"/>
     <boolean name="reg_retry_with_ip_ver_fallback_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>

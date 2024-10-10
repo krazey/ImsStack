@@ -23,6 +23,7 @@
         <item value="403"/>
         <item value="404"/>
     </int-array>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
