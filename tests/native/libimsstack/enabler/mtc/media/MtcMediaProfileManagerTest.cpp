@@ -16,7 +16,7 @@
 
 #include "../../include/media/MockIMediaSession.h"
 #include "ImsTypeDef.h"
-#include "core/MockISession.h"
+#include "MockISession.h"
 #include "media/MtcMediaProfileManager.h"
 #include <gtest/gtest.h>
 

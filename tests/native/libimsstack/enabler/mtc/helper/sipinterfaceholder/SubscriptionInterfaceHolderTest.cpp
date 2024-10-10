@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+#include "MockICoreService.h"
+#include "MockIMessage.h"
 #include "MockIOsFactory.h"
+#include "MockISession.h"
+#include "MockISubscription.h"
 #include "PlatformContext.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
-#include "core/MockISubscription.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
 #include <gtest/gtest.h>

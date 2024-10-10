@@ -17,8 +17,8 @@
 #ifndef DIALOG_SUBSCRIPTION_H_
 #define DIALOG_SUBSCRIPTION_H_
 
+#include "ISubscriptionListener.h"
 #include "ImsTypeDef.h"
-#include "core/ISubscriptionListener.h"
 #include "dialogevent/IDialogSubscription.h"
 
 class AString;

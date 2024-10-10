@@ -15,9 +15,12 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IMessage.h"
 #include "ImsTypeDef.h"
+#include "MockIMessage.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "PlatformContext.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
@@ -26,9 +29,6 @@
 #include "call/MockIMtcSession.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessage.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "helper/ILastComeFirstServedHelper.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "helper/MockIPassiveTimerHolder.h"

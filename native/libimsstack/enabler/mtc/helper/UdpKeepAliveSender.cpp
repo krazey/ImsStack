@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-// #include "IImsAosInfo.h"
 #include "IMtcService.h"
+#include "ISipKeepAliveHelper.h"
 #include "ImsTypeDef.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
@@ -24,7 +24,6 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "sipcore/ISipKeepAliveHelper.h"
 #include "util/IpAddress.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

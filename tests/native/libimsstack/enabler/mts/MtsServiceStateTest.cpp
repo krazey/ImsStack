@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
+#include "../../interface/aos/MockIImsAos.h"
+#include "../../interface/aos/MockIImsAosInfo.h"
 #include "CarrierConfig.h"
 #include "IConfiguration.h"
 #include "IImsAosInfo.h"
 #include "ImsAosReason.h"
 #include "MockICarrierConfig.h"
-#include "MtsServiceState.h"
 #include "MtsDef.h"
+#include "MtsServiceState.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
 #include "TestConnector.h"
-#include "../../interface/aos/MockIImsAos.h"
-#include "../../interface/aos/MockIImsAosInfo.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

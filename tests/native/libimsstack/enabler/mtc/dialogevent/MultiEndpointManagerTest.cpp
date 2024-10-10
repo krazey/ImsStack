@@ -19,16 +19,17 @@
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
+#include "MockICoreService.h"
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MtcDef.h"
 #include "PlatformContext.h"
+#include "SipAddress.h"
 #include "TestConfigService.h"
 #include "TestPhoneInfoService.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
 #include "dialogevent/DialogInfo.h"
 #include "dialogevent/IDialogInfoManager.h"
 #include "dialogevent/IDialogSubscription.h"
@@ -38,7 +39,6 @@
 #include "dialogevent/MultiEndpointFactory.h"
 #include "dialogevent/MultiEndpointManager.h"
 #include "helper/MockIMtcAosConnector.h"
-#include "sipcore/SipAddress.h"
 #include <gtest/gtest.h>
 #include <memory>
 #include <utility>

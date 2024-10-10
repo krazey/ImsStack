@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+#include "IMessage.h"
+#include "ISipHeader.h"
+#include "MockIMessage.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "MtcDef.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
@@ -34,9 +40,6 @@
 #include "conferencecall/ConferenceDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessage.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "dialogevent/MockIMultiEndpointManager.h"
 #include "helper/MockILastComeFirstServedHelper.h"
@@ -47,9 +50,6 @@
 #include "media/MediaDef.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/SipMethod.h"
-#include "sipcore/SipStatusCode.h"
 #include "ussi/MockUssiController.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>

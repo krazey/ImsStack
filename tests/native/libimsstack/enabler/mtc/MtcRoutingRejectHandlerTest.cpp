@@ -18,10 +18,10 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockINetworkWatcher.h"
+#include "MockISipMessage.h"
+#include "MockISipServerConnection.h"
 #include "MtcRoutingRejectHandler.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipServerConnection.h"
-#include "sipcore/SipMethod.h"
+#include "SipMethod.h"
 #include <gtest/gtest.h>
 #include <vector>
 

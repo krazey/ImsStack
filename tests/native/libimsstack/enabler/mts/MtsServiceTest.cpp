@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "../../interface/aos/MockIImsAos.h"
+#include "../../interface/aos/MockIImsAosInfo.h"
 #include "CarrierConfig.h"
 #include "IConfiguration.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
+#include "IPageMessage.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ImsServiceConfig.h"
@@ -26,18 +28,16 @@
 #include "IuMtsService.h"
 #include "MockICarrierConfig.h"
 #include "MockIMtsServiceListener.h"
+#include "MockIReference.h"
+#include "MtsDef.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
-#include "MtsDef.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
 #include "TestConnector.h"
 #include "TestImsRadioService.h"
 #include "TestPhoneInfoService.h"
-#include "core/MockIReference.h"
-#include "core/IPageMessage.h"
-#include "../../interface/aos/MockIImsAos.h"
-#include "../../interface/aos/MockIImsAosInfo.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::AnyNumber;

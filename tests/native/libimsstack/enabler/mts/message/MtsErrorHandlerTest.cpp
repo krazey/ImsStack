@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "IuMtsService.h"
 #include "MockICarrierConfig.h"
+#include "MockIMessage.h"
 #include "MockIMtsService.h"
 #include "MtsDef.h"
 #include "PlatformContext.h"
 #include "SipStatusCode.h"
 #include "TestConfigService.h"
-#include "core/MockIMessage.h"
 #include "message/MtsErrorHandler.h"
 #include "utility/MtsDynamicLoader.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

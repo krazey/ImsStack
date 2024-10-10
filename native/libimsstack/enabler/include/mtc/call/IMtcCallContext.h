@@ -21,7 +21,7 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
-#include "sipcore/SipMethod.h"
+#include "SipMethod.h"
 
 class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;

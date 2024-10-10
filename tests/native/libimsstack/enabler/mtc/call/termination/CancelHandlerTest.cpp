@@ -15,13 +15,13 @@
  */
 
 #include "AString.h"
+#include "ISipHeader.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "MockIMessage.h"
+#include "MockISipMessage.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/CancelHandler.h"
-#include "core/MockIMessage.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>

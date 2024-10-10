@@ -15,6 +15,7 @@
  */
 
 #include "ICoreService.h"
+#include "IMessage.h"
 #include "IMtcCallController.h"
 #include "ISession.h"
 #include "ISipHeader.h"
@@ -39,7 +40,6 @@
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessage.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"

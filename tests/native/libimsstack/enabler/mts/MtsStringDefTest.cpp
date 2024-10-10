@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IuMtsService.h"
 #include "MtsStringDef.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

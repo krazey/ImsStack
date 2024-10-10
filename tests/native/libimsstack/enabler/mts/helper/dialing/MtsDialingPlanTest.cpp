@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "AString.h"
 #include "ImsIdentity.h"
 #include "helper/dialing/MtsDialingPlan.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

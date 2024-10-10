@@ -20,6 +20,7 @@
 #include "MtcDef.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -28,7 +29,6 @@
 #include "ect/EctFactory.h"
 #include "ect/EctReference.h"
 #include "ect/IEctControllerListener.h"
-#include "sipcore/SipStatusCode.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;

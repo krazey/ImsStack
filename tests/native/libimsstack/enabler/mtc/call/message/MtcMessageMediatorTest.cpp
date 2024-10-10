@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include "ISipHeader.h"
 #include "MockISession.h"
+#include "MockISipMessage.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/message/MtcMessageMediator.h"
@@ -22,8 +24,6 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/MockIMedia.h"
 #include "media/MockIMediaDescriptor.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 

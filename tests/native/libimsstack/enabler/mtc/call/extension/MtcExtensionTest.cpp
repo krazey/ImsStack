@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+#include "ISipHeader.h"
 #include "ImsList.h"
+#include "MockIMessage.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/extension/MtcExtension.h"
-#include "core/MockIMessage.h"
-#include "sipcore/ISipHeader.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "ICarrierConfig.h"
+#include "IMessage.h"
 #include "IMtsService.h"
 #include "ImsAosParameter.h"
 #include "IuMtsService.h"
@@ -23,7 +24,6 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
-#include "core/IMessage.h"
 #include "message/MtsErrorHandler.h"
 #include "utility/MtsDynamicLoader.h"
 

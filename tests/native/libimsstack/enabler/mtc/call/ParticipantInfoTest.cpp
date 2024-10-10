@@ -16,18 +16,18 @@
 
 #include "AString.h"
 #include "ImsTypeDef.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "SipAddress.h"
 #include "aos/IImsAosInfo.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
-#include "sipcore/SipAddress.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;

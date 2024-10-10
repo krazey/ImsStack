@@ -16,15 +16,15 @@
 
 #include "ISipHeader.h"
 #include "ImsList.h"
+#include "MockIMessage.h"
 #include "MockISession.h"
+#include "MockISipMessage.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
-#include "core/MockIMessage.h"
-#include "sipcore/MockISipMessage.h"
 #include "media/MockIMtcMediaManager.h"
 #include "utility/MessageUtils.h"
 #include <gmock/gmock.h>

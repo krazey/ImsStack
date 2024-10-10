@@ -17,11 +17,11 @@
 #ifndef MESSAGE_FORMATTER_H_
 #define MESSAGE_FORMATTER_H_
 
+#include "IReasonHeaderSetter.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "configuration/ConfigDef.h"
-#include "core/IReasonHeaderSetter.h"
 
 class AString;
 class ICoreService;
