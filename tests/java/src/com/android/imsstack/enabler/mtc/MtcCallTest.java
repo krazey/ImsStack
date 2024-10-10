@@ -1106,4 +1106,14 @@ public class MtcCallTest extends ImsStackTest {
 
         verify(mListener, times(1)).onCallRttAudioIndication(eq(mTestMtcCall), eq(true));
     }
+
+    @Test
+    public void testonNotifyIncomingDtmfReceived() {
+        int dtmfDigit = 5;
+        mTestMtcCall.setListener(mListener);
+        mTestMtcCall.getAudioListener().onNotifyIncomingDtmfReceived(dtmfDigit);
+        processAllMessages();
+        verify(mListener, times(1)).onNotifyIncomingDtmfReceived(
+                eq(mTestMtcCall), eq(dtmfDigit));
+    }
 }

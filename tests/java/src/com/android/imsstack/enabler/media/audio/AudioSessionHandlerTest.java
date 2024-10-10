@@ -58,7 +58,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     private static final int SESSION_ID = 439;
 
     // Dtmf settings
-    private static final int DTMF_DURATION = 20;
+    private static final int DTMF_DURATION = 200;
     private static final char DTMF_DIGIT = '9';
 
     // Mock Objects
@@ -505,5 +505,13 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
                 times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
         assertEquals(mAudioSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
         testParcel.recycle();
+    }
+
+    @Test
+    public void testOnNotifyIncomingDtmfReceived() {
+        mAudioSessionCallback.onDtmfReceived(DTMF_DIGIT, DTMF_DURATION);
+        processAllMessages();
+        verify(mMockAudioSessionCallbackHandler).onNotifyIncomingDtmfReceived(
+                eq((int) DTMF_DIGIT), eq(DTMF_DURATION));
     }
 }

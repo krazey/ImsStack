@@ -1320,6 +1320,16 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback).invokeCallQualityChanged(null);
     }
 
+    @Test
+    public void testOnNotifyIncomingDtmfReceived() {
+        char digit = '5';
+        int dtmfDigit = 5;
+        mImsCallSession.getCallListenerProxy().onNotifyIncomingDtmfReceived(
+                mMockMtcCall, dtmfDigit);
+        verify(mMockImsCallSessionCallback).invokeDtmfReceived(
+                any(ImsCallSessionImplBase.class), eq(digit));
+    }
+
     private TestImsCallSessionImpl createImsCallSession(String callId) {
         TestImsCallSessionImpl callSession =  new TestImsCallSessionImpl(mMockCallContext,
                 mMockCallTracker, mMockMtcCall, callId, mImsCallProfile, true,
