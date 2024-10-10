@@ -501,7 +501,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
             }
             else if (GetRegIpcanCategory() == IIpcan::CATEGORY_MOBILE)
             {
-                if ((m_pIpsecHelper != IMS_NULL) && m_pIpsecHelper->IsEstablished())
+                if (m_pIpsecHelper != IMS_NULL && m_pIpsecHelper->IsEstablished())
                 {
                     nValue = AoSRegProtectedType::REG_PROTECTED;
                 }
@@ -1809,7 +1809,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegister(
 
     AddOperation_OnSendRegister();
 
-    if (IsIpsecSupported())
+    if (m_pIpsecHelper != IMS_NULL && IsIpsecSupported())
     {
         m_pIpsecHelper->Create(bInitial || bRestore);
     }
@@ -1875,7 +1875,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendDeregister()
         return IMS_FALSE;
     }
 
-    if (IsIpsecSupported())
+    if (m_pIpsecHelper != IMS_NULL && IsIpsecSupported())
     {
         m_pIpsecHelper->Create(IMS_FALSE);
     }
@@ -4764,7 +4764,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
 
     bResponseToChallenge = IMS_TRUE;
 
-    if (IsIpsecSupported())
+    if (m_pIpsecHelper != IMS_NULL && IsIpsecSupported())
     {
         if (!m_pIpsecHelper->ProcessAuthChallenged(nAlgorithm))
         {
@@ -4798,7 +4798,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAkaResponse(IN IMS_SI
 
     bResultOfSA = IMS_FALSE;
 
-    if (!IsIpsecSupported())
+    if (m_pIpsecHelper == IMS_NULL || !IsIpsecSupported())
     {
         return;
     }
@@ -4916,7 +4916,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_RefreshTimerExpired(
         return;
     }
 
-    if (IsIpsecSupported())
+    if (m_pIpsecHelper != IMS_NULL && IsIpsecSupported())
     {
         if (!m_pIpsecHelper->Create(IMS_FALSE))
         {
@@ -4956,7 +4956,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
 
     if (IsIpsecSupported())
     {
-        if (m_pIpsecHelper->IsEstablished())
+        if (m_pIpsecHelper != IMS_NULL && m_pIpsecHelper->IsEstablished())
         {
             m_pIpsecHelper->ProcessRegStarted();
         }
@@ -5054,7 +5054,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
 
     if (IsIpsecSupported())
     {
-        if (!m_pIpsecHelper->ProcessRegUpdated())
+        if (m_pIpsecHelper == IMS_NULL || !m_pIpsecHelper->ProcessRegUpdated())
         {
             ProcessUnpredictableFailure();
             return;
