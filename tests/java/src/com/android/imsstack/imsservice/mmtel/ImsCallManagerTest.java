@@ -372,7 +372,7 @@ public class ImsCallManagerTest {
     public void getConnectingSessionReturnsRingbackSessionTest() {
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
         ImsCallSessionImpl implSession = mImsCallManager.getConnectingSession();
-        Assert.assertNotNull(mImsCallManager.getSession().isEmpty());
+        Assert.assertTrue(mImsCallManager.getSession().isEmpty());
         Assert.assertNull(implSession);
 
         when(mMockMtcCall.isOnHold()).thenReturn(false);
@@ -390,7 +390,7 @@ public class ImsCallManagerTest {
     public void getConnectingSessionReturnsRingingSessionTest() {
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
         ImsCallSessionImpl implSession = mImsCallManager.getConnectingSession();
-        Assert.assertNotNull(mImsCallManager.getPendingSession().isEmpty());
+        Assert.assertTrue(mImsCallManager.getPendingSession().isEmpty());
         Assert.assertNull(implSession);
 
         when(mMockImsCallSession.getMtcCall()).thenReturn(mMockMtcCall);
@@ -405,7 +405,7 @@ public class ImsCallManagerTest {
     public void getActiveSessionTest() {
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
         ImsCallSessionImpl implSession = mImsCallManager.getActiveSession();
-        Assert.assertNotNull(mImsCallManager.getSession().isEmpty());
+        Assert.assertTrue(mImsCallManager.getSession().isEmpty());
         Assert.assertNull(implSession);
 
         when(mMockMtcCall.isOnHold()).thenReturn(false);

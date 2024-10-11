@@ -46,7 +46,6 @@ public class FeatureTableTest {
 
     @Test
     public void getFeatureMaskTest() {
-        assertNotNull(mFeature.getFeatureMask());
         assertEquals(FeatureConfig.FEATURE_S_VOLTE, mFeature.getFeatureMask());
     }
 
