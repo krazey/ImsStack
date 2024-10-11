@@ -15,11 +15,12 @@
  */
 
 #include "MockICoreService.h"
-#include "MockIOsFactory.h"
 #include "MockIReference.h"
 #include "MockISession.h"
 #include "MockISipServerConnection.h"
+#include "MockITimer.h"
 #include "PlatformContext.h"
+#include "TestTimerService.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include <gtest/gtest.h>
@@ -30,45 +31,29 @@ using ::testing::Return;
 namespace android
 {
 
-class TestImsTimerForSiHolder : public ImsTimer
-{
-public:
-    inline TestImsTimerForSiHolder() {}
-    inline ~TestImsTimerForSiHolder() {}
-
-public:
-    IMS_BOOL Equals(IN const ITimer* piTimer) const override
-    {
-        ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
-        return pTimer->GetTimerId() == reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    IMS_UINTP SetTimer(IN IMS_UINT32 /*nDuration*/, IN ITimerListener* /*piListener*/) override
-    {
-        return reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    void KillTimer() override {}
-
-    IMS_UINTP GetTimerId() const override { return reinterpret_cast<IMS_UINTP>(this); }
-
-    void DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/) override {}
-};
-
 class SessionInterfaceHolderTest : public ::testing::Test
 {
 public:
-    MockIOsFactory objMockIOsFactory;
-    IOsFactory* piOldOsFactory;
-    TestImsTimerForSiHolder* pTestImsTimerForSiHolder;
     SessionInterfaceHolder* pHolder;
     MockIInterfaceHolderListener objListener;
     MockISession objMockISession;
+    TestTimerService objTimerService;
+    MockITimer objMockITimer;
 
 protected:
-    virtual void SetUp() override { pHolder = new SessionInterfaceHolder(objListener); }
+    virtual void SetUp() override
+    {
+        objTimerService.SetTimer(&objMockITimer);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &objTimerService);
+        pHolder = new SessionInterfaceHolder(objListener);
+    }
 
-    virtual void TearDown() override { delete pHolder; }
+    virtual void TearDown() override
+    {
+        delete pHolder;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
 };
 
 TEST_F(SessionInterfaceHolderTest, HolderDoesNothingForSessionListenerExceptTerminated)
@@ -170,14 +155,6 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseStartsTimer)
 
 TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTimerExpiredStopsTimer)
 {
-    piOldOsFactory = PlatformContext::GetInstance()->SetOsFactory(&objMockIOsFactory);
-
-    // will be deleted in the TimerService::DestroyTimer.
-    pTestImsTimerForSiHolder = new TestImsTimerForSiHolder();
-    EXPECT_CALL(objMockIOsFactory, CreateTimer())
-            .Times(1)
-            .WillOnce(Return(pTestImsTimerForSiHolder));
-
     ON_CALL(objMockISession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
     ON_CALL(objMockISession, Destroy()).WillByDefault(Return());
 
@@ -194,12 +171,10 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTimerExpiredStopsTimer)
     EXPECT_TRUE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 
-    pHolder->Timer_TimerExpired(pTestImsTimerForSiHolder);
+    pHolder->Timer_TimerExpired(&objMockITimer);
 
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
-
-    PlatformContext::GetInstance()->SetOsFactory(piOldOsFactory);
 }
 
 TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTerminatedStopsTimer)

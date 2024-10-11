@@ -16,11 +16,12 @@
 
 #include "MockICoreService.h"
 #include "MockIMessage.h"
-#include "MockIOsFactory.h"
 #include "MockIReference.h"
 #include "MockISession.h"
 #include "MockISipServerConnection.h"
+#include "MockITimer.h"
 #include "PlatformContext.h"
+#include "TestTimerService.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include <gtest/gtest.h>
@@ -31,50 +32,31 @@ using ::testing::Return;
 namespace android
 {
 
-class TestImsTimerForRiHolder : public ImsTimer
-{
-public:
-    inline TestImsTimerForRiHolder() {}
-    inline ~TestImsTimerForRiHolder() {}
-
-public:
-    IMS_BOOL Equals(IN const ITimer* piTimer) const override
-    {
-        ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
-        return pTimer->GetTimerId() == reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    IMS_UINTP SetTimer(IN IMS_UINT32 /*nDuration*/, IN ITimerListener* /*piListener*/) override
-    {
-        return reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    void KillTimer() override {}
-
-    IMS_UINTP GetTimerId() const override { return reinterpret_cast<IMS_UINTP>(this); }
-
-    void DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/) override {}
-};
-
 class ReferenceInterfaceHolderTest : public ::testing::Test
 {
 public:
-    MockIOsFactory objMockIOsFactory;
-    IOsFactory* piOldOsFactory;
-    TestImsTimerForRiHolder* pTestImsTimerForRiHolder;
     ReferenceInterfaceHolder* pHolder;
     MockIInterfaceHolderListener objListener;
     MockIReference objMockIReference;
     MockISession objMockISession;
+    TestTimerService objTimerService;
+    MockITimer objMockITimer;
 
 protected:
     virtual void SetUp() override
     {
+        objTimerService.SetTimer(&objMockITimer);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &objTimerService);
         ON_CALL(objMockISession, CreateReference(_, _)).WillByDefault(Return(&objMockIReference));
         pHolder = new ReferenceInterfaceHolder(objListener);
     }
 
-    virtual void TearDown() override { delete pHolder; }
+    virtual void TearDown() override
+    {
+        delete pHolder;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
 };
 
 TEST_F(ReferenceInterfaceHolderTest, HolderDoesNothingForReferenceListenerExceptTerminated)
@@ -115,14 +97,6 @@ TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseStartsTimer)
 
 TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseWithTimerExpiredStopsTimer)
 {
-    piOldOsFactory = PlatformContext::GetInstance()->SetOsFactory(&objMockIOsFactory);
-
-    // will be deleted in the TimerService::DestroyTimer.
-    pTestImsTimerForRiHolder = new TestImsTimerForRiHolder();
-    EXPECT_CALL(objMockIOsFactory, CreateTimer())
-            .Times(1)
-            .WillOnce(Return(pTestImsTimerForRiHolder));
-
     ON_CALL(objMockIReference, GetState).WillByDefault(Return(IReference::STATE_REFERRING));
 
     EXPECT_EQ(pHolder->GetReferenceCount(), 0);
@@ -134,12 +108,10 @@ TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseWithTimerExpiredStopsTimer)
     pHolder->ReleaseIReference(&objMockIReference, IMS_FALSE);
     EXPECT_TRUE(pHolder->IsTimerExist(&objMockIReference));
 
-    pHolder->Timer_TimerExpired(pTestImsTimerForRiHolder);
+    pHolder->Timer_TimerExpired(&objMockITimer);
 
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockIReference));
     EXPECT_EQ(pHolder->GetReferenceCount(), 0);
-
-    PlatformContext::GetInstance()->SetOsFactory(piOldOsFactory);
 }
 
 TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseWithTerminatedStopsTimer)
