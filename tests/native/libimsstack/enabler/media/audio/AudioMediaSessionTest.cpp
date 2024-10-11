@@ -35,4 +35,5 @@ TEST_F(AudioMediaSessionTest, testSetGetInactivityTimer)
 
     m_pAudioMediaSession->SetNetworkToneTimer(INACTIVITY_TIME);
     EXPECT_EQ(m_pAudioMediaSession->GetInactivityTimer(NETWORK_TONE_INACTIVITY), INACTIVITY_TIME);
+    m_pAudioMediaSession->SetNetworkToneTimer(0);
 }
