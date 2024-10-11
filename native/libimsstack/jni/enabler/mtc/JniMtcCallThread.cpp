@@ -59,6 +59,17 @@ void JniMtcCallThread::OnStartFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
+void JniMtcCallThread::OnInitiating(
+        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo)
+{
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::INITIATING);
+    JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
+    JniMtcUtils::WriteMediaInfoToParcel(objMediaInfo, objParcel);
+    SendData2Java(objParcel);
+}
+
+PUBLIC
 void JniMtcCallThread::OnProgressing(IN const JniCallInfo& objCallInfo,
         IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {

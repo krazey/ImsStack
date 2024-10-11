@@ -35,6 +35,7 @@ public:
     MOCK_METHOD(void, SendIncomingCallRejected, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, SendStarted, (), (override));
     MOCK_METHOD(void, SendStartFailed, (IN const CallReasonInfo&), (override));
+    MOCK_METHOD(void, SendInitiating, (), (override));
     MOCK_METHOD(void, SendProgressing, (), (override));
     MOCK_METHOD(void, SendHeld, (), (override));
     MOCK_METHOD(void, SendHoldFailed, (IN const CallReasonInfo&), (override));

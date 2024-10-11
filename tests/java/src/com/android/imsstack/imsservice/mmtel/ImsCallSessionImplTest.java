@@ -824,6 +824,22 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnCallInitiating() {
+        MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
+        mImsCallSession.getCallListenerProxy().onCallInitiating(mockMtcCall, mMockCallInfo,
+                mMockMediaInfo);
+
+        assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.INITIATED);
+
+        mImsCallSession.getCallListenerProxy().onCallInitiating(mMockMtcCall, mMockCallInfo,
+                mMockMediaInfo);
+
+        assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.INITIATED);
+        verify(mMockImsCallSessionCallback).invokeInitiating(any(
+                ImsCallSessionImplBase.class), any(ImsCallProfile.class));
+    }
+
+    @Test
     public void testOnCallProgressing() {
         SuppInfo suppInfo = new SuppInfo();
         suppInfo.addService_bool(SuppInfo.TYPE_CW, false);

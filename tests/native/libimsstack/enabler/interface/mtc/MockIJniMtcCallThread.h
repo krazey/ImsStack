@@ -40,6 +40,7 @@ public:
                     (IN const ImsMap<SuppType, SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnStartFailed, (IN const CallReasonInfo&), (override));
+    MOCK_METHOD(void, OnInitiating, (IN const JniCallInfo&, IN const MediaInfo&), (override));
     MOCK_METHOD(void, OnProgressing,
             (IN const JniCallInfo&, IN const MediaInfo&,
                     (IN const ImsMap<SuppType, SuppService*>&)),

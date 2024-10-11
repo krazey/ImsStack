@@ -127,6 +127,21 @@ void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
+void MtcUiNotifier::SendInitiating()
+{
+    IMS_TRACE_I("SendInitiating", 0, 0, 0);
+
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
+    {
+        return;
+    }
+
+    piThread->OnInitiating(
+            m_objContext.CreateJniCallInfo(), m_objContext.GetMediaManager().GetMediaInfo());
+}
+
+PUBLIC
 void MtcUiNotifier::SendProgressing()
 {
     IMS_TRACE_I("SendProgressing", 0, 0, 0);

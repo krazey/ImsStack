@@ -49,6 +49,18 @@ public:
     virtual void OnStartFailed(IN const CallReasonInfo& objReason) = 0;
 
     /**
+     * @brief Notifies that the call setup is initiating.
+     *
+     * This method is called after sending an INVITE request, indicating that the call setup process
+     * has started but not yet progressed to ringing or connected state.
+     *
+     * @param objCallInfo The call information.
+     * @param objMediaInfo The media information related to the call.
+     */
+    virtual void OnInitiating(
+            IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) = 0;
+
+    /**
      * @brief Notifies
      *
      * @param objCallInfo

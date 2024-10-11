@@ -77,6 +77,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         public void onCallInitiating(MtcCall call,
                 CallInfo callInfo, MediaInfo mediaInfo) {
+            // no-op
         }
 
         public void onCallProgressing(MtcCall call,
@@ -380,14 +381,12 @@ public class MtcCall extends Call implements ConferenceTracker {
     private static final int MSG_CALL_HOLD_FAILED = 204;
     private static final int MSG_CALL_RESUME_FAILED = 205;
     private static final int MSG_CALL_TERMINATED = 206;
-    /** Args: None */
-    private static final int MSG_CALL_INITIATING = 301;
 
-    private static final int MSG_AUDIO_SESSION_OPENED = 401;
-    private static final int MSG_AUDIO_SESSION_CLOSED = 402;
-    private static final int MSG_AUDIO_QUALITY_CHANGED = 403;
-    private static final int MSG_AUDIO_RTP_EXTENSION_RECEIVED = 404;
-    private static final int MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED = 405;
+    private static final int MSG_AUDIO_SESSION_OPENED = 301;
+    private static final int MSG_AUDIO_SESSION_CLOSED = 302;
+    private static final int MSG_AUDIO_QUALITY_CHANGED = 303;
+    private static final int MSG_AUDIO_RTP_EXTENSION_RECEIVED = 304;
+    private static final int MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED = 305;
 
     private final MessageHandler mHandler;
     private final JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
@@ -884,8 +883,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         mCT.updateCallState(this, CallTracker.CALL_EVENT_ESTABLISHING, null);
-
-        notifyInitiating();
     }
 
     public void startConference(int callType, UsersInfo usersInfo,
@@ -927,8 +924,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         sendRequest(parcel);
 
         mCT.updateCallState(this, CallTracker.CALL_EVENT_ESTABLISHING, null);
-
-        notifyInitiating();
     }
 
     /**
@@ -1364,15 +1359,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                 new CallReasonInfo(CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE, 0, "");
     }
 
-    private void notifyInitiating() {
-        if (!isCallValid()) {
-            loge("Call is already closed");
-            return;
-        }
-
-        Message.obtain(mHandler, MSG_CALL_INITIATING).sendToTarget();
-    }
-
     private void notifyStartFailed() {
         logi("notifyStartFailed");
 
@@ -1700,10 +1686,6 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             switch (msg.what) {
-                case MSG_CALL_INITIATING: {
-                    listener.onCallInitiating(MtcCall.this, getCallInfo(), getMediaInfo());
-                    break;
-                }
                 case MSG_CALL_START_FAILED: {
                     listener.onCallStartFailed(MtcCall.this, (CallReasonInfo) msg.obj);
                     break;
@@ -1799,6 +1781,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             switch (msg) {
+                case IUMtcCall.INITIATING: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+
+                    onInitiating(callInfo, mediaInfo);
+                    break;
+                }
                 case IUMtcCall.PROGRESSING: {
                     CallInfo callInfo = new CallInfo(parcel);
                     MediaInfo mediaInfo = new MediaInfo(parcel);
@@ -1982,6 +1971,14 @@ public class MtcCall extends Call implements ConferenceTracker {
             // In this case, the application doesn't receive any notification,
             // so MtcCall needs to be closed in here.
             closeInternal(MtcCall.this);
+        }
+
+        private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo) {
+            logi("INITIATING");
+
+            if (mListener != null) {
+                mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo);
+            }
         }
 
         private void onProgressing(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {

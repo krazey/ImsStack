@@ -345,6 +345,24 @@ TEST_F(IdleStateTest, StartSetsOnly100WaitTimerAndTransitsToOutgoingState)
             pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
 }
 
+TEST_F(IdleStateTest, StartNotifiesInitiating)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(objUiNotifier, SendInitiating);
+
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
 TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabledButFailsIfMepIsNotSupported)
 {
     CallType eCallType = CallType::VOIP;
@@ -498,6 +516,24 @@ TEST_F(IdleStateTest, StartUssiSetsMoTimersAndTransitsToOutgoingState)
             pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
 }
 
+TEST_F(IdleStateTest, StarUssitNotifiesInitiating)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(objUiNotifier, SendInitiating);
+
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
 TEST_F(IdleStateTest, StartConferenceWithMediaSetsMediaInfo)
 {
     CallType eCallType = CallType::VOIP;
@@ -592,7 +628,7 @@ TEST_F(IdleStateTest, StartConferenceInvokesSendStartFailedIfStartSessionFailed)
                     eCallType, strTarget, objInputMediaInfo, objInputSuppServices, lstUsers));
 }
 
-TEST_F(IdleStateTest, StartConferenceSetsMoTimesAndTransitsOutgoingState)
+TEST_F(IdleStateTest, StartConferenceSetsMoTimersAndTransitsOutgoingState)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
@@ -614,6 +650,28 @@ TEST_F(IdleStateTest, StartConferenceSetsMoTimesAndTransitsOutgoingState)
 
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
+
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pIdleState->StartConference(
+                    eCallType, strTarget, objInputMediaInfo, objInputSuppServices, lstUsers));
+}
+
+TEST_F(IdleStateTest, StartConferenceNotifiesInitiating)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    ImsList<ConfUser*> lstUsers;
+
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
+
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objUiNotifier, SendInitiating);
 
     EXPECT_EQ(CallStateName::OUTGOING,
             pIdleState->StartConference(

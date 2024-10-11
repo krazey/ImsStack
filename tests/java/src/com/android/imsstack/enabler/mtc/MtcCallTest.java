@@ -516,8 +516,17 @@ public class MtcCallTest extends ImsStackTest {
         mTestMtcCall.start(IUMtcCall.CALLTYPE_VT, mCallee, "", new MediaInfo(), new SuppInfo());
         processAllMessages();
 
-        verify(mListener, times(1)).onCallInitiating(eq(mTestMtcCall), any(), any());
         assertEquals(mCallee, mTestMtcCall.getCallExtra(mTestMtcCall.EXTRA_TI_ORIGIN, ""));
+    }
+
+    @Test
+    public void testStartDoesNotNotifyInitiating() {
+        mTestMtcCall.createNativeCallObject();
+        mTestMtcCall.setListener(mListener);
+        mTestMtcCall.start(IUMtcCall.CALLTYPE_VT, mCallee, "", new MediaInfo(), new SuppInfo());
+        processAllMessages();
+
+        verify(mListener, times(0)).onCallInitiating(eq(mTestMtcCall), any(), any());
     }
 
     @Test
@@ -535,7 +544,19 @@ public class MtcCallTest extends ImsStackTest {
         assertEquals(IUMtcCall.STARTCONF, mCommand);
         verify(mCT, times(1)).updateCallState(
                 eq(mTestMtcCall), eq(CallTracker.CALL_EVENT_ESTABLISHING), eq(null));
-        verify(mListener, times(1)).onCallInitiating(eq(mTestMtcCall), any(), any());
+    }
+
+    @Test
+    public void testStartConferenceDoesNotNotifyInitiating() {
+        mTestMtcCall.createNativeCallObject();
+        mTestMtcCall.setListener(mListener);
+        UsersInfo usersInfo = new UsersInfo();
+        usersInfo.addUser(new UsersInfo.User());
+        mTestMtcCall.startConference(
+                IUMtcCall.CALLTYPE_VOIP, usersInfo, new MediaInfo(), new SuppInfo());
+        processAllMessages();
+
+        verify(mListener, times(0)).onCallInitiating(eq(mTestMtcCall), any(), any());
     }
 
     @Test
@@ -834,6 +855,15 @@ public class MtcCallTest extends ImsStackTest {
         verify(mCT, times(1)).updateCallState(
                 eq(mTestMtcCallWithMockJniProxy), eq(CallTracker.CALL_EVENT_TERMINATED), eq(null));
         verify(mMtcJniProxy, times(1)).releaseJniInterfaceAndrRemoveListener(anyLong(), any());
+    }
+
+    @Test
+    public void testJniListenerInitiating() {
+        sendMessageToJniListener(IUMtcCall.INITIATING);
+
+        assertEquals(CallTracker.CALL_STATE_IDLE, mTestMtcCallWithMockJniProxy.getCallState());
+        verify(mListener, times(1)).onCallInitiating(
+                eq(mTestMtcCallWithMockJniProxy), any(), any());
     }
 
     @Test
