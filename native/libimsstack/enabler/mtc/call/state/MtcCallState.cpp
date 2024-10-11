@@ -651,7 +651,7 @@ PROTECTED
 CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("RejectIncomingAndToTerminating", 0, 0, 0);
-    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED ||  // TODO: remove?
+    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED ||
             objReason.nCode == CODE_REJECT_QOS_FAILURE)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(
