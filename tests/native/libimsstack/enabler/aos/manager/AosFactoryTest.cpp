@@ -79,10 +79,14 @@ protected:
 
     virtual void TearDown() override
     {
+        ImsAosManager* pAoSMngr = TestAosFactory::GetManager(IMS_SLOT_0);
+        if (pAoSMngr != null)
+        {
+            TestAosFactory::Stop(IMS_SLOT_0);
+        }
         TestAosFactory::DeleteAosFactory();
         TestAosFactory::SetAosFactory(IMS_NULL);
         TestAosFactory::SetLock(IMS_NULL);
-        TestAosFactory::GetManagers().Remove(IMS_SLOT_0);
 
         TestAosFactory::SetAosFactory(m_pOriginAosFactory);
         TestAosFactory::SetLock(m_pOriginLock);

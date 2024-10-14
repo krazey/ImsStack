@@ -719,6 +719,7 @@ protected:
         if (m_pAosRegistration)
         {
             m_pAosRegistration->ClearTimers();
+            m_pAosRegistration->StopTimer(AosRegistration::TIMER_OFFLINE_RECOVER);
 
             delete m_pAosRegistration;
             m_pAosRegistration = IMS_NULL;

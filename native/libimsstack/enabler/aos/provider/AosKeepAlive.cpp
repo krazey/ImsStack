@@ -53,6 +53,7 @@ PUBLIC VIRTUAL AosKeepAlive::~AosKeepAlive()
             sizeof(AosKeepAlive), this);
 
     m_piKeepAliveHelper->Destroy();
+    ClearTimer();
 }
 
 PUBLIC

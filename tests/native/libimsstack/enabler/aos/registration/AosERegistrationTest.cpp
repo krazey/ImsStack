@@ -59,11 +59,13 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                                 \
+    using Base::ClearTimers;                                \
     using Base::IsReregFailureReportOnIpcanChangeRequired;  \
     using Base::IsTransactionStarted;                       \
     using Base::SetImsCall;                                 \
     using Base::SetReregFailureReportOnIpcanChangeRequired; \
     using Base::SetState;                                   \
+    using Base::StopTimer;                                  \
     using Base::UpdateTransactionStarted;
 
 const IMS_SINT32 SLOT_ID = 0;
@@ -376,6 +378,9 @@ protected:
 
         if (m_pAosERegistration)
         {
+            m_pAosERegistration->ClearTimers();
+            m_pAosERegistration->StopTimer(TestAosERegistration::TIMER_OFFLINE_RECOVER);
+
             delete m_pAosERegistration;
             m_pAosERegistration = IMS_NULL;
         }

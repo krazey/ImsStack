@@ -65,7 +65,9 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)               \
+    using Base::ClearTimers;              \
     using Base::SetAppState;              \
+    using Base::StopTimer;                \
     using Base::ProcessConnectionUpdated; \
     using Base::ProcessMessage;
 
@@ -82,7 +84,8 @@ enum
     TIMER_APP_CONNECTED,
     TIMER_APP_TERMINATED,
     TIMER_PDN_BLOCKED,
-    TIMER_IMS_ESTABLISHMENT
+    TIMER_IMS_ESTABLISHMENT,
+    TIMER_RAT_BLOCK
 };
 
 enum
@@ -376,7 +379,14 @@ protected:
 
         if (m_pTestAosEApplication)
         {
+            m_pTestAosEApplication->ClearTimers();
+            m_pTestAosEApplication->StopTimer(TIMER_RECONFIG_GUARD);
+            m_pTestAosEApplication->StopTimer(TIMER_PDN_BLOCKED);
+            m_pTestAosEApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
+            m_pTestAosEApplication->StopTimer(TIMER_RAT_BLOCK);
+
             delete m_pTestAosEApplication;
+            m_pTestAosEApplication = IMS_NULL;
         }
 
         if (m_pAosStaticProfile)

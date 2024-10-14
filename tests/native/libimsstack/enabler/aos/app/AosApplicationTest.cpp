@@ -475,6 +475,7 @@ protected:
         {
             CleanUpAosApplication();
             delete m_pAosApplication;
+            m_pAosApplication = IMS_NULL;
         }
     }
 
@@ -532,6 +533,10 @@ protected:
         }
 
         m_pAosApplication->ClearTimers();
+        m_pAosApplication->StopTimer(TIMER_RECONFIG_GUARD);
+        m_pAosApplication->StopTimer(TIMER_PDN_BLOCKED);
+        m_pAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
+        m_pAosApplication->StopTimer(TIMER_RAT_BLOCK);
     }
 };
 

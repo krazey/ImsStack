@@ -2732,8 +2732,9 @@ PROTECTED VIRTUAL void AosApplication::StopTimer(IN IMS_UINT32 nType)
 PROTECTED VIRTUAL void AosApplication::ClearTimers()
 {
     /*
-        NOT STOP TIMER : TIMER_RECONFIG_GUARD, TIMER_PDN_BLOCKED, TIMER_IMS_ESTABLISHMENT
-    */
+     * NOT STOP TIMER : TIMER_RECONFIG_GUARD, TIMER_PDN_BLOCKED, TIMER_IMS_ESTABLISHMENT,
+     *                  TIMER_RAT_BLOCK
+     */
     if (m_piMsgConditionTimer != IMS_NULL)
     {
         StopTimer(TIMER_MSG_CONDITION);
