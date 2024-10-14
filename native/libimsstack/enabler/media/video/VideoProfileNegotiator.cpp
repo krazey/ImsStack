@@ -115,26 +115,7 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
         // Setting framerate
         pNegotiatedProfile->SetFrameRate(nNegotiatedMaxFrameRate);
 
-        // Candidate Priority (no need in video)
-
-        // CVO mode
-        if (pLocalProfile->GetCvoId() > 0 && pPeerProfile->GetCvoId() > 0)
-        {
-            pNegotiatedProfile->SetCvoId(pPeerProfile->GetCvoId());
-        }
-        else
-        {
-            if (pNegotiatedProfile->GetDataPort() == 0)
-            {
-                pNegotiatedProfile->SetCvoId(pLocalProfile->GetCvoId());
-            }
-            else
-            {
-                pNegotiatedProfile->SetCvoId(0);
-            }
-        }
-
-        IMS_TRACE_D("Negotiate() - CVO Id[%d]", pNegotiatedProfile->GetCvoId(), 0, 0);
+        NegotiateCvo(pLocalProfile, pPeerProfile, pNegotiatedProfile);
 
         ret = IMS_TRUE;
     }
@@ -809,6 +790,34 @@ void VideoProfileNegotiator::NegotiatePayloadNumber(
         pNegotiatedLocalPayload->GetRtpMap().SetPayloadNumber(
                 pPeerPayload->GetRtpMap().GetPayloadNumber());
     }
+}
+
+PRIVATE
+void VideoProfileNegotiator::NegotiateCvo(IN VideoProfile* pLocalProfile,
+        IN VideoProfile* pPeerProfile, OUT VideoProfile* pNegotiatedProfile)
+{
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pLocalProfile->GetCvoId() > 0 && pPeerProfile->GetCvoId() > 0)
+    {
+        pNegotiatedProfile->SetCvoId(pPeerProfile->GetCvoId());
+    }
+    else
+    {
+        if (pNegotiatedProfile->GetDataPort() == 0)
+        {
+            pNegotiatedProfile->SetCvoId(pLocalProfile->GetCvoId());
+        }
+        else
+        {
+            pNegotiatedProfile->SetCvoId(0);
+        }
+    }
+
+    IMS_TRACE_D("NegotiateCvo() - CVO Id[%d]", pNegotiatedProfile->GetCvoId(), 0, 0);
 }
 
 PRIVATE
