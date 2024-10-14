@@ -277,7 +277,7 @@ void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
         pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
     }
 
-    IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
+    IMS_TRACE_D("NegotiateBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
             pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
             pLocalProfile->GetBandwidthRr());
 }

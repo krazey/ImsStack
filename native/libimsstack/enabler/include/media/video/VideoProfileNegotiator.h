@@ -87,6 +87,9 @@ private:
     IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload** pNegoPayload);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
+    IMS_BOOL MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig, IN VideoProfile* pLocalProfile,
+            IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
+            IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT VideoProfile* pNegotiatedProfile);
 };
 
 #endif

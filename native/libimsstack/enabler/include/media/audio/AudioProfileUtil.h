@@ -25,10 +25,6 @@ class AudioProfileUtil
 {
 public:
     static IMS_BOOL SetRtcpXr(OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig);
-    static IMS_BOOL MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig,
-            IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
-            OUT AudioProfile* pNegotiatedProfile);
     static const IMS_SINT32* GetAmrAsArray(
             IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6);
     static const IMS_SINT32* GetEvsAsArray(IN IMS_SINT32 nEVSFormat, IN IMS_BOOL bIpV6);

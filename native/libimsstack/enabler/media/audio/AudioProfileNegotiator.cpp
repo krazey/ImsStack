@@ -874,6 +874,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
     IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
             pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
             pLocalProfile->GetBandwidthRr());
+
     return IMS_TRUE;
 }
 

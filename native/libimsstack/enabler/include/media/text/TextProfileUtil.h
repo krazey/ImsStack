@@ -17,27 +17,10 @@
 #ifndef TEXT_PROFILE_UTIL_H_
 #define TEXT_PROFILE_UTIL_H_
 
-class TextConfiguration;
-
 #include "text/TextProfile.h"
 
 class TextProfileUtil
 {
-public:
-    /**
-     * @brief Make negotiated bandwidth AS/RS/RR value in SDP attribute with the parameters
-     *
-     * @param pConfig The carrier configuration for text
-     * @param pLocalProfile The local TextProfile
-     * @param pPeerProfile The peer TextProfile created from the SDP
-     * @param isOfferReceived The flag to identify the offer received
-     * @param nASValueOfNegoticatedCodec The bandwidth AS attribute negotiated
-     * @param pNegotiatedProfile The negotiated TextProfile to update
-     */
-    static void MakeNegotiatedBandwidth(IN TextConfiguration* pConfig,
-            IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
-            IN IMS_BOOL isOfferReceived, IN IMS_SINT32 nASValueOfNegoticatedCodec,
-            OUT TextProfile* pNegotiatedProfile);
 };
 
 #endif
