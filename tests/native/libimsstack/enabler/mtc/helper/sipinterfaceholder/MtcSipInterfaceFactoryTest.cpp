@@ -34,11 +34,6 @@ protected:
     virtual void TearDown() override { delete pFactory; }
 };
 
-TEST_F(MtcSipInterfaceFactoryTest, SessionInterfaceHolderIsReturnedForTheFirstInvoking)
-{
-    ASSERT_NE(pFactory->GetISessionHolder(), nullptr);
-}
-
 TEST_F(MtcSipInterfaceFactoryTest, ReferenceInterfaceHolderIsReturnedForTheFirstInvoking)
 {
     ASSERT_NE(pFactory->GetIReferenceHolder(), nullptr);
@@ -47,14 +42,6 @@ TEST_F(MtcSipInterfaceFactoryTest, ReferenceInterfaceHolderIsReturnedForTheFirst
 TEST_F(MtcSipInterfaceFactoryTest, SubscriptionInterfaceHolderIsReturnedForTheFirstInvoking)
 {
     ASSERT_NE(pFactory->GetISubscriptionHolder(), nullptr);
-}
-
-TEST_F(MtcSipInterfaceFactoryTest, SameSessionInterfaceHolderIsReturnedForTheSecondInvoking)
-{
-    SessionInterfaceHolder* pHolder1 = pFactory->GetISessionHolder();
-    ASSERT_NE(pHolder1, nullptr);
-    SessionInterfaceHolder* pHolder2 = pFactory->GetISessionHolder();
-    EXPECT_EQ(pHolder1, pHolder2);
 }
 
 TEST_F(MtcSipInterfaceFactoryTest, SameReferenceInterfaceHolderIsReturnedForTheSecondInvoking)
@@ -74,15 +61,12 @@ TEST_F(MtcSipInterfaceFactoryTest, SameSubscriptionInterfaceHolderIsReturnedForT
 }
 
 TEST_F(MtcSipInterfaceFactoryTest,
-        NewSessionInterfaceHolderIsReturnedForTheSecondInvokingAfterCleared)
+        SameSessionInterfaceHolderIsReturnedForTheSecondInvokingAfterReleased)
 {
-    SessionInterfaceHolder* pHolder1 = pFactory->GetISessionHolder();
-    ASSERT_NE(pHolder1, nullptr);
-    EXPECT_TRUE(pFactory->IsSessionHolderExist());
-    pFactory->OnSessionInterfaceCleared();
-    EXPECT_FALSE(pFactory->IsSessionHolderExist());
-    SessionInterfaceHolder* pHolder2 = pFactory->GetISessionHolder();
-    ASSERT_NE(pHolder2, nullptr);
+    SessionInterfaceHolder* pHolder1 = &pFactory->GetISessionHolder();
+    pFactory->OnSessionInterfaceReleased(0);
+    SessionInterfaceHolder* pHolder2 = &pFactory->GetISessionHolder();
+    EXPECT_EQ(pHolder1, pHolder2);
 }
 
 TEST_F(MtcSipInterfaceFactoryTest,

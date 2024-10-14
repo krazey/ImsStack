@@ -339,7 +339,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
         return GetStateName();
     }
 
-    m_objContext.GetSipInterfaceFactory().GetISessionHolder()->AddISession(piForkedSession);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddISession(
+            m_objContext.GetCallKey(), piForkedSession);
 
     m_objContext.CreateSession(piForkedSession);  // TODO: Need HandleResponse?
     m_objContext.GetMediaManager().CreateMediaProfile(piForkedSession, IMS_TRUE, IMS_TRUE);

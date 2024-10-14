@@ -52,7 +52,6 @@
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MockUdpKeepAliveSender.h"
 #include "helper/MtcSupplementaryService.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include "media/MockIMtcMediaManager.h"
@@ -87,7 +86,6 @@ public:
     MockIMtcUiNotifier objUiNotifier;
     MockIMessageUtils objMessageUtils;
     MockEpsFallbackTrigger* pEpsFbTrigger;
-    MockIInterfaceHolderListener objInterfaceHolderListener;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MockISipKeepAliveHelper objKeepAliveHelper;
@@ -143,9 +141,9 @@ protected:
         ON_CALL(objCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
 
-        pSessionInterfaceHolder = new MockSessionInterfaceHolder(objInterfaceHolderListener);
+        pSessionInterfaceHolder = new MockSessionInterfaceHolder();
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
-                .WillByDefault(Return(pSessionInterfaceHolder));
+                .WillByDefault(ReturnRef(*pSessionInterfaceHolder));
         ON_CALL(objCallContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
@@ -1078,7 +1076,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedInvokesSendProgressing)
 
 TEST_F(OutgoingStateTest, SessionForkedResponseReceivedDoesNothingIfSessionIsNull)
 {
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_)).Times(0);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, _)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->SessionForkedResponseReceived(IMS_NULL, IMS_NULL));
 
@@ -1096,7 +1094,7 @@ TEST_F(OutgoingStateTest, SessionForkedResponseReceivedAddsISession)
     EXPECT_CALL(objCallContext, RemoveSession(&objSession)).Times(0);
 
     MockISession objForkedSession;
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objForkedSession));
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objForkedSession));
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->SessionForkedResponseReceived(&objSession, &objForkedSession));
 }

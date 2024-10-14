@@ -19,8 +19,9 @@
 
 #include "ISessionListener.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ServiceTimer.h"
+#include "call/IMtcCall.h"
+#include <unordered_map>
 
 class ISession;
 class ICoreService;
@@ -29,7 +30,7 @@ class IInterfaceHolderListener;
 class SessionInterfaceHolder : public ISessionListener, public ITimerListener
 {
 public:
-    explicit SessionInterfaceHolder(IN IInterfaceHolderListener& objListener);
+    explicit SessionInterfaceHolder();
     virtual ~SessionInterfaceHolder();
     SessionInterfaceHolder(IN const SessionInterfaceHolder&) = delete;
     SessionInterfaceHolder& operator=(IN const SessionInterfaceHolder&) = delete;
@@ -61,9 +62,12 @@ public:
     // ITimerListener interface implementation.
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    virtual ISession* GetISession(
-            IN ICoreService* piCoreService, IN const AString& strFrom, IN const AString& strTo);
-    virtual void AddISession(IN ISession* piSession);
+    virtual void AddListener(IN IInterfaceHolderListener* piListener);
+    virtual void RemoveListener(IN IInterfaceHolderListener* piListener);
+
+    virtual ISession* GetISession(IN CallKey nKey, IN ICoreService* piCoreService,
+            IN const AString& strFrom, IN const AString& strTo);
+    virtual void AddISession(IN CallKey nKey, IN ISession* piSession);
     virtual void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bTerminated = IMS_FALSE);
 
     inline virtual IMS_BOOL IsTimerExist(IN ISession* piSession) const
@@ -71,21 +75,33 @@ public:
         return GetTimer(piSession) != IMS_NULL;
     }
 
-    inline virtual IMS_UINT32 GetSessionCount() const { return m_objISessions.GetSize(); }
+    inline virtual IMS_UINT32 GetSessionCount() const { return m_objSessionRecords.size(); }
 
 private:
     static IMS_BOOL IsReadyToDestroy(IN ISession* piSession);
 
-    void ClearISessions();
-
-    IMS_RESULT StartTimer(IN ISession* piSession, IN IMS_SINT32 nDuration);
+    void StartTimer(IN ISession* piSession);
     void StopTimer(IN ITimer* piTimer);
     ITimer* GetTimer(IN const ISession* piSession) const;
 
-private:
-    IInterfaceHolderListener& m_objListener;
-    ImsList<ISession*> m_objISessions;
-    ImsMap<ITimer*, ISession*> m_objTerminatedGuardTimers;
+    class SessionRecord
+    {
+    public:
+        explicit SessionRecord(IN ISession* piSession)
+        {
+            this->piSession = piSession;
+            piTimer = IMS_NULL;
+        }
+
+        SessionRecord(IN const SessionRecord&) = delete;
+        SessionRecord& operator=(IN const SessionRecord&) = delete;
+
+        ISession* piSession;
+        ITimer* piTimer;
+    };
+
+    ImsList<IInterfaceHolderListener*> m_objListeners;
+    std::unordered_multimap<CallKey, SessionRecord*> m_objSessionRecords;
 
     static const IMS_UINT32 TIME_TRANSACTION_TERMINATED_GUARD = 128000;
 };

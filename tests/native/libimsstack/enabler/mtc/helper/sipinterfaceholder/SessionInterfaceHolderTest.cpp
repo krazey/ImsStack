@@ -21,12 +21,16 @@
 #include "MockITimer.h"
 #include "PlatformContext.h"
 #include "TestTimerService.h"
+#include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
+
+LOCAL const CallKey CALL_KEY_1 = 1;
+LOCAL const CallKey CALL_KEY_2 = 2;
 
 namespace android
 {
@@ -46,7 +50,7 @@ protected:
         objTimerService.SetTimer(&objMockITimer);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_TIMER, &objTimerService);
-        pHolder = new SessionInterfaceHolder(objListener);
+        pHolder = new SessionInterfaceHolder();
     }
 
     virtual void TearDown() override
@@ -91,7 +95,7 @@ TEST_F(SessionInterfaceHolderTest, StopsTimerIfSessionTerminated)
 {
     EXPECT_CALL(objMockISession, Destroy()).Times(1);
 
-    pHolder->AddISession(&objMockISession);
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
     pHolder->SessionTerminated(&objMockISession);
 
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
@@ -105,7 +109,7 @@ TEST_F(SessionInterfaceHolderTest, AddAndReleaseStartsTimer)
 
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 
-    pHolder->AddISession(&objMockISession);
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 
@@ -122,7 +126,7 @@ TEST_F(SessionInterfaceHolderTest, AddAndReleaseWithTerminatedStopsTimer)
 
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 
-    pHolder->AddISession(&objMockISession);
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 1);
 
@@ -144,7 +148,8 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseStartsTimer)
 
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 
-    ISession* piSession = pHolder->GetISession(&objMockICoreService, "sip:fromuri", "sip:touri");
+    ISession* piSession =
+            pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
     EXPECT_EQ(piSession, &objMockISession);
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
 
@@ -163,7 +168,8 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTimerExpiredStopsTimer)
 
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 
-    ISession* piSession = pHolder->GetISession(&objMockICoreService, "sip:fromuri", "sip:touri");
+    ISession* piSession =
+            pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
     EXPECT_EQ(piSession, &objMockISession);
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
 
@@ -188,7 +194,8 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTerminatedStopsTimer)
 
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
 
-    ISession* piSession = pHolder->GetISession(&objMockICoreService, "sip:fromuri", "sip:touri");
+    ISession* piSession =
+            pHolder->GetISession(CALL_KEY_1, &objMockICoreService, "sip:fromuri", "sip:touri");
     EXPECT_EQ(piSession, &objMockISession);
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
 
@@ -198,6 +205,75 @@ TEST_F(SessionInterfaceHolderTest, GetAndReleaseWithTerminatedStopsTimer)
     pHolder->ReleaseISession(&objMockISession, IMS_TRUE);
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
     EXPECT_EQ(pHolder->GetSessionCount(), 0);
+}
+
+TEST_F(SessionInterfaceHolderTest, AddAndReleaseWithTerminatedNotifiesListener)
+{
+    ON_CALL(objMockISession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    ON_CALL(objMockISession, Destroy()).WillByDefault(Return());
+
+    pHolder->AddListener(&objListener);
+
+    EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1));
+
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
+    pHolder->ReleaseISession(&objMockISession, IMS_TRUE);
+}
+
+TEST_F(SessionInterfaceHolderTest, AddAndRemoveListenerRemovesGivenListener)
+{
+    ON_CALL(objMockISession, GetState).WillByDefault(Return(ISession::STATE_TERMINATED));
+    ON_CALL(objMockISession, Destroy()).WillByDefault(Return());
+
+    MockIInterfaceHolderListener objAnotherListener;
+    pHolder->AddListener(&objAnotherListener);
+    pHolder->AddListener(&objListener);
+    pHolder->RemoveListener(&objListener);
+
+    EXPECT_CALL(objListener, OnSessionInterfaceReleased(_)).Times(0);
+    EXPECT_CALL(objAnotherListener, OnSessionInterfaceReleased(_));
+
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
+    pHolder->ReleaseISession(&objMockISession, IMS_FALSE);
+}
+
+TEST_F(SessionInterfaceHolderTest, ListnerIsNotifiedOnlyIfAllInterfacesInSameCallKeyAreReleased)
+{
+    ON_CALL(objMockISession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    ON_CALL(objMockISession, Destroy()).WillByDefault(Return());
+
+    pHolder->AddListener(&objListener);
+
+    MockISession objISession1OfCall1;
+    MockISession objISession2OfCall1;
+    MockISession objISession1OfCall2;
+    MockISession objISession2OfCall2;
+
+    pHolder->AddISession(CALL_KEY_1, &objISession1OfCall1);
+    pHolder->AddISession(CALL_KEY_1, &objISession2OfCall1);
+    pHolder->AddISession(CALL_KEY_2, &objISession1OfCall2);
+    pHolder->AddISession(CALL_KEY_2, &objISession2OfCall2);
+
+    {
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(_)).Times(0);
+
+        pHolder->ReleaseISession(&objISession1OfCall1, IMS_TRUE);
+        pHolder->ReleaseISession(&objISession1OfCall2, IMS_TRUE);
+    }
+
+    {
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1));
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_2)).Times(0);
+
+        pHolder->ReleaseISession(&objISession2OfCall1, IMS_TRUE);
+    }
+
+    {
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_1)).Times(0);
+        EXPECT_CALL(objListener, OnSessionInterfaceReleased(CALL_KEY_2));
+
+        pHolder->ReleaseISession(&objISession2OfCall2, IMS_TRUE);
+    }
 }
 
 }  // namespace android

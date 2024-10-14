@@ -34,7 +34,7 @@ public:
      *
      * @return
      */
-    virtual SessionInterfaceHolder* GetISessionHolder() = 0;
+    virtual SessionInterfaceHolder& GetISessionHolder() = 0;
 
     /**
      * @brief Gets
