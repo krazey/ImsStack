@@ -88,10 +88,16 @@ public class MtcEmergencyServiceManager {
      */
     public void openEmergencyService(
             @EmergencyCallRouting int emergencyRouting, IServiceStateTracker serviceStateTracker) {
-        log("openEmergencyService");
+        if (mCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false)
+                && !CallFeature.isWiFiEmcOverEmergencyPdn(mContext.getSlotId())) {
+            emergencyRouting = EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL;
+        }
+
+        log("openEmergencyService :: emergencyRouting=" + emergencyRouting);
 
         if (serviceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)) {
-            onEsOpened(IUMtcCall.SERVICETYPE_EMERGENCY);
+            onEsOpened(emergencyRouting == EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL
+                    ? IUMtcCall.SERVICETYPE_NORMAL : IUMtcCall.SERVICETYPE_EMERGENCY);
             return;
         }
 

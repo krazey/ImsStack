@@ -26,14 +26,19 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.CarrierConfigManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 
 import org.junit.After;
@@ -49,14 +54,18 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     private int mCommand;
+    private int mEmergencyRouting;
     private final int mInvalid = -1;
     private long mNativeObject;
+    private static final int SLOT_ID = 0;
 
     @Mock private IBaseContext mMockContext;
     @Mock private MtcJniProxy mMockMtcJniProxy;
     @Mock private MtcCall mMockMtcCall;
     @Mock private IServiceStateTracker mServiceStateTracker;
     @Mock private ICallStateTracker mICallStateTracker;
+    @Mock private CarrierConfig mMockCarrierConfig;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Captor ArgumentCaptor<MtcEmergencyServiceManager.ECallStateListener> mECallStateListenerCaptor;
 
     private MtcEmergencyServiceManager mTestMtcEmergencyServiceManager;
@@ -65,8 +74,11 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     public void setUp() throws Exception {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
 
         mCommand = mInvalid;
+        mEmergencyRouting = mInvalid;
         mNativeObject = mInvalid;
         mTestMtcEmergencyServiceManager = new MtcEmergencyServiceManager(
                 mMockContext, mICallStateTracker, mMockMtcJniProxy);
@@ -82,6 +94,9 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
                     parcel.setDataPosition(0);
                     mCommand = parcel.readInt();
+                    if (mCommand == IUMtcService.OPEN_EMERGENCY_SERVICE) {
+                        mEmergencyRouting = parcel.readInt();
+                    }
 
                     parcel.recycle();
                     parcel = null;
@@ -95,6 +110,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
     @After
     public void tearDown() throws Exception {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
         mTestMtcEmergencyServiceManager = null;
         super.tearDown();
     }
@@ -108,6 +124,37 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
         assertEquals(1, mNativeObject);
         assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+    }
+
+    @Test
+    public void testOpenEmergencyServiceOverWiFi() {
+        when(mMockMtcCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false))
+                .thenReturn(true);
+        mTestMtcEmergencyServiceManager.setNativeObject(1);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL))
+                .thenReturn(true);
+
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+        processAllMessages();
+
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mEmergencyRouting);
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL))
+                .thenReturn(false);
+
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+        processAllMessages();
+
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL, mEmergencyRouting);
     }
 
     @Test
