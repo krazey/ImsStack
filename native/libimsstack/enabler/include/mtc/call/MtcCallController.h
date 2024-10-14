@@ -51,6 +51,7 @@ public:
 
     CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
     void Attach(IN CallKey nCallKey) override;
+    void Detach(IN CallKey nCallKey) override;
     void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;
     void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo& objMediaInfo,
