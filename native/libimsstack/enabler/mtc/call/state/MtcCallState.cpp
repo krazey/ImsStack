@@ -852,7 +852,16 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
             eFeature = bNormal ? Feature::MO_CALL_REQUEST_TIMEOUT : Feature::EMERGENCY_T_CALL_TIMER;
             break;
         case TIMER_MO_18X_WAIT:
-            eFeature = bNormal ? Feature::TIMER_18X : Feature::EMERGENCY_18X_TIMER;
+            if (bNormal)
+            {
+                eFeature = Feature::TIMER_18X;
+            }
+            else
+            {
+                eFeature = m_objContext.GetService().IsWlanIpCanType()
+                        ? Feature::WIFI_EMERGENCY_18X_TIMER
+                        : Feature::EMERGENCY_18X_TIMER;
+            }
             break;
         case TIMER_MO_NOANSWER:
             eFeature = bNormal ? Feature::RINGBACK_TIMER : Feature::EMERGENCY_RINGBACK_TIMER;

@@ -322,6 +322,52 @@ TEST_F(IdleStateTest, StartSetsMoTimersAndTransitsToOutgoingState)
             pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
 }
 
+TEST_F(IdleStateTest, StartSetsMoTimersForEmergencyCall)
+{
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
+
+    objCallInfo.bEmergency = IMS_TRUE;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    IMS_SINT32 n100WaitTimer = 10000;
+    IMS_SINT32 n18xWaitTimer = 20000;
+    ON_CALL(*pConfigurationManager, GetEmergencyTCallTimer).WillByDefault(Return(n100WaitTimer));
+    ON_CALL(*pConfigurationManager, GetEmergency18xTimer).WillByDefault(Return(n18xWaitTimer));
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
+
+    pIdleState->Start(CallType::VOIP, "target", objInputMediaInfo, objInputSuppServices);
+}
+
+TEST_F(IdleStateTest, StartSetsMoTimersForWifiEmergencyCall)
+{
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
+
+    objCallInfo.bEmergency = IMS_TRUE;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+
+    IMS_SINT32 n100WaitTimer = 10000;
+    IMS_SINT32 n18xWaitTimer = 20000;
+    ON_CALL(*pConfigurationManager, GetEmergencyTCallTimer).WillByDefault(Return(n100WaitTimer));
+    ON_CALL(*pConfigurationManager, GetWifiEmergency18xTimer).WillByDefault(Return(n18xWaitTimer));
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
+
+    pIdleState->Start(CallType::VOIP, "target", objInputMediaInfo, objInputSuppServices);
+}
+
 TEST_F(IdleStateTest, StartSetsOnly100WaitTimerAndTransitsToOutgoingState)
 {
     CallType eCallType = CallType::VOIP;
