@@ -815,7 +815,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
         case CODE_REJECT_INTERNAL_ERROR:
             eStatusCode = SipStatusCode::SC_480;
             break;
-        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED:  // TODO: can be removed?
+        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED:
         case CODE_REJECT_QOS_FAILURE:
             eStatusCode = SipStatusCode::SC_580;
             break;
