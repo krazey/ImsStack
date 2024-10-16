@@ -368,6 +368,16 @@ TEST_F(AlertingStateTest, QosReserveFailedDoesNothingIfNextActionIsModify)
             pAlertingState->QosReserveFailed(&objISession, QosLossPolicy::MODIFY));
 }
 
+TEST_F(AlertingStateTest, SessionStartedStartsTimerForDelayingUpdate)
+{
+    IMS_SINT32 nAnyTime = 60;
+    ON_CALL(*pConfigurationManager, GetDelayUpdateAfterConnectedTimer)
+            .WillByDefault(Return(nAnyTime));
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED, nAnyTime));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->SessionStarted(&objISession));
+}
+
 TEST_F(AlertingStateTest, SessionStartedTransitsStateToEstablished)
 {
     MtcSupplementaryService objSupplementaryService(objCallContext, *pConfigurationProxy);

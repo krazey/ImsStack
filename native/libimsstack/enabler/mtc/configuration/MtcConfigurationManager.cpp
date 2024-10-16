@@ -565,6 +565,12 @@ IMS_BOOL MtcConfigurationManager::IsEnableOipHeaderPolicyFallBack() const
 }
 
 PUBLIC
+IMS_SINT32 MtcConfigurationManager::GetDelayUpdateAfterConnectedTimer() const
+{
+    return m_objCarrierConfig.nDelayUpdateAfterConnectedTimer;
+}
+
+PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetEmergencyRttGuardTimer() const
 {
     return m_objCarrierConfig.nEmergencyRttGuardTimer;

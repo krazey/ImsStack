@@ -58,12 +58,12 @@ PUBLIC VIRTUAL EstablishedState::~EstablishedState() {}
 
 PUBLIC VIRTUAL void EstablishedState::OnEnter()
 {
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetAsyncRunner(
                 [&]()
                 {
-                    return m_objContext.RunPendingOperationIfPossible();
+                    m_objContext.RunPendingOperationIfPossible();
                 });
     }
     else
@@ -76,7 +76,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("Hold", 0, 0, 0);
 
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [objMediaInfo](IMtcCallState* pState) mutable
@@ -106,7 +106,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
 PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("Resume", 0, 0, 0);
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [objMediaInfo](IMtcCallState* pState) mutable
@@ -129,7 +129,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
         IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("Update", 0, 0, 0);
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [eCallType, objMediaInfo](IMtcCallState* pState) mutable
@@ -344,7 +344,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Refresh_NotifyCompleted(
     m_objContext.GetAsyncRunner(
             [&]()
             {
-                return m_objContext.RunPendingOperationIfPossible();
+                m_objContext.RunPendingOperationIfPossible();
             });
 
     return GetStateName();
@@ -451,7 +451,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
         return GetStateName();
     }
 
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [eIpcan](IMtcCallState* pState)
@@ -466,6 +466,26 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
     return CallStateName::UPDATING;
 }
 
+PUBLIC VIRTUAL CallStateName EstablishedState::OnTimerExpired(IN IMS_SINT32 nType)
+{
+    IMS_TRACE_D("OnTimerExpired : %d", nType, 0, 0);
+
+    switch (nType)
+    {
+        case TIMER_DELAY_UPDATE_AFTER_CONNECTED:
+            m_objContext.GetAsyncRunner(
+                    [&]()
+                    {
+                        m_objContext.RunPendingOperationIfPossible();
+                    });
+            break;
+        default:
+            break;
+    }
+
+    return GetStateName();
+}
+
 PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateType eType)
 {
     IMtcSession* piMtcSession = m_objContext.GetSession();
@@ -474,7 +494,7 @@ PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateTyp
         return GetStateName();
     }
 
-    // TODO: check IsRefreshInProgress in MtcCallState#OnSrvccStateUpdated?
+    // TODO: check ShouldPendOperation in MtcCallState#OnSrvccStateUpdated?
     // Handling in UpdatingState is also needed.
     HandleUpdate(eType, m_objContext.GetSession()->GetCallType(),
             m_objContext.GetMediaManager().GetMediaInfo());
@@ -677,10 +697,11 @@ CallStateName EstablishedState::Downgrade(IN CallType eCallType)
 }
 
 PRIVATE
-IMS_BOOL EstablishedState::IsRefreshInProgress() const
+IMS_BOOL EstablishedState::ShouldPendOperation() const
 {
     IMtcSession* piMtcSession = m_objContext.GetSession();
-    return piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress();
+    return (piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress()) ||
+            m_objContext.GetTimer().IsActive(TIMER_DELAY_UPDATE_AFTER_CONNECTED);
 }
 
 PRIVATE

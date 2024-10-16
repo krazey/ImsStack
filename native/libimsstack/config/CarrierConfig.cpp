@@ -926,6 +926,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[] =
         KEY_IMS_VOICE_PREFIX "oip_type_for_unavailable_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL[] =
         KEY_IMS_VOICE_PREFIX "enable_oip_header_policy_fallback_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "delay_update_after_connected_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_rtt_guard_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::

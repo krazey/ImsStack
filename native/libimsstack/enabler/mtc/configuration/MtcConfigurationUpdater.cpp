@@ -247,6 +247,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT);
     objItems.bEnableOipHeaderPolicyFallBack =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL);
+    objItems.nDelayUpdateAfterConnectedTimer = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT);
     objItems.nEmergencyRttGuardTimer =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT);
     objItems.bRetryEmergencyCallOverEmergencyPdnWithNextPcscf = piCc->GetBoolean(CarrierConfig::

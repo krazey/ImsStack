@@ -29,6 +29,7 @@
 #include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/UdpKeepAliveSender.h"
@@ -200,6 +201,13 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_FALSE);
     m_objContext.GetUiNotifier().SendStarted();
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
+
+    IMS_SINT32 nDelayTime = m_objContext.GetConfigurationProxy().GetInt(
+            Feature::DELAY_UPDATE_AFTER_CONNECTED_TIMER);
+    if (nDelayTime > 0)
+    {
+        m_objContext.GetTimer().Start(TIMER_DELAY_UPDATE_AFTER_CONNECTED, nDelayTime);
+    }
 
     return CallStateName::ESTABLISHED;
 }

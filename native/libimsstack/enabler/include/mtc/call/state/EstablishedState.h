@@ -62,6 +62,8 @@ public:
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
 
@@ -73,7 +75,7 @@ private:
     IMS_BOOL IsConferenceCallParticipant() const;
     ImsList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
     CallStateName Downgrade(IN CallType eCallType);
-    IMS_BOOL IsRefreshInProgress() const;
+    IMS_BOOL ShouldPendOperation() const;
 
     CallStateName TerminateUssiAfterInfoTransaction();
 };

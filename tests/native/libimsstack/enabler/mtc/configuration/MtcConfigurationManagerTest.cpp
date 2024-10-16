@@ -818,6 +818,12 @@ TEST_F(MtcConfigurationManagerTest, IsEnableOipHeaderPolicyFallBackReturnsValueI
             GetBool(CarrierConfig::ImsVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL));
 }
 
+TEST_F(MtcConfigurationManagerTest, GetDelayUpdateAfterConnectedTimerReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetDelayUpdateAfterConnectedTimer(),
+            GetInt(CarrierConfig::ImsVoice::KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT));
+}
+
 TEST_F(MtcConfigurationManagerTest, GetEmergencyRttGuardTimerReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetEmergencyRttGuardTimer(),

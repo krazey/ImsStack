@@ -660,6 +660,13 @@ public:
      *
      * @return
      */
+    virtual IMS_SINT32 GetDelayUpdateAfterConnectedTimer() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_SINT32 GetEmergencyRttGuardTimer() const = 0;
 
     /**

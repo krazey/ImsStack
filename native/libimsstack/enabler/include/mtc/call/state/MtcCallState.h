@@ -167,6 +167,8 @@ public:
         TIMER_E911_WIFI_OPEN,
         TIMER_E911_LTE_START,
         TIMER_E911_WIFI_START,
+
+        TIMER_DELAY_UPDATE_AFTER_CONNECTED,
     };
 
 protected:
