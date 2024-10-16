@@ -1948,10 +1948,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     onNotifyInfo(type, strValue, intValue, boolValue);
                     break;
                 }
-                case IUMtcCall.CODEC_INFO_UPDATED: {
-                    // TODO: needs to be deleted
-                    break;
-                }
                 default:
                     if (MtcConference.isMessageForConference(msg)) {
                         try {

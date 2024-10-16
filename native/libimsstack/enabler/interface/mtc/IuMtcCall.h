@@ -32,8 +32,6 @@ public:
     static const IMS_SINT32 EVENT_ECT_U2I = EVENT_U2I + 60;
     static const IMS_SINT32 EVENT_ECT_I2U = EVENT_I2U + 60;
 
-    static const IMS_SINT32 EVENT_MEDIA_I2U = EVENT_I2U + 90;
-
     static const IMS_SINT32 MAXIMUM = (EVENT_I2U + 99);
 
     // UI to IMS events
@@ -102,8 +100,6 @@ public:
     static const IMS_SINT32 ECT_COMPLETED = (EVENT_ECT_I2U + 1);
     static const IMS_SINT32 REPLACED_BY = (EVENT_ECT_I2U + 2);
     static const IMS_SINT32 CALL_PUSH_COMPLETED = (EVENT_ECT_I2U + 3);
-
-    static const IMS_SINT32 CODEC_INFO_UPDATED = (EVENT_MEDIA_I2U + 1);
 };
 
 #endif

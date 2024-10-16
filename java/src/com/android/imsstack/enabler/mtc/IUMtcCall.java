@@ -70,8 +70,6 @@ public class IUMtcCall {
     public static final int REPLACED_BY             = (EVENT_I2U + 62);
     public static final int CALL_PUSH_COMPLETED     = (EVENT_I2U + 63);
 
-    public static final int CODEC_INFO_UPDATED = (EVENT_I2U + 91);
-
     // Call Type
     public static final int VOLTE_CALL_TYPE_NORMAL = 0;
     public static final int VOLTE_CALL_TYPE_EMERGENCY = 1;
