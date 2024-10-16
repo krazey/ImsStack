@@ -59,6 +59,7 @@ VIRTUAL AudioMediaSession::~AudioMediaSession()
 {
     IMS_TRACE_I("~AudioMediaSession() - state[%d]", m_nState, 0, 0);
 
+    StopTimer();
     if (m_pRtpConfig)
     {
         delete m_pRtpConfig;
