@@ -451,7 +451,7 @@ PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession(IN ISession* piSession)
 
 PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession()
 {
-    ISession* piSession = GetSipInterfaceFactory().GetISessionHolder()->GetISession(
+    ISession* piSession = GetSipInterfaceFactory().GetISessionHolder().GetISession(m_nKey,
             GetService().GetICoreService(), GetParticipantInfo().GetLocalUri(),
             GetParticipantInfo().GetRemoteUri());
 
@@ -595,8 +595,8 @@ PUBLIC VIRTUAL void MtcCall::SessionReferenceReceived(
         if (piSession != IMS_NULL)
         {
             piSession->Terminate();
-            GetSipInterfaceFactory().GetISessionHolder()->AddISession(piSession);
-            GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piSession);
+            GetSipInterfaceFactory().GetISessionHolder().AddISession(m_nKey, piSession);
+            GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(piSession);
         }
         if (piReference != IMS_NULL)
         {
@@ -833,14 +833,14 @@ PUBLIC VIRTUAL void MtcCall::SessionForkedResponseReceived(
         if (piSession != IMS_NULL)
         {
             piSession->Reject();
-            GetSipInterfaceFactory().GetISessionHolder()->AddISession(piSession);
-            GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piSession);
+            GetSipInterfaceFactory().GetISessionHolder().AddISession(m_nKey, piSession);
+            GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(piSession);
         }
         if (piForkedSession != IMS_NULL)
         {
             piForkedSession->Terminate();
-            GetSipInterfaceFactory().GetISessionHolder()->AddISession(piForkedSession);
-            GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piForkedSession);
+            GetSipInterfaceFactory().GetISessionHolder().AddISession(m_nKey, piForkedSession);
+            GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(piForkedSession);
         }
         OnInternalFailure();
         return;

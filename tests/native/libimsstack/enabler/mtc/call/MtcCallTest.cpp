@@ -56,7 +56,6 @@
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include "ussi/UssiConstants.h"
@@ -85,7 +84,6 @@ public:
     MockIMtcContext objContext;
     CallInfo objCallInfo;
     MockICallStateProxy objCallStateProxy;
-    MockIInterfaceHolderListener objInterfaceHolderListener;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
@@ -104,9 +102,9 @@ protected:
 
         ON_CALL(objCallStateProxy, UpdateCallState(_, _, _, _, _)).WillByDefault(Return());
 
-        pSessionInterfaceHolder = new MockSessionInterfaceHolder(objInterfaceHolderListener);
+        pSessionInterfaceHolder = new MockSessionInterfaceHolder();
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
-                .WillByDefault(Return(pSessionInterfaceHolder));
+                .WillByDefault(ReturnRef(*pSessionInterfaceHolder));
         ON_CALL(objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
@@ -794,7 +792,7 @@ TEST_F(MtcCallTest, CreateSessionCreatesMtcSession)
 
 TEST_F(MtcCallTest, CreateSessionGetsISessionFromInterfaceFactory)
 {
-    EXPECT_CALL(*pSessionInterfaceHolder, GetISession(_, _, _));
+    EXPECT_CALL(*pSessionInterfaceHolder, GetISession(_, _, _, _));
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
@@ -1376,7 +1374,7 @@ TEST_F(MtcCallTest, SessionReferenceReceivedFailsIfReferenceIsNull)
     MockISession objSession;
     EXPECT_CALL(objSession, Terminate).Times(1);
 
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objSession)).Times(1);
     EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, _)).Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
@@ -1687,7 +1685,7 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfSessionIsNull)
     MockISession objForkedSession;
     EXPECT_CALL(objForkedSession, Terminate).Times(1);
 
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objForkedSession)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objForkedSession)).Times(1);
     EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objForkedSession, _)).Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
@@ -1704,7 +1702,7 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfForkedSessionIsNull)
     MockISession objSession;
     EXPECT_CALL(objSession, Reject()).Times(1);
 
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objSession)).Times(1);
     EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, _)).Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();

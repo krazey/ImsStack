@@ -18,10 +18,11 @@
 #define MTC_SIP_INTERFACE_FACTORY_H_
 
 #include "ImsTypeDef.h"
+#include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 
-class SessionInterfaceHolder;
 class ReferenceInterfaceHolder;
 class SubscriptionInterfaceHolder;
 
@@ -35,22 +36,20 @@ public:
 
 public:
     // IInterfaceHolderListener implementation
-    void OnSessionInterfaceCleared() override;
     void OnReferenceInterfaceCleared() override;
     void OnSubscriptionInterfaceCleared() override;
 
     // IMtcSipInterfaceFactory implementation
-    SessionInterfaceHolder* GetISessionHolder() override;
+    SessionInterfaceHolder& GetISessionHolder() override;
     ReferenceInterfaceHolder* GetIReferenceHolder() override;
     SubscriptionInterfaceHolder* GetISubscriptionHolder() override;
 
     // for unit tests
-    inline IMS_BOOL IsSessionHolderExist() const { return m_piSessionHolder != IMS_NULL; }
     inline IMS_BOOL IsReferenceHolderExist() const { return m_piReferenceHolder != IMS_NULL; }
     inline IMS_BOOL IsSubscriptionHolderExist() const { return m_piSubscriptionHolder != IMS_NULL; }
 
 private:
-    SessionInterfaceHolder* m_piSessionHolder;
+    SessionInterfaceHolder m_objSessionHolder;
     ReferenceInterfaceHolder* m_piReferenceHolder;
     SubscriptionInterfaceHolder* m_piSubscriptionHolder;
 };

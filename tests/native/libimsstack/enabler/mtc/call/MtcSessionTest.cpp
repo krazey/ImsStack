@@ -33,7 +33,6 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockIMtcAosConnector.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
@@ -46,6 +45,8 @@
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+LOCAL const CallKey CALL_KEY = 1;
 
 class MtcSessionTest : public ::testing::Test
 {
@@ -61,7 +62,6 @@ public:
     MockIMessageSender* pMessageSender;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
-    MockIInterfaceHolderListener objInterfaceHolderListener;
     MockIMtcService objMtcService;
     MockIMessageUtils objMessageUtils;
     MockIMtcAosConnector objAosConnector;
@@ -76,6 +76,7 @@ protected:
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
+        ON_CALL(objContext, GetCallKey).WillByDefault(Return(CALL_KEY));
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
@@ -91,9 +92,9 @@ protected:
 
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
-        pSessionInterfaceHolder = new MockSessionInterfaceHolder(objInterfaceHolderListener);
+        pSessionInterfaceHolder = new MockSessionInterfaceHolder();
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
-                .WillByDefault(Return(pSessionInterfaceHolder));
+                .WillByDefault(ReturnRef(*pSessionInterfaceHolder));
         ON_CALL(objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
@@ -151,7 +152,7 @@ protected:
 
 TEST_F(MtcSessionTest, CreateMtSessionaInvokesAddISessionInSessionHolder)
 {
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession));
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(CALL_KEY, &objSession));
     CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
 }
 

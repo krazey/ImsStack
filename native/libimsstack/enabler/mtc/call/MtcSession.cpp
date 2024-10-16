@@ -67,7 +67,8 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
-        m_objContext.GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
+        m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddISession(
+                m_objContext.GetCallKey(), &m_objSession);
     }
 
     UpdateSessionProperty();
@@ -85,7 +86,7 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
     m_objSession.SetRefreshListener(IMS_NULL);
     delete m_pMessageSender;
 
-    m_objContext.GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(&m_objSession);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()

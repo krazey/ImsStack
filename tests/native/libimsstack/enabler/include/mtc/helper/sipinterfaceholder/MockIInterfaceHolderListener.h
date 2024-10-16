@@ -17,6 +17,7 @@
 #ifndef MOCK_I_INTERFACE_HOLDER_LISTENER_H_
 #define MOCK_I_INTERFACE_HOLDER_LISTENER_H_
 
+#include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include <gmock/gmock.h>
 
@@ -24,7 +25,7 @@ class MockIInterfaceHolderListener : public IInterfaceHolderListener
 {
 public:
     ~MockIInterfaceHolderListener() {}
-    MOCK_METHOD(void, OnSessionInterfaceCleared, (), (override));
+    MOCK_METHOD(void, OnSessionInterfaceReleased, (IN CallKey), (override));
     MOCK_METHOD(void, OnReferenceInterfaceCleared, (), (override));
     MOCK_METHOD(void, OnSubscriptionInterfaceCleared, (), (override));
 };

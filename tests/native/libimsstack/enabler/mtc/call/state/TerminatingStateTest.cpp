@@ -14,18 +14,40 @@
  * limitations under the License.
  */
 
+#include "call/MockIMtcCallContext.h"
 #include "call/state/TerminatingState.h"
+#include "media/MockIMtcMediaManager.h"
 #include <gtest/gtest.h>
 
-namespace android
-{
+using ::testing::ReturnRef;
 
 class TerminatingStateTest : public ::testing::Test
 {
+public:
+    inline TerminatingStateTest() :
+            objCallContext(),
+            objMediaManager(),
+            objTerminatingState(objCallContext)
+    {
+    }
+
+    MockIMtcCallContext objCallContext;
+    MockIMtcMediaManager objMediaManager;
+
+    TerminatingState objTerminatingState;
+
 protected:
-    virtual void SetUp() override {}
+    virtual void SetUp() override
+    {
+        ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+    }
 
     virtual void TearDown() override {}
 };
 
-}  // namespace android
+TEST_F(TerminatingStateTest, OnEnterInvokesDestroyMediaSession)
+{
+    EXPECT_CALL(objMediaManager, DestroyMediaSession);
+
+    objTerminatingState.OnEnter();
+}

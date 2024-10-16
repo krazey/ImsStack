@@ -43,6 +43,7 @@ class MockIMtcCallController : public IMtcCallController
 public:
     MOCK_METHOD(CallKey, Open, (IN ServiceType eServiceType, IN CallInfo& objCallInfo), (override));
     MOCK_METHOD(void, Attach, (IN CallKey nCallKey), (override));
+    MOCK_METHOD(void, Detach, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, HandleIncoming,
             (IN IMtcService* pService, IN ISession* piSession), (override));
     MOCK_METHOD(void, Start,

@@ -56,6 +56,8 @@ JniMtcCall::~JniMtcCall()
         ImsProcess::GetInstance()->UnloadAppThread(m_pThread->GetName());
     }
     delete m_pJniMediaSession;
+
+    m_objCallController.Detach(m_nCallKey);
 }
 
 PUBLIC VIRTUAL int JniMtcCall::SendData(IN const android::Parcel& objParcel)
@@ -203,12 +205,15 @@ PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
         case IuMtcCall::CONF_DROP:
             RemoveFromConference(objParcel);
             break;
+
         case IuMtcCall::ECT_START:
             Transfer();
             break;
+
         case IuMtcCall::ECT_START_BLIND:
             TransferWithNumber(objParcel);
             break;
+
         default:
             break;
     }

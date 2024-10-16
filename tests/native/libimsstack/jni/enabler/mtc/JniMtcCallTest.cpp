@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "BaseService.h"
 #include "IuMtcCall.h"
 #include "JniEnablerConnector.h"
 #include "JniMtcCall.h"
@@ -21,6 +20,7 @@
 #include "MockIThread.h"
 #include "PlatformContext.h"
 #include "TestThreadService.h"
+#include "call/IMtcCall.h"
 #include <binder/Parcel.h>
 #include <gtest/gtest.h>
 
@@ -37,7 +37,7 @@ MATCHER_P(IsSameMessageType, type, "")
     return type == eType;
 }
 
-LOCAL IMS_SINT32 SLOT_ID = 0;
+LOCAL const IMS_SINT32 SLOT_ID = 0;
 
 class TestJniMtcCall : public JniMtcCall
 {
@@ -91,6 +91,11 @@ protected:
 TEST_F(JniMtcCallTest, CreatesJniMtcCallThread)
 {
     EXPECT_NE(nullptr, pJniCall->GetJniThread());
+}
+
+TEST_F(JniMtcCallTest, DestructorInvokesDetach)
+{
+    EXPECT_CALL(objMockController, Detach(IMtcCall::CALL_KEY_INVALID));
 }
 
 TEST_F(JniMtcCallTest, SendDataOpenInvokesOpenAndAttach)
@@ -152,7 +157,7 @@ TEST_F(JniMtcCallTest, SendDataStartDoesNotInvokeStartIfCallKeyIsInvalid)
     objParcel.writeInt32(IuMtcCall::OPEN);
     objParcel.setDataPosition(0);
     ON_CALL(objMockController, Open(_, _)).WillByDefault(Return(nInvalidKey));
-    ;
+
     pJniCall->SendData(objParcel);
 
     // BaseServiceThread::MESSAGE_THREAD_SWITCHING = 0

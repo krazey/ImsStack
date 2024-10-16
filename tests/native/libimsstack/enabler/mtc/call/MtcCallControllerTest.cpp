@@ -27,6 +27,7 @@
 #include "conferencecall/MockIConferenceManager.h"
 #include "ect/MockIEctManager.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/OperationAsyncRunner.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <initializer_list>
@@ -34,8 +35,11 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Eq;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+LOCAL const IMS_SINT32 SLOT_ID = 0;
 
 class MtcCallControllerTest : public ::testing::Test
 {
@@ -127,6 +131,23 @@ TEST_F(MtcCallControllerTest, AttachAttachesTargetCall)
     pCallController->Attach(nCallKey);
 
     delete pCall;
+}
+
+TEST_F(MtcCallControllerTest, DetachInvokesRemoveCallUsingAsyncRunner)
+{
+    CallKey nCallKey = 1;
+
+    EXPECT_CALL(objContext, GetAsyncRunner(_))
+            .WillOnce(Invoke(
+                    [](std::function<void()> objOperation)
+                    {
+                        objOperation();
+                        return new OperationAsyncRunner(SLOT_ID, objOperation);
+                    }));
+
+    EXPECT_CALL(objCallManager, RemoveCall(nCallKey)).Times(1);
+
+    pCallController->Detach(nCallKey);
 }
 
 TEST_F(MtcCallControllerTest, HandleIncomingCreatesCall)
@@ -264,12 +285,22 @@ TEST_F(MtcCallControllerTest, RejectResumeCallsTargetCall)
     pCallController->RejectResume(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, TerminateCallsAsyncRunner)
+TEST_F(MtcCallControllerTest, TerminateInvokesTerminateUsingAsyncRunner)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
+    MockIMtcCall objCall;
+    ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    EXPECT_CALL(objContext, GetAsyncRunner).Times(1);
+    EXPECT_CALL(objContext, GetAsyncRunner(_))
+            .WillOnce(Invoke(
+                    [](std::function<void()> objOperation)
+                    {
+                        objOperation();
+                        return new OperationAsyncRunner(SLOT_ID, objOperation);
+                    }));
+
+    EXPECT_CALL(objCall, Terminate(objReason)).Times(1);
 
     pCallController->Terminate(nCallKey, objReason);
 }

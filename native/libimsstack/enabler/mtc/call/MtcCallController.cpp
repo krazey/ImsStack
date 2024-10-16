@@ -58,6 +58,16 @@ void MtcCallController::Attach(IN CallKey nCallKey)
 }
 
 PUBLIC
+void MtcCallController::Detach(IN CallKey nCallKey)
+{
+    m_objContext.GetAsyncRunner(
+            [&, nCallKey]()
+            {
+                m_objCallManager.RemoveCall(nCallKey);
+            });
+}
+
+PUBLIC
 void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* piSession)
 {
     CallInfo objCallInfo;

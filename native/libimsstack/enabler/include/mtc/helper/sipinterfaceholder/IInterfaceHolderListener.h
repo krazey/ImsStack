@@ -17,6 +17,8 @@
 #ifndef INTERFACE_INTERFACE_HOLDER_LISTENER_H_
 #define INTERFACE_INTERFACE_HOLDER_LISTENER_H_
 
+#include "call/IMtcCall.h"
+
 class IInterfaceHolderListener
 {
 public:
@@ -26,19 +28,19 @@ public:
      * @brief Notifies
      *
      */
-    virtual void OnSessionInterfaceCleared() = 0;
+    virtual void OnSessionInterfaceReleased(IN CallKey nKey) { (void)nKey; };
 
     /**
      * @brief Notifies
      *
      */
-    virtual void OnReferenceInterfaceCleared() = 0;
+    virtual void OnReferenceInterfaceCleared() {};
 
     /**
      * @brief Notifies
      *
      */
-    virtual void OnSubscriptionInterfaceCleared() = 0;
+    virtual void OnSubscriptionInterfaceCleared() {};
 };
 
 #endif
