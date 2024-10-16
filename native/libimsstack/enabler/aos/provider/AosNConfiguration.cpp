@@ -505,6 +505,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetIpv6MtuSize() const
     return m_objCarrierConfig.nIpv6SipMtuSizeCellular;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetWaitTimeSecForReleaseEPdnAfterECallEnd() const
+{
+    return m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredEmergencyRegistration() const
 {
     return m_objCarrierConfig.nPreferredEmergencyRegistration;
@@ -1267,6 +1272,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
     /// imsemergency.
     m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL);
+    m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd = piCc->GetInt(
+            CarrierConfig::ImsEmergency::KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT);
     m_objCarrierConfig.nPreferredEmergencyRegistration =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT);
     /// imssms.

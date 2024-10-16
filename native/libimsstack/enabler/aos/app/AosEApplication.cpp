@@ -476,6 +476,13 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         return;
     }
 
+    IMS_SINT32 delayTime = GET_N_CONFIG(m_nSlotId)->GetWaitTimeSecForReleaseEPdnAfterECallEnd();
+    if (delayTime > 0)
+    {
+        StartTimer(TIMER_APP_TERMINATED, delayTime * 1000);
+        return;
+    }
+
     if (!IsTimerRunning(TIMER_APP_ACTIVATED))
     {
         // clean when e-call is terminated over ePDG

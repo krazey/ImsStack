@@ -111,6 +111,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetUpdateRegistrationWithRatChange().GetSize());
 
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyPdnWithEmergencyCallEndReleased());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetWaitTimeSecForReleaseEPdnAfterECallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
@@ -362,6 +363,13 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::ImsEmergency::
+                            KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT,
+                    -1))
+            .Times(2)
+            .WillRepeatedly(Return(240));
+
+    EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT, -1))
             .Times(2)
             .WillRepeatedly(
@@ -432,6 +440,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetUpdateRegistrationWithRatChange().GetSize());
 
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyPdnWithEmergencyCallEndReleased());
+    EXPECT_EQ(240, m_pAosNConfiguration->GetWaitTimeSecForReleaseEPdnAfterECallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
@@ -491,6 +500,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetUpdateRegistrationWithRatChange().GetSize());
 
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyPdnWithEmergencyCallEndReleased());
+    EXPECT_EQ(240, m_pAosNConfiguration->GetWaitTimeSecForReleaseEPdnAfterECallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());

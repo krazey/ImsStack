@@ -670,6 +670,17 @@ public:
     virtual IMS_SINT32 GetIpv6MtuSize() const = 0;
 
     /**
+     * @brief Returns the wait time in seconds before releasing an emergency PDN.
+     *
+     *        Emergency PDN can be released after a specific time when the emergency call ends.
+     *        This returns the delay time from the end of the call to the start of the emergency
+     *        PDN release. If this is set to zero, it will wait for emergency registration
+     *        expiration unless KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL is true.
+     * @return IMS_SINT32 Return the wait time in seconds before releasing an emergency PDN.
+     */
+    virtual IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const = 0;
+
+    /**
      * @brief Indicate whether emergency call is tried without emergency registration
      *
      *        Specify the preferred policy for emergency registration.
