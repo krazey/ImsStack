@@ -45,4 +45,7 @@
     <!-- Ut/Xcap Config -->
     <!-- AUID prefix is from previous solution. No requirements -->
     <string name="imsss.xcap_auid_prefix_string">/MYSERVICE</string>
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
+        <item value="400"/>
+    </int-array>
 </carrier_config>
