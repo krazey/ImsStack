@@ -77,6 +77,8 @@ private:
             OUT VideoProfile* pPeerProfile, IN IMS_SINT32 nLocalIndex, IN IMS_SINT32 nPeerIndex);
     void NegotiatePayloadNumber(
             OUT VideoProfile* pLocalProfile, IN VideoProfile::Payload* pPeerPayload);
+    void NegotiateCvo(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
+            OUT VideoProfile* pNegotiatedProfile);
     void SetMaxFrameRate(IN IMS_SINT32 nFrameRate, OUT IMS_SINT32* nNegotiatedMaxFrameRate);
     void SetMaxAs(IN IMS_SINT32 nAS, OUT IMS_SINT32* nNegotiatedMaxAs);
     IMS_SINT32 FindPayloadIndexFromProfile(
