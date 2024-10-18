@@ -24,6 +24,7 @@
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "text/TextNego.h"
+#include "text/TextProfileGenerator.h"
 #include "text/TextSdpParser.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -33,8 +34,10 @@ PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         m_pSdpParser(std::make_unique<TextSdpParser>())
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
+
     m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
     m_pProfileNegotiator = std::make_shared<TextProfileNegotiator>();
+    m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
 }
 
 PUBLIC
