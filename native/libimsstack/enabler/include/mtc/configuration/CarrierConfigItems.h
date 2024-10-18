@@ -55,7 +55,7 @@ public:
             nCountryCode(0),
             nDedicatedBearerWaitTimer(8000),
             nEmergency18xTimer(20000),
-            nEmergencyRingbackTimer(10000),
+            nEmergencyRingbackTimer(-1),
             nEmergencyRttGuardTimer(0),
             nEmergencyTCallTimer(10000),
             nEpsFallbackWatchDogTime(-1),
