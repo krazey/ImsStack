@@ -828,13 +828,15 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
         mImsCallSession.getCallListenerProxy().onCallInitiating(mockMtcCall, mMockCallInfo,
                 mMockMediaInfo);
+        verify(mMockImsCallSessionCallback, never()).invokeInitiating(any(
+                    ImsCallSessionImplBase.class), any(ImsCallProfile.class));
 
-        assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.INITIATED);
-
+        int state = mImsCallSession.getState();
         mImsCallSession.getCallListenerProxy().onCallInitiating(mMockMtcCall, mMockCallInfo,
                 mMockMediaInfo);
 
-        assertEquals(mImsCallSession.getState(), ImsCallSessionImplBase.State.INITIATED);
+        assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.INITIATED);
+        assertEquals(state, mImsCallSession.getState());
         verify(mMockImsCallSessionCallback).invokeInitiating(any(
                 ImsCallSessionImplBase.class), any(ImsCallProfile.class));
     }

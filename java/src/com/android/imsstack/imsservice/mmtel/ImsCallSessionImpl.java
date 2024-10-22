@@ -3399,8 +3399,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            setState(ImsCallSessionImplBase.State.INITIATED);
-
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
                     mCallContext, callInfo, mediaInfo);
 
