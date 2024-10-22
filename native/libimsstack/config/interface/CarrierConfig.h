@@ -256,7 +256,6 @@ public:
         static const IMS_CHAR KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT[];
         // Public carrier-config - ends
-        static const IMS_CHAR KEY_EMERGENCY_CELLULAR_SCAN_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_EMERGENCY_INVITE_18X_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT[];
         // Aos

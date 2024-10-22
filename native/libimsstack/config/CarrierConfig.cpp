@@ -211,8 +211,6 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MIL
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "refresh_geolocation_timeout_millis_int";
 // Public carrier-config - ends
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_CELLULAR_SCAN_TIMER_MILLIS_INT[] =
-        KEY_IMS_EMERGENCY_PREFIX "emergency_cellular_scan_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_INVITE_18X_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_invite_18x_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::

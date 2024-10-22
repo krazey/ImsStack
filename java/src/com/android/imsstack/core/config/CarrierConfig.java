@@ -372,8 +372,6 @@ public class CarrierConfig {
     /** Configuration items for emergency calling. */
     public static class ImsEmergency {
         public static final String KEY_PREFIX = "imsemergency.";
-        public static final String KEY_EMERGENCY_CELLULAR_SCAN_TIMER_MILLIS_INT =
-                KEY_PREFIX + "emergency_cellular_scan_timer_millis_int";
         public static final String KEY_EMERGENCY_INVITE_18X_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_invite_18x_timer_millis_int";
         public static final String KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT =

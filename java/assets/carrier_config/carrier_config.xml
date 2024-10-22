@@ -115,7 +115,6 @@
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
 
     <!-- Emergency -->
-    <int name="imsemergency.emergency_cellular_scan_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_provisional_to_final_response_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
