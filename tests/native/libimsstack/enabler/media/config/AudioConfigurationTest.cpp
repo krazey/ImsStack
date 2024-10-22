@@ -100,14 +100,14 @@ TEST_F(AudioConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->IsRtcpXrVoipEnabled(), DEFAULT_RTCPXR_VOIP_METRICS);
     EXPECT_EQ(m_pConfig->IsRtcpXrPlrEnabled(), DEFAULT_RTCPXR_PACKET_LOSS_RLE);
     EXPECT_EQ(m_pConfig->IsRtcpXrPdrEnabled(), DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE);
-    EXPECT_EQ(m_pConfig->GetDTMFDuration(), DEFAULT_DTMF_DURATION);
+    EXPECT_EQ(m_pConfig->GetDtmfDuration(), DEFAULT_DTMF_DURATION);
 }
 
 TEST_F(AudioConfigurationTest, CreateNullConfig)
 {
-    ICarrierConfig* m_nullPicc = IMS_NULL;
+    ICarrierConfig* nullPicc = IMS_NULL;
 
-    EXPECT_FALSE(m_pConfig->Create(m_nullPicc));
+    EXPECT_FALSE(m_pConfig->Create(nullPicc));
 }
 
 TEST_F(AudioConfigurationTest, IsEvsSupported)
@@ -223,55 +223,55 @@ TEST_F(AudioConfigurationTest, GetJitterBufferSize)
 
 TEST_F(AudioConfigurationTest, IsRtcpXrEnabled)
 {
-    IMS_BOOL m_bAudioRtcpxrEnabled = IMS_TRUE;
-    IMS_BOOL m_bAudioRtcpxrStatisticsEnabled = IMS_FALSE;
-    IMS_BOOL m_bAudioRtcpxrVoipMetricsEnabled = IMS_TRUE;
-    IMS_BOOL m_bAudioRtcpxrPacketLossRleEnabled = IMS_FALSE;
-    IMS_BOOL m_bAudioRtcpxrPacketDuplicateRleEnabled = IMS_TRUE;
+    IMS_BOOL bAudioRtcpxrEnabled = IMS_TRUE;
+    IMS_BOOL bAudioRtcpxrStatisticsEnabled = IMS_FALSE;
+    IMS_BOOL bAudioRtcpxrVoipMetricsEnabled = IMS_TRUE;
+    IMS_BOOL bAudioRtcpxrPacketLossRleEnabled = IMS_FALSE;
+    IMS_BOOL bAudioRtcpxrPacketDuplicateRleEnabled = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR))
-            .WillByDefault(Return(m_bAudioRtcpxrEnabled));
+            .WillByDefault(Return(bAudioRtcpxrEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL,
                     DEFAULT_RTCPXR_STATISTICS))
-            .WillByDefault(Return(m_bAudioRtcpxrStatisticsEnabled));
+            .WillByDefault(Return(bAudioRtcpxrStatisticsEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL,
                     DEFAULT_RTCPXR_VOIP_METRICS))
-            .WillByDefault(Return(m_bAudioRtcpxrVoipMetricsEnabled));
+            .WillByDefault(Return(bAudioRtcpxrVoipMetricsEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_LOSS_RLE))
-            .WillByDefault(Return(m_bAudioRtcpxrPacketLossRleEnabled));
+            .WillByDefault(Return(bAudioRtcpxrPacketLossRleEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE))
-            .WillByDefault(Return(m_bAudioRtcpxrPacketDuplicateRleEnabled));
+            .WillByDefault(Return(bAudioRtcpxrPacketDuplicateRleEnabled));
 
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->IsRtcpXrEnabled(), m_bAudioRtcpxrEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrStatisticsEnabled(), m_bAudioRtcpxrStatisticsEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrVoipEnabled(), m_bAudioRtcpxrVoipMetricsEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrPlrEnabled(), m_bAudioRtcpxrPacketLossRleEnabled);
-    EXPECT_EQ(m_pConfig->IsRtcpXrPdrEnabled(), m_bAudioRtcpxrPacketDuplicateRleEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrEnabled(), bAudioRtcpxrEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrStatisticsEnabled(), bAudioRtcpxrStatisticsEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrVoipEnabled(), bAudioRtcpxrVoipMetricsEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrPlrEnabled(), bAudioRtcpxrPacketLossRleEnabled);
+    EXPECT_EQ(m_pConfig->IsRtcpXrPdrEnabled(), bAudioRtcpxrPacketDuplicateRleEnabled);
 }
 
-TEST_F(AudioConfigurationTest, GetDTMFDuration)
+TEST_F(AudioConfigurationTest, GetDtmfDuration)
 {
-    IMS_SINT32 m_nDtmfDuration = 100;
+    IMS_SINT32 nDtmfDuration = 100;
 
     ON_CALL(*m_pMockICarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
                     DEFAULT_DTMF_DURATION))
-            .WillByDefault(Return(m_nDtmfDuration));
+            .WillByDefault(Return(nDtmfDuration));
 
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetDTMFDuration(), m_nDtmfDuration);
+    EXPECT_EQ(m_pConfig->GetDtmfDuration(), nDtmfDuration);
 }
 
 TEST_F(AudioConfigurationTest, GetConfigCandidateAttr)

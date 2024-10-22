@@ -154,7 +154,7 @@ public:
      *
      * @return IMS_SINT32 Return dtmf duration value
      */
-    IMS_SINT32 GetDTMFDuration() const;
+    IMS_SINT32 GetDtmfDuration() const;
     /**
      * @brief Get the audio candidate attribute
      *

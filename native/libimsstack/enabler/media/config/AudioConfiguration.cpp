@@ -381,8 +381,12 @@ IMS_BOOL AudioConfiguration::IsRtcpXrPdrEnabled() const
     return m_bAudioRtcpxrPacketDuplicateRleEnabled;
 }
 
+/**
+ * @brief   GetDtmfDuration
+ * @details Get the dtmf duration value for playing
+ */
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetDTMFDuration() const
+IMS_SINT32 AudioConfiguration::GetDtmfDuration() const
 {
     return m_nDtmfDuration;
 }

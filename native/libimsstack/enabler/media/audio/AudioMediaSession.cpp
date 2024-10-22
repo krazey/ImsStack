@@ -707,14 +707,14 @@ IMS_BOOL AudioMediaSession::SendDtmf(IN IMS_CHAR cDtmfCode)
     }
 
     IMS_TRACE_I("SendDtmf() - state[%d], cDtmfCode[%d], nDuration[%d]", m_nState, cDtmfCode,
-            m_pConfig->GetDTMFDuration());
+            m_pConfig->GetDtmfDuration());
     IMS_BOOL bResult = IMS_FALSE;
 
     if (m_piMediaSessionListener != IMS_NULL)
     {
         ImsMediaMsgDtmfParam* pParam = new ImsMediaMsgDtmfParam();
         pParam->m_dtmfCode = cDtmfCode;
-        pParam->m_nDuration = m_pConfig->GetDTMFDuration();
+        pParam->m_nDuration = m_pConfig->GetDtmfDuration();
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IJniMedia::REQUEST_SEND_DTMF, pParam);
     }
