@@ -19,6 +19,10 @@ import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
+import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
+import com.android.imsstack.its.servercontrol.ControlConnection;
+import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
+import com.android.imsstack.its.servercontrol.ServerFailureHandler;
 import com.android.imsstack.its.tests.ImsStackTestBase;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
@@ -26,14 +30,26 @@ import com.android.imsstack.its.tests.registration.util.TestRegistration;
 
 public class RegistrationTestBase extends ImsStackTestBase {
 
+    protected ControlConnection mServerControlConnection;
     protected TelephonyManagerProxyImpl mTelephony;
     protected TestRegistration mRegistration;
     protected RegistrationHelper mRegistrationHelper;
     protected PersistableBundle mConfig;
     protected RegistrationInfo.Builder mInfoBuilder;
 
+    protected void createControlConnection(ServerFailureHandler serverFailureHandler) {
+        mServerControlConnection =
+                new ControlConnection(serverFailureHandler, getPcscfAddresses().get(0));
+    }
+
     protected void setRegistrationBaseConfig() {
         mConfig = new PersistableBundle();
         mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
+    }
+
+    protected void setDefaultRegistrationScenario() {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
+        mServerControlConnection.sendControlCommand(generator.build().toString());
     }
 }
