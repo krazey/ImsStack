@@ -324,6 +324,7 @@
     <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
     <boolean name="ims_dereg_on_3g_network_bool" value="false"/>
     <boolean name="init_ipsec_setting_with_new_pcscf_bool" value="false"/>
+    <boolean name="keep_ereg_retry_on_wlan_bool" value="false"/>
     <boolean name="no_init_reg_on_pcscf_change_bool" value="false"/>
     <boolean name="plmn_block_with_timeout_on_voice_call_unavailable_bool" value="false"/>
     <boolean name="reg_contact_validation_bool" value="false"/>

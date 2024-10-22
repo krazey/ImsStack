@@ -332,6 +332,13 @@ public:
     virtual IMS_BOOL IsIpsecInitializedWithNewPcscf() const = 0;
 
     /**
+     * @brief Flag indicating whether keep on retrying emergency registration on WLAN.
+     *
+     * @return IMS_BOOL Return whether keep on retrying emergency registration on WLAN or not.
+     */
+    virtual IMS_BOOL IsKeepERegRetryOnWlanRequired() const = 0;
+
+    /**
      * @brief Returns whether UE doesn't send initial registration due to pcscf change
      *
      *        If this is set as TRUE, UE doesn't send initial registration due to pcscf change.
@@ -708,7 +715,7 @@ public:
      *        be established until completion of the emergency registration procedure.
      *        Upon timer expiry, the UE considers the emergency REGISTER request or
      *        the emergency call attempt as failed, and stop the
-     *        CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer, if running.
+     *        CarrierConfig::Assets::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer, if running.
      *
      * @return IMS_SINT32 Return the milli-second time
      */
