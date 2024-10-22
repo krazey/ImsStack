@@ -42,4 +42,11 @@ public interface IMtcMediaVideoCallProvider {
      * @param height height of resolution changed.
      */
     void peerDimensionChanged(int width, int height);
+
+    /**
+     * Notify an accumulated video data usage of the current session.
+     *
+     * @param bytes bytes of send and received rtp video data.
+     */
+    void onNotifyVideoDataUsage(long bytes);
 }
