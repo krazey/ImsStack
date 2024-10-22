@@ -149,5 +149,12 @@ public class CallFeatureTest {
                 .thenReturn(false);
         assertTrue(CallFeature.isCallMergeableOnConferenceOnHold(SLOT_ID));
         assertFalse(CallFeature.isCallMergeableOnConferenceOnHold(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isWiFiEmcOverEmergencyPdn(SLOT_ID));
+        assertFalse(CallFeature.isWiFiEmcOverEmergencyPdn(SLOT_ID));
     }
 }

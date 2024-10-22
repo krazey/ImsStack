@@ -119,6 +119,18 @@ public final class CallFeature {
     }
 
     /**
+     * Checks if the carrier supports WiFi emergency call over emergency PDN or not.
+     *
+     * @param slotId The slot-id to be checked.
+     * @return true if the carrier supports emergency PDN, false otherwise.
+     */
+    public static boolean isWiFiEmcOverEmergencyPdn(int slotId) {
+        return getConfigInterface(slotId).getCarrierConfig()
+                .getBoolean(
+                    CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL);
+    }
+
+    /**
      * Returns the configuration interface.
      *
      * @param slotId The slot-id to be retrieved.
