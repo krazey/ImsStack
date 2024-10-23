@@ -35,6 +35,12 @@ cc_defaults {
             ],
         },
     },
+    sanitize: {
+        cfi: true,
+        integer_overflow: true,
+        misc_undefined: ["bounds"],
+        scs: true,
+    },
 }
 
 cc_defaults {
