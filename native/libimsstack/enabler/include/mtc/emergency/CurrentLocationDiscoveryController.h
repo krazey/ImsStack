@@ -17,14 +17,19 @@
 #ifndef CURRENT_LOCATION_DISCOVERY_CONTROLLER_H_
 #define CURRENT_LOCATION_DISCOVERY_CONTROLLER_H_
 
+#include "IRetryTaskHelperListener.h"
 #include "ImsTypeDef.h"
+#include "RetryCmd.h"
+#include <memory>
 
+class IMessage;
 class IMtcCallContext;
 class IPublication;
 class ISipMessage;
 class ISipServerConnection;
+class RetryTaskHelper;
 
-class CurrentLocationDiscoveryController final
+class CurrentLocationDiscoveryController : public RetryCmd
 {
 public:
     explicit CurrentLocationDiscoveryController(IN IMtcCallContext& objContext);
@@ -35,9 +40,15 @@ public:
 
     static IMS_BOOL IsCurrentLocationDiscoveryInfoReceived(
             IN const ISipServerConnection& objSipServerConnection);
+    static IMS_BOOL IsPeriodicLocationDiscoveryRequired(
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nMethod);
 
-    void OnCurrentLocationDiscoveryInfoReceived(
+    virtual void OnCurrentLocationDiscoveryInfoReceived(
             IN ISipServerConnection& objSipServerConnection);
+    virtual void StartPeriodicLocationDiscovery();
+
+    // RetryCmd class
+    IMS_RESULT ExecuteCmd() override;
 
 private:
     static IMS_BOOL HasRequestForCurrentLocation(IN const ISipMessage& objSipMessage);
@@ -52,6 +63,7 @@ private:
 private:
     IMtcCallContext& m_objContext;
     IPublication* m_piPublication;
+    std::unique_ptr<RetryTaskHelper> m_pLocationTransmissionTask;
 };
 
 #endif

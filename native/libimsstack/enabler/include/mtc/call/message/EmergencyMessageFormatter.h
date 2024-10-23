@@ -19,6 +19,7 @@
 
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/message/MessageFormatter.h"
 
@@ -35,7 +36,8 @@ public:
     EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
 public:
-    virtual IMS_RESULT FormStartMessage(IN CallType eCallType) override;
+    IMS_RESULT FormStartMessage(IN CallType eCallType) override;
+    IMS_RESULT FormUpdateMessage(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo) override;
 
 protected:
     virtual void SetAcceptHeader();

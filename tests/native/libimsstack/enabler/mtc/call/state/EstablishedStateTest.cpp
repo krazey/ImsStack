@@ -47,6 +47,7 @@
 #include "conferencecall/MockIConferenceManager.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "emergency/MockCurrentLocationDiscoveryController.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
@@ -171,6 +172,22 @@ protected:
         return objMtcExtensionSet;
     }
 };
+
+TEST_F(EstablishedStateTest, OnEnterInvokesStartPeriodicLocationDiscovery)
+{
+    MockCurrentLocationDiscoveryController objLocationController(objMockCallContext);
+    ON_CALL(objMockCallContext, GetCurrentLocationDiscoveryController)
+            .WillByDefault(ReturnRef(objLocationController));
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(*pConfigurationProxy,
+            GetInt(CarrierConfig::ImsEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT))
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(objLocationController, StartPeriodicLocationDiscovery());
+
+    pEstablishedState->OnEnter();
+}
 
 TEST_F(EstablishedStateTest, OnEnterRunsPendingOperationSynchronously)
 {

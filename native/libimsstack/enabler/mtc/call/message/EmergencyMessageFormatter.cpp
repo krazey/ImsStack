@@ -76,6 +76,22 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallTyp
     return IMS_SUCCESS;
 }
 
+PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormUpdateMessage(
+        IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo)
+{
+    if (MessageFormatter::FormUpdateMessage(eUpdateType, bIncludeAlertInfo) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (eUpdateType == UpdateType::LOCATION)
+    {
+        SetLocation();
+    }
+
+    return IMS_SUCCESS;
+}
+
 PROTECTED VIRTUAL
 void EmergencyMessageFormatter::SetAcceptHeader()
 {

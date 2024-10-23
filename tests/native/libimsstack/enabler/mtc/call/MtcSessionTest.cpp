@@ -520,6 +520,7 @@ TEST_F(MtcSessionTest, UpdateUpdates)
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_NEGOTIATED, IMS_SUCCESS);
 
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(1);
     EXPECT_CALL(*pMessageSender, Update(eAnyType, bAlertInfo, eMethod, IMS_FALSE)).Times(1);
 
     pMtcSession->Update(eAnyType, bAlertInfo, eMethod);
@@ -534,6 +535,7 @@ TEST_F(MtcSessionTest, UpdateUpdatesForRefresh)
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_NEGOTIATED, IMS_SUCCESS);
 
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(1);
     EXPECT_CALL(*pMessageSender, Update(eAnyType, bAlertInfo, eMethod, IMS_TRUE)).Times(1);
 
     pMtcSession->Update(eAnyType, bAlertInfo, eMethod);
@@ -548,7 +550,23 @@ TEST_F(MtcSessionTest, UpdateFailsIfSetSdpFails)
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_OFFER_RECEIVED, IMS_FAILURE);
 
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(1);
     EXPECT_CALL(*pMessageSender, Update(_, _, _, _)).Times(0);
+
+    pMtcSession->Update(eAnyType, bAlertInfo, eMethod);
+}
+
+TEST_F(MtcSessionTest, UpdateUpdatesForLocation)
+{
+    UpdateType eAnyType = UpdateType::LOCATION;
+    IMS_BOOL bAlertInfo = IMS_FALSE;
+    IMS_SINT32 eMethod = SipMethod::UPDATE;
+
+    CreateMtcSession();
+    SetUpForSetSdp(NegotiationState::STATE_NEGOTIATED, IMS_SUCCESS);
+
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(0);
+    EXPECT_CALL(*pMessageSender, Update(_, _, _, _)).Times(1);
 
     pMtcSession->Update(eAnyType, bAlertInfo, eMethod);
 }

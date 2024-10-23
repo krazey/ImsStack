@@ -37,6 +37,7 @@
 #include "conferencecall/IConferenceManager.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "emergency/CurrentLocationDiscoveryController.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
@@ -59,6 +60,14 @@ PUBLIC VIRTUAL EstablishedState::~EstablishedState() {}
 
 PUBLIC VIRTUAL void EstablishedState::OnEnter()
 {
+    if (CurrentLocationDiscoveryController::IsPeriodicLocationDiscoveryRequired(
+                m_objContext.GetCallInfo().IsEmergency(),
+                m_objContext.GetConfigurationProxy().GetInt(
+                        ConfigEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT)))
+    {
+        m_objContext.GetCurrentLocationDiscoveryController().StartPeriodicLocationDiscovery();
+    }
+
     if (ShouldPendOperation())
     {
         m_objContext.GetAsyncRunner(

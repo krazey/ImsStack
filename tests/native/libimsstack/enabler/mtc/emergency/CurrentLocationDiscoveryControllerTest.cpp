@@ -15,6 +15,7 @@
  */
 
 #include "ByteArray.h"
+#include "CarrierConfig.h"
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIPublication.h"
@@ -22,6 +23,7 @@
 #include "MockISipMessage.h"
 #include "MockISipMessageBodyPart.h"
 #include "MockISipServerConnection.h"
+#include "RetryTaskHelper.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -165,4 +167,25 @@ TEST_F(CurrentLocationDiscoveryControllerTest, SendPublish)
     EXPECT_CALL(objIPublication, Publish(_, _)).Times(1);
 
     objController.OnCurrentLocationDiscoveryInfoReceived(objSipServerConnection);
+}
+
+TEST_F(CurrentLocationDiscoveryControllerTest, StartPeriodicLocationDiscoveryStartsRetryTaskHelper)
+{
+    CurrentLocationDiscoveryController objController(objContext);
+    EXPECT_CALL(*pConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT))
+            .Times(1)
+            .WillRepeatedly(Return(30));
+
+    objController.StartPeriodicLocationDiscovery();
+    objController.StartPeriodicLocationDiscovery();
+}
+
+TEST_F(CurrentLocationDiscoveryControllerTest, ExecuteCmdSendsLocationUpdate)
+{
+    CurrentLocationDiscoveryController objController(objContext);
+
+    EXPECT_CALL(objMtcSession, Update(UpdateType::LOCATION, IMS_FALSE, SipMethod::UPDATE)).Times(1);
+
+    objController.ExecuteCmd();
 }

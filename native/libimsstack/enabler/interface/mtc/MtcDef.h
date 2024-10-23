@@ -31,6 +31,7 @@ enum class UpdateType
     REFRESH,
     SRVCC_RECOVERED_CANCEL,
     SRVCC_RECOVERED_FAILURE,
+    LOCATION,
 };
 
 enum class PemType

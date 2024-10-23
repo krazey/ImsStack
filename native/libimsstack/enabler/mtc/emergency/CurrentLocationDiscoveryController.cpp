@@ -23,6 +23,7 @@
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ImsTypeDef.h"
+#include "RetryTaskHelper.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -42,7 +43,8 @@ PUBLIC
 CurrentLocationDiscoveryController::CurrentLocationDiscoveryController(
         IN IMtcCallContext& objContext) :
         m_objContext(objContext),
-        m_piPublication(IMS_NULL)
+        m_piPublication(IMS_NULL),
+        m_pLocationTransmissionTask(IMS_NULL)
 {
     IMS_TRACE_I("+CurrentLocationDiscoveryController", 0, 0, 0);
 }
@@ -53,6 +55,14 @@ CurrentLocationDiscoveryController::~CurrentLocationDiscoveryController()
     IMS_TRACE_I("~CurrentLocationDiscoveryController", 0, 0, 0);
 
     DestroyPublication();
+
+    if (m_pLocationTransmissionTask != IMS_NULL)
+    {
+        m_pLocationTransmissionTask->Terminate();
+
+        RetryTimer* pTimer = m_pLocationTransmissionTask->SetTimer(IMS_NULL);
+        delete pTimer;
+    }
 }
 
 PUBLIC GLOBAL
@@ -75,6 +85,12 @@ IMS_BOOL CurrentLocationDiscoveryController::IsCurrentLocationDiscoveryInfoRecei
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC GLOBAL IMS_BOOL CurrentLocationDiscoveryController::IsPeriodicLocationDiscoveryRequired(
+        IN IMS_BOOL bEmergency, IN IMS_SINT32 nMethod)
+{
+    return bEmergency && nMethod == ConfigEmergency::CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_UPDATE;
 }
 
 PUBLIC
@@ -100,6 +116,29 @@ void CurrentLocationDiscoveryController::OnCurrentLocationDiscoveryInfoReceived(
     }
 
     SendCurrentLocationPublish();
+}
+
+PUBLIC
+void CurrentLocationDiscoveryController::StartPeriodicLocationDiscovery()
+{
+    if (m_pLocationTransmissionTask != IMS_NULL)
+    {
+        return;
+    }
+
+    m_pLocationTransmissionTask = std::make_unique<RetryTaskHelper>();
+    m_pLocationTransmissionTask->SetCommand(this);
+
+    RetryTimer* pTimer = new RetryTimer(IMS_TRUE);
+    pTimer->AddValue(m_objContext.GetConfigurationProxy().GetInt(
+            ConfigEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT));
+    m_pLocationTransmissionTask->SetTimer(pTimer);
+    m_pLocationTransmissionTask->Start(RetryTaskHelper::START_TIMER);
+}
+
+PUBLIC VIRTUAL IMS_RESULT CurrentLocationDiscoveryController::ExecuteCmd()
+{
+    return m_objContext.GetSession()->Update(UpdateType::LOCATION, IMS_FALSE, SipMethod::UPDATE);
 }
 
 PRIVATE

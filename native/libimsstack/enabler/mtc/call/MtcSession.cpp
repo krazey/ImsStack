@@ -233,7 +233,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 {
     IMS_TRACE_D("Update", 0, 0, 0);
 
-    if (SetSdpToSend(IMS_TRUE) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(UpdateType::LOCATION != eUpdateType) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }

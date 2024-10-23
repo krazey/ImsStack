@@ -23,6 +23,7 @@
 #include "MockIPhoneInfoDevice.h"
 #include "MockISession.h"
 #include "MockISipMessage.h"
+#include "MtcDef.h"
 #include "PlatformContext.h"
 #include "ServiceNetworkPolicy.h"
 #include "SipParameter.h"
@@ -412,6 +413,22 @@ TEST_F(EmergencyMessageFormatterTest, SetCurrentLocationDiscovery)
 
     nResult = pFormatter->FormStartMessage(CallType::VOIP);
     EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, FormUpdateMessageSetsLocation)
+{
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
+                    static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE)))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    static_cast<IMS_SINT32>(
+                            ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR)))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objContext, GetSlotId).Times(1).WillOnce(Return(0));
+
+    EXPECT_EQ(IMS_SUCCESS, pFormatter->FormUpdateMessage(UpdateType::LOCATION, IMS_FALSE));
 }
 
 }  // namespace android
