@@ -36,7 +36,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        SIPHdrAccess::Init();
+        SipMsgUtil::Init();
 
         pMessage = new SipMessage();
         ASSERT_TRUE(pMessage != nullptr);

@@ -23,14 +23,16 @@ class SipRequestDispositionHeader : public SipHeaderBase
 public:
     SipRequestDispositionHeader();
     SipRequestDispositionHeader(const SipRequestDispositionHeader& objHeader);
-
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    static constexpr SIP_UINT16 MAX_DIRECTIVE_SIZE = 12;
-    static constexpr SIP_UINT16 MAX_DIRECTIVE_LEN = 11;
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+    static const SIP_CHAR* GetDirectiveString(SIP_UINT32 nIndex);
+    inline static SIP_UINT16 GetDirectiveSize() { return MAX_DIRECTIVE_SIZE; }
 
 private:
     ~SipRequestDispositionHeader();
+
+    static constexpr SIP_UINT16 MAX_DIRECTIVE_SIZE = 12;
+    static const SIP_CHAR* DIRECTIVE_STRING[MAX_DIRECTIVE_SIZE];
 };
 #endif  //__SIP_REQUEST_DISPOSITION_HEADER_H__

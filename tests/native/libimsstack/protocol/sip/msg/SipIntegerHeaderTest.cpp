@@ -301,6 +301,7 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));
     ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->DecodeHdr("", 0));
+    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->DecodeHdr("0", 1));
     EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->DecodeHdr("999", 3));
     EXPECT_EQ(999, pGeoLocationErrorHeader->GetValueInt());
     pGeoLocationErrorHeader->SipDelete();

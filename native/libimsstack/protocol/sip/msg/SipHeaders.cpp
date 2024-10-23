@@ -18,8 +18,6 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-extern SIP_CHAR gaszSipHdr[][SipMsgUtil::MAX_HDR_NAME_LEN];
-
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
         SipHeaderBase::GetNewObj,                // SipHeaderBase::ALLOW
         SipEventHeader::GetNewObj,               // SipHeaderBase::ALLOW_EVENTS
@@ -624,7 +622,7 @@ SIP_BOOL SipHeaders::SipEncodeHdrName(
         return SIP_TRUE;
     }
 
-    SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
+    SipPf_Strcpy(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
     SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
 
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
@@ -649,7 +647,7 @@ SIP_BOOL SipHeaders::SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgB
     }
     else
     {
-        SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
+        SipPf_Strcpy(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
     }
 
     SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);

@@ -56,7 +56,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        SIPHdrAccess::Init();
+        SipMsgUtil::Init();
 
         pTranspInfo = SIP_NULL;
         pMessage = SIP_NULL;
