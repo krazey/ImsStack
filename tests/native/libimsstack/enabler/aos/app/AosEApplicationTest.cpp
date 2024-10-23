@@ -71,7 +71,10 @@ using ::testing::ReturnRef;
     using Base::ProcessECallTerminated;   \
     using Base::ProcessMessage;           \
     using Base::SetAppState;              \
-    using Base::StopTimer;
+    using Base::StopTimer;                \
+    using Base::StartTimer;               \
+    using Base::ProcessRegStart;          \
+    using Base::StateReady_Connection;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -215,6 +218,8 @@ public:
     {
         m_piCallTracker = piAosCallTracker;
     }
+
+    inline void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_bEpdgEnabled = bEnabled; }
 
 private:
 };
@@ -495,6 +500,27 @@ TEST_F(AosEApplicationTest, ProcessRegStart)
     EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
 }
 
+TEST_F(AosEApplicationTest,
+        ShouldStopAppConnectedTimerIfEpdgEnabledAndKeepERegOnWlanIsRequiredWhenEPdnIsAlreadyConnected)
+{
+    // GIVEN
+    ImsMessage objMessage(MSG_REG_START, AoSRegType::TYPE_IPCAN_WLAN, 0);
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+
+    ON_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis())
+            .WillByDefault(Return(10000));
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepERegRetryOnWlanRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosConnector, IsReady()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessRegStart(objMessage);
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+}
+
 TEST_F(AosEApplicationTest, ProcessRegStop)
 {
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
@@ -534,6 +560,44 @@ TEST_F(AosEApplicationTest, StateReady_Connection)
     objMessageCnx.nWparam = CONNECTION_DEACTIVATED;
     m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest,
+        ShouldStopAppConnectedTimerIfEpdgEnabledAndKeepERegOnWlanIsRequiredWhenIpcanIsChanged)
+{
+    // GIVEN
+    ImsMessage objMessageCnx(MSG_IPCAN_CHANGED, 0, 0);
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    m_pTestAosEApplication->StartTimer(TIMER_APP_CONNECTED, 10000);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepERegRetryOnWlanRequired())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessMessage(objMessageCnx);
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+}
+
+TEST_F(AosEApplicationTest,
+        ShouldStopAppConnectedTimerIfEpdgEnabledAndKeepERegOnWlanIsRequiredWhenEPdnIsActivated)
+{
+    // GIVEN
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_ACTIVATED, 0);
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    m_pTestAosEApplication->StartTimer(TIMER_APP_CONNECTED, 10000);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepERegRetryOnWlanRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosConnector, IsReady()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
 }
 
 TEST_F(AosEApplicationTest, StateReady_Condition)
@@ -869,31 +933,12 @@ TEST_F(AosEApplicationTest, ShouldNotNotifyRegistrationIfIpcanIsChangedWhileTheC
     // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosEApplicationTest,
-        ShouldPostMessageForIpcanChangeIfConnectionNotifiesIpcanChangedWhildTheConfigIsTrue)
+TEST_F(AosEApplicationTest, ShouldPostMessageForIpcanChangeIfConnectionNotifiesIpcanChanged)
 {
     // GIVEN
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
-    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
-            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(MSG_IPCAN_CHANGED)));
-
-    // WHEN
-    m_pTestAosEApplication->ProcessConnectionUpdated(AosConnector::REASON_IPCAN_CAT_CHANGED);
-
-    // THEN: The GIVEN condition should be met.
-}
-
-TEST_F(AosEApplicationTest,
-        ShouldNotPostMessageForIpcanChangeIfConnectionNotifiesIpcanChangedWhildTheConfigIsFalse)
-{
-    // GIVEN
-    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
-    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
-            .WillByDefault(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(MSG_IPCAN_CHANGED))).Times(0);
 
     // WHEN
     m_pTestAosEApplication->ProcessConnectionUpdated(AosConnector::REASON_IPCAN_CAT_CHANGED);

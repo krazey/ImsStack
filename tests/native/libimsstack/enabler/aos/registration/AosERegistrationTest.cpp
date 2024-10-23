@@ -66,7 +66,9 @@ using ::testing::ReturnRef;
     using Base::SetReregFailureReportOnIpcanChangeRequired; \
     using Base::SetState;                                   \
     using Base::StopTimer;                                  \
-    using Base::UpdateTransactionStarted;
+    using Base::UpdateTransactionStarted;                   \
+    using Base::UpdateRegIpcanCategory;                     \
+    using Base::ProcessTransactionTimerExpired;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -100,6 +102,8 @@ public:
             m_pEModeInfo = new EmergencyModeInfo();
         }
     }
+
+    inline void SetConsecutiveFailure(IN IMS_UINT32 nValue) { m_nConsecutiveFailure = nValue; }
 
     FRIEND_TEST(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode);
     FRIEND_TEST(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetFakeMode);
@@ -1393,4 +1397,97 @@ TEST_F(AosERegistrationTest, ShouldUpdateTransactionStartedAsFalseIfNoActiveCall
 
     // THEN
     EXPECT_FALSE(m_pAosERegistration->IsTransactionStarted());
+}
+
+TEST_F(AosERegistrationTest,
+        ShouldSetNextPcscfWithoutRearrangeIfSinglePcscfFailedWhenTxnTimerExpired)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmcRegOnRandomPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepERegRetryOnWlanRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    m_pAosERegistration->UpdateRegIpcanCategory();
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosERegistration->SetConsecutiveFailure(0);
+
+    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).Times(1);
+
+    // WHEN
+    m_pAosERegistration->ProcessTransactionTimerExpired();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosERegistrationTest,
+        ShouldSetNextPcscfWithoutRearrangeIf1Of3PcscfsFailedWhenTxnTimerExpired)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmcRegOnRandomPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepERegRetryOnWlanRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    m_pAosERegistration->UpdateRegIpcanCategory();
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosERegistration->SetConsecutiveFailure(0);
+    m_objPcscfs.AddElement(AString("192.168.0.101"));
+    m_objPcscfs.AddElement(AString("192.168.0.102"));
+
+    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).Times(1);
+
+    // WHEN
+    m_pAosERegistration->ProcessTransactionTimerExpired();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosERegistrationTest,
+        ShouldSetNextPcscfWithoutRearrangeIf2Of3PcscfsFailedWhenTxnTimerExpired)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmcRegOnRandomPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepERegRetryOnWlanRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    m_pAosERegistration->UpdateRegIpcanCategory();
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosERegistration->SetConsecutiveFailure(1);
+    m_objPcscfs.AddElement(AString("192.168.0.101"));
+    m_objPcscfs.AddElement(AString("192.168.0.102"));
+
+    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).Times(1);
+
+    // WHEN
+    m_pAosERegistration->ProcessTransactionTimerExpired();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosERegistrationTest, ShouldSetNextPcscfWithRearrangeIfAllPcscfsFailedWhenTxnTimerExpired)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmcRegOnRandomPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepERegRetryOnWlanRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    m_pAosERegistration->UpdateRegIpcanCategory();
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosERegistration->SetConsecutiveFailure(2);
+    m_objPcscfs.AddElement(AString("192.168.0.101"));
+    m_objPcscfs.AddElement(AString("192.168.0.102"));
+
+    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).Times(1);
+
+    // WHEN
+    m_pAosERegistration->ProcessTransactionTimerExpired();
+
+    // THEN: The GIVEN condition should be met.
 }

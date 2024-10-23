@@ -140,6 +140,11 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
             break;
 
         case MSG_IPCAN_CHANGED:
+            if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+            {
+                StopTimer(TIMER_APP_CONNECTED);
+            }
+
             if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
             {
                 ProcessIpcanChanged(objMsg);
@@ -174,6 +179,11 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
 
     if (m_pConnector->IsReady())
     {
+        if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+        {
+            StopTimer(TIMER_APP_CONNECTED);
+        }
+
         SetAppState(STATE_CONNECTING);
         m_piRegistration->Start();
     }
@@ -235,6 +245,10 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& obj
     switch (nType)
     {
         case CONNECTION_ACTIVATED:
+            if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+            {
+                StopTimer(TIMER_APP_CONNECTED);
+            }
             m_piRegistration->Start();
             SetAppState(STATE_CONNECTING);
             break;
@@ -306,10 +320,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
             break;
 
         case AosConnector::REASON_IPCAN_CAT_CHANGED:
-            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
-            {
-                PostMessage(MSG_IPCAN_CHANGED, 0, 0);
-            }
+            PostMessage(MSG_IPCAN_CHANGED, 0, 0);
             break;
 
         default:

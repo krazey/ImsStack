@@ -19,6 +19,7 @@
 #include "ServiceTrace.h"
 
 #include "IImsRadio.h"
+#include "IIpcan.h"
 
 #include "CarrierConfig.h"
 #include "IRegistration.h"
@@ -362,10 +363,23 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
     m_nConsecutiveFailure++;
     ClearAuthChallengedCount();
 
-    if (IsRetryAllowed() && SetNextPcscf() && SendRegister(IMS_TRUE))
+    if (IsRetryAllowed())
     {
-        StartRegRetryTimer();
-        return;
+        if (GET_N_CONFIG(m_nSlotId)->IsEmcRegOnRandomPcscf())
+        {
+            IMS_SINT32 nNumOfPcscfs = m_piContext->GetPcscf()->GetPcscfs().GetCount();
+
+            if (nNumOfPcscfs > 1 && (m_nConsecutiveFailure % nNumOfPcscfs == 0))
+            {
+                ProcessRearrangePcscf();
+            }
+        }
+
+        if (SetNextPcscf() && SendRegister(IMS_TRUE))
+        {
+            StartRegRetryTimer();
+            return;
+        }
     }
 
     if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
@@ -708,6 +722,12 @@ PROTECTED IMS_BOOL AosERegistration::IsReinitiationRequested() const
 
 PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
 {
+    if (GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN &&
+            GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+    {
+        return IMS_TRUE;
+    }
+
     IMS_SINT32 nMaxRetryCnt = GET_N_CONFIG(m_nSlotId)->GetEmcRegRetryMaxCnt();
     if (nMaxRetryCnt == 0)
     {
@@ -822,7 +842,7 @@ PROTECTED void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRe
     ReportTryingState();
 }
 
-PROTECTED VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
+PROTECTED void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
 {
     A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
 
