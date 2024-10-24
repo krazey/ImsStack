@@ -362,6 +362,7 @@
             </int-array>
         </pbundle>
     </pbundle>
+    <boolean name="video_codec_hevc_priority_order_bool" value="true"/>
     <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>

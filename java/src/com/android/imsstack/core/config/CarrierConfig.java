@@ -1160,6 +1160,8 @@ public class CarrierConfig {
                 "dynamic_video_quality_supported_bool";
         public static final String KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL =
                 "incoming_dtmf_tone_play_support_bool";
+        public static final String KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL =
+                "video_codec_hevc_priority_order_bool";
 
         // TODO Media additional for CallFeature
         public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =

@@ -161,16 +161,34 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
     ImsVector<IMS_SINT32> objHevcPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
 
+    IMS_BOOL bHevcPriorityOrderEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL, false);
+
     piCcBundle->ReleaseBundle();
 
     IMS_UINT32 nCodecCnt = 0;
-    if (objHevcPayloadType.GetSize() > 0)
+
+    if (bHevcPriorityOrderEnabled)
     {
-        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
+        if (objHevcPayloadType.GetSize() > 0)
+        {
+            nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
+        }
+        if (objAvcPayloadType.GetSize() > 0)
+        {
+            nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
+        }
     }
-    if (objAvcPayloadType.GetSize() > 0)
+    else
     {
-        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
+        if (objAvcPayloadType.GetSize() > 0)
+        {
+            nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
+        }
+        if (objHevcPayloadType.GetSize() > 0)
+        {
+            nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
+        }
     }
 
     // to avoid static analysis issue (not used variable and variable scope)

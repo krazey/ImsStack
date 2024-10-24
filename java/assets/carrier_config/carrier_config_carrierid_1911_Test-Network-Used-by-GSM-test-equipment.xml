@@ -117,7 +117,7 @@
             </int-array>
         </pbundle>
     </pbundle>
-
+    <boolean name="video_codec_hevc_priority_order_bool" value="true"/>
     <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
 
