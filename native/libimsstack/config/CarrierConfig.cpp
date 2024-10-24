@@ -244,6 +244,11 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_18X_TIMER_MILLIS_INT[]
         KEY_IMS_EMERGENCY_PREFIX "emergency_18x_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "policy_for_emergency_urn_escv_mapping_int";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT[] =
+        KEY_IMS_EMERGENCY_PREFIX "call_periodic_location_discovery_method_int";
+const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT[] =
+                KEY_IMS_EMERGENCY_PREFIX "call_periodic_location_discovery_timer_millis_int";
 
 //// ImsRtt
 #define KEY_IMS_RTT_PREFIX "imsrtt."

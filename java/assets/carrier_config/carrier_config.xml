@@ -585,6 +585,8 @@
         <item value="-1"/> <!-- EMERGENCY_LTE-->
         <item value="-1"/> <!-- EMERGENCY_WIFI -->
     </int-array>
+    <int name="imsemergency.call_periodic_location_discovery_method_int" value="0"/>
+    <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="0"/>
 
     <!-- Media -->
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>
