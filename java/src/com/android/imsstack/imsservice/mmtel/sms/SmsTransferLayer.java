@@ -590,7 +590,9 @@ public class SmsTransferLayer {
             log("Incoming pdu = " + ImsLog.hiddenString(IccUtils
                                         .bytesToHexString(pdu)));
         }
-        return null;
+        CdmaSmsMessageHelper cdmaMsg = new CdmaSmsMessageHelper();
+        cdmaMsg.parseCdmaPdu(pdu);
+        return cdmaMsg.formatPdu();
     }
 
     class SmsRLListenerProxy implements SmsRelayLayer.Listener {
