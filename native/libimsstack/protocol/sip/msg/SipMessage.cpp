@@ -228,7 +228,7 @@ SIP_INT32 SipMessage::GetMethodType()
         return SipMessage::METHOD_INVALID;
     }
 
-    SIP_CHAR SipMethodArray[][SIP_MAX_HDR_LEN] = {
+    SIP_CHAR SipMethodArray[][MAX_METHOD_LEN] = {
             "INVITE",
             "ACK",
             "OPTIONS",
@@ -402,7 +402,7 @@ SIP_BOOL SipMessage::HasMIMEMessageBody()
     }
 
     const SIP_CHAR* pszMType = pHdr->GetMediaType();
-    SIP_INT16 nResult = SipPf_Stricmp(pszMType, MULTIPART);
+    SIP_INT16 nResult = SipPf_Stricmp(pszMType, SipMsgUtil::MULTIPART);
     pHdr->SipDelete();
     return (nResult == SIP_ZERO) ? SIP_TRUE : SIP_FALSE;
 }
@@ -418,7 +418,7 @@ SIP_BOOL SipMessage::HasSDPMessageBody()
     }
 
     const SIP_CHAR* pszSubMType = pHdr->GetSubMediaType();
-    SIP_INT16 nResult = SipPf_Stricmp(pszSubMType, SDP);
+    SIP_INT16 nResult = SipPf_Stricmp(pszSubMType, SipMsgUtil::SDP);
     pHdr->SipDelete();
     return (nResult == SIP_ZERO) ? SIP_TRUE : SIP_FALSE;
 }
@@ -490,9 +490,9 @@ SIP_BOOL SipMessage::Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
     }
 
     // Put CRLF at the end of Start Line
-    SIP_ENC_CRLF(pCurrPos);
+    SipMsgUtil::EncodeCrlf(pCurrPos);
 
-    SIP_CHAR aMsgBody[SIP_MAX_MSG_SIZE] = {
+    SIP_CHAR aMsgBody[SipMsgUtil::MAX_MSG_SIZE] = {
             0,
     };
     SIP_CHAR* pMsgBody = &(aMsgBody[0]);
@@ -519,7 +519,7 @@ SIP_BOOL SipMessage::Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
         {
             // Content-Length header is present in message, reset the value to ZERO as no
             // body in the message.
-            SIP_CHAR szLen[SIP_CONTLEN_LEN] = {0};
+            SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN] = {0};
 
             SipPf_Sprintf(szLen, "%d", 0);
             pUnknown->SetHeaderValue(szLen);
@@ -537,7 +537,7 @@ SIP_BOOL SipMessage::Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
     }
 
     // Put CRLF at the end of List of Headers
-    SIP_ENC_CRLF(pCurrPos);
+    SipMsgUtil::EncodeCrlf(pCurrPos);
 
     // Append Message body if present
     if (m_pMsgBodyList != SIP_NULL)
@@ -609,7 +609,7 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
 
         if (nMsgLen != nCurLen)
         { /*Mismatch in content length & actual body size*/
-            SIP_CHAR szLen[SIP_CONTLEN_LEN] = {0};
+            SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN] = {0};
             SipPf_Sprintf(szLen, "%u", nMsgLen);
             pUnknown->SetHeaderValue(szLen);
         }
@@ -942,7 +942,8 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsg
             return SIP_FALSE;
         }
 
-        bSingleBody = (SipPf_Stricmp(pszMType, MULTIPART) == SIP_ZERO) ? SIP_FALSE : SIP_TRUE;
+        bSingleBody =
+                (SipPf_Stricmp(pszMType, SipMsgUtil::MULTIPART) == SIP_ZERO) ? SIP_FALSE : SIP_TRUE;
         if (bSingleBody == SIP_TRUE)
         {
             pContentType->SipDelete();
@@ -1044,7 +1045,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         return SIP_FALSE;
     }
 
-    SIP_INT32 eMsgType = SipGetMsgType(pStartPt);
+    SIP_INT32 eMsgType = SipMsgUtil::GetMsgType(pStartPt);
     SIP_UINT32 nDecLen = pEndPt - pStartPt + SIP_ONE;
 
     if (eMsgType == SipMessage::REQ_TYPE)
@@ -1136,7 +1137,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
                 pBadHdr->SipDelete();
             }
 
-            SIP_INT32 eHdrType = SipGetHdrType(pszHdrName);
+            SIP_INT32 eHdrType = SipMsgUtil::GetHeaderType(pszHdrName);
 
             switch (eHdrType)
             {
@@ -1184,7 +1185,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         else
         {
 #ifdef SIP_BADMESSAGE_PARSING
-            SIP_INT32 eHdrType = SipGetHdrType(pszHdrName);
+            SIP_INT32 eHdrType = SipMsgUtil::GetHeaderType(pszHdrName);
 
             switch (eHdrType)
             {
@@ -1380,7 +1381,8 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
             return SIP_FALSE;
         }
 
-        bSingleBody = (SipPf_Stricmp(pszMType, MULTIPART) == SIP_ZERO) ? SIP_FALSE : SIP_TRUE;
+        bSingleBody =
+                (SipPf_Stricmp(pszMType, SipMsgUtil::MULTIPART) == SIP_ZERO) ? SIP_FALSE : SIP_TRUE;
         if (bSingleBody == SIP_TRUE)
         {
             pContentType->SipDelete();
@@ -1433,7 +1435,7 @@ SIP_VOID SipMessage::SetContentLengthHdr(SIP_UINT32 nLen, SIP_UINT32 nMsgOptions
     SipUnknownHeader* pUnknown = new SipUnknownHeader();
     if (pUnknown != SIP_NULL)
     {
-        SIP_CHAR szLen[SIP_CONTLEN_LEN] = {0};
+        SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN] = {0};
         SipPf_Sprintf(szLen, "%u", nLen);
 
         const SIP_CHAR* pszHdrName = ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM) ==
@@ -1591,12 +1593,12 @@ SIP_UINT16 SipMessage::GetStatusCode() const
 {
     if (m_eSipMsgType != SipMessage::RESP_TYPE)
     {
-        return SIP_SC_INVALID;
+        return SipMsgUtil::SIP_SC_INVALID;
     }
 
     if (m_pStatusLine == SIP_NULL)
     {
-        return SIP_SC_INVALID;
+        return SipMsgUtil::SIP_SC_INVALID;
     }
 
     return m_pStatusLine->GetStatusCodeAsInt();

@@ -87,7 +87,7 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     {
         if (nIndex != SIP_ZERO)
         {
-            SIP_ENC_SP(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, SPACE);
         }
         SIP_CHAR* pszVal = m_objProductList.GetAt(nIndex);
         SipPf_Strcpy(*ppCurrPos, pszVal);

@@ -329,7 +329,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 
     SIP_BOOL bACKFor2xxSent = SIP_FALSE;
 
-    if (SipPf_Strcmp(ACK_METHOD, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
+    if (SipPf_Strcmp(SipMsgUtil::METHOD_ACK, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
     {
         if (SipPf_Strcmp(m_pszMethod, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
         {
@@ -341,7 +341,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
     else
     {
         // 487 retransmission case
-        if (SipPf_Strcmp(m_pszMethod, CANCEL_METHOD) == SIP_EQUALS)
+        if (SipPf_Strcmp(m_pszMethod, SipMsgUtil::METHOD_CANCEL) == SIP_EQUALS)
         {
             return SIP_NOT_MATCH;
         }
@@ -350,7 +350,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
         // Test equipment issue: same transaction key - cseq / via-branch / from-tag / to-tag
         if (pGeneratedKey->m_eTxnType == SipTxn::INV_SER_TXN && m_eTxnType == SipTxn::INV_SER_TXN)
         {
-            if (SIP_SUCCESSFUL_RESP(m_nRespCode))
+            if (SipMsgUtil::IsSuccessfulResponse(m_nRespCode))
             {
                 bACKFor2xxSent = SIP_TRUE;
             }
@@ -422,7 +422,7 @@ SIP_INT32 SipTxnKey::CompareKeysForRPR(SipTxnKey* pGeneratedKey)
         return SIP_NOT_MATCH;
     }
 
-    if (SipPf_Strcmp(m_pszMethod, INVITE_METHOD) != SIP_EQUALS)
+    if (SipPf_Strcmp(m_pszMethod, SipMsgUtil::METHOD_INVITE) != SIP_EQUALS)
     {
         // Check if this condition is required or not...
         return SIP_NOT_MATCH;

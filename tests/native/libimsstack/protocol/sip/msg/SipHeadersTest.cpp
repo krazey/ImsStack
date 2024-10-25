@@ -712,7 +712,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
 
         pHdrs->DecodeHdrs(pucStartPt, uiDecLen, &pucHdrName, &pucHdrBody);
 
-        SIP_INT32 eHdrType = SipGetHdrType(pucHdrName);
+        SIP_INT32 eHdrType = SipMsgUtil::GetHeaderType(pucHdrName);
 
         EXPECT_EQ(arHeadersOrder[iHeaderCount], eHdrType);
         iHeaderCount++;
@@ -744,7 +744,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
 
         pHdrs->DecodeHdrs(pucStartPt, uiDecLen, &pucHdrName, &pucHdrBody);
 
-        SIP_INT32 eHdrType = SipGetHdrType(pucHdrName);
+        SIP_INT32 eHdrType = SipMsgUtil::GetHeaderType(pucHdrName);
 
         EXPECT_EQ(arHeadersOrder[iHeaderCount], eHdrType);
         iHeaderCount++;

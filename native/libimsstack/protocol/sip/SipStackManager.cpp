@@ -367,7 +367,7 @@ stack user must process this request and can decide whether to ignore or not
         {
             SIP_UINT16 nStatusCode = pSipMsg->GetStatusCode();
 
-            if (SIP_SUCCESSFUL_RESP(nStatusCode))
+            if (SipMsgUtil::IsSuccessfulResponse(nStatusCode))
             {
                 *peTxnStatus = SipTxn::STATUS_2XX_STRAY_RESP;
 

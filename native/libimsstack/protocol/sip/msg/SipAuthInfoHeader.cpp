@@ -106,7 +106,7 @@ SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams =
     {
         if (nIndex != SIP_ZERO)
         {
-            SIP_ENC_COMMA(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COMMA);
         }
 
         SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);

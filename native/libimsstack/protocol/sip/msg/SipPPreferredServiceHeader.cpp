@@ -85,13 +85,15 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
         }
     }
     SIP_UINT16 nCounter = SIP_ZERO;
-    // Validate Top Lebel
-    while ((nCounter < MAXLETDIG) && (pTempCurr < pTempPre))
+    // Validate Top level
+    while (pTempCurr < pTempPre)
     {
-        if ((IS_ALPHANUM(*pTempCurr) == SIP_FALSE) && !IS_HYPHEN(*pTempCurr))
+        if (((IS_ALPHANUM(*pTempCurr) == SIP_FALSE) && !IS_HYPHEN(*pTempCurr)) ||
+                (nCounter > MAX_LET_DIG))
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Top lebel is invalid", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODDECODER, "DecodeHdr:Top level is invalid", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
         }
         pTempCurr = pTempCurr + SIP_ONE;
         nCounter++;

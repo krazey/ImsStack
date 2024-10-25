@@ -30,6 +30,9 @@ private:
     /*Transport*/
     SIP_CHAR* m_pszWarnText;
 
+    static constexpr SIP_UINT16 MIN_WARNCODE = 100;
+    static constexpr SIP_UINT16 MAX_WARNCODE = 999;
+
 public:
     /*constructor*/
     SipWarningHeader();

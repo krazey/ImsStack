@@ -79,7 +79,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
             if (pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
             {
                 SIP_UINT16 nStatusCode = pSipMsg->GetStatusCode();
-                if (SIP_SUCCESSFUL_RESP(nStatusCode))
+                if (SipMsgUtil::IsSuccessfulResponse(nStatusCode))
                 {
                     *ppTxnKey = pTxnKey;
                     return SIP_TRUE;
@@ -950,11 +950,11 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateSendTxn(IN SipMessage* pSipMsg, OUT SIP_
 
 static SIP_INT32 GetNonInvCliFsmEvt(SIP_UINT16 nStatusCode)
 {
-    if (SIP_PROVISIONAL_RESP(nStatusCode))
+    if (SipMsgUtil::IsProvisionalResponse(nStatusCode))
     {
         return SipTxn::NON_INV_CLI_RECV_1XX_RESP_EVT;
     }
-    else if (SIP_NONPROVISIONAL_RESP(nStatusCode))
+    else if (SipMsgUtil::IsNonProvisionalResponse(nStatusCode))
     {
         return SipTxn::NON_INV_CLI_RECV_2XX_6XX_RESP_EVT;
     }
@@ -966,11 +966,11 @@ static SIP_INT32 GetNonInvCliFsmEvt(SIP_UINT16 nStatusCode)
 
 static SIP_INT32 GetNonInvSerFsmEvt(SIP_UINT16 nStatusCode)
 {
-    if (SIP_PROVISIONAL_RESP(nStatusCode))
+    if (SipMsgUtil::IsProvisionalResponse(nStatusCode))
     {
         return SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT;
     }
-    else if (SIP_NONPROVISIONAL_RESP(nStatusCode))
+    else if (SipMsgUtil::IsNonProvisionalResponse(nStatusCode))
     {
         return SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT;
     }
@@ -982,15 +982,15 @@ static SIP_INT32 GetNonInvSerFsmEvt(SIP_UINT16 nStatusCode)
 
 static SIP_INT32 GetInvCliFsmEvt(SIP_UINT16 nStatusCode)
 {
-    if (SIP_PROVISIONAL_RESP(nStatusCode))
+    if (SipMsgUtil::IsProvisionalResponse(nStatusCode))
     {
         return SipTxn::INV_CLI_RECV_1XX_RESP_EVT;
     }
-    else if (SIP_SUCCESSFUL_RESP(nStatusCode))
+    else if (SipMsgUtil::IsSuccessfulResponse(nStatusCode))
     {
         return SipTxn::INV_CLI_RECV_2XX_RESP_EVT;
     }
-    else if (SIP_FAILURE_RESP(nStatusCode))
+    else if (SipMsgUtil::IsFailureResponse(nStatusCode))
     {
         return SipTxn::INV_CLI_RECV_3XX_6XX_RESP_EVT;
     }
@@ -1002,15 +1002,15 @@ static SIP_INT32 GetInvCliFsmEvt(SIP_UINT16 nStatusCode)
 
 static SIP_INT32 GetInvSerFsmEvt(SIP_UINT16 nStatusCode)
 {
-    if (SIP_PROVISIONAL_RESP(nStatusCode))
+    if (SipMsgUtil::IsProvisionalResponse(nStatusCode))
     {
         return SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT;
     }
-    else if (SIP_SUCCESSFUL_RESP(nStatusCode))
+    else if (SipMsgUtil::IsSuccessfulResponse(nStatusCode))
     {
         return SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT;
     }
-    else if (SIP_FAILURE_RESP(nStatusCode))
+    else if (SipMsgUtil::IsFailureResponse(nStatusCode))
     {
         return SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT;
     }

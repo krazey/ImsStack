@@ -83,7 +83,7 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     /* Put a space */
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     /*Encode Status Code*/
     SipPf_Strcpy(*ppCurrPos, m_pszStatusCode);
@@ -91,7 +91,7 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     /* Put a space */
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     SipPf_Strcpy(*ppCurrPos, m_pszReasonPhrase);
     /*Update the Msg Buffer's current position*/
@@ -102,17 +102,17 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
 
 SIP_VOID SipStatusLine::SetStatusCode(const SIP_CHAR* pszStatusCode)
 {
-    SetCharVar(pszStatusCode, m_pszStatusCode);
+    SipMsgUtil::SetValue(pszStatusCode, m_pszStatusCode);
 }
 
 SIP_VOID SipStatusLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
-    SetCharVar(pszVer, m_pszSipVersion);
+    SipMsgUtil::SetValue(pszVer, m_pszSipVersion);
 }
 
 SIP_VOID SipStatusLine::SetReasonPhrase(const SIP_CHAR* pszReasonPhrase)
 {
-    SetCharVar(pszReasonPhrase, m_pszReasonPhrase);
+    SipMsgUtil::SetValue(pszReasonPhrase, m_pszReasonPhrase);
 }
 
 SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16* pnStatusCode) const
@@ -127,7 +127,7 @@ SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16* pnStatusCode) const
 
 SIP_UINT16 SipStatusLine::GetStatusCodeAsInt() const
 {
-    return (m_pszStatusCode != SIP_NULL) ? SipPf_Atoi(m_pszStatusCode) : SIP_SC_INVALID;
+    return (m_pszStatusCode != SIP_NULL) ? SipPf_Atoi(m_pszStatusCode) : SipMsgUtil::SIP_SC_INVALID;
 }
 
 SIP_BOOL SipStatusLine::DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

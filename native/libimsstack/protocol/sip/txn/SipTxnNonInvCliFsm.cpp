@@ -245,7 +245,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
     /* State Transition */
     pTxn->SetTxnState(SipTxn::NON_INV_CLI_TRYING_ST);
 
-    if (SipPf_Strcmp(pNewTxnKey->GetMethod(), CANCEL_METHOD) == SIP_EQUALS)
+    if (SipPf_Strcmp(pNewTxnKey->GetMethod(), SipMsgUtil::METHOD_CANCEL) == SIP_EQUALS)
     {
         SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
     }

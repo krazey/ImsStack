@@ -1362,7 +1362,7 @@ l: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* Calling GetHdrType with null header name, fail */
-    EXPECT_EQ(SipHeaderBase::TYPE_INVALID, SipGetHdrType(SIP_NULL));
+    EXPECT_EQ(SipHeaderBase::TYPE_INVALID, SipMsgUtil::GetHeaderType(SIP_NULL));
 
     /* message contains only CRLFs, fail */
     pMsg = "\r\n";

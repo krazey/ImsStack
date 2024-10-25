@@ -18,7 +18,7 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
+extern SIP_CHAR gaszSipHdr[][SipMsgUtil::MAX_HDR_NAME_LEN];
 
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
         SipHeaderBase::GetNewObj,                // SipHeaderBase::ALLOW
@@ -146,7 +146,7 @@ SipHeaders::SipHeaders() :
 
 SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
 {
-    eHdrType = CheckAndGetHdrEnumType(eHdrType);
+    eHdrType = SipMsgUtil::CheckAndGetHeaderType(eHdrType);
     if ((eHdrType >= SIP_ZERO) && eHdrType < SipHeaderBase::TYPE_END)
     {
         return gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
@@ -269,7 +269,7 @@ SIP_VOID SipHeaders::SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader)
 
 SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHeader /* = SIP_NULL */)
 {
-    eHdrType = CheckAndGetHdrEnumType(eHdrType);
+    eHdrType = SipMsgUtil::CheckAndGetHeaderType(eHdrType);
     if (SipHeaderBase::IsHeaderTypeValid(eHdrType) == SIP_FALSE)
     {
         return SIP_NULL;
@@ -393,7 +393,7 @@ SIP_BOOL SipHeaders::EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOp
             return SIP_FALSE;
         }
         pHeaderObj->SipDelete();
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -412,7 +412,7 @@ SIP_BOOL SipHeaders::EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOpti
             return SIP_FALSE;
         }
         pTemp->SipDelete();
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
     return SIP_TRUE;
 }
@@ -449,7 +449,7 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
                 return SIP_FALSE;
             }
             pHeaderObj->SipDelete();
-            SIP_ENC_CRLF(*ppCurrPos);
+            SipMsgUtil::EncodeCrlf(*ppCurrPos);
         }
         nHdr++;
     }
@@ -473,7 +473,7 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
         }
 
         pHeaderObj->SipDelete();
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -527,7 +527,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
     }
 
     /*this will return the type of header on passing name*/
-    SIP_INT32 eHdrType = SipGetHdrType(*ppHdrName);
+    SIP_INT32 eHdrType = SipMsgUtil::GetHeaderType(*ppHdrName);
 
     SipHeaderBase* pHeader = GetHeader(eHdrType);
 
@@ -627,9 +627,9 @@ SIP_BOOL SipHeaders::SipEncodeHdrName(
     SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
     SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
 
-    SIP_ENC_COLON(*ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
 
-    SIP_ENC_SP(*ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, SPACE);
 
     return SIP_TRUE;
 }
@@ -641,79 +641,20 @@ SIP_BOOL SipHeaders::SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgB
         return SIP_FALSE;
     }
 
-    switch (eHdrType)
+    SIP_CHAR cCompactName = SipMsgUtil::GetCompactHeaderName(eHdrType);
+
+    if (cCompactName != SIP_NULL_CHAR)
     {
-        case SipHeaderBase::VIA:
-            SIP_ENC_SHORT_VIA(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::TO:
-            SIP_ENC_SHORT_TO(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::FROM:
-            SIP_ENC_SHORT_FROM(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CALL_ID:
-            SIP_ENC_SHORT_CALLID(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTACT:
-        case SipHeaderBase::CONTACT_WILD:
-        case SipHeaderBase::CONTACT_ANY:
-            SIP_ENC_SHORT_CONTACT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTENT_TYPE:
-            SIP_ENC_SHORT_CONTENT_TYPE(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTENT_LENGTH:
-            SIP_ENC_SHORT_CONTENT_LENGTH(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::ACCEPT_CONTACT:
-            SIP_ENC_SHORT_ACCEPT_CONTACT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::SESSION_EXPIRES:
-            SIP_ENC_SHORT_SESSION_EXPIRES(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::SUPPORTED:
-            SIP_ENC_SHORT_SUPPORTED(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REQUEST_DISPOSITION:
-            SIP_ENC_SHORT_REQUEST_DISPOSITION(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REFERRED_BY:
-            SIP_ENC_SHORT_REFERRED_BY(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REFER_TO:
-            SIP_ENC_SHORT_REFER_TO(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTENT_ENCODING:
-            SIP_ENC_SHORT_CONTENT_ENCODING(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::SUBJECT:
-            SIP_ENC_SHORT_SUBJECT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REJECT_CONTACT:
-            SIP_ENC_SHORT_REJECT_CONTACT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::EVENT:
-            SIP_ENC_SHORT_EVENT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::ALLOW_EVENTS:
-            SIP_ENC_SHORT_ALLOW_EVENTS(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::IDENTITY:
-            SIP_ENC_SHORT_IDENTITY(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::IDENTITY_INFO:
-            SIP_ENC_SHORT_IDENTITY_INFO(*ppMsgBuffCurrPos);
-            break;
-        default:
-            SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
-            SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
-            break;
+        *(*ppMsgBuffCurrPos) = cCompactName;
+    }
+    else
+    {
+        SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
     }
 
-    SIP_ENC_COLON(*ppMsgBuffCurrPos);
-
-    SIP_ENC_SP(*ppMsgBuffCurrPos);
+    SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, SPACE);
 
     return SIP_TRUE;
 }

@@ -69,7 +69,7 @@ SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*b
     SipPf_Strcpy(*ppCurrPos, m_pszNameSpace);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_DOT(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SIP_DOT);
 
     SipPf_Strcpy(*ppCurrPos, m_pszRPriority);
     SipEnc_UpdateCurrPos(ppCurrPos);
@@ -79,12 +79,12 @@ SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*b
 
 SIP_VOID SipResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
 {
-    SetCharVar(pszNameSpace, m_pszNameSpace);
+    SipMsgUtil::SetValue(pszNameSpace, m_pszNameSpace);
 }
 
 SIP_VOID SipResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
 {
-    SetCharVar(pszRPriority, m_pszRPriority);
+    SipMsgUtil::SetValue(pszRPriority, m_pszRPriority);
 }
 
 SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

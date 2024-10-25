@@ -87,7 +87,7 @@ SIP_BOOL SipContentTypeHeader::EncodeHdr(
     SipPf_Strcpy(*ppCurrPos, m_pszMType);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SLASH(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
     SipPf_Strcpy(*ppCurrPos, m_pszMSubType);
     SipEnc_UpdateCurrPos(ppCurrPos);
@@ -97,12 +97,12 @@ SIP_BOOL SipContentTypeHeader::EncodeHdr(
 
 SIP_VOID SipContentTypeHeader::SetMediaType(const SIP_CHAR* pszMType)
 {
-    SetCharVar(pszMType, m_pszMType);
+    SipMsgUtil::SetValue(pszMType, m_pszMType);
 }
 
 SIP_VOID SipContentTypeHeader::SetSubMediaType(const SIP_CHAR* pszMSubType)
 {
-    SetCharVar(pszMSubType, m_pszMSubType);
+    SipMsgUtil::SetValue(pszMSubType, m_pszMSubType);
 }
 
 SIP_CHAR* SipContentTypeHeader::GetBoundary()

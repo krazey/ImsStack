@@ -98,7 +98,7 @@ TEST_F(SipStatusLineTest, DecodeStatusLine)
     EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine("", 0));
     /* only sip version present, fail */
     EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine("SIP/2.0", 7));
-    EXPECT_EQ(SIP_SC_INVALID, pStatusLine->GetStatusCodeAsInt());
+    EXPECT_EQ(SipMsgUtil::SIP_SC_INVALID, pStatusLine->GetStatusCodeAsInt());
     SIP_INT16 nStatusCode;
     EXPECT_FALSE(pStatusLine->GetStatusCode(&nStatusCode));
     EXPECT_EQ(0, nStatusCode);

@@ -72,7 +72,7 @@ TEST_F(SipPPreferredServiceHeaderTest, DecodeHdr)
 
     pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
-    pValue = "urn:urn-7:gpp-serv##ice.";
+    pValue = "urn:urn-7:gpp-serv--ice.";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);

@@ -345,7 +345,8 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
         {
             SipAddrSpec* pNewObjReqUri = new SipAddrSpec(*pReqUri);
             pReqUri->SipDelete();
-            pReqLine = new SipRequestLine(ACK_METHOD, pNewObjReqUri, SIP_SIPVERSION);
+            pReqLine = new SipRequestLine(
+                    SipMsgUtil::METHOD_ACK, pNewObjReqUri, SipMsgUtil::SIP_VERSION);
             if (pReqLine == SIP_NULL)
             {
                 SIP_DEBUG_WARNING(
@@ -417,7 +418,7 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
 
     /* Set MaxForward Header */
     SipIntegerHeader* pMaxForward = new SipIntegerHeader(SipHeaderBase::MAX_FORWARDS);
-    SIP_CHAR szMaxFwdValue[SIP_CONTLEN_LEN] = {
+    SIP_CHAR szMaxFwdValue[SipMsgUtil::MAX_INT_VALUE_LEN] = {
             0,
     };
     SipPf_Sprintf(szMaxFwdValue, "%d", SIP_MAX_HOP);

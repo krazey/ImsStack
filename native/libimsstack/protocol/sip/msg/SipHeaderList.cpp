@@ -106,13 +106,13 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
 
         if (pHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
         {
-            SIP_ENC_CRLF(*ppCurrPos);
+            SipMsgUtil::EncodeCrlf(*ppCurrPos);
         }
         /*case of Multiple line encoding*/
         else if ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE) ==
                 SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE)
         {
-            SIP_ENC_CRLF(*ppCurrPos);
+            SipMsgUtil::EncodeCrlf(*ppCurrPos);
             if ((nMsgOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM) ==
                     SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)
             {
@@ -125,7 +125,7 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
         }
         else if (nCount < nSize)
         {
-            SIP_ENC_COMMA(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COMMA);
         }
 
         if (pHeader->EncodeHdr(ppCurrPos, bParams) == SIP_FALSE)

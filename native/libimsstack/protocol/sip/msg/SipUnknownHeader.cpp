@@ -78,9 +78,9 @@ SIP_BOOL SipUnknownHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     SipPf_Strcpy(*ppCurrPos, m_pszHdrName);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_COLON(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, COLON);
 
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     SipPf_Strcpy(*ppCurrPos, m_pszHdrValue);
     SipEnc_UpdateCurrPos(ppCurrPos);
@@ -98,12 +98,12 @@ SIP_BOOL SipUnknownHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
 
 SIP_VOID SipUnknownHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
 {
-    SetCharVar(pszHdrName, m_pszHdrName);
+    SipMsgUtil::SetValue(pszHdrName, m_pszHdrName);
 }
 
 SIP_VOID SipUnknownHeader::SetHeaderValue(const SIP_CHAR* pszHdrValue)
 {
-    SetCharVar(pszHdrValue, m_pszHdrValue);
+    SipMsgUtil::SetValue(pszHdrValue, m_pszHdrValue);
 }
 
 SipHeaderBase* SipUnknownHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)

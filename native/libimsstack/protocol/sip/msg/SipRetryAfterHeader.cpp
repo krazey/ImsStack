@@ -57,8 +57,7 @@ SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams)
 SIP_BOOL SipRetryAfterHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    const SIP_UINT16 MAX_RETRY_AFTER_LEN = 11;
-    SIP_CHAR szLen[MAX_RETRY_AFTER_LEN];
+    SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN];
     SipPf_Sprintf(szLen, "%u", m_nDeltaSec);
 
     SipPf_Strcpy(*ppCurrPos, szLen);
@@ -66,10 +65,10 @@ SIP_BOOL SipRetryAfterHeader::EncodeHdr(
 
     if (m_pszComment != SIP_NULL)
     {
-        SIP_ENC_LPAREN(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, LPARAN);
         SipPf_Strcpy(*ppCurrPos, m_pszComment);
         SipEnc_UpdateCurrPos(ppCurrPos);
-        SIP_ENC_RPAREN(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, RPARAN);
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
@@ -77,7 +76,7 @@ SIP_BOOL SipRetryAfterHeader::EncodeHdr(
 
 SIP_VOID SipRetryAfterHeader::SetComment(const SIP_CHAR* pszComment)
 {
-    SetCharVar(pszComment, m_pszComment);
+    SipMsgUtil::SetValue(pszComment, m_pszComment);
 }
 
 SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
@@ -129,7 +128,7 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDe
     {
         if ((pCommentStart + SIP_ONE) == pCommentEnd)
         {
-            SetCharVar("", m_pszComment);
+            SipMsgUtil::SetValue("", m_pszComment);
         }
         else
         {

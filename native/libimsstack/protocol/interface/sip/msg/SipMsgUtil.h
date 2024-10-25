@@ -18,238 +18,128 @@
 
 #include "SipAbnfUtil.h"
 #include "SipDatatypes.h"
-#include "msg/SipHeaderBase.h"
+#include "SipAddrSpec.h"
 
-#define SIP_SIP_VERSION               "SIP/2.0"
-#define ZERO                          "0"
+class SipMsgUtil
+{
+public:
+    static const SIP_CHAR SIP_VERSION[];
 
-#define INVITE_METHOD                 "INVITE"
-#define ACK_METHOD                    "ACK"
-#define OPTION_METHOD                 "OPTIONS"
-#define BYE_METHOD                    "BYE"
-#define CANCEL_METHOD                 "CANCEL"
-#define REGISTER_METHOD               "REGISTER"
-#define INFO_METHOD                   "INFO"
-#define PRACK_METHOD                  "PRACK"
-#define SUBSCRIBE_METHOD              "SUBSCRIBE"
-#define NOTIFY_METHOD                 "NOTIFY"
-#define UPDATE_METHOD                 "UPDATE"
-#define MESSAGE_METHOD                "MESSAGE"
-#define REFER_METHOD                  "REFER"
-#define PUBLISH_METHOD                "PUBLISH"
-#define SIP_SIPVERSION                "SIP/2.0"
+    static const SIP_CHAR METHOD_INVITE[];
+    static const SIP_CHAR METHOD_ACK[];
+    static const SIP_CHAR METHOD_OPTION[];
+    static const SIP_CHAR METHOD_BYE[];
+    static const SIP_CHAR METHOD_CANCEL[];
+    static const SIP_CHAR METHOD_REGISTER[];
+    static const SIP_CHAR METHOD_INFO[];
+    static const SIP_CHAR METHOD_PRACK[];
+    static const SIP_CHAR METHOD_SUBSCRIBE[];
+    static const SIP_CHAR METHOD_NOTIFY[];
+    static const SIP_CHAR METHOD_UPDATE[];
+    static const SIP_CHAR METHOD_MESSAGE[];
+    static const SIP_CHAR METHOD_REFER[];
+    static const SIP_CHAR METHOD_PUBLISH[];
 
-#define SIP_SC_INVALID                0
-#define SIP_SC_100                    100
-#define SIP_SC_200                    200
-#define SIP_SC_300                    300
-#define SIP_SC_400                    400
-#define SIP_SC_500                    500
-#define SIP_SC_600                    600
-#define SIP_SC_MAX                    700
+    static const SIP_CHAR MULTIPART[];
+    static const SIP_CHAR SDP[];
 
-#define SIP_PROVISIONAL_RESP(usRC)    (((usRC) >= (SIP_SC_100)) && ((usRC) < (SIP_SC_200)))
-#define SIP_SUCCESSFUL_RESP(usRC)     (((usRC) >= (SIP_SC_200)) && ((usRC) < (SIP_SC_300)))
-#define SIP_REDIRECTION_RESP(usRC)    (((usRC) >= (SIP_SC_300)) && ((usRC) < (SIP_SC_400)))
-#define SIP_CLIENT_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_400)) && ((usRC) < (SIP_SC_500)))
-#define SIP_SERVER_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_500)) && ((usRC) < (SIP_SC_600)))
-#define SIP_GLOBAL_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_600)) && ((usRC) < (SIP_SC_MAX)))
+    enum
+    {
+        SIP_SC_INVALID = 0,
+        SIP_SC_100 = 100,
+        SIP_SC_200 = 200,
+        SIP_SC_300 = 300,
+        SIP_SC_400 = 400,
+        SIP_SC_500 = 500,
+        SIP_SC_600 = 600,
+        SIP_SC_MAX = 700
+    };
 
-/* For all response except for SIP successful response */
-#define SIP_FAILURE_RESP(usRC)        ((usRC) >= (SIP_SC_300))
-#define SIP_NONPROVISIONAL_RESP(usRC) ((usRC) >= (SIP_SC_200))
+    inline static SIP_BOOL IsProvisionalResponse(SIP_UINT16 nResponseCode)
+    {
+        return ((nResponseCode >= SIP_SC_100) && (nResponseCode < SIP_SC_200)) ? SIP_TRUE
+                                                                               : SIP_FALSE;
+    }
 
-#define SIP_ENC_SP(pC) \
-    *(pC) = 32;        \
-    (pC)++
-#define SIP_ENC_CRLF(pC) \
-    *(pC) = 13;          \
-    (pC)++;              \
-    *(pC) = 10;          \
-    (pC)++
-#define SIP_ENC_DASH(pC) \
-    *(pC) = 45;          \
-    (pC)++;              \
-    *(pC) = 45;          \
-    (pC)++
-#define SIP_ENC_STAR(pC) \
-    *(pC) = 42;          \
-    (pC)++
-#define SIP_ENC_SLASH(pC) \
-    *(pC) = 47;           \
-    (pC)++
-#define SIP_ENC_EQUAL(pC) \
-    *(pC) = 61;           \
-    (pC)++
-#define SIP_ENC_LPAREN(pC) \
-    *(pC) = 40;            \
-    (pC)++
-#define SIP_ENC_RPAREN(pC) \
-    *(pC) = 41;            \
-    (pC)++
-#define SIP_ENC_LAQUOT(pC) \
-    *(pC) = 60;            \
-    (pC)++
-#define SIP_ENC_RAQUOT(pC) \
-    *(pC) = 62;            \
-    (pC)++
-#define SIP_ENC_COMMA(pC) \
-    *(pC) = 44;           \
-    (pC)++
-#define SIP_ENC_SEMI(pC) \
-    *(pC) = 59;          \
-    (pC)++
-#define SIP_ENC_COLON(pC) \
-    *(pC) = 58;           \
-    (pC)++
-#define SIP_ENC_LDQUOT(pC) \
-    *(pC) = 34;            \
-    (pC)++
-#define SIP_ENC_RDQUOT(pC) \
-    *(pC) = 34;            \
-    (pC)++
-#define SIP_ENC_ATTHERATE(pC) \
-    *(pC) = 64;               \
-    (pC)++
-#define SIP_ENC_QMARK(pC) \
-    *(pC) = 63;           \
-    (pC)++
-#define SIP_ENC_AMPERSAND(pC) \
-    *(pC) = 38;               \
-    (pC)++
-#define SIP_ENC_BSLASH(pC) \
-    *(pC) = 92;            \
-    (pC)++
-#define SIP_ENC_DOT(pC) \
-    *(pC) = 46;         \
-    (pC)++
+    inline static SIP_BOOL IsSuccessfulResponse(SIP_UINT16 nResponseCode)
+    {
+        return ((nResponseCode >= SIP_SC_200) && (nResponseCode < SIP_SC_300)) ? SIP_TRUE
+                                                                               : SIP_FALSE;
+    }
 
-#define SIP_MAX_HDR_LEN       32
-#define SIP_MAX_MTD_LEN       16
-#define SIP_MAX_RESP_CODE_LEN 4
-#define MAX_RESP_PHRS_LEN     38
-#define SIP_MAX_URI_LEN       6
-#define SIP_CONTENT_HDRS_LEN  5
-#define SIP_CONTLEN_LEN       12
+    inline static SIP_BOOL IsRedirectionResponse(SIP_UINT16 nResponseCode)
+    {
+        return ((nResponseCode >= SIP_SC_300) && (nResponseCode < SIP_SC_400)) ? SIP_TRUE
+                                                                               : SIP_FALSE;
+    }
 
-// keeping same SIP message buffer size which is mentioned in SipMessageBuffer.h
-#define SIP_MAX_MSG_SIZE      65535
+    inline static SIP_BOOL IsClientFailureResponse(SIP_UINT16 nResponseCode)
+    {
+        return ((nResponseCode >= SIP_SC_400) && (nResponseCode < SIP_SC_500)) ? SIP_TRUE
+                                                                               : SIP_FALSE;
+    }
 
-#define SIP_ENC_SHORT_ACCEPT_CONTACT(ch) \
-    *(ch) = 'a';                         \
-    (ch)++
-#define SIP_ENC_SHORT_REFERRED_BY(ch) \
-    *(ch) = 'b';                      \
-    (ch)++
-#define SIP_ENC_SHORT_CONTENT_TYPE(ch) \
-    *(ch) = 'c';                       \
-    (ch)++
-#define SIP_ENC_SHORT_REQUEST_DISPOSITION(ch) \
-    *(ch) = 'd';                              \
-    (ch)++
-#define SIP_ENC_SHORT_CONTENT_ENCODING(ch) \
-    *(ch) = 'e';                           \
-    (ch)++
-#define SIP_ENC_SHORT_FROM(ch) \
-    *(ch) = 'f';               \
-    (ch)++
-#define SIP_ENC_SHORT_CALLID(ch) \
-    *(ch) = 'i';                 \
-    (ch)++
-#define SIP_ENC_SHORT_REJECT_CONTACT(ch) \
-    *(ch) = 'j';                         \
-    (ch)++
-#define SIP_ENC_SHORT_SUPPORTED(ch) \
-    *(ch) = 'k';                    \
-    (ch)++
-#define SIP_ENC_SHORT_CONTENT_LENGTH(ch) \
-    *(ch) = 'l';                         \
-    (ch)++
-#define SIP_ENC_SHORT_CONTACT(ch) \
-    *(ch) = 'm';                  \
-    (ch)++
-#define SIP_ENC_SHORT_IDENTITY_INFO(ch) \
-    *(ch) = 'n';                        \
-    (ch)++
-#define SIP_ENC_SHORT_EVENT(ch) \
-    *(ch) = 'o';                \
-    (ch)++
-#define SIP_ENC_SHORT_REFER_TO(ch) \
-    *(ch) = 'r';                   \
-    (ch)++
-#define SIP_ENC_SHORT_SUBJECT(ch) \
-    *(ch) = 's';                  \
-    (ch)++
-#define SIP_ENC_SHORT_TO(ch) \
-    *(ch) = 't';             \
-    (ch)++
-#define SIP_ENC_SHORT_ALLOW_EVENTS(ch) \
-    *(ch) = 'u';                       \
-    (ch)++
-#define SIP_ENC_SHORT_VIA(ch) \
-    *(ch) = 'v';              \
-    (ch)++
-#define SIP_ENC_SHORT_SESSION_EXPIRES(ch) \
-    *(ch) = 'x';                          \
-    (ch)++
-#define SIP_ENC_SHORT_IDENTITY(ch) \
-    *(ch) = 'y';                   \
-    (ch)++
+    inline static SIP_BOOL IsServerFailureResponse(SIP_UINT16 nResponseCode)
+    {
+        return ((nResponseCode >= SIP_SC_500) && (nResponseCode < SIP_SC_600)) ? SIP_TRUE
+                                                                               : SIP_FALSE;
+    }
 
-#define MULTIPART "Multipart"
-#define MIXED     "Mixed"
-#define SDP       "Sdp"
-#define SIP_ENC_GMT(ch) \
-    *(ch) = 'G';        \
-    (ch)++;             \
-    *(ch) = 'M';        \
-    (ch)++;             \
-    *(ch) = 'T';        \
-    (ch)++
+    inline static SIP_BOOL IsGlobalFailureResponse(SIP_UINT16 nResponseCode)
+    {
+        return ((nResponseCode >= SIP_SC_600) && (nResponseCode < SIP_SC_MAX)) ? SIP_TRUE
+                                                                               : SIP_FALSE;
+    }
 
-#define SIP_AINFO_CNT      5
+    /* For all response except for SIP successful response */
+    inline static SIP_BOOL IsFailureResponse(SIP_UINT16 nResponseCode)
+    {
+        return (nResponseCode >= SIP_SC_300) ? SIP_TRUE : SIP_FALSE;
+    }
 
-#define SIP_METHOD_COUNT   14
+    inline static SIP_BOOL IsNonProvisionalResponse(SIP_UINT16 nResponseCode)
+    {
+        return (nResponseCode >= SIP_SC_200) ? SIP_TRUE : SIP_FALSE;
+    }
 
-#define SIP_AINFO_LEN      20
+    inline static SIP_VOID Encode(SIP_CHAR*& pMsg, SIP_CHAR cChar)
+    {
+        *pMsg = cChar;
+        pMsg++;
+    }
 
-#define MAXLETDIG          27
+    inline static SIP_VOID EncodeCrlf(SIP_CHAR*& pMsg)
+    {
+        *pMsg = '\r';
+        pMsg++;
+        *pMsg = '\n';
+        pMsg++;
+    }
 
-#define MIN_WARNCODE       100
+    static constexpr SIP_UINT32 CONTENT_HDR_COUNT = 5;
+    static constexpr SIP_UINT32 MAX_INT_VALUE_LEN = 11;
+    static constexpr SIP_UINT32 MAX_HDR_NAME_LEN = 32;
+    static constexpr SIP_INT32 MAX_MSG_SIZE = 65535;
 
-#define MAX_WARNCODE       999
+    static SIP_VOID SetValue(const SIP_CHAR* pszSrc, SIP_CHAR*& pszDst);
 
-#define MAX_EXPIRES        4294967295
+    static SIP_INT32 GetMsgType(const SIP_CHAR* pStartPt);
 
-#define MAX_MAXFD          255
+    static SipUri::UriType GetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-#define MAX_ERROR_CODE     9999
+    static SIP_INT32 GetHeaderType(const SIP_CHAR* pszHdrName);
 
-#define MAX_CIDLEN         48
-
-#define MAX_FEIDLEN        16
-
-#define SIP_DIRECTIVE_SIZE 12
-
-#define SIP_DIRECTIVE_LEN  11
-
-SIP_BOOL SetCharVar(const SIP_CHAR* pszValue, SIP_CHAR*& pszVar);
-
-SIP_INT32 SipGetMsgType(const SIP_CHAR* pStartPoint);
-
-SipUri::UriType SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
-
-SIP_INT32 SipGetHdrType(const SIP_CHAR* pszHdrName);
-
-SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType);
+    static SIP_INT32 CheckAndGetHeaderType(SIP_INT32 nType);
 #ifdef SIP_STRICT_PARSING
-SIP_BOOL IsValidAddress(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    static SIP_BOOL IsValidAddress(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 #endif
 
-const SIP_CHAR* SipFindBodyEnd(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
-        const SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
+    static const SIP_CHAR* FindMsgBodyEnd(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+            const SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
 
-SIP_INT32 SipGetMimeHdrType(const SIP_CHAR* pszHdrName);
+    static SIP_INT32 GetMimeHeaderType(const SIP_CHAR* pszHdrName);
+    static SIP_CHAR GetCompactHeaderName(SIP_INT32 nType);
+};
 
 class SIPHdrAccess
 {
@@ -258,6 +148,6 @@ private:
 
 public:
     static void Init();
-    static SIP_INT32 GetHdrType(const SIP_CHAR* pszHdrName);
+    static SIP_INT32 GetHeaderType(const SIP_CHAR* pszHdrName);
 };
 #endif  //__SIP_MSG_UTIL_H__

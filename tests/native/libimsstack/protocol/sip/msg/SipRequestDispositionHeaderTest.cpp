@@ -19,7 +19,8 @@
 #include "msg/SipRequestDispositionHeader.h"
 #include "platform/SipString.h"
 
-extern SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN];
+extern SIP_CHAR gaszDirectivesArray[SipRequestDispositionHeader::MAX_DIRECTIVE_SIZE]
+                                   [SipRequestDispositionHeader::MAX_DIRECTIVE_LEN];
 
 namespace android
 {
@@ -65,7 +66,7 @@ TEST_F(SipRequestDispositionHeaderTest, DecodeHdr)
     pHeader->SipDelete();
 
     /* Check all possible valid values, success */
-    for (SIP_UINT16 nCnt = 0; nCnt < SIP_DIRECTIVE_SIZE; nCnt++)
+    for (SIP_UINT16 nCnt = 0; nCnt < SipRequestDispositionHeader::MAX_DIRECTIVE_SIZE; nCnt++)
     {
         pHeader = reinterpret_cast<SipRequestDispositionHeader*>(
                 SipRequestDispositionHeader::GetNewObj(

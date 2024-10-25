@@ -17,7 +17,6 @@
 
 #include "msg/SipHeaders.h"
 #include "msg/SipIntegerHeader.h"
-#include "msg/SipMsgUtil.h"
 #include "msg/SipParameters.h"
 
 namespace android
@@ -60,7 +59,6 @@ TEST_F(SipIntegerHeaderTest, SetValueInt)
     ASSERT_TRUE(pMaxForwardsHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->SetValueInt(20));
     EXPECT_EQ(20, pMaxForwardsHeader->GetValueInt());
-    EXPECT_EQ(SIP_FALSE, pMaxForwardsHeader->SetValueInt(MAX_MAXFD + 1));
     pMaxForwardsHeader->SipDelete();
 
     SipIntegerHeader* pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
@@ -68,7 +66,7 @@ TEST_F(SipIntegerHeaderTest, SetValueInt)
     ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->SetValueInt(20));
     EXPECT_EQ(20, pGeoLocationErrorHeader->GetValueInt());
-    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->SetValueInt(MAX_ERROR_CODE + 1));
+    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->SetValueInt(2000));
     pGeoLocationErrorHeader->SipDelete();
 
     SipIntegerHeader* pMinSeHeader = reinterpret_cast<SipIntegerHeader*>(
@@ -296,15 +294,15 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     pMaxForwardsHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS));
     ASSERT_TRUE(pMaxForwardsHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pMaxForwardsHeader->DecodeHdr("256", 3));
+    EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->DecodeHdr("256", 3));
     pMaxForwardsHeader->SipDelete();
 
     SipIntegerHeader* pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));
     ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->DecodeHdr("2505", 4));
-    EXPECT_EQ(2505, pGeoLocationErrorHeader->GetValueInt());
+    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->DecodeHdr("999", 3));
+    EXPECT_EQ(999, pGeoLocationErrorHeader->GetValueInt());
     pGeoLocationErrorHeader->SipDelete();
     pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));

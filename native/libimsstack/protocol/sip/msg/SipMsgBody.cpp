@@ -20,7 +20,7 @@
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
-extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
+extern SIP_CHAR gaszSipHdr[][SipMsgUtil::MAX_HDR_NAME_LEN];
 
 SipMIMEHdrs::SipMIMEHdrs() :
         m_pContentType(SIP_NULL),
@@ -235,7 +235,7 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
                 return SIP_FALSE;
             }
             pTemp->SipDelete();
-            SIP_ENC_CRLF(*ppCurrPos);
+            SipMsgUtil::EncodeCrlf(*ppCurrPos);
         }
         nHdr++;
     }
@@ -278,7 +278,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     }
 
     /*this will return the type of header on passing name*/
-    SIP_INT32 eHdrType = SipGetMimeHdrType(pszHdrName);
+    SIP_INT32 eHdrType = SipMsgUtil::GetMimeHeaderType(pszHdrName);
 
     /*Free the header name*/
     /*Get the header object*/
@@ -478,7 +478,7 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
     /*Encode the  MIME headers*/
     if (IsMimeEncoding() == SIP_TRUE)
     {
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
 
         if (m_pMIMEHdrs != SIP_NULL)
         {
@@ -490,7 +490,7 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
         }
 
         /*Put the second CRLF*/
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
 
     return (GetBodyType() == SipMsgBody::SINGLE_BODY) ? EncodeSingleMsgBody(ppCurrPos)
@@ -588,7 +588,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
         pContentType->SipDelete();
         return SIP_FALSE;
     }
-    SIP_BOOL bSingleBody = (SIP_BOOL)SipPf_Stricmp(pszMType, MULTIPART);
+    SIP_BOOL bSingleBody = (SIP_BOOL)SipPf_Stricmp(pszMType, SipMsgUtil::MULTIPART);
 
     /*Case of mime body*/
     if (bSingleBody == SIP_FALSE)
@@ -739,7 +739,7 @@ SIP_BOOL SipMsgBody::IsMessageBodySDP()
         return SIP_FALSE;
     }
     const SIP_CHAR* pszSubMType = pHdr->GetSubMediaType();
-    SIP_INT16 nResult = SipPf_Stricmp(pszSubMType, SDP);
+    SIP_INT16 nResult = SipPf_Stricmp(pszSubMType, SipMsgUtil::SDP);
     pHdr->SipDelete();
     return (nResult == SIP_ZERO) ? SIP_TRUE : SIP_FALSE;
 }
@@ -809,7 +809,8 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
     SIP_UINT32 nNumBodies = m_objBodyList.GetSize();
 
     /*Encoding Of Boundary*/
-    SIP_ENC_DASH(*ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
     SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
     SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
 
@@ -832,15 +833,17 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
         }
 
         /*Put the Closing Boundary*/
-        SIP_ENC_CRLF(*ppMsgBuffCurrPos);
-        SIP_ENC_DASH(*ppMsgBuffCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppMsgBuffCurrPos);
+        SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+        SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
         SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
         SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
     }
 
     /*End boundary*/
-    SIP_ENC_DASH(*ppMsgBuffCurrPos);
-    SIP_ENC_CRLF(*ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+    SipMsgUtil::EncodeCrlf(*ppMsgBuffCurrPos);
 
     return SIP_TRUE;
 }
@@ -994,7 +997,8 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
                     "SipMsgBodyList::DecodeMIMEBody:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        const SIP_CHAR* pTempEnd = SipFindBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
+        const SIP_CHAR* pTempEnd =
+                SipMsgUtil::FindMsgBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
 
         if (pMsgBody->DecodeMIMEMsgBody(pStartPt, pTempEnd) == SIP_FALSE)
         {

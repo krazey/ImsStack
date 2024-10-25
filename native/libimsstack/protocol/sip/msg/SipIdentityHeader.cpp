@@ -47,12 +47,12 @@ SipIdentityHeader::~SipIdentityHeader()
 
 SIP_VOID SipIdentityHeader::SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest)
 {
-    SetCharVar(pszSignedIdentiDigest, m_pSignedIdentityDigest);
+    SipMsgUtil::SetValue(pszSignedIdentiDigest, m_pSignedIdentityDigest);
 }
 
 SIP_VOID SipIdentityHeader::SetInfo(const SIP_CHAR* pszInfo)
 {
-    SetCharVar(pszInfo, m_pInfo);
+    SipMsgUtil::SetValue(pszInfo, m_pInfo);
 }
 
 SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -87,19 +87,19 @@ SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     SipPf_Strcpy(*ppCurrPos, m_pSignedIdentityDigest);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SEMI(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SIP_SEMI);
 
     SipPf_Strcpy(*ppCurrPos, "info");
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_EQUAL(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, EQUAL);
 
-    SIP_ENC_LAQUOT(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, LEFT_ANGLE);
 
     SipPf_Strcpy(*ppCurrPos, m_pInfo);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_RAQUOT(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, RIGHT_ANGLE);
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }

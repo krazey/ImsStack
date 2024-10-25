@@ -85,28 +85,27 @@ SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
         return SIP_FALSE;
     }
 
-    const SIP_UINT16 MAX_WARN_LEN = 11;
-    SIP_CHAR szLen[MAX_WARN_LEN];
+    SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN];
     SipPf_Sprintf(szLen, "%u", m_nWarnCode);
 
     SipPf_Strcpy(*ppCurrPos, szLen);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     SipPf_Strcpy(*ppCurrPos, m_pszWarnAgent);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     if (HasSpace(m_pszWarnText))
     {
-        SIP_ENC_LDQUOT(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
 
         SipPf_Strcpy(*ppCurrPos, m_pszWarnText);
         SipEnc_UpdateCurrPos(ppCurrPos);
 
-        SIP_ENC_RDQUOT(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
     }
     else
     {
@@ -119,12 +118,12 @@ SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
 
 SIP_VOID SipWarningHeader::SetWarnAgent(const SIP_CHAR* pszWarnAgent)
 {
-    SetCharVar(pszWarnAgent, m_pszWarnAgent);
+    SipMsgUtil::SetValue(pszWarnAgent, m_pszWarnAgent);
 }
 
 SIP_VOID SipWarningHeader::SetWarnText(const SIP_CHAR* pszWarnText)
 {
-    SetCharVar(pszWarnText, m_pszWarnText);
+    SipMsgUtil::SetValue(pszWarnText, m_pszWarnText);
 }
 
 SIP_BOOL SipWarningHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

@@ -89,7 +89,7 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
         SIP_CHAR* pszPrivacy = m_objPrivacyList.GetAt(nIndex);
         if (nIndex != SIP_ZERO)
         {
-            SIP_ENC_SEMI(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, SIP_SEMI);
         }
         SipPf_Strcpy(*ppCurrPos, pszPrivacy);
         SipEnc_UpdateCurrPos(ppCurrPos);
@@ -99,12 +99,14 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
 
 SIP_BOOL SipPrivacyHeader::AddPrivacy(const SIP_CHAR* pszPrivacy)
 {
-    SIP_CHAR* pszTempPrivacy = SIP_NULL;
-    if (SetCharVar(pszPrivacy, pszTempPrivacy) == SIP_TRUE)
+    if (pszPrivacy == SIP_NULL)
     {
-        return ((m_objPrivacyList.Add(pszTempPrivacy) >= 0) ? SIP_TRUE : SIP_FALSE);
+        return SIP_FALSE;
     }
-    return SIP_FALSE;
+
+    SIP_CHAR* pszTempPrivacy = SIP_NULL;
+    SipMsgUtil::SetValue(pszPrivacy, pszTempPrivacy);
+    return (m_objPrivacyList.Add(pszTempPrivacy) >= 0) ? SIP_TRUE : SIP_FALSE;
 }
 
 SIP_BOOL SipPrivacyHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

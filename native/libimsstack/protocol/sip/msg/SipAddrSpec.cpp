@@ -101,12 +101,12 @@ SIP_BOOL SipUri::IsValidComponent(const SIP_CHAR* pszComponent) const
 
 SIP_VOID SipUri::SetUser(const SIP_CHAR* pszUser)
 {
-    SetCharVar(pszUser, m_pszUser);
+    SipMsgUtil::SetValue(pszUser, m_pszUser);
 }
 
 SIP_VOID SipUri::SetPassword(const SIP_CHAR* pszPass)
 {
-    SetCharVar(pszPass, m_pszPassword);
+    SipMsgUtil::SetValue(pszPass, m_pszPassword);
 }
 
 SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -219,7 +219,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
         if (m_pszPassword != SIP_NULL)
         {
             /*encode the password*/
-            SIP_ENC_COLON(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COLON);
 
             SIP_CHAR* pszTempPassword =
                     SipPercentEncoding::DoPercentEncoding_Password(m_pszPassword);
@@ -229,7 +229,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             SipEnc_UpdateCurrPos(ppCurrPos);
         }
 
-        SIP_ENC_ATTHERATE(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, ATRATE);
     }
 
     /* encoding of host port
@@ -264,7 +264,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             SIP_CHAR szTmp[MAX_PORT_LEN] = {'\0'};
 
             SipPf_Sprintf(szTmp, "%u", m_nPort);
-            SIP_ENC_COLON(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COLON);
             SipPf_Strcpy(*ppCurrPos, szTmp);
             SipEnc_UpdateCurrPos(ppCurrPos);
         }
@@ -290,7 +290,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
         SetComponentType(IParameterComponent::HEADER);
 
         /*Put a QUESTION MARK*/
-        SIP_ENC_QMARK(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, QMARK);
 
         SIP_UINT32 nSize = m_pUriHdrParams->GetParamCount();
 
@@ -302,7 +302,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             {
                 if (nIndex != SIP_ZERO)
                 {
-                    SIP_ENC_AMPERSAND(*ppCurrPos);
+                    SipMsgUtil::Encode(*ppCurrPos, AMPERSAND);
                 }
                 pParamNamValue->Encode(ppCurrPos,
                         const_cast<IParameterComponent*>(
@@ -571,7 +571,7 @@ SipAddrSpec::~SipAddrSpec()
 
 SIP_VOID SipAddrSpec::SetAbsUri(const SIP_CHAR* pszSipUri)
 {
-    SetCharVar(pszSipUri, m_pszAbsUri);
+    SipMsgUtil::SetValue(pszSipUri, m_pszAbsUri);
 }
 
 SipUri* SipAddrSpec::GetSipUri()
@@ -625,7 +625,7 @@ SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
         {
             SipPf_Strcpy(*ppCurrPos, pStrUri);
             SipEnc_UpdateCurrPos(ppCurrPos);
-            SIP_ENC_COLON(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COLON);
         }
 
         SipEnc_UpdateCurrPos(ppCurrPos);
@@ -668,7 +668,7 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     }
     else
     {
-        m_eUriType = SipGetUriType(pStartPt, pTempPos);
+        m_eUriType = SipMsgUtil::GetUriType(pStartPt, pTempPos);
     }
 
     /*CAse of Sip or Sips URI*/
@@ -760,7 +760,7 @@ SIP_BOOL SipNameAddr::SetAddrSpec(SipAddrSpec* pSipAddrSpec)
 
 SIP_VOID SipNameAddr::SetDisplayName(const SIP_CHAR* pszDisplayName)
 {
-    SetCharVar(pszDisplayName, m_pszDispName);
+    SipMsgUtil::SetValue(pszDisplayName, m_pszDispName);
 }
 
 SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -814,10 +814,10 @@ SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
         //  First, check the display name if it has a double quotation.
         //  If present, just do normal procedure. Else, add the display name and space.
         //  But, we will always add the space after the display name.
-        SIP_ENC_SP(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, SPACE);
     }
 
-    SIP_ENC_LAQUOT(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, LEFT_ANGLE);
 
     if (m_pAddrSpec->EncodeAddrSpec(ppCurrPos) == SIP_FALSE)
     {
@@ -825,7 +825,7 @@ SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
         return SIP_FALSE;
     }
 
-    SIP_ENC_RAQUOT(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, RIGHT_ANGLE);
 
     return SIP_TRUE;
 }

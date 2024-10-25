@@ -125,7 +125,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     SipPf_Strcpy(*ppCurrPos, m_pszProtocolName);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SLASH(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
     /*protocol-version*/
     if (m_pszProtocolVer == SIP_NULL)
@@ -136,7 +136,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     SipPf_Strcpy(*ppCurrPos, m_pszProtocolVer);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SLASH(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
     /*transport*/
     if (m_pszTransport == SIP_NULL)
@@ -148,7 +148,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     /*put a space for LWS*/
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     /*Encode sent by*/
     /*sent-by = host [ COLON port ] */
@@ -168,7 +168,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
         SIP_CHAR szTmp[MAX_PORT_LEN];
         SipPf_Sprintf(szTmp, "%u", m_nPort);
 
-        SIP_ENC_COLON(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, COLON);
 
         SipPf_Strcpy(*ppCurrPos, szTmp);
         SipEnc_UpdateCurrPos(ppCurrPos);
@@ -179,22 +179,22 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
 
 SIP_VOID SipViaHeader::SetProtocolName(const SIP_CHAR* pszProtocolName)
 {
-    SetCharVar(pszProtocolName, m_pszProtocolName);
+    SipMsgUtil::SetValue(pszProtocolName, m_pszProtocolName);
 }
 
 SIP_VOID SipViaHeader::SetProtocolVer(const SIP_CHAR* pszProtocolVer)
 {
-    SetCharVar(pszProtocolVer, m_pszProtocolVer);
+    SipMsgUtil::SetValue(pszProtocolVer, m_pszProtocolVer);
 }
 
 SIP_VOID SipViaHeader::SetTransport(const SIP_CHAR* pszTransport)
 {
-    SetCharVar(pszTransport, m_pszTransport);
+    SipMsgUtil::SetValue(pszTransport, m_pszTransport);
 }
 
 SIP_VOID SipViaHeader::SetHost(const SIP_CHAR* pszHost)
 {
-    SetCharVar(pszHost, m_pszHost);
+    SipMsgUtil::SetValue(pszHost, m_pszHost);
 }
 
 const SIP_CHAR* SipViaHeader::GetBranch() const

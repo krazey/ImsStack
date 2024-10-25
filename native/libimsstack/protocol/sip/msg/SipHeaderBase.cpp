@@ -265,7 +265,8 @@ SIP_BOOL SipHeaderBase::SetValue(const SIP_CHAR* pszValue)
         }
     }
 
-    return SetCharVar(pszValue, m_pszValue);
+    SipMsgUtil::SetValue(pszValue, m_pszValue);
+    return SIP_TRUE;
 }
 
 const SIP_CHAR* SipHeaderBase::GetValue() const
@@ -371,6 +372,10 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     /*Now Decode the Value*/
     SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    if (pszValue == SIP_NULL)
+    {
+        return IsEmptyHeaderBodyAllowed();
+    }
 
     if ((m_eHdrType == SipHeaderBase::ACCEPT_CONTACT) ||
             (m_eHdrType == SipHeaderBase::FEATURE_CAPS) ||
@@ -384,7 +389,6 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
         if (pszValue != SIP_NULL)
         {
             delete[] pszValue;

@@ -33,5 +33,7 @@ public:
 
 private:
     ~SipPPreferredServiceHeader();
+
+    static constexpr SIP_UINT32 MAX_LET_DIG = 27;
 };
 #endif  //__SIP_P_PREFEERED_SERVICE_HEADER_H__

@@ -19,9 +19,10 @@
 #include "msg/SipRequestDispositionHeader.h"
 #include "platform/SipString.h"
 
-SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN] = {"proxy", "redirect",
-        "cancel", "no-cancel", "fork", "no-fork", "recurse", "no-recurse", "parallel", "sequential",
-        "queue", "no-queue"};
+SIP_CHAR gaszDirectivesArray[SipRequestDispositionHeader::MAX_DIRECTIVE_SIZE]
+                            [SipRequestDispositionHeader::MAX_DIRECTIVE_LEN] = {"proxy", "redirect",
+                                    "cancel", "no-cancel", "fork", "no-fork", "recurse",
+                                    "no-recurse", "parallel", "sequential", "queue", "no-queue"};
 
 SipRequestDispositionHeader::SipRequestDispositionHeader() :
         SipHeaderBase(SipHeaderBase::REQUEST_DISPOSITION)
@@ -50,7 +51,7 @@ SIP_BOOL SipRequestDispositionHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UI
         return SIP_FALSE;
     }
 
-    for (SIP_UINT16 nCnt = 0; nCnt < SIP_DIRECTIVE_SIZE; nCnt++)
+    for (SIP_UINT16 nCnt = 0; nCnt < MAX_DIRECTIVE_SIZE; nCnt++)
     {
         if (SipPf_Strcmp(gaszDirectivesArray[nCnt], pszValue) == 0)
         {

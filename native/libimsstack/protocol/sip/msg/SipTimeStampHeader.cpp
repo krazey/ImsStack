@@ -83,7 +83,7 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     /*Encoding of Delay*/
     if (m_pszDelay != SIP_NULL)
     {
-        SIP_ENC_SP(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
         SipPf_Strcpy(*ppCurrPos, m_pszDelay);
         SipEnc_UpdateCurrPos(ppCurrPos);
@@ -94,12 +94,12 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
 
 SIP_VOID SipTimeStampHeader::SetTimeVal(const SIP_CHAR* pszTimeVal)
 {
-    SetCharVar(pszTimeVal, m_pszTimeVal);
+    SipMsgUtil::SetValue(pszTimeVal, m_pszTimeVal);
 }
 
 SIP_VOID SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
 {
-    SetCharVar(pszDelay, m_pszDelay);
+    SipMsgUtil::SetValue(pszDelay, m_pszDelay);
 }
 
 SIP_BOOL SipTimeStampHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

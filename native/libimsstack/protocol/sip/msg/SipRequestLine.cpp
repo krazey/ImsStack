@@ -90,12 +90,12 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     /* Put a space */
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     /* Encode Request Uri*/
     m_pReqUri->EncodeAddrSpec(ppCurrPos);
 
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
     SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
 
     /*Update the Msg Buffer's current position*/
@@ -106,12 +106,12 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
 
 SIP_VOID SipRequestLine::SetMethod(const SIP_CHAR* pMethod)
 {
-    SetCharVar(pMethod, m_pszMethod);
+    SipMsgUtil::SetValue(pMethod, m_pszMethod);
 }
 
 SIP_VOID SipRequestLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
-    SetCharVar(pszVer, m_pszSipVersion);
+    SipMsgUtil::SetValue(pszVer, m_pszSipVersion);
 }
 
 SIP_VOID SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)

@@ -40,6 +40,7 @@
 #define RIGHT_SQUARE               ']'
 #define PERCENT                    '%'
 #define PLUS                       '+'
+#define HYPHEN                     '-'
 
 #define EXCLAMATION                '!'
 #define HASHH                      '#'

@@ -37,5 +37,8 @@ public:
 
 private:
     virtual ~SipIntegerHeader();
+
+    static constexpr SIP_INT32 MAX_GEOLOCATION_ERROR = 999;
+    static constexpr SIP_UINT32 MAX_EXPIRES = 4294967295;
 };
 #endif  //__SIP_INTEGER_HEADER_H__

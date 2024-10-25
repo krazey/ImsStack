@@ -204,5 +204,7 @@ public:
 
 private:
     ~SipMessage();
+
+    static constexpr SIP_UINT32 MAX_METHOD_LEN = 32;
 };
 #endif  //__SIP_MESSAGE_H__

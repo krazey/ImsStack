@@ -69,7 +69,7 @@ SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     SipPf_Sprintf(szBuf, "%u", m_nSeq);
     SipPf_Strcpy(*ppCurrPos, szBuf);
     SipEnc_UpdateCurrPos(ppCurrPos);
-    SIP_ENC_SP(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
     SipPf_Strcpy(*ppCurrPos, m_pszMethod);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
@@ -78,7 +78,7 @@ SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
 
 SIP_VOID SipCSeqHeader::SetMethod(const SIP_CHAR* pszMethod)
 {
-    SetCharVar(pszMethod, m_pszMethod);
+    SipMsgUtil::SetValue(pszMethod, m_pszMethod);
 }
 
 SIP_BOOL SipCSeqHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

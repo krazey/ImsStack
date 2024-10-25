@@ -681,7 +681,7 @@ GLOBAL SipHeaderBase* DecodeHeader(
 
     if (nType == SipHeaderBase::UNKNOWN && (strName.GetLength() != 0))
     {
-        SIP_INT32 nUnknownType = SipGetHdrType(strName.GetStr());
+        SIP_INT32 nUnknownType = SipMsgUtil::GetHeaderType(strName.GetStr());
 
         if (nUnknownType != SipHeaderBase::TYPE_INVALID)
         {
@@ -978,10 +978,10 @@ GLOBAL IMS_BOOL EncodePartialMessage(
         }
 
         // Put CRLF at the end of Start-Line
-        SIP_ENC_CRLF(pszBuffer);
+        SipMsgUtil::EncodeCrlf(pszBuffer);
     }
 
-    SIP_CHAR aMsgBody[SIP_MAX_MSG_SIZE] = {
+    SIP_CHAR aMsgBody[SipMsgUtil::MAX_MSG_SIZE] = {
             0,
     };
     SIP_CHAR* pMsgBody = &(aMsgBody[0]);
@@ -1094,7 +1094,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
         }
     }
 
-    SIP_ENC_CRLF(pszBuffer);
+    SipMsgUtil::EncodeCrlf(pszBuffer);
 
     if ((nOptions & OPT_BODY_PART) == OPT_BODY_PART)
     {
@@ -1149,7 +1149,7 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
 {
     if (strName.GetLength() != 0)
     {
-        nType = SipGetHdrType(strName.GetStr());
+        nType = SipMsgUtil::GetHeaderType(strName.GetStr());
     }
 
     return (nType == ISipHeader::UNKNOWN);
@@ -2939,7 +2939,7 @@ GLOBAL AString GetViaBranchParameter(IN ::SipMessage* pMessage)
 
 GLOBAL IMS_SINT32 GetHdrEnumType(IN IMS_SINT32 nType)
 {
-    return CheckAndGetHdrEnumType(nType);
+    return SipMsgUtil::CheckAndGetHeaderType(nType);
 }
 
 GLOBAL IMS_BOOL HasParameter(IN SipHeaderBase* pHeader, IN const AString& strName)
