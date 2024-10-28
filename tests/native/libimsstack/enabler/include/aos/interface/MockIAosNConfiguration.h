@@ -29,6 +29,7 @@ public:
     MOCK_METHOD(void, SetListener, (IN IAosNConfigurationListener*), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosNConfigurationListener*), (override));
 
+    MOCK_METHOD(IMS_BOOL, IsTcpRequiredForReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSubscription, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUnSubscription, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVoLteAvailable, (), (const, override));

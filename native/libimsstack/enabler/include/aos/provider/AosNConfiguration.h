@@ -44,6 +44,7 @@ public:
     void SetListener(IN IAosNConfigurationListener* piListener) override;
     void RemoveListener(IN IAosNConfigurationListener* piListener) override;
 
+    IMS_BOOL IsTcpRequiredForReg() const override;
     IMS_BOOL IsSubscription() const override;
     IMS_BOOL IsUnSubscription() const override;
     IMS_BOOL IsVoLteAvailable() const override;

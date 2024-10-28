@@ -53,6 +53,15 @@ public:
     virtual void RemoveListener(IN IAosNConfigurationListener* piListener) = 0;
 
     /**
+     * @brief Indicate whether SIP REGISTER message should be transmitted by TCP or not.
+     *        The default value is false and if set to true, SIP REGISTER message will be
+     *        transmitted by only TCP transport type.
+     *
+     * @return IMS_BOOL Return whether SIP REGISTER message should be transmitted by TCP or not.
+     */
+    virtual IMS_BOOL IsTcpRequiredForReg() const = 0;
+
+    /**
      * @brief Returns whether subscription is initiated after registration.
      *
      * @return IMS_BOOL Return whether to be applied or not

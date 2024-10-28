@@ -111,6 +111,11 @@ PUBLIC VIRTUAL void AosNConfiguration::RemoveListener(IN IAosNConfigurationListe
     }
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTcpRequiredForReg() const
+{
+    return m_objCarrierConfig.bTcpRequiredForReg;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSubscription() const
 {
     return m_objCarrierConfig.bRegistrationEventPackageSupported;
@@ -1252,6 +1257,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 
     /* carrier_config */
     /// ims.
+    m_objCarrierConfig.bTcpRequiredForReg =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_TCP_TRANSPORT_FOR_REGISTER_BOOL);
     m_objCarrierConfig.bUnsubscribeRegistrationEventPackage =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL);
     m_objCarrierConfig.nIsimIndexForImpu =

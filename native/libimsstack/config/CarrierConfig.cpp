@@ -182,6 +182,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
 // Aos
 const IMS_CHAR CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[] =
         KEY_IMS_PREFIX "unsubscribe_registration_event_package_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_USE_TCP_TRANSPORT_FOR_REGISTER_BOOL[] =
+        KEY_IMS_PREFIX "use_tcp_transport_for_register_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT[] =
         KEY_IMS_PREFIX "isim_index_for_impu_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_PREFERRED_IMS_DSCP_INT[] =

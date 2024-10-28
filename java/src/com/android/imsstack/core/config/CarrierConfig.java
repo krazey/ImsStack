@@ -329,6 +329,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "update_registration_with_rat_change_int_array";
         public static final String KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL =
                 KEY_PREFIX + "unsubscribe_registration_event_package_bool";
+        public static final String KEY_USE_TCP_TRANSPORT_FOR_REGISTER_BOOL =
+                KEY_PREFIX + "use_tcp_transport_for_register_bool";
         public static final String KEY_PREFERRED_IMS_DSCP_INT =
                 KEY_PREFIX + "preferred_ims_dscp_int";
         public static final String KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT =

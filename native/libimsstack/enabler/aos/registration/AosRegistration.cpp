@@ -1941,6 +1941,11 @@ PROTECTED VIRTUAL void AosRegistration::AddSpecificOperation()
         }
     }
 
+    if (GET_N_CONFIG(m_nSlotId)->IsTcpRequiredForReg() && m_piRegParameter != IMS_NULL)
+    {
+        m_piRegParameter->SetTransportExtForRegOnly(Sip::TRANSPORT_EXT_TCP);
+    }
+
     if (!GET_N_CONFIG(m_nSlotId)->IsSipOverIpsecInRoamingEnabled())
     {
         if (m_piContext->GetNetTracker()->IsRoaming())

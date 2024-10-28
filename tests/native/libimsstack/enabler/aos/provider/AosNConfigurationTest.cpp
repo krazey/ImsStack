@@ -100,6 +100,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(10000, m_pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
+    EXPECT_FALSE(m_pAosNConfiguration->IsTcpRequiredForReg());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnSubscription());
     EXPECT_EQ(1, m_pAosNConfiguration->GetIsimIndexForImpu());
     EXPECT_EQ(CarrierConfig::Ims::PREFERRED_DSCP_NONE, m_pAosNConfiguration->GetPreferredImsDscp());
@@ -309,6 +310,11 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(IMS_FALSE));
 
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::KEY_USE_TCP_TRANSPORT_FOR_REGISTER_BOOL, IMS_FALSE))
+            .Times(2)
+            .WillRepeatedly(Return(IMS_FALSE));
+
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT, -1))
             .Times(2)
             .WillRepeatedly(Return(1));
@@ -427,6 +433,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(1000, m_pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
+    EXPECT_FALSE(m_pAosNConfiguration->IsTcpRequiredForReg());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnSubscription());
     EXPECT_EQ(1, m_pAosNConfiguration->GetIsimIndexForImpu());
     EXPECT_EQ(CarrierConfig::Ims::PREFERRED_DSCP_NONE, m_pAosNConfiguration->GetPreferredImsDscp());
@@ -487,6 +494,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(1000, m_pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
+    EXPECT_FALSE(m_pAosNConfiguration->IsTcpRequiredForReg());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnSubscription());
     EXPECT_EQ(1, m_pAosNConfiguration->GetIsimIndexForImpu());
     EXPECT_EQ(CarrierConfig::Ims::PREFERRED_DSCP_NONE, m_pAosNConfiguration->GetPreferredImsDscp());

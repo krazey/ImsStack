@@ -20,6 +20,7 @@
     <string name="ims.ims_user_agent_string">#IMEISV#_suppfork</string>
 
     <!-- Aos -->
+    <boolean name="ims.use_tcp_transport_for_register_bool" value="true"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
 
