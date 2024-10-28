@@ -60,12 +60,17 @@ PUBLIC IMessage* MessageUtils::GetPreviousResponse(IN const ISession* piSession,
     ImsList<IMessage*> lstResponses = piSession->GetPreviousResponses(eServiceMethod);
     IMS_UINT32 nResponseSize = lstResponses.GetSize();
 
-    if (nResponseIndex < 0)
+    if (nResponseSize == 0)
     {
-        nResponseIndex = nResponseSize - 1;
+        return IMS_NULL;
     }
 
-    if ((IMS_UINT32)(nResponseIndex) >= nResponseSize)
+    if (nResponseIndex < 0)
+    {
+        nResponseIndex = static_cast<IMS_SINT32>(nResponseSize - 1);
+    }
+
+    if (static_cast<IMS_UINT32>(nResponseIndex) >= nResponseSize)
     {
         return IMS_NULL;
     }

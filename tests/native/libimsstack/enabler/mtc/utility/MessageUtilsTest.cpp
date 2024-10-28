@@ -114,9 +114,13 @@ public:
         ON_CALL(*piSession, GetPreviousRequest(eServiceMethod)).WillByDefault(Return(piMessage));
     }
 
-    void SetUpPreviousResponses(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START)
+    void SetUpPreviousResponses(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START,
+            IN IMS_BOOL bIsEmpty = IMS_FALSE)
     {
-        objMessages.Append(piMessage);
+        if (!bIsEmpty)
+        {
+            objMessages.Append(piMessage);
+        }
         ON_CALL(*piSession, GetPreviousResponses(eServiceMethod))
                 .WillByDefault(Return(objMessages));
     }
@@ -135,6 +139,9 @@ public:
 
 TEST_F(MessageUtilsTest, GetPreviousResponse)
 {
+    EXPECT_TRUE(objMessageUtils.GetPreviousResponse(IMS_NULL, ANY_METHOD) == IMS_NULL);
+
+    SetUpPreviousResponses(ANY_METHOD, IMS_TRUE);
     EXPECT_TRUE(objMessageUtils.GetPreviousResponse(IMS_NULL, ANY_METHOD) == IMS_NULL);
 
     SetUpPreviousResponses();
