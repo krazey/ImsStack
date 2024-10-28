@@ -102,7 +102,7 @@ public:
      * @param nState The emergency callback mode state.
      * @param nDuration The timer duration(seconds) of emergency callback mode for call or sms.
      */
-    virtual void NotifyEmcCallbackModeChanged(
+    virtual void NotifyEmergencyCallbackModeChanged(
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration) = 0;
 
     /**

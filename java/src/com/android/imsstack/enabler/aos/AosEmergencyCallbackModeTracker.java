@@ -29,8 +29,8 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeState;
-import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeType;
+import com.android.imsstack.enabler.aos.IAosInfo.EmergencyCallbackModeState;
+import com.android.imsstack.enabler.aos.IAosInfo.EmergencyCallbackModeType;
 import com.android.imsstack.util.ImsLog;
 
 import java.time.Duration;
@@ -92,15 +92,15 @@ public class AosEmergencyCallbackModeTracker {
     }
 
     private void updateEmergencyCallbackMode(@TelephonyManager.EmergencyCallbackModeType int type,
-            EmcCallbackModeState state, long duration) {
+            EmergencyCallbackModeState state, long duration) {
 
-        EmcCallbackModeType emergencyCbmType =
+        EmergencyCallbackModeType emergencyCbmType =
                 (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL)
-                ? EmcCallbackModeType.CALL : EmcCallbackModeType.SMS;
+                ? EmergencyCallbackModeType.CALL : EmergencyCallbackModeType.SMS;
 
         IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
         if (aosInfo != null) {
-            aosInfo.notifyEmcCallbackModeChanged(emergencyCbmType, state, duration);
+            aosInfo.notifyEmergencyCallbackModeChanged(emergencyCbmType, state, duration);
         }
     }
 
@@ -152,7 +152,7 @@ public class AosEmergencyCallbackModeTracker {
 
             ImsLog.i(this, mSlotId, "onCallbackModeStarted() type: " + type);
             updateEmergencyCallbackMode(
-                    type, EmcCallbackModeState.START, timerDuration.toSeconds());
+                    type, EmergencyCallbackModeState.START, timerDuration.toSeconds());
         }
 
         @Override
@@ -164,7 +164,7 @@ public class AosEmergencyCallbackModeTracker {
 
             ImsLog.i(this, mSlotId, "onCallbackModeRestarted() type: " + type);
             updateEmergencyCallbackMode(
-                    type, EmcCallbackModeState.START, timerDuration.toSeconds());
+                    type, EmergencyCallbackModeState.START, timerDuration.toSeconds());
         }
 
         @Override
@@ -176,10 +176,10 @@ public class AosEmergencyCallbackModeTracker {
 
             ImsLog.i(this, mSlotId, "onCallbackModeStopped() type: " + type + ",reason: " + reason);
 
-            EmcCallbackModeState state = EmcCallbackModeState.STOP;
+            EmergencyCallbackModeState state = EmergencyCallbackModeState.STOP;
             if (reason == TelephonyManager.STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED
                     || reason == TelephonyManager.STOP_REASON_EMERGENCY_SMS_SENT) {
-                state = EmcCallbackModeState.STOP_BY_EMC;
+                state = EmergencyCallbackModeState.STOP_BY_EMERGENCY;
             }
             updateEmergencyCallbackMode(type, state, 0);
         }

@@ -575,7 +575,7 @@ PROTECTED VIRTUAL void AosERegistration::ClearCbm()
 }
 
 PROTECTED void AosERegistration::CallbackModeChanged(
-        IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration)
+        IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState, IN IMS_ULONG nDuration)
 {
     if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
     {
@@ -585,9 +585,9 @@ PROTECTED void AosERegistration::CallbackModeChanged(
     A_IMS_TRACE_I(REGID, "CallbackModeChanged eType (%d), eState(%d), nDuration(%d)", eType, eState,
             nDuration);
 
-    if (eState == EmcCallbackMode::START)
+    if (eState == EmergencyCallbackMode::START)
     {
-        if (eType == EmcCallbackModeType::CALL)
+        if (eType == EmergencyCallbackModeType::CALL)
         {
             m_pEModeInfo->SetEcbm(IMS_TRUE);
         }
@@ -607,7 +607,7 @@ PROTECTED void AosERegistration::CallbackModeChanged(
     }
     else
     {
-        if (eType == EmcCallbackModeType::CALL)
+        if (eType == EmergencyCallbackModeType::CALL)
         {
             m_pEModeInfo->SetEcbm(IMS_FALSE);
         }
@@ -616,7 +616,7 @@ PROTECTED void AosERegistration::CallbackModeChanged(
             m_pEModeInfo->SetScbm(IMS_FALSE);
         }
 
-        if (eState == EmcCallbackMode::STOP)
+        if (eState == EmergencyCallbackMode::STOP)
         {
             ProcessUnpredictableFailure();
         }

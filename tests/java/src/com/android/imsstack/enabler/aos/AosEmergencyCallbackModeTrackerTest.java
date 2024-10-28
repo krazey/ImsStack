@@ -35,8 +35,8 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeState;
-import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeType;
+import com.android.imsstack.enabler.aos.IAosInfo.EmergencyCallbackModeState;
+import com.android.imsstack.enabler.aos.IAosInfo.EmergencyCallbackModeType;
 import com.android.imsstack.enabler.aos.service.AosService;
 
 import org.junit.After;
@@ -102,8 +102,8 @@ public class AosEmergencyCallbackModeTrackerTest {
         emergencyCbmListener.onCallbackModeStarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
                 Duration.ofMillis(300000L), SUB_ID_1);
 
-        verify(mMockAosService).notifyEmcCallbackModeChanged(
-                    eq(EmcCallbackModeType.CALL), eq(EmcCallbackModeState.START), eq(300L));
+        verify(mMockAosService).notifyEmergencyCallbackModeChanged(
+                eq(EmergencyCallbackModeType.CALL), eq(EmergencyCallbackModeState.START), eq(300L));
     }
 
     @Test
@@ -114,8 +114,8 @@ public class AosEmergencyCallbackModeTrackerTest {
         emergencyCbmListener.onCallbackModeRestarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS,
                 Duration.ofMillis(200000L), SUB_ID_1);
 
-        verify(mMockAosService).notifyEmcCallbackModeChanged(
-                    eq(EmcCallbackModeType.SMS), eq(EmcCallbackModeState.START), eq(200L));
+        verify(mMockAosService).notifyEmergencyCallbackModeChanged(
+                eq(EmergencyCallbackModeType.SMS), eq(EmergencyCallbackModeState.START), eq(200L));
     }
 
     @Test
@@ -126,8 +126,9 @@ public class AosEmergencyCallbackModeTrackerTest {
         emergencyCbmListener.onCallbackModeStopped(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
                 TelephonyManager.STOP_REASON_EMERGENCY_SMS_SENT, SUB_ID_1);
 
-        verify(mMockAosService).notifyEmcCallbackModeChanged(
-                    eq(EmcCallbackModeType.CALL), eq(EmcCallbackModeState.STOP_BY_EMC), eq(0L));
+        verify(mMockAosService).notifyEmergencyCallbackModeChanged(
+                eq(EmergencyCallbackModeType.CALL),
+                eq(EmergencyCallbackModeState.STOP_BY_EMERGENCY), eq(0L));
     }
 
     @Test
@@ -138,8 +139,8 @@ public class AosEmergencyCallbackModeTrackerTest {
         emergencyCbmListener.onCallbackModeStopped(TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS,
                 TelephonyManager.STOP_REASON_USER_ACTION, SUB_ID_1);
 
-        verify(mMockAosService).notifyEmcCallbackModeChanged(
-                    eq(EmcCallbackModeType.SMS), eq(EmcCallbackModeState.STOP), eq(0L));
+        verify(mMockAosService).notifyEmergencyCallbackModeChanged(
+                eq(EmergencyCallbackModeType.SMS), eq(EmergencyCallbackModeState.STOP), eq(0L));
     }
 
     @Test
@@ -150,8 +151,8 @@ public class AosEmergencyCallbackModeTrackerTest {
         emergencyCbmListener.onCallbackModeStarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
                 Duration.ofMillis(300000L), SUB_ID_2);
 
-        verify(mMockAosService, never()).notifyEmcCallbackModeChanged(
-                    eq(EmcCallbackModeType.CALL), eq(EmcCallbackModeState.START), eq(300L));
+        verify(mMockAosService, never()).notifyEmergencyCallbackModeChanged(
+                eq(EmergencyCallbackModeType.CALL), eq(EmergencyCallbackModeState.START), eq(300L));
     }
 
     private TelephonyCallback.EmergencyCallbackModeListener captureEmergencyCbmListener() {

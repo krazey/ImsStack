@@ -211,8 +211,8 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyCarrierSignalPcoValueChanged(objParcel);
             break;
 
-        case IIAosService::J2N_NOTIFY_EMC_CALLBACK_MODE_CHANGED:
-            NotifyEmcCallbackModeChanged(objParcel);
+        case IIAosService::J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED:
+            NotifyEmergencyCallbackModeChanged(objParcel);
             break;
 
         default:
@@ -499,12 +499,12 @@ void JniAosService::NotifyCarrierSignalPcoValueChanged(IN const android::Parcel&
 }
 
 PRIVATE
-void JniAosService::NotifyEmcCallbackModeChanged(IN const android::Parcel& objParcel)
+void JniAosService::NotifyEmergencyCallbackModeChanged(IN const android::Parcel& objParcel)
 {
     IAosService* piAosService = GetNativeService();
     if (piAosService)
     {
-        piAosService->NotifyEmcCallbackModeChanged(
+        piAosService->NotifyEmergencyCallbackModeChanged(
                 objParcel.readInt32(), objParcel.readInt32(), objParcel.readInt64());
     }
 }

@@ -458,7 +458,7 @@ TEST_F(AosServiceTest, FailsRemoveListenerForIAosEmergencyListenerWhenListenerIs
     EXPECT_NE(m_pAosService->GetEmergencyListeners().GetSize(), 0);
 }
 
-TEST_F(AosServiceTest, SucceedsNotifyEmcCallbackModeChanged)
+TEST_F(AosServiceTest, SucceedsNotifyEmergencyCallbackModeChanged)
 {
     // GIVEN
     m_pAosService->AddListener(&m_objMockIAosEmergencyListener1);
@@ -470,12 +470,12 @@ TEST_F(AosServiceTest, SucceedsNotifyEmcCallbackModeChanged)
     EXPECT_CALL(m_objMockIAosEmergencyListener3, CallbackModeChanged(_, _, _));
 
     // WHEN
-    m_pAosService->NotifyEmcCallbackModeChanged(1, 1, 300);
+    m_pAosService->NotifyEmergencyCallbackModeChanged(1, 1, 300);
 
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosServiceTest, FailsNotifyEmcCallbackModeChangedWhenListenerIsNull)
+TEST_F(AosServiceTest, FailsNotifyEmergencyCallbackModeChangedWhenListenerIsNull)
 {
     // GIVEN
     EXPECT_CALL(m_objMockIAosEmergencyListener1, CallbackModeChanged(_, _, _)).Times(0);
@@ -483,7 +483,7 @@ TEST_F(AosServiceTest, FailsNotifyEmcCallbackModeChangedWhenListenerIsNull)
     EXPECT_CALL(m_objMockIAosEmergencyListener3, CallbackModeChanged(_, _, _)).Times(0);
 
     // WHEN
-    m_pAosService->NotifyEmcCallbackModeChanged(1, 1, 300);
+    m_pAosService->NotifyEmergencyCallbackModeChanged(1, 1, 300);
 
     // THEN : GIVEN conditions should be met.
 }

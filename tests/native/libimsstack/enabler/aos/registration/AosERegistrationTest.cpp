@@ -1108,7 +1108,7 @@ TEST_F(AosERegistrationTest, CallbackModeChangedWhenEmergencyCallbackModeNotSupp
             .WillByDefault(Return(IMS_FALSE));
 
     m_pAosERegistration->CallbackModeChanged(
-            EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
+            EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
@@ -1121,7 +1121,7 @@ TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForCallType)
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosERegistration->CallbackModeChanged(
-            EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
+            EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_TRUE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
@@ -1136,7 +1136,8 @@ TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForSmsTypeDuringRegistere
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(700));
 
-    m_pAosERegistration->CallbackModeChanged(EmcCallbackModeType::SMS, EmcCallbackMode::START, 300);
+    m_pAosERegistration->CallbackModeChanged(
+            EmergencyCallbackModeType::SMS, EmergencyCallbackMode::START, 300);
 
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
     EXPECT_TRUE(m_pAosERegistration->m_pEModeInfo->IsScbm());
@@ -1150,7 +1151,8 @@ TEST_F(AosERegistrationTest, CallbackModeChangedAsStopForCallType)
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
-    m_pAosERegistration->CallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::STOP, 300);
+    m_pAosERegistration->CallbackModeChanged(
+            EmergencyCallbackModeType::CALL, EmergencyCallbackMode::STOP, 300);
 
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
@@ -1164,7 +1166,8 @@ TEST_F(AosERegistrationTest, CallbackModeChangedAsStopForSmsType)
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
-    m_pAosERegistration->CallbackModeChanged(EmcCallbackModeType::SMS, EmcCallbackMode::STOP, 300);
+    m_pAosERegistration->CallbackModeChanged(
+            EmergencyCallbackModeType::SMS, EmergencyCallbackMode::STOP, 300);
 
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
     EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
@@ -1188,7 +1191,7 @@ TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmWhenReRegTried)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(700));
     m_pAosERegistration->CallbackModeChanged(
-            EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
+            EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_TRUE(m_pAosERegistration->IsRefreshRequiredByCbm());
 }
@@ -1202,7 +1205,7 @@ TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegTried)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(700));
     m_pAosERegistration->CallbackModeChanged(
-            EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
+            EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_FALSE(m_pAosERegistration->IsRefreshRequiredByCbm());
 }
@@ -1215,7 +1218,7 @@ TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmWhenWhenReRegNotTried)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(400));
     m_pAosERegistration->CallbackModeChanged(
-            EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
+            EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_TRUE(m_pAosERegistration->IsRefreshRequiredByCbm());
 }
@@ -1228,7 +1231,7 @@ TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegNotTried)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(800));
     m_pAosERegistration->CallbackModeChanged(
-            EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
+            EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_FALSE(m_pAosERegistration->IsRefreshRequiredByCbm());
 }
