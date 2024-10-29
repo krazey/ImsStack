@@ -172,7 +172,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedNotifiesUnavailabl
             OnEmergencyServiceChanged(
                     EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
             .Times(1);
-    EXPECT_CALL(objEsm, StartOpen(EmergencyCallRoutingPdn::NORMAL)).Times(0);
+    EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
 }
@@ -188,7 +188,7 @@ TEST_F(EmergencyServiceControllerTest,
             OnEmergencyServiceChanged(
                     EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
             .Times(1);
-    EXPECT_CALL(objEsm, StartOpen(EmergencyCallRoutingPdn::NORMAL)).Times(0);
+    EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
 }
@@ -205,7 +205,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesU
             OnEmergencyServiceChanged(
                     EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
             .Times(1);
-    EXPECT_CALL(objEsm, StartOpen(EmergencyCallRoutingPdn::NORMAL)).Times(0);
+    EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
 }
@@ -217,7 +217,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedRetriesOverImsPdnW
     const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
     ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
-    // EXPECT_CALL(objEsm, StartOpen(EmergencyCallRoutingPdn::NORMAL)).Times(1); - By AsyncRunner
+    // EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(1); - By AsyncRunner
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
 }

@@ -105,7 +105,7 @@ public class MtcEmergencyServiceManager {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
-        parcel.writeInt(convertEmergencyRouting(emergencyRouting));
+        parcel.writeInt(convertEmergencyRoutingToServiceType(emergencyRouting));
         sendRequest(parcel);
     }
 
@@ -166,14 +166,15 @@ public class MtcEmergencyServiceManager {
         releaseCall();
     }
 
-    private int convertEmergencyRouting(@EmergencyCallRouting int emergencyRoutingIn) {
+    private int convertEmergencyRoutingToServiceType(
+            @EmergencyCallRouting int emergencyRoutingIn) {
         switch (emergencyRoutingIn) {
             case EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN:
-                return IUMtcService.EMERGENCY_CALL_ROUTING_UNKNOWN;
+                return IUMtcCall.SERVICETYPE_EMERGENCY;
             case EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL:
-                return IUMtcService.EMERGENCY_CALL_ROUTING_NORMAL;
+                return IUMtcCall.SERVICETYPE_NORMAL;
             default: // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY
-                return IUMtcService.EMERGENCY_CALL_ROUTING_EMERGENCY;
+                return IUMtcCall.SERVICETYPE_EMERGENCY;
         }
     }
 

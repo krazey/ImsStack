@@ -66,43 +66,31 @@ protected:
     virtual void TearDown() override { delete pEsm; }
 };
 
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormalPdn)
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormalService)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::NORMAL))
             .Times(1);
 
-    pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
+    pEsm->StartOpen(ServiceType::NORMAL);
 }
 
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForEmergencyPdn)
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForEmergencyService)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
 
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
-}
-
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForUnknownPdn)
-{
-    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
-            .Times(1);
-
-    pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 }
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEachService)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
-
-    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
-            .Times(1);
-    pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::NORMAL))
             .Times(1);
-    pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
+    pEsm->StartOpen(ServiceType::NORMAL);
 }
 
 TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNothing)
@@ -115,7 +103,7 @@ TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNothing)
 
 TEST_F(MtcEmergencyServiceManagerTest, StopOpenStopsRegistrationForEmergencyService)
 {
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
 
@@ -124,27 +112,23 @@ TEST_F(MtcEmergencyServiceManagerTest, StopOpenStopsRegistrationForEmergencyServ
 
 TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNotStopRegistrationForEmergencyService)
 {
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
 
     pEsm->StopOpen(IMS_FALSE);
 }
 
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenMakesNewInstanceForPdnType)
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenMakesNewInstanceForServiceType)
 {
     IEmergencyServiceController* pPreviousController = nullptr;
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     pPreviousController = pEsm->GetController();
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
     ASSERT_EQ(pPreviousController, pEsm->GetController());
 
     pPreviousController = pEsm->GetController();
-    pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
-    ASSERT_EQ(pPreviousController, pEsm->GetController());
-
-    pPreviousController = pEsm->GetController();
-    pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
+    pEsm->StartOpen(ServiceType::NORMAL);
     ASSERT_NE(pPreviousController, pEsm->GetController());
 }

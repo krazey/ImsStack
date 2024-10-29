@@ -38,10 +38,7 @@ public:
 
     void Start() override;
     inline void Close() override {}
-    inline EmergencyCallRoutingPdn GetRoutingPdnType() const override
-    {
-        return EmergencyCallRoutingPdn::NORMAL;
-    }
+    inline ServiceType GetServiceType() const override { return ServiceType::NORMAL; }
 
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;

@@ -19,7 +19,6 @@
 
 #include "INativeEnabler.h"
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
 
 class AString;
 class ICoreService;
@@ -170,7 +169,7 @@ public:
      * @brief Opens
      *
      */
-    virtual void OpenEmergencyService(IN IuMtcService::EmergencyCallRoutingPdn ePdn) = 0;
+    virtual void OpenEmergencyService(IN ServiceType eServiceType) = 0;
 
     /**
      * @brief Stops

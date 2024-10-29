@@ -177,8 +177,7 @@ void JniMtcService::OpenEmergencyService(IN const android::Parcel& objParcel)
     {
         return;
     }
-    piNativeService->OpenEmergencyService(
-            static_cast<IuMtcService::EmergencyCallRoutingPdn>(objParcel.readInt32()));
+    piNativeService->OpenEmergencyService(static_cast<ServiceType>(objParcel.readInt32()));
 }
 
 PRIVATE

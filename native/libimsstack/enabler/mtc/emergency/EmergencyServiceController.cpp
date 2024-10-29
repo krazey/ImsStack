@@ -215,7 +215,7 @@ PRIVATE void EmergencyServiceController::FinishAndRetryOverImsPdn()
     m_objContext.GetAsyncRunner(
             [&]()
             {
-                m_objServiceManager.StartOpen(EmergencyCallRoutingPdn::NORMAL);
+                m_objServiceManager.StartOpen(ServiceType::NORMAL);
             });
 }
 

@@ -128,9 +128,9 @@ TEST_F(NormalServiceControllerTest, NormalCallTerminatesDoesNothing)
             0, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
 }
 
-TEST_F(NormalServiceControllerTest, GetRoutingPdnTypeReturnsNormal)
+TEST_F(NormalServiceControllerTest, GetServiceTypeReturnsNormal)
 {
-    EXPECT_EQ(pController->GetRoutingPdnType(), EmergencyCallRoutingPdn::NORMAL);
+    EXPECT_EQ(pController->GetServiceType(), ServiceType::NORMAL);
 }
 
 TEST_F(NormalServiceControllerTest, OnTotalCallStateChangedDoesNothing)

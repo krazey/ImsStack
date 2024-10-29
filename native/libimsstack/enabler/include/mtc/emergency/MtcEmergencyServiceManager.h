@@ -18,13 +18,10 @@
 #define MTC_EMERGENCY_SERVICE_MANAGER_H_
 
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include <memory>
 
 class IMtcContext;
-
-using EmergencyCallRoutingPdn = IuMtcService::EmergencyCallRoutingPdn;
 
 class MtcEmergencyServiceManager : public IMtcEmergencyServiceManager
 {
@@ -34,7 +31,7 @@ public:
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    void StartOpen(IN EmergencyCallRoutingPdn ePdn) override;
+    void StartOpen(IN ServiceType eServiceType) override;
     void StopOpen(IN IMS_BOOL bClose) override;
 
 protected:
@@ -44,7 +41,7 @@ protected:
 private:
     IMtcContext& m_objContext;
 
-    IEmergencyServiceController* CreateController(IN EmergencyCallRoutingPdn ePdn);
+    IEmergencyServiceController* CreateController(IN ServiceType eServiceType);
 };
 
 #endif

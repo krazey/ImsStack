@@ -142,7 +142,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
         assertEquals(1, mNativeObject);
         assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
-        assertEquals(EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mEmergencyRouting);
+        assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, mEmergencyRouting);
 
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL))
@@ -154,7 +154,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
         assertEquals(1, mNativeObject);
         assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
-        assertEquals(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL, mEmergencyRouting);
+        assertEquals(IUMtcCall.SERVICETYPE_NORMAL, mEmergencyRouting);
     }
 
     @Test
