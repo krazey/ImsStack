@@ -220,6 +220,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "release_emergency_pdn_with_emergency_call_end_bool";
+const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT[] =
+                KEY_IMS_EMERGENCY_PREFIX "wait_time_sec_for_release_epdn_after_ecall_end_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "preferred_emergency_registration_int";
 

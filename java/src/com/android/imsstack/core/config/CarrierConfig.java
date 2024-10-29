@@ -381,6 +381,8 @@ public class CarrierConfig {
         // Aos
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL =
                 KEY_PREFIX + "release_emergency_pdn_with_emergency_call_end_bool";
+        public static final String KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT =
+                KEY_PREFIX + "wait_time_sec_for_release_epdn_after_ecall_end_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
                 KEY_PREFIX + "preferred_emergency_registration_int";
         // Mtc

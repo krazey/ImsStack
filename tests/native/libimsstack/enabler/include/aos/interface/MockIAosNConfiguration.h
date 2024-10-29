@@ -104,6 +104,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetSipPreferredTransport, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIpv4MtuSize, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIpv6MtuSize, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetWaitTimeSecForReleaseEPdnAfterECallEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredEmergencyRegistration, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyRegistrationTimerMillis, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsSignallingDscp, (), (const, override));

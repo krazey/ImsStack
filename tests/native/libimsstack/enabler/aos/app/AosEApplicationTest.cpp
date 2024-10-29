@@ -66,10 +66,12 @@ using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)               \
     using Base::ClearTimers;              \
-    using Base::SetAppState;              \
-    using Base::StopTimer;                \
+    using Base::IsTimerRunning;           \
     using Base::ProcessConnectionUpdated; \
-    using Base::ProcessMessage;
+    using Base::ProcessECallTerminated;   \
+    using Base::ProcessMessage;           \
+    using Base::SetAppState;              \
+    using Base::StopTimer;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -781,6 +783,21 @@ TEST_F(AosEApplicationTest, ProcessECallTerminated)
     m_pTestAosEApplication->ProcessECallTerminated();
     EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, StartAppTerminatedTimerIfEPdnReleaseDelayIsSetWhenECallTerminated)
+{
+    ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyPdnWithEmergencyCallEndReleased())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeSecForReleaseEPdnAfterECallEnd())
+            .WillByDefault(Return(240));
+
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
 }
 
 TEST_F(AosEApplicationTest, UpdateConnectedServices)

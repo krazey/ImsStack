@@ -58,6 +58,7 @@ public:
             nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
             nRegistrationPreferredAccesstypeFeatureTag(
                     CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
+            nWaitTimeSecForReleaseEPdnAfterECallEnd(0),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
             nRegistrationPrivateHeader(0),
@@ -131,6 +132,7 @@ public:
     IMS_SINT32 nPreferredImsDscp;
     IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
     /// carrier_config - imsemergency.
+    IMS_SINT32 nWaitTimeSecForReleaseEPdnAfterECallEnd;
     IMS_SINT32 nPreferredEmergencyRegistration;
     /// carrier_config - imswfc.
     IMS_SINT32 nRegistrationPrivateHeader;

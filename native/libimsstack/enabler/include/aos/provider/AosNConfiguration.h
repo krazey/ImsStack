@@ -116,6 +116,7 @@ public:
     IMS_SINT32 GetSipPreferredTransport() const override;
     IMS_SINT32 GetIpv4MtuSize() const override;
     IMS_SINT32 GetIpv6MtuSize() const override;
+    IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const override;
     IMS_SINT32 GetPreferredEmergencyRegistration() const override;
     IMS_SINT32 GetEmergencyRegistrationTimerMillis() const override;
     IMS_SINT32 GetImsSignallingDscp() const override;
