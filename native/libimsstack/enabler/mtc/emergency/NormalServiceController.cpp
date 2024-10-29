@@ -17,28 +17,28 @@
 #include "IJniMtcServiceThread.h"
 #include "IMtcContext.h"
 #include "ServiceTrace.h"
-#include "emergency/NormalRoutingEmergencyServiceController.h"
+#include "emergency/NormalServiceController.h"
 #include "helper/ICallStateProxy.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-NormalRoutingEmergencyServiceController::NormalRoutingEmergencyServiceController(
+NormalServiceController::NormalServiceController(
         IN IMtcEmergencyServiceManager& objServiceManager, IN IMtcContext& objContext) :
         m_objServiceManager(objServiceManager),
         m_objContext(objContext)
 {
-    IMS_TRACE_I("+NormalRoutingEmergencyServiceController", 0, 0, 0);
+    IMS_TRACE_I("+NormalServiceController", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL NormalRoutingEmergencyServiceController::~NormalRoutingEmergencyServiceController()
+PUBLIC VIRTUAL NormalServiceController::~NormalServiceController()
 {
-    IMS_TRACE_I("~NormalRoutingEmergencyServiceController", 0, 0, 0);
+    IMS_TRACE_I("~NormalServiceController", 0, 0, 0);
     RemoveListeners();
 }
 
-PUBLIC VIRTUAL void NormalRoutingEmergencyServiceController::Start()
+PUBLIC VIRTUAL void NormalServiceController::Start()
 {
     IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
     if (pNormalService && pNormalService->GetStatus() == ServiceStatus::SERVICE_ACTIVE)
@@ -53,9 +53,9 @@ PUBLIC VIRTUAL void NormalRoutingEmergencyServiceController::Start()
     }
 }
 
-PUBLIC VIRTUAL void NormalRoutingEmergencyServiceController::OnCallStateChanged(
-        IN CallKey /* nCallKey */, IN IMtcCall::State eState, IN Type /* eType */,
-        IN IMS_BOOL bEmergency, IN IMS_SINT32 /* nReason */)
+PUBLIC VIRTUAL void NormalServiceController::OnCallStateChanged(IN CallKey /* nCallKey */,
+        IN IMtcCall::State eState, IN Type /* eType */, IN IMS_BOOL bEmergency,
+        IN IMS_SINT32 /* nReason */)
 {
     if (!bEmergency)
     {
@@ -69,19 +69,18 @@ PUBLIC VIRTUAL void NormalRoutingEmergencyServiceController::OnCallStateChanged(
     }
 }
 
-PRIVATE void NormalRoutingEmergencyServiceController::AddListeners()
+PRIVATE void NormalServiceController::AddListeners()
 {
     m_objContext.GetCallStateProxy().AddListener(this);
 }
 
-PRIVATE void NormalRoutingEmergencyServiceController::RemoveListeners()
+PRIVATE void NormalServiceController::RemoveListeners()
 {
     m_objContext.GetCallStateProxy().RemoveListener(this);
 }
 
 PRIVATE
-void NormalRoutingEmergencyServiceController::Notify(
-        IN EmergencyServiceState eState, IN IMS_SINT32 eReason) const
+void NormalServiceController::Notify(IN EmergencyServiceState eState, IN IMS_SINT32 eReason) const
 {
     IMS_TRACE_D("Notify :: state=%d, reason=%d", eState, eReason, 0);
 
@@ -95,7 +94,7 @@ void NormalRoutingEmergencyServiceController::Notify(
     pThread->OnEmergencyServiceChanged(eState, eReason, ServiceType::NORMAL);
 }
 
-PRIVATE void NormalRoutingEmergencyServiceController::Finish()
+PRIVATE void NormalServiceController::Finish()
 {
     m_objContext.GetAsyncRunner(
             [&]()

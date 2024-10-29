@@ -19,7 +19,7 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "emergency/MockIMtcEmergencyServiceManager.h"
-#include "emergency/NormalRoutingEmergencyServiceController.h"
+#include "emergency/NormalServiceController.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>
@@ -28,7 +28,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-class NormalRoutingEmergencyServiceControllerTest : public ::testing::Test
+class NormalServiceControllerTest : public ::testing::Test
 {
 protected:
     MockIMtcContext objContext;
@@ -38,7 +38,7 @@ protected:
     MockIJniMtcServiceThread objJniMtcServiceThread;
     MockIMtcEmergencyServiceManager objEsm;
 
-    NormalRoutingEmergencyServiceController* pController;
+    NormalServiceController* pController;
 
     virtual void SetUp() override
     {
@@ -50,7 +50,7 @@ protected:
         ON_CALL(objNormalService, GetJniServiceThread)
                 .WillByDefault(Return(&objJniMtcServiceThread));
 
-        pController = new NormalRoutingEmergencyServiceController(objEsm, objContext);
+        pController = new NormalServiceController(objEsm, objContext);
     }
 
     virtual void TearDown() override
@@ -61,21 +61,21 @@ protected:
     }
 };
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, NoJniThreadDoesNothing)
+TEST_F(NormalServiceControllerTest, NoJniThreadDoesNothing)
 {
     ON_CALL(objNormalService, GetJniServiceThread).WillByDefault(Return(nullptr));
 
     pController->Start();
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, NoNormalServiceDoesNothing)
+TEST_F(NormalServiceControllerTest, NoNormalServiceDoesNothing)
 {
     ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL)).WillByDefault(Return(nullptr));
 
     pController->Start();
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, StartAddsListenersIfNormalServiceActive)
+TEST_F(NormalServiceControllerTest, StartAddsListenersIfNormalServiceActive)
 {
     ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
     EXPECT_CALL(objCallStateProxy, AddListener(pController)).Times(1);
@@ -83,7 +83,7 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest, StartAddsListenersIfNormalSe
     pController->Start();
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, StartNotifiesOpenedIfNormalServiceActive)
+TEST_F(NormalServiceControllerTest, StartNotifiesOpenedIfNormalServiceActive)
 {
     ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
     EXPECT_CALL(objJniMtcServiceThread,
@@ -93,15 +93,14 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest, StartNotifiesOpenedIfNormalS
     pController->Start();
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, CloseDoesNothing)
+TEST_F(NormalServiceControllerTest, CloseDoesNothing)
 {
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
 
     pController->Close();
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest,
-        StartNotifiesUnavailableIfNormalServiceNotActive)
+TEST_F(NormalServiceControllerTest, StartNotifiesUnavailableIfNormalServiceNotActive)
 {
     ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_IDLE));
     EXPECT_CALL(objJniMtcServiceThread,
@@ -111,7 +110,7 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest,
     pController->Start();
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, CallTerminatesDoesNothing)
+TEST_F(NormalServiceControllerTest, CallTerminatesDoesNothing)
 {
     EXPECT_CALL(objJniMtcServiceThread,
             OnEmergencyServiceChanged(EmergencyServiceState::IDLE, _, ServiceType::NORMAL))
@@ -121,7 +120,7 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest, CallTerminatesDoesNothing)
             0, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, NormalCallTerminatesDoesNothing)
+TEST_F(NormalServiceControllerTest, NormalCallTerminatesDoesNothing)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
 
@@ -129,12 +128,12 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest, NormalCallTerminatesDoesNoth
             0, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, GetRoutingPdnTypeReturnsNormal)
+TEST_F(NormalServiceControllerTest, GetRoutingPdnTypeReturnsNormal)
 {
     EXPECT_EQ(pController->GetRoutingPdnType(), EmergencyCallRoutingPdn::NORMAL);
 }
 
-TEST_F(NormalRoutingEmergencyServiceControllerTest, OnTotalCallStateChangedDoesNothing)
+TEST_F(NormalServiceControllerTest, OnTotalCallStateChangedDoesNothing)
 {
     const IMtcCall::State ANY_STATE = IMtcCall::State::IDLE;
     pController->OnTotalCallStateChanged(ANY_STATE);

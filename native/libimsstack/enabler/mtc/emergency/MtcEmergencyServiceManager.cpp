@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "emergency/EmergencyServiceController.h"
 #include "emergency/MtcEmergencyServiceManager.h"
-#include "emergency/NormalRoutingEmergencyServiceController.h"
+#include "emergency/NormalServiceController.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -69,7 +69,7 @@ PRIVATE IEmergencyServiceController* MtcEmergencyServiceManager::CreateControlle
 {
     if (ePdn == EmergencyCallRoutingPdn::NORMAL)
     {
-        return new NormalRoutingEmergencyServiceController(*this, m_objContext);
+        return new NormalServiceController(*this, m_objContext);
     }
     return new EmergencyServiceController(*this, m_objContext);
 }
