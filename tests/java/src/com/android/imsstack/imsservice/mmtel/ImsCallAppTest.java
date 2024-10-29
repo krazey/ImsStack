@@ -297,4 +297,3 @@ public class ImsCallAppTest {
         verify(ttyModeTracker).setTtyMode(anyInt());
     }
 }
-
