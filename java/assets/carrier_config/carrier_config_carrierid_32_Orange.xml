@@ -40,10 +40,10 @@
     </int-array>
 
     <!-- Ut/Xcap Assets -->
-    <int-array name="ut_sm_cause_temporary_block_int_array" value="1"/>
+    <int-array name="ut_sm_cause_temporary_block_int_array" value="1">
         <item value="0"/>
     </int-array>
-    <int-array name="ut_http_temporary_error_code_int_array" value="1"/>
+    <int-array name="ut_http_temporary_error_code_int_array" value="1">
         <item value="403"/>
     </int-array>
     <int name="ut_temporary_block_timer_min_int" value="240"/>
