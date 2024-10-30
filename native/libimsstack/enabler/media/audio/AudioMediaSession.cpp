@@ -33,7 +33,7 @@
 #include <AudioConfig.h>
 using namespace android::telephony::imsmedia;
 
-static const IMS_UINT32 IMS_MEDIA_TIMER_MARGIN = 1000;
+static const IMS_UINT32 IMS_MEDIA_TIMER_MARGIN = 500;
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -873,6 +873,12 @@ IMS_BOOL AudioMediaSession::SetMediaQuality()
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IJniMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
+
+    if (bResult && m_nNetworkToneTimer > 0)
+    {
+        StartTimer(m_nNetworkToneTimer);
+    }
+
     return bResult;
 }
 
@@ -881,11 +887,7 @@ void AudioMediaSession::SetNetworkToneTimer(IN IMS_UINT32 nTimer)
 {
     m_nNetworkToneTimer = nTimer;
 
-    if (nTimer > 0)
-    {
-        StartTimer(nTimer);
-    }
-    else
+    if (nTimer == 0)
     {
         StopTimer();
     }
