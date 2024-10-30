@@ -331,7 +331,7 @@ IMS_SINT32 AudioConfiguration::GetJitterBufferStepSize() const
     return m_nJitterBufferStepSize;
 }
 
-/*!
+/**
  * @brief   GetRtcpXr
  * @details Get RTCP-XR enable
  */
@@ -341,7 +341,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrEnabled() const
     return m_bAudioRtcpxrEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrStatistics
  * @details Get RTCP-XR statistic metrics enable
  */
@@ -351,7 +351,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrStatisticsEnabled() const
     return m_bAudioRtcpxrStatisticsEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrVoip
  * @details Get RTCP-XR Voip metrics enable
  */
@@ -361,7 +361,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrVoipEnabled() const
     return m_bAudioRtcpxrVoipMetricsEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrPlr
  * @details Get RTCP-XR packet loss rle enable
  */
@@ -371,7 +371,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrPlrEnabled() const
     return m_bAudioRtcpxrPacketLossRleEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrPdr
  * @details Get RTCP-XR packet duplicate rle enable
  */
@@ -391,6 +391,10 @@ IMS_SINT32 AudioConfiguration::GetDtmfDuration() const
     return m_nDtmfDuration;
 }
 
+/**
+ * @brief   GetAudioCandidateAttribute
+ * @details Get the audioCandidateAttribute
+ */
 PUBLIC
 const ImsVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
 {

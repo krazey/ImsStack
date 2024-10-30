@@ -151,6 +151,18 @@ public class AudioSessionCallbackHandler {
     }
 
     /**
+     * A notification is sent when an incoming audio dtmf is received.
+     * @param dtmfDigit Received incoming dtmf digit
+     * @param durationMs Dtmf tone playback time in milliseconds
+     */
+    public void onNotifyIncomingDtmfReceived(int dtmfDigit, int durationMs) {
+        ImsLog.v("onNotifyIncomingDtmfReceived: dtmfDigit= " + dtmfDigit + " duration= "
+                + durationMs);
+
+        getMtcMediaInterface().onNotifyIncomingDtmfReceived(dtmfDigit, durationMs);
+    }
+
+    /**
      * Handles notification when media quality change observed as per thresholds set by
      * setMediaQualityThreshold()
      *

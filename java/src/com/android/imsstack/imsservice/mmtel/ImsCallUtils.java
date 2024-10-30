@@ -847,6 +847,25 @@ public class ImsCallUtils {
         return false;
     }
 
+    /**
+     * Convert the Dtmf digit from int to char
+     *
+     * @param numDtmf int type Dtmf digit
+     * @return char type Dtmf digit
+     */
+    public static char convertIntToDtmfDigit(int numDtmf) {
+        if (numDtmf < 10) {
+            return (char) (numDtmf + '0');       // convert to '0'~'9'
+        } else if (numDtmf == 10) {
+            return '*';
+        } else if (numDtmf == 11) {
+            return '#';
+        }
+        // TODO : Need to check if DTMF service supports alphabets from A to D
+
+        return (char) numDtmf;
+    }
+
     private static String getCallExtra(ImsCallProfile profile, Bundle oemExtras,
             String key, String defaultValue) {
         if (CALL_PROFILE_OEM_EXTRA_PREFERRED && (oemExtras != null)) {

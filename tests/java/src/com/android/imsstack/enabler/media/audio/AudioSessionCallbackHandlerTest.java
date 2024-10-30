@@ -234,4 +234,12 @@ public class AudioSessionCallbackHandlerTest {
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
+
+    @Test
+    public void testOnNotifyIncomingDtmfReceived() {
+        int dtmfDigit = 1;
+        int duration = 200;
+        mAudioSessionCallbackHandler.onNotifyIncomingDtmfReceived(dtmfDigit, duration);
+        verify(mMockMtcMediaSession).onNotifyIncomingDtmfReceived(eq(dtmfDigit), eq(duration));
+    }
 }

@@ -71,6 +71,7 @@ public class MediaConstants {
     public static final int TRIGGER_ANBR_QUERY            = (IMSMEDIA_RESPONSE + 20);
     public static final int NOTIFY_ANBR_RECEIVED          = (IMSMEDIA_RESPONSE + 21);
     public static final int NOTIFY_RTP_RECEPTION_STATS    = (IMSMEDIA_RESPONSE + 22);
+    public static final int NOTIFY_DTMF_RECEIVED          = (IMSMEDIA_RESPONSE + 40);
 
     // Notifications for video
     public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 60);

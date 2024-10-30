@@ -361,9 +361,15 @@ public class AudioSessionHandler extends MediaState {
                     handleTriggerAnbrQuery((AudioConfig) msg.obj);
                 }
                     break;
+
                 case MediaConstants.NOTIFY_RTP_RECEPTION_STATS:
                     handleNotifyRtpReceptionStats((RtpReceptionStats) msg.obj);
                     break;
+
+                case MediaConstants.NOTIFY_DTMF_RECEIVED:
+                    handleNotifyIncomingDtmfReceived((int) msg.obj, msg.arg1);
+                    break;
+
                 default:
                 {
                     ImsLog.e("Invalid RequestType");
@@ -479,6 +485,13 @@ public class AudioSessionHandler extends MediaState {
                     stats).sendToTarget();
         }
 
+        @Override
+        public void onDtmfReceived(final char dtmfDigit, final int durationMs) {
+            ImsLog.d("onDtmfReceived: digit=" + ((int) dtmfDigit) + ", duration=" + durationMs);
+
+            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_DTMF_RECEIVED,
+                    durationMs, UNUSED, (int) dtmfDigit).sendToTarget();
+        }
     }
 
     /** Implements Interface to receive callbacks when the QoS is connected or disconnected. */
@@ -1075,6 +1088,12 @@ public class AudioSessionHandler extends MediaState {
     private void handleNotifyRtpReceptionStats(final RtpReceptionStats stats) {
         if (mAudioSessionCallbackHandler != null) {
             mAudioSessionCallbackHandler.onNotifyRtpReceptionStats(stats);
+        }
+    }
+
+    private void handleNotifyIncomingDtmfReceived(final int dtmfDigit, final int durationMs) {
+        if (mAudioSessionCallbackHandler != null) {
+            mAudioSessionCallbackHandler.onNotifyIncomingDtmfReceived(dtmfDigit, durationMs);
         }
     }
 

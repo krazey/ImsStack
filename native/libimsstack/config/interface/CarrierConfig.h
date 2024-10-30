@@ -1036,6 +1036,7 @@ public:
         static const IMS_CHAR KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[];
         static const IMS_CHAR KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
+        static const IMS_CHAR KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[];
 
         // Mts
         static const IMS_CHAR KEY_SMS_REQUEST_URI_TYPE_INT[];
