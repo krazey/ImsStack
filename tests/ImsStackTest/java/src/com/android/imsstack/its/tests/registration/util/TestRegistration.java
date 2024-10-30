@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
+import com.android.imsstack.its.servercontrol.ServerFailureHandler;
 import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
@@ -37,7 +38,7 @@ import java.util.function.Predicate;
 /**
  * Provides utilities and assertions for registration tests that use {@link ImsRegistrationWrapper}.
  */
-public class TestRegistration {
+public class TestRegistration extends ServerFailureHandler {
 
     private static final int DEFAULT_TIMEOUT_MS = 10000;
 
@@ -159,6 +160,11 @@ public class TestRegistration {
         Log.d(o, "TestRegistration: " + s);
     }
 
+    @Override
+    protected void handleServerFailure() {
+        mLatch.countDownAndInit();
+    }
+
     /**
      * A timed expectation for waiting for a specific event to occur within a defined time period.
      * This expectation is used to verify if a particular event has occurred within the specified
@@ -180,6 +186,10 @@ public class TestRegistration {
                 mLatch.await(mWaitingTimeMillis);
             } else {
                 mLatch.awaitTimeout(mWaitingTimeMillis);
+            }
+
+            if (mFailureDetail != null) {
+                fail(mFailureDetail);
             }
         }
 
