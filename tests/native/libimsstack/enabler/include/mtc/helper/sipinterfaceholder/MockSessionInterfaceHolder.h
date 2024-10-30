@@ -64,8 +64,11 @@ public:
                     IN const AString& strTo),
             (override));
     MOCK_METHOD(void, AddISession, (IN CallKey nKey, IN ISession* piSession), (override));
-    MOCK_METHOD(
-            void, ReleaseISession, (IN ISession* piSession, IN IMS_BOOL bTerminated), (override));
+    MOCK_METHOD(void, ReleaseISession, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, ReleaseISession,
+            (IN ISession * piSession, IN IMS_BOOL bEnforceDestroy,
+                    IN IMS_BOOL bSessionTerminatedOrStartFailed),
+            (override));
     MOCK_METHOD(IMS_BOOL, IsReadyToDestroy, (IN ISession* piSession), ());
     MOCK_METHOD(void, ClearISessions, (), ());
     MOCK_METHOD(IMS_RESULT, StartTimer, (IN ISession* piSession, IN IMS_SINT32 nDuration), ());

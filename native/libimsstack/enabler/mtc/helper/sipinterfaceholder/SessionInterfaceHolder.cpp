@@ -55,7 +55,7 @@ PUBLIC VIRTUAL void SessionInterfaceHolder::SessionTerminated(IN ISession* piSes
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
-    ReleaseISession(piSession, IMS_TRUE);
+    ReleaseISession(piSession, IMS_TRUE, IMS_TRUE);
 }
 
 PUBLIC VIRTUAL void SessionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
@@ -69,7 +69,7 @@ PUBLIC VIRTUAL void SessionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTime
         {
             ISession* piSession = pRecord->second->piSession;
             StopTimer(piTimer);
-            ReleaseISession(piSession, IMS_TRUE);
+            ReleaseISession(piSession, IMS_TRUE, IMS_FALSE);
             break;
         }
     }
@@ -118,8 +118,14 @@ void SessionInterfaceHolder::AddISession(CallKey nKey, IN ISession* piSession)
 }
 
 PUBLIC
-void SessionInterfaceHolder::ReleaseISession(
-        IN ISession* piSession, IN IMS_BOOL bTerminated /* = IMS_FALSE*/)
+void SessionInterfaceHolder::ReleaseISession(IN ISession* piSession)
+{
+    ReleaseISession(piSession, IMS_FALSE, IMS_FALSE);
+}
+
+PUBLIC
+void SessionInterfaceHolder::ReleaseISession(IN ISession* piSession, IN IMS_BOOL bEnforceDestroy,
+        IN IMS_BOOL bSessionTerminatedOrStartFailed)
 {
     if (piSession == IMS_NULL)
     {
@@ -127,11 +133,12 @@ void SessionInterfaceHolder::ReleaseISession(
     }
 
     IMS_UINT32 nSize = m_objSessionRecords.size();
-    IMS_TRACE_D("ReleaseISession size=[%d]", nSize, 0, 0);
+    IMS_TRACE_D("ReleaseISession size=[%d] EnforceDestroy[%s] SessionTerminated(%s)", nSize,
+            _TRACE_B_(bEnforceDestroy), _TRACE_B_(bSessionTerminatedOrStartFailed));
 
     piSession->SetListener(this);
 
-    if (bTerminated || IsReadyToDestroy(piSession))
+    if (bEnforceDestroy || IsReadyToDestroy(piSession, bSessionTerminatedOrStartFailed))
     {
         auto pRecord = std::find_if(m_objSessionRecords.begin(), m_objSessionRecords.end(),
                 [&piSession](const std::pair<CallKey, SessionRecord*>& record)
@@ -169,10 +176,18 @@ void SessionInterfaceHolder::ReleaseISession(
 }
 
 PRIVATE
-IMS_BOOL SessionInterfaceHolder::IsReadyToDestroy(IN ISession* piSession)
+IMS_BOOL SessionInterfaceHolder::IsReadyToDestroy(
+        IN ISession* piSession, IN IMS_BOOL bSessionTerminatedOrStartFailed)
 {
     IMS_TRACE_D("IsReadyToDestroy [%d]", piSession->GetState(), 0, 0);
-    return piSession->GetState() == ISession::STATE_TERMINATED;
+    if (bSessionTerminatedOrStartFailed)
+    {
+        if (piSession->GetState() != ISession::STATE_TERMINATING)
+        {
+            return IMS_TRUE;
+        }
+    }
+    return IMS_FALSE;
 }
 
 PRIVATE
