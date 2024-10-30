@@ -51,7 +51,7 @@ void AudioController::SetConfirmSession(IN IMS_BOOL bConfirmed)
 {
     if (bConfirmed)
     {
-        m_eUpdateCondition = READY_TO_CONFIRM;
+        m_eUpdateCondition = CONFIRMED_SESSION;
     }
     else
     {

@@ -292,7 +292,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
         // audio
         if (pMediaNego->GetAudioNego() != IMS_NULL)
         {
-            m_objAudioController.AddSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
+            m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
         }
 
         // video
