@@ -61,7 +61,7 @@ public class MediaConfigTest {
     @Test
     public void testUpdateMediaQualityThreshold() {
         MediaQualityThreshold mediaQualityThreshold = MediaTestUtils.createMediaQualityThreshold();
-        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold);
+        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold, true);
         MediaQualityThreshold expectedThreshold =  new MediaQualityThreshold.Builder()
                 .setRtpInactivityTimerMillis(MediaTestUtils.RTP_TIMEOUT)
                 .setRtcpInactivityTimerMillis(MediaTestUtils.RTCP_TIMEOUT)
@@ -94,7 +94,7 @@ public class MediaConfigTest {
     public void testCombinedMediaQualityThreshold() {
         MediaQualityThreshold mediaQualityThreshold = MediaTestUtils.createMediaQualityThreshold();
         MediaThreshold mediaThreshold = MediaTestUtils.createMediaThreshold();
-        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold);
+        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold, true);
         mMediaConfig.updateMediaQualityThreshold(mediaThreshold);
         MediaQualityThreshold expectedThreshold =  new MediaQualityThreshold.Builder()
                 .setRtpInactivityTimerMillis(new int[]{ 10000, 20000, 5000, 15000 })
@@ -110,7 +110,7 @@ public class MediaConfigTest {
         // Media threshold from Native updated after threshold from frameworks
         mMediaConfig.resetMediaConfig();
         mMediaConfig.updateMediaQualityThreshold(mediaThreshold);
-        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold);
+        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold, true);
         assertTrue(mMediaConfig.getMediaQualityThreshold().equals(expectedThreshold));
     }
 
@@ -119,7 +119,7 @@ public class MediaConfigTest {
         MediaQualityThreshold mediaQualityThreshold = MediaTestUtils.createMediaQualityThreshold();
         MediaThreshold mediaThreshold = MediaTestUtils.createMediaThreshold();
         mMediaConfig.updateMediaQualityThreshold(mediaThreshold);
-        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold);
+        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold, true);
         // clear threshold from frameworks
         mMediaConfig.updateMediaQualityThreshold((MediaThreshold) null);
         MediaQualityThreshold expectedThreshold =  new MediaQualityThreshold.Builder()

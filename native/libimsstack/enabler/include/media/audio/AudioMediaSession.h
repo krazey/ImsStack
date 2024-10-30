@@ -189,10 +189,13 @@ public:
      */
     IMS_BOOL Close();
 
-    /*
-     * request SET_MEDIA_QUALITY with Audio Media qualityThreshold
+    /**
+     * @brief request SET_MEDIA_QUALITY with Audio Media qualityThreshold
+     *
+     * @param bConfirmedSession Set IMS_TRUE if this session is confirmed session
+     * @return IMS_BOOL returns IMS_TRUE when the SetMediaQualityThreshold request is triggered
      */
-    IMS_BOOL SetMediaQuality();
+    IMS_BOOL SetMediaQuality(IN IMS_BOOL bConfirmedSession);
 
     /**
      * @brief Send a dtmf digit to the ImsMedia
@@ -248,6 +251,7 @@ private:
     void StopTimer();
     IMS_SINT32 GetRtpInactivityTimer(IN IMS_BOOL bActiveSession);
     IMS_SINT32 GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession);
+    IMS_BOOL IsRtpInactivityForQnsNeeded(IN IMS_BOOL bConfirmedSession);
 
 protected:
     AudioConfiguration* m_pConfig;

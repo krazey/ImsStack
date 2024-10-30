@@ -116,10 +116,14 @@ public class MediaConfig {
     /**
      * Updates Media Quality Thresholds received from Media native
      *
-     * @param  mediaThreshold object to set the threshold for
-     *         media quality status notifications
+     * @param mediaThreshold object to set the threshold for media quality status notifications
+     * @param needFwkTimer boolean to check if the telephony framework needs timer for the RTP
+     *        inactivity for the QNS
+     *
+     * @return boolean return true if MediaQualityThreshold is set
      */
-    public boolean updateMediaQualityThreshold(MediaQualityThreshold mediaThreshold) {
+    public boolean updateMediaQualityThreshold(MediaQualityThreshold mediaThreshold,
+            boolean needFwkTimer) {
         if (mRtcpInactivityTimer == mediaThreshold.getRtcpInactivityTimerMillis()
                 && Arrays.equals(mRtpInactivityImsTimer,
                     mediaThreshold.getRtpInactivityTimerMillis())) {
@@ -129,13 +133,15 @@ public class MediaConfig {
         mRtcpInactivityTimer = mediaThreshold.getRtcpInactivityTimerMillis();
         // update Rtp Inactivity Timer
         mRtpInactivityImsTimer = mediaThreshold.getRtpInactivityTimerMillis();
-        if (mRtpInactivityFwkTimer.length == 0) {
-            mRtpInactivityCombinedTimer = Arrays.copyOf(mRtpInactivityImsTimer,
-                    mRtpInactivityImsTimer.length);
-        } else {
+
+        if (needFwkTimer && mRtpInactivityFwkTimer.length != 0) {
             mRtpInactivityCombinedTimer = IntStream.concat(Arrays.stream(mRtpInactivityImsTimer),
-                    Arrays.stream(mRtpInactivityFwkTimer)).toArray();
+                Arrays.stream(mRtpInactivityFwkTimer)).toArray();
+        } else {
+            mRtpInactivityCombinedTimer = Arrays.copyOf(mRtpInactivityImsTimer,
+                mRtpInactivityImsTimer.length);
         }
+
         return true;
     }
 

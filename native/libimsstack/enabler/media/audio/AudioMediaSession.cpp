@@ -862,7 +862,7 @@ IMS_SINT32 AudioMediaSession::ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::SetMediaQuality()
+IMS_BOOL AudioMediaSession::SetMediaQuality(IN IMS_BOOL bConfirmedSession)
 {
     IMS_TRACE_I("SetMediaQuality() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -871,6 +871,8 @@ IMS_BOOL AudioMediaSession::SetMediaQuality()
     {
         ImsMediaMsgSetMediaQualityParam* pParam =
                 new ImsMediaMsgSetMediaQualityParam(MEDIA_TYPE_AUDIO);
+
+        pParam->m_bRtpInactivityFwkTimer = IsRtpInactivityForQnsNeeded(bConfirmedSession);
         pParam->m_objMediaQualityThreshold = m_objMediaQualityThreshold;
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IJniMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
@@ -956,4 +958,12 @@ IMS_SINT32 AudioMediaSession::GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession)
     IMS_TRACE_D("GetRtcpInactivityTimer() - RtcpTimer[%d]", nRtcpTimer, 0, 0);
 
     return nRtcpTimer;
+}
+
+PRIVATE
+IMS_BOOL AudioMediaSession::IsRtpInactivityForQnsNeeded(IN IMS_BOOL bConfirmedSession)
+{
+    IMS_TRACE_D("IsRtpInactivityForQnsNeeded() - confirmed session[%d], direction[%d]",
+            bConfirmedSession, GetDirection(), 0);
+    return bConfirmedSession ? !MEDIA_DIRECTION_IS_AUDIO_HOLD(GetDirection()) : IMS_FALSE;
 }

@@ -268,7 +268,8 @@ public class AudioSessionHandler extends MediaState {
 
                 case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
                 {
-                    handleAudioSetMediaQualityThreshold((MediaQualityThreshold) msg.obj);
+                    handleAudioSetMediaQualityThreshold((MediaQualityThreshold) msg.obj,
+                            msg.arg1 == 1);
                 }
                     break;
 
@@ -588,11 +589,14 @@ public class AudioSessionHandler extends MediaState {
 
             case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
             {
+                Boolean needFwkTimer = parcel.readBoolean();
                 MediaQualityThreshold threshold =
                     MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("MediaQualityThreshold: " + threshold.toString());
+                ImsLog.v("MediaQualityThreshold: " + threshold.toString() + ", needFwkTimer="
+                        + needFwkTimer);
 
-                Message.obtain(mAudioMessageHandler, requestType, threshold).sendToTarget();
+                Message.obtain(mAudioMessageHandler, requestType, needFwkTimer ? 1 : 0, UNUSED,
+                    threshold).sendToTarget();
             }
                 break;
 
@@ -890,8 +894,9 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold mediaThreshold) {
-        if (mMediaConfig.updateMediaQualityThreshold(mediaThreshold)) {
+    private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold mediaThreshold,
+            Boolean needFwkTimer) {
+        if (mMediaConfig.updateMediaQualityThreshold(mediaThreshold, needFwkTimer)) {
             setAudioQualityThreshold();
         }
     }
