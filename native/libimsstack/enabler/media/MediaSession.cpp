@@ -1326,14 +1326,17 @@ IMS_BOOL MediaSession::HandleNotifyMediaInactivity(IN IMS_UINTP nParam)
             IMS_TRACE_I("OnNotify() - Notified rtp inactivity[%d], rtcp inactivity[%d]",
                     pParam->m_nRtpInactivityTimerMillis, pParam->m_nRtcpInactivityTimerMillis, 0);
 
-            if (nLocalNetworkToneTimer > 0 && pParam->m_nRtpInactivityTimerMillis > 0 &&
-                    pParam->m_nRtpInactivityTimerMillis >= nLocalNetworkToneTimer)
+            if (nLocalNetworkToneTimer > 0)
             {
-                m_objAudioController.SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
-                m_pClientListener->MediaSession_Notify(
-                        REPORT_DATA_RECEIVE_FAILED, pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
-                m_pClientListener->MediaSession_Notify(
-                        REPORT_NW_TONE_RTP_RECEIVE_FAILED, pParam->m_eMediaType);
+                if (IsInactivityTimerExpired(
+                            pParam->m_nRtpInactivityTimerMillis, nLocalNetworkToneTimer))
+                {
+                    IMS_TRACE_I("HandleNotifyMediaInactivity() - Notified netwok tone timeout", 0,
+                            0, 0);
+                    m_objAudioController.SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
+                    m_pClientListener->MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_FAILED,
+                            pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
+                }
             }
             else
             {

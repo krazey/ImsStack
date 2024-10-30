@@ -89,8 +89,6 @@ PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
         if (m_piMediaSessionListener != IMS_NULL)
         {
             m_piMediaSessionListener->MediaSession_NotifyToClient(
-                    REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
-            m_piMediaSessionListener->MediaSession_NotifyToClient(
                     REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
         }
     }
