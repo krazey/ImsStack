@@ -81,6 +81,8 @@ public:
             IN IMS_BOOL bExplicitUpdate = IMS_TRUE) final;
     void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) final;
 
+    IMS_BOOL IsInCallbackMode() final;
+
 protected:
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) final;
 

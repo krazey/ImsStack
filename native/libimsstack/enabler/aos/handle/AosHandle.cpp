@@ -1148,10 +1148,12 @@ void AosHandle::NotifyEmergencyInitiated()
     if (m_nServiceType == ImsAosService::EMERGENCY_MTC)
     {
         m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
+        m_piAppContext->GetApp()->RequestCmd(IAosApplication::CMD_ECALL_INIT);
     }
     else if (m_nServiceType == ImsAosService::EMERGENCY_MTS)
     {
         m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
+        m_piAppContext->GetApp()->RequestCmd(IAosApplication::CMD_ESMS_INIT);
     }
 
     m_bEmergencyInitiated = IMS_TRUE;

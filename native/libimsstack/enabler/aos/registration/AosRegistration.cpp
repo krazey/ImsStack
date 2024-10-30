@@ -571,6 +571,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosRegistration::GetImsRegType()
     return IMS_REG_TYPE_INVALID;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosRegistration::IsInCallbackMode()
+{
+    return IMS_FALSE;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosRegistration::IsRegistered()
 {
     return (IsRefreshing() || m_nState == STATE_REGISTERED);

@@ -74,6 +74,13 @@ public:
         PROPERTY_REGISTERED_RAT = 0
     };
 
+    /// Command
+    enum
+    {
+        CMD_ECALL_INIT = 100,
+        CMD_ESMS_INIT
+    };
+
 protected:
     friend class AosBuildDirector;
     friend class AosAppContext;

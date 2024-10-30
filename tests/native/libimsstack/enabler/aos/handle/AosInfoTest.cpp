@@ -57,6 +57,7 @@ public:
     TestAosHandle* m_pTestAosHandle;
     AosInfo* m_pAosInfo;
     MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosApplication m_objMockIAosApplication;
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
@@ -73,6 +74,8 @@ protected:
         EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
                 .Times(AnyNumber())
                 .WillRepeatedly(ReturnRef(strValue));
+
+        ON_CALL(m_objMockIAosAppContext, GetApp()).WillByDefault(Return(&m_objMockIAosApplication));
 
         m_pTestAosHandle = new TestAosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
@@ -505,6 +508,7 @@ TEST_F(AosInfoTest, NotifyEmergencyCallState_Test)
             .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_INIT, _)).Times(1);
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_DONE, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ECALL_INIT, _));
 
     NotifyEmergencyCallState(IMS_TRUE);
     NotifyEmergencyCallState(IMS_FALSE);
@@ -569,6 +573,7 @@ TEST_F(AosInfoTest, NotifyEmergencySmsState_Test)
             .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_INIT, _)).Times(1);
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_DONE, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ESMS_INIT, _));
 
     NotifyEmergencySmsState(IMS_TRUE);
     NotifyEmergencySmsState(IMS_FALSE);

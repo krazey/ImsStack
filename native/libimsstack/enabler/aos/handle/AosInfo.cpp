@@ -228,6 +228,7 @@ PRIVATE VIRTUAL void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialize
     if (bIsInitialized)
     {
         m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
+        m_piContext->GetApp()->RequestCmd(IAosApplication::CMD_ECALL_INIT);
     }
     else
     {
@@ -270,6 +271,7 @@ PRIVATE VIRTUAL void AosInfo::NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized
     if (bIsInitialized)
     {
         m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
+        m_piContext->GetApp()->RequestCmd(IAosApplication::CMD_ESMS_INIT);
     }
     else
     {
