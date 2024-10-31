@@ -167,4 +167,17 @@
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="2"/>
     <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="true"/>
     <string name="imsvoice.conference_factory_uri_string">sip:mmtel@conf-factory.test.3gpp.com</string>
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
+        <item value="1"/> <!-- EMERGENCY_LTE-->
+        <item value="1"/> <!-- EMERGENCY_WIFI -->
+        <item value="0"/> <!-- NORMAL_LTE -->
+        <item value="0"/> <!-- NORMAL_WIFI -->
+    </int-array>
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
+        <item value="0"/> <!-- INVITE -->
+    </int-array>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
 </carrier_config>
