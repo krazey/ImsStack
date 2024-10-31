@@ -137,12 +137,14 @@ public:
      * @brief Update MediaQualityThreshold parameters and send it to the java
      *
      * @param bActiveSession Set IMS_TRUE if this session is active
+     * @param bConfirmedSession Set IMS_TRUE if this session is confirmed session
      * @param bEnableRtcp Set IMS_TRUE to enable monitoring Rtcp inacitivity, IMS_FALSE to disable
      * rtcp monitoring
      * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
      * successfully, IMS_FALSE when it is failed with invalid arguments
      */
-    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp);
+    IMS_BOOL UpdateMediaQualityThreshold(
+            IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp);
 
     /**
      * @brief Set the local ip address and port number

@@ -511,14 +511,18 @@ IMS_BOOL AudioMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
 
 PUBLIC
 IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
-        IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp)
+        IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp)
 {
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - ActiveSession[%d] EnableRtcp[%d]", bActiveSession,
-            bEnableRtcp, 0);
-
-    m_nRtcpInactivityTimer = bEnableRtcp ? GetRtcpInactivityTimer(bActiveSession) : 0;
-
-    m_nRtpInactivityTimer = GetRtpInactivityTimer(bActiveSession);
+    if (bConfirmedSession)
+    {
+        m_nRtcpInactivityTimer = bEnableRtcp ? GetRtcpInactivityTimer(bActiveSession) : 0;
+        m_nRtpInactivityTimer = GetRtpInactivityTimer(bActiveSession);
+    }
+    else
+    {
+        m_nRtcpInactivityTimer = 0;
+        m_nRtpInactivityTimer = 0;
+    }
 
     IMS_SINT32 nRtpInactivityValue = GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0
             ? GetInactivityTimer(NETWORK_TONE_INACTIVITY)
@@ -528,9 +532,9 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
             std::vector<int32_t>{nRtpInactivityValue});
     m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(m_nRtcpInactivityTimer);
 
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - ActiveSession[%d], "
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - ConfirmedSession[%d], "
                 "RtpInactivity[%d], RtcpInactivity[%d]",
-            bActiveSession,
+            bConfirmedSession,
             (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
                     ? -1
                     : m_objMediaQualityThreshold.getRtpInactivityTimerMillis().front(),
