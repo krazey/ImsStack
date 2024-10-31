@@ -113,6 +113,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetImsSignallingDscp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPrivateHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegActualWaitTimePolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegDefaultWaitTime, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegOutOfServicePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRoamingPreferredEmcReg, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSipMessageThresholdForTransportChange, (), (const, override));

@@ -763,6 +763,7 @@ const IMS_CHAR CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT[] = "ims_pref
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT[] = "ims_signalling_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[] =
         "reg_actual_wait_time_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_DEFAULT_WAIT_TIME_INT[] = "reg_default_wait_time_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT[] =
         "reg_out_of_service_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_PCSCF_UPDATE_POLICY_INT[] =

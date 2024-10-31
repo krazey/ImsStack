@@ -550,6 +550,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegActualWaitTimePolicy() const
     return m_objAsset.nRegActualWaitTimePolicy;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegDefaultWaitTime() const
+{
+    return m_objAsset.nRegDefaultWaitTime;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegOutOfServicePolicy() const
 {
     return m_objAsset.nRegOutOfServicePolicy;
@@ -1390,6 +1395,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT);
     m_objAsset.nRegActualWaitTimePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT);
+    m_objAsset.nRegDefaultWaitTime =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_DEFAULT_WAIT_TIME_INT);
     m_objAsset.nRegOutOfServicePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT);
     m_objAsset.nRegPcscfUpdatePolicy =

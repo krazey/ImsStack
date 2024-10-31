@@ -70,6 +70,7 @@ public:
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
             nRegActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
+            nRegDefaultWaitTime(0),
             nRegOutOfServicePolicy(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT),
             nRegPcscfUpdatePolicy(CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_DEFAULT),
             nRegRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
@@ -148,6 +149,7 @@ public:
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
     IMS_SINT32 nRegActualWaitTimePolicy;
+    IMS_SINT32 nRegDefaultWaitTime;
     IMS_SINT32 nRegOutOfServicePolicy;
     IMS_SINT32 nRegPcscfUpdatePolicy;
     IMS_SINT32 nRegRetry305Policy;

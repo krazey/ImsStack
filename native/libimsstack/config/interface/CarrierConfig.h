@@ -902,6 +902,7 @@ public:
         static const IMS_CHAR KEY_IMS_PREFERRED_IPTYPE_INT[];
         static const IMS_CHAR KEY_IMS_SIGNALLING_DSCP_INT[];
         static const IMS_CHAR KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_DEFAULT_WAIT_TIME_INT[];
         static const IMS_CHAR KEY_REG_OUT_OF_SERVICE_POLICY_INT[];
         static const IMS_CHAR KEY_REG_PCSCF_UPDATE_POLICY_INT[];
         static const IMS_CHAR KEY_REG_RETRY_305_POLICY_INT[];

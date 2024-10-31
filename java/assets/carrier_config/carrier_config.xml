@@ -361,6 +361,7 @@
     <int name="ims_preferred_iptype_int" value="1"/>
     <int name="ims_signalling_dscp_int" value="46"/>
     <int name="reg_actual_wait_time_policy_int" value="0"/>
+    <int name="reg_default_wait_time_int" value="0"/>
     <int name="reg_out_of_service_policy_int" value="0"/>
     <int name="reg_pcscf_update_policy_int" value="0"/>
     <int name="reg_retry_305_policy_int" value="1"/>

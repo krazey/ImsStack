@@ -670,6 +670,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT, -1))
             .WillOnce(Return(0));
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_DEFAULT_WAIT_TIME_INT, -1))
+            .WillOnce(Return(0));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT));
@@ -843,6 +845,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(1, m_pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, m_pAosNConfiguration->GetImsSignallingDscp());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegActualWaitTimePolicy());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetRegDefaultWaitTime());
     EXPECT_EQ(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT,
             m_pAosNConfiguration->GetRegOutOfServicePolicy());
     EXPECT_EQ(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT,

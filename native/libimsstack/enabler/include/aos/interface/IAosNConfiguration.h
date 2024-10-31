@@ -774,6 +774,14 @@ public:
     virtual IMS_SINT32 GetRegActualWaitTimePolicy() const = 0;
 
     /**
+     * @brief Indicate the default wait time prior to proceed to the next PCSCF.
+     *        If this value is greater than 0, this will overlay the actual wait time.
+     *
+     * @return IMS_SINT32 Return the default wait time
+     */
+    virtual IMS_SINT32 GetRegDefaultWaitTime() const = 0;
+
+    /**
      * @brief Get the out of service policy object
      *
      *        CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT
