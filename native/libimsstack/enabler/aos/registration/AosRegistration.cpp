@@ -2508,6 +2508,13 @@ PROTECTED VIRTUAL void AosRegistration::UpdateIpsecSupported(
 
 PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
 {
+    IMS_SINT32 nDefaultWaitTime = GET_N_CONFIG(m_nSlotId)->GetRegDefaultWaitTime();
+
+    if (nDefaultWaitTime > 0)
+    {
+        return nDefaultWaitTime;
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
             CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
@@ -3357,8 +3364,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf
         }
 
         if ((GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
-                    CarrierConfig::Assets::AWT_POLICY_RFC_RULE) &&
-                GET_N_CONFIG(m_nSlotId)->IsAwtUsedWhenInitRegWithNextPcscf())
+                    CarrierConfig::Assets::AWT_POLICY_RFC_RULE))
         {
             ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
             IncreaseConsecutiveFailCount();
@@ -3653,33 +3659,36 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
             return;
         }
     }
-    else
+    else  // AWT_POLICY_RFC_RULE
     {
-        if (!IsRetryOnSamePcscfRequired())
-        {
-            m_piContext->GetPcscf()->SetCurrentPcscfInvalid(
-                    IMS_TRUE, (nRetryAfter > 0) ? nRetryAfter : nAwt);
-        }
+        IMS_BOOL bBlockPcscf = GET_N_CONFIG(m_nSlotId)->IsBlockPcscfOnRegFailure();
 
-        if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_RFC_RULE &&
-                (GET_N_CONFIG(m_nSlotId)->IsAwtUsedWhenInitRegWithNextPcscf()))
+        if (nRetryAfter > 0)  // IR.92
         {
-            if (SetNextPcscf())
+            if (bBlockPcscf)
             {
-                IMS_UINT32 nRetryTime = (nRetryAfter > 0) ? nRetryAfter : nAwt;
-                StartTimer(TIMER_STOP_RETRY, nRetryTime * 1000);
-
-                SetState(STATE_REGSTOP);
-                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
-                return;
+                m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nRetryAfter);
             }
-        }
-        else
-        {
+
             if (TryNextPcscf())
             {
                 SetState(STATE_REGISTERING);
                 ReportTryingState();
+                return;
+            }
+        }
+        else  // 3GPP TS 24.229
+        {
+            if (bBlockPcscf)
+            {
+                m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nAwt + 300);
+            }
+
+            if (SetNextPcscf())
+            {
+                StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+                SetState(STATE_REGSTOP);
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
                 return;
             }
         }
@@ -3692,9 +3701,9 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
         m_nPdnReactivateWaitTime = 0;
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
     }
-    else
+    else  // AWT_POLICY_RFC_RULE
     {
-        m_nPdnReactivateWaitTime = (nRetryAfter == 0 || nRetryAfter > nAwt) ? nAwt : nRetryAfter;
+        m_nPdnReactivateWaitTime = (nRetryAfter > 0) ? nRetryAfter : nAwt;
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
     }
 }
@@ -4373,7 +4382,10 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
     IMS_UINT32 nAwt = GetActualWaitTime();
     if (!IsRetryOnSamePcscfRequired())
     {
-        m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nAwt);
+        if (GET_N_CONFIG(m_nSlotId)->IsBlockPcscfOnRegFailure())
+        {
+            m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nAwt + 300);
+        }
     }
 
     if (TryNextPcscf())
