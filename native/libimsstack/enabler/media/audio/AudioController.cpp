@@ -528,9 +528,6 @@ PUBLIC void AudioController::SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UI
 PUBLIC IMS_SINT32 AudioController::GetInactivityTimer(
         IN InactivitytimerType eType, IN IMS_UINTP nNegoId)
 {
-    IMS_TRACE_I("GetInactivityTimer() - Type[%d], nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]",
-            eType, nNegoId, m_nCurrentActiveNegoId);
-
     if (nNegoId == UNDEFINED_NEGO_ID)
     {
         nNegoId = m_nCurrentActiveNegoId;

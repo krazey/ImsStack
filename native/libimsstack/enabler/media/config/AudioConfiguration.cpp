@@ -408,8 +408,6 @@ IMS_BOOL AudioConfiguration::IsAudioInactivityCallEndReason(IN IMS_SINT32 nReaso
 
     for (IMS_UINT32 i = 0; i < m_objAudioInactivityCallEndReasons.GetSize(); i++)
     {
-        IMS_TRACE_D("IsAudioInactivityCallEndReason() - value: %d reason: %d",
-                m_objAudioInactivityCallEndReasons.GetAt(i), nReason, 0);
         if (m_objAudioInactivityCallEndReasons.GetAt(i) == nReason)
         {
             return IMS_TRUE;

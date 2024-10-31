@@ -1397,9 +1397,6 @@ PRIVATE
 IMS_BOOL MediaSession::IsInactivityTimerExpired(
         IN IMS_SINT32 nRunningTimerValue, IN IMS_SINT32 nTimerValue)
 {
-    IMS_TRACE_D("IsInactivityTimerExpired() - runningtimer[%d], timerValue[%d]", nRunningTimerValue,
-            nTimerValue, 0);
-
     if (nRunningTimerValue > 0 && nTimerValue > 0 && nRunningTimerValue >= nTimerValue)
     {
         return IMS_TRUE;
