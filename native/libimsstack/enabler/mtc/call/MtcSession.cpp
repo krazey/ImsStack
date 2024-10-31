@@ -54,6 +54,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
+        m_bSessionTerminatedOrStartFailed(IMS_FALSE),
         m_eOngoingUpdateType(UpdateType::NONE),
         m_objCallTypeHistory({})
 {
@@ -86,7 +87,8 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
     m_objSession.SetRefreshListener(IMS_NULL);
     delete m_pMessageSender;
 
-    m_objContext.GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(&m_objSession);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(
+            &m_objSession, IMS_FALSE, m_bSessionTerminatedOrStartFailed);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()

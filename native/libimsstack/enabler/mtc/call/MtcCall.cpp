@@ -652,6 +652,12 @@ PUBLIC VIRTUAL void MtcCall::SessionStartFailed(IN ISession* piSession)
         return;
     }
 
+    IMtcSession* piMtcSession = GetSession(piSession);
+    if (piMtcSession)
+    {
+        piMtcSession->SetSessionTerminatedOrStartFailed();
+    }
+
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
@@ -667,6 +673,12 @@ PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
     {
         OnInternalFailure();
         return;
+    }
+
+    IMtcSession* piMtcSession = GetSession(piSession);
+    if (piMtcSession)
+    {
+        piMtcSession->SetSessionTerminatedOrStartFailed();
     }
 
     if (IsUssi())

@@ -64,6 +64,11 @@ public:
     IMS_RESULT CancelUpdate(IN const CallReasonInfo& objReason) override;
     IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) override;
 
+    inline void SetSessionTerminatedOrStartFailed() override
+    {
+        m_bSessionTerminatedOrStartFailed = IMS_TRUE;
+    }
+
     void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
@@ -113,6 +118,7 @@ private:
     IMS_BOOL m_bVideoCapable;
     IMS_BOOL m_bRttCapable;
     IMS_BOOL m_bTerminated;
+    IMS_BOOL m_bSessionTerminatedOrStartFailed;
     UpdateType m_eOngoingUpdateType;
 
     std::vector<CallType> m_objCallTypeHistory;

@@ -68,7 +68,9 @@ public:
     virtual ISession* GetISession(IN CallKey nKey, IN ICoreService* piCoreService,
             IN const AString& strFrom, IN const AString& strTo);
     virtual void AddISession(IN CallKey nKey, IN ISession* piSession);
-    virtual void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bTerminated = IMS_FALSE);
+    virtual void ReleaseISession(IN ISession* piSession);
+    virtual void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bEnforceDestroy,
+            IN IMS_BOOL bSessionTerminatedOrStartFailed);
 
     inline virtual IMS_BOOL IsTimerExist(IN ISession* piSession) const
     {
@@ -78,7 +80,8 @@ public:
     inline virtual IMS_UINT32 GetSessionCount() const { return m_objSessionRecords.size(); }
 
 private:
-    static IMS_BOOL IsReadyToDestroy(IN ISession* piSession);
+    static IMS_BOOL IsReadyToDestroy(
+            IN ISession* piSession, IN IMS_BOOL bSessionTerminatedOrStartFailed);
 
     void StartTimer(IN ISession* piSession);
     void StopTimer(IN ITimer* piTimer);
