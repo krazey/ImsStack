@@ -409,11 +409,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() c
     return m_objAsset.bSupportVerstatForReg;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsAwtUsedWhenInitRegWithNextPcscf() const
-{
-    return m_objAsset.bUseAwtWhenInitRegWithNextPcscf;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const
 {
     return m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
@@ -1365,8 +1360,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
     m_objAsset.bSupportVideoForEmergencyReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL);
-    m_objAsset.bUseAwtWhenInitRegWithNextPcscf =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Assets::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
     m_objAsset.bUseSecurityServerPortInInitReg =
