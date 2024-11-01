@@ -137,6 +137,8 @@ protected:
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objSession, IsFinalResponseReceivedForInitialInviteRequest)
+                .WillByDefault(Return(IMS_FALSE));
 
         ON_CALL(objCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
@@ -1754,6 +1756,42 @@ TEST_F(OutgoingStateTest,
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
     EXPECT_CALL(objUiNotifier, SendProgressing());
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendPrackIfFinalResponseIsNotReceived)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_180));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objSession, IsFinalResponseReceivedForInitialInviteRequest)
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcSession, SendPrack(_));
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedDoesNotInvokeSendPrackIfFinalResponseIsReceived)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_180));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objSession, IsFinalResponseReceivedForInitialInviteRequest)
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendPrack(_)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }

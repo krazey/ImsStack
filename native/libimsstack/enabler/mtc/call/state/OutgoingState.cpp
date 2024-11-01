@@ -559,10 +559,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (pSession->SendPrack(IsNeedToSendLocalResourceConfirmation(piSession)) == IMS_FAILURE)
+    if (piSession->IsFinalResponseReceivedForInitialInviteRequest())
     {
-        // TODO: If there is no ISession in ISession::STATE_ESTABLISHED state and
-        // not piSession->IsFinalResponseReceivedForInitialInviteRequest())
+        IMS_TRACE_E(0, "SessionRprReceived - Session already has final response.", 0, 0, 0);
+    }
+    else
+    {
+        if (pSession->SendPrack(IsNeedToSendLocalResourceConfirmation(piSession)) == IMS_FAILURE)
         {
             CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
             HandleCancel(piSession, objReason);
