@@ -18,6 +18,7 @@
 #include "ImsAosReason.h"
 #include "ImsTypeDef.h"
 #include "MockIJniMtcServiceThread.h"
+#include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "PlatformContext.h"
@@ -29,6 +30,7 @@
 #include "emergency/MockIMtcEmergencyServiceManager.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -41,7 +43,9 @@ protected:
     MockIMtcContext objContext;
     MockIMtcService objNormalService;
     MockIMtcService objEmergencyService;
+    MockIMtcCallController objCallController;
     MockICallStateProxy objCallStateProxy;
+    MockIPassiveTimerHolder objPassiveTimer;
     MockIMtcAosConnector objAosConnector;
     MockIJniMtcServiceThread objJniMtcServiceThread;
     MockIMtcEmergencyServiceManager objEsm;
@@ -60,7 +64,9 @@ protected:
                 .WillByDefault(Return(&objNormalService));
         ON_CALL(objContext, GetServiceByType(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&objEmergencyService));
+        ON_CALL(objContext, GetCallController).WillByDefault(ReturnRef(objCallController));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
         ON_CALL(objContext, GetAosConnector(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&objAosConnector));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
@@ -80,6 +86,8 @@ protected:
     {
         EXPECT_CALL(objCallStateProxy, RemoveListener(pController)).Times(1);
         EXPECT_CALL(objEmergencyService, RemoveAosStateListener(pController)).Times(1);
+        EXPECT_CALL(objPassiveTimer,
+                RemoveListener(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, pController));
 
         delete pController;
         delete pConfigurationProxy;
@@ -105,6 +113,8 @@ TEST_F(EmergencyServiceControllerTest, StartAddsListeners)
 {
     EXPECT_CALL(objCallStateProxy, AddListener(pController)).Times(1);
     EXPECT_CALL(objEmergencyService, AddAosStateListener(pController)).Times(1);
+    EXPECT_CALL(objPassiveTimer,
+            AddListener(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, pController));
 
     pController->Start();
 }
@@ -359,6 +369,147 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndOtherEmergencyCallBlockDoesNothi
             nSecondCall, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
     pController->OnCallStateChanged(nSecondCall, IMtcCall::State::TERMINATING,
             IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+}
+
+TEST_F(EmergencyServiceControllerTest, StartStartsRegTo18xTimer)
+{
+    const IMS_BOOL bWifi = IMS_FALSE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE))
+            .Times(1);
+
+    pController->Start();
+}
+
+TEST_F(EmergencyServiceControllerTest, StartStartsRegTo18xTimerForWifi)
+{
+    const IMS_BOOL bWifi = IMS_TRUE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE))
+            .Times(1);
+
+    pController->Start();
+}
+
+TEST_F(EmergencyServiceControllerTest, CallStateChangedToTerminatingStopsRegTo18xTimer)
+{
+    const IMS_BOOL bWifi = IMS_FALSE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    pController->Start();
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+}
+
+TEST_F(EmergencyServiceControllerTest, CloseStopsRegTo18xTimer)
+{
+    const IMS_BOOL bWifi = IMS_FALSE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    pController->Start();
+
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+
+    pController->Close();
+}
+
+TEST_F(EmergencyServiceControllerTest, AosDisconnectedStopsRegTo18xTimer)
+{
+    const IMS_BOOL bWifi = IMS_FALSE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    pController->Start();
+
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::NONE);
+}
+
+TEST_F(EmergencyServiceControllerTest, RegTo18xTimerExpiresBeforeCallSetupStopsAos)
+{
+    const IMS_BOOL bWifi = IMS_FALSE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    pController->Start();
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP));
+
+    pController->OnPassiveTimerExpired(IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
+}
+
+TEST_F(EmergencyServiceControllerTest, RegTo18xTimerExpiresAfterCallSetupTerminatesCall)
+{
+    const IMS_BOOL bWifi = IMS_FALSE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    pController->Start();
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+
+    const IMS_SINT32 nCallKey = 1;
+    pController->OnCallStateChanged(
+            nCallKey, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+
+    EXPECT_CALL(objCallController,
+            Terminate(nCallKey,
+                    CallReasonInfo(
+                            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY)));
+
+    pController->OnPassiveTimerExpired(IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
+}
+
+TEST_F(EmergencyServiceControllerTest,
+        CallStateChangedToIdleStartsRegTo18xTimerIfServiceAlreadyOpened)
+{
+    const IMS_BOOL bWifi = IMS_FALSE;
+    const IMS_SINT32 nTimer = 10;
+    ON_CALL(objEmergencyService, IsWlanIpCanType).WillByDefault(Return(bWifi));
+    ON_CALL(*pConfigurationManager, GetEmergencyRegistrationTo18xTimer(bWifi))
+            .WillByDefault(Return(nTimer));
+
+    pController->Start();
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTimer, IMS_FALSE));
+
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, OnIpcanChangedDoesNothing)

@@ -49,6 +49,7 @@
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MockUdpKeepAliveSender.h"
 #include "helper/MtcSupplementaryService.h"
@@ -83,6 +84,7 @@ public:
     MockISilentRedialHelper objRedialHelper;
     CallInfo objCallInfo;
     MockMtcTimerWrapper objTimer;
+    MockIPassiveTimerHolder objPassiveTimer;
     MockIMtcUiNotifier objUiNotifier;
     MockIMessageUtils objMessageUtils;
     MockEpsFallbackTrigger* pEpsFbTrigger;
@@ -127,6 +129,7 @@ protected:
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimer));
+        ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
@@ -1295,6 +1298,8 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStopsTimersIfNot100)
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 }
 
@@ -1312,6 +1317,9 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStops100WaitTimerIf1
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT)).Times(0);
+
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X))
+            .Times(0);
 
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 }
@@ -1426,6 +1434,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedStopsTimers)
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
 
     pOutgoingState->SessionRprReceived(&objSession, 0);
 }

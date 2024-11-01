@@ -23,6 +23,8 @@
 #include "call/IMtcCall.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/IPassiveTimerHolder.h"
+#include "helper/IPassiveTimerListener.h"
 
 class IMtcContext;
 
@@ -31,7 +33,8 @@ using EmergencyServiceState = IuMtcService::EmergencyServiceState;
 class EmergencyServiceController final :
         public IEmergencyServiceController,
         public IMtcAosStateListener,
-        public IMtcCallStateListener
+        public IMtcCallStateListener,
+        public IPassiveTimerListener
 {
 public:
     explicit EmergencyServiceController(
@@ -51,6 +54,8 @@ public:
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     inline void OnTotalCallStateChanged(IN State) override {}
+
+    void OnPassiveTimerExpired(IN IPassiveTimerHolder::Type eType) override;
 
 private:
     enum class State
@@ -80,8 +85,10 @@ private:
     void Finish();
     void FinishAndRetryOverImsPdn();
     void SetState(IN State eState);
+    void Start18xWaitingTimer();
+    void Stop18xWaitingTimer();
 
-    IMS_BOOL IsCallSetupUnsuccessful(IN IMtcCall::State eState) const;
+    IMS_BOOL IsTerminatingCallSetupUnsuccessful(IN IMtcCall::State eOldState) const;
     IMS_BOOL IsCurrentEmergencyCall(IN CallKey nCallKey) const;
     IMS_BOOL IsRetryOverImsPdnRequired(IN IMS_SINT32 eAosReason) const;
 };

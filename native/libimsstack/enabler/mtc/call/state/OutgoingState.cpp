@@ -41,6 +41,7 @@
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/IMtcDialingPlan.h"
+#include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/UdpKeepAliveSender.h"
@@ -432,6 +433,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     if (SipStatusCode::IsProvisional(nStatusCode))
     {
         StopTimer(TIMER_MO_18X_WAIT);
+        m_objContext.GetPassiveTimerHolder().RemoveTimer(
+                IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
     }
     StartTimer(TIMER_MO_NOANSWER);
 
@@ -494,6 +497,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     IMS_TRACE_D("SessionRprReceived", 0, 0, 0);
     StopTimer(TIMER_MO_100_WAIT);
     StopTimer(TIMER_MO_18X_WAIT);
+    m_objContext.GetPassiveTimerHolder().RemoveTimer(
+            IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
 
     IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_START, nIndex);

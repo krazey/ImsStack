@@ -20,9 +20,12 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -46,24 +49,36 @@ protected:
     MockIMtcContext objContext;
     MockIMtcService objService;
     MockICallStateProxy objCallStateProxy;
+    MockIPassiveTimerHolder objPassiveTimer;
     MockIMtcAosConnector objAosConnector;
     MockIJniMtcServiceThread objJniMtcServiceThread;
+
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
 
     TestEmergencyServiceManager* pEsm;
 
     virtual void SetUp() override
     {
+        pConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+
         ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
         ON_CALL(objContext, GetAosConnector(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&objAosConnector));
-
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objJniMtcServiceThread));
 
         pEsm = new TestEmergencyServiceManager(objContext);
     }
 
-    virtual void TearDown() override { delete pEsm; }
+    virtual void TearDown() override
+    {
+        delete pEsm;
+        delete pConfigurationProxy;
+    }
 };
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormalService)
