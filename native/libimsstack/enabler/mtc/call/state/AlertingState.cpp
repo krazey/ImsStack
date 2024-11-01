@@ -326,12 +326,21 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionRprDeliveryFailed(IN ISession
             CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK));
 }
 
-PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
     if (IsNeedToIgnoreStartFailure())
     {
         return GetStateName();
+    }
+
+    if (piSession->GetState() == ISession::STATE_ESTABLISHED)
+    {
+        // This condition occurs when no ACK is received within the 200 OK retransmission timer
+        // period. In such cases, the UE should send a BYE to notify the remote party that the
+        // call is terminated.
+        const CallReasonInfo objReasonInfo(CODE_SIP_SERVER_ERROR);
+        return Terminate(objReasonInfo);
     }
 
     m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));

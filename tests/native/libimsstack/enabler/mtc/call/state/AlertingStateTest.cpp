@@ -611,9 +611,18 @@ TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
 TEST_F(AlertingStateTest, SessionStartFailedNotifiesStartFailed)
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
+    const IMS_SINT32 objNonEstablishedStates[] = {ISession::STATE_CREATED,
+            ISession::STATE_INITIATED, ISession::STATE_NEGOTIATING, ISession::STATE_ESTABLISHING,
+            ISession::STATE_RENEGOTIATING, ISession::STATE_REESTABLISHING,
+            ISession::STATE_TERMINATING, ISession::STATE_TERMINATED};
 
-    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
+    for (const auto& state : objNonEstablishedStates)
+    {
+        ON_CALL(objISession, GetState).WillByDefault(Return(state));
+        EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
+
+        EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
+    }
 }
 
 TEST_F(AlertingStateTest, SessionStartFailedDoesNotNotifyStartFailedIfSrvccStarted)
@@ -626,6 +635,18 @@ TEST_F(AlertingStateTest, SessionStartFailedDoesNotNotifyStartFailedIfSrvccStart
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionStartFailed(&objISession));
+}
+
+TEST_F(AlertingStateTest, SessionStartFailedInvokesTerminateIfEstablishedState)
+{
+    ON_CALL(objISession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+
+    const CallReasonInfo objReason(CODE_SIP_SERVER_ERROR);
+
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objReason));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReason));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
 }
 
 TEST_F(AlertingStateTest, OnMediaFailed)
