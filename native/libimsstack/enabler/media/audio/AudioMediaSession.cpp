@@ -79,10 +79,9 @@ PUBLIC VIRTUAL void AudioMediaSession::Timer_TimerExpired(IN ITimer* piTimer)
 
 PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
 {
-    IMS_TRACE_D("NetworkToneTimerExpired : networktone time[%d]",
-            GetInactivityTimer(NETWORK_TONE_INACTIVITY), 0, 0);
+    IMS_TRACE_D("NetworkToneTimerExpired : networktone time[%d]", m_nNetworkToneTimer, 0, 0);
 
-    if (GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0)
+    if (m_nNetworkToneTimer > 0)
     {
         SetNetworkToneTimer(0);
 
@@ -524,9 +523,8 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
         m_nRtpInactivityTimer = 0;
     }
 
-    IMS_SINT32 nRtpInactivityValue = GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0
-            ? GetInactivityTimer(NETWORK_TONE_INACTIVITY)
-            : m_nRtpInactivityTimer;
+    IMS_SINT32 nRtpInactivityValue =
+            m_nNetworkToneTimer > 0 ? m_nNetworkToneTimer : m_nRtpInactivityTimer;
 
     m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
             std::vector<int32_t>{nRtpInactivityValue});
