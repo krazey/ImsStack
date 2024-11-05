@@ -71,9 +71,9 @@ SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     return SipHeaderBase::EncodeHdr(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipIntegerHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipIntegerHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+    if (SipHeaderBase::Decode(pStartPt, nDecLen) == SIP_FALSE)
     {
         return SIP_FALSE;
     }

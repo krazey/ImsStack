@@ -71,7 +71,7 @@ SIP_BOOL SipInfoBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipInfoBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipInfoBase::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {

@@ -135,17 +135,17 @@ TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
     pAcceptResourcePriorityHeader->SipDelete();
 }
 
-TEST_F(SipResourcePriorityHeaderTest, DecodeHdr)
+TEST_F(SipResourcePriorityHeaderTest, Decode)
 {
     SipResourcePriorityHeader* pHeader = reinterpret_cast<SipResourcePriorityHeader*>(
             SipResourcePriorityHeader::GetNewObj(SipHeaderBase::RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("OnlyNameSpace", 13));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("OnlyNameSpace", 13));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("Namespace.ResourcePriority", 26));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("Namespace.ResourcePriority", 26));
 
     EXPECT_STREQ("Namespace", pHeader->GetNameSpace());
     EXPECT_STREQ("ResourcePriority", pHeader->GetResourcePriority());
@@ -159,13 +159,13 @@ TEST_F(SipResourcePriorityHeaderTest, DecodeHdr)
     ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
 
     /* Empty header allowed */
-    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->DecodeHdr(nullptr, 0));
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Decode(nullptr, 0));
 
     /* Only namespace present, fail */
-    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->DecodeHdr("namespace", 9));
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Decode("namespace", 9));
 
     /* Only namespace(DOT) without r-priority, fail */
-    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->DecodeHdr("namespace.", 10));
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Decode("namespace.", 10));
     pAcceptResourcePriorityHeader->SipDelete();
     pAcceptResourcePriorityHeader = nullptr;
 
@@ -173,7 +173,7 @@ TEST_F(SipResourcePriorityHeaderTest, DecodeHdr)
             SipResourcePriorityHeader::GetNewObj(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
     /* Only (DOT)r-priority present, fail */
-    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->DecodeHdr(".r-priority", 11));
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Decode(".r-priority", 11));
     pAcceptResourcePriorityHeader->SipDelete();
     pAcceptResourcePriorityHeader = nullptr;
 
@@ -181,7 +181,7 @@ TEST_F(SipResourcePriorityHeaderTest, DecodeHdr)
             SipResourcePriorityHeader::GetNewObj(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pAcceptResourcePriorityHeader != nullptr);
     /* Both namespace and r-priority present, success */
-    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->DecodeHdr("namespace.r-priority", 20));
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Decode("namespace.r-priority", 20));
     EXPECT_STREQ("namespace", pAcceptResourcePriorityHeader->GetNameSpace());
     EXPECT_STREQ("r-priority", pAcceptResourcePriorityHeader->GetResourcePriority());
     pAcceptResourcePriorityHeader->SipDelete();

@@ -69,15 +69,15 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     pHeader->SipDelete();
 }
 
-TEST_F(SipTimeStampHeaderTest, DecodeHdr)
+TEST_F(SipTimeStampHeaderTest, Decode)
 {
     SipTimeStampHeader* pHeader = reinterpret_cast<SipTimeStampHeader*>(
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("12.56", 5));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("12.56", 5));
 
     EXPECT_STREQ("12.56", pHeader->GetTimeVal());
     EXPECT_EQ(nullptr, pHeader->GetDelay());
@@ -88,7 +88,7 @@ TEST_F(SipTimeStampHeaderTest, DecodeHdr)
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("12.56 1.30", 10));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("12.56 1.30", 10));
 
     EXPECT_STREQ("12.56", pHeader->GetTimeVal());
     EXPECT_STREQ("1.30", pHeader->GetDelay());

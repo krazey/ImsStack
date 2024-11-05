@@ -665,7 +665,7 @@ GLOBAL SipAddrSpec* DecodeAddrSpec(IN const AString& strAddress)
 
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
 
-    if (pAddrSpec->DecodeAddrSpec(strAddrSpec.GetStr(), strAddrSpec.GetLength()) == SIP_FALSE)
+    if (pAddrSpec->Decode(strAddrSpec.GetStr(), strAddrSpec.GetLength()) == SIP_FALSE)
     {
         pAddrSpec->SipDelete();
         return IMS_NULL;
@@ -731,7 +731,7 @@ GLOBAL SipHeaderBase* DecodeHeader(
             return IMS_NULL;
         }
 
-        if (pHeader->DecodeHdr(pszTmpBody, nBodyLen) == SIP_FALSE)
+        if (pHeader->Decode(pszTmpBody, nBodyLen) == SIP_FALSE)
         {
             IMS_MEM_Free(pszTmpBody);
             FreeHeaderEx(pHeader);
@@ -3666,7 +3666,7 @@ GLOBAL IMS_BOOL SetRequestLine(
 {
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
 
-    pAddrSpec->DecodeAddrSpec(strUri.GetStr(), strUri.GetLength());
+    pAddrSpec->Decode(strUri.GetStr(), strUri.GetLength());
 
     SipRequestLine* pReqLine = new SipRequestLine(strMethod.GetStr(), pAddrSpec, SIP_SIPVER);
 

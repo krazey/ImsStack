@@ -715,7 +715,7 @@ CSeq: 1 MESSAGE\r\n\
 
     SipHeaderBase* pRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
     ASSERT_TRUE(pRSeqHdr != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr("10", 2));
+    EXPECT_EQ(SIP_TRUE, pRSeqHdr->Decode("10", 2));
     EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRSeqHdr));
 
     /* Calling with valid 183 response message */
@@ -843,7 +843,7 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
 
     const SIP_CHAR* pReqUri = "sip:2222@ims.mnc861.mcc405.3gppnetwork.org";
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
-    ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, SipPf_Strlen(pReqUri)));
+    ASSERT_TRUE(pAddrSpec->Decode(pReqUri, SipPf_Strlen(pReqUri)));
     SipRequestLine* pobjReqLine = new SipRequestLine("INVITE", pAddrSpec, "SIP/2.0");
     ASSERT_TRUE(pobjReqLine != nullptr);
     pTempSipMsg->SetRequestline(pobjReqLine);
@@ -854,8 +854,8 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
     ASSERT_TRUE(pToHdr != nullptr);
     const SIP_CHAR* pViaValue = "SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
     const SIP_CHAR* pToValue = "<sip:1111@ims.mnc861.mcc405.3gppnetwork.org>";
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
-    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, SipPf_Strlen(pToValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->Decode(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pToHdr->Decode(pToValue, SipPf_Strlen(pToValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
 
@@ -888,7 +888,7 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
 
     const SIP_CHAR* pReqUri = "sip:2222@ims.mnc861.mcc405.3gppnetwork.org";
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
-    ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, SipPf_Strlen(pReqUri)));
+    ASSERT_TRUE(pAddrSpec->Decode(pReqUri, SipPf_Strlen(pReqUri)));
     SipRequestLine* pobjReqLine = new SipRequestLine("INVITE", pAddrSpec, "SIP/2.0");
     ASSERT_TRUE(pobjReqLine != nullptr);
     pTempSipMsg->SetRequestline(pobjReqLine);
@@ -896,7 +896,7 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
     const SIP_CHAR* pViaValue = "SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->Decode(pViaValue, SipPf_Strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
 
     /* Calling with valid SipTxnKey by creating with req msg
@@ -934,7 +934,7 @@ TEST_F(SipTxnHandlerTest, DeleteTxn)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
     const SIP_CHAR* pViaValue = "SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->Decode(pViaValue, SipPf_Strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
 
     /* Calling with valid SipTxnKey by creating with req msg

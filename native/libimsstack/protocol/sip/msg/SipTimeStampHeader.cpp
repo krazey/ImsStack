@@ -102,7 +102,7 @@ SIP_VOID SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
     SipMsgUtil::SetValue(pszDelay, m_pszDelay);
 }
 
-SIP_BOOL SipTimeStampHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipTimeStampHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -121,8 +121,7 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDec
     m_pszTimeVal = SipCreateString(pStartPt, pTempPre);
     if (m_pszTimeVal == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -134,8 +133,7 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDec
         m_pszDelay = SipCreateString(pStartPt, pEndPt);
         if (m_pszDelay == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }

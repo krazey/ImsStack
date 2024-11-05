@@ -32,7 +32,7 @@ SipPPreferredServiceHeader::SipPPreferredServiceHeader(
 
 SipPPreferredServiceHeader::~SipPPreferredServiceHeader() {}
 
-SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPPreferredServiceHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -47,8 +47,8 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
     SIP_CHAR* pszTempString = SipCreateString(pStartPt, pStartPt + SIP_NINE);
     if (SipPf_Stricmp("urn:urn-7:", pszTempString) != SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr:value must start by urn:urn-7:", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "value must start by urn:urn-7:", SIP_ZERO, SIP_ZERO);
         if (pszTempString != SIP_NULL)
         {
             delete[] pszTempString;
@@ -73,13 +73,13 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
             if ((IS_ALPHANUM(*pTempNext) == SIP_FALSE) && !IS_HYPHEN(*pTempNext) &&
                     (*pTempNext != SIP_DOT))
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:invalid subService id", SIP_ZERO,
-                        SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODDECODER, "invalid sub service id", SIP_ZERO, SIP_ZERO);
             }
             if ((*pTempNext == SIP_DOT) && (pTempNext == pEndPt))
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:invalid subService id", SIP_ZERO,
-                        SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODDECODER, "invalid sub service id", SIP_ZERO, SIP_ZERO);
             }
             pTempNext = pTempNext + SIP_ONE;
         }
@@ -91,8 +91,7 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
         if (((IS_ALPHANUM(*pTempCurr) == SIP_FALSE) && !IS_HYPHEN(*pTempCurr)) ||
                 (nCounter > MAX_LET_DIG))
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Top level is invalid", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Top level is invalid", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pTempCurr = pTempCurr + SIP_ONE;
@@ -103,8 +102,7 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
     SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         if (pszValue != SIP_NULL)
         {
             delete[] pszValue;

@@ -36,13 +36,11 @@ public:
     /*Function for encoding of headers*/
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetNameSpace(const SIP_CHAR* pszNameSpace);
     SIP_VOID SetRPriority(const SIP_CHAR* pszRPriority);
 
-    /*Get methods*/
     inline const SIP_CHAR* GetNameSpace() const { return m_pszNameSpace; }
 
     inline const SIP_CHAR* GetResourcePriority() const { return m_pszRPriority; }

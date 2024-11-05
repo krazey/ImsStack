@@ -175,7 +175,7 @@ public:
     }
     SIP_BOOL DecodeHeaderParameters(
             const SIP_CHAR* pStart, const SIP_CHAR* pEnd, const SIP_CHAR cDelimiter);
-    virtual SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    virtual SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     inline SIP_INT32 GetHdrType() const { return m_eHdrType; }
     inline SIP_VOID SetHdrType(SIP_INT32 eHdrType) { m_eHdrType = eHdrType; }
     inline SIP_UINT32 GetParamCount() const
@@ -239,7 +239,7 @@ public:
     SIP_CHAR* GetTag();
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
-    virtual SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    virtual SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     inline SIP_BOOL IsValidHeader() const override
     {

@@ -137,7 +137,7 @@ const SipNameValue* SipAuthInfoHeader::GetAiInfoVal(SIP_UINT32 nIndex /*default 
     return SIP_NULL;
 }
 
-SIP_BOOL SipAuthInfoHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipAuthInfoHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -159,20 +159,20 @@ SIP_BOOL SipAuthInfoHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
         SipNameValue* pNameValue = new SipNameValue();
         if (pNameValue == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (pNameValue->Decode(pStartPt, pTempPos, SIP_NULL) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value Decode fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name value decode failed", SIP_ZERO, SIP_ZERO);
             pNameValue->SipDelete();
             return SIP_FALSE;
         }
 
         if (m_pAuthInfoList.Add(pNameValue) < SIP_ZERO)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Append in list Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Append in list failed", SIP_ZERO, SIP_ZERO);
             pNameValue->SipDelete();
             return SIP_FALSE;
         }

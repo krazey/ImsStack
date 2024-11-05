@@ -77,7 +77,7 @@ SIP_VOID SipRAcKHeader::SetMethod(const SIP_CHAR* pszMethod)
     SipMsgUtil::SetValue(pszMethod, m_pszMethod);
 }
 
-SIP_BOOL SipRAcKHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRAcKHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -98,8 +98,7 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pszResponseNum = SipCreateString(pStartPt, pTempPre);
     if (pszResponseNum == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -115,16 +114,14 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Now find the end of CSeq Num*/
     if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in RAcK", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS missing in RAcK", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pszCSeqNum = SipCreateString(pStartPt, pTempPre);
     if (pszCSeqNum == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -139,8 +136,7 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     m_pszMethod = SipCreateString(pStartPt, pEndPt);
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

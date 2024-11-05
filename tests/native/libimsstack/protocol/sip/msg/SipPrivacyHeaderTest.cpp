@@ -141,23 +141,23 @@ TEST_F(SipPrivacyHeaderTest, Encode)
     pHeader->SipDelete();
 }
 
-TEST_F(SipPrivacyHeaderTest, DecodeHdr)
+TEST_F(SipPrivacyHeaderTest, Decode)
 {
     SipPrivacyHeader* pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty header not allowed for privacy*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(SIP_NULL, 0));
 
     /* Empty value after ; not allowed for privacy*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("user;", 5));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("user;", 5));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     /* Decode ; value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(";", 1));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(";", 1));
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
@@ -171,7 +171,7 @@ TEST_F(SipPrivacyHeaderTest, DecodeHdr)
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
 
     /* Decode valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("history", 7));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("history", 7));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -182,7 +182,7 @@ TEST_F(SipPrivacyHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     /* Decode more than one value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("user;header;id", 14));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("user;header;id", 14));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);

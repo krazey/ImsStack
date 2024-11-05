@@ -91,7 +91,7 @@ TEST_F(SipUriTest, EncodeAndEncodeSipUri)
 
     /* user, password, host, port, uri params and header params present. success */
     EXPECT_EQ(SIP_TRUE,
-            pSipUri->DecodeSipUri("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue?\
+            pSipUri->Decode("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue?\
 OnlyHeaderName&HeaderName=HeaderValue",
                     101));
 
@@ -124,7 +124,7 @@ OnlyHeaderName",
     pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("192.168.1.2:9090", 16));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("192.168.1.2:9090", 16));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -143,7 +143,7 @@ OnlyHeaderName",
 
     /* host missing, fail */
     EXPECT_EQ(SIP_FALSE,
-            pSipUri->DecodeSipUri("UserName:password;OnlyUriName;\
+            pSipUri->Decode("UserName:password;OnlyUriName;\
 UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
                     84));
 
@@ -154,7 +154,7 @@ UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
 
     /* HostName will be considered as host and port as unspecified, success */
     EXPECT_EQ(SIP_TRUE,
-            pSipUri->DecodeSipUri("hostName;OnlyUriName;\
+            pSipUri->Decode("hostName;OnlyUriName;\
 UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
                     75));
 
@@ -180,7 +180,7 @@ UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
     pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("UserName:password@192.168.1.2:9090", 34));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("UserName:password@192.168.1.2:9090", 34));
 
     /* user,password,host,port present.uri-params and header params absent, SUCCESS */
     EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
@@ -198,7 +198,7 @@ UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
     ASSERT_TRUE(pSipUri != nullptr);
 
     EXPECT_EQ(SIP_TRUE,
-            pSipUri->DecodeSipUri("UserName:password@192.168.1.2:9090;\
+            pSipUri->Decode("UserName:password@192.168.1.2:9090;\
 OnlyUriName;UriName=UriValue",
                     63));
 
@@ -219,7 +219,7 @@ OnlyUriName;UriName=UriValue",
     ASSERT_TRUE(pSipUri != nullptr);
 
     EXPECT_EQ(SIP_TRUE,
-            pSipUri->DecodeSipUri("UserName:password@192.168.1.2:9090?\
+            pSipUri->Decode("UserName:password@192.168.1.2:9090?\
 OnlyHeaderName&HeaderName=HeaderValue",
                     72));
 
@@ -240,7 +240,7 @@ OnlyHeaderName&HeaderName=HeaderValue",
     pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("UserName:password@[2001::2]:9090", 32));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("UserName:password@[2001::2]:9090", 32));
 
     /* user,password,host IPv6,port,header params present.uri-params absent, SUCCESS */
     EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
@@ -251,15 +251,15 @@ OnlyHeaderName&HeaderName=HeaderValue",
     pSipUri->SipDelete();
 }
 
-TEST_F(SipUriTest, DecodeSipUri)
+TEST_F(SipUriTest, Decode)
 {
     SipUri* pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pSipUri->DecodeSipUri(nullptr, 0));
+    EXPECT_EQ(SIP_FALSE, pSipUri->Decode(nullptr, 0));
 
     /* Only IPv4 host, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("192.168.1.2", 11));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("192.168.1.2", 11));
 
     EXPECT_STREQ("192.168.1.2", pSipUri->GetHost());
     EXPECT_EQ(SIP_UNSPECIFIED_PORT, pSipUri->GetPort());
@@ -270,7 +270,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* Only IPv6 host, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("[2001::2]", 9));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("[2001::2]", 9));
 
     EXPECT_STREQ("2001::2", pSipUri->GetHost());
     EXPECT_EQ(SIP_UNSPECIFIED_PORT, pSipUri->GetPort());
@@ -281,7 +281,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* Only IPv4 host with port, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("192.168.1.2:9090", 16));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("192.168.1.2:9090", 16));
 
     EXPECT_STREQ("192.168.1.2", pSipUri->GetHost());
     EXPECT_EQ(9090, pSipUri->GetPort());
@@ -292,7 +292,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* Only IPv6 host with port, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("[2001::2]:8080", 14));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("[2001::2]:8080", 14));
 
     EXPECT_STREQ("2001::2", pSipUri->GetHost());
     EXPECT_EQ(8080, pSipUri->GetPort());
@@ -303,7 +303,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* Only IPv6 host with port value 0, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("[2001::2]:0", 11));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("[2001::2]:0", 11));
 
     EXPECT_STREQ("2001::2", pSipUri->GetHost());
     EXPECT_EQ(0, pSipUri->GetPort());
@@ -314,7 +314,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* Only IPv6 host with port value alphabet, SUCCESS */
-    EXPECT_EQ(SIP_FALSE, pSipUri->DecodeSipUri("[2001::2]:a", 11));
+    EXPECT_EQ(SIP_FALSE, pSipUri->Decode("[2001::2]:a", 11));
 
     pSipUri->SipDelete();
 
@@ -322,7 +322,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* Only IPv6 host with port value alphabet, SUCCESS */
-    EXPECT_EQ(SIP_FALSE, pSipUri->DecodeSipUri("[2001::2]:12ab", 14));
+    EXPECT_EQ(SIP_FALSE, pSipUri->Decode("[2001::2]:12ab", 14));
 
     pSipUri->SipDelete();
 
@@ -330,7 +330,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* user without password and host:port, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("UserName@192.168.1.2:9090", 25));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("UserName@192.168.1.2:9090", 25));
 
     EXPECT_STREQ("UserName", pSipUri->GetUser());
     EXPECT_STREQ("192.168.1.2", pSipUri->GetHost());
@@ -342,7 +342,7 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pSipUri != nullptr);
 
     /* user:password and host:port, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri("UserName:Password@[2001::2]:8080", 32));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Decode("UserName:Password@[2001::2]:8080", 32));
 
     EXPECT_STREQ("UserName", pSipUri->GetUser());
     EXPECT_STREQ("Password", pSipUri->GetPassword());
@@ -358,8 +358,8 @@ TEST_F(SipUriTest, DecodeSipUri)
 
     /* user:password, host:port and Uri params, SUCCESS */
     EXPECT_EQ(SIP_TRUE,
-            pSipUri->DecodeSipUri("UserName:Password@[2001::2]:8080;OnlyUriparam-name;"
-                                  "uriparam-name=uriparam-value",
+            pSipUri->Decode("UserName:Password@[2001::2]:8080;OnlyUriparam-name;"
+                            "uriparam-name=uriparam-value",
                     79));
 
     EXPECT_STREQ("UserName", pSipUri->GetUser());
@@ -387,8 +387,8 @@ TEST_F(SipUriTest, DecodeSipUri)
 
     /* user:password, host:port and header params, SUCCESS */
     EXPECT_EQ(SIP_TRUE,
-            pSipUri->DecodeSipUri("UserName:Password@[2001::2]:8080?OnlyHeaderName&"
-                                  "HeaderName=HeaderValue",
+            pSipUri->Decode("UserName:Password@[2001::2]:8080?OnlyHeaderName&"
+                            "HeaderName=HeaderValue",
                     70));
 
     EXPECT_STREQ("UserName", pSipUri->GetUser());
@@ -416,7 +416,7 @@ TEST_F(SipUriTest, DecodeSipUri)
 
     /* user:password, host:port Uri params and header params, SUCCESS */
     EXPECT_EQ(SIP_TRUE,
-            pSipUri->DecodeSipUri("UserName:Password@[2001::2]:8080;OnlyUriparam-name;\
+            pSipUri->Decode("UserName:Password@[2001::2]:8080;OnlyUriparam-name;\
 uriparam-name=uriparam-value?OnlyHeaderName&HeaderName=HeaderValue",
                     117));
 

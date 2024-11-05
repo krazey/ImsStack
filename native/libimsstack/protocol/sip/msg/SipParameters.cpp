@@ -212,8 +212,7 @@ SIP_BOOL SipNameValue::Decode(
     m_pszName = SipCreateString(pStartPt, pTempPos);
     if (m_pszName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipNameValue::DecUriNameVal: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -230,9 +229,8 @@ SIP_BOOL SipNameValue::Decode(
             SIP_CHAR* pszValue = SipCreateString(pszValuePtr, pEndPt);
             if (pszValue == SIP_NULL)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "SipNameValue::DecUriNameVal: Memory Allocation Failed", SIP_ZERO,
-                        SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
             }
 
@@ -243,8 +241,8 @@ SIP_BOOL SipNameValue::Decode(
             /*put the value in the value list*/
             if (m_objValueList.Add(pszTempValue) < SIP_ZERO)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "SipNameValue::DecUriNameVal:Adding in list failed", SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
                 delete[] pszTempValue;
                 return SIP_FALSE;
             }
@@ -264,17 +262,15 @@ SIP_BOOL SipNameValue::Decode(
                 pszValue = SipCreateString(pszValuePtr, pTempPos);
                 if (pszValue == SIP_NULL)
                 {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                            "SipNameValue::DecHdrNameVal: Memory Allocation Failed", SIP_ZERO,
-                            SIP_ZERO);
+                    SIP_DEBUG_WARNING(
+                            ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
                     return SIP_FALSE;
                 }
                 /*put the value in the value list*/
                 if (m_objValueList.Add(pszValue) < SIP_ZERO)
                 {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                            "SipNameValue::DecHdrNameVal:Adding in list failed", SIP_ZERO,
-                            SIP_ZERO);
+                    SIP_DEBUG_WARNING(
+                            ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
                     delete[] pszValue;
                     return SIP_FALSE;
                 }
@@ -375,7 +371,7 @@ SIP_BOOL SipParameters::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
 {
     if ((pStartPt > pEndPt) || ((pStartPt == pEndPt) && (*pStartPt == '\0')))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode: No Value Present", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No value present", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -392,23 +388,20 @@ SIP_BOOL SipParameters::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
         SipNameValue* pNameValue = new SipNameValue();
         if (pNameValue == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "Decode: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (pNameValue->Decode(pStartPt, pTempPos, pParameterComponent) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "Decode: Name Val Decode fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name value decode fail", SIP_ZERO, SIP_ZERO);
             pNameValue->SipDelete();
             return SIP_FALSE;
         }
 
         if (m_objNameValueList.Add(pNameValue) < SIP_ZERO)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "Decode: Append in list Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Append in list failed", SIP_ZERO, SIP_ZERO);
             pNameValue->SipDelete();
             return SIP_FALSE;
         }
@@ -422,7 +415,7 @@ SIP_BOOL SipParameters::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
 
         if (pStartPt > pEndPt)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode: No Value Present", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No value present", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }

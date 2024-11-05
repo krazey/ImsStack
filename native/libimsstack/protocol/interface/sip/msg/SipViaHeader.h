@@ -49,7 +49,7 @@ public:
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetProtocolName(const SIP_CHAR* pszProtocolName);
     SIP_VOID SetProtocolVer(const SIP_CHAR* pszProtocolVer);
@@ -57,8 +57,6 @@ public:
     SIP_VOID SetHost(const SIP_CHAR* pszHost);
 
     inline SIP_VOID SetPortNum(SIP_UINT16 nPort) { m_nPort = nPort; }
-
-    /*Get methods*/
 
     inline const SIP_CHAR* GetProtocolName() const { return m_pszProtocolName; }
 

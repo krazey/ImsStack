@@ -138,7 +138,7 @@ SipAddrSpec* SipRequestLine::GetReqUri()
     return m_pReqUri;
 }
 
-SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRequestLine::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     const SIP_CHAR* pTempLoc = SIP_NULL;
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
@@ -146,16 +146,14 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     /*find first space i.e. end of Method*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Create a NULL terminated String of Method*/
     m_pszMethod = SipCreateString(pStartPt, pTempLoc);
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -166,8 +164,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     /*find Second space i.e. end of Req URI*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -176,8 +173,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     m_pReqUri = new SipAddrSpec();
     if (m_pReqUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -185,17 +181,15 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
 #ifdef SIP_STRICT_PARSING
     if (IsValidAddress(pStartPt, nTempLen) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Address Spec is Invalid", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Addr-spec is invalid", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
 #endif
 
-    if (m_pReqUri->DecodeAddrSpec(pStartPt, nTempLen) == SIP_FALSE)
+    if (m_pReqUri->Decode(pStartPt, nTempLen) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Addr Spec decode failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Addr-spec decode failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Take the ptr to the start of  Sip Version*/
@@ -204,8 +198,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     m_pszSipVersion = SipCreateString(pStartPt, pEndPt);
     if (m_pszSipVersion == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

@@ -32,7 +32,7 @@ public:
     SIP_UINT32 GetValueInt() const;
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     SIP_BOOL EncodeHdr(SIP_CHAR** ppszCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pszStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pszStartPt, SIP_UINT32 nDecLen) override;
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:

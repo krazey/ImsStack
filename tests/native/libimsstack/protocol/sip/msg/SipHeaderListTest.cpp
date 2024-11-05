@@ -115,12 +115,12 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     ASSERT_TRUE(pHeaderList != nullptr);
 
     /* Allow empty header allowed, success */
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr("", 0));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("", 0));
     EXPECT_EQ(SIP_FALSE, pHeaderList->EncodeHdr(nullptr));
     AStringBuffer objBuffer(256);
     EXPECT_EQ(SIP_TRUE, pHeaderList->Encode(objBuffer, SIP_TRUE));
 
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr("INVITE,ACK,UPDATE,REFER", 23));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("INVITE,ACK,UPDATE,REFER", 23));
 
     EXPECT_EQ(4, pHeaderList->GetSize());
 
@@ -160,8 +160,8 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     ASSERT_TRUE(pHeaderList != nullptr);
 
     /* Authentication Info header should be considered as one complete header, success */
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr("nextnonce=\"abcdefgh\",nonce-count=\"3\"", 37));
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr("nonce-count=\"2\"", 15));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("nextnonce=\"abcdefgh\",nonce-count=\"3\"", 37));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("nonce-count=\"2\"", 15));
 
     EXPECT_EQ(2, pHeaderList->GetSize());
 

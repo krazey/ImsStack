@@ -487,7 +487,7 @@ SIP_BOOL SipHeaders::IsListHdr(SIP_INT32 eHdrType)
     return SipHeaderBase::IsMultiValueHeader(eHdrType);
 }
 
-SIP_BOOL SipHeaders::DecodeHdrs(
+SIP_BOOL SipHeaders::Decode(
         const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName, SIP_CHAR** ppHdrBody)
 {
     if (pStartPt == SIP_NULL || nDecLen == SIP_ZERO)
@@ -520,7 +520,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
     *ppHdrName = SipCreateString(pStartPt, pTempPos);
     if (*ppHdrName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -557,7 +557,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
         SipUnknownHeader* pUnknown = new SipUnknownHeader();
         if (pUnknown == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -568,11 +568,11 @@ SIP_BOOL SipHeaders::DecodeHdrs(
             pUnknown->SipDelete();
             if (pTempNext > pEndPt)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Unknown Hdr Contain Invalid Value",
+                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Unknown header contains invalid Value",
                         SIP_ZERO, SIP_ZERO);
                 return SIP_TRUE;
             }
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -581,7 +581,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
         if ((static_cast<SipHeaderList*>(pHeader))->AddHeader(pUnknown) == SIP_FALSE)
         {
             pUnknown->SipDelete();
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pUnknown->SipDelete();
@@ -596,10 +596,9 @@ SIP_BOOL SipHeaders::DecodeHdrs(
 
         *ppHdrBody = SipCreateString(pTempNext, pEndPt);
 
-        /*Call the Decoder function*/
-        if (pHeader->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+        if (pHeader->Decode(pStartPt, nDecLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode header %d fail", eHdrType, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode header %d failed", eHdrType, SIP_ZERO);
             return SIP_FALSE;
         }
     }

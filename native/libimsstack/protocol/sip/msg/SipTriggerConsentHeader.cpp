@@ -103,7 +103,7 @@ SIP_BOOL SipTriggerConsentHeader::SetSipUri(SipUri* pSipUri)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipTriggerConsentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipTriggerConsentHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -131,7 +131,7 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODDECODER, "Header parameter decoding failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pEndPt = pTempPre;
@@ -142,8 +142,7 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32
     m_pSipUri = new SipUri();
     if (m_pSipUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -164,10 +163,9 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32
         }
     }
 
-    if (m_pSipUri->DecodeSipUri(pStartPt, nDecLen) == SIP_FALSE)
+    if (m_pSipUri->Decode(pStartPt, nDecLen) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: SIP URI Decoding Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SIP URI decoding failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

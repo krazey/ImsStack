@@ -87,7 +87,7 @@ SIP_VOID SipResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
     SipMsgUtil::SetValue(pszRPriority, m_pszRPriority);
 }
 
-SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipResourcePriorityHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -100,17 +100,15 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
 
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipResourcePriorityHeader::DecodeHdr: Dot missing in ResourcePriority", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Dot missing in ResourcePriority", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     m_pszNameSpace = SipCreateString(pStartPt, pTempPre);
     if (m_pszNameSpace == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -118,8 +116,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
     m_pszRPriority = SipCreateString(pStartPt, pEndPt);
     if (m_pszRPriority == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

@@ -62,7 +62,7 @@ public:
     SIP_BOOL CopyHdrs(SipHeaders* pHdrs);
     SIP_BOOL EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL DecodeHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
             SIP_CHAR** ppHdrBody);
 
     SipHeaderBase* GetHdrObj(SIP_INT32 eHdrType);

@@ -224,7 +224,7 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
     return pszVal;
 }
 
-SIP_BOOL SipAuthBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipAuthBase::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -244,7 +244,7 @@ SIP_BOOL SipAuthBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pszScheme = SipCreateString(pStartPt, pTempPre);
     if (SetValue(pszScheme) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         if (pszScheme != SIP_NULL)
         {
             delete[] pszScheme;
@@ -276,19 +276,19 @@ SIP_BOOL SipAuthBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SipNameValue* pTempNameValue = new SipNameValue();
         if (pTempNameValue == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (pTempNameValue->Decode(pStartPt, pTempPre) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value decode Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name value decode failed", SIP_ZERO, SIP_ZERO);
             pTempNameValue->SipDelete();
             return SIP_FALSE;
         }
         if (m_objAuthList.Add(pTempNameValue) < 0)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
             pTempNameValue->SipDelete();
             return SIP_FALSE;
         }

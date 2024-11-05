@@ -50,7 +50,7 @@ SIP_BOOL SipBadHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     return SIP_TRUE;
 }
 
-SIP_BOOL SipBadHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipBadHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     (void)pStartPt;
     (void)nDecLen;

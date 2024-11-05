@@ -104,7 +104,7 @@ SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipEventHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -142,7 +142,7 @@ SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pszValue = SipCreateString(pStartPt, pTempPos);
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         if (pszValue != SIP_NULL)
         {
             delete[] pszValue;
@@ -180,7 +180,7 @@ SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SIP_CHAR* pTemplate = SipCreateString(pStartPt, pTempPos);
         if (pTemplate == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 

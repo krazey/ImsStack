@@ -109,13 +109,12 @@ SIP_BOOL SipPrivacyHeader::AddPrivacy(const SIP_CHAR* pszPrivacy)
     return (m_objPrivacyList.Add(pszTempPrivacy) >= 0) ? SIP_TRUE : SIP_FALSE;
 }
 
-SIP_BOOL SipPrivacyHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPrivacyHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*"Privacy" HCOLON priv-value *(";" priv-value)*/
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipPrivacyHeader::DecodeHdr:Privacy Value Missing",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Privacy value missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -132,15 +131,13 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         SIP_CHAR* pszPrivacy = SipCreateString(pStartPt, pTempPos);
         if (pszPrivacy == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipPrivacyHeader::DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Put the value into list*/
         if (m_objPrivacyList.Add(pszPrivacy) < SIP_ZERO)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipPrivacyHeader::DecodeHdr:Adding in list failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
             delete[] pszPrivacy;
             return SIP_FALSE;
         }
@@ -155,9 +152,7 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
             pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
             if (pStartPt > pEndPt)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "SipParameterList::DecHdrSipParameterList: No Parameter Present", SIP_ZERO,
-                        SIP_ZERO);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No Parameter Present", SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
             }
         }

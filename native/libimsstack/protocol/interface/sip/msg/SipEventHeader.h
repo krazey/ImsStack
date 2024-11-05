@@ -35,8 +35,7 @@ public:
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams = SIP_TRUE) const override;
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     inline SIP_UINT32 GetTemplateCount() const { return m_objEventTemplates.GetSize(); }
     SIP_BOOL IsTemplatePresent(const SIP_CHAR* pTemplateName) const;

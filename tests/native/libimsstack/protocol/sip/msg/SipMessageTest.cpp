@@ -49,7 +49,7 @@ protected:
         SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
         ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-        EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
+        EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode("sip:user@host", 13));
 
         SipRequestLine* pRequestLine = new SipRequestLine("INVITE", pSipAddrSpec, SIP_SIPVER);
         ASSERT_TRUE(pRequestLine != nullptr);
@@ -91,11 +91,11 @@ protected:
                                 "544671422bd42c-2899e679";
         const SIP_CHAR* pTo = "<sip:user@host>";
 
-        EXPECT_EQ(SIP_TRUE, pViaHeader->DecodeHdr(pVia, SipPf_Strlen(pVia)));
-        EXPECT_EQ(SIP_TRUE, pCallIdHeader->DecodeHdr(pCallid, SipPf_Strlen(pCallid)));
-        EXPECT_EQ(SIP_TRUE, pCSeqHeader->DecodeHdr(pCseq, SipPf_Strlen(pCseq)));
-        EXPECT_EQ(SIP_TRUE, pFromHeader->DecodeHdr(pfrom, SipPf_Strlen(pfrom)));
-        EXPECT_EQ(SIP_TRUE, pToHeader->DecodeHdr(pTo, SipPf_Strlen(pTo)));
+        EXPECT_EQ(SIP_TRUE, pViaHeader->Decode(pVia, SipPf_Strlen(pVia)));
+        EXPECT_EQ(SIP_TRUE, pCallIdHeader->Decode(pCallid, SipPf_Strlen(pCallid)));
+        EXPECT_EQ(SIP_TRUE, pCSeqHeader->Decode(pCseq, SipPf_Strlen(pCseq)));
+        EXPECT_EQ(SIP_TRUE, pFromHeader->Decode(pfrom, SipPf_Strlen(pfrom)));
+        EXPECT_EQ(SIP_TRUE, pToHeader->Decode(pTo, SipPf_Strlen(pTo)));
 
         pMessage->SetHeader(pViaHeader);
         pMessage->SetHeader(pCallIdHeader);
@@ -155,7 +155,7 @@ TEST_F(SipMessageTest, SetHeader)
     const SIP_CHAR* pViaValue = "SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
             branch=z9hG4bK1422bd448-755bfe94";
 
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->Decode(pViaValue, SipPf_Strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pMessage->SetHeader(pViaHdr));
 
     ASSERT_TRUE(pMessage->GetMsgHdrs() != nullptr);
@@ -232,7 +232,7 @@ TEST_F(SipMessageTest, AppendHeader)
     const SIP_CHAR* pViaValue = "SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
             branch=z9hG4bK1422bd448-755bfe94";
 
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->Decode(pViaValue, SipPf_Strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pMessage->AppendHeader(pViaHdr));
 
     pViaHdr->SipDelete();
@@ -252,7 +252,7 @@ TEST_F(SipMessageTest, InsertHeader)
     const SIP_CHAR* pViaValue = "SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
             branch=z9hG4bK1422bd448-755bfe94";
 
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->Decode(pViaValue, SipPf_Strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pMessage->InsertHeader(pViaHdr, 0));
 
     pViaHdr->SipDelete();
@@ -273,7 +273,7 @@ TEST_F(SipMessageTest, GetMethodType)
     pCSeqHeader = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CSEQ);
     ASSERT_TRUE(pCSeqHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pCSeqHeader->DecodeHdr("3 INVALIDMETHOD", 10));
+    EXPECT_EQ(SIP_TRUE, pCSeqHeader->Decode("3 INVALIDMETHOD", 10));
 
     pMessage->SetHeader(pCSeqHeader);
     pCSeqHeader->SipDelete();
@@ -283,7 +283,7 @@ TEST_F(SipMessageTest, GetMethodType)
     pCSeqHeader = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CSEQ);
     ASSERT_TRUE(pCSeqHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pCSeqHeader->DecodeHdr("3 REGISTER", 10));
+    EXPECT_EQ(SIP_TRUE, pCSeqHeader->Decode("3 REGISTER", 10));
 
     pMessage->SetHeader(pCSeqHeader);
     pCSeqHeader->SipDelete();
@@ -333,7 +333,7 @@ TEST_F(SipMessageTest, HasMIMEMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("multipart/mixed;boundary=\"boundary1\"", 36));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("multipart/mixed;boundary=\"boundary1\"", 36));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -346,7 +346,7 @@ TEST_F(SipMessageTest, HasMIMEMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("application/sdp", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("application/sdp", 15));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -362,7 +362,7 @@ TEST_F(SipMessageTest, HasSDPMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("multipart/mixed;boundary=\"boundary1\"", 36));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("multipart/mixed;boundary=\"boundary1\"", 36));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -375,7 +375,7 @@ TEST_F(SipMessageTest, HasSDPMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("application/sdp", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("application/sdp", 15));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -405,7 +405,7 @@ TEST_F(SipMessageTest, SetHdrList_GetHdrList)
     const SIP_CHAR* pViaValue = "SIP/2.0/TLS [2001::4]:8090;\
                              branch=z9hG4bK1422bd448-755bfe94";
 
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->Decode(pViaValue, SipPf_Strlen(pViaValue)));
 
     EXPECT_EQ(SIP_TRUE, pHeaderList->AddHeader(pViaHdr));
 
@@ -434,8 +434,8 @@ TEST_F(SipMessageTest, DecodeMultiPartBody)
     SipContentTypeHeader* pContentTypeHdr = new SipContentTypeHeader(SipHeaderBase::CONTENT_TYPE);
     ASSERT_TRUE(pContentTypeHdr != nullptr);
 
-    EXPECT_EQ(SIP_TRUE,
-            pContentTypeHdr->DecodeHdr(pContentTypeValue, SipPf_Strlen(pContentTypeValue)));
+    EXPECT_EQ(
+            SIP_TRUE, pContentTypeHdr->Decode(pContentTypeValue, SipPf_Strlen(pContentTypeValue)));
 
     pMessage->SetHeader(pContentTypeHdr);
 
