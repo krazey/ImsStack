@@ -24,7 +24,7 @@ namespace android
 class SipStackTest : public ::testing::Test
 {
 protected:
-    virtual void SetUp() override { SIPHdrAccess::Init(); }
+    virtual void SetUp() override { SipMsgUtil::Init(); }
 
     virtual void TearDown() override {}
 };

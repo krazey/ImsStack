@@ -20,8 +20,6 @@
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
-extern SIP_CHAR gaszSipHdr[][SipMsgUtil::MAX_HDR_NAME_LEN];
-
 SipMIMEHdrs::SipMIMEHdrs() :
         m_pContentType(SIP_NULL),
         m_pContentEncoding(SIP_NULL),

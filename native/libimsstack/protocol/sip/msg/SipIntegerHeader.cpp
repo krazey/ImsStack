@@ -32,12 +32,9 @@ SipIntegerHeader::~SipIntegerHeader() {}
 
 SIP_BOOL SipIntegerHeader::SetValueInt(const SIP_UINT32 nValue)
 {
-    if (nValue > MAX_GEOLOCATION_ERROR)
+    if ((GetHdrType() == SipHeaderBase::GEOLOCATION_ERROR) && (nValue > MAX_GEOLOCATION_ERROR))
     {
-        if (GetHdrType() == SipHeaderBase::GEOLOCATION_ERROR)
-        {
-            return SIP_FALSE;
-        }
+        return SIP_FALSE;
     }
 
     SIP_CHAR szValue[SipMsgUtil::MAX_INT_VALUE_LEN];

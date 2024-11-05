@@ -18,7 +18,7 @@
 
 #include "SipAbnfUtil.h"
 #include "SipDatatypes.h"
-#include "SipAddrSpec.h"
+#include "SipHeaderBase.h"
 
 class SipMsgUtil
 {
@@ -54,6 +54,10 @@ public:
         SIP_SC_600 = 600,
         SIP_SC_MAX = 700
     };
+
+    static constexpr SIP_UINT32 MAX_INT_VALUE_LEN = 11;
+    static constexpr SIP_UINT32 MAX_HDR_NAME_LEN = 32;
+    static constexpr SIP_INT32 MAX_MSG_SIZE = 65535;
 
     inline static SIP_BOOL IsProvisionalResponse(SIP_UINT16 nResponseCode)
     {
@@ -116,38 +120,41 @@ public:
         pMsg++;
     }
 
-    static constexpr SIP_UINT32 CONTENT_HDR_COUNT = 5;
-    static constexpr SIP_UINT32 MAX_INT_VALUE_LEN = 11;
-    static constexpr SIP_UINT32 MAX_HDR_NAME_LEN = 32;
-    static constexpr SIP_INT32 MAX_MSG_SIZE = 65535;
-
     static SIP_VOID SetValue(const SIP_CHAR* pszSrc, SIP_CHAR*& pszDst);
-
     static SIP_INT32 GetMsgType(const SIP_CHAR* pStartPt);
-
     static SipUri::UriType GetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
-
-    static SIP_INT32 GetHeaderType(const SIP_CHAR* pszHdrName);
-
     static SIP_INT32 CheckAndGetHeaderType(SIP_INT32 nType);
 #ifdef SIP_STRICT_PARSING
     static SIP_BOOL IsValidAddress(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 #endif
-
     static const SIP_CHAR* FindMsgBodyEnd(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
             const SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
-
     static SIP_INT32 GetMimeHeaderType(const SIP_CHAR* pszHdrName);
-    static SIP_CHAR GetCompactHeaderName(SIP_INT32 nType);
-};
-
-class SIPHdrAccess
-{
-private:
-    static SIP_INT32 GetHdrTypeCompact(SIP_CHAR cHdrName);
-
-public:
     static void Init();
     static SIP_INT32 GetHeaderType(const SIP_CHAR* pszHdrName);
+    static const SIP_CHAR* GetHeaderName(SIP_INT32 nType);
+    static SIP_CHAR GetCompactHeaderName(SIP_INT32 nType);
+
+private:
+    struct HdrNameType
+    {
+        SIP_INT32 HdrType;
+        SIP_CHAR HdrName[MAX_HDR_NAME_LEN];
+    };
+
+    struct HdrLenRecord
+    {
+        SIP_UINT32 NoOfEntries;
+        HdrNameType objHeaders[SipHeaderBase::TYPE_END];
+    };
+
+    static HdrLenRecord s_objHdrLenRecord[MAX_HDR_NAME_LEN];
+    static constexpr SIP_UINT32 CONTENT_HDR_COUNT = 5;
+    static const SIP_CHAR* HEADER_NAMES[];
+    static const SIP_CHAR COMPACT_HEADER_NAMES[];
+    static const SIP_INT32 COMPACT_HEADERS[];
+    static const SIP_CHAR* CONTENT_HEADERS[CONTENT_HDR_COUNT];
+
+    static SIP_INT32 GetHdrTypeCompact(SIP_CHAR cHdrName);
 };
 #endif  //__SIP_MSG_UTIL_H__

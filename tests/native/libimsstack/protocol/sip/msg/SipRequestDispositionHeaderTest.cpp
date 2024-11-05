@@ -15,12 +15,8 @@
  */
 #include <gtest/gtest.h>
 
-#include "msg/SipMsgUtil.h"
 #include "msg/SipRequestDispositionHeader.h"
 #include "platform/SipString.h"
-
-extern SIP_CHAR gaszDirectivesArray[SipRequestDispositionHeader::MAX_DIRECTIVE_SIZE]
-                                   [SipRequestDispositionHeader::MAX_DIRECTIVE_LEN];
 
 namespace android
 {
@@ -66,16 +62,17 @@ TEST_F(SipRequestDispositionHeaderTest, DecodeHdr)
     pHeader->SipDelete();
 
     /* Check all possible valid values, success */
-    for (SIP_UINT16 nCnt = 0; nCnt < SipRequestDispositionHeader::MAX_DIRECTIVE_SIZE; nCnt++)
+    const SIP_CHAR* pDirectiveStr;
+
+    for (SIP_UINT16 nCnt = 0; nCnt < SipRequestDispositionHeader::GetDirectiveSize(); nCnt++)
     {
         pHeader = reinterpret_cast<SipRequestDispositionHeader*>(
                 SipRequestDispositionHeader::GetNewObj(
                         SipHeaderBase::REQUEST_DISPOSITION, nullptr));
         ASSERT_TRUE(pHeader != nullptr);
 
-        EXPECT_EQ(SIP_TRUE,
-                pHeader->DecodeHdr(
-                        gaszDirectivesArray[nCnt], SipPf_Strlen(gaszDirectivesArray[nCnt])));
+        pDirectiveStr = SipRequestDispositionHeader::GetDirectiveString(nCnt);
+        EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pDirectiveStr, SipPf_Strlen(pDirectiveStr)));
         pHeader->SipDelete();
     }
 }

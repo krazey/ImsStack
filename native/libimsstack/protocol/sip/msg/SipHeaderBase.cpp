@@ -381,7 +381,7 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             (m_eHdrType == SipHeaderBase::FEATURE_CAPS) ||
             (m_eHdrType == SipHeaderBase::REJECT_CONTACT))
     {
-        if ((pszValue != SIP_NULL) && (SipPf_Strcmp(pszValue, "*") != 0))
+        if (SipPf_Strcmp(pszValue, "*") != 0)
         {
             return SIP_FALSE;
         }
@@ -389,12 +389,10 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        if (pszValue != SIP_NULL)
-        {
-            delete[] pszValue;
-        }
+        delete[] pszValue;
         return SIP_FALSE;
     }
+
     delete[] pszValue;
     return SIP_TRUE;
 }
