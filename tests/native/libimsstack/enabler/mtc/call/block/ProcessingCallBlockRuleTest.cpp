@@ -43,7 +43,7 @@ protected:
     {
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
-        objEmergencyCallInfo.bEmergency = IMS_TRUE;
+        objEmergencyCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
         ON_CALL(objEmergencyCallContext, GetCallInfo)
                 .WillByDefault(ReturnRef(objEmergencyCallInfo));
 

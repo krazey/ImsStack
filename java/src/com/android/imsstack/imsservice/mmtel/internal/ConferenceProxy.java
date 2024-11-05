@@ -313,7 +313,8 @@ public class ConferenceProxy {
         MtcCall confCall = app.createMtcCallAndAttach(MtcCall.FLAG_MO | MtcCall.FLAG_CONFERENCE);
 
         if (confCall != null) {
-            confCall.open(IUMtcCall.SERVICETYPE_NORMAL, false, false, false);
+            confCall.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE,
+                    false, false);
         }
 
         return confCall;

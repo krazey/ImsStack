@@ -76,7 +76,7 @@ protected:
         objContent = ByteArray(STR_REQUEST_FOR_LOCATION_INFORMATION);
         ON_CALL(objISipMessageBodyPart, GetContent).WillByDefault(ReturnRef(objContent));
 
-        objCallInfo.bEmergency = IMS_TRUE;
+        objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         lstHeaders.Append(MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY);
@@ -127,7 +127,7 @@ TEST_F(CurrentLocationDiscoveryControllerTest, Send469ForNonEmergencyCall)
 {
     CurrentLocationDiscoveryController objController(objContext);
 
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
     EXPECT_CALL(objSipServerConnection, InitResponse(SipStatusCode::SC_469)).Times(1);
 
     objController.OnCurrentLocationDiscoveryInfoReceived(objSipServerConnection);

@@ -64,7 +64,7 @@ protected:
 
     inline void SetUp() override
     {
-        objCallInfo.bEmergency = IMS_FALSE;
+        objCallInfo.eEmergencyType = EmergencyType::NONE;
 
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
@@ -81,7 +81,7 @@ protected:
 TEST_F(TransactionTimerUpdateHelperTest,
         SetInviteTransactionTimerWithEcallDoesNothingIfEcallTimeoutPolicyIsWait)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteEmergencyCall)
             .WillByDefault(Return(
                     CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
@@ -97,7 +97,7 @@ TEST_F(TransactionTimerUpdateHelperTest,
 TEST_F(TransactionTimerUpdateHelperTest,
         SetInviteTransactionTimerWithEcallUpdatesTimerIfEcallTimeoutPolicyIsNotWait)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteEmergencyCall)
             .WillByDefault(Return(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
     ON_CALL(*pConfigurationManager, GetEmergencyTCallTimer).WillByDefault(Return(TIMER_VALUE));

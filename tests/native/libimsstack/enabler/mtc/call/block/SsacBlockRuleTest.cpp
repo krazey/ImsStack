@@ -106,7 +106,7 @@ TEST_F(SsacBlockRuleTest, CheckNotChecksSsacWhenMt)
 TEST_F(SsacBlockRuleTest, CheckNotChecksSsacWhenEmergency)
 {
     SetSsacBarred(IMS_TRUE, IMS_TRUE);
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     SsacBlockRule objRule(objContext, CallType::VOIP);
     EXPECT_EQ(Result(Result::Status::UNBLOCKED), objRule.Check(objBlockRuleCheckListener));

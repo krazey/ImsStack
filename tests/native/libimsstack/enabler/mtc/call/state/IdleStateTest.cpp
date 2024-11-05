@@ -331,7 +331,7 @@ TEST_F(IdleStateTest, StartSetsMoTimersForEmergencyCall)
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
 
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     IMS_SINT32 n100WaitTimer = 10000;
@@ -354,7 +354,7 @@ TEST_F(IdleStateTest, StartSetsMoTimersForWifiEmergencyCall)
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
 
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
     IMS_SINT32 n100WaitTimer = 10000;

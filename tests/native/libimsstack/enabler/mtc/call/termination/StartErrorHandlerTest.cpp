@@ -181,7 +181,7 @@ protected:
 
 TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByTransactionTimeoutOfEcc)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     SetMessageCode(SipStatusCode::SC_INVALID);
 
     EXPECT_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
@@ -198,7 +198,7 @@ TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByTransactionTimeout
 
 TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByNullIMessageOfEcc)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
@@ -348,7 +348,7 @@ TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfi
 TEST_F(StartErrorHandlerTest, HandleReturnsRedialEmergencyWithNextPcscf)
 {
     SetMessageCode(SipStatusCode::SC_600);
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
@@ -964,7 +964,7 @@ TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
 TEST_F(StartErrorHandlerTest, HandleResponseForEmergencyCall)
 {
     SetMessageCode(SipStatusCode::SC_400);
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
             EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }

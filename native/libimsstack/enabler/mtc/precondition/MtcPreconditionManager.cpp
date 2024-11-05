@@ -104,7 +104,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
         bSupport = IMS_FALSE;
         return bSupport;
     }
-    else if (m_objContext.GetCallInfo().bEmergency)
+    else if (m_objContext.GetCallInfo().IsEmergency())
     {
         bSupport = m_objContext.GetConfigurationProxy().Is(
                 Feature::EMERGENCY_QOS_PRECONDITION_SUPPORTED);

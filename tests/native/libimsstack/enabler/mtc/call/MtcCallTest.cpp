@@ -811,7 +811,7 @@ TEST_F(MtcCallTest, CreateBlockCheckerReturnsNotNull)
 TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCallInfo)
 {
     objCallInfo.eInitialCallType = CallType::VT;
-    objCallInfo.bEmergency = !objCallInfo.bEmergency;
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
     objCallInfo.bOffline = !objCallInfo.bOffline;
     objCallInfo.bUssi = !objCallInfo.bUssi;
     objCallInfo.bConference = !objCallInfo.bConference;
@@ -821,7 +821,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCallInfo)
 
     EXPECT_EQ(objService.GetServiceType(), objJniCallInfo.eServiceType);
     EXPECT_EQ(objCall.GetCallType(), objJniCallInfo.eCallType);
-    EXPECT_EQ(objCallInfo.bEmergency, objJniCallInfo.bEmergency);
+    EXPECT_EQ(objCallInfo.eEmergencyType, objJniCallInfo.eEmergencyType);
     EXPECT_EQ(objCallInfo.bOffline, objJniCallInfo.bOffline);
     EXPECT_EQ(objCallInfo.bUssi, objJniCallInfo.bUssi);
     EXPECT_EQ(objCallInfo.bConference, objJniCallInfo.bConference);
@@ -2018,7 +2018,7 @@ TEST_F(MtcCallTest, OnStateTransitionUpdatesCallStateProxy)
 
     EXPECT_CALL(objCallStateProxy,
             UpdateCallState(
-                    objCall.GetKey(), eState, objCall.GetCallType(), objCallInfo.bEmergency, _))
+                    objCall.GetKey(), eState, objCall.GetCallType(), objCallInfo.IsEmergency(), _))
             .Times(1);
 
     objCall.OnStateTransition(eState);

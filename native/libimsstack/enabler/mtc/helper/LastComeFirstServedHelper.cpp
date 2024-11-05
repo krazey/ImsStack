@@ -90,7 +90,7 @@ PRIVATE
 IMS_BOOL LastComeFirstServedHelper::IsNormalCall(IN CallKey nKey) const
 {
     CallInfo& objCallInfo = GetCallContext(nKey).GetCallInfo();
-    return (!objCallInfo.bEmergency && !objCallInfo.bUssi);
+    return (!objCallInfo.IsEmergency() && !objCallInfo.bUssi);
 }
 
 PRIVATE

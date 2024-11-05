@@ -25,8 +25,8 @@ public class CallInfo implements Parcelable
 {
     public int            serviceType;
     public int            callType;
+    public int            emergencyType;
 
-    public boolean        emergency;
     public boolean        offline;
     public boolean        ussi;
     public boolean        isConf;
@@ -40,7 +40,7 @@ public class CallInfo implements Parcelable
     public CallInfo() {
         serviceType = IUMtcCall.SERVICETYPE_NORMAL;
         callType = IUMtcCall.CALLTYPE_VOIP;
-        emergency = false;
+        emergencyType = IUMtcCall.EMERGENCYTYPE_NONE;
         offline = false;
         ussi = false;
         isConf = false;
@@ -55,7 +55,7 @@ public class CallInfo implements Parcelable
     public CallInfo(CallInfo callInfo) {
         serviceType = callInfo.serviceType;
         callType = callInfo.callType;
-        emergency = callInfo.emergency;
+        emergencyType = callInfo.emergencyType;
         offline = callInfo.offline;
         ussi = callInfo.ussi;
         isConf = callInfo.isConf;
@@ -74,7 +74,7 @@ public class CallInfo implements Parcelable
     public CallInfo(int _serviceType, int _callType) {
         serviceType = _serviceType;
         callType = _callType;
-        emergency = false;
+        emergencyType = IUMtcCall.EMERGENCYTYPE_NONE;
         offline = false;
         ussi = false;
         isConf = false;
@@ -89,7 +89,7 @@ public class CallInfo implements Parcelable
     public CallInfo(int _serviceType, int _callType, boolean _isConf) {
         serviceType = _serviceType;
         callType = _callType;
-        emergency = false;
+        emergencyType = IUMtcCall.EMERGENCYTYPE_NONE;
         offline = false;
         ussi = false;
         isConf = _isConf;
@@ -104,7 +104,7 @@ public class CallInfo implements Parcelable
     public void update(CallInfo callInfo) {
         serviceType = callInfo.serviceType;
         callType = callInfo.callType;
-        emergency = callInfo.emergency;
+        emergencyType = callInfo.emergencyType;
         offline = callInfo.offline;
         ussi = callInfo.ussi;
         isConf = callInfo.isConf;
@@ -119,11 +119,11 @@ public class CallInfo implements Parcelable
     public void logLn(String tag) {
         ImsLog.i(tag + " - serviceType : " + serviceType
                 + " callType : " + callType
+                + " emergencyType : " + emergencyType
                 + " isConf : " + isConf
                 + " enabledConf : " + enabledConf
                 + " confSub : " + confSub
                 + " rttCapable : " + rttCapable
-                + " emergency : " + emergency
                 + " offline : " + offline
                 + " ussi : " + ussi
                 + " videoCapable : " + videoCapable);
@@ -132,8 +132,8 @@ public class CallInfo implements Parcelable
     public void readFromParcel(Parcel source) {
         serviceType = source.readInt();
         callType = source.readInt();
+        emergencyType = source.readInt();
 
-        emergency = (source.readInt() == 1) ? true : false;
         offline = (source.readInt() == 1) ? true : false;
         ussi = (source.readInt() == 1) ? true : false;
         isConf = (source.readInt() == 1) ? true : false;
@@ -150,8 +150,8 @@ public class CallInfo implements Parcelable
 
         dest.writeInt(serviceType);
         dest.writeInt(callType);
+        dest.writeInt(emergencyType);
 
-        dest.writeInt(emergency ? 1 : 0);
         dest.writeInt(offline ? 1 : 0);
         dest.writeInt(ussi ? 1 : 0);
         dest.writeInt(isConf ? 1 : 0);

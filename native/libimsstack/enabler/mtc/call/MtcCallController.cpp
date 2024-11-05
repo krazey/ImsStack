@@ -71,7 +71,10 @@ PUBLIC
 void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* piSession)
 {
     CallInfo objCallInfo;
-    objCallInfo.bEmergency = pService->IsEmergency();
+    if (pService->IsEmergency())
+    {
+        objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    }
     m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)->HandleIncoming(piSession);
 }
 

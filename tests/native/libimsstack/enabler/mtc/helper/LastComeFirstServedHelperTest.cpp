@@ -134,7 +134,7 @@ TEST_F(LastComeFirstServedHelperTest, IsSupportedReturnsFalseIfPreAlertingTimerI
 
 TEST_F(LastComeFirstServedHelperTest, OnCallReceivedDoesNothingInEmergencyCall)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     LastComeFirstServedHelper objLastComeFirstServedHelper(objContext);
 
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
@@ -345,7 +345,7 @@ TEST_F(LastComeFirstServedHelperTest,
     MockIMtcCallContext objEmergencyCallContext;
     ON_CALL(objEmergencyCall, GetCallContext()).WillByDefault(ReturnRef(objEmergencyCallContext));
     CallInfo objEmergencyCallInfo;
-    objEmergencyCallInfo.bEmergency = IMS_TRUE;
+    objEmergencyCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objEmergencyCallContext, GetCallInfo()).WillByDefault(ReturnRef(objEmergencyCallInfo));
 
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);

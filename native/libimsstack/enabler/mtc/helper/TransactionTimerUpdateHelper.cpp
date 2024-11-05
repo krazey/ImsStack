@@ -35,7 +35,7 @@ TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(
         m_pSipConfig(pSipConfig),
         m_nSlotId(objContext.GetSlotId()),
         m_objConfiguration(objContext.GetConfigurationProxy()),
-        m_bEmergency(objContext.GetCallInfo().bEmergency),
+        m_bEmergency(objContext.GetCallInfo().IsEmergency()),
         m_bWifi(objContext.GetService().IsWlanIpCanType())
 {
     IMS_TRACE_I("+TransactionTimerUpdateHelper", 0, 0, 0);

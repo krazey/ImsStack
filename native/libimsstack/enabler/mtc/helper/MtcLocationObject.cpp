@@ -87,7 +87,7 @@ PUBLIC MtcLocationObject::~MtcLocationObject() {}
 PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallContext& objContext)
 {
     IMS_SINT32 nType = GetGeolocationPidfAllowedType(
-            objContext.GetCallInfo().bEmergency, objContext.GetService().IsWlanIpCanType());
+            objContext.GetCallInfo().IsEmergency(), objContext.GetService().IsWlanIpCanType());
 
     const SuppService* pSuppService =
             objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION);
@@ -260,8 +260,8 @@ PRIVATE
 IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 {
     return m_objContext.GetConfigurationProxy().GetInt(
-            Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, m_objContext.GetCallInfo().bEmergency,
-            m_objContext.GetService().IsWlanIpCanType(),
+            Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF,
+            m_objContext.GetCallInfo().IsEmergency(), m_objContext.GetService().IsWlanIpCanType(),
             m_objContext.GetConfigurationProxy().Is(
                     Feature::PIDF_SHORT_CODE, m_objContext.GetParticipantInfo().GetRemoteNumber()));
 }

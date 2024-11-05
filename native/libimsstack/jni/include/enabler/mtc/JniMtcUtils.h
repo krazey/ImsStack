@@ -34,6 +34,7 @@ public:
     static void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
     static CallType ReadCallType(IN const android::Parcel& objParcel);
     static ServiceType ReadServiceType(IN const android::Parcel& objParcel);
+    static EmergencyType ReadEmergencyType(IN const android::Parcel& objParcel);
     static JniCallInfo ReadCallInfo(IN const android::Parcel& objParcel);
     static MediaInfo& ReadMediaInfo(
             IN const android::Parcel& objParcel, IN_OUT MediaInfo& objMediaInfo);

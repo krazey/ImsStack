@@ -91,6 +91,20 @@ public class IUMtcCall {
     public static final int SERVICETYPE_NORMAL          = (0x00000001);
     public static final int SERVICETYPE_EMERGENCY       = (0x00000002);
 
+    // Emergency Type
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_NORMAL.
+    public static final int EMERGENCYTYPE_NONE              = 0;
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to either
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN or
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY.
+    public static final int EMERGENCYTYPE_EMERGENCY_ROUTING = 1;
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL.
+    public static final int EMERGENCYTYPE_NORMAL_ROUTING    = 2;
+
     // Property AGOODUC - WILL REMOVED
     public static final int PROPERTY_IS_CONF                = 0;
     public static final int PROPERTY_IS_VMS                    = 1;

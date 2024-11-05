@@ -469,7 +469,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     JniCallInfo objJniCallInfo;
     objJniCallInfo.eServiceType = GetService().GetServiceType();
     objJniCallInfo.eCallType = GetCallType();
-    objJniCallInfo.bEmergency = m_objCallInfo.bEmergency;
+    objJniCallInfo.eEmergencyType = m_objCallInfo.eEmergencyType;
     objJniCallInfo.bOffline = m_objCallInfo.bOffline;
     objJniCallInfo.bUssi = m_objCallInfo.bUssi;
     objJniCallInfo.bConference = m_objCallInfo.bConference;
@@ -1090,7 +1090,7 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
     IMS_TRACE_I(
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
-    GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.bEmergency);
+    GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.IsEmergency());
 }
 
 PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(

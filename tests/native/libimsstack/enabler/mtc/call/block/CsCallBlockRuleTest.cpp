@@ -46,7 +46,7 @@ protected:
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedForEmergencyCall)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     CsCallBlockRule objBlockRule(objContext);
 
     EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE)).Times(0);

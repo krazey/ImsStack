@@ -825,7 +825,7 @@ TEST_F(OutgoingStateTest,
 
 TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objService, GetSrvccState()).WillByDefault(Return(SrvccState::IDLE));
 
     MockIMessage objMessage;

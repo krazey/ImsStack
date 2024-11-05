@@ -34,7 +34,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_NORMAL, callInfo.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VOIP, callInfo.callType);
-        assertFalse(callInfo.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_NONE, callInfo.emergencyType);
         assertFalse(callInfo.offline);
         assertFalse(callInfo.ussi);
         assertFalse(callInfo.isConf);
@@ -51,7 +51,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, callInfo.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VIDEO_RTT, callInfo.callType);
-        assertFalse(callInfo.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_NONE, callInfo.emergencyType);
         assertFalse(callInfo.offline);
         assertFalse(callInfo.ussi);
         assertFalse(callInfo.isConf);
@@ -68,7 +68,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_NONE, callInfo.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VT, callInfo.callType);
-        assertFalse(callInfo.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_NONE, callInfo.emergencyType);
         assertFalse(callInfo.offline);
         assertFalse(callInfo.ussi);
         assertTrue(callInfo.isConf);
@@ -83,7 +83,7 @@ public class CallInfoTest  {
         CallInfo callInfo = new CallInfo();
         callInfo.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
         callInfo.callType = IUMtcCall.CALLTYPE_VIDEO_RTT;
-        callInfo.emergency = true;
+        callInfo.emergencyType = IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
         callInfo.offline = true;
         callInfo.ussi = true;
         callInfo.isConf = true;
@@ -96,7 +96,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, callInfo2.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VIDEO_RTT, callInfo2.callType);
-        assertTrue(callInfo2.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, callInfo2.emergencyType);
         assertTrue(callInfo2.offline);
         assertTrue(callInfo2.ussi);
         assertTrue(callInfo2.isConf);
@@ -111,7 +111,7 @@ public class CallInfoTest  {
         CallInfo callInfo = new CallInfo();
         callInfo.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
         callInfo.callType = IUMtcCall.CALLTYPE_VIDEO_RTT;
-        callInfo.emergency = true;
+        callInfo.emergencyType = IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
         callInfo.offline = true;
         callInfo.ussi = true;
         callInfo.isConf = true;
@@ -125,7 +125,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, callInfo2.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VIDEO_RTT, callInfo2.callType);
-        assertTrue(callInfo2.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, callInfo2.emergencyType);
         assertTrue(callInfo2.offline);
         assertTrue(callInfo2.ussi);
         assertTrue(callInfo2.isConf);
@@ -148,7 +148,7 @@ public class CallInfoTest  {
 
         assertEquals(callInfo.serviceType, callInfo2.serviceType);
         assertEquals(callInfo.callType, callInfo2.callType);
-        assertEquals(callInfo.emergency, callInfo2.emergency);
+        assertEquals(callInfo.emergencyType, callInfo2.emergencyType);
         assertEquals(callInfo.offline, callInfo2.offline);
         assertEquals(callInfo.ussi, callInfo2.ussi);
         assertEquals(callInfo.isConf, callInfo2.isConf);

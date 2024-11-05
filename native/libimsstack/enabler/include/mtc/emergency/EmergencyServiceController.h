@@ -42,10 +42,7 @@ public:
 
     void Start() override;
     void Close() override;
-    inline EmergencyCallRoutingPdn GetRoutingPdnType() const override
-    {
-        return EmergencyCallRoutingPdn::EMERGENCY;
-    }
+    inline ServiceType GetServiceType() const override { return ServiceType::EMERGENCY; }
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;

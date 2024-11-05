@@ -81,8 +81,8 @@ void CurrentLocationDiscoveryController::OnCurrentLocationDiscoveryInfoReceived(
         IN ISipServerConnection& objSipServerConnection)
 {
     if (!m_objContext.GetConfigurationProxy().Is(
-            Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED) ||
-            !m_objContext.GetCallInfo().bEmergency)
+                Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED) ||
+            !m_objContext.GetCallInfo().IsEmergency())
     {
         SendResponseForInfo(objSipServerConnection, SipStatusCode::SC_469);
         return;

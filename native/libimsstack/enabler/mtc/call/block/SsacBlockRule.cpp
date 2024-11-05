@@ -54,7 +54,7 @@ PUBLIC VIRTUAL SsacBlockRule::Result SsacBlockRule::Check(
     }
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT ||
-            m_objContext.GetCallInfo().bEmergency || m_objContext.GetService().IsWlanIpCanType())
+            m_objContext.GetCallInfo().IsEmergency() || m_objContext.GetService().IsWlanIpCanType())
     {
         return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
     }

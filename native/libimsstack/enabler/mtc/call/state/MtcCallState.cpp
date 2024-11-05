@@ -844,7 +844,7 @@ void MtcCallState::StopTimer(IN IMS_UINT32 nType) const
 PROTECTED
 IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
 {
-    IMS_BOOL bNormal = !m_objContext.GetCallInfo().bEmergency;
+    IMS_BOOL bNormal = !m_objContext.GetCallInfo().IsEmergency();
     Feature eFeature = Feature::UNKNOWN;
     switch (nType)
     {

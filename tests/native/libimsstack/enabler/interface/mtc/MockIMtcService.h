@@ -20,7 +20,6 @@
 #include <gmock/gmock.h>
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
 
 class AString;
 class ICoreService;
@@ -55,8 +54,7 @@ public:
     MOCK_METHOD(SrvccState, GetSrvccState, (), (const, override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState eState), (override));
     MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bEnabled), (override));
-    MOCK_METHOD(void, OpenEmergencyService, (IN IuMtcService::EmergencyCallRoutingPdn ePdn),
-            (override));
+    MOCK_METHOD(void, OpenEmergencyService, (IN ServiceType eServiceType), (override));
     MOCK_METHOD(void, StopEmergencyService, (), (override));
     MOCK_METHOD(
             void, ProcessTestCommand, (IN IMS_SINT32, IN IMS_SINT32, IN IMS_SINT32), (override));

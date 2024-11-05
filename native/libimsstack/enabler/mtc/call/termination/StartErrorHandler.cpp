@@ -63,7 +63,7 @@ StartErrorHandler::~StartErrorHandler() {}
 PUBLIC
 CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
         // According to Domain Selection and legacy Call Framework behavior,
         // IMS Stack should use same failure reason as normal call.
@@ -90,7 +90,7 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
@@ -102,7 +102,7 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
         return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
     }
@@ -612,7 +612,7 @@ IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 PRIVATE
 IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
         return IMS_FALSE;
     }

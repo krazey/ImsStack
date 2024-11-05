@@ -97,12 +97,10 @@ TEST_F(JniMtcServiceTest, SendDataSetTbcw)
 TEST_F(JniMtcServiceTest, SendDataOpenEmergencyService)
 {
     objParcel.writeInt32(IuMtcService::OPEN_EMERGENCY_SERVICE);
-    objParcel.writeInt32(static_cast<IMS_SINT32>(IuMtcService::EmergencyCallRoutingPdn::EMERGENCY));
+    objParcel.writeInt32(static_cast<IMS_SINT32>(ServiceType::EMERGENCY));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(
-            objMockService, OpenEmergencyService(IuMtcService::EmergencyCallRoutingPdn::EMERGENCY))
-            .Times(1);
+    EXPECT_CALL(objMockService, OpenEmergencyService(ServiceType::EMERGENCY)).Times(1);
 
     pJniService->SendData(objParcel);
 }

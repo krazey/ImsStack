@@ -167,7 +167,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNorma
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
             .WillByDefault(Return(IMS_TRUE));
 
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
@@ -190,7 +190,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmerg
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
             .WillByDefault(Return(bConfig));
 
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
@@ -205,7 +205,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularN
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
             .WillByDefault(Return(bConfig));
 
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
@@ -220,7 +220,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularE
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
             .WillByDefault(Return(bConfig));
 
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 

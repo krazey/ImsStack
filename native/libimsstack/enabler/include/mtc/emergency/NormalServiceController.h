@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef NORMAL_ROUTING_EMERGENCY_SERVICE_CONTROLLER_H_
-#define NORMAL_ROUTING_EMERGENCY_SERVICE_CONTROLLER_H_
+#ifndef NORMAL_SERVICE_CONTROLLER_H_
+#define NORMAL_SERVICE_CONTROLLER_H_
 
 #include "ImsTypeDef.h"
 #include "IMtcCallStateListener.h"
@@ -27,25 +27,18 @@ class IMtcContext;
 
 using EmergencyServiceState = IuMtcService::EmergencyServiceState;
 
-class NormalRoutingEmergencyServiceController :
-        public IEmergencyServiceController,
-        public IMtcCallStateListener
+class NormalServiceController : public IEmergencyServiceController, public IMtcCallStateListener
 {
 public:
-    explicit NormalRoutingEmergencyServiceController(
+    explicit NormalServiceController(
             IN IMtcEmergencyServiceManager& objServiceManager, IN IMtcContext& objContext);
-    virtual ~NormalRoutingEmergencyServiceController();
-    NormalRoutingEmergencyServiceController(
-            IN const NormalRoutingEmergencyServiceController&) = delete;
-    NormalRoutingEmergencyServiceController& operator=(
-            IN const NormalRoutingEmergencyServiceController&) = delete;
+    virtual ~NormalServiceController();
+    NormalServiceController(IN const NormalServiceController&) = delete;
+    NormalServiceController& operator=(IN const NormalServiceController&) = delete;
 
     void Start() override;
     inline void Close() override {}
-    inline EmergencyCallRoutingPdn GetRoutingPdnType() const override
-    {
-        return EmergencyCallRoutingPdn::NORMAL;
-    }
+    inline ServiceType GetServiceType() const override { return ServiceType::NORMAL; }
 
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;

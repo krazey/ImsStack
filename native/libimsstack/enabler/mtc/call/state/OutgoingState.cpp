@@ -644,7 +644,7 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
         m_bWaitingRedial = IMS_FALSE;
         return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
                 CallReasonInfo(CODE_INTERNAL_REDIAL,
-                        m_objContext.GetCallInfo().bEmergency
+                        m_objContext.GetCallInfo().IsEmergency()
                                 ? EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF
                                 : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
     }

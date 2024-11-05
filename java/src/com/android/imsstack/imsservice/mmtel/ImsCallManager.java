@@ -149,7 +149,6 @@ public class ImsCallManager {
      */
     @SuppressWarnings("deprecation") // EXTRA_CALL_RAT_TYPE
     public ImsCallSessionImpl createSession(ImsCallProfile profile) {
-        boolean emergency = false;
         boolean offline = false;
         boolean ussi = false;
         @EmergencyCallRouting int emergencyRouting =
@@ -159,7 +158,6 @@ public class ImsCallManager {
 
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
-            emergency = true;
             emergencyRouting = ImsCallUtils.getEmergencyRoutingFromCallProfile(profile);
 
             // ECBM
@@ -209,7 +207,7 @@ public class ImsCallManager {
         if (call.isEmergencyCall()) {
             mMtcApp.openEmergencyService(call, emergencyRouting);
         } else {
-            call.open(IUMtcCall.SERVICETYPE_NORMAL, emergency, offline, ussi);
+            call.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE, offline, ussi);
         }
 
         return callSession;

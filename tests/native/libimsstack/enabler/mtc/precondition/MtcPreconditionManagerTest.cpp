@@ -246,7 +246,7 @@ TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalReturnsFalseInC
 
 TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalInCaseOfEmergency)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     EXPECT_CALL(*pConfigurationManager, IsEmergencyQosPreconditionSupported)
             .Times(2)

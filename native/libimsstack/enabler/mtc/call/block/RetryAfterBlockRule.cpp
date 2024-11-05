@@ -39,7 +39,7 @@ PUBLIC VIRTUAL RetryAfterBlockRule::~RetryAfterBlockRule()
 PUBLIC VIRTUAL RetryAfterBlockRule::Result RetryAfterBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
         return Result(Result::Status::UNBLOCKED);
     }

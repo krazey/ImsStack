@@ -24,7 +24,7 @@
 class MockIMtcEmergencyServiceManager : public IMtcEmergencyServiceManager
 {
 public:
-    MOCK_METHOD(void, StartOpen, (IN EmergencyCallRoutingPdn), (override));
+    MOCK_METHOD(void, StartOpen, (IN ServiceType), (override));
     MOCK_METHOD(void, StopOpen, (IN IMS_BOOL), (override));
 };
 

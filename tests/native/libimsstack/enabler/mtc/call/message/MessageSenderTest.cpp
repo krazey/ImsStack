@@ -94,7 +94,7 @@ TEST_F(MessageSenderTest, CreateSenderWithNormalFormatter)
 TEST_F(MessageSenderTest, CreateSenderWithEmergencyFormatter)
 {
     CallInfo objEmergencyCallInfo;
-    objEmergencyCallInfo.bEmergency = IMS_TRUE;
+    objEmergencyCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objEmergencyCallInfo));
 

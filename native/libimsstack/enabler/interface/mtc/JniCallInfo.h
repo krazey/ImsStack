@@ -27,7 +27,7 @@ public:
     JniCallInfo() :
             eServiceType(ServiceType::NORMAL),
             eCallType(CallType::VOIP),
-            bEmergency(IMS_FALSE),
+            eEmergencyType(EmergencyType::NONE),
             bOffline(IMS_FALSE),
             bUssi(IMS_FALSE),
             bConference(IMS_FALSE),
@@ -41,7 +41,7 @@ public:
     JniCallInfo(IN const JniCallInfo& objRhs) :
             eServiceType(objRhs.eServiceType),
             eCallType(objRhs.eCallType),
-            bEmergency(objRhs.bEmergency),
+            eEmergencyType(objRhs.eEmergencyType),
             bOffline(objRhs.bOffline),
             bUssi(objRhs.bUssi),
             bConference(objRhs.bConference),
@@ -58,7 +58,7 @@ public:
         {
             eServiceType = objRhs.eServiceType;
             eCallType = objRhs.eCallType;
-            bEmergency = objRhs.bEmergency;
+            eEmergencyType = objRhs.eEmergencyType;
             bOffline = objRhs.bOffline;
             bUssi = objRhs.bUssi;
             bConference = objRhs.bConference;
@@ -79,7 +79,7 @@ public:
         }
 
         return eServiceType == objRhs.eServiceType && eCallType == objRhs.eCallType &&
-                bEmergency == objRhs.bEmergency && bOffline == objRhs.bOffline &&
+                eEmergencyType == objRhs.eEmergencyType && bOffline == objRhs.bOffline &&
                 bUssi == objRhs.bUssi && bConference == objRhs.bConference &&
                 bConferenceEnabled == objRhs.bConferenceEnabled &&
                 bConferenceSubscriptionRequired == objRhs.bConferenceSubscriptionRequired &&
@@ -89,8 +89,8 @@ public:
 public:
     ServiceType eServiceType;
     CallType eCallType;
+    EmergencyType eEmergencyType;
 
-    IMS_BOOL bEmergency;
     IMS_BOOL bOffline;
     IMS_BOOL bUssi;
     IMS_BOOL bConference;

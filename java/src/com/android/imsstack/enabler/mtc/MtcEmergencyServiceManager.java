@@ -38,6 +38,7 @@ public class MtcEmergencyServiceManager {
     private MtcJniProxy mMtcJniProxy;
     private ECallStateListener mECallStateListener = null;
     private final ICallStateTracker mCallStateTracker;
+    private int mEmergencyType;
 
     public MtcEmergencyServiceManager(IBaseContext context, ICallStateTracker callStateTracker) {
         mContext = context;
@@ -88,6 +89,10 @@ public class MtcEmergencyServiceManager {
      */
     public void openEmergencyService(
             @EmergencyCallRouting int emergencyRouting, IServiceStateTracker serviceStateTracker) {
+        mEmergencyType = emergencyRouting == EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL
+                ? IUMtcCall.EMERGENCYTYPE_NORMAL_ROUTING
+                : IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
+
         if (mCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false)
                 && !CallFeature.isWiFiEmcOverEmergencyPdn(mContext.getSlotId())) {
             emergencyRouting = EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL;
@@ -105,7 +110,7 @@ public class MtcEmergencyServiceManager {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
-        parcel.writeInt(convertEmergencyRouting(emergencyRouting));
+        parcel.writeInt(convertEmergencyRoutingToServiceType(emergencyRouting));
         sendRequest(parcel);
     }
 
@@ -157,7 +162,7 @@ public class MtcEmergencyServiceManager {
         }
 
         mCall.createNativeCallObject();
-        mCall.open(serviceType, true, false, false);
+        mCall.open(serviceType, mEmergencyType, false, false);
         releaseCall();
     }
 
@@ -166,14 +171,15 @@ public class MtcEmergencyServiceManager {
         releaseCall();
     }
 
-    private int convertEmergencyRouting(@EmergencyCallRouting int emergencyRoutingIn) {
+    private int convertEmergencyRoutingToServiceType(
+            @EmergencyCallRouting int emergencyRoutingIn) {
         switch (emergencyRoutingIn) {
             case EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN:
-                return IUMtcService.EMERGENCY_CALL_ROUTING_UNKNOWN;
+                return IUMtcCall.SERVICETYPE_EMERGENCY;
             case EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL:
-                return IUMtcService.EMERGENCY_CALL_ROUTING_NORMAL;
+                return IUMtcCall.SERVICETYPE_NORMAL;
             default: // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY
-                return IUMtcService.EMERGENCY_CALL_ROUTING_EMERGENCY;
+                return IUMtcCall.SERVICETYPE_EMERGENCY;
         }
     }
 
