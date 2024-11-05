@@ -61,7 +61,7 @@ protected:
     virtual void HandleLocationInfoChanged();
     virtual IMS_BOOL CheckServiceAvailable();
 
-    void Notify();
+    void Notify(IN IMS_BOOL bNotify = IMS_TRUE);
     void RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason);
 
     IMS_BOOL IsSameAsBeforeUnavailableReason();
@@ -79,6 +79,7 @@ public:
         EVENT_NETWORK,
         EVENT_WIFI_STATE,
         EVENT_BLOCK,
+        EVENT_BLOCK_SILENT,
         EVENT_MAX
     };
 

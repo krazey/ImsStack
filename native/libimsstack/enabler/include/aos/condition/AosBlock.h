@@ -31,6 +31,8 @@ public:
 
     void SetListener(IN IAosBlockListener* piListener) override;
     void RemoveListener(IN IAosBlockListener* piListener) override;
+    void SetSilentListener(IN IAosBlockSilentListener* piListener) override;
+    void RemoveSilentListener(IN IAosBlockSilentListener* piListener) override;
 
     IMS_BOOL SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
     IMS_BOOL ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
@@ -48,7 +50,7 @@ public:
     static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 
 protected:
-    void Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable);
+    void Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable, IN IMS_BOOL bNotify = IMS_TRUE);
     static IMS_UINT32 GetBlockType(IN BLOCK_REASON eReason);
     static const IMS_CHAR* ServiceTypeToString(IN SERVICE_TYPE eType);
 
@@ -70,6 +72,7 @@ protected:
     ImsHashMap m_objBlockWifi;
 
     ImsList<IAosBlockListener*> m_objListeners;
+    ImsList<IAosBlockSilentListener*> m_objSilentListeners;
 
     AString m_strTag;
     ImsList<IMS_UINT32> objServiceBlockReasons;

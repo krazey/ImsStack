@@ -86,6 +86,7 @@ PUBLIC VIRTUAL void AosCondition::Start()
         if (m_piBlock != IMS_NULL)
         {
             m_piBlock->SetListener(this);
+            m_piBlock->SetSilentListener(this);
         }
     }
 
@@ -155,6 +156,7 @@ PUBLIC VIRTUAL void AosCondition::Stop()
         if (m_piBlock != IMS_NULL)
         {
             m_piBlock->RemoveListener(this);
+            m_piBlock->RemoveSilentListener(this);
         }
     }
 
@@ -436,7 +438,15 @@ PROTECTED VIRTUAL void AosCondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_U
     SendConditionEvent(AosServiceAvailable::EVENT_BLOCK, nType, nParam);
 }
 
-PROTECTED VIRTUAL void AosCondition::ServiceAvailable_Changed()
+PROTECTED VIRTUAL void AosCondition::Block_SilentChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
+{
+    A_IMS_TRACE_I(APPPROFILE, "Block_SilentChanged :: Reason(%s)(%d) - %s",
+            AosBlock::BlockReasonToString(nType), nType, (nParam > 0) ? "BLOCK" : "NOT_BLOCK");
+
+    SendConditionEvent(AosServiceAvailable::EVENT_BLOCK_SILENT, nType, nParam);
+}
+
+PROTECTED VIRTUAL void AosCondition::ServiceAvailable_Changed(IN IMS_BOOL bNotify /*= IMS_TRUE*/)
 {
     m_bCellServiceAvailable = m_pAvailableCellular->IsAvailable();
     m_bWifiServiceAvailable = m_pAvailableWifi->IsAvailable();
@@ -453,7 +463,7 @@ PROTECTED VIRTUAL void AosCondition::ServiceAvailable_Changed()
         }
     }
 
-    if (m_piListener != IMS_NULL)
+    if (bNotify && m_piListener != IMS_NULL)
     {
         m_piListener->Condition_Changed();
     }

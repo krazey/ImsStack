@@ -20,6 +20,7 @@
 #include "ITimer.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosBlockListener.h"
+#include "interface/IAosBlockSilentListener.h"
 #include "interface/IAosCallTrackerListener.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
@@ -37,6 +38,7 @@ class AosServiceAvailableWifi;
 class AosCondition :
         public IEventListener,
         public IAosBlockListener,
+        public IAosBlockSilentListener,
         public IAosCallTrackerListener,
         public IAosNetTrackerListener,
         public IAosServiceAvailableListener,
@@ -128,8 +130,11 @@ protected:
     // IAosBlockListener
     void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;
 
+    // IAosBlockSilentListener
+    void Block_SilentChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;
+
     // IAosServiceAvailableListener
-    void ServiceAvailable_Changed() override;
+    void ServiceAvailable_Changed(IN IMS_BOOL bNotify = IMS_TRUE) override;
     void ServiceAvailable_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason) override;
 
     // IAosNConfigurationListener

@@ -16,6 +16,7 @@
 #include "ServiceTrace.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlockListener.h"
+#include "interface/IAosBlockSilentListener.h"
 #include "condition/AosBlock.h"
 
 __IMS_TRACE_TAG_AOS__;
@@ -88,6 +89,51 @@ PUBLIC VIRTUAL void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
     }
 }
 
+PUBLIC VIRTUAL void AosBlock::SetSilentListener(IN IAosBlockSilentListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objSilentListeners.GetSize(); ++i)
+    {
+        IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
+
+        if (pTmpListener == piListener)
+        {
+            A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is already set",
+                    piListener, 0, 0);
+            return;
+        }
+    }
+
+    m_objSilentListeners.Append(piListener);
+    A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is set", piListener, 0, 0);
+}
+
+PUBLIC VIRTUAL void AosBlock::RemoveSilentListener(IN IAosBlockSilentListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objSilentListeners.GetSize(); ++i)
+    {
+        IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
+
+        if (pTmpListener == piListener)
+        {
+            m_objSilentListeners.RemoveAt(i);
+
+            A_IMS_TRACE_D(APPPROFILE, "RemoveSilentListener :: (%" PFLS_X ") is removed",
+                    piListener, 0, 0);
+            return;
+        }
+    }
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosBlock::SetBlockReason(
         IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
 {
@@ -112,10 +158,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::SetBlockReason(
         m_objBlock.SetAt(&REASON[eReason], &BLOCK_ENABLED);
     }
 
-    if (bNotify)
-    {
-        Notify(eReason, IMS_TRUE);
-    }
+    Notify(eReason, IMS_TRUE, bNotify);
 
     return IMS_TRUE;
 }
@@ -144,10 +187,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::ResetBlockReason(
         m_objBlock.RemoveKey(&REASON[eReason]);
     }
 
-    if (bNotify)
-    {
-        Notify(eReason, IMS_FALSE);
-    }
+    Notify(eReason, IMS_FALSE, bNotify);
 
     return IMS_TRUE;
 }
@@ -410,12 +450,24 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
 }
 
 PROTECTED
-void AosBlock::Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable)
+void AosBlock::Notify(
+        IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable, IN IMS_BOOL bNotify /*= IMS_TRUE*/)
 {
-    for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
+    if (bNotify)
     {
-        IAosBlockListener* piListener = m_objListeners.GetAt(nAt);
-        piListener->Block_Changed(eReason, (bIsEnable) ? 1 : 0);
+        for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
+        {
+            IAosBlockListener* piListener = m_objListeners.GetAt(nAt);
+            piListener->Block_Changed(eReason, (bIsEnable) ? 1 : 0);
+        }
+    }
+    else
+    {
+        for (IMS_UINT32 nAt = 0; nAt < m_objSilentListeners.GetSize(); nAt++)
+        {
+            IAosBlockSilentListener* piListener = m_objSilentListeners.GetAt(nAt);
+            piListener->Block_SilentChanged(eReason, (bIsEnable) ? 1 : 0);
+        }
     }
 }
 

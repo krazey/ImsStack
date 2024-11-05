@@ -24,6 +24,7 @@
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlockListener.h"
+#include "interface/MockIAosBlockSilentListener.h"
 #include "app/MockAosAppContext.h"
 
 using ::testing::_;
@@ -45,6 +46,10 @@ public:
     }
 
     inline ImsList<IAosBlockListener*> GetBlockListeners() { return m_objListeners; }
+    inline ImsList<IAosBlockSilentListener*> GetBlockSilentListeners()
+    {
+        return m_objSilentListeners;
+    }
 };
 
 struct AosBlockParams
@@ -63,6 +68,10 @@ public:
     MockIAosBlockListener m_objMockIAosBlockListener1;
     MockIAosBlockListener m_objMockIAosBlockListener2;
     MockIAosBlockListener m_objMockIAosBlockListener3;
+
+    MockIAosBlockSilentListener m_objMockIAosBlockSilentListener1;
+    MockIAosBlockSilentListener m_objMockIAosBlockSilentListener2;
+    MockIAosBlockSilentListener m_objMockIAosBlockSilentListener3;
 
 protected:
     virtual void SetUp() override
@@ -206,6 +215,86 @@ TEST_P(AosBlockTest, FailsSetBlockReasonWhenReasonIsBlocked)
     EXPECT_FALSE(m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objAosBlockParams.nReason)));
 }
 
+TEST_F(AosBlockTest, FailsSetSilentListenerWhenListenerIsNull)
+{
+    // GIVEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 0);
+
+    // WHEN
+    m_pAosBlock->SetSilentListener(IMS_NULL);
+
+    // THEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 0);
+}
+
+TEST_F(AosBlockTest, SucceedsSetSilentListener)
+{
+    // GIVEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 0);
+
+    // WHEN
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener1);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener3);
+
+    // THEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 3);
+}
+
+TEST_F(AosBlockTest, FailsSetSilentListenerWhenSameListenerIsExist)
+{
+    // GIVEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 0);
+
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener1);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener3);
+
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 3);
+
+    // WHEN
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener1);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener3);
+
+    // THEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 3);
+}
+
+TEST_F(AosBlockTest, FailsRemoveSilentListenerWhenListenerIsNull)
+{
+    // GIVEN
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener1);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener3);
+
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 3);
+
+    // WHEN
+    m_pAosBlock->RemoveSilentListener(IMS_NULL);
+
+    // THEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 3);
+}
+
+TEST_F(AosBlockTest, SucceedsRemoveSilentListener)
+{
+    // GIVEN
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener1);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener3);
+
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 3);
+
+    // WHEN
+    m_pAosBlock->RemoveSilentListener(&m_objMockIAosBlockSilentListener3);
+    m_pAosBlock->RemoveSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->RemoveSilentListener(&m_objMockIAosBlockSilentListener1);
+
+    // THEN
+    EXPECT_EQ(m_pAosBlock->GetBlockSilentListeners().GetSize(), 0);
+}
+
 TEST_P(AosBlockTest, SucceedsSetBlockReason)
 {
     // GIVEN
@@ -235,16 +324,16 @@ TEST_F(AosBlockTest, SucceedsNotifySetBlockReasonWhenNotifyEnabled)
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosBlockTest, DoesNotNotifySetBlockReasonWhenNotifyDisabled)
+TEST_F(AosBlockTest, SucceedsNotifySetBlockReasonWhenNotifyDisabled)
 {
     // GIVEN
-    m_pAosBlock->SetListener(&m_objMockIAosBlockListener1);
-    m_pAosBlock->SetListener(&m_objMockIAosBlockListener2);
-    m_pAosBlock->SetListener(&m_objMockIAosBlockListener3);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener1);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener3);
 
-    EXPECT_CALL(m_objMockIAosBlockListener1, Block_Changed(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlockListener2, Block_Changed(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlockListener3, Block_Changed(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlockSilentListener1, Block_SilentChanged(_, IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosBlockSilentListener2, Block_SilentChanged(_, IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosBlockSilentListener3, Block_SilentChanged(_, IMS_TRUE));
 
     // WHEN
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED, IMS_FALSE);
@@ -298,18 +387,18 @@ TEST_F(AosBlockTest, SucceedsNotifyResetBlockReasonWhenNotifyEnabled)
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosBlockTest, DoesNotNotifyResetBlockReasonWhenNotifyDisabled)
+TEST_F(AosBlockTest, SucceedsNotifyResetBlockReasonWhenNotifyDisabled)
 {
     // GIVEN
-    m_pAosBlock->SetListener(&m_objMockIAosBlockListener1);
-    m_pAosBlock->SetListener(&m_objMockIAosBlockListener2);
-    m_pAosBlock->SetListener(&m_objMockIAosBlockListener3);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener1);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener2);
+    m_pAosBlock->SetSilentListener(&m_objMockIAosBlockSilentListener3);
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED, IMS_FALSE);
 
-    EXPECT_CALL(m_objMockIAosBlockListener1, Block_Changed(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlockListener2, Block_Changed(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlockListener3, Block_Changed(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlockSilentListener1, Block_SilentChanged(_, IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosBlockSilentListener2, Block_SilentChanged(_, IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosBlockSilentListener3, Block_SilentChanged(_, IMS_FALSE));
 
     // WHEN
     m_pAosBlock->ResetBlockReason(BLOCK_AC_INCOMPLETED, IMS_FALSE);

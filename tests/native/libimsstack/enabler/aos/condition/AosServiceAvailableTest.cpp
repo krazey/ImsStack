@@ -317,9 +317,9 @@ TEST_F(AosServiceAvailableTest, ShouldNotifyToListenersWhenRefreshServiceAvailab
     objListeners.Append(&m_objListener3);
     m_pAosServiceAvailable->SetListeners(objListeners);
 
-    EXPECT_CALL(m_objListener1, ServiceAvailable_Changed());
-    EXPECT_CALL(m_objListener2, ServiceAvailable_Changed());
-    EXPECT_CALL(m_objListener3, ServiceAvailable_Changed());
+    EXPECT_CALL(m_objListener1, ServiceAvailable_Changed(_));
+    EXPECT_CALL(m_objListener2, ServiceAvailable_Changed(_));
+    EXPECT_CALL(m_objListener3, ServiceAvailable_Changed(_));
 
     m_pAosServiceAvailable->SetAvailableLastNotified(IMS_FALSE);
 
@@ -336,6 +336,7 @@ TEST_F(AosServiceAvailableTest, SucceedsInvokeValidFunctionWhenHandleEvent)
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_CALL, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_NETWORK, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_BLOCK, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_BLOCK_SILENT, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1);
@@ -345,7 +346,7 @@ TEST_F(AosServiceAvailableTest, SucceedsInvokeValidFunctionWhenHandleEvent)
     // THEN
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleCallStateChanged"), 1);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleNetworkStateChanged"), 1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 2);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleAirplaneModeChanged"), 1);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 1);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleVopsChanged"), 1);
