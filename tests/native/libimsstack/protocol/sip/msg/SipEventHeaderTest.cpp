@@ -30,7 +30,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipEventHeaderTest, EncodeHdrAndDecode)
+TEST_F(SipEventHeaderTest, EncodeAndDecode)
 {
     SipHeaderBase* pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
@@ -44,7 +44,7 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecode)
     AStringBuffer objBuffer(256);
 
     EXPECT_EQ(SIP_FALSE,
-            pHeader->EncodeHdr(&pBuff, SIP_TRUE, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
+            pHeader->Encode(&pBuff, SIP_TRUE, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
@@ -55,7 +55,7 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecode)
 
     pHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("event-package", &(aBuffer[0]));
     EXPECT_STREQ("event-package", objBuffer.GetCharString());
@@ -76,7 +76,7 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecode)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("event-package.event-template", &(aBuffer[0]));
     EXPECT_STREQ("event-package.event-template", objBuffer.GetCharString());
@@ -121,7 +121,7 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecode)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pEventsHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pEventsHeader->Encode(&pBuff));
     EXPECT_STREQ("event-package.event-template1.event-template5", &(aBuffer[0]));
 
     pEventsHeader->SipDelete();
@@ -142,7 +142,7 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecode)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("event-package.event-template;event-param-name=event-param-value", &(aBuffer[0]));
     EXPECT_STREQ("event-package.event-template;event-param-name=event-param-value",

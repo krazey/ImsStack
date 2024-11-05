@@ -40,7 +40,7 @@ TEST_F(SipUnknownHeaderTest, Constructor)
 
     pUnknownHeader->SipDelete();
 }
-TEST_F(SipUnknownHeaderTest, EncodeHdr)
+TEST_F(SipUnknownHeaderTest, Encode)
 {
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
@@ -55,12 +55,12 @@ TEST_F(SipUnknownHeaderTest, EncodeHdr)
     ASSERT_TRUE(pUnknownHeader != nullptr);
 
     pUnknownHeader->SetHeaderValue("UnknownHeaderValue");
-    EXPECT_EQ(SIP_FALSE, pUnknownHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pUnknownHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pUnknownHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pUnknownHeader->IsValidHeader());
 
     pUnknownHeader->SetHeaderName("UnknownHeaderName");
-    EXPECT_EQ(SIP_TRUE, pUnknownHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pUnknownHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pUnknownHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("UnknownHeaderName: UnknownHeaderValue", &(aBuffer[0]));
     EXPECT_STREQ("UnknownHeaderName: UnknownHeaderValue", objBuffer.GetCharString());
@@ -74,7 +74,7 @@ TEST_F(SipUnknownHeaderTest, EncodeHdr)
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::UNKNOWN));
     ASSERT_TRUE(pUnknownHeader != nullptr);
     pUnknownHeader->SetHeaderName("UnknownHeaderName");
-    EXPECT_EQ(SIP_TRUE, pUnknownHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pUnknownHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pUnknownHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("UnknownHeaderName: ", &(aBuffer[0]));
     EXPECT_STREQ("UnknownHeaderName: ", objBuffer.GetCharString());

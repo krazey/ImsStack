@@ -62,25 +62,22 @@ SipRequestLine::~SipRequestLine()
     }
 }
 
-SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipRequestLine::Encode(SIP_CHAR** ppCurrPos)
 {
     /*check for existence of Method, request uri and version */
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Method missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Method missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pReqUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Request Uri missing", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Request Uri missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pszSipVersion == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Sip Version missing", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Sip Version missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -93,7 +90,7 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     /* Encode Request Uri*/
-    m_pReqUri->EncodeAddrSpec(ppCurrPos);
+    m_pReqUri->Encode(ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
     SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);

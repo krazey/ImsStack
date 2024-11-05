@@ -31,7 +31,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipViaHeaderTest, Encode)
 {
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE];
@@ -43,11 +43,11 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     pHeader->SetProtocolName("SIP");
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     pBuff = &(aBuffer[0]);
@@ -55,7 +55,7 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
     objBuffer = AString::ConstNull();
 
     pHeader->SetProtocolVer("2.0");
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     pBuff = &(aBuffer[0]);
@@ -63,7 +63,7 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
     objBuffer = AString::ConstNull();
 
     pHeader->SetTransport("TCP");
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     pBuff = &(aBuffer[0]);
@@ -74,7 +74,7 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
     pHeader->SetPortNum((SIP_UINT16)39002);
     EXPECT_EQ(SIP_TRUE, pHeader->SetBranchParam("z9hG4bK1422bd448-755bfe94"));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
 
     EXPECT_STREQ("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\

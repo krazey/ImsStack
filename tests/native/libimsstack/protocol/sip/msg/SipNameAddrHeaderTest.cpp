@@ -90,13 +90,13 @@ TEST_F(SipNameAddrHeaderTest, GetNameAddr)
     pHeader->SipDelete();
 }
 
-TEST_F(SipNameAddrHeaderTest, EncodeHdr)
+TEST_F(SipNameAddrHeaderTest, Encode)
 {
     SipNameAddrHeader* pHeader = reinterpret_cast<SipNameAddrHeader*>(
             SipNameAddrHeader::GetNewObj(SipHeaderBase::TO, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(nullptr));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(nullptr));
 
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
@@ -111,7 +111,7 @@ TEST_F(SipNameAddrHeaderTest, EncodeHdr)
     pNameAddress->SetAddrSpec(pAddressSpec);
     pNameAddress->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("DisplayName <www.absolute-uri.com/abcd>", &(aBuffer[0]));
 
     pBuff = &(aBuffer[0]);
@@ -120,7 +120,7 @@ TEST_F(SipNameAddrHeaderTest, EncodeHdr)
     /* Encode with parameters */
     pHeader->AddParam("param-name", "param-value");
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("DisplayName <www.absolute-uri.com/abcd>;param-name=param-value", &(aBuffer[0]));
 
     pHeader->SipDelete();

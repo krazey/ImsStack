@@ -72,7 +72,7 @@ TEST_F(SipUriTest, IsValidComponent)
     pSipUri->SipDelete();
 }
 
-TEST_F(SipUriTest, EncodeAndEncodeSipUri)
+TEST_F(SipUriTest, Encode)
 {
     SipUri* pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
@@ -86,7 +86,7 @@ TEST_F(SipUriTest, EncodeAndEncodeSipUri)
     AStringBuffer objBuffer(256);
 
     /* Empty SipUri, fail */
-    EXPECT_EQ(SIP_FALSE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pSipUri->Encode(objBuffer, SIP_FALSE));
 
     /* user, password, host, port, uri params and header params present. success */
@@ -96,7 +96,7 @@ OnlyHeaderName&HeaderName=HeaderValue",
                     101));
 
     /* user,password,host,port,uri-params and header params present, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue?\
 OnlyHeaderName&HeaderName=HeaderValue",
@@ -110,7 +110,7 @@ OnlyHeaderName&HeaderName=HeaderValue",
     objBuffer = AString::ConstNull();
 
     pSipUri->RemoveHdrParam("HeaderName");
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue?\
 OnlyHeaderName",
@@ -131,7 +131,7 @@ OnlyHeaderName",
     objBuffer = AString::ConstNull();
 
     /* Only host and port present, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("192.168.1.2:9090", &(aBuffer[0]));
     EXPECT_STREQ("192.168.1.2:9090", objBuffer.GetCharString());
@@ -162,7 +162,7 @@ UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("hostName;OnlyUriName;\
 UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
@@ -183,7 +183,7 @@ UriName=UriValue?OnlyHeaderName&HeaderName=HeaderValue",
     EXPECT_EQ(SIP_TRUE, pSipUri->Decode("UserName:password@192.168.1.2:9090", 34));
 
     /* user,password,host,port present.uri-params and header params absent, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090", &(aBuffer[0]));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090", objBuffer.GetCharString());
@@ -203,7 +203,7 @@ OnlyUriName;UriName=UriValue",
                     63));
 
     /* user,password,host,port,uri-params present.header params absent, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue", &(aBuffer[0]));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue",
@@ -224,7 +224,7 @@ OnlyHeaderName&HeaderName=HeaderValue",
                     72));
 
     /* user,password,host,port,header params present.uri-params absent, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090?OnlyHeaderName&HeaderName=HeaderValue",
             &(aBuffer[0]));
@@ -243,7 +243,7 @@ OnlyHeaderName&HeaderName=HeaderValue",
     EXPECT_EQ(SIP_TRUE, pSipUri->Decode("UserName:password@[2001::2]:9090", 32));
 
     /* user,password,host IPv6,port,header params present.uri-params absent, SUCCESS */
-    EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipUri->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("UserName:password@[2001::2]:9090", &(aBuffer[0]));
     EXPECT_STREQ("UserName:password@[2001::2]:9090", objBuffer.GetCharString());

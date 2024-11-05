@@ -104,7 +104,7 @@ TEST_F(SipTriggerConsentHeaderTest, EncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty value not allowed */
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipTriggerConsentHeader*>(
@@ -115,7 +115,7 @@ TEST_F(SipTriggerConsentHeaderTest, EncodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->SetSipUri(pSipUri));
     pSipUri->SipDelete();
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipTriggerConsentHeader*>(
@@ -127,9 +127,12 @@ TEST_F(SipTriggerConsentHeaderTest, EncodeHdr)
 
     /* Valid value */
     const SIP_CHAR* pValue = "sip:123@example.com";
+
     pSipUri->Decode(pValue, SipPf_Strlen(pValue));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
+
     pHeader->SipDelete();
 }
 
@@ -212,7 +215,7 @@ TEST_F(SipTriggerConsentHeaderTest, Decode)
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ(pValue + 4, &(aBuffer[0]));
     pHeader->SipDelete();
 
@@ -227,7 +230,7 @@ TEST_F(SipTriggerConsentHeaderTest, Decode)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("1111@example.com", &(aBuffer[0]));
     pHeader->SipDelete();
 }

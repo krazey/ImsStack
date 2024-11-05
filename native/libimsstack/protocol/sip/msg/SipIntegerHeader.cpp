@@ -60,7 +60,7 @@ SIP_BOOL SipIntegerHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) co
     return SipHeaderBase::Encode(objBuffer, bParams);
 }
 
-SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
+SIP_BOOL SipIntegerHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
     const SIP_CHAR* pszValue = GetValue();
 
@@ -68,7 +68,7 @@ SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     {
         SetValue("0");
     }
-    return SipHeaderBase::EncodeHdr(ppCurrPos, bParams);
+    return SipHeaderBase::Encode(ppCurrPos, bParams);
 }
 
 SIP_BOOL SipIntegerHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

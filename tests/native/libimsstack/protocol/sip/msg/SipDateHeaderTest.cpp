@@ -29,7 +29,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipDateHeaderTest, Encode)
 {
     SipDateHeader* pHeader = reinterpret_cast<SipDateHeader*>(
             SipDateHeader::GetNewObj(SipHeaderBase::DATE, nullptr));
@@ -44,11 +44,11 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     AStringBuffer objValue(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetDate(35);
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetDate(25);
 
@@ -61,7 +61,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
 
     pHeader->SetMonth(SipDateHeader::JANUARY);
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     objValue = AString::ConstNull();
     pBuff = &(aBuffer[0]);
@@ -69,7 +69,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
 
     pHeader->SetYear(999);
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetYear(2050);
 
@@ -81,7 +81,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
 
     pHeader->SetWkDay(SipDateHeader::MONDAY);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
 
     EXPECT_STREQ("Mon, 25 Jan 2050 00:00:00 GMT", objValue.GetCharString());
@@ -102,7 +102,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     pHeader->SetHour(21);
     pHeader->SetSecond(30);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("Mon, 25 Jan 2050 21:45:30 GMT", &(aBuffer[0]));
 
     pHeader->SipDelete();

@@ -43,7 +43,7 @@ TEST_F(SipResourcePriorityHeaderTest, CopyConstructor)
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipResourcePriorityHeaderTest, Encode)
 {
     SipResourcePriorityHeader* pHeader = reinterpret_cast<SipResourcePriorityHeader*>(
             SipResourcePriorityHeader::GetNewObj(SipHeaderBase::RESOURCE_PRIORITY, nullptr));
@@ -58,17 +58,17 @@ TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
     AStringBuffer objBuffer(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetNameSpace("Namespace");
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetRPriority("ResourcePriority");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("Namespace.ResourcePriority", objBuffer.GetCharString());
     EXPECT_STREQ("Namespace.ResourcePriority", &(aBuffer[0]));
@@ -88,13 +88,13 @@ TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
 
     /* Empty header allowed */
     EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->IsValidHeader());
-    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
 
     /* Only namespace present, fail */
     pAcceptResourcePriorityHeader->SetNameSpace("namespace");
     EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->IsValidHeader());
-    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
     pAcceptResourcePriorityHeader->SipDelete();
     pAcceptResourcePriorityHeader = nullptr;
@@ -110,7 +110,7 @@ TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     objBuffer = AString::ConstNull();
-    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
     pAcceptResourcePriorityHeader->SipDelete();
     pAcceptResourcePriorityHeader = nullptr;
@@ -127,7 +127,7 @@ TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     objBuffer = AString::ConstNull();
-    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pAcceptResourcePriorityHeader->Encode(objBuffer, SIP_FALSE));
 
     EXPECT_STREQ("namespace.r-priority", &(aBuffer[0]));

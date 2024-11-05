@@ -76,7 +76,7 @@ TEST_F(SipReferSubHeaderTest, Decode)
     SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("true", &(aBuffer[0]));
     pHeader->SipDelete();
 
@@ -87,7 +87,7 @@ TEST_F(SipReferSubHeaderTest, Decode)
     EXPECT_EQ(SIP_TRUE, pHeader->Decode("false", 5));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("false", &(aBuffer[0]));
     pHeader->SipDelete();
 }

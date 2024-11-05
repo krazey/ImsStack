@@ -956,7 +956,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
 
             if (pRequestLine != SIP_NULL)
             {
-                bStatus = pRequestLine->EncodeRequestLine(&pszBuffer);
+                bStatus = pRequestLine->Encode(&pszBuffer);
                 pRequestLine->SipDelete();
             }
         }
@@ -966,7 +966,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
 
             if (pStatusLine != SIP_NULL)
             {
-                bStatus = pStatusLine->EncodeStatusLine(&pszBuffer);
+                bStatus = pStatusLine->Encode(&pszBuffer);
                 pStatusLine->SipDelete();
             }
         }
@@ -1086,7 +1086,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
             pContentLength->SipDelete();
         }
 
-        if (pMessage->GetMsgHdrs()->EncodeHdrs(&pszBuffer, SipConfiguration::MSG_OPT_ENCODE_NONE) ==
+        if (pMessage->GetMsgHdrs()->Encode(&pszBuffer, SipConfiguration::MSG_OPT_ENCODE_NONE) ==
                 SIP_FALSE)
         {
             IMS_TRACE_D("Encoding headers failed", 0, 0, 0);

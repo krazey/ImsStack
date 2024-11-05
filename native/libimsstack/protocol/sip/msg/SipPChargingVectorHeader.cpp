@@ -58,22 +58,17 @@ SIP_BOOL SipPChargingVectorHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bPa
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipPChargingVectorHeader::EncodeHdr(
+SIP_BOOL SipPChargingVectorHeader::Encode(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if (m_pChargingVectorList == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipPChargingVectorHeader::EncodeHdr:m_pChargingVectorList missing", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Missing body", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (m_pChargingVectorList->Encode(ppCurrPos) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipPChargingVectorHeader::EncodeHdr: Name Value Encoding failed", SIP_ZERO,
-                SIP_ZERO);
         return SIP_FALSE;
     }
 

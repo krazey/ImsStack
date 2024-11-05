@@ -76,7 +76,7 @@ SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) c
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
+SIP_BOOL SipIdentityHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
     if (IsValidHeader() == SIP_FALSE)
     {

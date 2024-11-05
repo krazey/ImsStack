@@ -31,7 +31,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipStatusLineTest, EncodeStatusLine)
+TEST_F(SipStatusLineTest, Encode)
 {
     SipStatusLine* pStatusLine = new SipStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
@@ -43,22 +43,22 @@ TEST_F(SipStatusLineTest, EncodeStatusLine)
     SIP_CHAR* pBuff = &(aBuffer[0]);
 
     /* Empty object, fail */
-    EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pStatusLine->Encode(&pBuff));
 
     /* Only status code present, fail */
     pStatusLine->SetStatusCode("183");
 
-    EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pStatusLine->Encode(&pBuff));
 
     /* Status code, reason phrase present and sip version absent, fail */
     pStatusLine->SetReasonPhrase("Session Progress");
 
-    EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pStatusLine->Encode(&pBuff));
 
     pStatusLine->SetSipVersion(SIP_SIPVER);
 
     /* sip version,status code and reason phrase present, success */
-    EXPECT_EQ(SIP_TRUE, pStatusLine->EncodeStatusLine(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pStatusLine->Encode(&pBuff));
 
     EXPECT_STREQ("SIP/2.0 183 Session Progress", &(aBuffer[0]));
 
@@ -70,7 +70,7 @@ TEST_F(SipStatusLineTest, EncodeStatusLine)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     /* sip version,status code and reason phrase present, success */
-    EXPECT_EQ(SIP_TRUE, pStatusLine->EncodeStatusLine(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pStatusLine->Encode(&pBuff));
 
     EXPECT_STREQ("SIP/2.0 180 Ringing", &(aBuffer[0]));
 
@@ -82,7 +82,7 @@ TEST_F(SipStatusLineTest, EncodeStatusLine)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     /* sip version,status code and reason phrase present, success */
-    EXPECT_EQ(SIP_TRUE, pStatusLine->EncodeStatusLine(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pStatusLine->Encode(&pBuff));
 
     EXPECT_STREQ("SIP/2.0 100 Trying", &(aBuffer[0]));
 

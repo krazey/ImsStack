@@ -60,12 +60,12 @@ SipHeaderList::~SipHeaderList()
     }
 }
 
-SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
+SIP_BOOL SipHeaderList::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
-    return EncodeHdr(ppCurrPos, bParams, SipConfiguration::MSG_OPT_ENCODE_NONE);
+    return Encode(ppCurrPos, bParams, SipConfiguration::MSG_OPT_ENCODE_NONE);
 }
 
-SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions)
+SIP_BOOL SipHeaderList::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions)
 {
     if (m_objHeaderList.IsEmpty() == SIP_TRUE)
     {
@@ -86,7 +86,7 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
         nMsgOptions = nMsgOptions | SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE;
     }
 
-    if (pHeader->EncodeHdr(ppCurrPos, bParams) == SIP_FALSE)
+    if (pHeader->Encode(ppCurrPos, bParams) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -128,7 +128,7 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
             SipMsgUtil::Encode(*ppCurrPos, COMMA);
         }
 
-        if (pHeader->EncodeHdr(ppCurrPos, bParams) == SIP_FALSE)
+        if (pHeader->Encode(ppCurrPos, bParams) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;

@@ -29,7 +29,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipTimeStampHeaderTest, Encode)
 {
     SipTimeStampHeader* pHeader = reinterpret_cast<SipTimeStampHeader*>(
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
@@ -44,12 +44,12 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     AStringBuffer objValue(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetTimeVal("12.56");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("12.56", objValue.GetCharString());
     EXPECT_STREQ("12.56", &(aBuffer[0]));
@@ -61,7 +61,7 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     pHeader->SetDelay("1.30");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("12.56 1.30", objValue.GetCharString());
     EXPECT_STREQ("12.56 1.30", &(aBuffer[0]));

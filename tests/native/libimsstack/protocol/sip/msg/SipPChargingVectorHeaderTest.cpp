@@ -46,7 +46,7 @@ TEST_F(SipPChargingVectorHeaderTest, CopyConstructor)
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipPChargingVectorHeaderTest, EncodeHdr_Null)
+TEST_F(SipPChargingVectorHeaderTest, Encode_Null)
 {
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
@@ -59,7 +59,7 @@ TEST_F(SipPChargingVectorHeaderTest, EncodeHdr_Null)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty value not allowed */
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     pHeader->SipDelete();
 }
 
@@ -94,7 +94,7 @@ TEST_F(SipPChargingVectorHeaderTest, Encode)
     pHeader->SipDelete();
 }
 
-TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
+TEST_F(SipPChargingVectorHeaderTest, Encode_Decode)
 {
     SipPChargingVectorHeader* pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
@@ -117,7 +117,7 @@ TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SipDelete();
 
@@ -136,7 +136,7 @@ TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
 
@@ -159,7 +159,7 @@ TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
 }
@@ -180,7 +180,7 @@ TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_CopyConstr
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_EncodeHdr_Null)
+TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_Encode_Null)
 {
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
@@ -193,7 +193,7 @@ TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_EncodeHdr_
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty value not allowed */
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     pHeader->SipDelete();
 }
 
@@ -228,7 +228,7 @@ TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_Encode)
     pHeader->SipDelete();
 }
 
-TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_Encode_DecodeHdr)
+TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_Encode_Decode)
 {
     SipPChargingVectorHeader* pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
@@ -250,7 +250,7 @@ TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_Encode_Dec
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SipDelete();
 
@@ -269,7 +269,7 @@ TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_Encode_Dec
     EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
 
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
 
@@ -282,7 +282,7 @@ TEST_F(SipPChargingVectorHeaderTest, PChargingVectorFunctionAddresses_Encode_Dec
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
 }

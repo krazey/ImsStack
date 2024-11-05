@@ -30,7 +30,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipIdentityHeaderTest, Encode)
 {
     SipIdentityHeader* pHeader = reinterpret_cast<SipIdentityHeader*>(
             SipIdentityHeader::GetNewObj(SipHeaderBase::IDENTITY, nullptr));
@@ -46,13 +46,13 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
 
     /* Empty header, fail */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetSignedIdentityDigest("signed.digest");
 
     /* Only signed identity digest present, fail */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SipDelete();
 
@@ -64,13 +64,13 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
 
     /* Only info present, fail */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetSignedIdentityDigest("signed.digest");
 
     /* Signed identity digest and info present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("signed.digest;info=<InfoValue>", objValue.GetCharString());
     EXPECT_STREQ("signed.digest;info=<InfoValue>", &(aBuffer[0]));
@@ -83,7 +83,7 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
 
     /* Signed identity digest, info and parameters present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("signed.digest;info=<InfoValue>;alg=ES256", objValue.GetCharString());
     EXPECT_STREQ("signed.digest;info=<InfoValue>;alg=ES256", &(aBuffer[0]));

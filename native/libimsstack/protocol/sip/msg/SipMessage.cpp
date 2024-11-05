@@ -466,7 +466,7 @@ SIP_BOOL SipMessage::Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
 
     if ((m_eSipMsgType == SipMessage::REQ_TYPE) && (m_pReqLine != SIP_NULL))
     {
-        if (m_pReqLine->EncodeRequestLine(&pCurrPos) == SIP_FALSE)
+        if (m_pReqLine->Encode(&pCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODENCODER, "Encoding Request line Fail", SIP_ZERO, SIP_ZERO);
@@ -475,7 +475,7 @@ SIP_BOOL SipMessage::Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
     }
     else if ((m_eSipMsgType == SipMessage::RESP_TYPE) && (m_pStatusLine != SIP_NULL))
     {
-        if (m_pStatusLine->EncodeStatusLine(&pCurrPos) == SIP_FALSE)
+        if (m_pStatusLine->Encode(&pCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODENCODER, "Encoding status line Fail", SIP_ZERO, SIP_ZERO);
@@ -530,7 +530,7 @@ SIP_BOOL SipMessage::Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
     }
 
     // Encoding of headers
-    if (m_objHdrs->EncodeHdrs(&pCurrPos, nMsgOptions) == SIP_FALSE)
+    if (m_objHdrs->Encode(&pCurrPos, nMsgOptions) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Headers Encoding Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;

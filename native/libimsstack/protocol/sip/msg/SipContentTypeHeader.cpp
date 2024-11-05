@@ -67,8 +67,7 @@ SIP_BOOL SipContentTypeHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipContentTypeHeader::EncodeHdr(
-        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipContentTypeHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if ((m_pszMType == SIP_NULL) && (m_pszMSubType == SIP_NULL))
     {

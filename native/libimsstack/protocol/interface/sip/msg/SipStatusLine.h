@@ -26,23 +26,18 @@ private:
     SIP_CHAR* m_pszReasonPhrase;
 
 public:
-    /*constructor*/
     SipStatusLine() :
             m_pszSipVersion(SIP_NULL),
             m_pszStatusCode(SIP_NULL),
             m_pszReasonPhrase(SIP_NULL)
     {
     }
-
     SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszReasonPhrase);
-
     SipStatusLine(const SIP_CHAR* pszSipVersion, const SIP_CHAR* pszStatusCode,
             const SIP_CHAR* pszReasonPhrase);
-
     SipStatusLine(const SipStatusLine& objHeader);
 
-    /*Function for encoding*/
-    SIP_BOOL EncodeStatusLine(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 

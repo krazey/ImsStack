@@ -576,7 +576,7 @@ TEST_F(SipHeadersTest, InsertHdr)
     delete pHdrs;
 }
 
-TEST_F(SipHeadersTest, EncodeHdrs)
+TEST_F(SipHeadersTest, Encode)
 {
     SipHeaders* pHdrs = new SipHeaders();
     ASSERT_TRUE(pHdrs != nullptr);
@@ -588,7 +588,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     SIP_CHAR* pBuff = &(aBuffer[0]);
 
     /* Empty buffer */
-    EXPECT_EQ(SIP_FALSE, pHdrs->EncodeHdrs(&pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
+    EXPECT_EQ(SIP_FALSE, pHdrs->Encode(&pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
 
     SipUnknownHeader* pUnknownHdr = reinterpret_cast<SipUnknownHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::UNKNOWN));
@@ -665,9 +665,9 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     SIP_CHAR* pShortFormBuff = &(aShortFormBuffer[0]);
 
     /* Encode headers */
-    EXPECT_EQ(SIP_TRUE, pHdrs->EncodeHdrs(&pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
-    EXPECT_EQ(SIP_TRUE,
-            pHdrs->EncodeHdrs(&pShortFormBuff, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
+    EXPECT_EQ(SIP_TRUE, pHdrs->Encode(&pBuff, SipConfiguration::MSG_OPT_ENCODE_NONE));
+    EXPECT_EQ(
+            SIP_TRUE, pHdrs->Encode(&pShortFormBuff, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
 
     SIP_UINT32 uiLength = pBuff - &(aBuffer[0]);
 

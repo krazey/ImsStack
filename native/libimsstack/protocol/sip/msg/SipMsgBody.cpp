@@ -211,7 +211,7 @@ SipHeaderBase* SipMIMEHdrs::GetNewMIMEHdrObj(SIP_INT32 eHdrType)
     }
 }
 
-SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipMIMEHdrs::Encode(SIP_CHAR** ppCurrPos)
 {
     SIP_INT32 nHdr = SipMIMEHdrs::CONTENT_TYPE;
 
@@ -226,9 +226,10 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
                         pTemp->GetHdrType(), ppCurrPos, SipConfiguration::MSG_OPT_ENCODE_NONE);
             }
 
-            if (pTemp->EncodeHdr(ppCurrPos) == SIP_FALSE)
+            if (pTemp->Encode(ppCurrPos) == SIP_FALSE)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeHdr Failed", SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode mime header %d failed",
+                        pTemp->GetHdrType(), SIP_ZERO);
                 pTemp->SipDelete();
                 return SIP_FALSE;
             }
@@ -418,7 +419,7 @@ SIP_BOOL SipMsgBody::EncodeSingleMsgBody(SIP_CHAR** ppCurrPos)
     if (m_pBuffer == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "EncodeMsgBody Failed - No body", SIP_ZERO, SIP_ZERO);
+                ESIPTRACE_MODENCODER, "EncodeMsgBody failed - No body", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     SIP_CHAR* pBody = *ppCurrPos;
@@ -443,7 +444,8 @@ SIP_BOOL SipMsgBody::EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos)
     SipContentTypeHeader* pContentType = static_cast<SipContentTypeHeader*>(GetContentType());
     if (pContentType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content Type Not Present", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Content type header not present", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -451,7 +453,7 @@ SIP_BOOL SipMsgBody::EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos)
 
     if (m_pBodyList->EncodeBody(ppCurrPos, pszBoundary) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Msg Body Enc Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode message body failed", SIP_ZERO, SIP_ZERO);
         if (pszBoundary != SIP_NULL)
         {
             delete[] pszBoundary;
@@ -477,10 +479,10 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
 
         if (m_pMIMEHdrs != SIP_NULL)
         {
-            if (m_pMIMEHdrs->EncodeMIMEHdrs(ppCurrPos) == SIP_FALSE)
+            if (m_pMIMEHdrs->Encode(ppCurrPos) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(
-                        ESIPTRACE_MODENCODER, "EncodeBody Failed - No body", SIP_ZERO, SIP_ZERO);
+                        ESIPTRACE_MODENCODER, "EncodeBody failed, no body", SIP_ZERO, SIP_ZERO);
             }
         }
 
@@ -810,14 +812,14 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
         if (pMsgbody == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODENCODER, "EncodeBody Failed - No body", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODENCODER, "EncodeBody failed, no body", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (pMsgbody->EncodeBody(ppMsgBuffCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODENCODER, "Encode message Body Failed", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODENCODER, "Encode message body failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 

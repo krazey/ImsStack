@@ -21,13 +21,12 @@
 class SipPAssertedServiceHeader : public SipHeaderBase
 {
 public:
-    /*constructor*/
     SipPAssertedServiceHeader();
     SipPAssertedServiceHeader(const SipPAssertedServiceHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipPAssertedServiceHeader();

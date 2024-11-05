@@ -60,7 +60,7 @@ public:
     SipHeaders();
     virtual ~SipHeaders();
     SIP_BOOL CopyHdrs(SipHeaders* pHdrs);
-    SIP_BOOL EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
             SIP_CHAR** ppHdrBody);
