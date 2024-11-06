@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include "IMtcImsEventReceiver.h"
-#include "ImsEventDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
@@ -57,7 +55,7 @@ PUBLIC VIRTUAL RetryAfterBlockRule::Result RetryAfterBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (IsEpsOnlyAttach())
+    if (!m_objContext.GetService().IsEpsCombinedAttach())
     {
         m_piMtcBlockRuleCheckListener = &objListener;
         m_objContext.GetPassiveTimerHolder().AddListener(
@@ -74,11 +72,4 @@ PUBLIC VIRTUAL void RetryAfterBlockRule::OnPassiveTimerExpired(
         IN IPassiveTimerHolder::Type /* eType */)
 {
     m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(Result(Result::Status::UNBLOCKED));
-}
-
-PRIVATE
-IMS_BOOL RetryAfterBlockRule::IsEpsOnlyAttach() const
-{
-    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_LTE_INFO) ==
-            IMS_LTE_INFO_EPS_ONLY_ATTACHED;
 }

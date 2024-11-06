@@ -20,7 +20,6 @@ import static com.android.imsstack.its.base.TestConstants.SLOT0;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
-import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.its.tests.ImsStackTestBase;
@@ -51,8 +50,6 @@ public class CallTestBase extends ImsStackTestBase {
         if (mConfig == null) {
             mConfig = new PersistableBundle();
         }
-        mConfig.putInt(
-                CarrierConfig.Assets.KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT, 0);
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
                 false);
     }

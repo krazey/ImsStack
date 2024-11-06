@@ -17,6 +17,7 @@
 #define ENGINE_H_
 
 class IConfiguration;
+class IRegistrationManager;
 
 /**
  * @brief This class provides an interface to manage and control the state of Engine.
@@ -28,6 +29,11 @@ public:
      * @brief Returns the Configuration interface.
      */
     static IConfiguration* GetConfiguration();
+
+    /**
+     * @brief Returns the RegistrationManager interface.
+     */
+    static IRegistrationManager* GetRegistrationManager();
 };
 
 #endif

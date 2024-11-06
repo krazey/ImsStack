@@ -23,13 +23,9 @@ public:
     {
         NONE = 0,
 
-        SRV_OUT = 1,
-        POWER_OFF,
-        BAD_BATTERY,
+        POWER_OFF = 1,
         AIRPLANE_MODE,
-        NO_LTE_COVERAGE,
         SERVICE_POLICY,
-        SERVICE_BLOCKED,
         IMS_DISABLED,
         TTYMODEON,
         NOT_SPECIFIED,
@@ -42,10 +38,7 @@ public:
         REG_FAILURE = 30,
         REG_TERMINATED,
         INITIAL_REG_REQUESTED,
-        REG_TERMINATING,
-        PCSCF_DISCOVERY_FAILED,
-
-        UNKNOWN,
+        REG_TERMINATING
     };
 
     // Flags for suspend reason

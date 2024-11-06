@@ -81,7 +81,7 @@ public interface SystemServiceProxy {
     interface CarrierConfigManagerProxy {
         /**
          * Determines whether a configuration {@link PersistableBundle} obtained from
-         * {@link #getConfigForSubId(int)} corresponds to an identified carrier.
+         * {@link #getConfigForSubId(int, String...)} corresponds to an identified carrier.
          *
          * @param bundle The configuration bundle to be checked.
          * @return {@code true} if any carrier specific configuration bundle has been applied,
@@ -93,15 +93,6 @@ public interface SystemServiceProxy {
          * Returns a new bundle with the default value for every supported configuration variable.
          */
         @NonNull PersistableBundle getDefaultConfig();
-
-        /**
-         * Gets the configuration values for a particular subscription, which is associated with a
-         * specific SIM card. If an invalid subId is used, the returned config will contain default
-         * values. After using this method to get the configuration bundle,
-         * {@link #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm
-         * whether any carrier specific configuration has been applied.
-         */
-        @NonNull PersistableBundle getConfigForSubId(int subId);
 
         /**
          * Gets the configuration values of the specified keys for a particular subscription.

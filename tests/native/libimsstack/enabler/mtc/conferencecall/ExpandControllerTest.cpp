@@ -139,7 +139,8 @@ protected:
                 .WillByDefault(Return(&objConfCall));
 
         pConnectionIdManager = std::make_unique<MockCallConnectionIdManager>(objContext);
-        pNotifier = new MockConferenceEventNotifier(objConfCallContext, *pConnectionIdManager);
+        pNotifier = new MockConferenceEventNotifier(
+                objCallManager, CONFERENCE_CALL_KEY, *pConnectionIdManager);
         ON_CALL(objFactory, CreateEventNotifier(_, _)).WillByDefault(Return(pNotifier));
 
         pExpandController = std::make_unique<TestExpandController>(

@@ -16,7 +16,7 @@
 #include "BaseServiceThread.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_USER_DECL__("BaseService");
+__IMS_TRACE_TAG_USER_DECL__("JNI");
 
 PUBLIC
 BaseServiceThread::BaseServiceThread() :

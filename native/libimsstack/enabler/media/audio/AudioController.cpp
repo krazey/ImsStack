@@ -28,7 +28,7 @@ AudioController::AudioController() :
         m_eUpdateCondition(EARLY_SESSION),
         m_objLocalAddr(IpAddress::IPv6NONE),
         m_nPort(0),
-        m_nCurrentActiveNegoId(IMS_NULL)
+        m_nCurrentActiveNegoId(UNDEFINED_NEGO_ID)
 {
     m_listAudioSession.Clear();
 }
@@ -107,10 +107,10 @@ IMS_BOOL AudioController::UpdateSession(
 
     m_nCurrentActiveNegoId = nNegoId;
 
-    IMS_BOOL bAnbrResult =
-            UpdateAnbrEnabledConfig(nNegoId, pNego->GetNegotiatedNegoProfile()->bAnbr);
+    IMS_BOOL bAnbrResult = UpdateAnbrEnabledConfig(
+            nNegoId, pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported());
     IMS_TRACE_D("UpdateSession() - res: %d, anbr enable: %d", bAnbrResult,
-            pNego->GetNegotiatedNegoProfile()->bAnbr, 0);
+            pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported(), 0);
 
     if (m_eUpdateCondition == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
     {
@@ -291,7 +291,7 @@ IMS_BOOL AudioController::DeleteSession(IN IMS_UINTP nNegoId)
     IMS_TRACE_D("DeleteSession() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
             m_listAudioSession.GetSize(), 0);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         return IMS_FALSE;
     }
@@ -348,8 +348,10 @@ IMS_BOOL AudioController::UpdateRtpConfig(
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->UpdateRtpConfig(nAccessNetwork, pNego->GetNegotiatedLocalProfile(),
-                pNego->GetNegotiatedPeerProfile(), pNego->GetNegotiatedNegoProfile());
+        return pAudioSession->UpdateRtpConfig(nAccessNetwork,
+                pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
     }
 
     IMS_TRACE_E(0, "UpdateRtpConfig() - invalid param", 0, 0, 0);
@@ -362,7 +364,7 @@ IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_B
     IMS_TRACE_D("UpdateAnbrEnabledConfig() - nNegoId[%" PFLS_x "], anbr enable[%d]", nNegoId,
             anbrEnabled, 0);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         IMS_TRACE_E(0, "UpdateAnbrEnabledConfig() - invalid param", 0, 0, 0);
         return IMS_FALSE;
@@ -440,11 +442,11 @@ IMS_BOOL AudioController::UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioN
 
     if (pAudioSession != IMS_NULL && pNego != IMS_NULL)
     {
-        AudioProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
+        AudioProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
         IMS_BOOL bEnableRtcp = IMS_TRUE;
 
-        if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&
-                pPeerProfile->nBandwidthRr == 0)
+        if (pPeerProfile != IMS_NULL && pPeerProfile->GetBandwidthRs() == 0 &&
+                pPeerProfile->GetBandwidthRr() == 0)
         {
             bEnableRtcp = IMS_FALSE;
         }
@@ -509,7 +511,7 @@ PUBLIC void AudioController::SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UI
                 "], timer[%d]",
             nNegoId, m_nCurrentActiveNegoId, nTimer);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         nNegoId = m_nCurrentActiveNegoId;
     }
@@ -527,7 +529,7 @@ PUBLIC IMS_SINT32 AudioController::GetInactivityTimer(
     IMS_TRACE_I("GetInactivityTimer() - Type[%d], nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]",
             eType, nNegoId, m_nCurrentActiveNegoId);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         nNegoId = m_nCurrentActiveNegoId;
     }
@@ -549,7 +551,7 @@ AudioMediaSession* AudioController::FindAudioSession(IN IMS_UINTP nNegoId)
         return IMS_NULL;
     }
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         return m_listAudioSession.GetAt(0);
     }

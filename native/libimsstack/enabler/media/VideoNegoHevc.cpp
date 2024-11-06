@@ -48,110 +48,103 @@ PUBLIC void VideoNegoHevc::AppendSeparatorIfNotEmpty(OUT AString& str, IN AStrin
     }
 }
 
-PUBLIC void VideoNegoHevc::AddProfileIdToFmtp(IN VideoProfile::HevcFmtp* profile, OUT AString& fmtp)
+PUBLIC void VideoNegoHevc::AddProfileIdToFmtp(
+        IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddProfileIdToFmtp() profile-id=%d, show=%d", profile->nProfile,
-            profile->bShow_Profile, 0);
-
-    if (profile == IMS_NULL)
+    if (hevcFmtp != IMS_NULL)
     {
-        return;
-    }
+        IMS_TRACE_I("AddProfileIdToFmtp() profile-id=%d, visible=%d", hevcFmtp->GetProfile(),
+                hevcFmtp->IsProfileVisible(), 0);
 
-    if (profile->bShow_Profile == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        if (hevcFmtp->IsProfileVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-        AString strTemp;
-        strTemp.Sprintf("profile-id=%d", profile->nProfile);
-        fmtp.Append(strTemp);
+            AString strTemp;
+            strTemp.Sprintf("profile-id=%d", hevcFmtp->GetProfile());
+            fmtp.Append(strTemp);
+        }
     }
 }
 
-PUBLIC void VideoNegoHevc::AddLevelIdToFmtp(IN VideoProfile::HevcFmtp* profile, OUT AString& fmtp)
+PUBLIC void VideoNegoHevc::AddLevelIdToFmtp(IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& fmtp)
 {
-    IMS_TRACE_I(
-            "AddLevelIdToFmtp() level-id=%d, show=%d", profile->nLevel, profile->bShow_Level, 0);
-
-    if (profile == IMS_NULL)
+    if (hevcFmtp != IMS_NULL)
     {
-        return;
-    }
+        IMS_TRACE_I("AddLevelIdToFmtp() level-id=%d, visible=%d", hevcFmtp->GetLevel(),
+                hevcFmtp->IsLevelVisible(), 0);
 
-    if (profile->bShow_Level == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        if (hevcFmtp->IsLevelVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-        AString strTemp;
-        strTemp.Sprintf("level-id=%d", profile->nLevel);
-        fmtp.Append(strTemp);
+            AString strTemp;
+            strTemp.Sprintf("level-id=%d", hevcFmtp->GetLevel());
+            fmtp.Append(strTemp);
+        }
     }
 }
 
 PUBLIC void VideoNegoHevc::AddPacketizationModeToFmtp(
-        IN VideoProfile::HevcFmtp* profile, OUT AString& fmtp)
+        IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddPacketizationModeToFmtp() packetization-mode=%d, show=%d",
-            profile->nPacketizationMode, profile->bShow_PacketizationMode, 0);
-
-    if (profile == IMS_NULL)
+    if (hevcFmtp != IMS_NULL)
     {
-        return;
-    }
+        IMS_TRACE_I("AddPacketizationModeToFmtp() packetization-mode=%d, visible=%d",
+                hevcFmtp->GetPacketizationMode(), hevcFmtp->IsPacketizationModeVisible(), 0);
 
-    if (profile->bShow_PacketizationMode == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        if (hevcFmtp->IsPacketizationModeVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-        AString strTemp;
-        strTemp.Sprintf("packetization-mode=%d", profile->nPacketizationMode);
-        fmtp.Append(strTemp);
+            AString strTemp;
+            strTemp.Sprintf("packetization-mode=%d", hevcFmtp->GetPacketizationMode());
+            fmtp.Append(strTemp);
+        }
     }
 }
 
 PUBLIC void VideoNegoHevc::AddSpropParamsToFmtp(
-        IN VideoProfile::HevcFmtp* profile, OUT AString& fmtp)
+        IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddSpropParamsToFmtp() sprop parameter=%s, show=%d",
-            profile->strSpropParam.GetStr(), profile->bShow_SpropParam, 0);
-
-    if (profile == IMS_NULL)
+    if (hevcFmtp != IMS_NULL)
     {
-        return;
-    }
+        IMS_TRACE_I("AddSpropParamsToFmtp() sprop parameter=%s, visible=%d",
+                hevcFmtp->GetSpropParam().GetStr(), hevcFmtp->IsSpropParamVisible(), 0);
 
-    if (profile->bShow_SpropParam == IMS_TRUE)
-    {
-        ImsList<AString> objSplitComma = profile->strSpropParam.Split(',');
-
-        if (objSplitComma.GetSize() == 3)
+        if (hevcFmtp->IsSpropParamVisible() == IMS_TRUE)
         {
-            AString strVps = AString::ConstNull();
-            AString strSps = AString::ConstNull();
-            AString strPps = AString::ConstNull();
+            ImsList<AString> objSplitComma = hevcFmtp->GetSpropParam().Split(',');
 
-            strVps = objSplitComma.GetAt(0);
-            strSps = objSplitComma.GetAt(1);
-            strPps = objSplitComma.GetAt(2);
-
-            if (strVps.GetLength() > 0 || strSps.GetLength() > 0 || strPps.GetLength() > 0)
+            if (objSplitComma.GetSize() == 3)
             {
-                AString strTemp;
+                AString strVps = AString::ConstNull();
+                AString strSps = AString::ConstNull();
+                AString strPps = AString::ConstNull();
 
-                AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+                strVps = objSplitComma.GetAt(0);
+                strSps = objSplitComma.GetAt(1);
+                strPps = objSplitComma.GetAt(2);
 
-                strTemp.Sprintf("sprop-vps=%s", strVps.GetStr());
-                fmtp.Append(strTemp);
+                if (strVps.GetLength() > 0 || strSps.GetLength() > 0 || strPps.GetLength() > 0)
+                {
+                    AString strTemp;
 
-                AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+                    AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-                strTemp.Sprintf("sprop-sps=%s", strSps.GetStr());
-                fmtp.Append(strTemp);
+                    strTemp.Sprintf("sprop-vps=%s", strVps.GetStr());
+                    fmtp.Append(strTemp);
 
-                AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+                    AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-                strTemp.Sprintf("sprop-pps=%s", strPps.GetStr());
-                fmtp.Append(strTemp);
+                    strTemp.Sprintf("sprop-sps=%s", strSps.GetStr());
+                    fmtp.Append(strTemp);
+
+                    AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+                    strTemp.Sprintf("sprop-pps=%s", strPps.GetStr());
+                    fmtp.Append(strTemp);
+                }
             }
         }
     }

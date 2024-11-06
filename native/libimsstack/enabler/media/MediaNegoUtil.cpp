@@ -122,3 +122,18 @@ PUBLIC IMS_UINT32 MediaNegoUtil::AcquireRtpPort(IN IMS_SINT32 slotId, IN IMS_UIN
 
     return 0;
 }
+
+PUBLIC IMS_SINT32 MediaNegoUtil::ConvertMediaTypeToSdpMediaType(IN const MEDIA_CONTENT_TYPE eType)
+{
+    switch (eType)
+    {
+        case MEDIA_TYPE_AUDIO:
+            return SdpMedia::TYPE_AUDIO;
+        case MEDIA_TYPE_VIDEO:
+            return SdpMedia::TYPE_VIDEO;
+        case MEDIA_TYPE_TEXT:
+            return SdpMedia::TYPE_TEXT;
+        default:
+            return SdpMedia::TYPE_INVALID;
+    }
+}

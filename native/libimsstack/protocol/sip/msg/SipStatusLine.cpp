@@ -100,19 +100,19 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipStatusLine::SetStatusCode(const SIP_CHAR* pszStatusCode)
+SIP_VOID SipStatusLine::SetStatusCode(const SIP_CHAR* pszStatusCode)
 {
-    return SetCharVar(pszStatusCode, m_pszStatusCode);
+    SetCharVar(pszStatusCode, m_pszStatusCode);
 }
 
-SIP_BOOL SipStatusLine::SetSipVersion(const SIP_CHAR* pszVer)
+SIP_VOID SipStatusLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
-    return SetCharVar(pszVer, m_pszSipVersion);
+    SetCharVar(pszVer, m_pszSipVersion);
 }
 
-SIP_BOOL SipStatusLine::SetRsnPhrase(const SIP_CHAR* pszRsnPhrase)
+SIP_VOID SipStatusLine::SetRsnPhrase(const SIP_CHAR* pszRsnPhrase)
 {
-    return SetCharVar(pszRsnPhrase, m_pszRsnPhrase);
+    SetCharVar(pszRsnPhrase, m_pszRsnPhrase);
 }
 
 SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16* pnStatusCode) const

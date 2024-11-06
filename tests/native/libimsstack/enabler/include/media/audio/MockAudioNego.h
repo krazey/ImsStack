@@ -30,7 +30,7 @@ public:
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-                    IN IMS_BOOL bEnforceReofferMode),
+                    IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(IMS_BOOL, IsMediaCodecFromSdpSupported,
             (IN ISessionDescriptor * pSessionDescriptor, IN IMediaDescriptor* pDescriptor),
@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(AUDIO_CODEC_BITRATE, GetNegotiatedAudioCodecRate, (), (override));
     MOCK_METHOD(IMS_BOOL, HasNegotiatedDtmf, (), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedRtpPort, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetMediaBandwidth, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetNegotiatedBandwidth, (), (override));
 };
 
 #endif

@@ -25,7 +25,6 @@
 #include "ServerAddress.h"
 
 #include "IRegistration.h"
-#include "RegistrationManager.h"
 
 #include "connection/AosPcscf.h"
 #include "provider/AosProvider.h"
@@ -37,7 +36,7 @@
 #include "interface/IAosRegistration.h"
 #include "interface/IAosSubscriber.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPPROFILE m_strTag.GetStr()
 

@@ -50,7 +50,7 @@ public:
     MtcSession& operator=(IN const MtcSession&) = delete;
 
     IMS_RESULT Start() override;
-    IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert) override;
+    IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable) override;
     IMS_RESULT SendPrack(IN IMS_BOOL bAllowReOffer) override;
     IMS_RESULT RespondToPrack(IN IMS_SINT32 eStatusCode) override;
     IMS_RESULT SendEarlyUpdate(IN UpdateType eUpdateType) override;
@@ -87,20 +87,19 @@ private:
     ImsList<IMtcExtension*> GetSupportedExtensions() const;
 
     void UpdateSessionProperty();
-    void UpdateCallTypeFromCurrentCapability();
     IMS_RESULT UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
     CallType RestrictCallTypeByRegisteredFeature(IN CallType& eCallType);
+    CallType GetCallTypeForOfferlessInvite();
     CallType GetCallTypeByRegisteredFeature();
     CallType GetCallTypeByHistory();
     ResultSetSdp SetSdpToSend(
             IN IMS_BOOL bAllowReOffer, IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE);
 
-    IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
+    IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature) const;
     IMS_BOOL IsCallWaiting() const;
-    IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
-    IMS_BOOL IsInHistory(IN CallType eCallType);
+    IMS_BOOL IsInHistory(IN CallType eCallType) const;
     void SaveCallTypeHistory(IN CallType eCallType);
 
     IMtcCallContext& m_objContext;

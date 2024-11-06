@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/MtcCall.h"
@@ -35,14 +36,7 @@ MtcCallManager::MtcCallManager(IN IMtcContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL MtcCallManager::~MtcCallManager()
-{
-    for (IMS_UINT32 nIndex = 0; nIndex < m_lstCalls.GetSize(); nIndex++)
-    {
-        delete m_lstCalls.GetAt(nIndex);
-    }
-    m_lstCalls.Clear();
-}
+PUBLIC VIRTUAL MtcCallManager::~MtcCallManager() {}
 
 PUBLIC
 void MtcCallManager::Init()
@@ -54,6 +48,14 @@ PUBLIC
 void MtcCallManager::DeInit()
 {
     m_objContext.GetCallStateProxy().RemoveListener(this);
+
+    for (IMS_SINT32 nIndex = m_lstCalls.GetSize() - 1; nIndex >= 0; nIndex--)
+    {
+        MtcCall* pCall = m_lstCalls.GetAt(nIndex);
+        pCall->Terminate(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
+        delete pCall;
+        m_lstCalls.RemoveAt(nIndex);
+    }
 }
 
 PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(

@@ -23,7 +23,7 @@ class AosBuilder : public IAosBuilder
     // Operation
 public:
     AosBuilder();
-    virtual ~AosBuilder();
+    ~AosBuilder() override;
 
     /// AosAppContext
     IAosAppContext* BuildAppContext(IN AosStaticProfile* pProfile) override;

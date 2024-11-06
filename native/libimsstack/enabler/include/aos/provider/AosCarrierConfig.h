@@ -30,12 +30,12 @@ public:
             bCarrierVtAvailable(IMS_FALSE),
             bCarrierWfcImsAvailable(IMS_FALSE),
             bRttSupported(IMS_FALSE),
+            bRttSupportedWhileRoaming(IMS_FALSE),
             bCarrierCrossSimImsAvailable(IMS_FALSE),
             bCarrierVolteTtySupported(IMS_FALSE),
             bImsSingleRegistrationRequired(IMS_FALSE),
             bKeepPdnUpInNoVops(IMS_FALSE),
-            bSipOverIpsecEnabled(IMS_FALSE)  // default - IMS_TRUE
-            ,
+            bSipOverIpsecEnabled(IMS_FALSE),  // default - IMS_TRUE
             bRegistrationEventPackageSupported(IMS_TRUE),
             bCarrierVolteRoamingAvailable(IMS_TRUE),
             bSmsOverImsSupported(IMS_TRUE),
@@ -89,6 +89,7 @@ public:
     IMS_BOOL bCarrierVtAvailable;
     IMS_BOOL bCarrierWfcImsAvailable;
     IMS_BOOL bRttSupported;
+    IMS_BOOL bRttSupportedWhileRoaming;
     IMS_BOOL bCarrierCrossSimImsAvailable;
     IMS_BOOL bCarrierVolteTtySupported;
     /// aosp_carrier_config - ims.

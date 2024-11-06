@@ -23,6 +23,7 @@
 #include "SipStackManager.h"
 #include "SipTxnContext.h"
 #include "SipUtil.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
 
 SipTxn* pTxn = SIP_NULL;
@@ -146,22 +147,22 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    SIP_CHAR* pReqMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    unsigned int nLength = strlen(pReqMsg);
+    SIP_UINT32 nLength = SipPf_Strlen(pReqMsg);
 
     SipMessage* pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
     EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
 
-    unsigned short nError = 0;
+    SIP_UINT16 nError = 0;
     SipTxnKey* pTxnKey = SIP_NULL;
 
     /* Passing invalig arguments, fail */
@@ -201,17 +202,17 @@ Content-Length: 0\r\n\
 
     pMessage->SipDelete();
 
-    SIP_CHAR* pRespMsg = const_cast<SIP_CHAR*>("SIP/2.0 200 OK\r\n\
+    const SIP_CHAR* pRespMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    nLength = strlen(pRespMsg);
-    int eTxnStatus = SipTxn::STATUS_INVALID;
+    nLength = SipPf_Strlen(pRespMsg);
+    SIP_INT32 eTxnStatus = SipTxn::STATUS_INVALID;
 
     SipMessage* pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -264,7 +265,7 @@ CSeq: 1 ACK\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pAckMsg);
+    nLength = SipPf_Strlen(pAckMsg);
 
     SipMessage* pAckSipMessage = new SipMessage();
     ASSERT_TRUE(pAckSipMessage != nullptr);
@@ -288,7 +289,7 @@ CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pReqMsg);
+    nLength = SipPf_Strlen(pReqMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -319,7 +320,7 @@ CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pRespMsg);
+    nLength = SipPf_Strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
@@ -347,7 +348,7 @@ CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pReqMsg);
+    nLength = SipPf_Strlen(pReqMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -372,7 +373,7 @@ CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pRespMsg);
+    nLength = SipPf_Strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
@@ -403,7 +404,7 @@ CSeq: 1 ACK\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pAckMsg);
+    nLength = SipPf_Strlen(pAckMsg);
 
     pAckSipMessage = new SipMessage();
     ASSERT_TRUE(pAckSipMessage != nullptr);
@@ -435,7 +436,7 @@ CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pReqMsg);
+    nLength = SipPf_Strlen(pReqMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -465,7 +466,7 @@ CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pReqMsg);
+    nLength = SipPf_Strlen(pReqMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -493,7 +494,7 @@ CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pRespMsg);
+    nLength = SipPf_Strlen(pRespMsg);
 
     pRespSipMessage = new SipMessage();
     ASSERT_TRUE(pRespSipMessage != nullptr);
@@ -518,7 +519,7 @@ CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pRespMsg);
+    nLength = SipPf_Strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
@@ -555,7 +556,7 @@ CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pReqMsg);
+    nLength = SipPf_Strlen(pReqMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -584,7 +585,7 @@ CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pRespMsg);
+    nLength = SipPf_Strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
@@ -608,7 +609,7 @@ CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pRespMsg);
+    nLength = SipPf_Strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
 
     pRespSipMessage = new SipMessage();
@@ -638,7 +639,7 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
     SipStackManager* pSipStackManager = SipStackManager::GetInstance();
     ASSERT_TRUE(pSipStackManager != nullptr);
 
-    unsigned short nError = 0;
+    SIP_UINT16 nError = 0;
     SipTxnKey* pTxnKey = SIP_NULL;
 
     EXPECT_EQ(SIP_FALSE, pSipStackManager->OnRecvTanspError(0, pTxnKey, &nError));
@@ -670,16 +671,16 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    SIP_CHAR* pReqMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    unsigned int nLength = strlen(pReqMsg);
+    SIP_UINT32 nLength = SipPf_Strlen(pReqMsg);
 
     SipMessage* pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);

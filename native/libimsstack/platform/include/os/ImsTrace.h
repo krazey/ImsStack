@@ -23,16 +23,12 @@ class ImsTrace : public ITrace
 {
 public:
     ImsTrace();
-    virtual ~ImsTrace();
+    virtual ~ImsTrace() = default;
 
     ImsTrace(IN const ImsTrace&) = delete;
     ImsTrace& operator=(IN const ImsTrace&) = delete;
 
 public:
-    virtual const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName);
-    virtual const IMS_CHAR* GetFileName(
-            IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName);
-
     inline IMS_UINT32 GetOption() const { return m_nOption; }
 
     void SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule);
@@ -54,14 +50,14 @@ protected:
 private:
     void Out(IN const IMS_CHAR* pszFormat, ...) override;
     void Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-            IN const IMS_CHAR* pszFormat, ...) override;
-    void OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction, IN IMS_UINT16 nLine,
-            IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat,
+            IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine, IN const IMS_CHAR* pszFormat,
             ...) override;
+    void OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
+            IN const IMS_CHAR* pszFile, IN const IMS_CHAR* pszFunc, IN IMS_UINT32 nLine,
+            IN const IMS_CHAR* pszFormat, ...) override;
     //// For a large TEXT message (HTTP, MSRP, SDP, SIP, XML, ...)
     void OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType, IN const IMS_CHAR* pszDescription,
-            IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
-            IN IMS_BOOL bBinaryBody = IMS_FALSE) override;
+            IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize) override;
 
     static void HideArgs(
             IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer, IN IMS_SINT32 nIgnore = 2);
@@ -69,8 +65,8 @@ private:
 private:
     enum
     {
-        END_SIZE = 19,
-        START_SIZE = 21,
+        END_SIZE = 15,
+        START_SIZE = 17,
         MAX_SPARE_SIZE = 128,
         MAX_TEXT_SIZE = 4096
     };

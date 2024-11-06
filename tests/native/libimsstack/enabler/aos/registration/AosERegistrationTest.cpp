@@ -58,11 +58,21 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+#define DECLARE_USING(Base)                                 \
+    using Base::IsReregFailureReportOnIpcanChangeRequired;  \
+    using Base::IsTransactionStarted;                       \
+    using Base::SetImsCall;                                 \
+    using Base::SetReregFailureReportOnIpcanChangeRequired; \
+    using Base::SetState;                                   \
+    using Base::UpdateTransactionStarted;
+
 const IMS_SINT32 SLOT_ID = 0;
 
 class TestAosERegistration : public AosERegistration
 {
 public:
+    DECLARE_USING(AosERegistration)
+
     inline TestAosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
             AosERegistration(piAppContext, strRegId),
             m_piReg(IMS_NULL)
@@ -76,6 +86,16 @@ public:
         {
             delete m_pEModeInfo;
             m_pEModeInfo = IMS_NULL;
+        }
+    }
+
+    inline EmergencyModeInfo* GetEModeInfo() { return m_pEModeInfo; }
+
+    void CreateEModeInfo()
+    {
+        if (m_pEModeInfo == IMS_NULL)
+        {
+            m_pEModeInfo = new EmergencyModeInfo();
         }
     }
 
@@ -1286,4 +1306,83 @@ TEST_F(AosERegistrationTest, GetPreferredRegSchemeWhenRoamingSchemeIsConfigured)
 
     EXPECT_EQ(m_pAosERegistration->GetPreferredRegScheme(),
             CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL);
+}
+
+TEST_F(AosERegistrationTest,
+        ShouldNotSetReregFailureReportOnIpcanChangeRequiredValueIfTheConfigIsFalse)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosERegistration->SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(m_pAosERegistration->IsReregFailureReportOnIpcanChangeRequired());
+}
+
+TEST_F(AosERegistrationTest, ShouldSetReregFailureReportOnIpcanChangeRequiredValueIfTheConfigIsTrue)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosERegistration->SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
+
+    // THEN
+    EXPECT_TRUE(m_pAosERegistration->IsReregFailureReportOnIpcanChangeRequired());
+}
+
+TEST_F(AosERegistrationTest, ShouldUpdateTransactionStartedAsTrueIfCallIsActive)
+{
+    // GIVEN
+    m_pAosERegistration->SetImsCall(IMS_TRUE);
+
+    // WHEN
+    m_pAosERegistration->UpdateTransactionStarted();
+
+    // THEN
+    EXPECT_TRUE(m_pAosERegistration->IsTransactionStarted());
+}
+
+TEST_F(AosERegistrationTest, ShouldUpdateTransactionStartedAsTrueIfRefreshRequiredByCbm)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosERegistration->CreateEModeInfo();
+    ASSERT_NE(m_pAosERegistration->GetEModeInfo(), nullptr);
+    m_pAosERegistration->GetEModeInfo()->SetEcbm(IMS_TRUE);
+    m_pAosERegistration->GetEModeInfo()->SetESms(IMS_TRUE);
+
+    // WHEN
+    m_pAosERegistration->UpdateTransactionStarted();
+
+    // THEN
+    EXPECT_TRUE(m_pAosERegistration->IsTransactionStarted());
+}
+
+TEST_F(AosERegistrationTest, ShouldUpdateTransactionStartedAsTrueIfReregIsRequiredOnIpcanChange)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosERegistration->SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
+
+    // WHEN
+    m_pAosERegistration->UpdateTransactionStarted();
+
+    // THEN
+    EXPECT_TRUE(m_pAosERegistration->IsTransactionStarted());
+}
+
+TEST_F(AosERegistrationTest, ShouldUpdateTransactionStartedAsFalseIfNoActiveCallAndReregNotRequired)
+{
+    // WHEN
+    m_pAosERegistration->UpdateTransactionStarted();
+
+    // THEN
+    EXPECT_FALSE(m_pAosERegistration->IsTransactionStarted());
 }

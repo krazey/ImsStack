@@ -32,14 +32,6 @@ public class RegistrationTestBase extends ImsStackTestBase {
     protected PersistableBundle mConfig;
     protected RegistrationInfo.Builder mInfoBuilder;
 
-    protected void setTestValueInitializer(int carrierId) {
-        setTestValueInitializer((slotId, simApplicationState) -> {
-            int subId = getSubId(slotId);
-            TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
-            telephony.setSimCarrierId(carrierId);
-        });
-    }
-
     protected void setRegistrationBaseConfig() {
         mConfig = new PersistableBundle();
         mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);

@@ -58,8 +58,8 @@ protected:
         m_pLocalProfile = new AudioProfile();
         AudioProfile::Payload* pSrcAmrPayload = new AudioProfile::Payload();
         pSrcAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
-        pSrcAmrPayload->pFmtp = new AudioProfile::AmrFmtp();
-        m_pLocalProfile->lstPayload.Append(pSrcAmrPayload);
+        pSrcAmrPayload->SetFmtp(new AudioProfile::AmrFmtp());
+        m_pLocalProfile->GetPayloadList().Append(pSrcAmrPayload);
 
         m_pPeerProfile = new AudioProfile(*m_pLocalProfile);
         m_pNegoProfile = new AudioProfile(*m_pLocalProfile);
@@ -173,7 +173,7 @@ TEST_F(AudioControllerTest, testUpdateQualityThreshold)
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, nullptr), IMS_FALSE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(IMS_NULL, m_pAudioNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(UNDEFINED_NEGO_ID, m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, m_pAudioNego), IMS_TRUE);
 }
 
@@ -197,7 +197,7 @@ TEST_F(AudioControllerTest, testInactivityTimer)
 
     m_pController->UpdateSession(negoId2, ACCESS_NETWORK, m_pAudioNego);
 
-    m_pController->SetNetworkToneTimer(IMS_NULL, inactivityTime3);
+    m_pController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, inactivityTime3);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId1), inactivityTime1);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId2), inactivityTime3);
 }

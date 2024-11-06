@@ -17,13 +17,14 @@
 #ifndef TEXT_NEGO_H_
 #define TEXT_NEGO_H_
 
-#include "media/IMedia.h"
 #include "BaseNego.h"
-#include "ISession.h"
 #include "MediaDef.h"
 #include "config/TextConfiguration.h"
 #include "text/TextDef.h"
 #include "text/TextProfileUtil.h"
+#include "text/TextProfileExtractor.h"
+#include "text/TextSdpGenerator.h"
+#include "text/TextSdpNegotiator.h"
 
 /**
  * @brief The class to negotiate and form the SDP attribute belong to the m=text line
@@ -38,23 +39,6 @@ public:
     virtual ~TextNego();
 
     /**
-     * @brief Form the SDP with the current profile based on the state
-     *
-     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
-     * list
-     * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
-     * @param pDescriptor The SDP descriptor instance to form the media level SDP
-     * @param eDir The media direction of the SDP
-     * @param bDisable if it is IMS_TRUE, set the port number to zero
-     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
-     * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
-     * it is failed to form
-     */
-    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
-            IN IMS_BOOL bEnforceReofferMode);
-
-    /**
      * @brief Check if text codec from SDP is supported
      *
      * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
@@ -66,98 +50,42 @@ public:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
 
     /**
-     * @brief Negotiate the SDP and make the negotiate profile based on the nego state
-     *
-     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
-     * list
-     * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
-     * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
-     * @param eDir The media direction of the SDP
-     */
-    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-            OUT IMS_SINT32& eDir);
-
-    /**
-     * @brief Get the negotiated remote ip address
-     *
-     * @return const IpAddress& The ip address
-     */
-    virtual const IpAddress& GetNegotiatedRemoteAddress();
-
-    /**
-     * @brief Get the negotiated remote port number
-     *
-     * @return IMS_UINT32 The port number
-     */
-    virtual IMS_SINT32 GetRemotePort();
-
-    /**
-     * @brief Get the negotiated local profile object
-     */
-    virtual TextProfile* GetNegotiatedLocalProfile();
-
-    /**
-     * @brief Get the negotiated negotiated profile object
-     */
-    virtual TextProfile* GetNegotiatedNegoProfile();
-
-    /**
-     * @brief Get the negotiated peer profile object
-     */
-    virtual TextProfile* GetNegotiatedPeerProfile();
-
-    /**
-     * @brief Get the negotiated audio direction
-     */
-    virtual MEDIA_DIRECTION GetNegotiatedDirection();
-
-    /**
      * @brief Get the negotiated audio codec
      */
     virtual TEXT_CODEC GetNegotiatedCodec();
 
     /**
-     * @brief Get the port number from the negotiated profile
+     * @brief static cast from MediaConfiguration to TextConfiguration
      */
-    virtual IMS_SINT32 GetNegotiatedRtpPort();
+    TextConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
 
     /**
-     * @brief Get the negotiated audio bandwidth
+     * @brief static cast from MediaBaseProfile to TextProfile
      */
-    virtual IMS_SINT32 GetMediaBandwidth();
+    TextProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
+
+    /**
+     * @brief static cast from MediaBaseProfile::BasePayload to TextProfile::Payload
+     */
+    TextProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
 
 protected:
-    TextConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
-    TextProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
     TextProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     TextProfile* GetPeerProfile(IN OaModel* pOaModel) override;
     TextProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
-
-private:
-    void Copy(IN const TextNego* pTextNego);
-    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-            IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+            IN IMS_BOOL bDisable) override;
     IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
-            IN IMS_BOOL bEnforceReofferMode);
-    IMS_SINT32 NegotiateOffer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    IMS_SINT32 NegotiateAnswer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    IMS_BOOL MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN TextProfile* pProfile);
-    IMS_BOOL MakeProfileFromSDP(IN ISessionDescriptor* pSessionDescriptor,
-            IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile);
-    IMS_BOOL MakeNegotiatedProfile(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, OUT TextProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp);
-    IMS_BOOL FindT140InProfile(IN TextProfile* pProfile, IN TextProfile::Payload* pPayload);
-    MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
-            IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
-    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
+            IN IMS_BOOL bEnforceReofferMode) override;
+    MEDIA_DIRECTION NegotiateOffer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
+    MEDIA_DIRECTION NegotiateAnswer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
+
+private:
+    std::unique_ptr<TextProfileExtractor> m_pProfileExtractor;
 };
 
 #endif

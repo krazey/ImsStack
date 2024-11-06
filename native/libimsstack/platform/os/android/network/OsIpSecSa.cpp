@@ -21,7 +21,7 @@
 #include "ServiceUtil.h"
 #include "network/OsIpSecSa.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 class OsIpSecSaPrivate
 {

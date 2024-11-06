@@ -26,6 +26,7 @@ import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TE
 import static org.junit.Assert.fail;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.LocationManager;
 import android.net.InetAddresses;
 import android.net.NetworkCapabilities;
@@ -37,16 +38,21 @@ import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.PreciseDisconnectCause;
 import android.telephony.ServiceState;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.imsstack.ServiceLoader;
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.its.base.BroadcastReceiverProxyImpl;
 import com.android.imsstack.its.base.CarrierConfigManagerProxyImpl;
@@ -67,6 +73,7 @@ import com.android.imsstack.its.core.agents.WifiAgent;
 import com.android.imsstack.its.imsservice.ImsServiceConnector;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.util.SingleLatch;
+import com.android.imsstack.jni.NativeCommands;
 import com.android.imsstack.util.Log;
 
 import java.io.IOException;
@@ -110,6 +117,7 @@ public class ImsStackTestBase {
     protected final ImsServiceConnector mImsServiceConnector = ImsServiceConnector.getInstance();
     private final SingleLatch mEventLatch = new SingleLatch("ImsStackTestBase");
     private TestValueInitializer mTestValueInitializer = this::initTestValues;
+    private boolean mEnablerStoppable = true;
 
     public ImsStackTestBase() {
         mBroadcastReceiverProxy = SystemProxyResolver.getBroadcastReceiverProxy();
@@ -182,9 +190,10 @@ public class ImsStackTestBase {
 
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
         telephony.setDefaultValues();
-        telephony.setSimApplicationState(simApplicationState);
         // TODO: Need to be removed when ImsService can handle the startImsTraffic.
         telephony.setHalVersion(-2, -2);
+        telephony.setSimApplicationState(simApplicationState);
+        broadcastSimApplicationStateChanged(slotId, subId, simApplicationState);
 
         // This ensures each test to initialize their own configuration before ImsStack starts.
         if (mTestValueInitializer != null) {
@@ -202,6 +211,52 @@ public class ImsStackTestBase {
      */
     public int getSubId(int slotId) {
         return mSubscriptionManagerProxy.getSubscriptionId(slotId);
+    }
+
+    /**
+     * Checks whether stopping enabler is capable or not.
+     *
+     * @return {@code true} if stopping enabler is capable, {@code false} otherwise.
+     */
+    public final boolean isEnablerStoppable() {
+        return mEnablerStoppable;
+    }
+
+    /**
+     * Sets the flag for stopping enabler when the test is ended.
+     *
+     * @param enablerStoppable The flag specifying whether stopping enabler is capable or not.
+     */
+    public final void setEnablerStoppable(boolean enablerStoppable) {
+        mEnablerStoppable = enablerStoppable;
+    }
+
+    /**
+     * Starts the native enablers.
+     * If the native enablers are already running, this operation does nothing.
+     *
+     * @param slotId The slot id.
+     */
+    public final void startEnabler(int slotId) {
+        NativeCommands.startEnabler(slotId);
+    }
+
+    /**
+     * Stops the native enablers.
+     * If the native enablers are not running, this operation does nothing.
+     *
+     * @param slotId The slot id.
+     */
+    public final void stopEnabler(int slotId) {
+        NativeCommands.stopEnabler(slotId);
+
+        // Clear the cached information such as IMPI/IMPU/Domain.
+        ImsPrivateProperties.Persistent.set(
+                ImsPrivateProperties.Persistent.KEY_CONFIG_IMPI, "", slotId);
+        ImsPrivateProperties.Persistent.set(
+                ImsPrivateProperties.Persistent.KEY_CONFIG_IMPU_LIST, "", slotId);
+        ImsPrivateProperties.Persistent.set(
+                ImsPrivateProperties.Persistent.KEY_CONFIG_HOME_DOMAIN_NAME, "", slotId);
     }
 
     /**
@@ -285,6 +340,10 @@ public class ImsStackTestBase {
         int carrierId = telephony.getSimCarrierId();
         int specificCarrierId = telephony.getSimSpecificCarrierId();
 
+        if (isEnablerStoppable()) {
+            updateCarrierConfig(slotId, subId);
+        }
+        startEnabler(slotId);
         mCarrierConfigManagerProxy.notifyCarrierConfigChanged(
                 slotId, subId, carrierId, specificCarrierId);
     }
@@ -304,6 +363,10 @@ public class ImsStackTestBase {
         int carrierId = telephony.getSimCarrierId();
         int specificCarrierId = telephony.getSimSpecificCarrierId();
 
+        if (isEnablerStoppable()) {
+            updateCarrierConfig(slotId, subId);
+        }
+        startEnabler(slotId);
         mCarrierConfigManagerProxy.notifyCarrierConfigChanged(
                 slotId, subId, carrierId, specificCarrierId);
     }
@@ -327,9 +390,17 @@ public class ImsStackTestBase {
         telephony.notifyPreciseDataConnectionStateChanged(
                 new PreciseDataConnectionState.Builder().build());
 
+        telephony.setSimApplicationState(TelephonyManager.SIM_STATE_ABSENT);
+        broadcastSimApplicationStateChanged(
+                slotId, MSimUtils.INVALID_SUB_ID, TelephonyManager.SIM_STATE_ABSENT);
+
         mConnectivityManagerProxy.notifyNetworkLost(APN_IMS);
         mConnectivityManagerProxy.notifyNetworkLost(APN_EMERGENCY);
         mConnectivityManagerProxy.notifyNetworkLost(APN_XCAP);
+
+        if (isEnablerStoppable()) {
+            stopEnabler(slotId);
+        }
 
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
     }
@@ -466,6 +537,34 @@ public class ImsStackTestBase {
      */
     public void setTestValueInitializer(TestValueInitializer initializer) {
         mTestValueInitializer = initializer;
+    }
+
+    /**
+     * Broadcasts the change of SIM application state.
+     *
+     * @param slotId The slot id.
+     * @param subId The subscription id.
+     * @param simState The SIM application state.
+     */
+    public void broadcastSimApplicationStateChanged(int slotId, int subId, int simState) {
+        Intent intent = new Intent(TelephonyManager.ACTION_SIM_APPLICATION_STATE_CHANGED);
+        intent.putExtra(TelephonyManager.EXTRA_SIM_STATE, simState);
+        intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, slotId);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
+        mBroadcastReceiverProxy.sendIntent(intent);
+        // Waits for 500ms to handle the SIM state change.
+        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS / 2);
+    }
+
+    /**
+     * Updates the carrier configuration immediately.
+     *
+     * @param slotId The slot id.
+     * @param subId  The subscription id.
+     */
+    public void updateCarrierConfig(int slotId, int subId) {
+        ServiceCaps.updateServiceCapabilities(AppContext.getInstance(), slotId, subId);
+        ServiceLoader.updateCarrierConfig(slotId);
     }
 
     protected final TelephonyManagerProxyImpl getTelephonyManagerProxy(int subId) {

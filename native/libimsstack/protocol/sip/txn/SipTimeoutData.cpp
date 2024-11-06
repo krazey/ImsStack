@@ -53,15 +53,3 @@ SIP_INT32 SipTimeoutData::GetTimerType() const
 {
     return m_eTimerType;
 }
-
-SIP_BOOL SipTimeoutData::SetTxnKey(SipTxnKey* pTxnKey)
-{
-    this->m_pTxnKey = pTxnKey;
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipTimeoutData::SetTimerType(SIP_INT32 eTimerType)
-{
-    this->m_eTimerType = eTimerType;
-    return SIP_TRUE;
-}

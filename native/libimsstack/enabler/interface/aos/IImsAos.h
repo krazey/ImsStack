@@ -138,6 +138,10 @@ public:
      * @brief Register with next PCSCF.
      *        Current PCSCF is marked as unavailable for nUnavailableTimeForCurrentPcscf value.
      *        Aos would trigger PCSCF discovery procedure if there is no available next PCSCF.
+     *        This will terminate current registration.
+     *        Then the callback ImsAos_Disconnected() will be called with REG_NEW_REQUIRED reason.
+     *        (@see IImsAosListener::ImsAos_Disconnected)
+     *        (@see ImsAosReason::REG_NEW_REQUIRED)
      *
      * @param nUnavailableTimeForCurrentPcscf
      *        The duration(sec) of marking current PCSCF as unavailable.

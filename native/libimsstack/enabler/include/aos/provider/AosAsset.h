@@ -29,6 +29,7 @@ public:
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
             bEmcRegOnRandomPcscf(IMS_FALSE),
+            bERegWithOnlyTcpInRoaming(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
@@ -46,6 +47,7 @@ public:
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
             bSupportContactUserInfo(IMS_TRUE),
+            bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
             bUseAwtWhenInitRegWithNextPcscf(IMS_FALSE),
@@ -104,6 +106,7 @@ public:
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
     IMS_BOOL bEmcRegOnRandomPcscf;
+    IMS_BOOL bERegWithOnlyTcpInRoaming;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
@@ -121,6 +124,7 @@ public:
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
     IMS_BOOL bSupportContactUserInfo;
+    IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatForReg;
     IMS_BOOL bUseAwtWhenInitRegWithNextPcscf;

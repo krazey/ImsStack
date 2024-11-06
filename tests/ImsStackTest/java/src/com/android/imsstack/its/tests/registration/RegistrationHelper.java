@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.its.tests.registration;
 
+import android.location.LocationManager;
 import android.telephony.ServiceState;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 
@@ -23,7 +24,10 @@ import androidx.annotation.Nullable;
 
 import com.android.imsstack.its.base.CarrierConfigManagerProxyImpl;
 import com.android.imsstack.its.base.ConnectivityManagerProxyImpl;
+import com.android.imsstack.its.base.ImsMmTelManagerProxyImpl;
+import com.android.imsstack.its.base.LocationManagerProxyImpl;
 import com.android.imsstack.its.base.ServiceStateBuilder;
+import com.android.imsstack.its.base.SmsManagerProxyImpl;
 import com.android.imsstack.its.base.SubscriptionManagerProxyImpl;
 import com.android.imsstack.its.base.SystemProxyResolver;
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
@@ -110,11 +114,7 @@ public class RegistrationHelper {
             info = new RegistrationInfo.Builder().build();
         }
 
-        if (info.isServiceStateChanged()) {
-            startImsStackWithRegistrationInfo(testBase, info);
-        } else {
-            testBase.startImsStack(info.getSlotId(), info.getConfig());
-        }
+        startImsStackWithRegistrationInfo(testBase, info);
 
         if (info.isCapabilityRequestChanged()) {
             performMmTelCapabilityChange(info.getCapabilityRequest());
@@ -145,32 +145,110 @@ public class RegistrationHelper {
 
         int slotId = info.getSlotId();
         testBase.writeTestConfig(slotId, info.getConfig());
-        testBase.initSystemProxies(slotId, info.getSimApplicationState());
 
-        if (info.isServiceStateChanged()) {
-            triggerInServiceWithServiceState(slotId, info.getServiceState());
-        } else {
-            testBase.triggerInService(slotId);
-        }
+        initSystemProxiesWithRegistrationInfo(testBase, info);
+
+        triggerInServiceWithServiceState(slotId, info.getServiceState());
 
         int subId = getSubId(slotId);
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
-        int carrierId = telephony.getSimCarrierId();
-        int specificCarrierId = telephony.getSimSpecificCarrierId();
+
+        if (testBase.isEnablerStoppable()) {
+            testBase.updateCarrierConfig(slotId, subId);
+        }
+        testBase.startEnabler(slotId);
 
         getCarrierConfigManagerProxy().notifyCarrierConfigChanged(
-                slotId, subId, carrierId, specificCarrierId);
+                slotId, subId, telephony.getSimCarrierId(), telephony.getSimSpecificCarrierId());
+    }
+
+    /**
+     * Initializes the default values of the system proxies.
+     *
+     * @param testBase The {@link ImsStackTestBase} instance.
+     * @param info The {@link RegistrationInfo} object containing IMS registration information.
+     * @throws NullPointerException if {@code testBase} or {@code info} is null.
+     */
+    public final void initSystemProxiesWithRegistrationInfo(@NonNull ImsStackTestBase testBase,
+            @NonNull RegistrationInfo info) {
+        Objects.requireNonNull(testBase, "testBase must not be null.");
+        Objects.requireNonNull(info, "info must not be null.");
+
+        int subId = getSubId(info.getSlotId());
+        ImsMmTelManagerProxyImpl imsMmTel = getImsMmTelManagerProxy(subId);
+        if (imsMmTel != null) {
+            imsMmTel.setDefaultValues();
+        }
+
+        LocationManagerProxyImpl location = getLocationManagerProxy();
+        location.setProviderEnablement(LocationManager.FUSED_PROVIDER, true);
+        location.setProviderEnablement(LocationManager.GPS_PROVIDER, true);
+        location.setProviderEnablement(LocationManager.NETWORK_PROVIDER, true);
+
+        getSmsManagerProxy(subId).setDefaultValues();
+
+        getSubscriptionManagerProxy().setDefaultValues();
+
+        setTelephonyValues(info);
+
+        TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
+
+        // TODO: Need to be removed when ImsService can handle the startImsTraffic.
+        telephony.setHalVersion(-2, -2);
+        telephony.setSimApplicationState(info.getSimApplicationState());
+        testBase.broadcastSimApplicationStateChanged(info.getSlotId(), subId,
+                info.getSimApplicationState());
+
+        if (info.getSimCarrierId() != -1) {
+            telephony.setSimCarrierId(info.getSimCarrierId());
+        }
+    }
+
+    private void setTelephonyValues(@NonNull RegistrationInfo info) {
+        TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(getSubId(info.getSlotId()));
+
+        telephony.setActiveModemCount(1);
+        telephony.setSupportedModemCount(2);
+        telephony.setHalVersion(2, 1);
+        telephony.clearEmergencyNumbers();
+
+        telephony.clearUsimApplication();
+        telephony.clearIsimApplication();
+
+        switch (info.getSimSupportMode()) {
+            case BOTH_ISIM_USIM -> {
+                telephony.initUsimApplication();
+                telephony.initIsimApplication();
+            }
+            case ONLY_USIM -> {
+                telephony.initUsimApplication();
+            }
+            case INCOMP_ISIM_USIM -> {
+                telephony.initUsimApplication();
+                telephony.initIsimApplication();
+                telephony.clearIsimRecords();
+            }
+            default -> { }
+        }
+
+        telephony.initNetworkInfo();
     }
 
     /**
      * Triggers the IMS stack into service with the specified {@link ServiceState}.
+     * If the provided {@code serviceState} is null, a default {@link ServiceState} will be created
+     * with LTE CS and LTE PS network registration information.
      *
      * @param slotId          The slot ID.
      * @param serviceState    The {@link ServiceState} to set.
-     * @throws NullPointerException if {@code testBase} or {@code serviceState} is null.
      */
-    public void triggerInServiceWithServiceState(int slotId, @NonNull ServiceState serviceState) {
-        Objects.requireNonNull(serviceState, "serviceState must not be null.");
+    public void triggerInServiceWithServiceState(int slotId, ServiceState serviceState) {
+        if (serviceState == null) {
+            serviceState = new ServiceStateBuilder()
+                    .addNetworkRegistrationInfoForLteCs()
+                    .addNetworkRegistrationInfoForLtePs()
+                    .build();
+        }
 
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(getSubId(slotId));
         telephony.setServiceState(serviceState);
@@ -230,9 +308,23 @@ public class RegistrationHelper {
         return SystemProxyResolver.getConnectivityManagerProxy();
     }
 
+    private static LocationManagerProxyImpl getLocationManagerProxy() {
+        return SystemProxyResolver.getLocationManagerProxy();
+    }
+
+    protected final SmsManagerProxyImpl getSmsManagerProxy(int subId) {
+        return (SmsManagerProxyImpl) SystemProxyResolver.getSmsManagerProxy()
+                .createForSubscriptionId(subId);
+    }
+
     private static TelephonyManagerProxyImpl getTelephonyManagerProxy(int subId) {
         return (TelephonyManagerProxyImpl) SystemProxyResolver.getTelephonyManagerProxy()
                 .createForSubscriptionId(subId);
+    }
+
+    private static ImsMmTelManagerProxyImpl getImsMmTelManagerProxy(int subId) {
+        return (ImsMmTelManagerProxyImpl) SystemProxyResolver.getImsManagerProxy()
+                .getImsMmTelManagerProxy(subId);
     }
 
     private static ImsServiceConnector getImsServiceConnector() {

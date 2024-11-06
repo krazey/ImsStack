@@ -35,20 +35,51 @@ public interface IApn {
     interface Listener {
         /**
          * Invoked when the IPCAN(IP Connectivity Access Network) category is changed.
+         *
+         * @param apnType The APN type.
+         *                {@link EApnType#IMS},
+         *                {@link EApnType#INTERNET},
+         *                {@link EApnType#EMERGENCY}
+         * @param ipcanCategory The IPCAN type.
+         *                      {@link IApn#IPCAN_CATEGORY_MOBILE},
+         *                      {@link IApn#IPCAN_CATEGORY_WLAN}
          */
         default void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
         }
 
         /**
          * Invoked when the state of handover between WWAN and WLAN is changed.
+         *
+         * @param handoverState The state of handover
+         *                      {@link IApn#HANDOVER_UNKNOWN}
+         *                      {@link IApn#HANDOVER_START}
+         *                      {@link IApn#HANDOVER_SUCCESS}
+         *                      {@link IApn#HANDOVER_FAILURE}
+         * @param networkType The network type
+         * @param failCause The data connection failure causes code
          */
         default void onHandoverStateChanged(int handoverState, int networkType, int failCause) {
         }
 
         /**
          * Invoked when the connection status through Cross SIM is changed.
+         *
+         * @param connectedOverCrossSim {@code true} if connected over CrossSim,
+         *                              {@code false} otherwise.
          */
         default void onCrossSimStatusChanged(boolean connectedOverCrossSim) {
+        }
+
+        /**
+         * Notifies the state of PreciseDataConnectionState by APN type.
+         *
+         * @param apnType The APN type.
+         *                {@link EApnType#IMS},
+         *                {@link EApnType#INTERNET},
+         *                {@link EApnType#EMERGENCY}
+         * @param state The data connection state.
+         */
+        default void onPreciseDataConnectionStateChanged(int apnType, int state) {
         }
     }
 

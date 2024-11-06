@@ -162,9 +162,9 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     SipPf_Strcpy(*ppCurrPos, m_pszHost);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-#define MAX_PORT_LEN 20
     if (m_nPort != SIP_ZERO)
     {
+        const SIP_UINT16 MAX_PORT_LEN = 6;
         SIP_CHAR szTmp[MAX_PORT_LEN];
         SipPf_Sprintf(szTmp, "%u", m_nPort);
 
@@ -177,30 +177,24 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipViaHeader::SetProtocolName(const SIP_CHAR* pszProtocolNm)
+SIP_VOID SipViaHeader::SetProtocolName(const SIP_CHAR* pszProtocolNm)
 {
-    return SetCharVar(pszProtocolNm, m_pszProtocolName);
+    SetCharVar(pszProtocolNm, m_pszProtocolName);
 }
 
-SIP_BOOL SipViaHeader::SetProtocolVer(const SIP_CHAR* pszProtocolVer)
+SIP_VOID SipViaHeader::SetProtocolVer(const SIP_CHAR* pszProtocolVer)
 {
-    return SetCharVar(pszProtocolVer, m_pszProtocolVer);
+    SetCharVar(pszProtocolVer, m_pszProtocolVer);
 }
 
-SIP_BOOL SipViaHeader::SetTransport(const SIP_CHAR* pszTransport)
+SIP_VOID SipViaHeader::SetTransport(const SIP_CHAR* pszTransport)
 {
-    return SetCharVar(pszTransport, m_pszTransport);
+    SetCharVar(pszTransport, m_pszTransport);
 }
 
-SIP_BOOL SipViaHeader::SetHost(const SIP_CHAR* pszHost)
+SIP_VOID SipViaHeader::SetHost(const SIP_CHAR* pszHost)
 {
-    return SetCharVar(pszHost, m_pszHost);
-}
-
-SIP_BOOL SipViaHeader::SetPortNum(SIP_UINT16 nPort)
-{
-    m_nPort = nPort;
-    return SIP_TRUE;
+    SetCharVar(pszHost, m_pszHost);
 }
 
 const SIP_CHAR* SipViaHeader::GetBranch() const

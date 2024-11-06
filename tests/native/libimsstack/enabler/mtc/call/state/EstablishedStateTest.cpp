@@ -31,6 +31,8 @@
 #include "call/UpdatingInfo.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/MockIMtcBlockChecker.h"
+#include "call/extension/MockIMtcExtension.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/state/EstablishedState.h"
 #include "call/state/MtcCallState.h"
 #include "conferencecall/MockIConferenceController.h"
@@ -158,6 +160,17 @@ protected:
         delete pEstablishedState;
         delete pSupplementaryService;
         delete pMockUssiController;
+    }
+
+    MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag, IN const IMS_BOOL& bSupoort)
+    {
+        ImsList<IMtcExtension*> objExtensions;
+        MockIMtcExtension* pExtension = new MockIMtcExtension();
+        ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
+        ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(bSupoort));
+        objExtensions.Append(pExtension);
+        MtcExtensionSet objMtcExtensionSet(objMockCallContext, objExtensions);
+        return objMtcExtensionSet;
     }
 };
 
@@ -431,8 +444,12 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsInvokedIfPreconditionIsSup
     ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE));
+    ON_CALL(objMockMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
     EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
-    EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE));
+    EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE, IMS_FALSE));
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }

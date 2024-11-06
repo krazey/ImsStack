@@ -20,7 +20,7 @@
 #include "ServiceTrace.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 LOCAL
 void osTimerService_AddListener(IN ISystemListener* piListener)

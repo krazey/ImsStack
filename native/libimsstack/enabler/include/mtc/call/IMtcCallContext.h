@@ -166,13 +166,6 @@ public:
      *
      * @return
      */
-    virtual UdpKeepAliveSender& GetUdpKeepAliveSender() = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @return
-     */
     virtual CurrentLocationDiscoveryController& GetCurrentLocationDiscoveryController() = 0;
 
     /**
@@ -246,6 +239,13 @@ public:
      * @return
      */
     virtual ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) = 0;
+
+    /**
+     * Creates UdpKeepAliveSender with the current configuration and context.
+     *
+     * @return A new instance of UdpKeepAliveSender.
+     */
+    virtual UdpKeepAliveSender* CreateUdpKeepAliveSender() = 0;
 
     /**
      * @brief Removes

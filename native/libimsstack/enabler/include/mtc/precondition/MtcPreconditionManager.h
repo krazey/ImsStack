@@ -132,9 +132,8 @@ private:
     void SetRemoteResourceAvailable(IN ISession* piSession) const;
     void UpdateSupportingPrecondition(IN ISession* piSession, IN IMS_BOOL bRemoteSupported) const;
     void UpdateQosAttributesFromRemoteSdp(IN ISession* piSession);
-    static IMS_BOOL IsStatusAvailable(IN QosStatus eStatus);
     static IMS_BOOL IsNeedToUpdateQosStatus(IN QosStatus eCurrentStatus, IN QosStatus eNewStatus);
-    IMS_BOOL IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) const;
+    IMS_BOOL IsDefaultBearerAllowed(IN IMS_UINT32 eMediaType) const;
     IMS_BOOL IsRemoteResourceReserved(IN ISession* piSession) const;
     IMS_BOOL IsLocalResourceReserved(IN ISession* piSession, IN IMS_BOOL bAtLeastOneReserved) const;
     IMS_BOOL IsLocalResourceReservedByMediaType(
@@ -152,8 +151,8 @@ private:
     static const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
     QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType) const;
     QosLossPolicy GetActionForQosLoss(IN ISession* piSession) const;
-    IMS_BOOL IsDedicatedBearerAllocationRequiredToAlertUser() const;
     IMS_BOOL IsConfirmationRequired(IN const ISession& objISession) const;
+    IMS_BOOL IsRoaming() const;
 
 protected:
     ImsMap<ISession*, QosInfo*> m_objQosInfos;

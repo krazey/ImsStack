@@ -48,8 +48,7 @@ public:
     /*Gets */
     inline SIP_UINT32 GetDeltaSec() const { return m_nDeltaSec; }
 
-    /*Sets */
-    SIP_BOOL SetComment(const SIP_CHAR* pszComment);
+    SIP_VOID SetComment(const SIP_CHAR* pszComment);
     /*Gets */
     inline const SIP_CHAR* GetComment() const { return m_pszComment; }
 

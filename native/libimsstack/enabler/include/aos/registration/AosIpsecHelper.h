@@ -31,7 +31,7 @@ public:
     AosIpsecHelper(IN IRegContact* piRegContact, IN IRegParameter* piRegParameter,
             IN IAosAppContext* piAppContext, IN AString& strRegId);
     inline explicit AosIpsecHelper(){};
-    virtual ~AosIpsecHelper();
+    ~AosIpsecHelper() override;
 
 private:
     AosIpsecHelper(IN const AosIpsecHelper& objRhs);

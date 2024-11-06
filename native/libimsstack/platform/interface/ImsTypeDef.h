@@ -44,7 +44,7 @@
 #endif
 
 #ifndef IMS_NULL
-#define IMS_NULL (0)
+#define IMS_NULL (nullptr)
 #endif
 
 #ifndef IMS_TRUE
@@ -319,7 +319,7 @@ typedef unsigned int IMS_UINTP;
 #endif  // IMS_RTTI_ENABLED
 
 // IMS ASSERT (ServiceTrace.cpp implements this function)
-extern void TraceService_Assert(IN const IMS_CHAR*, IN const IMS_CHAR*, IN IMS_UINT16);
+extern void TraceService_Assert(IN const IMS_CHAR*, IN const IMS_CHAR*, IN IMS_UINT32);
 
 #define IMS_ASSERT(CONDITION)                                            \
     do                                                                   \

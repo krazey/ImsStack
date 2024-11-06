@@ -33,11 +33,8 @@ public:
 
 public:
     void OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-            IN const IMS_CHAR* pszFormat, IN va_list args) override;
-
-    const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName) override;
-    const IMS_CHAR* GetFileName(
-            IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) override;
+            IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine, IN const IMS_CHAR* pszFormat,
+            IN va_list args) override;
 
 protected:
     const IMS_CHAR* GetDirName() const override;

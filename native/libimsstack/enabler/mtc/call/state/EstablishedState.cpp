@@ -180,7 +180,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::UPDATE, *piMessage);
-    m_objContext.GetUpdatingInfo().GetNegotiatedInfo() =
+    m_objContext.GetUpdatingInfo().GetOriginalInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
     m_objContext.GetUpdatingInfo().SetTargetCallType(
             m_objContext.GetMessageUtils().GetCallType(piMessage, piSession, IMS_TRUE));
@@ -491,7 +491,7 @@ IMS_RESULT EstablishedState::HandleUpdate(
     m_objContext.GetUpdatingInfo().SetRequestingType(eUpdateType);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    m_objContext.GetUpdatingInfo().GetNegotiatedInfo() = objMediaManager.GetMediaInfo();
+    m_objContext.GetUpdatingInfo().GetOriginalInfo() = objMediaManager.GetMediaInfo();
     objMediaManager.SetMediaInfo(objMediaInfo);
 
     IMtcSession* pSession = m_objContext.GetSession();
@@ -538,7 +538,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
                     m_objContext.GetConfigurationProxy(), m_objContext.GetUpdatingInfo()))
         {
             // re-INVITE for update call type is just received.
-            m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE);
+            m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE, IsRprRequired());
 
             // No QoS wait timer is used for Upgrade media.
             // And, TIMER_CONVERT_USER_RESPONSE is started when the precondition negotiation is

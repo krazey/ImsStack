@@ -17,6 +17,7 @@
 
 #include "msg/SipMsgBody.h"
 #include "msg/SipUnknownHeader.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -35,7 +36,7 @@ TEST_F(SipMsgBodyTest, EncodeSingleMsgBody)
     SipMsgBody* pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -79,7 +80,7 @@ TEST_F(SipMsgBodyTest, DecodeSingleMsgBody)
 
     const SIP_CHAR* pSingleBody = "This is a single body,\r\n\
 and no headers and boundary present\r\n";
-    int nLen = strlen(pSingleBody);
+    SIP_INT32 nLen = SipPf_Strlen(pSingleBody);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeSingleMsgBody(pSingleBody, pSingleBody + nLen));
     EXPECT_EQ(SIP_TRUE, pMessageBody->GetMsgBuffer(&pDecodeBody));
@@ -128,8 +129,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     /* Level - 2 Message body 1 */
     SipMsgBody* pMessageLevel2 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel2 != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel2->SetMsgBuffer(const_cast<SIP_CHAR*>("level2 - message body 1"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel2->SetMsgBuffer("level2 - message body 1", 23));
     SipMsgBodyList* pMsgBobyList = pMessageBodyLevel2->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel2));
@@ -138,8 +138,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     /* Level - 2 Message body 2 */
     pMessageLevel2 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel2 != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel2->SetMsgBuffer(const_cast<SIP_CHAR*>("level2 - message body 2"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel2->SetMsgBuffer("level2 - message body 2", 23));
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel2));
     pMessageLevel2->SipDelete();
     pMsgBobyList->SipDelete();
@@ -152,8 +151,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     /* Level - 1 Message body 1 */
     SipMsgBody* pMessageLevel1 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel1 != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel1->SetMsgBuffer(const_cast<SIP_CHAR*>("level1 - message body 1"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel1->SetMsgBuffer("level1 - message body 1", 23));
     pMsgBobyList = pMessageBodyLevel1->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel1));
@@ -166,20 +164,19 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     SipUnknownHeader* pUnknownHeader = reinterpret_cast<SipUnknownHeader*>(
             SipUnknownHeader::GetNewObj(SipHeaderBase::UNKNOWN, nullptr));
     ASSERT_TRUE(pUnknownHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pUnknownHeader->SetHeaderName("UnknownHeaderName1"));
-    EXPECT_EQ(SIP_TRUE, pUnknownHeader->SetHeaderValue("UnknownHeaderValue1"));
+    pUnknownHeader->SetHeaderName("UnknownHeaderName1");
+    pUnknownHeader->SetHeaderValue("UnknownHeaderValue1");
     EXPECT_EQ(SIP_TRUE, pMessageLevel1->SetMimeHdr(pUnknownHeader));
     pUnknownHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel1->SetMsgBuffer(const_cast<SIP_CHAR*>("level1 - message body 2"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel1->SetMsgBuffer("level1 - message body 2", 23));
     pMsgBobyList = pMessageBodyLevel1->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel1));
     pMessageLevel1->SipDelete();
     pMsgBobyList->SipDelete();
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -217,7 +214,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     SipMsgBody* pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -226,7 +223,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     /* Empty message body, fail */
     EXPECT_EQ(SIP_FALSE, pMessageBody->EncodeBody(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<SIP_CHAR*>("single body"), 11));
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer("single body", 11));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -258,7 +255,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
 
     EXPECT_EQ(SIP_TRUE, pBody1->IsMessageBodySDP());
 
-    EXPECT_EQ(SIP_TRUE, pBody1->SetMsgBuffer(const_cast<SIP_CHAR*>("sdp message body"), 16));
+    EXPECT_EQ(SIP_TRUE, pBody1->SetMsgBuffer("sdp message body", 16));
 
     SipMsgBodyList* pMsgBobyList = pMessageBody->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
@@ -323,7 +320,7 @@ UnknownHeaderName1: UnknownHeaderValue1\r\n\
 \r\n\
 level1 - message body 2\r\n\
 --abcxz--\r\n";
-    int nLen = strlen(pMessage);
+    SIP_INT32 nLen = SipPf_Strlen(pMessage);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
 
@@ -441,7 +438,7 @@ level1 - message body 2\r\n\
     ASSERT_TRUE(pMessageBody != nullptr);
 
     pMessage = "\r\nlevel1 - message body with no headers\r\n";
-    nLen = strlen(pMessage);
+    nLen = SipPf_Strlen(pMessage);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
 
@@ -456,7 +453,7 @@ level1 - message body 2\r\n\
     ASSERT_TRUE(pMessageBody != nullptr);
 
     pMessage = "Content-Type: multipart/mixed;boundary=abcxz\r\n";
-    nLen = strlen(pMessage);
+    nLen = SipPf_Strlen(pMessage);
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen - 1));
     pMessageBody->SipDelete();

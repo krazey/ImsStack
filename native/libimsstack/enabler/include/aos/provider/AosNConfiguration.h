@@ -37,7 +37,7 @@ class AosNConfiguration : public ICarrierConfigListener, public IAosNConfigurati
 {
 public:
     AosNConfiguration();
-    virtual ~AosNConfiguration();
+    ~AosNConfiguration() override;
 
     IMS_SINT32 GetSlotId() const override;
 
@@ -52,8 +52,9 @@ public:
     IMS_BOOL IsWfcImsAvailable() const override;
     IMS_BOOL IsImsSingleRegistrationRequired() const override;
     IMS_BOOL IsRttSupported() const override;
+    IMS_BOOL IsRttSupportedWhileRoaming() const override;
     IMS_BOOL IsSupportLimitedAdminSmsMode() const override;
-    IMS_BOOL IsTtySupported() const override;
+    IMS_BOOL IsVolteTtySupported() const override;
     IMS_BOOL IsVopsIgnoredForVolteEnabled() const override;
     IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const override;
     IMS_BOOL IsRequiredVolteBlockBySsac() const override;
@@ -74,6 +75,8 @@ public:
     IMS_BOOL IsImsOverNrEnabled() const override;
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
     IMS_BOOL IsEmcRegOnRandomPcscf() const override;
+    IMS_BOOL IsERegWithOnlyTcpInRoaming() const override;
+    IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
     IMS_BOOL IsDeregOn3gNetwork() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
@@ -150,6 +153,11 @@ public:
     IMS_SINT32 GetNotifyWaitTime() const override;
     IMS_UINT32 GetNotifyEventForInitialRegWithWaitTime() const override;
 
+    IMS_SINT32 GetPcscfRecoveryMaxRetryCnt() const override;
+    IMS_SINT32 GetPcscfRecoveryWaitTime() const override;
+    IMS_SINT32 GetPcscfRecoveryBaseTime() const override;
+    IMS_SINT32 GetPcscfRecoveryMaxTime() const override;
+
     ImsVector<IMS_SINT32>& GetSubErrorRegRequired() override;
     IMS_SINT32 GetRetryCountSubErrorRegRequired() const override;
     ImsVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() override;
@@ -199,6 +207,7 @@ private:
 
     AosExtraRegErrBundle m_objExtraRegErr;
     AosNotifyTerminatedForInitRegBundle m_objNotifyTerminated;
+    AosPcscfRecoveryConditionsBundle m_objPcscfRecoveryConditions;
     AosRegErrCodeWithRaTimeBundle m_objRegErrCodeWithRaTime;
     AosRegRetryIntervalBundle m_objRegRetryInterval;
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;

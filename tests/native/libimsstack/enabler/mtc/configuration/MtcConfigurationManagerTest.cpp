@@ -339,14 +339,6 @@ TEST_F(MtcConfigurationManagerTest, GetPolicyOfLocalNumbersReturnsValueInCarrier
             GetInt(CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT));
 }
 
-TEST_F(MtcConfigurationManagerTest,
-        IsDefaultEpsBearerContextUsageRestrictionOnCellularReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->IsDefaultEpsBearerContextUsageRestrictionOnCellular(),
-            GetBool(CarrierConfig::ImsVoice::
-                            KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL));
-}
-
 TEST_F(MtcConfigurationManagerTest, GetSilentRedialIntervalReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetSilentRedialInterval(),
@@ -794,6 +786,12 @@ TEST_F(MtcConfigurationManagerTest, IsEnableFakeQosCallFlowOnWifiReturnsValueInC
             GetBool(CarrierConfig::Assets::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL));
 }
 
+TEST_F(MtcConfigurationManagerTest, GetMediaTypeForOfferlessInviteReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetMediaTypeForOfferlessInvite(),
+            GetInt(CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT));
+}
+
 TEST_F(MtcConfigurationManagerTest, GetMediaTypeForOfferlessReinviteReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetMediaTypeForOfferlessReinvite(),
@@ -1035,7 +1033,6 @@ TEST_F(MtcConfigurationManagerTest,
 {
     ImsVector<IMS_SINT32> objArray;
     objArray.Push(ImsAosReason::POWER_OFF);
-    objArray.Push(ImsAosReason::OUT_OF_SERVICE);
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
@@ -1048,8 +1045,6 @@ TEST_F(MtcConfigurationManagerTest,
     EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::NONE));
     EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::POWER_OFF));
     EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::DATA_DISCONNECTED));
-    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::NO_RAT_COVERAGE));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::OUT_OF_SERVICE));
     EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::REG_TERMINATED));
 }
 
@@ -1230,14 +1225,6 @@ TEST_F(MtcConfigurationManagerTest,
     EXPECT_EQ(pManager->IsReleaseEmergencyPdnWithEmergencyCallFail(),
             GetBool(CarrierConfig::Assets::
                             KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL));
-}
-
-TEST_F(MtcConfigurationManagerTest,
-        GetPolicyForAlertNotUsingPreconditionMechanismReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->GetPolicyForAlertNotUsingPreconditionMechanism(),
-            GetInt(CarrierConfig::Assets::
-                            KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsRequiredCdmalessFeatureTag)

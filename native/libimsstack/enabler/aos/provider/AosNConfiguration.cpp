@@ -22,7 +22,7 @@
 #include "interface/IAosNConfigurationListener.h"
 #include "provider/AosNConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define LOGTAG m_strLogTag.GetStr()
 
@@ -34,6 +34,7 @@ AosNConfiguration::AosNConfiguration() :
         m_objMmtelProvisioning(AosMmtelRequiresProvisioningBundle()),
         m_objExtraRegErr(AosExtraRegErrBundle()),
         m_objNotifyTerminated(AosNotifyTerminatedForInitRegBundle()),
+        m_objPcscfRecoveryConditions(AosPcscfRecoveryConditionsBundle()),
         m_objRegErrCodeWithRaTime(AosRegErrCodeWithRaTimeBundle()),
         m_objRegRetryInterval(AosRegRetryIntervalBundle()),
         m_objSubErrCodeForInitReg(AosSubErrCodeForInitRegBundle()),
@@ -150,12 +151,17 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRttSupported() const
     return m_objCarrierConfig.bRttSupported;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRttSupportedWhileRoaming() const
+{
+    return m_objCarrierConfig.bRttSupportedWhileRoaming;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSupportLimitedAdminSmsMode() const
 {
     return m_objCarrierConfig.bSupportLimitedAdminSmsMode;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTtySupported() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVolteTtySupported() const
 {
     return m_objCarrierConfig.bCarrierVolteTtySupported;
 }
@@ -178,6 +184,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockBySsac() const
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredWfcBlockByAirplaneMode() const
 {
     return m_objAsset.bRequiredWfcBlockByAirplaneMode;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyReregSupportedOnIpcanChange() const
+{
+    return m_objAsset.bSupportEmergencyReregOnIpcanChange;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReregRetryWithChangedCountryOnWifi() const
@@ -268,6 +279,11 @@ AosNConfiguration::IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() cons
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmcRegOnRandomPcscf() const
 {
     return m_objAsset.bEmcRegOnRandomPcscf;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsERegWithOnlyTcpInRoaming() const
+{
+    return m_objAsset.bERegWithOnlyTcpInRoaming;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithIpcanChangedDuringImsCallHeld() const
@@ -661,6 +677,26 @@ PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetNotifyEventForInitialRegWithWait
     return m_nEventToFollowWtForInitRegOnTerminatedState;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPcscfRecoveryMaxRetryCnt() const
+{
+    return m_objPcscfRecoveryConditions.nMaxRetryCnt;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPcscfRecoveryWaitTime() const
+{
+    return m_objPcscfRecoveryConditions.nWaitTime;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPcscfRecoveryBaseTime() const
+{
+    return m_objPcscfRecoveryConditions.nBaseTime;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPcscfRecoveryMaxTime() const
+{
+    return m_objPcscfRecoveryConditions.nMaxTime;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRetryCountSubErrorRegRequired() const
 {
     return m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt;
@@ -959,6 +995,28 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
     }
 
+    // AosPcscfRecoveryConditionsBundle
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objPcscfRecoveryConditions.nMaxRetryCnt =
+                piCcBundle->GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_MAX_CNT_INT);
+        m_objPcscfRecoveryConditions.nWaitTime =
+                piCcBundle->GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT);
+        m_objPcscfRecoveryConditions.nBaseTime =
+                piCcBundle->GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT);
+        m_objPcscfRecoveryConditions.nMaxTime =
+                piCcBundle->GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT);
+        piCcBundle->ReleaseBundle();
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG, "KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE :: MRC(%d), WT(%d)",
+                m_objPcscfRecoveryConditions.nMaxRetryCnt, m_objPcscfRecoveryConditions.nWaitTime,
+                0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE :: BT(%d), MT(%d)",
+                m_objPcscfRecoveryConditions.nBaseTime, m_objPcscfRecoveryConditions.nMaxTime, 0);
+#endif
+    }
+
     // AosRegErrCodeWithRaTimeBundle
     piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE);
     if (piCcBundle != IMS_NULL)
@@ -1110,6 +1168,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
     m_objCarrierConfig.bCarrierWfcImsAvailable =
             piCc->GetBoolean(CarrierConfig::KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL);
     m_objCarrierConfig.bRttSupported = piCc->GetBoolean(CarrierConfig::KEY_RTT_SUPPORTED_BOOL);
+    m_objCarrierConfig.bRttSupportedWhileRoaming =
+            piCc->GetBoolean(CarrierConfig::KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL);
     m_objCarrierConfig.bCarrierCrossSimImsAvailable =
             piCc->GetBoolean(CarrierConfig::KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL);
     m_objCarrierConfig.bCarrierVolteTtySupported =
@@ -1223,6 +1283,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL);
+    m_objAsset.bERegWithOnlyTcpInRoaming =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
@@ -1257,6 +1319,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL);
     m_objAsset.bSupportContactUserInfo =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
+    m_objAsset.bSupportEmergencyReregOnIpcanChange =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportRegWithFeatureTagUnavailable = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatForReg =

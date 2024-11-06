@@ -26,6 +26,8 @@ public:
 
     virtual SIP_VOID DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,
             const SIP_CHAR* pszFormat, ...) = 0;
+    virtual SIP_VOID DumpAssertLog(
+            IN const SIP_CHAR* pszCondition, IN const SIP_CHAR* pszModule, IN SIP_UINT16 nLine) = 0;
 };
 
 #endif  //__INTERFACE_SIP_LOGGER_UTIL_H__

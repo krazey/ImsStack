@@ -171,7 +171,7 @@ public:
 
         if (pMediaNego == IMS_NULL)
         {
-            return IMS_NULL;
+            return UNDEFINED_NEGO_ID;
         }
 
         IMS_UINTP nMediaNego = reinterpret_cast<IMS_UINTP>(pMediaNego);

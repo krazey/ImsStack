@@ -182,7 +182,7 @@ TEST_F(EmergencyServiceControllerTest,
 {
     pController->Start();
 
-    const IMS_UINT32 nAosReason = ImsAosReason::OUT_OF_SERVICE;
+    const IMS_UINT32 nAosReason = ImsAosReason::POWER_OFF;
     ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objJniMtcServiceThread,
             OnEmergencyServiceChanged(

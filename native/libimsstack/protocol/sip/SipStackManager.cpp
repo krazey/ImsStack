@@ -133,7 +133,7 @@ SipUtil* SipStackManager::GetSipUtil()
  *
  */
 SIP_BOOL SipStackManager::SendMsg(SipMessage* pSipMsg, IN_OUT SipTransportParameter* pTranspParam,
-        IN ISipUserData* pUserData, IN SIP_CHAR* pSipBuffer, IN SIP_UINT32 nSipBufferLen,
+        IN ISipUserData* pUserData, IN const SIP_CHAR* pSipBuffer, IN SIP_UINT32 nSipBufferLen,
         IN SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {
     /* Input parameter validation */

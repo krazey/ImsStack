@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
 #include "ImsVector.h"
 
 namespace android
@@ -62,6 +63,32 @@ TEST_F(ImsVectorTest, OperatorAssignment)
     objNewVector = m_objVector;
     EXPECT_EQ(objNewVector.GetSize(), m_objVector.GetSize());
     EXPECT_EQ(objNewVector, m_objVector);
+}
+
+TEST_F(ImsVectorTest, Contains)
+{
+    EXPECT_TRUE(m_objVector.Contains(1));
+    EXPECT_TRUE(m_objVector.Contains(10));
+    EXPECT_FALSE(m_objVector.Contains(11));
+
+    ImsVector<AString> objVector;
+    AString strDog("dog");
+    AString strCat("cat");
+    AString strLion("lion");
+    objVector.Add(strDog);
+    objVector.Add(strCat);
+
+    EXPECT_TRUE(objVector.Contains(strDog));
+    EXPECT_TRUE(objVector.Contains(strCat));
+    EXPECT_FALSE(objVector.Contains(strLion));
+
+    ImsVector<AString*> objPointerVector;
+    objPointerVector.Add(&strDog);
+    objPointerVector.Add(&strCat);
+
+    EXPECT_TRUE(objPointerVector.Contains(&strDog));
+    EXPECT_TRUE(objPointerVector.Contains(&strCat));
+    EXPECT_FALSE(objPointerVector.Contains(&strLion));
 }
 
 TEST_F(ImsVectorTest, Equals)
@@ -268,6 +295,45 @@ TEST_F(ImsVectorTest, RemoveAt)
 
     m_objVector.RemoveElementsAt(0, m_objVector.GetSize());
     EXPECT_EQ(m_objVector.GetSize(), 0);
+}
+
+TEST_F(ImsVectorTest, Remove)
+{
+    IMS_UINT32 nSize = m_objVector.GetSize();
+    EXPECT_TRUE(m_objVector.Remove(1));
+    EXPECT_EQ(nSize - 1, m_objVector.GetSize());
+    EXPECT_EQ(2, m_objVector.GetAt(0));
+    EXPECT_TRUE(m_objVector.Remove(10));
+    EXPECT_EQ(nSize - 2, m_objVector.GetSize());
+    EXPECT_EQ(9, m_objVector.GetAt(m_objVector.GetSize() - 1));
+    EXPECT_FALSE(m_objVector.Remove(11));
+    EXPECT_EQ(nSize - 2, m_objVector.GetSize());
+
+    ImsVector<AString> objVector;
+    AString strDog("dog");
+    AString strCat("cat");
+    AString strLion("lion");
+    objVector.Add(strDog);
+    objVector.Add(strCat);
+
+    EXPECT_TRUE(objVector.Remove(strDog));
+    EXPECT_EQ(1, objVector.GetSize());
+    EXPECT_EQ(strCat, objVector.GetAt(0));
+    EXPECT_TRUE(objVector.Remove(strCat));
+    EXPECT_EQ(0, objVector.GetSize());
+    EXPECT_FALSE(objVector.Remove(strLion));
+
+    ImsVector<AString*> objPointerVector;
+    objPointerVector.Add(&strDog);
+    objPointerVector.Add(&strCat);
+
+    EXPECT_TRUE(objPointerVector.Remove(&strDog));
+    EXPECT_EQ(1, objPointerVector.GetSize());
+    AString* pstrCat = objPointerVector.GetAt(0);
+    EXPECT_EQ(strCat, *pstrCat);
+    EXPECT_TRUE(objPointerVector.Remove(&strCat));
+    EXPECT_EQ(0, objPointerVector.GetSize());
+    EXPECT_FALSE(objPointerVector.Remove(&strLion));
 }
 
 TEST_F(ImsVectorTest, Shrink)

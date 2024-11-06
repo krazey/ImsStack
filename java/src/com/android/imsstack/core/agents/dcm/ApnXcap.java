@@ -21,6 +21,8 @@ import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -31,18 +33,21 @@ import com.android.imsstack.util.ImsLog;
 /**
  * this is data connection class for xcap
  */
-public class ApnXcap extends Apn {
-
-    // Constants--------------------------------------------------
-    protected static final int OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL = 2000;
+public final class ApnXcap extends Apn {
+    @VisibleForTesting
+    static final int OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL = 2000;
 
     // Variables--------------------------------------------------
 
     // Public methods --------------------------------------------
     public ApnXcap(Context context, int slotId) {
-        super(context, slotId);
+        super(context, slotId, EApnType.XCAP);
 
-        initializeApn();
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
+        registerHandler(EVENT_WAITING_IPV6_ADDRESS, new HandleWaitingIpv6Address());
+        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
     }
 
     // Interface implementation methods --------------------------
@@ -89,17 +94,6 @@ public class ApnXcap extends Apn {
         return true;
     }
 
-    // Private/Protected methods ---------------------------------
-    protected void initializeApn() {
-        mType = EApnType.XCAP;
-
-        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
-        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
-        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
-        registerHandler(EVENT_WAITING_IPV6_ADDRESS, new HandleWaitingIpv6Address());
-        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
-    }
-
     private boolean procWaitingLocalAddressForIpv6() {
         if (!hasLocalAddress(EIpVersion.IPV6.getInt())) {
             if (hasMessages(EVENT_WAITING_IPV6_ADDRESS)) {
@@ -115,7 +109,7 @@ public class ApnXcap extends Apn {
         return false;
     }
 
-    private class HandleNetworkAvailable implements MsgProcInterface {
+    private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_CONNECTED;
@@ -145,7 +139,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class HandleNetworkLost implements MsgProcInterface {
+    private final class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -166,7 +160,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class HandleIpChanged implements MsgProcInterface {
+    private final class HandleIpChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "ip is changed");
@@ -193,7 +187,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class HandleWaitingIpv6Address implements MsgProcInterface {
+    private final class HandleWaitingIpv6Address implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "apn is delayed, data is updated");
@@ -201,7 +195,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class HandleDataConnectionFailed implements MsgProcInterface {
+    private final class HandleDataConnectionFailed implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.d(mSlotId, "");

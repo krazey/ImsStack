@@ -151,10 +151,10 @@ TEST_F(OsUsimTest, DispatchServiceMessage_WithResponse)
     m_pIUsim->DispatchServiceMessage(wParam, lParam);
 
     EXPECT_CALL(m_objMockDigestAkaListener, DigestAka_OnResponse(_, _, _)).Times(0);
-    m_pIUsim->DispatchServiceMessage(0, IMS_NULL);
+    m_pIUsim->DispatchServiceMessage(0, 0);
 
     EXPECT_CALL(m_objMockThread, PostMessageI(_, _, _)).Times(0);
-    m_piSystemListener->System_NotifyEvent(OsUsim::NOTIFICATION_USIM_AUTH, 0, IMS_NULL);
+    m_piSystemListener->System_NotifyEvent(OsUsim::NOTIFICATION_USIM_AUTH, 0, 0);
 }
 
 TEST_F(OsUsimTest, DispatchServiceMessage_WithFailure)

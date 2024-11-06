@@ -40,7 +40,7 @@ public:
     {
     }
 
-    virtual ~Pcscf() { StopTimer(); }
+    ~Pcscf() override { StopTimer(); }
 
     inline const AString& GetAddress() { return m_strAddress; }
     inline IMS_SINT32 GetPort() { return m_nPort; }
@@ -159,7 +159,7 @@ class AosPcscf : public IAosPcscf, public ITimerListener
 {
 public:
     explicit AosPcscf(IN IAosAppContext* piAppContext);
-    virtual ~AosPcscf();
+    ~AosPcscf() override;
 
     void Init() override;
     void CleanUp() override;

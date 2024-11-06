@@ -20,8 +20,6 @@
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
-#define MAX_BODY_SIZE 1500
-
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 SipMIMEHdrs::SipMIMEHdrs() :
@@ -304,13 +302,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
             return SIP_FALSE;
         }
 
-        if (pUnknown->SetHeaderName(pszHdrName) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SetHeaderName fail", SIP_ZERO, SIP_ZERO);
-            pUnknown->SipDelete();
-            delete[] pszHdrName;
-            return SIP_FALSE;
-        }
+        pUnknown->SetHeaderName(pszHdrName);
         delete[] pszHdrName;
 
         SIP_CHAR* pszHdrValue = SipCreateString(pTempNext, pEndPt);
@@ -320,13 +312,8 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
             pUnknown->SipDelete();
             return SIP_FALSE;
         }
-        if (pUnknown->SetHeaderValue(pszHdrValue) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SetHeaderValue Fail", SIP_ZERO, SIP_ZERO);
-            pUnknown->SipDelete();
-            delete[] pszHdrValue;
-            return SIP_FALSE;
-        }
+
+        pUnknown->SetHeaderValue(pszHdrValue);
         delete[] pszHdrValue;
 
         if (m_pUnKnownHdrList == SIP_NULL)
@@ -817,7 +804,7 @@ SipMsgBodyList::SipMsgBodyList(const SipMsgBodyList& objMsgBodyList) :
     }
 }
 
-SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBoundary)
+SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR* pszBoundary)
 {
     SIP_UINT32 nNumBodies = m_objBodyList.GetSize();
 
@@ -859,7 +846,7 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBo
 }
 
 SIP_BOOL SipMsgBodyList::GetEncodedMessageBody(
-        SIP_CHAR** ppMsgBufer, SIP_UINT32& nMsgLen, SIP_CHAR* pszBoundary)
+        SIP_CHAR** ppMsgBufer, SIP_UINT32& nMsgLen, const SIP_CHAR* pszBoundary)
 {
     SIP_UINT32 nCount = m_objBodyList.GetSize();
     if (nCount == SIP_ZERO)
@@ -944,7 +931,7 @@ SIP_BOOL SipMsgBodyList::DecodeSingleBody(const SIP_CHAR* pStartPt, const SIP_CH
 }
 
 SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
-        const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary)
+        const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR* pszBoundary)
 {
     /*Boundary check*/
     if (pszBoundary == SIP_NULL)

@@ -20,7 +20,7 @@
 #include "IService.h"
 #include "ServiceProtocol.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_USER_DECL__("GCF");
 
 PUBLIC GLOBAL const IMS_CHAR ServiceProtocol::CONNECTION_PARAM_USER_ID[] = "userId";
 PUBLIC GLOBAL const IMS_CHAR ServiceProtocol::CONNECTION_PARAM_SERVICE_ID[] = "serviceId";

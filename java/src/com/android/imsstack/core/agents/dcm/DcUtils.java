@@ -77,7 +77,7 @@ public class DcUtils implements IDcUtils {
     public void cleanup() {
     }
 
-     /**
+    /**
      * Returns the access network information that the device is currently attached.
      *
      * @param defaultNetworkType A default network type that requests the access network information
@@ -85,12 +85,10 @@ public class DcUtils implements IDcUtils {
      */
     @Override
     public IDcUtils.AccessNetworkInfo getAccessNetworkInfo(int defaultNetworkType) {
-        /**
-         * GET_ACCESS_NETWORK_INFO
-         * eHRPD: Sector ID/Subnet Length/Carrier ID(optional)
-         * GERAN/UTRAN: MCC/MNC/Cell Identity/LAC
-         * EUTRAN/NGRAN: MCC/MNC/Cell Identity/TAC/Duplex Mode
-         */
+        // GET_ACCESS_NETWORK_INFO
+        //     eHRPD: Sector ID/Subnet Length/Carrier ID(optional)
+        //     GERAN/UTRAN: MCC/MNC/Cell Identity/LAC
+        //     EUTRAN/NGRAN: MCC/MNC/Cell Identity/TAC/Duplex Mode
         String[] ani = null;
         ServiceState ss = getServiceState();
         NetworkRegistrationInfo nri = getNetworkRegistrationInfo(ss);
@@ -99,9 +97,9 @@ public class DcUtils implements IDcUtils {
                 : TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
         if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-            // when no uicc is inserted, network type is not correctly reported from modem.
-            // the only case we care is making 911 call with no uicc.
-            // if 911 call is over ims, then UE must be in lte network.
+            // When no UICC is inserted, network type is not correctly reported from modem.
+            // the only case we care is making 911 call with no UICC.
+            // if 911 call is over IMS, then UE must be in lte network.
             networkType = (defaultNetworkType > 0)
                     ? defaultNetworkType : TelephonyManager.NETWORK_TYPE_LTE;
         }
@@ -144,14 +142,10 @@ public class DcUtils implements IDcUtils {
     }
 
     /**
-    * isMobileDataEnabled
-    *
-    * @param
-    * @return
-    *
-    *         false: Disable
-    *         true: Enable
-    */
+     * Checks whether the mobile data setting is enabled or not.
+     *
+     * @return {@code true} if the mobile data setting is enabled, {@code false} otherwise.
+     */
     @Override
     public boolean isMobileDataEnabled() {
         TelephonyManagerProxy tmp =

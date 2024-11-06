@@ -21,7 +21,7 @@
 #include "ServiceTrace.h"
 #include "config/UceAssetItems.h"
 
-__IMS_TRACE_TAG_USER_DECL__("CONF");
+__IMS_TRACE_TAG_UCE__;
 
 PUBLIC
 UceConfig::UceConfig() :

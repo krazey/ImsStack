@@ -23,18 +23,19 @@ class JniAosServiceThread final : public BaseServiceThread, public IJniAosServic
 {
 public:
     JniAosServiceThread();
-    virtual ~JniAosServiceThread();
+    ~JniAosServiceThread() override;
 
-    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
 
-    IMS_BOOL NotifyRegistering(IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyRegistering(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
 
-    IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
+    IMS_BOOL NotifyDeregistered(
+            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
 
     IMS_BOOL NotifyTechnologyChangeFailed(
-            IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode) override;
+            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
 
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
 

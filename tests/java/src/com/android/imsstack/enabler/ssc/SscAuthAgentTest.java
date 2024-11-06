@@ -46,7 +46,7 @@ public class SscAuthAgentTest {
     @Test
     public void calculateResponse_normal() {
         String wwwAuthentication = "Digest realm=\"3GPP-bootstrapping@test.3gpp.com\","
-                + " algorithm=\"MD5-sees\", qop=\"auth-int\","
+                + " algorithm=\"MD5-sess\", qop=\"auth-int\","
                 + " nonce=\"o94MbTY+MMNkpAePG/jVd24yOzbEbJERo98ObjI7p9U=\","
                 + " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
         String uri = "/simservs.ngn.etsi.org/users/"

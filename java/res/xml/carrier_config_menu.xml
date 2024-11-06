@@ -17,6 +17,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="carrier_config_editor"
     android:title="CarrierConfig Editor">
+    <PreferenceScreen/> <!-- Empty row for notification bar. -->
     <PreferenceScreen/> <!-- Empty row for title bar. -->
     <PreferenceScreen android:title="CarrierConfig - Public"
         android:key="screen_carrier_config">
@@ -235,6 +236,10 @@
         android:key="test_carrier_id" android:defaultValue="0" android:enabled="true"
         android:selectable="true">
     </ListPreference>
+    <EditTextPreference android:title="Test Specific Carrier Id"
+        android:key="test_specific_carrier_id"
+        android:dialogMessage="">
+    </EditTextPreference>
     <ListPreference android:title="VoLte Provisioning"
         android:entryValues="@array/volte_provisioning_value"
         android:entries="@array/volte_provisioning_entry"

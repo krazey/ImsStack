@@ -38,7 +38,7 @@
 
 #include "manager/AosBuildDirector.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosBuildDirector::AosBuildDirector(IN IAosBuilder* piBuilder, IN IMS_SINT32 nSlotId) :

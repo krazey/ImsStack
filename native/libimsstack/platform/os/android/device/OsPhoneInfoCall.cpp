@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "device/OsPhoneInfoCall.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsPhoneInfoCall::OsPhoneInfoCall(IN IMS_SINT32 nSlotId) :

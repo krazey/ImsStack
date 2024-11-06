@@ -24,7 +24,7 @@ class AosHandleSipController : public AosHandle
 public:
     AosHandleSipController(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleSipController();
+    ~AosHandleSipController() override;
 
 protected:
     void InitializeServiceBlock() override;

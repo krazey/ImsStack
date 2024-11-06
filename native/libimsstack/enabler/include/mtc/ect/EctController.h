@@ -54,7 +54,7 @@ protected:
     static const IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 3000;
 
     IMtcCall* GetTransferee() const;
-    virtual void OnCompleted();  // TODO: OnSucceeded?
+    virtual void OnSuccess();
     virtual void OnFailed();
 
     void NotifyResult(IN IMS_RESULT nResult, IN IMS_SINT32 nReason = CODE_NONE) const;

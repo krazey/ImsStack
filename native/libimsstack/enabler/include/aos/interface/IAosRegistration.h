@@ -21,6 +21,8 @@
 class AString;
 class IAosRegistrationListener;
 
+enum class AosRegistrationType;
+
 /**
  * @brief This class provides the interface for AosRegistration.
  */
@@ -99,6 +101,12 @@ public:
      * @brief Get the registration type. (@see AosRegistrationType)
      */
     virtual AosRegistrationType GetRegType() = 0;
+
+    /**
+     * @brief Get the IMS registration type. (@see IMS_REG_TYPE_XXX enum)
+     *        This registration type is for notifying to the telephony module.
+     */
+    virtual IMS_SINT32 GetImsRegType() = 0;
 
     /**
      * @brief Check whether IMS is registered or not.
@@ -205,6 +213,20 @@ public:
         MODE_NORMAL = 0,
         MODE_LIMITED,
         MODE_FAKE
+    };
+
+    /**
+     * @brief Indicate the IMS registration type.
+     *        This is for notifying to the telephony module.
+     *
+     *  @see GetImsRegType()
+     */
+    enum
+    {
+        IMS_REG_TYPE_INVALID = -1,
+        IMS_REG_TYPE_NORMAL,
+        IMS_REG_TYPE_EMERGENCY,
+        IMS_REG_TYPE_FAKE
     };
 
     /**

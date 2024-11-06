@@ -17,6 +17,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="ims_config_menu"
     android:title="ImsConfig Editor">
+    <PreferenceScreen/> <!-- Empty row for notification bar. -->
     <PreferenceScreen/> <!-- Empty row for title bar. -->
     <PreferenceScreen android:title="CarrierConfig"
         android:key="carrier_config_menu">

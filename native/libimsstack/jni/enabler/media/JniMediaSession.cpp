@@ -346,7 +346,7 @@ void JniMediaSession::OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parce
 PRIVATE
 void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
 {
-    GetMediaManager()->SendMessage(nMsg, m_nCallKey, IMS_NULL);
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, 0);
 }
 
 PRIVATE

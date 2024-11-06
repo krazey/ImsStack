@@ -18,7 +18,7 @@
 
 #include "ServiceFilterCriteria.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 ServiceFilterCriteria::ServiceFilterCriteria() :

@@ -27,7 +27,7 @@ UpdatingInfo::UpdatingInfo(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_eTargetCallType(CallType::UNKNOWN),
         m_eRequestingType(UpdateType::NORMAL),
-        m_objNegotiatedInfo(MediaInfo()),
+        m_objOriginalInfo(MediaInfo()),
         m_objModifyingInfo(MediaInfo()),
         m_objAlertingInfo(MediaInfo()),
         m_objModifiedInfo(MediaInfo()),
@@ -46,7 +46,7 @@ PUBLIC VIRTUAL UpdatingInfo::~UpdatingInfo()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsHeld() const
 {
-    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
+    if (m_objOriginalInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
         if (m_objModifyingInfo.eAudioDirection == DIRECTION_SEND ||
                 m_objModifyingInfo.eAudioDirection == DIRECTION_INACTIVE)
@@ -54,7 +54,7 @@ IMS_BOOL UpdatingInfo::IsHeld() const
             return IMS_TRUE;
         }
     }
-    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_RECEIVE &&
+    else if (m_objOriginalInfo.eAudioDirection == DIRECTION_RECEIVE &&
             m_objModifyingInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
         return IMS_TRUE;
@@ -72,7 +72,7 @@ IMS_BOOL UpdatingInfo::IsHeldBy() const
         eNewAudioDirection = m_objAlertingInfo.eAudioDirection;
     }
 
-    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
+    if (m_objOriginalInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
         if (eNewAudioDirection == DIRECTION_RECEIVE ||
                 (eNewAudioDirection == DIRECTION_INACTIVE &&
@@ -81,7 +81,7 @@ IMS_BOOL UpdatingInfo::IsHeldBy() const
             return IMS_TRUE;
         }
     }
-    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND &&
+    else if (m_objOriginalInfo.eAudioDirection == DIRECTION_SEND &&
             eNewAudioDirection == DIRECTION_INACTIVE)
     {
         return IMS_TRUE;
@@ -93,12 +93,12 @@ IMS_BOOL UpdatingInfo::IsHeldBy() const
 PUBLIC
 IMS_BOOL UpdatingInfo::IsResumed() const
 {
-    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND &&
+    if (m_objOriginalInfo.eAudioDirection == DIRECTION_SEND &&
             m_objModifyingInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
         return IMS_TRUE;
     }
-    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_INACTIVE)
+    else if (m_objOriginalInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
         if (m_objModifyingInfo.eAudioDirection == DIRECTION_RECEIVE ||
                 m_objModifyingInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
@@ -119,12 +119,12 @@ IMS_BOOL UpdatingInfo::IsResumedBy() const
         eNewAudioDirection = m_objAlertingInfo.eAudioDirection;
     }
 
-    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_RECEIVE &&
+    if (m_objOriginalInfo.eAudioDirection == DIRECTION_RECEIVE &&
             eNewAudioDirection == DIRECTION_SEND_RECEIVE)
     {
         return IMS_TRUE;
     }
-    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_INACTIVE)
+    else if (m_objOriginalInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
         if (eNewAudioDirection == DIRECTION_SEND ||
                 (eNewAudioDirection == DIRECTION_SEND_RECEIVE &&
@@ -150,7 +150,7 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert() const
         return IMS_FALSE;
     }
 
-    if (m_objNegotiatedInfo.eVideoDirection != m_objAlertingInfo.eVideoDirection)
+    if (m_objOriginalInfo.eVideoDirection != m_objAlertingInfo.eVideoDirection)
     {
         CallType eCurrentType = GetCurrentCallType();
         if (eCurrentType == CallType::VT || eCurrentType == CallType::VIDEO_RTT)
@@ -170,7 +170,7 @@ IMS_BOOL UpdatingInfo::IsRequestedHoldResume() const
         return IMS_FALSE;
     }
 
-    if (m_objNegotiatedInfo.eAudioDirection == m_objModifyingInfo.eAudioDirection)
+    if (m_objOriginalInfo.eAudioDirection == m_objModifyingInfo.eAudioDirection)
     {
         return IMS_FALSE;
     }
@@ -191,7 +191,7 @@ IMS_BOOL UpdatingInfo::IsRequestedModifying() const
         return IMS_TRUE;
     }
 
-    if (m_objNegotiatedInfo.eVideoDirection != m_objModifyingInfo.eVideoDirection)
+    if (m_objOriginalInfo.eVideoDirection != m_objModifyingInfo.eVideoDirection)
     {
         return IMS_TRUE;
     }
@@ -227,22 +227,14 @@ IMS_BOOL UpdatingInfo::IsDowngraded() const
 }
 
 PUBLIC
-void UpdatingInfo::AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const
+MediaInfo UpdatingInfo::GetModifiedMediaInfoWithOriginalAudioDir() const
 {
-    if (objMediaInfo.eAudioDirection != DIRECTION_INVALID)
-    {
-        objMediaInfo.eAudioDirection = m_objAlertingInfo.eAudioDirection;
-    }
+    MediaInfo objInfoForUpdatedNotiying(m_objModifiedInfo);
+    // Don't need to care about video and text direction because the ISIL relies on
+    // upper layer(or directly sets in the specific cases) for video, text direction.
+    objInfoForUpdatedNotiying.eAudioDirection = m_objOriginalInfo.eAudioDirection;
 
-    if (objMediaInfo.eVideoDirection != DIRECTION_INVALID)
-    {
-        objMediaInfo.eVideoDirection = m_objAlertingInfo.eVideoDirection;
-    }
-
-    if (objMediaInfo.eTextDirection != DIRECTION_INVALID)
-    {
-        objMediaInfo.eTextDirection = m_objAlertingInfo.eTextDirection;
-    }
+    return objInfoForUpdatedNotiying;
 }
 
 PRIVATE

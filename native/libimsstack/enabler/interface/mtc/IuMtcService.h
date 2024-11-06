@@ -69,7 +69,6 @@ public:
         OPENING = 1,
         OPENED = 2,
         UNAVAILABLE = 3,
-        IN_CALL = 4,  // TODO: remove
     };
 
     enum class EmergencyCallRoutingPdn

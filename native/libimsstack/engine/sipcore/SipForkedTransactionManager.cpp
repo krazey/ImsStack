@@ -22,7 +22,7 @@
 #include "SipForkedTransactionManager.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 IMS_BOOL SipForkedTransactionManager::Add(IN SipClientTransactionState* pCtState)

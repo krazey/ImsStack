@@ -630,14 +630,6 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
 }
 
 PROTECTED
-void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
-{
-    IMS_BOOL bEarly =
-            !m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_200);
-    m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly);
-}
-
-PROTECTED
 IMS_RESULT MtcCallState::SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession)
 {
     if (!piMtcSession)
@@ -689,13 +681,6 @@ void MtcCallState::SendIncomingUpdateToUi(IN CallType eCallType)
     m_objContext.GetUiNotifier().SendIncomingUpdate(eCallType);
     m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
             m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
-}
-
-PROTECTED
-IMS_BOOL MtcCallState::IsRprSupported() const
-{
-    return m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-            MtcExtensionSet::OPTION_TAG_RPR);
 }
 
 PROTECTED
@@ -1025,8 +1010,7 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
 PROTECTED
 void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const
 {
-    if (objMessage.GetStatusCode() != SipStatusCode::SC_183 &&
-            objMessage.GetStatusCode() != SipStatusCode::SC_200)
+    if (!Is18x(objMessage.GetStatusCode()) && objMessage.GetStatusCode() != SipStatusCode::SC_200)
     {
         return;
     }
@@ -1054,14 +1038,9 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
 {
     switch (nAosReason)
     {
-        case ImsAosReason::OUT_OF_SERVICE:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
         case ImsAosReason::POWER_OFF:
             return CODE_LOCAL_POWER_OFF;
-        case ImsAosReason::NO_RAT_COVERAGE:
-            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
         case ImsAosReason::SERVICE_POLICY:
-        case ImsAosReason::SERVICE_BLOCKED:
         case ImsAosReason::REG_TERMINATING:
             return CODE_LOCAL_SERVICE_UNAVAILABLE;
         case ImsAosReason::DATA_DISCONNECTED:
@@ -1085,4 +1064,27 @@ IMS_BOOL MtcCallState::IsNeedToSendLocalResourceConfirmation(IN ISession* piSess
 
     return objPreconditionManager.IsLocalResourceConfirmationRequired(piSession) &&
             objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession);
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsRprRequired() const
+{
+    if (!m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
+                MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetSession()->GetExtensionSet().IsRequiredOnRemote(
+                MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Is(Feature::PRACK_SUPPORTED_FOR_18X))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }

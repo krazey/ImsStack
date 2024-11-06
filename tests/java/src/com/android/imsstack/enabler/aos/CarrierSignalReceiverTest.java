@@ -52,14 +52,13 @@ public class CarrierSignalReceiverTest {
 
         MockitoAnnotations.initMocks(this);
 
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mMockAosService);
-
+        AosFactory.getInstance().replaceService(SLOT_0, mMockAosService);
         mFakeCarrierSignalReceiver = new FakeCarrierSignalReceiver();
     }
 
     @After
     public void cleanUp() throws Exception {
-        AosFactory.getInstance().mAosServices.remove(SLOT_0);
+        AosFactory.getInstance().replaceService(SLOT_0, null);
     }
 
     @Test

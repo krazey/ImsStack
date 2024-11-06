@@ -147,6 +147,7 @@ public class CarrierConfigTest {
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
             assertNotNull(userAgent);
             assertFalse(userAgent.contains("#"));
+            assertFalse(userAgent.contains(" "));
             assertTrue(userAgent.endsWith("TEST"));
 
             // IMEI: empty, SV: empty

@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -56,7 +57,7 @@ public final class LocalLog {
         }
         final String logLine;
         if (mUseLocalTimestamps) {
-            logLine = LocalDateTime.now() + " - " + msg;
+            logLine = LocalDateTime.now(ZoneId.systemDefault()) + " - " + msg;
         } else {
             logLine = Duration.ofMillis(SystemClock.elapsedRealtime())
                     + " / " + Instant.now() + " - " + msg;

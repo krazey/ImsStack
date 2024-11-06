@@ -16,26 +16,24 @@
 #include <string.h>
 #include <cutils/log.h>
 
-#include "AStringBuffer.h"
 #include "ImsStrLib.h"
 #include "ImsTrace.h"
 #include "ServiceMemory.h"
-#include "ServiceSystemTime.h"
 
-// SDP/SIP/XML: SP is added before first CRLF to align a size of start string
+// SDP/SIP/XML: SP is added before first LF to align a size of start string
 PRIVATE GLOBAL const IMS_CHAR* ImsTrace::START[ITrace::TEXT_MAX] = {
-        "\r\nTEXT_TEXT_START\r\n\r\n",
-        " \r\nTEXT_SDP_START\r\n\r\n",
-        " \r\nTEXT_SIP_START\r\n\r\n",
-        " \r\nTEXT_XML_START\r\n\r\n",
+        "\nTEXT_TEXT_START\n",
+        " \nTEXT_SDP_START\n",
+        " \nTEXT_SIP_START\n",
+        " \nTEXT_XML_START\n",
 };
 
-// SDP/SIP/XML: SP is added before last CRLF to align a size of end string
+// SDP/SIP/XML: SP is added before last LF to align a size of end string
 PRIVATE GLOBAL const IMS_CHAR* ImsTrace::END[ITrace::TEXT_MAX] = {
-        "\r\nTEXT_TEXT_END\r\n\r\n",
-        "\r\nTEXT_SDP_END\r\n \r\n",
-        "\r\nTEXT_SIP_END\r\n \r\n",
-        "\r\nTEXT_XML_END\r\n \r\n",
+        "TEXT_TEXT_END\n\n",
+        "TEXT_SDP_END\n \n",
+        "TEXT_SIP_END\n \n",
+        "TEXT_XML_END\n \n",
 };
 
 PUBLIC
@@ -43,19 +41,6 @@ ImsTrace::ImsTrace() :
         m_nOption(ITraceOption::OPT_DEFAULT),
         m_nTracedModules(IMS_TRACE_MODULE_ALL)
 {
-}
-
-PUBLIC VIRTUAL ImsTrace::~ImsTrace() {}
-
-PUBLIC VIRTUAL const IMS_CHAR* ImsTrace::GetFileName(IN const IMS_CHAR* /*pszFileName*/)
-{
-    return "__NULL__";
-}
-
-PUBLIC VIRTUAL const IMS_CHAR* ImsTrace::GetFileName(
-        IN_OUT IMS_CHAR* /*pszOutFileName*/, IN const IMS_CHAR* /*pszFileName*/)
-{
-    return "__NULL__";
 }
 
 PUBLIC
@@ -99,7 +84,7 @@ void ImsTrace::OutP(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_U
     va_list args;
 
     va_start(args, pszFormat);
-    OutV(nCategory, pszTag, nModule, pszFormat, args);
+    OutV(nCategory, pszTag, nModule, IMS_NULL, 0, pszFormat, args);
     va_end(args);
 }
 
@@ -164,15 +149,6 @@ IMS_BOOL ImsTrace::IsModuleEnabled(IN IMS_UINT32 nModule) const
 PROTECTED
 IMS_BOOL ImsTrace::IsOptionEnabled(IN IMS_SINT32 nCategory) const
 {
-#if 0
-    // Check the trace category
-    if ((m_nOption & ITraceOption::OPT_CAT_ALL) == ITraceOption::OPT_CAT_NONE)
-    {
-        // All Trace Disabled
-        return IMS_FALSE;
-    }
-#endif
-
     switch (nCategory)
     {
         case ITrace::CAT_D:
@@ -197,7 +173,7 @@ IMS_BOOL ImsTrace::IsOptionEnabled(IN IMS_SINT32 nCategory) const
             break;
     }
 
-    // Trace Disabed...
+    // Trace disabled
     return IMS_FALSE;
 }
 
@@ -212,11 +188,13 @@ PRIVATE VIRTUAL void ImsTrace::Out(IN const IMS_CHAR* pszFormat, ...)
     {
         IMS_CHAR acBuffer[MAX_TEXT_SIZE + 1];
         HideArgs(pszFormat, acBuffer);
-        OutV(ITrace::CAT_D, __IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT, acBuffer, args);
+        OutV(ITrace::CAT_D, __IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT, IMS_NULL, 0,
+                acBuffer, args);
     }
     else
     {
-        OutV(ITrace::CAT_D, __IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT, pszFormat, args);
+        OutV(ITrace::CAT_D, __IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT, IMS_NULL, 0,
+                pszFormat, args);
     }
 
     va_end(args);
@@ -224,7 +202,8 @@ PRIVATE VIRTUAL void ImsTrace::Out(IN const IMS_CHAR* pszFormat, ...)
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
 PRIVATE VIRTUAL void ImsTrace::Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
-        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, ...)
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine,
+        IN const IMS_CHAR* pszFormat, ...)
 {
     va_list args;
 
@@ -234,41 +213,32 @@ PRIVATE VIRTUAL void ImsTrace::Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* p
     {
         IMS_CHAR acBuffer[MAX_TEXT_SIZE + 1];
         HideArgs(pszFormat, acBuffer);
-        OutV(nCategory, pszTag, nModule, acBuffer, args);
+        OutV(nCategory, pszTag, nModule, pszFile, nLine, acBuffer, args);
     }
     else
     {
-        OutV(nCategory, pszTag, nModule, pszFormat, args);
+        OutV(nCategory, pszTag, nModule, pszFile, nLine, pszFormat, args);
     }
 
     va_end(args);
 }
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
-PRIVATE VIRTUAL void ImsTrace::OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction,
-        IN IMS_UINT16 nLine, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-        IN const IMS_CHAR* pszFormat, ...)
+PRIVATE VIRTUAL void ImsTrace::OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszTag,
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFile, IN const IMS_CHAR* pszFunc,
+        IN IMS_UINT32 nLine, IN const IMS_CHAR* pszFormat, ...)
 {
-#if 0
-    if ((m_nOption & ITraceOption::OPT_CAT_E) != ITraceOption::OPT_CAT_E)
-    {
-        // Do nothing ...
-        return;
-    }
-#endif
-
     va_list args;
 
     va_start(args, pszFormat);
-    OutV(ITrace::CAT_E, pszTag, nModule, pszFormat, args);
+    OutV(ITrace::CAT_E, pszTag, nModule, pszFile, nLine, pszFormat, args);
     va_end(args);
 
-    Out(ITrace::CAT_E, pszTag, nModule, "E_CODE (%d) AT (%s, %d)", nErrorCode, pszFunction, nLine);
+    Out(ITrace::CAT_E, pszTag, nModule, pszFile, nLine, "E_CODE(%d) AT (%s)", nErrorCode, pszFunc);
 }
 
 PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
-        IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
-        IN IMS_BOOL bBinaryBody /*= IMS_FALSE*/)
+        IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize)
 {
     if ((m_nOption & ITraceOption::OPT_CAT_TEXT) != ITraceOption::OPT_CAT_TEXT)
     {
@@ -282,47 +252,20 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
 
     IMS_CHAR acBuffer[MAX_TEXT_SIZE + 1];
     IMS_SINT32 nLength = 0;
-    IMS_UINT32 nTextEnd = nTextSize;
 
-    if (nType == ITrace::TEXT_SIP)
+    IMS_MEM_Memcpy(&acBuffer[nLength], START[nType], START_SIZE);
+    nLength = START_SIZE;
+
+    if (pszDescription != IMS_NULL)
     {
-        if (bBinaryBody)
-        {
-            // Find a CRLFCRLF
-            IMS_CHAR* pszTmp = IMS_StrStr(pszText, "\r\n\r\n");
-
-            if (pszTmp != IMS_NULL)
-            {
-                nTextEnd = pszTmp - pszText + 4 /*CRLF CRLF*/;
-            }
-        }
-
-        // Display a time string
-        AString strTime = IMS_SYS_GetTimeString();
-
-        nLength = IMS_Sprintf(acBuffer, MAX_TEXT_SIZE,
-                "%s"
-                "TIME: %s\r\n",
-                START[nType], strTime.GetStr());
-    }
-    else
-    {
-        IMS_MEM_Memcpy(&acBuffer[nLength], START[nType], START_SIZE);
-        nLength = START_SIZE;
+        nLength +=
+                IMS_Sprintf(&acBuffer[nLength], MAX_TEXT_SIZE - nLength, "%s\n\n", pszDescription);
     }
 
-    if ((pszDescription != IMS_NULL) && (nLength != -1))
+    if (nTextSize <= (MAX_TEXT_SIZE - MAX_SPARE_SIZE))
     {
-        nLength += IMS_Sprintf(
-                &acBuffer[nLength], MAX_TEXT_SIZE - nLength, "%s\r\n\r\n", pszDescription);
-    }
-
-    if (nTextEnd <= (MAX_TEXT_SIZE - MAX_SPARE_SIZE))
-    {
-        IMS_MEM_Memcpy(&acBuffer[nLength], pszText, nTextEnd);
-        nLength += nTextEnd;
-        nLength += IMS_Sprintf(&acBuffer[nLength], MAX_TEXT_SIZE - nLength, "%s", END[nType]);
-
+        IMS_MEM_Memcpy(&acBuffer[nLength], pszText, nTextSize);
+        nLength += nTextSize;
         OutputString(ITrace::CAT_I, acBuffer, nLength);
     }
     else
@@ -331,7 +274,7 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
         OutputString(ITrace::CAT_I, acBuffer, nLength);
 
         // Display a protocol message
-        IMS_UINT32 nTotalLength = nTextEnd;
+        IMS_UINT32 nTotalLength = nTextSize;
         const IMS_CHAR* pszTextStart = pszText;
 
         if (nTotalLength > MAX_TEXT_SIZE)
@@ -363,12 +306,12 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
                 nLength = nTotalLength;
             }
         }
-
-        // Display END
-        IMS_MEM_Memcpy(acBuffer, END[nType], END_SIZE);
-        acBuffer[END_SIZE] = '\0';
-        OutputString(ITrace::CAT_I, acBuffer, END_SIZE);
     }
+
+    // Display END
+    IMS_MEM_Memcpy(acBuffer, END[nType], END_SIZE);
+    acBuffer[END_SIZE] = '\0';
+    OutputString(ITrace::CAT_I, acBuffer, END_SIZE);
 }
 
 PRIVATE

@@ -39,7 +39,7 @@ extern "C"
 #include "network/OsSocketService.h"
 #include "network/OsSslSocket.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 /**
  * @brief Display all the ciphers available for a specific SSL structure.

@@ -29,8 +29,8 @@
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ISipServerConnectionListener.h"
+#include "ImsCoreContext.h"
 #include "Service.h"
-#include "ServiceContext.h"
 #include "ServiceManager.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
@@ -49,7 +49,7 @@
 #include "util/SipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 class SipServerConnectionListenerProxy : public EngineActivity, public ISipServerConnectionListener
 {
@@ -945,7 +945,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         IN ISipServerConnection* piSsc, OUT SipStatusCode& objStatusCode)
 {
     ImsList<Service*> objServices =
-            ServiceContext::GetInstance()->GetServiceManager()->GetServices();
+            ImsCoreContext::GetInstance()->GetServiceManager()->GetServices();
 
     if (objServices.IsEmpty())
     {
@@ -1320,14 +1320,13 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::SetServerHeader(
     }
 }
 
-PRIVATE
+PUBLIC
 SipConnectionNotifierManager::SipConnectionNotifierManager() :
         m_pScnMngrPrivate(new SipConnectionNotifierManagerPrivate())
 {
 }
 
-PRIVATE
-SipConnectionNotifierManager::~SipConnectionNotifierManager()
+PUBLIC VIRTUAL SipConnectionNotifierManager::~SipConnectionNotifierManager()
 {
     if (m_pScnMngrPrivate != IMS_NULL)
     {
@@ -1335,64 +1334,29 @@ SipConnectionNotifierManager::~SipConnectionNotifierManager()
     }
 }
 
-PUBLIC
-ISipConnectionNotifier* SipConnectionNotifierManager::CreateConnectionNotifier(
+PUBLIC VIRTUAL ISipConnectionNotifier* SipConnectionNotifierManager::CreateConnectionNotifier(
         IN const AString& strScheme, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
         IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl, IN const AString& strParams,
         IN const SipAddress& objUserId)
 {
-    if (m_pScnMngrPrivate == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
     return m_pScnMngrPrivate->CreateConnectionNotifier(
             strScheme, objIpAddr, nPortS, nPortC, nPortFlowControl, strParams, objUserId);
 }
 
-PUBLIC
-ISipConnectionNotifier* SipConnectionNotifierManager::GetConnectionNotifier(
+PUBLIC VIRTUAL ISipConnectionNotifier* SipConnectionNotifierManager::GetConnectionNotifier(
         IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort)
 {
-    if (m_pScnMngrPrivate == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
     return m_pScnMngrPrivate->GetConnectionNotifier(objIpAddr, nPort);
 }
 
-PUBLIC
-void SipConnectionNotifierManager::ReleaseConnectionNotifier(IN ISipConnectionNotifier*& piScn)
+PUBLIC VIRTUAL void SipConnectionNotifierManager::ReleaseConnectionNotifier(
+        IN ISipConnectionNotifier*& piScn)
 {
-    if (m_pScnMngrPrivate == IMS_NULL)
-    {
-        return;
-    }
-
     m_pScnMngrPrivate->ReleaseConnectionNotifier(piScn);
-
     piScn = IMS_NULL;
 }
 
-PUBLIC GLOBAL SipConnectionNotifierManager* SipConnectionNotifierManager::GetInstance()
+PUBLIC VIRTUAL void SipConnectionNotifierManager::Init(IN IMS_SINT32 nSlotId)
 {
-    static SipConnectionNotifierManager* s_pScnMngr = IMS_NULL;
-
-    if (s_pScnMngr == IMS_NULL)
-    {
-        s_pScnMngr = new SipConnectionNotifierManager();
-    }
-
-    return s_pScnMngr;
-}
-
-PUBLIC GLOBAL void SipConnectionNotifierManager::Init(IN IMS_SINT32 nSlotId)
-{
-    SipConnectionNotifierManager* pScnMngr = GetInstance();
-
-    if (pScnMngr->m_pScnMngrPrivate != IMS_NULL)
-    {
-        pScnMngr->m_pScnMngrPrivate->Init(nSlotId);
-    }
+    m_pScnMngrPrivate->Init(nSlotId);
 }

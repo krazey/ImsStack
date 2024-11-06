@@ -22,9 +22,6 @@
 #include "txn/SipTxnTimerValues.h"
 #include "txn/SipTxnUtil.h"
 
-/* Timer D value */
-#define SIP_32Sec 32000
-
 extern SIP_VOID* Sip_Cbk_CreateAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData);
 
 static SIP_BOOL InvCliFsm_NullFxn(IN SipTxn* pTxn, IN SIP_VOID* pvData, OUT SIP_UINT16* pnError)
@@ -104,8 +101,8 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
         return SIP_FALSE;
     }
 
-    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
-                reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
+    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), SipTxn::OPT_CREATE,
+                SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
     {
         pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,

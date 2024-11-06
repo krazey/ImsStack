@@ -331,7 +331,7 @@ public final class SscConfig {
     }
 
     static int getUriTypeForCfTargetNumber(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER);
+        return getInt(slotId, CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT);
     }
 
     // Specific APIs

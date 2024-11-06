@@ -28,7 +28,7 @@ class AosConnection : public IAosConnection, public INetworkConnectionListener
 {
 public:
     explicit AosConnection(IN IAosAppContext* piAppContext);
-    virtual ~AosConnection();
+    ~AosConnection() override;
 
     IMS_BOOL Activate() override;
     void Deactivate() override;

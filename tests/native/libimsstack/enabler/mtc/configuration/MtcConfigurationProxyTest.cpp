@@ -80,11 +80,6 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, IsEnableSendReinviteOnRatChange).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::ENABLE_SEND_REINVITE_ON_RAT_CHANGE));
 
-    EXPECT_CALL(*pConfigManager, IsDefaultEpsBearerContextUsageRestrictionOnCellular)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(
-            bValue, pConfig->Is(Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR));
-
     EXPECT_CALL(*pConfigManager, IsAllowMultipleCallIncludingVideoCall).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL));
 
@@ -429,6 +424,9 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetConferenceDropReferToUriSourceType).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE));
 
+    EXPECT_CALL(*pConfigManager, GetMediaTypeForOfferlessInvite).WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_INVITE));
+
     EXPECT_CALL(*pConfigManager, GetMediaTypeForOfferlessReinvite).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_REINVITE));
 
@@ -472,10 +470,6 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetCallRejectCodeForNotAcceptableCallType)
             .WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForAlertNotUsingPreconditionMechanism)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM));
 }
 
 TEST_F(MtcConfigurationProxyTest, GetIntWith3BoolArgReturnsFromConfigManager)

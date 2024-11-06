@@ -30,7 +30,7 @@ class ImsAosManager : public ImsApp
 {
 public:
     explicit ImsAosManager(IN const AString& strAppName);
-    virtual ~ImsAosManager();
+    ~ImsAosManager() override;
 
     /// Implement child class
     virtual IImsAos* GetImsAos(IN const AString& strAppId, IN const AString& strServiceId);

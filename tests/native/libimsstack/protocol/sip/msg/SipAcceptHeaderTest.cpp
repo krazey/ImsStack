@@ -35,8 +35,8 @@ TEST_F(SipAcceptHeaderTest, CopyConstructor)
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
+    pHeader->SetMediaType("mediaType");
+    pHeader->SetMediaSubType("mediaSubType");
 
     SipAcceptHeader* pCopyHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, pHeader));
@@ -60,7 +60,7 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     /* Only mediaType present, fail */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
+    pHeader->SetMediaType("mediaType");
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -68,7 +68,7 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* Only media subType present, fail */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
+    pHeader->SetMediaSubType("mediaSubType");
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -76,8 +76,8 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* mediaType and media subType present and are *'s, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("*"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("*"));
+    pHeader->SetMediaType("*");
+    pHeader->SetMediaSubType("*");
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -85,8 +85,8 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* mediaType and media subType present and are not *'s, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
+    pHeader->SetMediaType("mediaType");
+    pHeader->SetMediaSubType("mediaSubType");
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -94,8 +94,8 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* mediaType is '*' and media subType is not '*', fail */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("*"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
+    pHeader->SetMediaType("*");
+    pHeader->SetMediaSubType("mediaSubType");
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -103,8 +103,8 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* mediaType is not '*' and media subType is '*', success */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("*"));
+    pHeader->SetMediaType("mediaType");
+    pHeader->SetMediaSubType("*");
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -112,7 +112,7 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
 
 TEST_F(SipAcceptHeaderTest, EncodeAndEncodeHdr)
 {
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -129,7 +129,7 @@ TEST_F(SipAcceptHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     /* Only mediaType present, fail */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
+    pHeader->SetMediaType("mediaType");
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     pHeader->SipDelete();
@@ -138,7 +138,7 @@ TEST_F(SipAcceptHeaderTest, EncodeAndEncodeHdr)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* Only media subType present, fail */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
+    pHeader->SetMediaSubType("mediaSubType");
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     pHeader->SipDelete();
@@ -147,8 +147,8 @@ TEST_F(SipAcceptHeaderTest, EncodeAndEncodeHdr)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* mediaType and media subType present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
+    pHeader->SetMediaSubType("mediaSubType");
+    pHeader->SetMediaType("mediaType");
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("mediaType/mediaSubType", &(aBuffer[0]));

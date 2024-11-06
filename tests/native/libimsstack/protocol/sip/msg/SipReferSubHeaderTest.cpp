@@ -69,7 +69,7 @@ TEST_F(SipReferSubHeaderTest, DecodeHdr)
             SipReferSubHeader::GetNewObj(SipHeaderBase::REFER_SUB, nullptr));
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("true", 4));
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

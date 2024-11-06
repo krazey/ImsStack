@@ -42,8 +42,7 @@ public:
 
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*set methods*/
-    SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
+    SIP_VOID SetMethod(const SIP_CHAR* pszMethod);
 
     /*Get methods*/
 

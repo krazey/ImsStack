@@ -75,8 +75,9 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         return IMS_FALSE;
     }
 
-    if (pLocalProfile->lstPayload.GetSize() == 0 || pNegoProfile->lstPayload.GetSize() == 0 ||
-            pPeerProfile->lstPayload.GetSize() == 0)
+    if (pLocalProfile->GetPayloadList().GetSize() == 0 ||
+            pNegoProfile->GetPayloadList().GetSize() == 0 ||
+            pPeerProfile->GetPayloadList().GetSize() == 0)
     {
         return IMS_FALSE;
     }
@@ -85,15 +86,16 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     VideoProfile::Payload* pNegoPayload;
 
     IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nPeerPayloadIndex[%d], nLocalPayloadIndex[%d]",
-            pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
+            pPeerProfile->GetNegotiatedPayloadIndex(), pLocalProfile->GetNegotiatedPayloadIndex(),
+            0);
 
-    if (pLocalProfile->nNegotiatedPayloadIndex < 0)
+    if (pLocalProfile->GetNegotiatedPayloadIndex() < 0)
     {
         pLocalPayload = pLocalProfile->GetPayloadAt(0);
     }
     else
     {
-        pLocalPayload = pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+        pLocalPayload = pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
     }
 
     pNegoPayload = pNegoProfile->GetPayloadAt(0);
@@ -106,13 +108,13 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
     // Setting the network properties
-    UpdateLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
-    pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->objRtpMap.nPayloadNum);
-    pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->objRtpMap.nPayloadNum);
+    UpdateLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
+    pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->GetRtpMap().GetPayloadNumber());
+    pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
     // remote network parameters
     pVideoConfig->setRemoteAddress(
-            android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
-    pVideoConfig->setRemotePort(pPeerProfile->nDataPort);
+            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
+    pVideoConfig->setRemotePort(pPeerProfile->GetDataPort());
     pVideoConfig->setDscp(m_pConfig->GetVideoDscp());
     pVideoConfig->setMaxMtuBytes(1500);
 
@@ -130,13 +132,13 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     IMS_SINT32 nVideoDirection;
 
-    if (pNegoProfile->nDataPort == 0 || pLocalProfile->nDataPort == 0)
+    if (pNegoProfile->GetDataPort() == 0 || pLocalProfile->GetDataPort() == 0)
     {
         nVideoDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
     }
     else
     {
-        switch (pNegoProfile->eDirection)
+        switch (pNegoProfile->GetDirection())
         {
             case MEDIA_DIRECTION_RECEIVE:
                 nVideoDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
@@ -168,15 +170,15 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));
-    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
+    objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
 
-    if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
+    if (pNegoProfile->GetBandwidthRs() == 0 && pNegoProfile->GetBandwidthRr() == 0)
     {
         objRtcpConfig.setIntervalSec(0);
     }
     else
     {
-        objRtcpConfig.setIntervalSec(pNegoProfile->nRtcpInterval);
+        objRtcpConfig.setIntervalSec(pNegoProfile->GetRtcpInterval());
     }
 
     objRtcpConfig.setRtcpXrBlockTypes(0);
@@ -195,78 +197,78 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
     }
 
-    if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+    if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
     {
         VideoProfile::AvcFmtp* pFmtp =
-                reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->pFmtp);
+                reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_AVC);
-        pVideoConfig->setCodecProfile(convertAvcProfile((pFmtp->nProfile)));
+        pVideoConfig->setCodecProfile(convertAvcProfile((pFmtp->GetProfile())));
 
         /** TODO: check the case for setting AVC_LEVEL_1B */
-        pVideoConfig->setCodecLevel(convertAvcLevel(pFmtp->nLevel));
+        pVideoConfig->setCodecLevel(convertAvcLevel(pFmtp->GetLevel()));
 
-        pVideoConfig->setFramerate(pFmtp->nFrameRate);
-        pVideoConfig->setBitrate(pFmtp->nBitrate);
-        pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
-        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
+        pVideoConfig->setFramerate(pFmtp->GetFramerate());
+        pVideoConfig->setBitrate(pFmtp->GetBitrate());
+        pVideoConfig->setPacketizationMode(pFmtp->GetPacketizationMode());
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->GetSpropParam().GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
-        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
+        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->GetResolution(), &nWidth, &nHeight);
         pVideoConfig->setResolutionWidth(nWidth);
         pVideoConfig->setResolutionHeight(nHeight);
     }
-    else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+    else if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
         VideoProfile::HevcFmtp* pFmtp =
-                reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->pFmtp);
+                reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_HEVC);
-        pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->nProfile)));
+        pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->GetProfile())));
 
         /** TODO: check the case for setting HIGHTIER */
-        pVideoConfig->setCodecLevel(convertHevcLevel(pFmtp->nLevel));
+        pVideoConfig->setCodecLevel(convertHevcLevel(pFmtp->GetLevel()));
 
-        pVideoConfig->setFramerate(pFmtp->nFrameRate);
-        pVideoConfig->setBitrate(pFmtp->nBitrate);
-        pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
-        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
+        pVideoConfig->setFramerate(pFmtp->GetFramerate());
+        pVideoConfig->setBitrate(pFmtp->GetBitrate());
+        pVideoConfig->setPacketizationMode(pFmtp->GetPacketizationMode());
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->GetSpropParam().GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
-        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
+        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->GetResolution(), &nWidth, &nHeight);
         pVideoConfig->setResolutionWidth(nWidth);
         pVideoConfig->setResolutionHeight(nHeight);
     }
 
-    pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
+    pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
     pVideoConfig->setIntraFrameInterval(m_pConfig->GetVideoIframeIntervalSec());
     pVideoConfig->setCameraId(m_nCameraId);
     pVideoConfig->setCameraZoom(m_nCameraZoom);
     pVideoConfig->setPauseImagePath(android::String8("/image/path"));
     pVideoConfig->setDeviceOrientationDegree(0);
-    pVideoConfig->setCvoValue(pNegoProfile->nCvoId);
+    pVideoConfig->setCvoValue(pNegoProfile->GetCvoId());
 
     IMS_UINT32 nRtcpFbAttr = VideoConfig::RTP_FB_NONE;
 
-    if (pNegoPayload->objRtcpFbAttr.bNackSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsNackSupported())
     {
         nRtcpFbAttr |= VideoConfig::RTP_FB_NACK;
     }
 
-    if (pNegoPayload->objRtcpFbAttr.bTmmbrSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsTmmbrSupported())
     {
         nRtcpFbAttr |= VideoConfig::RTP_FB_TMMBR;
         nRtcpFbAttr |= VideoConfig::RTP_FB_TMMBN;
     }
 
-    if (pNegoPayload->objRtcpFbAttr.bPliSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsPliSupported())
     {
         nRtcpFbAttr |= VideoConfig::PSFB_PLI;
     }
 
-    if (pNegoPayload->objRtcpFbAttr.bFirSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsFirSupported())
     {
         nRtcpFbAttr |= VideoConfig::PSFB_FIR;
     }

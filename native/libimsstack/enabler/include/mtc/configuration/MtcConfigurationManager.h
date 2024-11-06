@@ -77,7 +77,6 @@ public:
     IMS_SINT32 GetPolicyForMediaTypeRestrictionOnCellular() const override;
     IMS_SINT32 GetPolicyForMediaTypeRestrictionOnCellularInRoaming() const override;
     IMS_SINT32 GetPolicyOfLocalNumbers() const override;
-    IMS_BOOL IsDefaultEpsBearerContextUsageRestrictionOnCellular() const override;
     IMS_SINT32 GetSilentRedialInterval() const override;
     IMS_SINT32 GetCallTypeAfterAudioAndVideoCallMerged() const override;
     IMS_BOOL IsShortCallCode(IN IMS_SINT32 nCode) const override;
@@ -122,6 +121,7 @@ public:
     IMS_BOOL IsConferenceReferToUriSourcePaid() const override;
     IMS_SINT32 GetConferenceDropReferToUriSourceType() const override;
     IMS_BOOL IsEnableFakeQosCallFlowOnWifi() const override;
+    IMS_SINT32 GetMediaTypeForOfferlessInvite() const override;
     IMS_SINT32 GetMediaTypeForOfferlessReinvite() const override;
     IMS_BOOL IsSupportVideoCallUpgradeRegardlessOfFeatureTags() const override;
     IMS_SINT32 GetOipTypeForUnavailable() const override;
@@ -172,7 +172,6 @@ public:
     IMS_SINT32 GetSendUdpKeepAliveIntervalTime() const override;
     IMS_SINT32 GetCallRejectCodeForNotAcceptableCallType() const override;
     IMS_BOOL IsReleaseEmergencyPdnWithEmergencyCallFail() const override;
-    IMS_SINT32 GetPolicyForAlertNotUsingPreconditionMechanism() const override;
     IMS_BOOL IsRequiredCdmalessFeatureTag() const override;
     IMS_BOOL IsEmergencyCallCurrentLocationDiscoverySupported() const override;
     IMS_BOOL IsCheckUiConditionForIncomingResume() const override;

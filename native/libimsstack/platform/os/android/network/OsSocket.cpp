@@ -40,7 +40,7 @@
 #include "network/OsSocketMsg.h"
 #include "network/OsSocketService.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 #if defined(_DEBUG)
 #define IMSSOCKET_DEBUG(ec) OsSocket::OutputDebugString(ec, __IMS_FUNC__, __IMS_LINE__)

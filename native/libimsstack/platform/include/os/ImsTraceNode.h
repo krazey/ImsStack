@@ -17,13 +17,15 @@
 #define IMS_TRACE_NODE_H_
 
 #include <stdarg.h>
-#include "ImsTypeDef.h"
+
+#include "AString.h"
 
 class ImsTraceNode
 {
 public:
-    ImsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag);
+    explicit ImsTraceNode(IN const IMS_CHAR* pszTag);
     virtual ~ImsTraceNode();
+
     ImsTraceNode(IN const ImsTraceNode&) = delete;
     ImsTraceNode& operator=(IN const ImsTraceNode&) = delete;
 
@@ -31,24 +33,17 @@ public:
     inline IMS_CHAR* GetBuffer() { return m_pBuffer; }
     inline IMS_UINT32 GetLength() const { return m_nLength; }
 
-    void Format(IN const IMS_CHAR* pszFormat, IN va_list args);
+    void Format(IN const IMS_CHAR* pszFormat, IN va_list args,
+            IN const AString& strSuffix = AString::ConstNull());
+    static AString GetComponentName(IN const IMS_CHAR* pszComponent);
 
 protected:
     virtual IMS_SINT32 Vsnprintf(OUT IMS_CHAR* pszBuffer, IN IMS_UINT32 nBuffSize,
             IN const IMS_CHAR* pszFormat, IN va_list args) = 0;
 
-public:
-    enum
-    {
-        MAX_BUFF_SIZE = 512
-    };
-    // Prefix -> hh:mm:ss xxxxx\r\n -> 9 + 2
-    enum
-    {
-        CRLF_SIZE = 2
-    };
-
 private:
+    static constexpr IMS_SINT32 MAX_BUFF_SIZE = 512;
+
     IMS_BOOL m_bAlloc;
     IMS_SINT32 m_nHeaderLength;
 

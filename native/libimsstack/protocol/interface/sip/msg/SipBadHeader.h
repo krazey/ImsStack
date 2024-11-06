@@ -41,8 +41,7 @@ public:
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*set methods*/
-    SIP_BOOL SetHeaderName(const SIP_CHAR* pszHdrName);
+    SIP_VOID SetHeaderName(const SIP_CHAR* pszHdrName);
 
     /*Get methods*/
     inline const SIP_CHAR* GetHeaderName() const { return m_pszHdrName; }

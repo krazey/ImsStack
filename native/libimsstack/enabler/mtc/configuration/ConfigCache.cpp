@@ -21,7 +21,7 @@
 #include "configuration/ConfigCache.h"
 #include "configuration/ConfigDef.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MTC");
+__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 ConfigCache::ConfigCache() :

@@ -88,33 +88,6 @@ TraceService::~TraceService()
 }
 
 PUBLIC
-const IMS_CHAR* TraceService::GetFileName(IN const IMS_CHAR* pszFileName) const
-{
-    ImsTrace* pTrace = m_pPrivate->GetTrace();
-
-    if (pTrace == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    return pTrace->GetFileName(pszFileName);
-}
-
-PUBLIC
-const IMS_CHAR* TraceService::GetFileName(
-        IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) const
-{
-    ImsTrace* pTrace = m_pPrivate->GetTrace();
-
-    if (pTrace == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    return pTrace->GetFileName(pszOutFileName, pszFileName);
-}
-
-PUBLIC
 const ImsTraceTag& TraceService::GetTraceTag(IN IMS_SINT32 nTag) const
 {
     if ((nTag < 0) || (nTag > IMS_TRACE_TAG_MAX))
@@ -193,10 +166,10 @@ PUBLIC GLOBAL TraceService* TraceService::GetTraceService()
 
 GLOBAL
 void TraceService_Assert(
-        IN const IMS_CHAR* pszCondition, IN const IMS_CHAR* pszModule, IN IMS_UINT16 nLine)
+        IN const IMS_CHAR* pszCondition, IN const IMS_CHAR* pszModule, IN IMS_UINT32 nLine)
 {
     TraceService::GetTraceService()->GetTrace()->Out(ITrace::CAT_E, "ASSERT",
-            IMS_TRACE_MODULE_DEFAULT, "(%s) FAILED AT (%s, %d)", pszCondition, pszModule, nLine);
+            IMS_TRACE_MODULE_DEFAULT, pszModule, nLine, "(%s) FAILED", pszCondition);
 }
 
 GLOBAL

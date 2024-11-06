@@ -21,7 +21,7 @@
 #include "SipMessageFraming.h"
 #include "SipPrivate.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR* pszEnd)
 {

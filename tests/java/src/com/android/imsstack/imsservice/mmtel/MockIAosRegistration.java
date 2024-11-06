@@ -22,6 +22,8 @@ import androidx.annotation.NonNull;
 
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -59,20 +61,20 @@ class MockIAosRegistration implements IAosRegistration {
     }
 
     @Override
-    public int getRegisteredNetworkType() {
+    public NetworkType getRegisteredNetworkType() {
         return IAosRegistrationListener.NetworkType.LTE;
     }
 
     @Override
-    public int getRegistrationState() {
+    public RegistrationState getRegistrationState() {
         return IAosRegistrationListener.RegistrationState.REGISTERED;
     }
 
     @Override
-    public void controlRegistration(int requestType, int pcscfOrder, int cause) {
+    public void controlRegistration(RequestType requestType, Pcscf pcscfOrder, Cause cause) {
         assertEquals(IAosRegistration.RequestType.STOP, requestType);
         assertEquals(IAosRegistration.Pcscf.CURRENT, pcscfOrder);
-        assertEquals(IAosRegistration.Cause.RADIO_SIM_REMOVED.getValue(), cause);
+        assertEquals(IAosRegistration.Cause.RADIO_SIM_REMOVED, cause);
     }
 
     @Override

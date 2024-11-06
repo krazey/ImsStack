@@ -27,7 +27,7 @@ class AosBlock : public IAosBlock
 {
 public:
     explicit AosBlock(IN IAosAppContext* piAppContext);
-    virtual ~AosBlock();
+    ~AosBlock() override;
 
     void SetListener(IN IAosBlockListener* piListener) override;
     void RemoveListener(IN IAosBlockListener* piListener) override;

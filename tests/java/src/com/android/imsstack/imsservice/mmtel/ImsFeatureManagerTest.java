@@ -106,7 +106,7 @@ public class ImsFeatureManagerTest {
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
                 features, new ArraySet<String>());
 
@@ -128,7 +128,7 @@ public class ImsFeatureManagerTest {
         int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.IWLAN,
                 features, new ArraySet<String>());
         when(mMockUt.isUtAvailable()).thenReturn(true);
@@ -146,8 +146,9 @@ public class ImsFeatureManagerTest {
 
     @Test
     public void testupdateFeatureCapabilities_deReg() {
-        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.REGISTRATION_ERROR, null);
         when(mMockUt.isUtAvailable()).thenReturn(true);
 
         int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT
@@ -167,7 +168,7 @@ public class ImsFeatureManagerTest {
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
                 features, new ArraySet<String>());
         when(mMockUt.isUtAvailable()).thenReturn(true);
@@ -205,7 +206,7 @@ public class ImsFeatureManagerTest {
         int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
                 features, new ArraySet<String>());
         when(mMockUt.isUtAvailable()).thenReturn(false);

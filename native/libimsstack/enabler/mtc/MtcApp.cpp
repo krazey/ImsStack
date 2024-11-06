@@ -110,8 +110,8 @@ PUBLIC VIRTUAL void MtcApp::Start()
 PUBLIC VIRTUAL void MtcApp::Stop()
 {
     IMS_TRACE_I("Stop", 0, 0, 0);
-    DestroyServices();
     m_objCallManager.DeInit();
+    DestroyServices();
     m_objPassiveTimerHolder.SetNormalService(IMS_NULL);
 }
 

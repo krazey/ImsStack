@@ -116,6 +116,9 @@ private:
      */
     static IMS_UINT32 GetNtpTime();
 
+public:
+    static const IMS_CHAR DEFAULT_USERNAME[];
+
 private:
     // 1900/01/01 ~ before 1970/01/01, 2208988800
     enum

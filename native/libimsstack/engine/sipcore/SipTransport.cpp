@@ -33,7 +33,7 @@
 #include "SipTransport.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipTransport::SipTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType) :
@@ -617,11 +617,11 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL
     // LOG_EXCLUDING_SERVER_INFO
     if (SipRtConfigUtils::IsMessageHiddenInLog(nSlotId))
     {
-        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, (nLength < 11) ? nLength : 11, IMS_FALSE);
+        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, (nLength < 11) ? nLength : 11);
     }
     else
     {
-        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, nLength, IMS_FALSE);
+        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, nLength);
     }
 }
 

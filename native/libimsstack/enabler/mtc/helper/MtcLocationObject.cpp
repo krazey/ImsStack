@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ByteArray.h"
 #include "CarrierConfig.h"
 #include "DocumentBuilder.h"
 #include "DomDocumentBuilderFactory.h"
@@ -22,16 +23,13 @@
 #include "IDocument.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
-#include "ISipMessage.h"
 #include "ISubscriberConfig.h"
-#include "IXmlStreamWriter.h"
 #include "MtcDef.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "TextParser.h"
-#include "XmlFactory.h"
 #include "call/IMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -167,13 +165,12 @@ void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
     objMessage.AddHeader(SipHeaderName::GEOLOCATION_ROUTING,
             bGeolocationRouting ? GEOLOCATION_ROUTING_YES : GEOLOCATION_ROUTING_NO);
 
-    ISipMessageBodyPart* piBodyPart = objMessage.GetMessage()->CreateSdpBodyPart();
-    piBodyPart->SetContent(objContent);
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, GetContentLengthHeader(objContent),
-            SipHeaderName::CONTENT_LENGTH);
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_ID, GetContentIdHeader(strCid));
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, CONTENT_TYPE_PIDF_XML);
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, GetContentDispositionHeader());
+    IMessageBodyPart* pBodyPart = objMessage.CreateBodyPart();
+    pBodyPart->SetContent(objContent);
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_LENGTH, GetContentLengthHeader(objContent));
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_ID, GetContentIdHeader(strCid));
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_TYPE, CONTENT_TYPE_PIDF_XML);
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_DISPOSITION, GetContentDispositionHeader());
 }
 
 PUBLIC
@@ -214,16 +211,13 @@ PUBLIC
 ByteArray MtcLocationObject::CreateCallComposerLocationBody(
         IN const AString& strLatitude, IN const AString& strLongitude) const
 {
-    XmlFactory* pXmlFactory = XmlFactory::GetInstance();
-    IXmlStreamWriter* pWriter = pXmlFactory->CreateStreamWriter();
-
     const IMS_SINT32 eNamespaces = Presence::Namespace::DM | Presence::Namespace::GP |
             Presence::Namespace::GML | Presence::Namespace::GS;
 
     AString strEntityUri = GetEntityUri(*m_objContext.GetSubscriberConfig());
 
     // clang-format off
-    PidfLoXml{
+    return PidfLoXml{
         new Presence{eNamespaces, strEntityUri, {
             new Person{CreatePersonId(), {
                 new Geopriv{
@@ -234,22 +228,8 @@ ByteArray MtcLocationObject::CreateCallComposerLocationBody(
                 },
             }},
         }},
-    }.Write(*pWriter);
+    }.Write();
     // clang-format on
-
-    ByteArray objContent;
-
-    IMS_CHAR* pszXml = pWriter->Flush();
-    if (pszXml != IMS_NULL)
-    {
-        objContent.Attach(reinterpret_cast<IMS_BYTE*>(pszXml), pWriter->GetContentLength());
-        objContent.Detach();
-        IMS_MEM_Free(pszXml);
-    }
-
-    pWriter->Close();
-    pXmlFactory->DestroyStreamWriter(pWriter);
-    return objContent;
 }
 
 PRIVATE

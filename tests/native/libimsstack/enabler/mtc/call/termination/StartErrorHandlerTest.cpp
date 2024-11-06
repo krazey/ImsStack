@@ -27,7 +27,9 @@
 #include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -67,6 +69,7 @@ public:
     MockIMtcImsEventReceiver objImsEventReceiver;
     Ims3gppData objIms3gppData;
     TestConfigService* m_pConfigService;
+    MockIMtcCallManager objCallManager;
 
     StartErrorHandler* pHandler;
 
@@ -95,10 +98,10 @@ protected:
         ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
                 .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
-        ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-                .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+        ON_CALL(objMtcService, IsEpsCombinedAttach).WillByDefault(Return(IMS_TRUE));
 
         ON_CALL(objMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
+        ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
 
         pHandler = new StartErrorHandler(objCallContext, objSession);
     }
@@ -313,14 +316,11 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    ON_CALL(objMtcService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
-
+    ON_CALL(objMtcService, IsEpsCombinedAttach).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
             .WillByDefault(Return(IMS_ROAMING_STATE_ON));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
@@ -398,17 +398,6 @@ TEST_F(StartErrorHandlerTest, Handle380Response)
     SetCsfbConfig(SipStatusCode::SC_380);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-}
-
-TEST_F(StartErrorHandlerTest, Handle380ResponseForEmergencyCall)
-{
-    SetMessageCode(SipStatusCode::SC_380);
-    objCallInfo.bEmergency = IMS_TRUE;
-    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
 }
 
 TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCall)
@@ -577,19 +566,6 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, Handle403ResponseForEmergencyCall)
-{
-    SetMessageCode(SipStatusCode::SC_403);
-    objCallInfo.bEmergency = IMS_TRUE;
-    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
-            .WillByDefault(Return(2));
-
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
-}
-
 TEST_F(StartErrorHandlerTest, Handle403ResponseForMaxCallLimitInReasonHeader)
 {
     SetMessageCode(SipStatusCode::SC_403);
@@ -684,9 +660,30 @@ TEST_F(StartErrorHandlerTest, Handle5xxResponses)
 
 TEST_F(StartErrorHandlerTest, Handle500Response)
 {
-    // TODO: more tests
     SetMessageCode(SipStatusCode::SC_500);
+    ON_CALL(objMessageUtils,
+            IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC, AString::ConstNull()))
+            .WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
+
+    ON_CALL(objMessageUtils,
+            IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC, AString::ConstNull()))
+            .WillByDefault(Return(IMS_FALSE));
+    const AString strFailureCause("FAILURE_CAUSE");
+    ON_CALL(objMessageUtils, GetCauseFromReasonHeader(&objMessage, strFailureCause))
+            .WillByDefault(Return(1));
+    const IMS_SINT32 nAnyExtraCode = 100;
+    ON_CALL(objMessageUtils, GetCauseFromReasonHeader(&objMessage, AString::ConstNull()))
+            .WillByDefault(Return(nAnyExtraCode));
+    const AString strFe("fe");
+    const AString strResponseSource("Response-Source");
+    const AString strFeParamValue("urn:3gpp:fe:p-cscf.orig");
+    ON_CALL(objMessageUtils,
+            GetParameterValue(&objMessage, strFe, ISipHeader::UNKNOWN, strResponseSource))
+            .WillByDefault(Return(strFeParamValue));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, nAnyExtraCode));
 }
 
 TEST_F(StartErrorHandlerTest,
@@ -705,6 +702,20 @@ TEST_F(StartErrorHandlerTest,
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(0);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+}
+
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithActiveCallReturnsServiceUnavailable)
+{
+    SetMessageCode(SipStatusCode::SC_503);
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(-1));
+
+    ImsList<IMtcCall*> objCalls;
+    MockIMtcCall objCall;
+    objCalls.Append(&objCall);
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
 }
 
 TEST_F(StartErrorHandlerTest,
@@ -795,9 +806,6 @@ TEST_F(StartErrorHandlerTest,
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
 
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
-
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
     MockIPassiveTimerHolder objPassiveTimer;
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
@@ -811,7 +819,7 @@ TEST_F(StartErrorHandlerTest,
 }
 
 TEST_F(StartErrorHandlerTest,
-        Handle503ResponseWithRetryAfterInvokesRedialWithoutSettingTimerIfRetryAfterisSmallerThanTimerbAndEpsOnlyAttached)
+        Handle503ResponseWithRetryAfterInvokesRedialWithoutSettingTimerIfRetryAfterisSmallerThanTimerbAndNotEpsCombinedAttached)
 {
     IMS_SINT32 nAnyRetryAfter = 10;
     SetMessageCode(SipStatusCode::SC_503);
@@ -822,8 +830,7 @@ TEST_F(StartErrorHandlerTest,
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
 
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    ON_CALL(objMtcService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
     MockIPassiveTimerHolder objPassiveTimer;
@@ -834,13 +841,6 @@ TEST_F(StartErrorHandlerTest,
             .Times(0);
 
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "10000"));
-}
-
-TEST_F(StartErrorHandlerTest, Handle503ResponseForEmergencyCall)
-{
-    SetMessageCode(SipStatusCode::SC_503);
-    objCallInfo.bEmergency = IMS_TRUE;
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
 }
 
 TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistration)
@@ -915,8 +915,8 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverByNetworkContext
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     // eps only attached case
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    ON_CALL(objMtcService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
@@ -927,13 +927,6 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverWithoutPdnReconn
                     REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
-}
-
-TEST_F(StartErrorHandlerTest, Handle504ResponseForEmergencyCall)
-{
-    SetMessageCode(SipStatusCode::SC_504);
-    objCallInfo.bEmergency = IMS_TRUE;
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
@@ -963,6 +956,14 @@ TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
 
     SetMessageCode(SipStatusCode::SC_603);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_USER_REJECTED, nAnyCause));
+}
+
+TEST_F(StartErrorHandlerTest, HandleResponseForEmergencyCall)
+{
+    SetMessageCode(SipStatusCode::SC_400);
+    objCallInfo.bEmergency = IMS_TRUE;
+    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+            EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }
 
 }  // namespace android

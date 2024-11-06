@@ -51,15 +51,12 @@ public:
 
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*set methods*/
-    SIP_BOOL SetProtocolName(const SIP_CHAR* pszProtocolNm);
+    SIP_VOID SetProtocolName(const SIP_CHAR* pszProtocolName);
+    SIP_VOID SetProtocolVer(const SIP_CHAR* pszProtocolVer);
+    SIP_VOID SetTransport(const SIP_CHAR* pszTransport);
+    SIP_VOID SetHost(const SIP_CHAR* pszHost);
 
-    SIP_BOOL SetProtocolVer(const SIP_CHAR* pszProtocolVer);
-
-    SIP_BOOL SetTransport(const SIP_CHAR* pszTransport);
-
-    SIP_BOOL SetHost(const SIP_CHAR* pszHost);
-    SIP_BOOL SetPortNum(SIP_UINT16 nPort);
+    inline SIP_VOID SetPortNum(SIP_UINT16 nPort) { m_nPort = nPort; }
 
     /*Get methods*/
 

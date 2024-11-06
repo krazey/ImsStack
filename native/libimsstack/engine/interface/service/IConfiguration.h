@@ -152,7 +152,7 @@ public:
      *              - "fake" : fake subscriber info. (for fake registration)
      * @return Pointer to ISubscriberConfig or null.
      */
-    virtual const ISubscriberConfig* GetSubscriberConfig(
+    virtual ISubscriberConfig* GetSubscriberConfig(
             IN IMS_SINT32 nSlotId, IN const AString& strId = AString::ConstNull()) const = 0;
 
     /**

@@ -31,7 +31,6 @@ class ConferenceSubscription;
 class IConferenceReference;
 class IConferenceReferenceListener;
 class IConferenceSubscriptionListener;
-class IMtcCallContext;
 class IMtcContext;
 
 class ConferenceFactory
@@ -50,8 +49,8 @@ public:
             IN ImsList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
     virtual ConferenceParticipantList* CreateParticipantList();
     virtual ConferenceOperationQueue* CreateOperationQueue();
-    virtual ConferenceEventNotifier* CreateEventNotifier(IN IMtcCallContext& objConfCallContext,
-            IN CallConnectionIdManager& objConnectionIdManager);
+    virtual ConferenceEventNotifier* CreateEventNotifier(
+            IN CallKey nConfCallKey, IN CallConnectionIdManager& objConnectionIdManager);
     virtual ConferenceInfoUpdater* CreateInfoUpdater();
     virtual ConferenceInfo* CreateInfo();
 

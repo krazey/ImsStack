@@ -43,9 +43,8 @@ public:
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
     SIP_BOOL IsValidHeader() const override;
     /*set methods*/
-    SIP_BOOL SetMediaType(const SIP_CHAR* pszMType);
-
-    SIP_BOOL SetMediaSubType(const SIP_CHAR* pszMSubType);
+    SIP_VOID SetMediaType(const SIP_CHAR* pszMType);
+    SIP_VOID SetMediaSubType(const SIP_CHAR* pszMSubType);
 
     /*Get methods*/
     inline const SIP_CHAR* GetMType() const { return m_pszMType; }

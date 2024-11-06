@@ -23,7 +23,7 @@
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipDatagramSocket::SipDatagramSocket(IN IMS_SINT32 nSlotId) :

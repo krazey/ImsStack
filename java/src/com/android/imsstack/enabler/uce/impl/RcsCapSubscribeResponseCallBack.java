@@ -24,17 +24,17 @@ import android.util.Pair;
 
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
-import com.android.imsstack.util.MessageExecutor;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
 
-    private static final String LOG_TAG = "SubscribeResponseCallBack";
+    private static final String LOG_TAG = RcsCapSubscribeResponseCallBack.class.getSimpleName();
     private SubscribeResponseCallback mSubscribeResponseCallBack;
-    private MessageExecutor mMessageExecutor;
+    private final Executor mMessageExecutor;
 
-    public RcsCapSubscribeResponseCallBack(MessageExecutor messageExecutor) {
+    public RcsCapSubscribeResponseCallBack(Executor messageExecutor) {
         mMessageExecutor = messageExecutor;
     }
 

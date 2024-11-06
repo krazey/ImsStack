@@ -17,7 +17,7 @@
 
 #include "util/CallerPreferenceManager.h"
 
-PRIVATE
+PUBLIC
 CallerPreferenceManager::CallerPreferenceManager() :
         m_objEmptyPreferenceWrapper(PreferenceWrapper()),
         m_objPreferenceWrappers(ImsMap<AString, PreferenceWrapper>())
@@ -111,16 +111,4 @@ void CallerPreferenceManager::UpdateDialogId(
     PreferenceWrapper& objPreferenceWrapper = m_objPreferenceWrappers.GetValueAt(nIndex);
 
     objPreferenceWrapper.SetDialogId(strDialogId);
-}
-
-PUBLIC GLOBAL CallerPreferenceManager* CallerPreferenceManager::GetInstance()
-{
-    static CallerPreferenceManager* s_pCallerPreferenceMngr = IMS_NULL;
-
-    if (s_pCallerPreferenceMngr == IMS_NULL)
-    {
-        s_pCallerPreferenceMngr = new CallerPreferenceManager();
-    }
-
-    return s_pCallerPreferenceMngr;
 }

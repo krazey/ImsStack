@@ -17,6 +17,7 @@
 #include "IMtcContext.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCall.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceInfo.h"
@@ -74,9 +75,10 @@ PUBLIC VIRTUAL ConferenceOperationQueue* ConferenceFactory::CreateOperationQueue
 }
 
 PUBLIC VIRTUAL ConferenceEventNotifier* ConferenceFactory::CreateEventNotifier(
-        IN IMtcCallContext& objConfCallContext, IN CallConnectionIdManager& objConnectionIdManager)
+        IN CallKey nConfCallKey, IN CallConnectionIdManager& objConnectionIdManager)
 {
-    return new ConferenceEventNotifier(objConfCallContext, objConnectionIdManager);
+    return new ConferenceEventNotifier(
+            m_objContext.GetCallManager(), nConfCallKey, objConnectionIdManager);
 }
 
 PUBLIC VIRTUAL ConferenceInfoUpdater* ConferenceFactory::CreateInfoUpdater()

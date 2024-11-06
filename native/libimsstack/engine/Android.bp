@@ -30,7 +30,7 @@ cc_library_headers {
 }
 
 cc_library_static {
-    name:"libimsstack-engine",
+    name: "libimsstack-engine",
     defaults: [
         "imsstack_native_defaults",
     ],
@@ -48,6 +48,7 @@ cc_library_static {
         "include/base",
         "include/connection",
         "include/core",
+        "include/internal",
         "include/registration",
         "include/service",
         "include/sipcore",
@@ -58,6 +59,7 @@ cc_library_static {
         "include/base",
         "include/connection",
         "include/core",
+        "include/internal",
         "include/registration",
         "include/service",
         "include/sipcore",

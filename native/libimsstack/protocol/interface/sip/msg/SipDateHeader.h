@@ -65,6 +65,13 @@ private:
 
     SIP_INT32 m_eWkDay;
 
+    static constexpr SIP_UINT16 MAX_DATE = 31;
+    static constexpr SIP_UINT16 MAX_MIN_SEC = 60;
+    static constexpr SIP_UINT16 MAX_HOUR = 24;
+    static const SIP_CHAR STR_GMT[];
+    static const SIP_CHAR* WEEKDAY[];
+    static const SIP_CHAR* MONTH[];
+
 public:
     /*constructor*/
     SipDateHeader();
@@ -81,19 +88,19 @@ public:
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*set methods*/
-    SIP_BOOL SetDate(const SIP_UINT16 nDate);
+    SIP_VOID SetDate(const SIP_UINT16 nDate);
 
-    SIP_BOOL SetMonth(SIP_INT32 eMonth);
+    SIP_VOID SetMonth(SIP_INT32 eMonth);
 
-    SIP_BOOL SetYear(const SIP_UINT16 nYear);
+    SIP_VOID SetYear(const SIP_UINT16 nYear);
 
-    SIP_BOOL SetHour(const SIP_UINT16 nHour);
+    SIP_VOID SetHour(const SIP_UINT16 nHour);
 
-    SIP_BOOL SetMinute(const SIP_UINT16 nMin);
+    SIP_VOID SetMinute(const SIP_UINT16 nMin);
 
-    SIP_BOOL SetSecond(const SIP_UINT16 nSec);
+    SIP_VOID SetSecond(const SIP_UINT16 nSec);
 
-    SIP_BOOL SetWkDay(SIP_INT32 eWkDay);
+    SIP_VOID SetWkDay(SIP_INT32 eWkDay);
 
     /*Get methods*/
     inline SIP_UINT16 GetDate() const { return m_nDate; }
@@ -120,5 +127,7 @@ public:
 
 private:
     ~SipDateHeader();
+    static SIP_INT32 GetWeekDayType(SIP_CHAR* pszWeekDay);
+    static SIP_INT32 GetMonthType(SIP_CHAR* pszMonth);
 };
 #endif  //__SIP_DATE_HEADER_H__

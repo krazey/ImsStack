@@ -108,7 +108,10 @@ public:
     /* Returns the Transport parameter to which the Req/Resp was sent initially */
     SipTransportParameter* GetMsgSentTranspParam();
 
-    SIP_BOOL SetMsgSentTranspParam(SipTransportParameter* pTranspParam);
+    inline SIP_VOID SetMsgSentTranspParam(SipTransportParameter* pTranspParam)
+    {
+        m_pActualDestParam = pTranspParam;
+    }
 
     /* Returns the Transmitting SIP Buffer */
     SipTransportBuffer* GetTranspSipBuffer();

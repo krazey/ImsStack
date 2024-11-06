@@ -16,20 +16,16 @@
 #ifndef SIP_CONNECTION_NOTIFIER_MANAGER_H_
 #define SIP_CONNECTION_NOTIFIER_MANAGER_H_
 
-#include "IpAddress.h"
+#include "ISipConnectionNotifierManager.h"
 
-#include "SipAddress.h"
-
-class ISipConnectionNotifier;
 class SipConnectionNotifierManagerPrivate;
 
-class SipConnectionNotifierManager
+class SipConnectionNotifierManager : public ISipConnectionNotifierManager
 {
-private:
-    SipConnectionNotifierManager();
-    ~SipConnectionNotifierManager();
-
 public:
+    SipConnectionNotifierManager();
+    virtual ~SipConnectionNotifierManager();
+
     SipConnectionNotifierManager(IN const SipConnectionNotifierManager&) = delete;
     SipConnectionNotifierManager& operator=(IN const SipConnectionNotifierManager&) = delete;
 
@@ -37,13 +33,11 @@ public:
     ISipConnectionNotifier* CreateConnectionNotifier(IN const AString& strScheme,
             IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFlowControl, IN const AString& strParams,
-            IN const SipAddress& objUserId);
+            IN const SipAddress& objUserId) override;
     ISipConnectionNotifier* GetConnectionNotifier(
-            IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort);
-    void ReleaseConnectionNotifier(IN ISipConnectionNotifier*& piScn);
-
-    static SipConnectionNotifierManager* GetInstance();
-    static void Init(IN IMS_SINT32 nSlotId);
+            IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) override;
+    void ReleaseConnectionNotifier(IN ISipConnectionNotifier*& piScn) override;
+    void Init(IN IMS_SINT32 nSlotId) override;
 
 private:
     SipConnectionNotifierManagerPrivate* m_pScnMngrPrivate;

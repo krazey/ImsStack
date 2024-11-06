@@ -150,8 +150,10 @@ IMS_BOOL TextController::UpdateRtpConfig(IN TextNego* pNego)
 
     if (m_pSession != IMS_NULL)
     {
-        return m_pSession->UpdateRtpConfig(pNego->GetNegotiatedLocalProfile(),
-                pNego->GetNegotiatedPeerProfile(), pNego->GetNegotiatedNegoProfile());
+        return m_pSession->UpdateRtpConfig(
+                pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
     }
 
     return IMS_FALSE;
@@ -178,11 +180,11 @@ IMS_BOOL TextController::UpdateQualityThreshold(IN TextNego* pNego)
         return IMS_FALSE;
     }
 
-    TextProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
+    TextProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
     IMS_BOOL bEnableRtcp = IMS_TRUE;
 
-    if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&
-            pPeerProfile->nBandwidthRr == 0)
+    if (pPeerProfile != IMS_NULL && pPeerProfile->GetBandwidthRs() == 0 &&
+            pPeerProfile->GetBandwidthRr() == 0)
     {
         bEnableRtcp = IMS_FALSE;
     }

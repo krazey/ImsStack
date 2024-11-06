@@ -22,7 +22,7 @@ class AosServiceAvailableCellular : public AosServiceAvailable
 {
 public:
     AosServiceAvailableCellular();
-    virtual ~AosServiceAvailableCellular();
+    ~AosServiceAvailableCellular() override;
 
     IMS_BOOL IsVopsSupported();
 

@@ -169,7 +169,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         return IMS_FALSE;
     }
 
-    if (pNegoProfile->lstPayload.GetSize() == 0 || pPeerProfile->lstPayload.GetSize() == 0)
+    if (pNegoProfile->GetPayloadList().GetSize() == 0 ||
+            pPeerProfile->GetPayloadList().GetSize() == 0)
     {
         IMS_TRACE_E(0, "UpdateRtpConfig() - no payload to update", 0, 0, 0);
         return IMS_FALSE;
@@ -180,17 +181,18 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     AudioProfile::Payload* pNegoPayload;
 
     IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nDestPIndex[%d], nSrcIndex[%d]",
-            pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
+            pPeerProfile->GetNegotiatedPayloadIndex(), pLocalProfile->GetNegotiatedPayloadIndex(),
+            0);
 
     pNegoPayload = pNegoProfile->GetPayloadAt(0);
 
-    if (pPeerProfile->nNegotiatedPayloadIndex < 0)
+    if (pPeerProfile->GetNegotiatedPayloadIndex() < 0)
     {
         pPeerPayload = pPeerProfile->GetPayloadAt(0);
     }
     else
     {
-        pPeerPayload = pPeerProfile->GetPayloadAt(pPeerProfile->nNegotiatedPayloadIndex);
+        pPeerPayload = pPeerProfile->GetPayloadAt(pPeerProfile->GetNegotiatedPayloadIndex());
     }
 
     if (pNegoPayload == IMS_NULL || pPeerPayload == IMS_NULL)
@@ -201,21 +203,21 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     AudioConfig objAudioConfig;
 
     // Setting the network properties
-    SetLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
+    SetLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     objAudioConfig.setAccessNetwork(nAccessNetwork);
-    objAudioConfig.setTxPayloadTypeNumber(pNegoPayload->objRtpMap.nPayloadNum);
+    objAudioConfig.setTxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
 
     // remote network parameters
     objAudioConfig.setRemoteAddress(
-            android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
-    objAudioConfig.setRemotePort(pPeerProfile->nDataPort);
+            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
+    objAudioConfig.setRemotePort(pPeerProfile->GetDataPort());
     objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
 
-    objAudioConfig.setRxPayloadTypeNumber(pPeerPayload->objRtpMap.nPayloadNum);
+    objAudioConfig.setRxPayloadTypeNumber(pPeerPayload->GetRtpMap().GetPayloadNumber());
 
     IMS_SINT32 nAudioDirection;
 
-    switch (pNegoProfile->eDirection)
+    switch (pNegoProfile->GetDirection())
     {
         case MEDIA_DIRECTION_RECEIVE:
             nAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
@@ -245,32 +247,32 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     // RTCP
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));  // TODO_MEDIA
-    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
+    objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
 
-    if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
+    if (pNegoProfile->GetBandwidthRs() == 0 && pNegoProfile->GetBandwidthRr() == 0)
     {
         objRtcpConfig.setIntervalSec(0);
     }
     else
     {
-        objRtcpConfig.setIntervalSec(pNegoProfile->nRtcpInterval);
+        objRtcpConfig.setIntervalSec(pNegoProfile->GetRtcpInterval());
     }
 
     // RTCP-XR
     IMS_UINT32 nRtcpXrBlocks = 0;
-    if (pNegoProfile->objRtcpXrAttr.bSupportVoipMetrics)
+    if (pNegoProfile->GetRtcpXrAttr().IsVoipMetricsSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_VOIP_METRICS_REPORT_BLOCK;
     }
-    if (pNegoProfile->objRtcpXrAttr.bSupportStatisticMetrics)
+    if (pNegoProfile->GetRtcpXrAttr().IsStatisticMetricsSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_STATISTICS_SUMMARY_REPORT_BLOCK;
     }
-    if (pNegoProfile->objRtcpXrAttr.bSupportPacketLossRle)
+    if (pNegoProfile->GetRtcpXrAttr().IsPacketLossRleSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_LOSS_RLE_REPORT_BLOCK;
     }
-    if (pNegoProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle)
+    if (pNegoProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_DUPLICATE_RLE_REPORT_BLOCK;
     }
@@ -283,17 +285,17 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             objRtcpConfig.getRtcpXrBlockTypes());
 
     // Setting the codec properties
-    if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") ||
-            pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
+    if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+            pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
     {
         AudioProfile::AmrFmtp* pFmtp =
-                REINTERPRET_CAST(AudioProfile::AmrFmtp*, pNegoPayload->pFmtp);
+                REINTERPRET_CAST(AudioProfile::AmrFmtp*, pNegoPayload->GetFmtp());
         if (pFmtp == IMS_NULL)
         {
             return IMS_FALSE;
         }
 
-        if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
+        if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
         {
             objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_AMR_WB);
         }
@@ -302,30 +304,32 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_AMR);
         }
 
-        objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
-        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
+        objAudioConfig.setSamplingRateKHz(
+                (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
+        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->GetPtime());
+        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
         // AMR DTX on/off by source codec
         objAudioConfig.setDtxEnabled(IMS_FALSE);
 
-        if (pLocalProfile->nNegotiatedPayloadIndex >= 0)
+        if (pLocalProfile->GetNegotiatedPayloadIndex() >= 0)
         {
             AudioProfile::Payload* pLocalPayload =
-                    pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+                    pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
 
-            if (pLocalPayload != IMS_NULL && pLocalPayload->pFmtp != IMS_NULL)
+            if (pLocalPayload != IMS_NULL && pLocalPayload->GetFmtp() != IMS_NULL)
             {
                 objAudioConfig.setDtxEnabled(
-                        (REINTERPRET_CAST(AudioProfile::AmrFmtp*, pLocalPayload->pFmtp)->bDtx));
+                        (REINTERPRET_CAST(AudioProfile::AmrFmtp*, pLocalPayload->GetFmtp())
+                                        ->IsDtxEnabled()));
             }
         }
 
         AmrParams* pAmrParams = new AmrParams();
         pAmrParams->setAmrMode((int32_t)AudioProfileUtil::GetModesetList(
-                pNegoPayload->objRtpMap.strPayloadType, pNegoPayload));
+                pNegoPayload->GetRtpMap().GetPayloadType(), pNegoPayload));
 
         // AMR padding mode
-        pAmrParams->setOctetAligned(pFmtp->nOctetAlign);
+        pAmrParams->setOctetAligned(pFmtp->GetOctetAlign());
         pAmrParams->setMaxRedundancyMillis(0);  // TODO::MEDIA insert real value
         objAudioConfig.setAmrParams(*pAmrParams);
         delete pAmrParams;
@@ -335,47 +339,48 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
                 objAmrParams.getAmrMode(), objAmrParams.getOctetAligned(),
                 objAmrParams.getMaxRedundancyMillis());
     }
-    else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
+    else if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
         AudioProfile::EvsFmtp* pFmtp =
-                REINTERPRET_CAST(AudioProfile::EvsFmtp*, pNegoPayload->pFmtp);
+                REINTERPRET_CAST(AudioProfile::EvsFmtp*, pNegoPayload->GetFmtp());
         AudioProfile::EvsFmtp* pDestFmtp =
-                REINTERPRET_CAST(AudioProfile::EvsFmtp*, pPeerPayload->pFmtp);
+                REINTERPRET_CAST(AudioProfile::EvsFmtp*, pPeerPayload->GetFmtp());
         if (pFmtp == IMS_NULL)
         {
             return IMS_FALSE;
         }
         objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_EVS);
-        objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
-        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
+        objAudioConfig.setSamplingRateKHz(
+                (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
+        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->GetPtime());
+        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
         // AMR DTX on/off by source codec
-        objAudioConfig.setDtxEnabled(pFmtp->bDtx);
+        objAudioConfig.setDtxEnabled(pFmtp->IsDtxEnabled());
 
         EvsParams* pEvsParams = new EvsParams();
-        pEvsParams->setChannelAwareMode((int8_t)pFmtp->nChAwRecv);
+        pEvsParams->setChannelAwareMode((int8_t)pFmtp->GetChAwRecv());
 
         // TODO Media : use the Dest HFOnly
-        pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pDestFmtp->nHfOnly);
+        pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pDestFmtp->GetHfOnly());
 
         IMS_SINT32 modeSet = AudioProfileUtil::GetModesetList("EVS", pNegoPayload);
 
         // evs primary mode conversion
-        if (pFmtp->nEvsModeSwitch == 0)
+        if (pFmtp->GetEvsModeSwitch() == 0)
         {  // evs primary mode
             modeSet = modeSet << 9;
         }
         pEvsParams->setEvsMode((int32_t)modeSet);
 
         // update bandwidth
-        IMS_SINT32 nEvsBandwidth = pFmtp->nBwList;
+        IMS_SINT32 nEvsBandwidth = pFmtp->GetBwList();
         // exception : evs AMR-WB IO mode
-        if (pFmtp->nEvsModeSwitch == 1)
+        if (pFmtp->GetEvsModeSwitch() == 1)
         {
             nEvsBandwidth = EvsParams::EVS_WIDE_BAND;
         }
         pEvsParams->setEvsBandwidth(nEvsBandwidth);
-        pEvsParams->setCodecModeRequest((int8_t)pFmtp->bSendCmr);
+        pEvsParams->setCodecModeRequest((int8_t)pFmtp->IsSendCmrEnabled());
 
         objAudioConfig.setEvsParams(*pEvsParams);
 
@@ -389,10 +394,10 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         IMS_TRACE_D("UpdateRtpConfig() - EVS nBandwidth[0x%08x], CodecModeRequest[0x%08x]",
                 objEvsParams.getEvsBandwidth(), objEvsParams.getCodecModeRequest(), 0);
     }
-    else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU") ||
-            pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
+    else if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ||
+            pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA"))
     {
-        if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU"))
+        if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU"))
         {
             objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_PCMA);
         }
@@ -400,9 +405,10 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         {
             objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_PCMU);
         }
-        objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
-        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
+        objAudioConfig.setSamplingRateKHz(
+                (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
+        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->GetPtime());
+        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
     }
     else
     {
@@ -417,7 +423,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             objAudioConfig.getDtxEnabled());
 
     // Setting the DTMF properties
-    for (IMS_UINT32 i = 0; i < pNegoProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pNegoProfile->GetPayloadList().GetSize(); i++)
     {
         AudioProfile::Payload* pPayload = pNegoProfile->GetPayloadAt(i);
 
@@ -426,11 +432,11 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             continue;
         }
 
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
+        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
         {
-            objAudioConfig.setTxDtmfPayloadTypeNumber(pPayload->objRtpMap.nPayloadNum);
-            objAudioConfig.setRxDtmfPayloadTypeNumber(pPayload->objRtpMap.nPayloadNum);
-            objAudioConfig.setDtmfsamplingRateKHz(pPayload->objRtpMap.nSamplingRate / 1000);
+            objAudioConfig.setTxDtmfPayloadTypeNumber(pPayload->GetRtpMap().GetPayloadNumber());
+            objAudioConfig.setRxDtmfPayloadTypeNumber(pPayload->GetRtpMap().GetPayloadNumber());
+            objAudioConfig.setDtmfsamplingRateKHz(pPayload->GetRtpMap().GetSamplingRate() / 1000);
             break;
         }
     }

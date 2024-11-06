@@ -140,4 +140,15 @@ typedef unsigned int SIP_SIZE_T;
 
 #endif  // defined(__LP64__)
 
+template <typename T>
+inline const T& SIP_MIN(const T& a, const T& b)
+{
+    return (a < b) ? a : b;
+}
+
+template <typename T>
+inline const T& SIP_MAX(const T& a, const T& b)
+{
+    return (a < b) ? b : a;
+}
 #endif  //__SIP_DATATYPES_H__

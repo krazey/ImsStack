@@ -78,8 +78,7 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     @Override
     public boolean isServiceRegistered(int serviceType) {
         if (serviceType == IUMtcService.SERVICE_EMERGENCY) {
-            return isEmergencyServiceState(IUMtcService.ES_OPENED)
-                    || isEmergencyServiceState(IUMtcService.ES_IN_CALL);
+            return isEmergencyServiceState(IUMtcService.ES_OPENED);
         } else {
             int regServiceType = MtcStateUtils.getRegisteredServiceType(
                     mContext.getContext(), mContext.getPhoneId());

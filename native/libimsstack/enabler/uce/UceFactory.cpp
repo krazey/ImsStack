@@ -19,7 +19,7 @@
 #include "UceApp.h"
 #include "UceFactory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Uce");
+__IMS_TRACE_TAG_UCE__;
 
 PRIVATE GLOBAL UceFactory* UceFactory::m_gpUceFactory = IMS_NULL;
 

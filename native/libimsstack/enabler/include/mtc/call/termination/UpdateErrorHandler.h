@@ -23,6 +23,7 @@
 
 class IMessage;
 class IMtcCallContext;
+class SipMethod;
 
 /*
  * It handles error responses when `ISessionListener::SessionUpdateFailed` occurs after the call
@@ -46,13 +47,15 @@ public:
     static IMS_UINT32 GetGlareTimeMillisecond(IN PeerType ePeerType);
 
 private:
-    CallReasonInfo GetCallReasonInfoForResponse(IN const IMessage& objMessage) const;
-    static CallReasonInfo GetCallReasonInfoFor3xxResponse(IN const IMessage& objMessage);
-    CallReasonInfo GetCallReasonInfoFor4xxResponse(IN const IMessage& objMessage) const;
-    static CallReasonInfo GetCallReasonInfoFor5xxResponse(IN const IMessage& objMessage);
-    static CallReasonInfo GetCallReasonInfoFor6xxResponse(IN const IMessage& objMessage);
-    void Handle503Response(IN const IMessage& objMessage) const;
-    void RegisterWithNextPcscfIfRequired(IN IMS_SINT32 nRetryAfter) const;
+    CallReasonInfo HandleResponse(IN const IMessage& objMessage) const;
+    static CallReasonInfo Handle3xxResponse(IN const IMessage& objMessage);
+    CallReasonInfo Handle4xxResponse(IN const IMessage& objMessage) const;
+    CallReasonInfo Handle5xxResponse(IN const IMessage& objMessage) const;
+    static CallReasonInfo Handle6xxResponse(IN const IMessage& objMessage);
+    CallReasonInfo Handle503Response(IN const IMessage& objMessage) const;
+    void RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
+    IMS_BOOL IsRegisterWithNextPcscfRequiredFor503(
+            IN IMS_SINT32 nRetryAfter, IN const SipMethod& objMethod) const;
 
     IMtcCallContext& m_objContext;
 };

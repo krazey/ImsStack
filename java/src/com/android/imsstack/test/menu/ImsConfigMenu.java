@@ -85,13 +85,13 @@ public class ImsConfigMenu extends AppCompatActivity {
             new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String[] tokens = new String[] { "", "SIM1", "SIM2", "SIM3" };
+                    String[] tokens = new String[] { "", "", "SIM1", "SIM2", "SIM3" };
                     String selectedSim = mSimList.get(position);
 
                     // First item will be skipped.
-                    for (int i = 1; i < tokens.length; ++i) {
+                    for (int i = 2; i < tokens.length; ++i) {
                         if (selectedSim.contains(tokens[i])) {
-                            setSlotId(i - 1);
+                            setSlotId(i - 2);
                             break;
                         }
                     }
@@ -102,7 +102,8 @@ public class ImsConfigMenu extends AppCompatActivity {
 
     private void showSimList() {
         mSimList = new ArrayList<>();
-        // Add an empty line for UI limitation.
+        // Add empty lines (notification/title bar) for UI limitation.
+        mSimList.add("");
         mSimList.add("");
 
         int activeSimCount = DeviceConfig.getActiveSimCount();

@@ -36,7 +36,7 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
             SipIdentityHeader::GetNewObj(SipHeaderBase::IDENTITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 256;
+    const SIP_INT32 BUFFER_SIZE = 256;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -48,7 +48,7 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetSignedIdentityDigest("signed.digest"));
+    pHeader->SetSignedIdentityDigest("signed.digest");
 
     /* Only signed identity digest present, fail */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
@@ -60,13 +60,13 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
             SipIdentityHeader::GetNewObj(SipHeaderBase::IDENTITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetInfo("InfoValue"));
+    pHeader->SetInfo("InfoValue");
 
     /* Only info present, fail */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetSignedIdentityDigest("signed.digest"));
+    pHeader->SetSignedIdentityDigest("signed.digest");
 
     /* Signed identity digest and info present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));

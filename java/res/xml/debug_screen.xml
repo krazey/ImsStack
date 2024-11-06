@@ -18,7 +18,9 @@
     android:background="@android:color/black"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:paddingTop="20dp">
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"
@@ -33,7 +35,7 @@
         android:textStyle="bold"
         android:textColor="@android:color/black"
         android:background="@android:color/white"
-        android:text=" Debug Service On/Off" />
+        android:text="Debug Service On/Off" />
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

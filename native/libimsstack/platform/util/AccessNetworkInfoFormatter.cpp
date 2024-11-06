@@ -18,7 +18,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_BASE__;
 
 static const IMS_CHAR* ACCESS_CLASS[] = {
         "",

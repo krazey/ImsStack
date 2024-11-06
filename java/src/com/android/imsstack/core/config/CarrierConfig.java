@@ -54,6 +54,7 @@ public class CarrierConfig {
         CarrierConfigManager.KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL,
         CarrierConfigManager.KEY_CARRIER_USSD_METHOD_INT,
         CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL,
+        CarrierConfigManager.KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL,
         CarrierConfigManager.KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL,
         CarrierConfigManager.KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL,
         CarrierConfigManager.KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL,
@@ -521,8 +522,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_media_type_restriction_on_cellular_in_roaming_int";
         public static final String KEY_POLICY_OF_LOCAL_NUMBERS_INT =
                 KEY_PREFIX + "policy_of_local_numbers_int";
-        public static final String KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL =
-                KEY_PREFIX + "default_eps_bearer_context_usage_restriction_on_cellular_bool";
         public static final String KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT =
                 KEY_PREFIX + "silent_redial_interval_millis_int";
         public static final String KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT =
@@ -706,6 +705,8 @@ public class CarrierConfig {
                 "ecall_based_on_p_associated_uri_of_normal_reg_bool";
         public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
                 "ereg_on_random_pcscf_bool";
+        public static final String KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL =
+                "ereg_set_tcp_only_in_roaming_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
@@ -740,6 +741,8 @@ public class CarrierConfig {
                 "sms_over_ims_available_without_voice_capa_bool";
         public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
                 "support_contact_user_info_bool";
+        public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
+                "support_erereg_on_ipcan_change_bool";
         public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
                 "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
@@ -867,6 +870,18 @@ public class CarrierConfig {
                         "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
         // }
         // Bundle {
+        public static final String KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE =
+                "pcscf_recovery_conditions_bundle";
+        public static final String KEY_PCSCF_RECOVERY_MAX_CNT_INT =
+                "pcscf_recovery_max_cnt_int";
+        public static final String KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT =
+                "pcscf_recovery_wait_time_sec_int";
+        public static final String KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT =
+                "pcscf_recovery_base_time_sec_int";
+        public static final String KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT =
+                "pcscf_recovery_max_time_sec_int";
+        // }
+        // Bundle {
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE =
                 "reg_err_code_with_ra_time_bundle";
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL =
@@ -927,6 +942,8 @@ public class CarrierConfig {
                 "conference_drop_refer_to_uri_source_type_int";
         public static final String KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL =
                 "enable_fake_qos_call_flow_on_wifi_bool";
+        public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT =
+                "media_type_for_offerless_invite_int";
         public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT =
                 "media_type_for_offerless_reinvite_int";
         public static final String KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL =
@@ -1039,8 +1056,6 @@ public class CarrierConfig {
                 "call_mergeable_on_conference_on_hold_bool";
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL =
                 "release_emergency_pdn_with_emergency_call_fail_bool";
-        public static final String KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT =
-                "policy_for_alert_not_using_precondition_mechanism_int";
         public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
                 "emergency_call_current_location_discovery_supported_bool";
         public static final String KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL =
@@ -1189,8 +1204,8 @@ public class CarrierConfig {
         public static final String KEY_UT_OMIT_NAMESPACE_SS_BOOL = "ut_omit_namespace_ss_bool";
         public static final String KEY_UT_OMIT_NAMESPACE_CP_BOOL = "ut_omit_namespace_cp_bool";
         public static final String KEY_UT_INSERT_NEW_RULE_BOOL = "ut_insert_new_rule_bool";
-        public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER =
-                "ut_uri_type_for_cf_target_number";
+        public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT =
+                "ut_uri_type_for_cf_target_number_int";
         // Uce
         public static final String KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL =
                 "add_video_tag_contact_header_in_publish_bool";
@@ -1209,6 +1224,19 @@ public class CarrierConfig {
         public static final int GEODETIC_SHAPE_ELLIPSOID = 1;
 
         private Assets() {}
+    }
+
+    /**
+     * Configuration items for the AP IMS hidden key.
+     * The AP IMS hidden key contains internal settings of AP IMS as a nested bundle.
+     **/
+    public static class ApIms {
+        public static final String KEY_PREFIX = "apims.";
+        public static final String KEY_CARRIER_CONFIG_BUNDLE =
+                KEY_PREFIX + "carrier_config_bundle";
+
+        private ApIms() {
+        }
     }
 
     // PAYLOAD_DESCRIPTION_BUNDLE is excluded from this list because it has a nested bundle.
@@ -1495,16 +1523,16 @@ public class CarrierConfig {
                 switch (token) {
                     case "MANUFACTURER": // FALL-THROUGH
                     case "MANUFACTURE":
-                        sb.append(Build.MANUFACTURER);
+                        sb.append(Build.MANUFACTURER.replaceAll("\\s", ""));
                         break;
                     case "MODEL":
-                        sb.append(Build.MODEL);
+                        sb.append(Build.MODEL.replaceAll("\\s", ""));
                         break;
                     case "AV":
-                        sb.append(Build.VERSION.RELEASE);
+                        sb.append(Build.VERSION.RELEASE.replaceAll("\\s", ""));
                         break;
                     case "BUILD":
-                        sb.append(Build.ID);
+                        sb.append(Build.ID.replaceAll("\\s", ""));
                         break;
                     case "IMEI":
                         sb.append(getImei(slotId));

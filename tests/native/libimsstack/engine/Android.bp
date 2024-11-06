@@ -22,8 +22,10 @@ cc_library_headers {
     name: "libimsstack_test_engine_headers",
     export_include_dirs: [
         "include/core",
+        "include/internal",
         "include/registration",
         "include/service",
+        "include/sipcore",
         "interface",
         "interface/core",
         "interface/registration",
@@ -53,6 +55,31 @@ cc_defaults {
     ],
 }
 
+cc_library_static {
+    name: "libimsstack-test-engine",
+    defaults: [
+        "imsstack_native_test_engine_defaults",
+    ],
+    srcs: [
+        "TestConnector.cpp",
+        "TestEngine.cpp",
+        "internal/TestImsCoreContext.cpp",
+        "sipcore/TestSipProtocol.cpp",
+    ],
+    local_include_dirs: [
+        "include/core",
+        "include/internal",
+        "include/registration",
+        "include/service",
+        "include/sipcore",
+        "interface",
+        "interface/core",
+        "interface/registration",
+        "interface/service",
+        "interface/sipcore",
+    ],
+}
+
 cc_test {
     name: "ImsStackNativeEngineTests",
     defaults: [
@@ -64,8 +91,10 @@ cc_test {
     local_include_dirs: [
         "include",
         "include/core",
+        "include/internal",
         "include/registration",
         "include/service",
+        "include/sipcore",
         "interface",
         "interface/core",
         "interface/registration",

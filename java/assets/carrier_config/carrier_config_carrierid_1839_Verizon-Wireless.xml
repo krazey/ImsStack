@@ -56,6 +56,7 @@
     <boolean name="reg_contact_validation_bool" value="true"/>
     <boolean name="required_cdmaless_feature_tag_bool" value="true"/>
     <boolean name="required_volte_block_by_ssac_bool" value="true"/>
+    <boolean name="support_erereg_on_ipcan_change_bool" value="true"/>
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
@@ -67,6 +68,7 @@
     <int name="reg_retry_default_policy_int" value="1"/>
     <int name="volte_hys_time_sec_int" value="60"/>
     <int name="ereg_retry_max_cnt_int" value="1"/>
+    <int name="ereg_retry_timer_millis_int" value="2000"/>
     <int-array name="reg_permanent_err_max_cnt_int_array" num="1">
         <item value="2"/>
     </int-array>
@@ -193,6 +195,7 @@
     <boolean name="support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
     <int name="oip_type_for_unavailable_int" value="1"/>
     <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
+    <int name="media_type_for_offerless_invite_int" value="1"/>
     <int name="media_type_for_offerless_reinvite_int" value="1"/>
     <boolean name="support_video_call_only_in_vops_off_status_bool" value="true"/>
     <boolean name="reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="true"/>
@@ -220,7 +223,6 @@
     <boolean name="one_way_video_call_by_remote_end_supported_bool" value="false"/>
     <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
     <boolean name="call_mergeable_on_conference_on_hold_bool" value="true"/>
-    <int name="policy_for_alert_not_using_precondition_mechanism_int" value="1"/>
     <boolean name="check_ui_condition_for_incoming_resume_bool" value="true"/>
 
     <!-- MTC terminate reason -->
@@ -308,7 +310,8 @@
     <!-- Media -->
     <boolean name="media_anbr_capability_in_modem_bool" value="true"/>
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+        <int-array name="imsvoice.evs_payload_type_int_array" num="2">
+            <item value="115"/>
             <item value="109"/>
         </int-array>
         <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
@@ -328,6 +331,18 @@
         </int-array>
     </pbundle>
     <pbundle name="imsvoice.evs_payload_description_bundle">
+        <pbundle name="115">
+            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
+            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="4"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="3"/>
+            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
+        </pbundle>
         <pbundle name="109">
             <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
             <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="2"/>
@@ -337,8 +352,8 @@
             </int-array>
             <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="3"/>
             <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">

@@ -20,7 +20,7 @@
 #include "network/OsNetworkConstants.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsNetworkWatcher::OsNetworkWatcher(IN IMS_SINT32 nSlotId) :

@@ -26,13 +26,12 @@ class JniAosService : public BaseService
 {
 public:
     JniAosService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
-    virtual ~JniAosService();
+    ~JniAosService() override;
 
     virtual int SendData(const android::Parcel& objParcel) override;
 
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
 
-    inline void NotifyNativeEnablerSet() override {}
     IJniEnablerThread* GetJniThread() const override;
 
 private:

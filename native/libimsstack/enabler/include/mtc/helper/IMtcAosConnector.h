@@ -204,6 +204,7 @@ public:
      * @brief Calls the AoS to register with next P-CSCF.
      *        Current P-CSCF is marked as unavailable for nUnavailableTimeForCurrentPcscf value.
      *        AoS would trigger P-CSCF discovery procedure if there is no available next P-CSCF.
+     *        This is only for handling 503 error response.
      *
      * @param nUnavailableTimeForCurrentPcscf The duration(sec) of marking current P-CSCF as
      *        unavailable.

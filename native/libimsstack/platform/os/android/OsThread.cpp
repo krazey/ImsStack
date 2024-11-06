@@ -32,7 +32,7 @@
 #define WAIT_TIMEOUT_FOR_IPC 1      // ms
 #define WAIT_TIMEOUT_FOR_RUN 10000  // us
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 LOCAL
 void osThread_Run(IN OsThread* pThread)

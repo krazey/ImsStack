@@ -1082,8 +1082,13 @@ public class SscServiceImplTest {
         mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ERASURE,
                 SscConstant.CONDITION_CFB, null, 0, 20);
 
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFB);
+
         mLooper.processAllMessages();
-        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockSscTransaction).close();
         verifyNoMoreInteractions(mMockSscTransaction);
     }
 
@@ -1127,8 +1132,10 @@ public class SscServiceImplTest {
     public void testUpdateCallForward_invalidTimer() {
         int tId = 1;
         int invalidTimer = SscConstant.CFNR_TIMER_MAX + 1;
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
 
-        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ERASURE,
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_REGISTRATION,
                 SscConstant.CONDITION_CFB, null, 0, invalidTimer);
 
         mLooper.processAllMessages();

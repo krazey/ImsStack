@@ -20,15 +20,16 @@
 #include "ImsIdentity.h"
 
 #include "Connector.h"
+#include "IRegInfoManager.h"
 #include "IRegSubscriptionListener.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsCoreContext.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "RegContact.h"
 #include "RegInfo.h"
-#include "RegInfoManager.h"
 #include "RegSubscription.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
@@ -41,7 +42,7 @@
 #include "base/Ims.h"
 #include "util/DialogMethodManager.h"
 // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-#include "util/SipConnectionNotifierManager.h"
+#include "util/ISipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
 __IMS_TRACE_TAG_REG__;
@@ -95,14 +96,16 @@ RegSubscription::RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker*
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     if (!m_pRegStateTracker.IsNull())
     {
-        m_piReferredScn = SipConnectionNotifierManager::GetInstance()->GetConnectionNotifier(
-                m_pRegStateTracker->GetIpAddress(), m_pRegStateTracker->GetPortUs());
+        m_piReferredScn = ImsCoreContext::GetInstance()
+                                  ->GetSipConnectionNotifierManager()
+                                  ->GetConnectionNotifier(m_pRegStateTracker->GetIpAddress(),
+                                          m_pRegStateTracker->GetPortUs());
     }
 }
 
 PUBLIC VIRTUAL RegSubscription::~RegSubscription()
 {
-    RegInfoManager::GetInstance()->DestroyRegInfo(m_objRegKey);
+    ImsCoreContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -136,11 +139,8 @@ PUBLIC VIRTUAL RegSubscription::~RegSubscription()
     }
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    if (m_piReferredScn != IMS_NULL)
-    {
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
-        m_piReferredScn = IMS_NULL;
-    }
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piReferredScn);
 
     IMS_TRACE_D("Destructor :: RegSubscription", 0, 0, 0);
 }
@@ -183,17 +183,14 @@ PUBLIC VIRTUAL void RegSubscription::DestroyEx()
         m_piOngoingScc = IMS_NULL;
     }
 
-    RegInfoManager::GetInstance()->DestroyRegInfo(m_objRegKey);
+    ImsCoreContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    if (m_piReferredScn != IMS_NULL)
-    {
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
-        m_piReferredScn = IMS_NULL;
-    }
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piReferredScn);
 
     // SIP_MESSAGE_MEDIATOR
     SetSipMessageMediator(IMS_NULL);
@@ -217,7 +214,7 @@ PUBLIC VIRTUAL IMS_SINT32 RegSubscription::EnableFeatures(IN IMS_SINT32 nFeature
 
 PUBLIC VIRTUAL const IRegInfo* RegSubscription::GetRegInfo() const
 {
-    return RegInfoManager::GetInstance()->GetRegInfo(m_objRegKey);
+    return ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_objRegKey);
 }
 
 PUBLIC VIRTUAL IMS_RESULT RegSubscription::SetContactParameter(
@@ -578,9 +575,10 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::InitInstance()
 
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
 
-    RegInfoManager::GetInstance()->CreateRegInfo(m_objRegKey);
+    IRegInfoManager* piRegInfoManager = ImsCoreContext::GetInstance()->GetRegInfoManager();
+    piRegInfoManager->CreateRegInfo(m_objRegKey);
 
-    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(m_objRegKey);
+    RegInfo* pRegInfo = piRegInfoManager->GetRegInfo(m_objRegKey);
 
     if (pRegInfo != IMS_NULL)
     {
@@ -949,7 +947,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
                 IMS_TRACE_XML(strContentType.GetStr(), strRegInfo.GetStr(), strRegInfo.GetLength());
             }
 
-            RegInfoManager::GetInstance()->Update(m_objRegKey, strRegInfo);
+            ImsCoreContext::GetInstance()->GetRegInfoManager()->Update(m_objRegKey, strRegInfo);
 
             nBodyParts = 1;
         }

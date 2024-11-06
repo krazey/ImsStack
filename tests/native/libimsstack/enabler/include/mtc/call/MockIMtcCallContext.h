@@ -73,7 +73,6 @@ public:
     MOCK_METHOD(MtcSupplementaryService&, GetSupplementaryService, (), (override));
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
     MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));
-    MOCK_METHOD(UdpKeepAliveSender&, GetUdpKeepAliveSender, (), (override));
     MOCK_METHOD(CurrentLocationDiscoveryController&, GetCurrentLocationDiscoveryController, (),
             (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
@@ -87,6 +86,7 @@ public:
             (override));
     MOCK_METHOD(JniCallInfo, CreateJniCallInfo, (), (override));
     MOCK_METHOD(ISipClientConnection*, CreateClientConnection, (IN SipMethod eMethod), (override));
+    MOCK_METHOD(UdpKeepAliveSender*, CreateUdpKeepAliveSender, (), (override));
     MOCK_METHOD(void, RemoveSession, (IN const ISession* piSession), (override));
     MOCK_METHOD(void, RemoveInactiveSessions, (IN const ISession* piActiveSession), (override));
     MOCK_METHOD(void, DeleteUpdatingInfo, (), (override));

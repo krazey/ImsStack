@@ -19,45 +19,52 @@ package com.android.imsstack.imsservice.mmtel.reg;
 import android.annotation.NonNull;
 import android.net.Uri;
 
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
+
 import java.util.Set;
 
 public interface IRegistrationNotifier {
     /**
      * Notify the application that the device is connected to the IMS network.
      *
+     * @param regType a type of the registration.(@see IAosRegistrationListener.RegistrationType)
      * @param networkType the radio access technology.
      * @param featureTags set of strings containing the MMTEL feature tags associated with the IMS
      * registration.
      */
-    void notifyRegistered(int networkType, @NonNull Set<String> featureTags);
+    void notifyRegistered(int regType, int networkType, @NonNull Set<String> featureTags);
 
     /**
      * Notify the application that the device is trying to connect to the IMS network.
      *
+     * @param regType a type of the registration.(@see IAosRegistrationListener.RegistrationType)
      * @param networkType the radio access technology.
      * @param featureTags set of strings containing the MMTEL feature tags associated with the IMS
      * registration.
      */
-    void notifyRegistering(int networkType, @NonNull Set<String> featureTags);
+    void notifyRegistering(int regType, int networkType, @NonNull Set<String> featureTags);
 
     /**
      * Notify the application that the device is disconnected from the IMS network.
      *
+     * @param regType a type of the registration.(@see IAosRegistrationListener.RegistrationType)
      * @param networkType the radio access technology.
      * @param reason the disconnected reason.
      * @param message the disconnected message.
      */
-    void notifyDeregistered(int networkType, int reason, String message);
+    void notifyDeregistered(int regType, int networkType, ReasonCode reason, String message);
 
     /**
      * Notify the framework that the handover from the current radio technology
      * to the other technology has failed.
      *
+     * @param regType a type of the registration.(@see IAosRegistrationListener.RegistrationType)
      * @param networkType the current network type (before handover)
      * @param reason the handover failure reason.
      * @param message the handover failure message.
      */
-    void notifyTechnologyChangeFailed(int networkType, int reason, String message);
+    void notifyTechnologyChangeFailed(
+            int regType, int networkType, ReasonCode reason, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter

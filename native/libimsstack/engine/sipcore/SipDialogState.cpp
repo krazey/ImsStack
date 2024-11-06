@@ -25,7 +25,7 @@
 
 #define __IMS_SIP_DIALOG_COMPONENT_BY_REFERENCE__
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipDialogState::PendingRemoteTarget::PendingRemoteTarget() :

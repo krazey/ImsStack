@@ -26,35 +26,33 @@ const AString COMMA = ",";
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC AString AudioNegoEvs::SetSdpFmtpFromEvsFmtp(IN AudioProfile::EvsFmtp* evsFmtp)
+PUBLIC AString AudioNegoEvs::SetSdpFmtpFromEvsFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp)
 {
     IMS_TRACE_I("SetSdpFmtpFromEvsFmtp()", 0, 0, 0);
 
     AString strFmtp = AString::ConstNull();
 
-    if (evsFmtp == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return strFmtp;
     }
 
-    AddPtimeToFmtp(evsFmtp, strFmtp);
-    AddMaxPtimeToFmtp(evsFmtp, strFmtp);
-    AddDtxToFmtp(evsFmtp, strFmtp);
-    AddHfOnlyToFmtp(evsFmtp, strFmtp);
-    AddEvsModeSwitchToFmtp(evsFmtp, strFmtp);
-    AddMaxRedToFmtp(evsFmtp, strFmtp);
-    AddBwToFmtp(evsFmtp, strFmtp);
-    AddBrToFmtp(evsFmtp, strFmtp);
-    AddCmrToFmtp(evsFmtp, strFmtp);
-    AddChannelAwModeToFmtp(evsFmtp, strFmtp);
-    AddModeSetListToFmtp(evsFmtp, strFmtp);
-    AddModeChangeCapabilityToFmtp(evsFmtp, strFmtp);
-    AddModeChangePeriodToFmtp(evsFmtp, strFmtp);
-    AddModeChangeNeighborToFmtp(evsFmtp, strFmtp);
-    AddBwSendToFmtp(evsFmtp, strFmtp);
-    AddBwRecvToFmtp(evsFmtp, strFmtp);
-    AddBrSendToFmtp(evsFmtp, strFmtp);
-    AddBrRecvToFmtp(evsFmtp, strFmtp);
+    AddDtxToFmtp(pEvsFmtp, strFmtp);
+    AddHfOnlyToFmtp(pEvsFmtp, strFmtp);
+    AddEvsModeSwitchToFmtp(pEvsFmtp, strFmtp);
+    AddMaxRedToFmtp(pEvsFmtp, strFmtp);
+    AddBwToFmtp(pEvsFmtp, strFmtp);
+    AddBrToFmtp(pEvsFmtp, strFmtp);
+    AddCmrToFmtp(pEvsFmtp, strFmtp);
+    AddChannelAwModeToFmtp(pEvsFmtp, strFmtp);
+    AddModeSetListToFmtp(pEvsFmtp, strFmtp);
+    AddModeChangeCapabilityToFmtp(pEvsFmtp, strFmtp);
+    AddModeChangePeriodToFmtp(pEvsFmtp, strFmtp);
+    AddModeChangeNeighborToFmtp(pEvsFmtp, strFmtp);
+    AddBwSendToFmtp(pEvsFmtp, strFmtp);
+    AddBwRecvToFmtp(pEvsFmtp, strFmtp);
+    AddBrSendToFmtp(pEvsFmtp, strFmtp);
+    AddBrRecvToFmtp(pEvsFmtp, strFmtp);
 
     return strFmtp;
 }
@@ -67,136 +65,100 @@ PUBLIC void AudioNegoEvs::AppendSeparatorIfNotEmpty(OUT AString& str, IN AString
     }
 }
 
-PUBLIC void AudioNegoEvs::AddPtimeToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddDtxToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, show=%d", profile->nPtime, profile->bShowMaxPtime, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nPtime != AudioProfile::EvsFmtp::DEFAULT_PTIME && profile->bShowPtime == IMS_TRUE)
+    IMS_TRACE_I("AddDtxToFmtp() dtx=%d, visible=%d", pEvsFmtp->IsDtxEnabled(),
+            pEvsFmtp->IsDtxVisible(), 0);
+
+    if (pEvsFmtp->IsDtxVisible() == IMS_TRUE)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("ptime=%d", profile->nPtime);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("dtx=%d", pEvsFmtp->IsDtxEnabled());
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddMaxPtimeToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I(
-            "AddMaxPtimeToFmtp() ptime=%d, show=%d", profile->nMaxPtime, profile->bShowMaxPtime, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nMaxPtime != AudioProfile::EvsFmtp::DEFAULT_MAXPTIME &&
-            profile->bShowMaxPtime == IMS_TRUE)
+    IMS_TRACE_I("AddHfOnlyToFmtp() hf-only=%d, visible=%d", pEvsFmtp->GetHfOnly(),
+            pEvsFmtp->IsHfOnlyVisible(), 0);
+
+    if (pEvsFmtp->IsHfOnlyVisible() == IMS_TRUE)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("maxptime=%d", profile->nMaxPtime);
-        fmtp.Append(strTemp);
-    }
-}
-
-PUBLIC void AudioNegoEvs::AddDtxToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
-{
-    IMS_TRACE_I("AddDtxToFmtp() dtx=%d, show=%d", profile->bDtx, profile->bShowDtx, 0);
-
-    if (profile == IMS_NULL)
-    {
-        return;
-    }
-
-    if (profile->bShowDtx == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
-
-        AString strTemp;
-        strTemp.Sprintf("dtx=%d", profile->bDtx);
-        fmtp.Append(strTemp);
-    }
-}
-
-PUBLIC void AudioNegoEvs::AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
-{
-    IMS_TRACE_I("AddHfOnlyToFmtp() hf-only=%d, show=%d", profile->nHfOnly, profile->bShowHfOnly, 0);
-
-    if (profile == IMS_NULL)
-    {
-        return;
-    }
-
-    if (profile->bShowHfOnly == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
-
-        AString strTemp;
-        strTemp.Sprintf("hf-only=%d", profile->nHfOnly);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("hf-only=%d", pEvsFmtp->GetHfOnly());
+        strFmtp.Append(strTemp);
     }
 }
 
 PUBLIC void AudioNegoEvs::AddEvsModeSwitchToFmtp(
-        IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+        IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddEvsModeSwitchToFmtp() evs-mode-switch=%d, show=%d", profile->nEvsModeSwitch,
-            profile->bShowEvsModeSwitch, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowEvsModeSwitch == IMS_TRUE)
+    IMS_TRACE_I("AddEvsModeSwitchToFmtp() evs-mode-switch=%d, visible=%d",
+            pEvsFmtp->GetEvsModeSwitch(), pEvsFmtp->IsEvsModeSwitchVisible(), 0);
+
+    if (pEvsFmtp->IsEvsModeSwitchVisible() == IMS_TRUE)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("evs-mode-switch=%d", profile->nEvsModeSwitch);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("evs-mode-switch=%d", pEvsFmtp->GetEvsModeSwitch());
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddMaxRedToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddMaxRedToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, show=%d", profile->nMaxRed, profile->bShowMaxRed, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowMaxRed == IMS_TRUE)
+    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, visible=%d", pEvsFmtp->GetMaxRed(),
+            pEvsFmtp->IsMaxRedVisible(), 0);
+
+    if (pEvsFmtp->IsMaxRedVisible() == IMS_TRUE)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("max-red=%d", profile->nMaxRed);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("max-red=%d", pEvsFmtp->GetMaxRed());
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddBwToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddBwToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddBwToFmtp() bw-list=%d, show=%d", profile->nBwList, profile->bShowBwList, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nBwList != 0 && profile->bShowBwList)
+    IMS_TRACE_I("AddBwToFmtp() bw-list=%d, visible=%d", pEvsFmtp->GetBwList(),
+            pEvsFmtp->IsBwListVisible(), 0);
+
+    if (pEvsFmtp->GetBwList() != 0 && pEvsFmtp->IsBwListVisible())
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp, strMode, strFirstBandwidth, strLastBandwidth;
         IMS_UINT32 nBandwidthList;
@@ -205,7 +167,7 @@ PUBLIC void AudioNegoEvs::AddBwToFmtp(IN AudioProfile::EvsFmtp* profile, OUT ASt
         /** TODO: Need to check that '11' is proper later */
         for (nBandwidthList = 0; nBandwidthList <= 11; nBandwidthList++)
         {
-            if ((profile->nBwList) & (1 << nBandwidthList))
+            if ((pEvsFmtp->GetBwList()) & (1 << nBandwidthList))
             {
                 if (strTemp.GetLength() > 0)
                 {
@@ -234,23 +196,24 @@ PUBLIC void AudioNegoEvs::AddBwToFmtp(IN AudioProfile::EvsFmtp* profile, OUT ASt
             strTemp.Append(strLastBandwidth);
         }
 
-        fmtp.Append("bw=");
-        fmtp.Append(strTemp);
+        strFmtp.Append("bw=");
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddBrToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddBrToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddBrToFmtp() br-list=%d, show=%d", profile->nBrList, profile->bShowBrList, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowBrList == IMS_TRUE)
+    IMS_TRACE_I("AddBrToFmtp() br-list=%d, visible=%d", pEvsFmtp->GetBrList(),
+            pEvsFmtp->IsBrListVisible(), 0);
+
+    if (pEvsFmtp->IsBrListVisible() == IMS_TRUE)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp, strMode, strFirstBitrate, strLastBitrate;
         IMS_UINT32 nBitrateList;
@@ -258,7 +221,7 @@ PUBLIC void AudioNegoEvs::AddBrToFmtp(IN AudioProfile::EvsFmtp* profile, OUT ASt
 
         for (nBitrateList = 0; nBitrateList < AudioProfileUtil::EVS_BR_CNT; nBitrateList++)
         {
-            IMS_UINT32 nMatch = (profile->nBrList) & (1 << nBitrateList);
+            IMS_UINT32 nMatch = (pEvsFmtp->GetBrList()) & (1 << nBitrateList);
             if (nMatch)
             {
                 if (strTemp.GetLength() > 0)
@@ -283,71 +246,73 @@ PUBLIC void AudioNegoEvs::AddBrToFmtp(IN AudioProfile::EvsFmtp* profile, OUT ASt
             strTemp.Append(strLastBitrate);
         }
 
-        fmtp.Append("br=");
-        fmtp.Append(strTemp);
+        strFmtp.Append("br=");
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddCmrToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddCmrToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddCmrToFmtp() cmr=%d, show=%d", profile->nCmr, profile->bShowCmr, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowCmr == IMS_TRUE && profile->nEvsModeSwitch != 1)
+    IMS_TRACE_I(
+            "AddCmrToFmtp() cmr=%d, visible=%d", pEvsFmtp->GetCmr(), pEvsFmtp->IsCmrVisible(), 0);
+
+    if (pEvsFmtp->IsCmrVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() != 1)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("cmr=%d", profile->nCmr);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("cmr=%d", pEvsFmtp->GetCmr());
+        strFmtp.Append(strTemp);
     }
 }
 
 PUBLIC void AudioNegoEvs::AddChannelAwModeToFmtp(
-        IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+        IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddChannelAwModeToFmtp() ch-aw-recv=%d, show=%d", profile->nChAwRecv,
-            profile->bShowChannelAwMode, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowChannelAwMode == IMS_TRUE && profile->nEvsModeSwitch != 1)
+    IMS_TRACE_I("AddChannelAwModeToFmtp() ch-aw-recv=%d, visible=%d", pEvsFmtp->GetChAwRecv(),
+            pEvsFmtp->IsChannelAwModeVisible(), 0);
+
+    if (pEvsFmtp->IsChannelAwModeVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() != 1)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("ch-aw-recv=%d", profile->nChAwRecv);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("ch-aw-recv=%d", pEvsFmtp->GetChAwRecv());
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddModeSetListToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddModeSetListToFmtp(
+        IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddModeSetListToFmtp() mode-set=%d, show=%d", profile->nModeSetList,
-            profile->bShowModeSet, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nModeSetList != 0 && profile->bShowModeSet)
+    IMS_TRACE_I("AddModeSetListToFmtp() mode-set=%d, visible=%d", pEvsFmtp->GetModeSetList(),
+            pEvsFmtp->IsModeSetVisible(), 0);
+
+    if (pEvsFmtp->GetModeSetList() != 0 && pEvsFmtp->IsModeSetVisible())
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp, strMode;
         IMS_UINT32 nModeSet;
 
         for (nModeSet = 0; nModeSet <= MODESET_MAX_AMRWB; nModeSet++)
         {
-            IMS_UINT32 nMatch = (profile->nModeSetList) & (1 << nModeSet);
+            IMS_UINT32 nMatch = (pEvsFmtp->GetModeSetList()) & (1 << nModeSet);
             if (nMatch)
             {
                 AppendSeparatorIfNotEmpty(strTemp, COMMA);
@@ -356,86 +321,86 @@ PUBLIC void AudioNegoEvs::AddModeSetListToFmtp(IN AudioProfile::EvsFmtp* profile
                 strTemp.Append(strMode);
             }
         }
-        fmtp.Append("mode-set=");
-        fmtp.Append(strTemp);
+        strFmtp.Append("mode-set=");
+        strFmtp.Append(strTemp);
     }
 }
 
 PUBLIC void AudioNegoEvs::AddModeChangeCapabilityToFmtp(
-        IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+        IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, show=%d",
-            profile->nModeChangeCapability, profile->bShowModeChangeCapability, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowModeChangeCapability == IMS_TRUE && profile->nEvsModeSwitch == 1)
+    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, visible=%d",
+            pEvsFmtp->GetModeChangeCapability(), pEvsFmtp->IsModeChangeCapabilityVisible(), 0);
+
+    if (pEvsFmtp->IsModeChangeCapabilityVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() == 1)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("mode-change-capability=%d", profile->nModeChangeCapability);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("mode-change-capability=%d", pEvsFmtp->GetModeChangeCapability());
+        strFmtp.Append(strTemp);
     }
 }
 
 PUBLIC void AudioNegoEvs::AddModeChangePeriodToFmtp(
-        IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+        IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, show=%d",
-            profile->nModeChangePeriod, profile->bShowModeChangePeriod, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowModeChangePeriod == IMS_TRUE && profile->nEvsModeSwitch == 1)
+    IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, visible=%d",
+            pEvsFmtp->GetModeChangePeriod(), pEvsFmtp->IsModeChangePeriodVisible(), 0);
+
+    if (pEvsFmtp->IsModeChangePeriodVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() == 1)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("mode-change-period=%d", profile->nModeChangePeriod);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("mode-change-period=%d", pEvsFmtp->GetModeChangePeriod());
+        strFmtp.Append(strTemp);
     }
 }
 
 PUBLIC void AudioNegoEvs::AddModeChangeNeighborToFmtp(
-        IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+        IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, show=%d",
-            profile->nModeChangeNeighbor, profile->bShowModeChangeNeighbor, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowModeChangeNeighbor == IMS_TRUE && profile->nEvsModeSwitch == 1)
+    IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, visible=%d",
+            pEvsFmtp->GetModeChangeNeighbor(), pEvsFmtp->IsModeChangeNeighborVisible(), 0);
+
+    if (pEvsFmtp->IsModeChangeNeighborVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() == 1)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("mode-change-neighbor=%d", profile->nModeChangeNeighbor);
-        fmtp.Append(strTemp);
+        strTemp.Sprintf("mode-change-neighbor=%d", pEvsFmtp->GetModeChangeNeighbor());
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddBwSendToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddBwSendToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddBwSendToFmtp() bw-send=%d", profile->nBwSend, 0, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nBwSend != 0)
+    IMS_TRACE_I("AddBwSendToFmtp() bw-send=%d", pEvsFmtp->GetBwSend(), 0, 0);
+
+    if (pEvsFmtp->GetBwSend() != 0)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp, strMode, strFirstBandwidth, strLastBandwidth;
         IMS_UINT32 nBandwidthList;
@@ -443,7 +408,7 @@ PUBLIC void AudioNegoEvs::AddBwSendToFmtp(IN AudioProfile::EvsFmtp* profile, OUT
 
         for (nBandwidthList = 0; nBandwidthList < AudioProfileUtil::EVS_BW_CNT; nBandwidthList++)
         {
-            IMS_UINT32 nMatch = (profile->nBwSend) & (1 << nBandwidthList);
+            IMS_UINT32 nMatch = (pEvsFmtp->GetBwSend()) & (1 << nBandwidthList);
             if (nMatch)
             {
                 AppendSeparatorIfNotEmpty(strTemp, COMMA);
@@ -468,23 +433,23 @@ PUBLIC void AudioNegoEvs::AddBwSendToFmtp(IN AudioProfile::EvsFmtp* profile, OUT
             strTemp.Append(strLastBandwidth);
         }
 
-        fmtp.Append("bw-send=");
-        fmtp.Append(strTemp);
+        strFmtp.Append("bw-send=");
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddBwRecvToFmtp() bw-recv=%d", profile->nBwRecv, 0, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nBwRecv != 0)
+    IMS_TRACE_I("AddBwRecvToFmtp() bw-recv=%d", pEvsFmtp->GetBwRecv(), 0, 0);
+
+    if (pEvsFmtp->GetBwRecv() != 0)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp, strMode, strFirstBandwidth, strLastBandwidth;
         IMS_UINT32 nBandwidthList;
@@ -492,7 +457,7 @@ PUBLIC void AudioNegoEvs::AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT
 
         for (nBandwidthList = 0; nBandwidthList < AudioProfileUtil::EVS_BW_CNT; nBandwidthList++)
         {
-            IMS_UINT32 nMatch = (profile->nBwRecv) & (1 << nBandwidthList);
+            IMS_UINT32 nMatch = (pEvsFmtp->GetBwRecv()) & (1 << nBandwidthList);
             if (nMatch)
             {
                 AppendSeparatorIfNotEmpty(strTemp, COMMA);
@@ -517,30 +482,30 @@ PUBLIC void AudioNegoEvs::AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT
             strTemp.Append(strLastBandwidth);
         }
 
-        fmtp.Append("bw-recv=");
-        fmtp.Append(strTemp);
+        strFmtp.Append("bw-recv=");
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddBrSendToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddBrSendToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddBrSendToFmtp() br-send=%d", profile->nBwSend, 0, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nBrSend != 0)
+    IMS_TRACE_I("AddBrSendToFmtp() br-send=%d", pEvsFmtp->GetBwSend(), 0, 0);
+
+    if (pEvsFmtp->GetBrSend() != 0)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
         AString strTemp, strMode, strFirstBitrate, strLastBitrate;
         IMS_UINT32 nBitrateList;
         IMS_UINT32 nBitrateListTotalCnt = 0;
 
         for (nBitrateList = 0; nBitrateList < AudioProfileUtil::EVS_BR_CNT; nBitrateList++)
         {
-            IMS_UINT32 nMatch = (profile->nBrSend) & (1 << nBitrateList);
+            IMS_UINT32 nMatch = (pEvsFmtp->GetBrSend()) & (1 << nBitrateList);
             if (nMatch)
             {
                 AppendSeparatorIfNotEmpty(strTemp, COMMA);
@@ -566,23 +531,23 @@ PUBLIC void AudioNegoEvs::AddBrSendToFmtp(IN AudioProfile::EvsFmtp* profile, OUT
             strTemp.Append(strLastBitrate);
         }
 
-        fmtp.Append("br-send=");
-        fmtp.Append(strTemp);
+        strFmtp.Append("br-send=");
+        strFmtp.Append(strTemp);
     }
 }
 
-PUBLIC void AudioNegoEvs::AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
+PUBLIC void AudioNegoEvs::AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
 {
-    IMS_TRACE_I("AddBrRecvToFmtp() br-recv=%d", profile->nBwRecv, 0, 0);
-
-    if (profile == IMS_NULL)
+    if (pEvsFmtp == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nBrRecv != 0)
+    IMS_TRACE_I("AddBrRecvToFmtp() br-recv=%d", pEvsFmtp->GetBwRecv(), 0, 0);
+
+    if (pEvsFmtp->GetBrRecv() != 0)
     {
-        AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp, strMode, strFirstBitrate, strLastBitrate;
         IMS_UINT32 nBitrateList;
@@ -590,7 +555,7 @@ PUBLIC void AudioNegoEvs::AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT
 
         for (nBitrateList = 0; nBitrateList < AudioProfileUtil::EVS_BR_CNT; nBitrateList++)
         {
-            IMS_UINT32 nMatch = (profile->nBrRecv) & (1 << nBitrateList);
+            IMS_UINT32 nMatch = (pEvsFmtp->GetBrRecv()) & (1 << nBitrateList);
             if (nMatch)
             {
                 AppendSeparatorIfNotEmpty(strTemp, COMMA);
@@ -616,7 +581,7 @@ PUBLIC void AudioNegoEvs::AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT
             strTemp.Append(strLastBitrate);
         }
 
-        fmtp.Append("br-recv=");
-        fmtp.Append(strTemp);
+        strFmtp.Append("br-recv=");
+        strFmtp.Append(strTemp);
     }
 }

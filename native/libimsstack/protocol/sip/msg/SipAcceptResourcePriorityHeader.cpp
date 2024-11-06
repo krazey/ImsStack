@@ -98,14 +98,14 @@ SIP_BOOL SipAcceptResourcePriorityHeader::EncodeHdr(
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAcceptResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
+SIP_VOID SipAcceptResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
 {
-    return SetCharVar(pszNameSpace, m_pszNameSpace);
+    SetCharVar(pszNameSpace, m_pszNameSpace);
 }
 
-SIP_BOOL SipAcceptResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
+SIP_VOID SipAcceptResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
 {
-    return SetCharVar(pszRPriority, m_pszRPriority);
+    SetCharVar(pszRPriority, m_pszRPriority);
 }
 
 SIP_BOOL SipAcceptResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

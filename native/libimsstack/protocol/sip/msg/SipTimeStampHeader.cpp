@@ -92,14 +92,14 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipTimeStampHeader::SetTimeVal(const SIP_CHAR* pszTimeVal)
+SIP_VOID SipTimeStampHeader::SetTimeVal(const SIP_CHAR* pszTimeVal)
 {
-    return SetCharVar(pszTimeVal, m_pszTimeVal);
+    SetCharVar(pszTimeVal, m_pszTimeVal);
 }
 
-SIP_BOOL SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
+SIP_VOID SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
 {
-    return SetCharVar(pszDelay, m_pszDelay);
+    SetCharVar(pszDelay, m_pszDelay);
 }
 
 SIP_BOOL SipTimeStampHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

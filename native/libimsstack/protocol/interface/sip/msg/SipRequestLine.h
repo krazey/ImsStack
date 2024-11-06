@@ -40,12 +40,9 @@ public:
     /*Function for decoding*/
     SIP_BOOL DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-    /*Set Methods*/
-    SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
-
-    SIP_BOOL SetSipVersion(const SIP_CHAR* pszVer);
-
-    SIP_BOOL SetReqUri(SipAddrSpec* pAddrSpec);
+    SIP_VOID SetMethod(const SIP_CHAR* pMethod);
+    SIP_VOID SetSipVersion(const SIP_CHAR* pszVer);
+    SIP_VOID SetReqUri(SipAddrSpec* pAddrSpec);
 
     inline const SIP_CHAR* GetMethod() const { return m_pszMethod; }
 

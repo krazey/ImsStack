@@ -38,8 +38,7 @@ public:
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*set methods*/
-    SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
+    SIP_VOID SetMethod(const SIP_CHAR* pszMethod);
 
     /*set Seq*/
     inline SIP_VOID SetSeq(SIP_UINT32 nSeq) { m_nSeq = nSeq; }

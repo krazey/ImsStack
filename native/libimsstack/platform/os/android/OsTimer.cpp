@@ -20,7 +20,7 @@
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PRIVATE GLOBAL IMS_UINT32 OsTimer::s_nInternalTimerId = 1;
 

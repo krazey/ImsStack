@@ -45,6 +45,10 @@ public:
 
 private:
     static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
+    CallReasonInfo Handle503Response(IN const IMessage& objMessage) const;
+    IMS_BOOL RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
+    IMS_BOOL IsRegisterWithNextPcscfAndRedialRequiredFor503(IN IMS_SINT32 nRetryAfter) const;
+    void SetTimerForImsCallBlocking(IN IMS_SINT32 nRetryAfterInMillis) const;
 
     IMtcCallContext& m_objContext;
 };

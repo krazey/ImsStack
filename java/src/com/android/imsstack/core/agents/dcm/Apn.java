@@ -52,9 +52,6 @@ import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.enabler.aos.IAosRegistration;
-import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
@@ -142,7 +139,6 @@ public abstract class Apn extends Handler implements IApn {
     protected IDcSettings mDcSettings;
     protected IDcNetWatcher mDcNetWatcher;
     protected ISystem mSystem;
-    protected IAosRegistration mAosReg;
     protected final int mSlotId;
     protected EApnType mType;
     protected EApnReqState mAPNState = EApnReqState.APN_REQUEST_IDLE;
@@ -152,7 +148,7 @@ public abstract class Apn extends Handler implements IApn {
     protected int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     protected int mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
     protected int mIpcanCategory = IPCAN_CATEGORY_MOBILE;
-    protected LinkedHashMap<Integer, MsgProcInterface> mMapMsgHandler =
+    protected final LinkedHashMap<Integer, MsgProcInterface> mMapMsgHandler =
             new LinkedHashMap<Integer, MsgProcInterface>();
     protected ImsNetworkCallback mNetworkCallback = null;
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
@@ -161,18 +157,20 @@ public abstract class Apn extends Handler implements IApn {
     protected ConfigInterface.Listener mConfigListener;
     protected Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
-    protected Apn(Context context, int slotId) {
+    protected Apn(Context context, int slotId, EApnType type) {
         super(Looper.myLooper());
 
         mContext = context;
         mSlotId = slotId;
+        mType = type;
         mDcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
         mDcSettings = DcFactory.getDcAgent(IDcSettings.class, mSlotId);
         mDcNetWatcher = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
-        mAosReg = AosFactory.getInstance().getAosRegistration(mSlotId);
 
-        registerEvent();
+        registerHandler(EVENT_NOTIFY_DATA_STATE_CHANGED, new HandleDataStateChanged());
+        registerHandler(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
+                new HandlePreciseDataConnectionStateChanged());
     }
 
     // Interface implementation methods --------------------------
@@ -359,8 +357,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (mNetworkMonitoringCallback == null) {
-            mNetworkMonitoringCallback = new ImsNetworkCallback(
-                    mContext, mType.getType(), events, this);
+            mNetworkMonitoringCallback = new ImsNetworkCallback(mType.getType(), events, this);
             mNetworkMonitoringCallback.setSlotId(mSlotId);
         } else {
             mNetworkMonitoringCallback.setEvents(events);
@@ -422,7 +419,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (mNetworkCallback == null) {
-            mNetworkCallback = new ImsNetworkCallback(mContext, mType.getType(), this);
+            mNetworkCallback = new ImsNetworkCallback(mType.getType(), this);
             mNetworkCallback.setSlotId(mSlotId);
         }
 
@@ -446,14 +443,8 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
-    protected void registerHandler(int evt, MsgProcInterface proc) {
+    protected final void registerHandler(int evt, MsgProcInterface proc) {
         mMapMsgHandler.put(evt, proc);
-    }
-
-    protected void registerEvent() {
-        registerHandler(EVENT_NOTIFY_DATA_STATE_CHANGED, new HandleDataStateChanged());
-        registerHandler(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
-                new HandlePreciseDataConnectionStateChanged());
     }
 
     protected EApnReqState getApnReqState() {
@@ -653,6 +644,15 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
+    /**
+     * Notifies that data connection state is changed.
+     */
+    protected void notifyConnectionStateChanged(int state) {
+        for (Listener l : mListeners) {
+            l.onPreciseDataConnectionStateChanged(mType.getType(), state);
+        }
+    }
+
     protected static ConnectivityManagerProxy getConnectivityManagerProxy() {
         return AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
     }
@@ -671,7 +671,6 @@ public abstract class Apn extends Handler implements IApn {
         public static final int EVENT_NET_PCSCF_CHANGED = 0x00000080;
         public static final int EVENT_ALL = 0x0000FFFF;
 
-        private final Context mContext;
         // DcConstants.TYPE_XXX
         private final int mType;
         private Handler mTarget;
@@ -685,15 +684,11 @@ public abstract class Apn extends Handler implements IApn {
         @VisibleForTesting
         protected boolean mIsPendingOnAvailable = false;
 
-        ImsNetworkCallback(Context context, int type, Handler target) {
-            mContext = context;
-            mType = type;
-            mEvents = EVENT_ALL;
-            mTarget = target;
+        ImsNetworkCallback(int type, Handler target) {
+            this(type, EVENT_ALL, target);
         }
 
-        ImsNetworkCallback(Context context, int type, int events, Handler target) {
-            mContext = context;
+        ImsNetworkCallback(int type, int events, Handler target) {
             mType = type;
             mEvents = events;
             mTarget = target;
@@ -733,6 +728,10 @@ public abstract class Apn extends Handler implements IApn {
 
         @Override
         public void onAvailable(Network network) {
+            if (mNetwork != null && !mNetwork.equals(network)) {
+                onLost(mNetwork);
+            }
+
             cacheLinkProperties(network);
 
             mNetwork = network;
@@ -1157,9 +1156,9 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     /**
-    * This is common handler of each APN type to handle EVENT_NOTIFY_DATA_STATE_CHANGED event
-    * It notify the change of data connection state to IMS Native
-    */
+     * This is common handler of each APN type to handle EVENT_NOTIFY_DATA_STATE_CHANGED event
+     * It notify the change of data connection state to IMS Native
+     */
     protected class HandleDataStateChanged implements MsgProcInterface {
 
         @Override
@@ -1233,33 +1232,8 @@ public abstract class Apn extends Handler implements IApn {
                         mNetworkType = networkType;
                     }
                     break;
-                case TelephonyManager.DATA_CONNECTING:
-                    if (mType.getType() == DcConstants.TYPE_IMS
-                            && mPreciseDcState != TelephonyManager.DATA_CONNECTING) {
-                        if (mDcSettings != null && mDcSettings.isCdmalessFeatureTagRequired()) {
-                            if (mAosReg != null) {
-                                mAosReg.controlRegistration(
-                                        IAosRegistration.RequestType.START_IMS_EST_TIMER,
-                                        IAosRegistration.Pcscf.CURRENT,
-                                        IAosRegistration.Cause.DATA_CONNECTING.getValue());
-                            }
-                        }
-                    }
-                    break;
                 case TelephonyManager.DATA_HANDOVER_IN_PROGRESS:
                     handleHandoverStart(networkType);
-                    break;
-                case TelephonyManager.DATA_DISCONNECTING:
-                    if (mType.getType() == DcConstants.TYPE_IMS) {
-                        if (mAosReg != null) {
-                            if (mAosReg.getRegisteredNetworkType()
-                                    != IAosRegistrationListener.NetworkType.NONE) {
-                                mAosReg.controlRegistration(IAosRegistration.RequestType.STOP,
-                                        IAosRegistration.Pcscf.CURRENT,
-                                        IAosRegistration.Cause.DATA.getValue());
-                            }
-                        }
-                    }
                     break;
                 case TelephonyManager.DATA_DISCONNECTED:
                     if (mPreciseDcState == TelephonyManager.DATA_CONNECTING
@@ -1276,7 +1250,12 @@ public abstract class Apn extends Handler implements IApn {
             }
 
             // update PreciseDataConnectionState
-            mPreciseDcState = dataState;
+            if (mPreciseDcState != dataState) {
+                mPreciseDcState = dataState;
+                ImsLog.i(mSlotId, "notifyConnectionStateChanged : apnType=" + mType.getString()
+                        + ", dataState=" + dataState);
+                notifyConnectionStateChanged(dataState);
+            }
         }
 
         private void handleHandoverStart(int networkType) {

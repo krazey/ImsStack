@@ -54,7 +54,7 @@ public:
     static IMS_BOOL UpdateAnswerHold(IN IMessage* piMessage);
     IMS_BOOL UpdateMcid(IN IMessage* piMessage);
     static IMS_BOOL UpdateDualNumber(IN IMessage* piMessage);
-    IMS_BOOL UpdateCallingNumVerification(IN IMessage* piMessage);
+    IMS_BOOL UpdateCallingNumberVerification(IN IMessage* piMessage);
     IMS_BOOL UpdateCallComposerElements(IN IMessage* piMessage);
     IMS_BOOL UpdateSessionId(IN IMessage* piMessage);
     void Delete(IN SuppType eType);
@@ -70,7 +70,8 @@ private:
     static IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
     static IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
     static IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
-    static IMS_SINT32 GetCallingNumVerificationResult(IN const AString& strValue);
+    static IMS_SINT32 GetCallingNumberVerificationResult(
+            IN const AString& strVerstatParameter, IN const AString& strDisplayName);
     AString GetCnvParameterValue(IN IMessage* piMessage) const;
     OipType GetOipTypeByHeader(
             IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack);

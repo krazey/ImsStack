@@ -16,12 +16,23 @@
 #include "ServiceMemory.h"
 
 #include "EngineState.h"
+#include "ImsCore.h"
+#include "ImsCoreContext.h"
+#include "ProtocolPermission.h"
+#include "ServiceProtocol.h"
+#include "Sip.h"
+#include "SipCoreContext.h"
 #include "StaticSip.h"
 #include "base/Ims.h"
 
 // Initialization / Uninitialization for Engine
 PUBLIC GLOBAL IMS_BOOL EngineState::Initialize()
 {
+    ProtocolPermission::RegisterProtocol(
+            ImsCore::CONNECTION_SCHEME, ImsCoreContext::GetInstance()->GetImsCoreProtocol());
+    ProtocolPermission::RegisterProtocol(
+            Sip::CONNECTION_SCHEME_SIP, SipCoreContext::GetInstance()->GetSipProtocol());
+
     // Initialize a SipManager
     IMS_BOOL bResult = StaticSip::Initialize();
 
@@ -37,4 +48,6 @@ PUBLIC GLOBAL void EngineState::Uninitialize()
 
     // Uninitialize a SipManager
     StaticSip::Uninitialize();
+
+    ProtocolPermission::UnregisterAllProtocols();
 }

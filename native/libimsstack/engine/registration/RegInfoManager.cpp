@@ -23,7 +23,7 @@
 
 __IMS_TRACE_TAG_REG__;
 
-PRIVATE
+PUBLIC
 RegInfoManager::RegInfoManager() :
         m_piLock(IMS_NULL),
         m_objParsers(ImsList<RegInfoParser*>()),
@@ -32,7 +32,7 @@ RegInfoManager::RegInfoManager() :
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
-PRIVATE VIRTUAL RegInfoManager::~RegInfoManager()
+PUBLIC VIRTUAL RegInfoManager::~RegInfoManager()
 {
     LockGuard objLock(m_piLock);
 
@@ -69,8 +69,7 @@ PRIVATE VIRTUAL RegInfoManager::~RegInfoManager()
     MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
-PUBLIC
-IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey)
+PUBLIC VIRTUAL IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey)
 {
     RegInfo* pRegInfo = const_cast<RegInfo*>(GetRegInfo(objRegKey));
 
@@ -98,8 +97,7 @@ IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey)
     return IMS_TRUE;
 }
 
-PUBLIC
-void RegInfoManager::DestroyRegInfo(IN const RegKey& objRegKey)
+PUBLIC VIRTUAL void RegInfoManager::DestroyRegInfo(IN const RegKey& objRegKey)
 {
     LockGuard objLock(m_piLock);
     IMS_SLONG nIndex = m_objRegInfos.GetIndexOfKey(objRegKey);
@@ -121,8 +119,7 @@ void RegInfoManager::DestroyRegInfo(IN const RegKey& objRegKey)
     IMS_TRACE_I("RegInfo(%d:%d) is destroyed", objRegKey.GetSlotId(), objRegKey.GetFlowId(), 0);
 }
 
-PUBLIC
-RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey)
+PUBLIC VIRTUAL RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey)
 {
     LockGuard objLock(m_piLock);
     IMS_SLONG nIndex = m_objRegInfos.GetIndexOfKey(objRegKey);
@@ -135,8 +132,7 @@ RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey)
     return m_objRegInfos.GetValueAt(nIndex);
 }
 
-PUBLIC
-const RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey) const
+PUBLIC VIRTUAL const RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey) const
 {
     LockGuard objLock(m_piLock);
     IMS_SLONG nIndex = m_objRegInfos.GetIndexOfKey(objRegKey);
@@ -149,14 +145,8 @@ const RegInfo* RegInfoManager::GetRegInfo(IN const RegKey& objRegKey) const
     return m_objRegInfos.GetValueAt(nIndex);
 }
 
-PUBLIC
-IMS_BOOL RegInfoManager::Initialize()
-{
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL RegInfoManager::Update(IN const RegKey& objRegKey, IN const AString& strRegInfo)
+PUBLIC VIRTUAL IMS_BOOL RegInfoManager::Update(
+        IN const RegKey& objRegKey, IN const AString& strRegInfo)
 {
     if (strRegInfo.IsNULL())
     {
@@ -200,8 +190,7 @@ IMS_BOOL RegInfoManager::Update(IN const RegKey& objRegKey, IN const AString& st
     return IMS_TRUE;
 }
 
-PUBLIC
-void RegInfoManager::DisplayRegInfo()
+PUBLIC VIRTUAL void RegInfoManager::DisplayRegInfo() const
 {
     for (IMS_UINT32 i = 0; i < m_objRegInfos.GetSize(); ++i)
     {
@@ -211,18 +200,6 @@ void RegInfoManager::DisplayRegInfo()
         pRegInfo->DisplayRegInfo();
         IMS_TRACE_D("___ REG INFO (%d) -- END ___\n", i, 0, 0);
     }
-}
-
-PUBLIC GLOBAL RegInfoManager* RegInfoManager::GetInstance()
-{
-    static RegInfoManager* s_pRegInfoMngr = IMS_NULL;
-
-    if (s_pRegInfoMngr == IMS_NULL)
-    {
-        s_pRegInfoMngr = new RegInfoManager();
-    }
-
-    return s_pRegInfoMngr;
 }
 
 PRIVATE VIRTUAL void RegInfoManager::RegInfoParser_ParsingCompleted(

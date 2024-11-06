@@ -24,7 +24,7 @@
 #include "EnablerUtils.h"
 #include "GeolocationHelper.h"
 
-__IMS_TRACE_TAG_USER_DECL__("EnablerLoader");
+__IMS_TRACE_TAG_BASE__;
 
 PRIVATE GLOBAL EnablerLoader* EnablerLoader::s_pEnablerLoader = IMS_NULL;
 

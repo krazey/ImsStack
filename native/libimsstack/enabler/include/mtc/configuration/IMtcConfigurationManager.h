@@ -321,13 +321,6 @@ public:
     virtual IMS_SINT32 GetPolicyOfLocalNumbers() const = 0;
 
     /**
-     * @brief Checks
-     *
-     * @return
-     */
-    virtual IMS_BOOL IsDefaultEpsBearerContextUsageRestrictionOnCellular() const = 0;
-
-    /**
      * @brief Gets
      *
      * @return
@@ -626,6 +619,13 @@ public:
      * @return
      */
     virtual IMS_BOOL IsEnableFakeQosCallFlowOnWifi() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual IMS_SINT32 GetMediaTypeForOfferlessInvite() const = 0;
 
     /**
      * @brief Gets
@@ -971,13 +971,6 @@ public:
      * @return
      */
     virtual IMS_BOOL IsReleaseEmergencyPdnWithEmergencyCallFail() const = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @return
-     */
-    virtual IMS_SINT32 GetPolicyForAlertNotUsingPreconditionMechanism() const = 0;
 
     /**
      * @brief Checks

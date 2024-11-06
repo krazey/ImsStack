@@ -620,12 +620,7 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
     }
 
     // Create a media capabilities for this service & session
-    const SipAddress::UserInfoPart* pUserInfo = m_objUserAor.GetUserInfoPart();
-    const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
-            : m_objUserAor.IsSchemeTel()               ? m_objUserAor.GetHost()
-                                                       : m_objUserAor.GetUser();
-
-    if (!m_pOaState->CreateCapabilities(m_pService, strUserId))
+    if (!m_pOaState->CreateCapabilities(m_pService))
     {
         IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
         return IMS_FALSE;

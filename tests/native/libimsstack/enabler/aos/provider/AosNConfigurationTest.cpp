@@ -67,8 +67,9 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsVtAvailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsWfcImsAvailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsRttSupported());
+    EXPECT_FALSE(m_pAosNConfiguration->IsRttSupportedWhileRoaming());
     // bCarrierCrossSimImsAvailable (IMS_FALSE)
-    EXPECT_FALSE(m_pAosNConfiguration->IsTtySupported());
+    EXPECT_FALSE(m_pAosNConfiguration->IsVolteTtySupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_CS_PREFERRED, m_pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(0, m_pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -134,6 +135,10 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig, GetBoolean(CarrierConfig::KEY_RTT_SUPPORTED_BOOL, IMS_FALSE))
+            .Times(2)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL, IMS_FALSE))
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
     // currently it doesn't have a function
@@ -381,8 +386,9 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsVtAvailable());
     EXPECT_TRUE(m_pAosNConfiguration->IsWfcImsAvailable());
     EXPECT_TRUE(m_pAosNConfiguration->IsRttSupported());
+    EXPECT_TRUE(m_pAosNConfiguration->IsRttSupportedWhileRoaming());
     // KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL
-    EXPECT_TRUE(m_pAosNConfiguration->IsTtySupported());
+    EXPECT_TRUE(m_pAosNConfiguration->IsVolteTtySupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_IMS_PREFERRED, m_pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -439,8 +445,9 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsVtAvailable());
     EXPECT_TRUE(m_pAosNConfiguration->IsWfcImsAvailable());
     EXPECT_TRUE(m_pAosNConfiguration->IsRttSupported());
+    EXPECT_TRUE(m_pAosNConfiguration->IsRttSupportedWhileRoaming());
     // KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL
-    EXPECT_TRUE(m_pAosNConfiguration->IsTtySupported());
+    EXPECT_TRUE(m_pAosNConfiguration->IsVolteTtySupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_IMS_PREFERRED, m_pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -513,6 +520,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -573,6 +583,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL,
                     IMS_FALSE))
@@ -766,6 +779,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsEmcRegOnRandomPcscf());
+    EXPECT_TRUE(m_pAosNConfiguration->IsERegWithOnlyTcpInRoaming());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
     EXPECT_TRUE(m_pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(m_pAosNConfiguration->IsDeregOn3gNetwork());
@@ -980,6 +994,24 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
             .WillOnce(Return(objEventWithWtForInitRegOnTerminatedState));
 
     EXPECT_CALL(objNotifyTerminated, ReleaseBundle()).Times(1);
+
+    MockICarrierConfig objPcscfRecoveryConditionsBundle;
+    EXPECT_CALL(objCarrierConfig,
+            GetBundle(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE))
+            .WillRepeatedly(
+                    Return(static_cast<ICarrierConfig*>(&objPcscfRecoveryConditionsBundle)));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_MAX_CNT_INT, -1))
+            .WillOnce(Return(3));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT, -1))
+            .WillOnce(Return(20));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT, -1))
+            .WillOnce(Return(20));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT, -1))
+            .WillOnce(Return(1800));
 
     MockICarrierConfig objRegErrCodeWithRaTimeBundle;
 

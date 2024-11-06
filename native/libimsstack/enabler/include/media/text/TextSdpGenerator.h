@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,32 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef INTERFACE_SERVICE_CONTEXT_H_
-#define INTERFACE_SERVICE_CONTEXT_H_
 
-#include "ImsTypeDef.h"
+#ifndef TEXT_SDP_GENERATOR_H_
+#define TEXT_SDP_GENERATOR_H_
 
-class IConfiguration;
-class IServiceManager;
+#include "SdpGenerator.h"
 
-/**
- * A context interface for providing the singleton instances for service layer.
- */
-class IServiceContext
+class TextSdpGenerator : public SdpGenerator
 {
-protected:
-    virtual ~IServiceContext() = default;
-
 public:
-    /**
-     * @brief Returns the IConfiguration instance.
-     */
-    virtual IConfiguration* GetConfiguration() const = 0;
+    TextSdpGenerator();
+    virtual ~TextSdpGenerator();
 
-    /**
-     * @brief Returns the IServiceManager instance.
-     */
-    virtual IServiceManager* GetServiceManager() const = 0;
+    IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+            IN MediaBaseProfile* pBaseProfile) override;
+
+private:
+    void CheckRedPayloadSubTypeValidity(OUT TextProfile* pProfile);
+    void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN TextProfile* pProfile);
+    IMS_BOOL GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Payload* pPayload);
 };
 
 #endif

@@ -113,8 +113,21 @@ public final class CarrierInfo {
             } else if (simState == Sim.STATE_LOADED) {
                 int testCarrierId = ImsPrivateProperties.Persistent.getInt(
                         ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, slotId);
-                builder.setCarrierId((testCarrierId > 0) ? testCarrierId : tmp.getSimCarrierId());
-                builder.setSpecificCarrierId(tmp.getSimSpecificCarrierId());
+                int testSpecificCarrierId = ImsPrivateProperties.Persistent.getInt(
+                        ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID, slotId);
+                if (testCarrierId > 0) {
+                    builder.setCarrierId(testCarrierId);
+                    builder.setSpecificCarrierId(
+                            (testSpecificCarrierId > 0)
+                            ? testSpecificCarrierId
+                            : SimCarrierId.UNKNOWN_ID);
+                } else {
+                    builder.setCarrierId(tmp.getSimCarrierId());
+                    builder.setSpecificCarrierId(
+                            (testSpecificCarrierId > 0)
+                            ? testSpecificCarrierId
+                            : tmp.getSimSpecificCarrierId());
+                }
 
                 String simOperator = tmp.getSimOperator();
 

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "SipStackCallback.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
 
 namespace android
@@ -67,10 +68,10 @@ protected:
     virtual void TearDown() override {}
 
     /* This utility is used only for receive message */
-    void FillTransportParameters(SIP_CHAR* pMsg)
+    void FillTransportParameters(const SIP_CHAR* pMsg)
     {
-        unsigned short nError = 0;
-        unsigned int nLength = strlen(pMsg);
+        SIP_UINT16 nError = 0;
+        SIP_UINT32 nLength = SipPf_Strlen(pMsg);
 
         pMessage = new SipMessage();
         ASSERT_TRUE(pMessage != nullptr);
@@ -141,18 +142,18 @@ TEST_F(SipTransportHandlerTest, OnSendTransp)
     SipTransportHandler objTranspHandler;
     SipTransportInfo* pTranspInfo = SIP_NULL;
 
-    SIP_CHAR* pMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    unsigned int nLength = strlen(pMsg);
+    SIP_UINT32 nLength = SipPf_Strlen(pMsg);
 
-    unsigned short nError = 0;
+    SIP_UINT16 nError = 0;
 
     /* SipMessage and pTranspParam null, fail */
     EXPECT_EQ(SIP_FALSE,
@@ -182,14 +183,14 @@ Content-Length: 0\r\n\
 TEST_F(SipTransportHandlerTest, OnRecvTransp)
 {
     /* INVITE Request */
-    SIP_CHAR* pMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     FillTransportParameters(pMsg);
 
@@ -209,8 +210,8 @@ Content-Length: 0\r\n\
     // clang-format on
     SipStackCallback_SetCallbacks(stCallbacks);
 
-    unsigned short nError = 0;
-    int nTxnStatus = 0;
+    SIP_UINT16 nError = 0;
+    SIP_INT32 nTxnStatus = 0;
     SIP_BOOL bTxnExist = SIP_FALSE;
     SipTxnKey* pNewTxnKey = SIP_NULL;
 
@@ -386,21 +387,21 @@ Content-Length: 0\r\n\
 
 TEST_F(SipTransportHandlerTest, OnRecvTanspError)
 {
-    unsigned short nError = 0;
-    int nTxnStatus = 0;
+    SIP_UINT16 nError = 0;
+    SIP_INT32 nTxnStatus = 0;
 
     SipTransportInfo* pNewTranspInfo = SIP_NULL;
 
-    SIP_CHAR* pMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    unsigned int nLength = strlen(pMsg);
+    SIP_UINT32 nLength = SipPf_Strlen(pMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -549,7 +550,7 @@ CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pMsg);
+    nLength = SipPf_Strlen(pMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -611,7 +612,7 @@ CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    nLength = strlen(pMsg);
+    nLength = SipPf_Strlen(pMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
@@ -667,7 +668,7 @@ Content-Length: 0\r\n\
 
 TEST_F(SipTransportHandlerTest, IsInviteTxnPresentForAckTxn)
 {
-    unsigned short nError = 0;
+    SIP_UINT16 nError = 0;
 
     const SIP_CHAR* pMsg = "ACK sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
@@ -678,7 +679,7 @@ CSeq: 3 ACK\r\n\
 Content-Length: 0\r\n\
 \r\n";
 
-    unsigned int nLength = strlen(pMsg);
+    SIP_UINT32 nLength = SipPf_Strlen(pMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);

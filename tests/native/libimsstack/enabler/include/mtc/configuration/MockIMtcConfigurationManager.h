@@ -69,8 +69,6 @@ public:
     MOCK_METHOD(
             IMS_SINT32, GetPolicyForMediaTypeRestrictionOnCellularInRoaming, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPolicyOfLocalNumbers, (), (const, override));
-    MOCK_METHOD(
-            IMS_BOOL, IsDefaultEpsBearerContextUsageRestrictionOnCellular, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSilentRedialInterval, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetCallTypeAfterAudioAndVideoCallMerged, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsShortCallCode, (IN IMS_SINT32 nCode), (const, override));
@@ -110,6 +108,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsConferenceReferToUriSourcePaid, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetConferenceDropReferToUriSourceType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEnableFakeQosCallFlowOnWifi, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetMediaTypeForOfferlessInvite, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetMediaTypeForOfferlessReinvite, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportVideoCallUpgradeRegardlessOfFeatureTags, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetOipTypeForUnavailable, (), (const, override));
@@ -171,7 +170,6 @@ public:
     MOCK_METHOD(IMS_SINT32, GetSendUdpKeepAliveIntervalTime, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetCallRejectCodeForNotAcceptableCallType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReleaseEmergencyPdnWithEmergencyCallFail, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetPolicyForAlertNotUsingPreconditionMechanism, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredCdmalessFeatureTag, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallCurrentLocationDiscoverySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCheckUiConditionForIncomingResume, (), (const, override));

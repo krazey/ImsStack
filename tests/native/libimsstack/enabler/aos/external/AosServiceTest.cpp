@@ -19,6 +19,7 @@
 
 #include "external/AosService.h"
 #include "interface/IAosEmergencyListener.h"
+#include "interface/IAosRegistration.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServiceSettingListener.h"
 #include "interface/IAosServicePhoneListener.h"
@@ -970,23 +971,27 @@ TEST_F(AosServiceTest, NotifyCarrierSignalPcoValueChanged)
 TEST_F(AosServiceTest, NotifyRegistered)
 {
     const ImsList<AString> objFeatureTags;
-    EXPECT_TRUE(m_pAosService->NotifyRegistered(AosNetworkType::LTE, 1, objFeatureTags));
+    EXPECT_TRUE(m_pAosService->NotifyRegistered(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1, objFeatureTags));
 }
 
 TEST_F(AosServiceTest, NotifyRegistering)
 {
     const ImsList<AString> objFeatureTags;
-    EXPECT_TRUE(m_pAosService->NotifyRegistering(AosNetworkType::LTE, 1, objFeatureTags));
+    EXPECT_TRUE(m_pAosService->NotifyRegistering(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1, objFeatureTags));
 }
 
 TEST_F(AosServiceTest, NotifyDeregistered)
 {
-    EXPECT_TRUE(m_pAosService->NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::UNSPECIFIED));
+    EXPECT_TRUE(m_pAosService->NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL,
+            AosNetworkType::LTE, AosReasonCode::UNSPECIFIED));
 }
 
 TEST_F(AosServiceTest, NotifyTechnologyChangeFailed)
 {
-    EXPECT_TRUE(m_pAosService->NotifyTechnologyChangeFailed(AosNetworkType::LTE, 1));
+    EXPECT_TRUE(m_pAosService->NotifyTechnologyChangeFailed(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK));
 }
 
 TEST_F(AosServiceTest, NotifyAssociatedUriChanged)
@@ -1031,6 +1036,7 @@ TEST_F(AosServiceTest, GetCapabilities)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1057,6 +1063,7 @@ TEST_F(AosServiceTest, GetCapabilitiesForNetwork_ReturnValue)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1087,6 +1094,7 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1107,6 +1115,8 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
     EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::LTE, AosCapability::CALL_COMPOSER));
     EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
+            AosNetworkType::LTE, AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::LTE, AosCapability::OPTIONS_UCE));
     EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::LTE, AosCapability::PRESENCE_UCE));
@@ -1121,6 +1131,8 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
             AosNetworkType::IWLAN, AosCapability::SMS));
     EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::IWLAN, AosCapability::CALL_COMPOSER));
+    EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
+            AosNetworkType::IWLAN, AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
     EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::IWLAN, AosCapability::OPTIONS_UCE));
     EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
@@ -1201,4 +1213,30 @@ TEST_F(AosServiceTest, NetworkTypeToString)
     EXPECT_STREQ(m_pAosService->NetworkTypeToString(static_cast<IMS_SINT32>(AosNetworkType::UTRAN)),
             "UTRAN");
     EXPECT_STREQ(m_pAosService->NetworkTypeToString(999), "INVALID");
+}
+
+TEST_F(AosServiceTest, ShouldReturnAStringForTheCallComposerBusinessOnlyCapability)
+{
+    // GIVEN
+    const AString strExpected("[ CALL_COMPOSER_BUSINESS_ONLY ] ");
+
+    // WHEN
+    const AString strResult = m_pAosService->CapabilitiesToString(
+            static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+
+    // THEN
+    EXPECT_TRUE(strResult.Equals(strExpected));
+}
+
+TEST_F(AosServiceTest, ShouldReturnAStringForTheTextCapability)
+{
+    // GIVEN
+    const AString strExpected("[ TEXT ] ");
+
+    // WHEN
+    const AString strResult =
+            m_pAosService->CapabilitiesToString(static_cast<IMS_UINT32>(AosCapability::TEXT));
+
+    // THEN
+    EXPECT_TRUE(strResult.Equals(strExpected));
 }

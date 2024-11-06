@@ -35,7 +35,7 @@ public:
     void Transfer() override;
 
 protected:
-    void OnCompleted() override;
+    void OnSuccess() override;
 
 private:
     IMS_BOOL IsValid() const;

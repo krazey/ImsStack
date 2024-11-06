@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "service/MtsEnabler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Mts");
+__IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsEnabler::MtsEnabler(IN IMS_SINT32 nSlotId) :

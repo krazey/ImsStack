@@ -21,37 +21,12 @@
 
 #include "CoreServiceImpl.h"
 #include "IServiceManager.h"
+#include "ImsCoreContext.h"
 #include "ImsCoreProtocol.h"
-#include "ServiceContext.h"
 #include "SipDebug.h"
 #include "SipError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
-
-PRIVATE
-ImsCoreProtocol::ImsCoreProtocol() :
-        ServiceProtocol()
-{
-}
-
-/**
- * @brief Returns a singleton object of IMS Core Protocol.
- *
- * It throws the error as follows:
- *   ILLEGAL_ARGUMENT,
- *   CONNECTION_NOT_FOUND
- */
-PUBLIC GLOBAL ImsCoreProtocol* ImsCoreProtocol::GetInstance()
-{
-    static ImsCoreProtocol* s_pImsCoreProtocol = IMS_NULL;
-
-    if (s_pImsCoreProtocol == IMS_NULL)
-    {
-        s_pImsCoreProtocol = new ImsCoreProtocol();
-    }
-
-    return s_pImsCoreProtocol;
-}
 
 /**
  * @brief Creates a IMS Service.
@@ -107,7 +82,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
     }
 
     // Check if the service is already created
-    IServiceManager* piServiceMngr = ServiceContext::GetInstance()->GetServiceManager();
+    IServiceManager* piServiceMngr = ImsCoreContext::GetInstance()->GetServiceManager();
     Service* pService = piServiceMngr->GetService(nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)

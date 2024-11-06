@@ -27,7 +27,7 @@ public:
             Protocol()
     {
     }
-    inline virtual ~ServiceProtocol() {}
+    ~ServiceProtocol() override = default;
 
     ServiceProtocol(IN const ServiceProtocol&) = delete;
     ServiceProtocol& operator=(IN const ServiceProtocol&) = delete;

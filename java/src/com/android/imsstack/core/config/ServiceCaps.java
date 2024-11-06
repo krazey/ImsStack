@@ -205,7 +205,7 @@ public class ServiceCaps {
                             -1) == 1;
         }
 
-        return voLteEnabled;
+        return true;
     }
 
     /**
@@ -226,7 +226,7 @@ public class ServiceCaps {
                             -1) == 1;
         }
 
-        return vtEnabled;
+        return true;
     }
 
     /**
@@ -247,6 +247,6 @@ public class ServiceCaps {
                             -1) == 1;
         }
 
-        return wfcEnabled;
+        return true;
     }
 }

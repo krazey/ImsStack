@@ -32,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.net.DatagramSocket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This instantiates ImsMediaManager and interacts with ImsMedia framework
@@ -39,8 +40,7 @@ import java.util.concurrent.Executors;
 public class MediaManagerHelper {
 
     private final Context mContext;
-    private static boolean sIsImsMediaManagerReady;
-    private static boolean sIsImsMediaServiceDisconnected;
+    private static AtomicBoolean sIsImsMediaConnected = new AtomicBoolean(false);
     private static ImsMediaManager sImsMediaManager;
     private static Executor sExecutor;
     private static IMediaConnectionObserver sMediaObserver;
@@ -77,10 +77,9 @@ public class MediaManagerHelper {
             ImsLog.v("ImsMediaManager instance created");
             sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
             sExecutor = Executors.newSingleThreadExecutor();
+            setImsMediaConnected(false);
             sImsMediaManager = new ImsMediaManager(mContext, sExecutor,
                                     new ImsMediaManagerCallback());
-            sIsImsMediaManagerReady = false;
-            sIsImsMediaServiceDisconnected = false;
             if (sMediaHandlerThread.getState() == Thread.State.NEW) {
                 sMediaHandlerThread.start();
             }
@@ -105,13 +104,17 @@ public class MediaManagerHelper {
     /**
      * Returns whether ImsMedia is connected or not
      */
-    public boolean isImsMediaConnected() {
-        return sIsImsMediaManagerReady;
+    public static boolean isImsMediaConnected() {
+        return sIsImsMediaConnected.get();
     }
 
+    /**
+     * Sets whether ImsMedia is connected or not
+     */
     @VisibleForTesting
-    void setImsMediaConnected(boolean isConnected) {
-        sIsImsMediaManagerReady = isConnected;
+    static void setImsMediaConnected(boolean isConnected) {
+        sIsImsMediaConnected.set(isConnected);
+        ImsLog.i("ImsMediaManager is connected[" + isImsMediaConnected() + "]");
     }
 
     /**
@@ -120,12 +123,12 @@ public class MediaManagerHelper {
     @VisibleForTesting
     void close() {
         if (sImsMediaManager != null) {
+            ImsLog.i("ImsMediaManager - close");
             sImsMediaManager.release();
             sImsMediaManager = null;
             sExecutor = null;
             sMediaObserver = null;
-            sIsImsMediaManagerReady = false;
-            sIsImsMediaServiceDisconnected = false;
+            setImsMediaConnected(false);
         }
 
         if (sMediaHandlerThread != null) {
@@ -185,13 +188,11 @@ public class MediaManagerHelper {
      * Handle ImsMedia onConnected callback
      */
     private void handleConnected() {
-        if (sIsImsMediaServiceDisconnected) {
-            close();
-            return;
-        }
-        sIsImsMediaManagerReady = true;
-        if (sMediaObserver != null) {
-            sMediaObserver.onMediaConnected();
+        if (!isImsMediaConnected()) {
+            setImsMediaConnected(true);
+            if (sMediaObserver != null) {
+                sMediaObserver.onMediaConnected();
+            }
         }
     }
 
@@ -199,10 +200,11 @@ public class MediaManagerHelper {
      * Handle ImsMedia onDisconnected callback
      */
     private void handleDisconnected() {
-        sIsImsMediaManagerReady = false;
-        sIsImsMediaServiceDisconnected = true;
-        if (sMediaObserver != null) {
-            sMediaObserver.onMediaDisconnected();
+        if (isImsMediaConnected()) {
+            if (sMediaObserver != null) {
+                sMediaObserver.onMediaDisconnected();
+            }
+            close();
         }
     }
 

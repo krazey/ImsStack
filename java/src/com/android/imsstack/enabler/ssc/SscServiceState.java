@@ -753,9 +753,13 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistered(int networkType, int featureTagBits,
+        public void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
-            ImsLog.d(mSlotId, "Registered : network = " + networkType);
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
+            ImsLog.d(mSlotId, "Registered : network = " + networkType.toString());
 
             if (!mImsRegistrationState) {
                 mImsRegistrationState = true;
@@ -764,14 +768,23 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistering(int networkType, int featureTagBits,
+        public void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
             // do nothing
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason, String message) {
-            ImsLog.d(mSlotId, "Deregistered : reason = " + reason);
+        public void notifyDeregistered(
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
+            ImsLog.d(mSlotId, "Deregistered : reason = " + reason.toString());
 
             if (mImsRegistrationState) {
                 mImsRegistrationState = false;
@@ -780,7 +793,12 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int causeCode, String message) {
+        public void notifyTechnologyChangeFailed(
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
             // do nothing
         }
 
@@ -790,7 +808,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(
+                int capabilities, NetworkType networkType, int reason) {
             // do nothing
         }
 

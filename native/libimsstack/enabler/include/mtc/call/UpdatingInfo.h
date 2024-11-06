@@ -32,7 +32,7 @@ public:
 public:
     inline CallType GetTargetCallType() const { return m_eTargetCallType; }
     inline UpdateType GetRequestingType() const { return m_eRequestingType; }
-    inline MediaInfo& GetNegotiatedInfo() { return m_objNegotiatedInfo; }
+    inline MediaInfo& GetOriginalInfo() { return m_objOriginalInfo; }
     inline MediaInfo& GetModifyingInfo() { return m_objModifyingInfo; }
     inline MediaInfo& GetAlertingInfo() { return m_objAlertingInfo; }
     inline MediaInfo& GetModifiedInfo() { return m_objModifiedInfo; }
@@ -42,11 +42,8 @@ public:
     inline void SetRequestingType(IN UpdateType eType) { m_eRequestingType = eType; }
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
-    inline void SetPendingUpdate(IN IMS_BOOL bHasPendingUpdate)
-    {
-        // TODO: check if setting to false is required.
-        m_bHasPendingUpdate = bHasPendingUpdate;
-    }
+    inline void SetPendingUpdate() { m_bHasPendingUpdate = IMS_TRUE; }
+    MediaInfo GetModifiedMediaInfoWithOriginalAudioDir() const;
 
     IMS_BOOL IsHeld() const;
     IMS_BOOL IsHeldBy() const;
@@ -65,7 +62,6 @@ public:
     IMS_BOOL IsModified() const;
     IMS_BOOL IsDowngraded() const;
     inline IMS_BOOL HasPendingUpdate() const { return m_bHasPendingUpdate; }
-    void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const;
 
 private:
     // This returns the original CallType before this update is successfully completed.
@@ -75,7 +71,7 @@ private:
     IMtcCallContext& m_objContext;
     CallType m_eTargetCallType;
     UpdateType m_eRequestingType;
-    MediaInfo m_objNegotiatedInfo;  // Info before starting update.
+    MediaInfo m_objOriginalInfo;    // Info before starting update.
     MediaInfo m_objModifyingInfo;   // Info after sending update.
     MediaInfo m_objAlertingInfo;    // Info after receiving update.
     MediaInfo m_objModifiedInfo;    // Info after update completed.

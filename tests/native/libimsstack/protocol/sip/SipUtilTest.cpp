@@ -26,7 +26,7 @@ public:
     SipTransactionListener() {}
     virtual ~SipTransactionListener() {}
 
-    virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, int eTimerType) override
+    virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, SIP_INT32 eTimerType) override
     {
         (void)pUserData;
         (void)eTimerType;

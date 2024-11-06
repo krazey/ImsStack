@@ -26,7 +26,7 @@
 #include "provider/AosUtil.h"
 #include "external/AosService.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 #define TO_BOOLEAN(n) ((n) > 0)
@@ -594,58 +594,61 @@ PUBLIC VIRTUAL void AosService::NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN AosNetworkType eNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN IMS_SINT32 nRegType,
+        IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+        IN const ImsList<AString>& objFeatureTags)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyRegistered", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
         piJniThread->NotifyRegistered(
-                static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN AosNetworkType eNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN IMS_SINT32 nRegType,
+        IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+        IN const ImsList<AString>& objFeatureTags)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyRegistering", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
         piJniThread->NotifyRegistering(
-                static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistered(
-        IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
+        IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
 {
-    A_IMS_TRACE_I(AOSTAG, "NotifyDeregistered - network(%d), reason(%d)",
-            static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason), 0);
+    A_IMS_TRACE_I(AOSTAG, "NotifyDeregistered - regType(%d), network(%d), reason(%d)", nRegType,
+            static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
         piJniThread->NotifyDeregistered(
-                static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     }
 
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyTechnologyChangeFailed(
-        IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode)
+        IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
 {
-    A_IMS_TRACE_I(AOSTAG, "NotifyTechnologyChangeFailed", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "NotifyTechnologyChangeFailed - regType(%d), network(%d), reason(%d)",
+            nRegType, static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
         piJniThread->NotifyTechnologyChangeFailed(
-                static_cast<IMS_SINT32>(eNetworkType), nCauseCode);
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     }
 
     return IMS_TRUE;
@@ -824,6 +827,11 @@ PUBLIC GLOBAL const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapa
         strCapabilities.Append("CALL_COMPOSER ");
     }
 
+    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY))
+    {
+        strCapabilities.Append("CALL_COMPOSER_BUSINESS_ONLY ");
+    }
+
     if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE))
     {
         strCapabilities.Append("OPTIONS_UCE ");
@@ -832,6 +840,11 @@ PUBLIC GLOBAL const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapa
     if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE))
     {
         strCapabilities.Append("PRESENCE_UCE ");
+    }
+
+    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::TEXT))
+    {
+        strCapabilities.Append("TEXT ");
     }
 
     strCapabilities.Append("] ");
