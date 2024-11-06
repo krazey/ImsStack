@@ -60,7 +60,6 @@ public:
     AString GetConferenceFactoryUri() const override;
     IMS_BOOL IsOipSourceFromHeader() const override;
     IMS_SINT32 GetMoCallRequestTimeout() const override;
-    IMS_BOOL IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const override;
     IMS_SINT32 Get18xTimer() const override;
     IMS_BOOL IsSupportConferenceReferSubscribe() const override;
     IMS_BOOL IsEnableConferenceSubscribeByParticipant() const override;

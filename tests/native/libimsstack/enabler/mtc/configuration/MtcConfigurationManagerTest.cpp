@@ -209,32 +209,6 @@ TEST_F(MtcConfigurationManagerTest, GetMoCallRequestTimeoutReturnsValueInCarrier
             GetInt(CarrierConfig::ImsVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT));
 }
 
-TEST_F(MtcConfigurationManagerTest, IsAudioInactivityCallEndReasonReturnsValueInCarrierConfig)
-{
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(CarrierConfig::Ims::RTCP_INACTIVITY_ON_HOLD);
-    objArray.Push(CarrierConfig::Ims::RTCP_INACTIVITY_ON_CONNECTED);
-    objArray.Push(CarrierConfig::Ims::RTP_INACTIVITY_ON_CONNECTED);
-
-    MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
-    ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY))
-            .WillByDefault(Return(objArray));
-
-    pManager->UpdateFullConfig(piMockCarrierConfig);
-
-    EXPECT_TRUE(
-            pManager->IsAudioInactivityCallEndReason(CarrierConfig::Ims::RTCP_INACTIVITY_ON_HOLD));
-    EXPECT_TRUE(pManager->IsAudioInactivityCallEndReason(
-            CarrierConfig::Ims::RTCP_INACTIVITY_ON_CONNECTED));
-    EXPECT_TRUE(pManager->IsAudioInactivityCallEndReason(
-            CarrierConfig::Ims::RTP_INACTIVITY_ON_CONNECTED));
-    EXPECT_FALSE(pManager->IsAudioInactivityCallEndReason(
-            CarrierConfig::Ims::E911_RTCP_INACTIVITY_ON_CONNECTED));
-    EXPECT_FALSE(pManager->IsAudioInactivityCallEndReason(
-            CarrierConfig::Ims::E911_RTP_INACTIVITY_ON_CONNECTED));
-}
-
 TEST_F(MtcConfigurationManagerTest, Get18xTimerReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->Get18xTimer(), GetInt(CarrierConfig::ImsVoice::KEY_18X_TIMER_MILLIS_INT));

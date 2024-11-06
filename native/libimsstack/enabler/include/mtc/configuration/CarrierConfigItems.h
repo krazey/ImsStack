@@ -31,7 +31,6 @@ public:
             objCallTerminateReasonHeaders(ImsVector<AString>()),
             objCarrierSpecificSipHeaders(ImsVector<AString>()),
             objPidfShortCodes(ImsVector<AString>()),
-            objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>()),
             objCallMaintainingOnRegistrationSuspendeds(ImsVector<IMS_SINT32>()),
             objInformationLevelOfGeolocationPidfs(ImsVector<IMS_SINT32>()),
             objMessageTypesSupportGeolocationPidf(ImsVector<IMS_SINT32>()),
@@ -159,7 +158,6 @@ public:
         objCallTerminateReasonHeaders.Clear();
         objCarrierSpecificSipHeaders.Clear();
         objPidfShortCodes.Clear();
-        objAudioInactivityCallEndReasons.Clear();
         objCallMaintainingOnRegistrationSuspendeds.Clear();
         objInformationLevelOfGeolocationPidfs.Clear();
         objMessageTypesSupportGeolocationPidf.Clear();
@@ -185,7 +183,6 @@ public:
     ImsVector<AString> objCarrierSpecificSipHeaders;
     ImsVector<AString> objPidfShortCodes;
 
-    ImsVector<IMS_SINT32> objAudioInactivityCallEndReasons;
     ImsVector<IMS_SINT32> objCallMaintainingOnRegistrationSuspendeds;  // name?
     ImsVector<IMS_SINT32> objInformationLevelOfGeolocationPidfs;
     ImsVector<IMS_SINT32> objMessageTypesSupportGeolocationPidf;

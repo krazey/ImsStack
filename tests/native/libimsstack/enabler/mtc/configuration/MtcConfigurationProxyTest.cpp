@@ -267,9 +267,6 @@ TEST_F(MtcConfigurationProxyTest, IsWithIntArgReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, IsSrvccType(nArg)).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::SRVCC_TYPE, nArg));
 
-    EXPECT_CALL(*pConfigManager, IsAudioInactivityCallEndReason(nArg)).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::AUDIO_INACTIVITY_CALL_END_REASON, nArg));
-
     EXPECT_CALL(*pConfigManager, IsShortCallCode(nArg)).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::SHORT_CALL_CODE, nArg));
 

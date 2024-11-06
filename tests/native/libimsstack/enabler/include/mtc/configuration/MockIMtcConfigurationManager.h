@@ -49,8 +49,6 @@ public:
     MOCK_METHOD(AString, GetConferenceFactoryUri, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsOipSourceFromHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetMoCallRequestTimeout, (), (const, override));
-    MOCK_METHOD(
-            IMS_BOOL, IsAudioInactivityCallEndReason, (IN IMS_SINT32 nReason), (const, override));
     MOCK_METHOD(IMS_SINT32, Get18xTimer, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportConferenceReferSubscribe, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEnableConferenceSubscribeByParticipant, (), (const, override));

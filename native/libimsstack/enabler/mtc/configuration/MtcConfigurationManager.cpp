@@ -177,12 +177,6 @@ IMS_SINT32 MtcConfigurationManager::GetMoCallRequestTimeout() const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const
-{
-    return ContainsValue(m_objCarrierConfig.objAudioInactivityCallEndReasons, nReason);
-}
-
-PUBLIC
 IMS_SINT32 MtcConfigurationManager::Get18xTimer() const
 {
     return m_objCarrierConfig.n18xTimer;

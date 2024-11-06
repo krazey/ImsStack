@@ -196,8 +196,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN IMS_SINT32 nAdditiona
             return m_pManager->IsSupportGeolocationPidfInSipInvite(nAdditionalInfo);
         case Feature::SRVCC_TYPE:
             return m_pManager->IsSrvccType(nAdditionalInfo);
-        case Feature::AUDIO_INACTIVITY_CALL_END_REASON:
-            return m_pManager->IsAudioInactivityCallEndReason(nAdditionalInfo);
         case Feature::SHORT_CALL_CODE:
             return m_pManager->IsShortCallCode(nAdditionalInfo);
         case Feature::REJECT_CODE_FOR_CSFB:

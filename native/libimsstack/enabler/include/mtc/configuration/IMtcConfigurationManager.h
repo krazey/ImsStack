@@ -199,16 +199,6 @@ public:
             const = 0;  // KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT
 
     /**
-     * @brief Checks
-     *
-     * @param nReason
-     * @param KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY
-     * @return
-     */
-    virtual IMS_BOOL IsAudioInactivityCallEndReason(
-            IN IMS_SINT32 nReason) const = 0;  // KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY
-
-    /**
      * @brief Get18xs
      *
      * @return
