@@ -174,6 +174,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallCurrentLocationDiscoverySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCheckUiConditionForIncomingResume, (), (const, override));
     MOCK_METHOD(AString, GetPEmergencyInfoHeaderInInvite, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetEmergencyRegistrationTo18xTimer, (IN IMS_BOOL), (const, override));
 };
 
 #endif

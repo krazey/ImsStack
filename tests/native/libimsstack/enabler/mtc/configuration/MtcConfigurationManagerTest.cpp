@@ -1256,4 +1256,21 @@ TEST_F(MtcConfigurationManagerTest, GetPEmergencyInfoHeaderInInviteReturnsValueI
                     .GetStr());
 }
 
+TEST_F(MtcConfigurationManagerTest, GetEmergencyRegistrationTo18xTimerReturnsValueInCarrierConfig)
+{
+    ImsVector<IMS_SINT32> objArray;
+    objArray.Push(10000);
+    objArray.Push(20000);
+
+    MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
+    ON_CALL(*piMockCarrierConfig,
+            GetIntArray(CarrierConfig::ImsVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY))
+            .WillByDefault(Return(objArray));
+
+    pManager->UpdateFullConfig(piMockCarrierConfig);
+
+    EXPECT_EQ(pManager->GetEmergencyRegistrationTo18xTimer(IMS_FALSE), 10000);
+    EXPECT_EQ(pManager->GetEmergencyRegistrationTo18xTimer(IMS_TRUE), 20000);
+}
+
 }  // namespace android

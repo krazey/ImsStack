@@ -341,6 +341,19 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
 }
 
 PUBLIC
+IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature, IN IMS_BOOL bParam) const
+{
+    switch (eFeature)
+    {
+        case Feature::EMERGENCY_REGISTRATION_TO_18X_TIMER_MILLIS_INT:
+            return m_pManager->GetEmergencyRegistrationTo18xTimer(bParam);
+        default:
+            IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
+            return 0;
+    }
+}
+
+PUBLIC
 IMS_SINT32 MtcConfigurationProxy::GetInt(
         IN Feature eFeature, IN IMS_BOOL bParam1, IN IMS_BOOL bParam2, IN IMS_BOOL bParam3) const
 {

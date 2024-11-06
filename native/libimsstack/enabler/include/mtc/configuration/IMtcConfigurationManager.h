@@ -999,6 +999,11 @@ public:
      * @return
      */
     virtual AString GetPEmergencyInfoHeaderInInvite() const = 0;
+
+    /**
+     * Gets config value of imsvoice.registration_to_18x_timer_millis_int_array.
+     */
+    virtual IMS_SINT32 GetEmergencyRegistrationTo18xTimer(IN IMS_BOOL bWifi) const = 0;
 };
 
 #endif

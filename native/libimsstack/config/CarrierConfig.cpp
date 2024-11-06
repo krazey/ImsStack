@@ -553,6 +553,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_vowifi_off_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_user_reject_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "registration_to_18x_timer_millis_int_array";
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_jitter_buffer_size_int_array";

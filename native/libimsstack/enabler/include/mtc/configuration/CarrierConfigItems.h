@@ -42,6 +42,7 @@ public:
             objSrvccTypes(ImsVector<IMS_SINT32>()),
             objSupportGeolocationPidfInSipInvite(ImsVector<IMS_SINT32>()),
             objVilteToVolteRetryFailureResponseCodes(ImsVector<IMS_SINT32>()),
+            objEmergencyRegistrationTo18xTimer(ImsVector<IMS_SINT32>()),
             n18xTimer(32000),
             nCallMaxCount(3),
             nCallRejectCodeForNotAcceptableCallType(488),
@@ -169,6 +170,7 @@ public:
         objSrvccTypes.Clear();
         objSupportGeolocationPidfInSipInvite.Clear();
         objVilteToVolteRetryFailureResponseCodes.Clear();
+        objEmergencyRegistrationTo18xTimer.Clear();
     }
 
     CarrierConfigItems(IN const CarrierConfigItems&) = delete;
@@ -194,6 +196,7 @@ public:
     ImsVector<IMS_SINT32> objSrvccTypes;
     ImsVector<IMS_SINT32> objSupportGeolocationPidfInSipInvite;
     ImsVector<IMS_SINT32> objVilteToVolteRetryFailureResponseCodes;
+    ImsVector<IMS_SINT32> objEmergencyRegistrationTo18xTimer;
 
     IMS_SINT32 n18xTimer;
     IMS_SINT32 nCallMaxCount;

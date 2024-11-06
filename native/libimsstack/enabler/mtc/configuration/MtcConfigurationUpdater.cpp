@@ -86,6 +86,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL);
     objItems.bEnableConferenceSubscribeByParticipant = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL);
+    objItems.objEmergencyRegistrationTo18xTimer = piCc->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY);
     // KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL
     objItems.nConferenceSipFlowOrder =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT);

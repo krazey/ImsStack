@@ -472,6 +472,16 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE));
 }
 
+TEST_F(MtcConfigurationProxyTest, GetIntWithBoolArgReturnsFromConfigManager)
+{
+    const IMS_SINT32 nValue = 1;
+    const IMS_BOOL bArg = IMS_TRUE;
+
+    EXPECT_CALL(*pConfigManager, GetEmergencyRegistrationTo18xTimer(bArg)).WillOnce(Return(nValue));
+    EXPECT_EQ(
+            nValue, pConfig->GetInt(Feature::EMERGENCY_REGISTRATION_TO_18X_TIMER_MILLIS_INT, bArg));
+}
+
 TEST_F(MtcConfigurationProxyTest, GetIntWith3BoolArgReturnsFromConfigManager)
 {
     const IMS_SINT32 nValue = 1;

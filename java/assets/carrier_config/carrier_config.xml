@@ -561,6 +561,10 @@
     <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="false"/>
     <boolean name="imsemergency.emergency_call_current_location_discovery_supported_bool" value="true"/>
     <boolean name="imsvoice.check_ui_condition_for_incoming_resume_bool" value="false"/>
+    <int-array name="imsvoice.registration_to_18x_timer_millis_int_array" num="2">
+        <item value="-1"/> <!-- EMERGENCY_LTE-->
+        <item value="-1"/> <!-- EMERGENCY_WIFI -->
+    </int-array>
 
     <!-- Media -->
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>

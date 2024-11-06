@@ -869,6 +869,19 @@ IMS_BOOL MtcConfigurationManager::IsCheckUiConditionForIncomingResume() const
     return m_objCarrierConfig.bCheckUiConditionForIncomingResume;
 }
 
+PUBLIC
+IMS_SINT32 MtcConfigurationManager::GetEmergencyRegistrationTo18xTimer(IN IMS_BOOL bWifi) const
+{
+    if (!bWifi)
+    {
+        return m_objCarrierConfig.objEmergencyRegistrationTo18xTimer.GetAt(0);
+    }
+    else
+    {
+        return m_objCarrierConfig.objEmergencyRegistrationTo18xTimer.GetAt(1);
+    }
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)

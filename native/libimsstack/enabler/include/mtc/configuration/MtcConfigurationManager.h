@@ -176,6 +176,7 @@ public:
     IMS_BOOL IsEmergencyCallCurrentLocationDiscoverySupported() const override;
     IMS_BOOL IsCheckUiConditionForIncomingResume() const override;
     AString GetPEmergencyInfoHeaderInInvite() const override;
+    IMS_SINT32 GetEmergencyRegistrationTo18xTimer(IN IMS_BOOL bWifi) const override;
 
 private:
     static IMS_BOOL ContainsValue(IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue);
