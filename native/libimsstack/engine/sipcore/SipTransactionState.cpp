@@ -549,7 +549,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
             m_pTxnKey = pTxnKey;
         }
 
-        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER)
         {
             // If the method is INVITE, then store the txn key in the InvTxnKey.
             // This will be used when the application calls AbortCall().

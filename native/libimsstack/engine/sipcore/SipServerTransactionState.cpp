@@ -300,11 +300,11 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
 
     if (m_pTxnKey != IMS_NULL)
     {
-        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER)
         {
             m_nClass = CLASS_INVITE;
         }
-        else if (m_pTxnKey->GetTxnType() == SipTxn::NON_INV_SER_TXN)
+        else if (m_pTxnKey->GetTxnType() == SipTxn::NON_INVITE_SERVER)
         {
             m_nClass = CLASS_REGULAR;
         }
@@ -314,7 +314,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     /* NOTE::
     If the message is an ACK request for non-2xx response to INVITE request,
     then stack drop the message by returning ignore request */
-    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN))
+    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER))
     {
         if (objMethod.Equals(SipMethod::ACK) &&
                 (m_pTxnKey->GetResponseCode() >= SipStatusCode::SC_300))

@@ -99,7 +99,7 @@ CSeq: 1 INVITE\r\n\
     }
 };
 
-TEST_F(SipInviteServerTxnTest, InvSer_IdleState)
+TEST_F(SipInviteServerTxnTest, IdleState)
 {
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_IDLE_ST][SipTxn::INV_SER_INVALID_EVT](
@@ -111,7 +111,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_IdleState)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_IDLE_ST][SipTxn::INV_SER_RECV_INV_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
@@ -127,7 +127,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_IdleState)
     pReqLine->SipDelete();
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     /* Passing Bye msg to make fetch txn fail */
     EXPECT_EQ(SIP_FALSE,
@@ -141,7 +141,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_IdleState)
     pTxnKey->SipDelete();
 }
 
-TEST_F(SipInviteServerTxnTest, InvSer_ProceedingState)
+TEST_F(SipInviteServerTxnTest, ProceedingState)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -149,7 +149,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_ProceedingState)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST][SipTxn::INV_SER_RECV_INV_REQ_EVT](
@@ -196,7 +196,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_ProceedingState)
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -235,7 +235,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_ProceedingState)
     pTxn->SetMaxDuration(4000);
     pTxn->SetCurrentDuration(2000);
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::INV_SER_TXN, SipTxn::TIMER_G, pTxnKey);
+            new SipTimeoutData(SipTxn::INVITE_SERVER, SipTxn::TIMER_G, pTxnKey);
     /* Calling once timer to make startTimer for Timer G return success */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST]
@@ -258,7 +258,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_ProceedingState)
     pTxn->SipDelete();
 }
 
-TEST_F(SipInviteServerTxnTest, InvSer_CompletedState)
+TEST_F(SipInviteServerTxnTest, CompletedState)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -266,7 +266,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_CompletedState)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
@@ -302,7 +302,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_CompletedState)
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -327,7 +327,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_CompletedState)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
@@ -363,7 +363,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_CompletedState)
     delete pSipTranspParam;
 }
 
-TEST_F(SipInviteServerTxnTest, InvSer_ConfirmedState)
+TEST_F(SipInviteServerTxnTest, ConfirmedState)
 {
     SIP_UINT16 nError = 0;
 
@@ -382,7 +382,7 @@ TEST_F(SipInviteServerTxnTest, InvSer_ConfirmedState)
     delete pTxnFsmData;
 }
 
-TEST_F(SipInviteServerTxnTest, InvSer_InvalidState)
+TEST_F(SipInviteServerTxnTest, InvalidState)
 {
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST][SipTxn::INV_SER_INVALID_EVT](

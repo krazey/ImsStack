@@ -65,7 +65,7 @@ SIP_BOOL Mock_FetchTransaction(
                 if (SipPf_Strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "UPDATE") == 0)
                 {
                     SipMessage* pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                    *ppvTxn = new SipTxn(SipTxn::INVITE_SERVER, static_cast<SipTxnKey*>(pvTxnKey),
                             pTempSipMsg, SIP_NULL, &nError);
                     pTempSipMsg->SipDelete();
                     return SIP_TRUE;
@@ -110,7 +110,7 @@ SIP_BOOL Mock_FetchTransaction(
                 if (bFromRecvTxn == SIP_TRUE)
                 {
                     pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_CLI_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                    *ppvTxn = new SipTxn(SipTxn::INVITE_CLIENT, static_cast<SipTxnKey*>(pvTxnKey),
                             pTempSipMsg, SIP_NULL, &nError);
                     SipTxn* pTempTxn = (SipTxn*)*ppvTxn;
                     pTempTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
@@ -143,7 +143,7 @@ SIP_BOOL Mock_FetchTransaction(
                     }
                 }
                 pTempSipMsg = new SipMessage();
-                *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                *ppvTxn = new SipTxn(SipTxn::INVITE_SERVER, static_cast<SipTxnKey*>(pvTxnKey),
                         pTempSipMsg, SIP_NULL, &nError);
                 SipTxn* pTempTxn = (SipTxn*)*ppvTxn;
                 pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);

@@ -104,7 +104,7 @@ CSeq: 1 INVITE\r\n\
     }
 };
 
-TEST_F(SipInviteClientTxnTest, InvCli_IdleState)
+TEST_F(SipInviteClientTxnTest, IdleState)
 {
     SIP_UINT16 nError = 0;
     /* Calling with all null values */
@@ -117,7 +117,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_IdleState)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
     /* Calling once to make startTimer for timer A fail */
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_IDLE_ST][SipTxn::INV_CLI_SEND_INV_REQ_EVT](
@@ -139,7 +139,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_IdleState)
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
     /* Calling once to make startTimer for timer B fail */
     EXPECT_EQ(SIP_FALSE,
@@ -154,7 +154,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_IdleState)
     pReqLine->SipDelete();
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
     /* Calling with BYE msg so that fetch msg returns fail */
     EXPECT_EQ(SIP_FALSE,
@@ -168,14 +168,14 @@ TEST_F(SipInviteClientTxnTest, InvCli_IdleState)
     pTxnKey->SipDelete();
 }
 
-TEST_F(SipInviteClientTxnTest, InvCli_CallingState)
+TEST_F(SipInviteClientTxnTest, CallingState)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
@@ -184,7 +184,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_CallingState)
     pTxn->UpdateTranspInfo(pTranspInfo);
 
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMER_A, pTxnKey);
+            new SipTimeoutData(SipTxn::INVITE_CLIENT, SipTxn::TIMER_A, pTxnKey);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
@@ -218,7 +218,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_CallingState)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -226,7 +226,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_CallingState)
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
-    pTimeoutData = new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMER_B, pTxnKey);
+    pTimeoutData = new SipTimeoutData(SipTxn::INVITE_CLIENT, SipTxn::TIMER_B, pTxnKey);
     /* Calling with TCP transport info */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
@@ -272,7 +272,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_CallingState)
     pTxn->SipDelete();
 }
 
-TEST_F(SipInviteClientTxnTest, InvCli_ProceedingState)
+TEST_F(SipInviteClientTxnTest, ProceedingState)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -280,7 +280,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_ProceedingState)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
@@ -404,7 +404,7 @@ RSeq: 2\r\n\
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
     /* Calling without passing transport info will be considered as reliable */
     EXPECT_EQ(SIP_TRUE,
@@ -424,12 +424,12 @@ RSeq: 2\r\n\
     pTempSipMsg->SipDelete();
 }
 
-TEST_F(SipInviteClientTxnTest, InvCli_CompletedState)
+TEST_F(SipInviteClientTxnTest, CompletedState)
 {
     SIP_UINT16 nError = 0;
     SipTxn* pTxn = new SipTxn();
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMER_D, SIP_NULL);
+            new SipTimeoutData(SipTxn::INVITE_CLIENT, SipTxn::TIMER_D, SIP_NULL);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_COMPLETED_ST]
@@ -455,7 +455,7 @@ TEST_F(SipInviteClientTxnTest, InvCli_CompletedState)
     delete pTxnFsmData;
 }
 
-TEST_F(SipInviteClientTxnTest, InvCli_InvalidState)
+TEST_F(SipInviteClientTxnTest, InvalidState)
 {
     SIP_UINT16 nError = 0;
     EXPECT_EQ(SIP_FALSE,

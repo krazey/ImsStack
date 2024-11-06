@@ -45,11 +45,11 @@ public:
     /* Type of Transaction is defined */
     enum
     {
-        INV_CLI_TXN = 0,
-        INV_SER_TXN,
-        NON_INV_CLI_TXN,
-        NON_INV_SER_TXN,
-        INVALID_TXN
+        INVITE_CLIENT = 0,
+        INVITE_SERVER,
+        NON_INVITE_CLIENT,
+        NON_INVITE_SERVER,
+        INVALID
     };
 
     enum

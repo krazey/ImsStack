@@ -184,7 +184,7 @@ Content-Length: 0\r\n\
             pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
                     &pTxnKey, &nError));
 
-    EXPECT_EQ(SipTxn::INV_CLI_TXN, pTxn->GetTxnType());
+    EXPECT_EQ(SipTxn::INVITE_CLIENT, pTxn->GetTxnType());
 
     ASSERT_TRUE(pTxnKey != nullptr);
 
@@ -304,7 +304,7 @@ Content-Length: 0\r\n\
             pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
                     &pTxnKey, &nError));
 
-    EXPECT_EQ(SipTxn::INV_CLI_TXN, pTxn->GetTxnType());
+    EXPECT_EQ(SipTxn::INVITE_CLIENT, pTxn->GetTxnType());
 
     pTxnKey->SipDelete();
     pTxnKey = SIP_NULL;
@@ -359,7 +359,7 @@ Content-Length: 0\r\n\
             pSipStackManager->OnRecvMessage(
                     pMessage, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
 
-    EXPECT_EQ(SipTxn::INV_SER_TXN, pTxn->GetTxnType());
+    EXPECT_EQ(SipTxn::INVITE_SERVER, pTxn->GetTxnType());
 
     pTxnKey->SipDelete();
     pTxnKey = SIP_NULL;
@@ -478,7 +478,7 @@ Content-Length: 0\r\n\
             pSipStackManager->OnRecvMessage(
                     pMessage, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
 
-    EXPECT_EQ(SipTxn::NON_INV_SER_TXN, pTxn->GetTxnType());
+    EXPECT_EQ(SipTxn::NON_INVITE_SERVER, pTxn->GetTxnType());
 
     pTxnKey->SipDelete();
     pTxnKey = SIP_NULL;
@@ -569,7 +569,7 @@ Content-Length: 0\r\n\
             pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
                     &pTxnKey, &nError));
 
-    EXPECT_EQ(SipTxn::NON_INV_CLI_TXN, pTxn->GetTxnType());
+    EXPECT_EQ(SipTxn::NON_INVITE_CLIENT, pTxn->GetTxnType());
 
     pTxnKey->SipDelete();
     pTxnKey = SIP_NULL;
@@ -690,7 +690,7 @@ Content-Length: 0\r\n\
             pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
                     &pTxnKey, &nError));
 
-    EXPECT_EQ(SipTxn::INV_CLI_TXN, pTxn->GetTxnType());
+    EXPECT_EQ(SipTxn::INVITE_CLIENT, pTxn->GetTxnType());
 
     EXPECT_EQ(SIP_TRUE, pSipStackManager->OnRecvTanspError(0, pTxnKey, &nError));
 
