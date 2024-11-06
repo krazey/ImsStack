@@ -256,6 +256,15 @@ TEST_F(EstablishedStateTest, RefreshNotifyCompletedRunsPendingOperationAsynchron
     pEstablishedState->Refresh_NotifyCompleted(piFakeConnection);
 }
 
+TEST_F(EstablishedStateTest, OnReceivingMediaDataFailedWithAudioTerminatesCall)
+{
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, _));
+    EXPECT_CALL(objUiNotifier, SendTerminated(_));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTP));
+}
+
 TEST_F(EstablishedStateTest, OnReceivingMediaDataFailedWithVideoInvokesDowngrade)
 {
     EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED))

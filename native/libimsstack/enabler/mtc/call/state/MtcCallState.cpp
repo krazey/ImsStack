@@ -925,59 +925,6 @@ void MtcCallState::SendTransactionResponse(IN ISipServerConnection* piSipServerC
 }
 
 PROTECTED
-IMS_BOOL MtcCallState::IsCallEndNeededByAudioInactivity(
-        IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const
-{
-    IMS_BOOL bNeedToEnd = IMS_FALSE;
-    if (eMediaType != MEDIATYPE_AUDIO)
-    {
-        return bNeedToEnd;
-    }
-
-    IMS_SINT32 nAdditionalInfo = -1;
-    if (m_objContext.GetMediaManager().IsOnHold())
-    {
-        if (eProtocolType == MEDIA_PROTOCOL_RTCP)
-        {
-            nAdditionalInfo = CarrierConfig::Ims::RTCP_INACTIVITY_ON_HOLD;
-        }
-    }
-    else
-    {
-        if (m_objContext.GetService().IsEmergency())
-        {
-            if (eProtocolType == MEDIA_PROTOCOL_RTP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::E911_RTP_INACTIVITY_ON_CONNECTED;
-            }
-            else if (eProtocolType == MEDIA_PROTOCOL_RTCP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::E911_RTCP_INACTIVITY_ON_CONNECTED;
-            }
-        }
-        else
-        {
-            if (eProtocolType == MEDIA_PROTOCOL_RTP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::RTP_INACTIVITY_ON_CONNECTED;
-            }
-            else if (eProtocolType == MEDIA_PROTOCOL_RTCP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::RTCP_INACTIVITY_ON_CONNECTED;
-            }
-        }
-    }
-
-    bNeedToEnd = (nAdditionalInfo < 0)
-            ? IMS_FALSE
-            : m_objContext.GetConfigurationProxy().Is(
-                      Feature::AUDIO_INACTIVITY_CALL_END_REASON, nAdditionalInfo);
-    IMS_TRACE_D("IsCallEndNeededByAudioInactivity : %s", _TRACE_B_(bNeedToEnd), 0, 0);
-
-    return bNeedToEnd;
-}
-
-PROTECTED
 CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
         IN const CallReasonInfo& objReason)
 {

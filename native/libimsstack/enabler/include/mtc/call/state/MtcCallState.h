@@ -205,8 +205,6 @@ protected:
     static void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
             IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
 
-    IMS_BOOL IsCallEndNeededByAudioInactivity(
-            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;

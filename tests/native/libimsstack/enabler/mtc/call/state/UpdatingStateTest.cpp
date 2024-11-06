@@ -389,11 +389,6 @@ TEST_F(UpdatingStateTest, SessionTerminatedTerminatesCall)
 
 TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedInvokesSendTerminated)
 {
-    ON_CALL(objMediaManager, IsOnHold).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
-    ON_CALL(*pConfigurationManager, IsAudioInactivityCallEndReason(_))
-            .WillByDefault(Return(IMS_TRUE));
-
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, _));
     EXPECT_CALL(objUiNotifier, SendTerminated(_));
 

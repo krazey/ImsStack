@@ -356,7 +356,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(
     IMS_TRACE_I(
             "OnReceivingMediaDataFailed : Media[%d] Protocol[%d]", eMediaType, eProtocolType, 0);
 
-    if (IsCallEndNeededByAudioInactivity(eMediaType, eProtocolType))
+    if (eMediaType == MEDIATYPE_AUDIO)
     {
         CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
         HandleTerminate(objReason);
