@@ -45,7 +45,6 @@ private:
     AString GetSupportedHeaderValue() override;
     AString GetServiceRouteHeaderValue() override;
     void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override;
-    void NotifyScbmState(IN IMS_UINT32 nState) override;
     void NotifyPublishState(IN IMS_BOOL bIsStarted) override;
     void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) override;
     void NotifyEpsfbCallState(IN IMS_UINT32 nState) override;
