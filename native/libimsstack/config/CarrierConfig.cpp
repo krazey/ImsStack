@@ -885,13 +885,14 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_I
         KEY_IMS_PREFIX "reg_err_code_with_ra_time_for_update_int_array";
 // }
 // Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_BUNDLE[] = "reg_retry_interval_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_BUNDLE[] =
+        KEY_IMS_PREFIX "reg_retry_interval_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL[] =
-        "reg_retry_interval_used_for_sub_bool";
+        KEY_IMS_PREFIX "reg_retry_interval_used_for_sub_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY[] =
-        "reg_retry_interval_random_upper_value_sec_int_array";
+        KEY_IMS_PREFIX "reg_retry_interval_random_upper_value_sec_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY[] =
-        "reg_retry_interval_sec_int_array";
+        KEY_IMS_PREFIX "reg_retry_interval_sec_int_array";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE[] =

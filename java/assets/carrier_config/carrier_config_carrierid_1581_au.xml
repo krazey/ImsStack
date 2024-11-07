@@ -54,8 +54,8 @@
         </int-array>
     </pbundle>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <pbundle name="reg_retry_interval_bundle">
-        <int-array name="reg_retry_interval_sec_int_array" num="1">
+    <pbundle name="ims.reg_retry_interval_bundle">
+        <int-array name="ims.reg_retry_interval_sec_int_array" num="1">
             <item value="10"/>
         </int-array>
     </pbundle>

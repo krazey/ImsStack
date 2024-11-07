@@ -131,8 +131,8 @@
         </int-array>
     </pbundle>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <pbundle name="reg_retry_interval_bundle">
-        <int-array name="reg_retry_interval_random_upper_value_sec_int_array" num="6">
+    <pbundle name="ims.reg_retry_interval_bundle">
+        <int-array name="ims.reg_retry_interval_random_upper_value_sec_int_array" num="6">
             <item value="0"/>
             <item value="0"/>
             <item value="15"/>
@@ -140,7 +140,7 @@
             <item value="0"/>
             <item value="0"/>
         </int-array>
-        <int-array name="reg_retry_interval_sec_int_array" num="6">
+        <int-array name="ims.reg_retry_interval_sec_int_array" num="6">
             <item value="30"/>
             <item value="30"/>
             <item value="60"/>

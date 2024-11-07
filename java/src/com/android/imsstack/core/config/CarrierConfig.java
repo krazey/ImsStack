@@ -1040,13 +1040,13 @@ public class CarrierConfig {
         // }
         // Bundle {
         public static final String KEY_REG_RETRY_INTERVAL_BUNDLE =
-                "reg_retry_interval_bundle";
+                KEY_IMS_PREFIX + "reg_retry_interval_bundle";
         public static final String KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL =
-                "reg_retry_interval_used_for_sub_bool";
+                KEY_IMS_PREFIX + "reg_retry_interval_used_for_sub_bool";
         public static final String KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY =
-                "reg_retry_interval_random_upper_value_sec_int_array";
+                KEY_IMS_PREFIX + "reg_retry_interval_random_upper_value_sec_int_array";
         public static final String KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY =
-                "reg_retry_interval_sec_int_array";
+                KEY_IMS_PREFIX + "reg_retry_interval_sec_int_array";
         // }
         // Bundle {
         public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE =
