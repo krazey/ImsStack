@@ -1018,15 +1018,15 @@ public class CarrierConfig {
         // }
         // Bundle {
         public static final String KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE =
-                "pcscf_recovery_conditions_bundle";
+                KEY_IMS_PREFIX + "pcscf_recovery_conditions_bundle";
         public static final String KEY_PCSCF_RECOVERY_MAX_CNT_INT =
-                "pcscf_recovery_max_cnt_int";
+                KEY_IMS_PREFIX + "pcscf_recovery_max_cnt_int";
         public static final String KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT =
-                "pcscf_recovery_wait_time_sec_int";
+                KEY_IMS_PREFIX + "pcscf_recovery_wait_time_sec_int";
         public static final String KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT =
-                "pcscf_recovery_base_time_sec_int";
+                KEY_IMS_PREFIX + "pcscf_recovery_base_time_sec_int";
         public static final String KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT =
-                "pcscf_recovery_max_time_sec_int";
+                KEY_IMS_PREFIX + "pcscf_recovery_max_time_sec_int";
         // }
         // Bundle {
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE =
