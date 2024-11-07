@@ -826,6 +826,8 @@ public class CarrierConfig {
                 "cellular_network_info_utc_offset_enabled_bool";
 
         // Aos
+        public static final String KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL =
+                "block_pcscf_on_reg_failure_bool";
         public static final String KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL =
                 "call_end_and_pdn_reactivation_by_reg_terminated_bool";
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
@@ -883,8 +885,6 @@ public class CarrierConfig {
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
                         "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
-        public static final String KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL =
-                "use_awt_when_init_reg_with_next_pcscf_bool";
         public static final String
                 KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
                         "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
@@ -912,6 +912,8 @@ public class CarrierConfig {
         public static final String KEY_IMS_SIGNALLING_DSCP_INT = "ims_signalling_dscp_int";
         public static final String KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT =
                 "reg_actual_wait_time_policy_int";
+        public static final String KEY_REG_DEFAULT_WAIT_TIME_INT =
+                "reg_default_wait_time_int";
         public static final String KEY_REG_OUT_OF_SERVICE_POLICY_INT =
                 "reg_out_of_service_policy_int";
         public static final String KEY_REG_PCSCF_UPDATE_POLICY_INT =

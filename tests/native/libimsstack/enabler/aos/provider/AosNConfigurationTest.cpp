@@ -520,6 +520,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     MockICarrierConfig objCarrierConfig;
 
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(
                     CarrierConfig::Assets::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL,
                     IMS_FALSE))
@@ -618,10 +621,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
                                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
                     IMS_FALSE))
@@ -666,6 +665,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(46));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT, -1))
+            .WillOnce(Return(0));
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_DEFAULT_WAIT_TIME_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT, -1))
@@ -799,6 +800,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     m_pAosNConfiguration->InitAssetsConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
     EXPECT_FALSE(m_pAosNConfiguration->IsCdmalessFeatureTagRequired());
+    EXPECT_TRUE(m_pAosNConfiguration->IsBlockPcscfOnRegFailure());
     EXPECT_FALSE(m_pAosNConfiguration->IsCallEndAndPdnReactivationByRegTerminated());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
@@ -823,7 +825,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsUserInfoInContactSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
-    EXPECT_FALSE(m_pAosNConfiguration->IsAwtUsedWhenInitRegWithNextPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInInitRegUsed());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInRegContactOfInitRegUsed());
@@ -839,6 +840,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(1, m_pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, m_pAosNConfiguration->GetImsSignallingDscp());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegActualWaitTimePolicy());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetRegDefaultWaitTime());
     EXPECT_EQ(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT,
             m_pAosNConfiguration->GetRegOutOfServicePolicy());
     EXPECT_EQ(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT,

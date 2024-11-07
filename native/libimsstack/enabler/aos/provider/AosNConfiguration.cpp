@@ -242,6 +242,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() cons
     return m_objAsset.bRemoveOldSaOnEstablishingSa;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsBlockPcscfOnRegFailure() const
+{
+    return m_objAsset.bBlockPcscfOnRegFailure;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsCallEndAndPdnReactivationByRegTerminated() const
 {
     return m_objAsset.bCallEndAndPdnReactivationByRegTerminated;
@@ -404,11 +409,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() c
     return m_objAsset.bSupportVerstatForReg;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsAwtUsedWhenInitRegWithNextPcscf() const
-{
-    return m_objAsset.bUseAwtWhenInitRegWithNextPcscf;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const
 {
     return m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
@@ -543,6 +543,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() cons
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegActualWaitTimePolicy() const
 {
     return m_objAsset.nRegActualWaitTimePolicy;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegDefaultWaitTime() const
+{
+    return m_objAsset.nRegDefaultWaitTime;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegOutOfServicePolicy() const
@@ -1299,6 +1304,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 PROTECTED
 void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
+    m_objAsset.bBlockPcscfOnRegFailure =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL);
     m_objAsset.bCallEndAndPdnReactivationByRegTerminated = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL);
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
@@ -1353,8 +1360,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
     m_objAsset.bSupportVideoForEmergencyReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL);
-    m_objAsset.bUseAwtWhenInitRegWithNextPcscf =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Assets::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
     m_objAsset.bUseSecurityServerPortInInitReg =
@@ -1383,6 +1388,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT);
     m_objAsset.nRegActualWaitTimePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT);
+    m_objAsset.nRegDefaultWaitTime =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_DEFAULT_WAIT_TIME_INT);
     m_objAsset.nRegOutOfServicePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT);
     m_objAsset.nRegPcscfUpdatePolicy =

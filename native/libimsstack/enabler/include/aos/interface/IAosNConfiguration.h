@@ -235,6 +235,13 @@ public:
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const = 0;
 
     /**
+     * @brief Returns flag indicating whether PCSCFs that UE fails to register will be blocked.
+     *
+     * @return IMS_BOOL Return whether to be blocked or not
+     */
+    virtual IMS_BOOL IsBlockPcscfOnRegFailure() const = 0;
+
+    /**
      * @brief Returns whether a call should be terminated due to expiration of registration.
      *
      * @return IMS_BOOL Return wherther to be applied or not
@@ -475,19 +482,6 @@ public:
      * @return IMS_BOOL Return wherther to be supported or not
      */
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
-
-    /**
-     * @brief Flag specifying whether to wait AWT when initial registration proceeds with
-     *        the next pcscf.
-     *
-     * @return IMS_BOOL Returns whether to wait actual wait time(AWT) before attempting initial
-     *         registration with the next pcscf when error responses without retry-after to
-     *         the REGISTER message is received. When true, the UE waits AWT before attempting
-     *         initial registration with next pcscf. When false, the UE doesn't wait.
-     *         This function related to GetRegActualWaitTimePolicy. This is only valid when the
-     *         value of GetRegActualWaitTimePolicy() is CarrierConfig::Assets::AWT_POLICY_RFC_RULE.
-     */
-    virtual IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const = 0;
 
     /**
      * @brief Flag specifying if service fallback is required when voice call is unavailable.
@@ -765,6 +759,14 @@ public:
      * @return IMS_SINT32 Return the actual wait time policy
      */
     virtual IMS_SINT32 GetRegActualWaitTimePolicy() const = 0;
+
+    /**
+     * @brief Indicate the default wait time prior to proceed to the next PCSCF.
+     *        If this value is greater than 0, this will overlay the actual wait time.
+     *
+     * @return IMS_SINT32 Return the default wait time
+     */
+    virtual IMS_SINT32 GetRegDefaultWaitTime() const = 0;
 
     /**
      * @brief Get the out of service policy object

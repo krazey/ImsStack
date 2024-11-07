@@ -681,6 +681,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_B
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[] =
         "support_local_session_timer_bool";
 // Aos
+const IMS_CHAR CarrierConfig::Assets::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[] =
+        "block_pcscf_on_reg_failure_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL[] =
         "call_end_and_pdn_reactivation_by_reg_terminated_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[] =
@@ -734,8 +736,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
         "support_verstat_for_reg_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[] =
         "support_video_for_ereg_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL[] =
-        "use_awt_when_init_reg_with_next_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
@@ -763,6 +763,7 @@ const IMS_CHAR CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT[] = "ims_pref
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT[] = "ims_signalling_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[] =
         "reg_actual_wait_time_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_DEFAULT_WAIT_TIME_INT[] = "reg_default_wait_time_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT[] =
         "reg_out_of_service_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_PCSCF_UPDATE_POLICY_INT[] =

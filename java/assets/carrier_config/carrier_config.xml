@@ -317,6 +317,7 @@
     <int name="location_geodetic_shape_int" value="0"/>
     <boolean name="cellular_network_info_utc_offset_enabled_bool" value="false"/>
     <!-- Aos -->
+    <boolean name="block_pcscf_on_reg_failure_bool" value="true"/>
     <boolean name="call_end_and_pdn_reactivation_by_reg_terminated_bool" value="false"/>
     <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
     <boolean name="ecall_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
@@ -345,7 +346,6 @@
     <boolean name="support_verstat_for_reg_bool" value="false"/>
     <boolean name="support_video_for_ereg_bool" value="false"/>
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
-    <boolean name="use_awt_when_init_reg_with_next_pcscf_bool" value="false"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="use_security_server_port_in_init_reg_bool" value="false"/>
     <boolean name="use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>
@@ -361,6 +361,7 @@
     <int name="ims_preferred_iptype_int" value="1"/>
     <int name="ims_signalling_dscp_int" value="46"/>
     <int name="reg_actual_wait_time_policy_int" value="0"/>
+    <int name="reg_default_wait_time_int" value="0"/>
     <int name="reg_out_of_service_policy_int" value="0"/>
     <int name="reg_pcscf_update_policy_int" value="0"/>
     <int name="reg_retry_305_policy_int" value="1"/>

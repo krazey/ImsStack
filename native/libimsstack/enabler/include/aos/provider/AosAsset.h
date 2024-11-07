@@ -25,6 +25,7 @@ struct AosAsset
 {
 public:
     AosAsset() :
+            bBlockPcscfOnRegFailure(IMS_TRUE),
             bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
@@ -52,7 +53,6 @@ public:
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
             bSupportVideoForEmergencyReg(IMS_FALSE),
-            bUseAwtWhenInitRegWithNextPcscf(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
             bUseSecurityServerPortInInitReg(IMS_FALSE),
             bUseSecurityServerPortInRegContactOfInitReg(IMS_FALSE),
@@ -69,6 +69,7 @@ public:
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
             nRegActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
+            nRegDefaultWaitTime(0),
             nRegOutOfServicePolicy(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT),
             nRegPcscfUpdatePolicy(CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_DEFAULT),
             nRegRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
@@ -104,6 +105,7 @@ public:
     AosAsset& operator=(IN const AosAsset&) = delete;
 
 public:
+    IMS_BOOL bBlockPcscfOnRegFailure;
     IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
@@ -131,7 +133,6 @@ public:
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatForReg;
     IMS_BOOL bSupportVideoForEmergencyReg;
-    IMS_BOOL bUseAwtWhenInitRegWithNextPcscf;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMS_BOOL bUseSecurityServerPortInInitReg;
     IMS_BOOL bUseSecurityServerPortInRegContactOfInitReg;
@@ -146,6 +147,7 @@ public:
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
     IMS_SINT32 nRegActualWaitTimePolicy;
+    IMS_SINT32 nRegDefaultWaitTime;
     IMS_SINT32 nRegOutOfServicePolicy;
     IMS_SINT32 nRegPcscfUpdatePolicy;
     IMS_SINT32 nRegRetry305Policy;
