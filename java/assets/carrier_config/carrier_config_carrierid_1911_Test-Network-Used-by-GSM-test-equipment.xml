@@ -17,7 +17,7 @@
 <carrier_config>
     <!-- Aos -->
     <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
-    <boolean name="support_video_for_ereg_bool" value="true"/>
+    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
 
     <int name="ims.isim_index_for_impu_int" value="0"/>
 
