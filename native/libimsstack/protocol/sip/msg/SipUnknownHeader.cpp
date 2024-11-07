@@ -75,15 +75,10 @@ SIP_BOOL SipUnknownHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszHdrName);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pszHdrName);
     SipMsgUtil::Encode(*ppCurrPos, COLON);
-
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszHdrValue);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszHdrValue);
 
     return SIP_TRUE;
 }

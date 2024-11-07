@@ -56,17 +56,13 @@ SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams)
 
 SIP_BOOL SipRetryAfterHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN];
-    SipPf_Sprintf(szLen, "%u", m_nDeltaSec);
-
-    SipPf_Strcpy(*ppCurrPos, szLen);
+    SipPf_Sprintf(*ppCurrPos, "%u", m_nDeltaSec);
     SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     if (m_pszComment != SIP_NULL)
     {
         SipMsgUtil::Encode(*ppCurrPos, LPARAN);
-        SipPf_Strcpy(*ppCurrPos, m_pszComment);
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszComment);
         SipMsgUtil::Encode(*ppCurrPos, RPARAN);
     }
 

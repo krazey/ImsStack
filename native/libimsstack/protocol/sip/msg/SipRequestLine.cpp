@@ -81,22 +81,11 @@ SIP_BOOL SipRequestLine::Encode(SIP_CHAR** ppCurrPos)
         return SIP_FALSE;
     }
 
-    /*Encode Method*/
-    SipPf_Strcpy(*ppCurrPos, m_pszMethod);
-    /*Update the Msg Buffer's current position*/
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
-    /* Put a space */
+    SipAbnfUtil::Append(*ppCurrPos, m_pszMethod);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-
-    /* Encode Request Uri*/
     m_pReqUri->Encode(ppCurrPos);
-
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-    SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
-
-    /*Update the Msg Buffer's current position*/
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszSipVersion);
 
     return SIP_TRUE;
 }

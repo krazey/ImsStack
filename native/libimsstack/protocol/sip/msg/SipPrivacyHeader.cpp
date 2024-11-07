@@ -91,8 +91,7 @@ SIP_BOOL SipPrivacyHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
         {
             SipMsgUtil::Encode(*ppCurrPos, SIP_SEMI);
         }
-        SipPf_Strcpy(*ppCurrPos, pszPrivacy);
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, pszPrivacy);
     }
     return SIP_TRUE;
 }

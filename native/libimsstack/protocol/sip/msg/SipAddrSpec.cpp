@@ -211,10 +211,8 @@ SIP_BOOL SipUri::Encode(SIP_CHAR** ppCurrPos)
     {
         SIP_CHAR* pszTempUser =
                 SipPercentEncoding::DoPercentEncoding_UserAndHeader(m_pszUser, SIP_USER);
-        SipPf_Strcpy(*ppCurrPos, pszTempUser);
+        SipAbnfUtil::Append(*ppCurrPos, pszTempUser);
         delete[] pszTempUser;
-
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
         if (m_pszPassword != SIP_NULL)
         {
@@ -223,10 +221,8 @@ SIP_BOOL SipUri::Encode(SIP_CHAR** ppCurrPos)
 
             SIP_CHAR* pszTempPassword =
                     SipPercentEncoding::DoPercentEncoding_Password(m_pszPassword);
-            SipPf_Strcpy(*ppCurrPos, pszTempPassword);
+            SipAbnfUtil::Append(*ppCurrPos, pszTempPassword);
             delete[] pszTempPassword;
-
-            SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
         }
 
         SipMsgUtil::Encode(*ppCurrPos, ATRATE);
@@ -242,8 +238,7 @@ SIP_BOOL SipUri::Encode(SIP_CHAR** ppCurrPos)
             **ppCurrPos = LEFT_SQUARE;
             (*ppCurrPos)++;
 
-            SipPf_Strcpy(*ppCurrPos, m_pszHost);
-            SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+            SipAbnfUtil::Append(*ppCurrPos, m_pszHost);
 
             **ppCurrPos = RIGHT_SQUARE;
             (*ppCurrPos)++;
@@ -252,20 +247,15 @@ SIP_BOOL SipUri::Encode(SIP_CHAR** ppCurrPos)
         else
         {
             SIP_CHAR* pszTempHost = SipPercentEncoding::DoPercentEncoding_Host(m_pszHost);
-            SipPf_Strcpy(*ppCurrPos, pszTempHost);
-            SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+            SipAbnfUtil::Append(*ppCurrPos, pszTempHost);
             delete[] pszTempHost;
         }
 
         /*Encoding of Port*/
         if ((m_nPort != SIP_ZERO) && (m_nPort != SIP_UNSPECIFIED_PORT))
         {
-            const SIP_UINT16 MAX_PORT_LEN = 6;
-            SIP_CHAR szTmp[MAX_PORT_LEN] = {'\0'};
-
-            SipPf_Sprintf(szTmp, "%u", m_nPort);
             SipMsgUtil::Encode(*ppCurrPos, COLON);
-            SipPf_Strcpy(*ppCurrPos, szTmp);
+            SipPf_Sprintf(*ppCurrPos, "%u", m_nPort);
             SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
         }
     }
@@ -624,8 +614,7 @@ SIP_BOOL SipAddrSpec::Encode(SIP_CHAR** ppCurrPos) const
 
         if (pStrUri != SIP_NULL)
         {
-            SipPf_Strcpy(*ppCurrPos, pStrUri);
-            SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+            SipAbnfUtil::Append(*ppCurrPos, pStrUri);
             SipMsgUtil::Encode(*ppCurrPos, COLON);
         }
 
@@ -639,8 +628,7 @@ SIP_BOOL SipAddrSpec::Encode(SIP_CHAR** ppCurrPos) const
     }
     else if (m_pszAbsUri != SIP_NULL)
     {
-        SipPf_Strcpy(*ppCurrPos, m_pszAbsUri);
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszAbsUri);
     }
     else
     {
@@ -804,8 +792,7 @@ SIP_BOOL SipNameAddr::Encode(SIP_CHAR** ppCurrPos)
 
     if (m_pszDispName != SIP_NULL)
     {
-        SipPf_Strcpy(*ppCurrPos, m_pszDispName);
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszDispName);
 
         // FIX_MESSAGE_ENCODING_OPERATION
         //  Add LWS between the display name and left angle quote ('<').

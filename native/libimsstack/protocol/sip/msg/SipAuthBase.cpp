@@ -93,9 +93,7 @@ SIP_BOOL SipAuthBase::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE
         return SIP_FALSE;
     }
 
-    const SIP_CHAR* pszValue = GetValue();
-    SipPf_Strcpy(*ppCurrPos, pszValue);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, GetValue());
 
     /*Encode space*/
     **ppCurrPos = SPACE;

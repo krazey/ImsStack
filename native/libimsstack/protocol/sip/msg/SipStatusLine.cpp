@@ -77,25 +77,11 @@ SIP_BOOL SipStatusLine::Encode(SIP_CHAR** ppCurrPos)
         return SIP_FALSE;
     }
 
-    /* Encode Sip Version*/
-    SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
-    /*Update the Msg Buffer's current position*/
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
-    /* Put a space */
+    SipAbnfUtil::Append(*ppCurrPos, m_pszSipVersion);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-
-    /*Encode Status Code*/
-    SipPf_Strcpy(*ppCurrPos, m_pszStatusCode);
-    /*Update the Msg Buffer's current position*/
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
-    /* Put a space */
+    SipAbnfUtil::Append(*ppCurrPos, m_pszStatusCode);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszReasonPhrase);
-    /*Update the Msg Buffer's current position*/
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszReasonPhrase);
 
     return SIP_TRUE;
 }

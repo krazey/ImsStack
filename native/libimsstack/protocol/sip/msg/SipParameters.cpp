@@ -135,8 +135,7 @@ SIP_BOOL SipNameValue::Encode(
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszName);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszName);
 
     if (m_objValueList.IsEmpty() != SIP_TRUE)
     {
@@ -151,8 +150,7 @@ SIP_BOOL SipNameValue::Encode(
             SIP_CHAR* pszValue = m_objValueList.GetAt(SIP_ZERO);
             SIP_CHAR* pszTempValue =
                     SipPercentEncoding::DoPercentEncoding_Param(m_pszName, pszValue);
-            SipPf_Strcpy(*ppCurrPos, pszTempValue);
-            SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+            SipAbnfUtil::Append(*ppCurrPos, pszTempValue);
             delete[] pszTempValue;
         }
         else
@@ -176,8 +174,7 @@ SIP_BOOL SipNameValue::Encode(
                     return SIP_FALSE;
                 }
 
-                SipPf_Strcpy(*ppCurrPos, pszVal);
-                SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+                SipAbnfUtil::Append(*ppCurrPos, pszVal);
 
                 /*Condition to prevent last put of separator*/
                 if (sLocalCount < (nCount - SIP_ONE))
