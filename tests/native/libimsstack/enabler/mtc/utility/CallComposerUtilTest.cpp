@@ -210,26 +210,27 @@ TEST_F(CallComposerUtilTest, SetLocationSetsLocation)
 {
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(CID));
 
-    const ByteArray objContent =
-            ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                      "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
-                      "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
-                      "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
-                      "xmlns:gml=\"http://www.opengis.net/gml\" "
-                      "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" entity=\"pres:prid\">\n"
-                      "<dm:person id=\"\">\n"
-                      "<gp:geopriv>\n"
-                      "<gp:location-info>\n"
-                      "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">\n"
-                      "<gml:pos>1 2</gml:pos>\n"
-                      "</gs:Circle>\n"
-                      "</gp:location-info>\n"
-                      "<gp:usage-rules/>\n"
-                      "</gp:geopriv>\n"
-                      "</dm:person>\n"
-                      "</presence>\n");
+    const ByteArray objContent = ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                           "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                                           "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                                           "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                                           "xmlns:gml=\"http://www.opengis.net/gml\" "
+                                           "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+                                           "entity=\"pres:prid\">\n"
+                                           "<dm:person id=\"\">\n"
+                                           "<gp:geopriv>\n"
+                                           "<gp:location-info>\n"
+                                           "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">\n"
+                                           "<gml:pos>1 2</gml:pos>\n"
+                                           "</gs:Circle>\n"
+                                           "</gp:location-info>\n"
+                                           "<gp:usage-rules>\n"
+                                           "</gp:usage-rules>\n"
+                                           "</gp:geopriv>\n"
+                                           "</dm:person>\n"
+                                           "</presence>\n");
     EXPECT_CALL(objBodyPart, SetContent(objContent));
-    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("500")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("517")));
     EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), AString("<cid>")));
     EXPECT_CALL(objBodyPart,
             SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));

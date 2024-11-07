@@ -77,7 +77,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString& strEnti
     // clang-format off
     objContent = PidfLoXml{
         new Presence{
-            Presence::Namespace::COUNTRY,
+            Presence::Namespace::COUNTRY | Presence::Namespace::GBP,
             strEntityUri.GetLength() > 0 ? strEntityUri : CreateEntityUri(), {
             CreateLocationElement(piLocation->GetCurrentTime(), {
                 new Geopriv{
@@ -87,7 +87,9 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString& strEnti
                             strState,
                         },
                     },
-                    new UsageRules{},
+                    new UsageRules{
+                        new RetransmissionAllowed{m_strRetransmissionAllowed},
+                    },
                 },
             }),
         }},
@@ -147,7 +149,9 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityU
                         CreateShapeElement(*piLocation),
                         new Confidence{strConfidence},
                     },
-                    new UsageRules{},
+                    new UsageRules{
+                        new RetransmissionAllowed{m_strRetransmissionAllowed},
+                    },
                     new Method{strMethod},
                 },
             }),
@@ -204,7 +208,9 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& 
                         CreateShapeElement(*piLocation),
                         new Confidence{strConfidence},
                     },
-                    new UsageRules{},
+                    new UsageRules{
+                        new RetransmissionAllowed{m_strRetransmissionAllowed},
+                    },
                     new Method{strMethod},
                 },
             }),
@@ -253,7 +259,9 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString& strEntityU
                         CreateShapeElement(*piLocation),
                         new Confidence{strConfidence},
                     },
-                    new UsageRules{},
+                    new UsageRules{
+                        new RetransmissionAllowed{m_strRetransmissionAllowed},
+                    },
                     new Method{strMethod},
                 },
             }),
