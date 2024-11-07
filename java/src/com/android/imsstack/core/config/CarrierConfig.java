@@ -1029,13 +1029,13 @@ public class CarrierConfig {
         // }
         // Bundle {
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE =
-                "reg_err_code_with_ra_time_bundle";
+                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_bundle";
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL =
-                "reg_err_code_with_ra_time_only_defined_bool";
+                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_only_defined_bool";
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY =
-                "reg_err_code_with_ra_time_int_array";
+                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_int_array";
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY =
-                "reg_err_code_with_ra_time_for_update_int_array";
+                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_for_update_int_array";
         // }
         // Bundle {
         public static final String KEY_REG_RETRY_INTERVAL_BUNDLE =
