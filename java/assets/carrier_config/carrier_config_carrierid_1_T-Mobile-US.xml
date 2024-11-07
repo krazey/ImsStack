@@ -52,7 +52,7 @@
     <int name="imswfc.registration_private_header_int" value="2"/>
 
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
     <boolean name="rereg_with_changed_country_on_wifi_bool" value="true"/>
     <boolean name="support_video_for_ereg_bool" value="true"/>

@@ -778,6 +778,7 @@ public class CarrierConfig {
     /** Configuration items for internal assets. */
     public static class Assets {
         public static final String KEY_IMS_SMS_PREFIX = "imssms.";
+        public static final String KEY_IMS_VOICE_PREFIX = "imsvoice.";
 
         // Ims General
         public static final String KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL =
@@ -843,7 +844,7 @@ public class CarrierConfig {
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
-                "ignore_vops_for_volte_enable_bool";
+                KEY_IMS_VOICE_PREFIX + "ignore_vops_for_volte_enable_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
                 "ims_dereg_on_3g_network_bool";
         public static final String KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
@@ -853,7 +854,7 @@ public class CarrierConfig {
         public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
                 "no_init_reg_on_pcscf_change_bool";
         public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =
-                "plmn_block_with_timeout_on_voice_call_unavailable_bool";
+                KEY_IMS_VOICE_PREFIX + "plmn_block_with_timeout_on_voice_call_unavailable_bool";
         public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
                 "reg_contact_validation_bool";
         public static final String KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL =
@@ -865,7 +866,7 @@ public class CarrierConfig {
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
                 "required_init_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL =
-                "required_volte_block_by_ssac_bool";
+                KEY_IMS_VOICE_PREFIX + "required_volte_block_by_ssac_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
                 "required_wfc_block_by_airplane_mode_bool";
         public static final String KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL =
@@ -942,7 +943,8 @@ public class CarrierConfig {
                 "sip_message_threshold_for_transport_change_int";
         public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
                 "usat_reg_event_download_policy_int";
-        public static final String KEY_VOLTE_HYS_TIME_INT = "volte_hys_time_sec_int";
+        public static final String KEY_VOLTE_HYS_TIME_SEC_INT =
+                KEY_IMS_VOICE_PREFIX + "volte_hys_time_sec_int";
 
         public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
                 "permanent_pdn_failure_int_array";
