@@ -87,7 +87,7 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
     /*Encode Method*/
     SipPf_Strcpy(*ppCurrPos, m_pszMethod);
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     /* Put a space */
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
@@ -99,7 +99,7 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
     SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
 
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -144,14 +144,14 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*find first space i.e. end of Method*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Create a NULL terminated String of Method*/
-    m_pszMethod = SipCreateString(pStartPt, pTempLoc);
+    m_pszMethod = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -164,7 +164,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*find Second space i.e. end of Req URI*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
@@ -201,7 +201,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     /*Take the ptr to the start of  Sip Version*/
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
-    m_pszSipVersion = SipCreateString(pStartPt, pEndPt);
+    m_pszSipVersion = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszSipVersion == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,

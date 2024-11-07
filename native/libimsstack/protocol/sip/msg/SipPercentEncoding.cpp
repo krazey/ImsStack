@@ -112,7 +112,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_UserAndHeader(
             *pEncodedString = PERCENT;
             pEncodedString++;
             SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
-            SipEnc_UpdateCurrPos(&pEncodedString);
+            SipAbnfUtil::UpdateCurrentPosition(pEncodedString);
             pCurrPt++;
         }
     }
@@ -158,7 +158,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Password(SIP_CHAR* pszString)
             *pEncodedString = PERCENT;
             pEncodedString++;
             SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
-            SipEnc_UpdateCurrPos(&pEncodedString);
+            SipAbnfUtil::UpdateCurrentPosition(pEncodedString);
             pCurrPt++;
         }
     }
@@ -190,7 +190,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_Host(SIP_CHAR* pszString)
             *pEncodedString = PERCENT;
             pEncodedString++;
             SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
-            SipEnc_UpdateCurrPos(&pEncodedString);
+            SipAbnfUtil::UpdateCurrentPosition(pEncodedString);
             pCurrPt++;
         }
     }
@@ -220,7 +220,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_TokenParam(SIP_CHAR* pszString)
             *pEncodedString = PERCENT;
             pEncodedString++;
             SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
-            SipEnc_UpdateCurrPos(&pEncodedString);
+            SipAbnfUtil::UpdateCurrentPosition(pEncodedString);
             pCurrPt++;
         }
     }
@@ -250,7 +250,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentEncoding_TtlParam(SIP_CHAR* pszString)
             *pEncodedString = PERCENT;
             pEncodedString++;
             SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
-            SipEnc_UpdateCurrPos(&pEncodedString);
+            SipAbnfUtil::UpdateCurrentPosition(pEncodedString);
             pCurrPt++;
         }
     }

@@ -322,7 +322,7 @@ SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszValue);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
@@ -361,7 +361,8 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
     /*First Check the presence of params i.e. ";" and decode if present*/
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -371,7 +372,7 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pEndPt = pTempPre;
     }
     /*Now Decode the Value*/
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)
     {
         return IsEmptyHeaderBodyAllowed();
@@ -530,7 +531,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
 
     if (GetHdrType() == SipHeaderBase::CONTACT)
     {
-        pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
+        pEndPt = SipAbnfUtil::SkipWhiteSpaceFromRight(pStartPt, pEndPt);
 
         if ((pStartPt == pEndPt) && (*pStartPt == ASTERISK))
         {
@@ -547,7 +548,8 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, RIGHT_ANGLE) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, RIGHT_ANGLE) ==
+            SIP_TRUE)
     {
         if (m_pNameAddr->DecodeNameAddr(pStartPt, pTempPre) == SIP_FALSE)
         {
@@ -556,7 +558,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
 
         pStartPt = pTempNext;
         pTempNext = SIP_NULL;
-        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempNext, SIP_SEMI) == SIP_TRUE)
+        if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempNext, SIP_SEMI) == SIP_TRUE)
         {
             pTempNext = pTempNext + SIP_TWO;
         }
@@ -564,7 +566,8 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     else
     {
         SIP_INT32 nLen = nDecLen;
-        if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+                SIP_TRUE)
         {
             nLen = pTempPre - pStartPt + SIP_ONE;
         }

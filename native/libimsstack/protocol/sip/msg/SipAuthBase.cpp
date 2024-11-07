@@ -95,7 +95,7 @@ SIP_BOOL SipAuthBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_T
 
     const SIP_CHAR* pszValue = GetValue();
     SipPf_Strcpy(*ppCurrPos, pszValue);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     /*Encode space*/
     **ppCurrPos = SPACE;
@@ -235,13 +235,13 @@ SIP_BOOL SipAuthBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipAbnfUtil::FindWhiteSpace(pStartPt, pEndPt, pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszScheme = SipCreateString(pStartPt, pTempPre);
+    SIP_CHAR* pszScheme = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (SetValue(pszScheme) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -260,14 +260,15 @@ SIP_BOOL SipAuthBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Update the temp to start of LWS*/
     pTempPre = pTempPre + SIP_ONE;
     /*Skip the LWS*/
-    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
     while (pStartPt < pEndPt)
     {
         const SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
+        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, COMMA) ==
+                SIP_FALSE)
         {
             pTempPre = pEndPt;
             pTempNext = pEndPt;

@@ -76,14 +76,14 @@ SIP_BOOL SipUnknownHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszHdrName);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, COLON);
 
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     SipPf_Strcpy(*ppCurrPos, m_pszHdrValue);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return SIP_TRUE;
 }

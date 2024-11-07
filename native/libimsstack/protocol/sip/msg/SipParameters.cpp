@@ -136,7 +136,7 @@ SIP_BOOL SipNameValue::Encode(
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszName);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     if (m_valueList.IsEmpty() != SIP_TRUE)
     {
@@ -152,7 +152,7 @@ SIP_BOOL SipNameValue::Encode(
             SIP_CHAR* pszTempValue =
                     SipPercentEncoding::DoPercentEncoding_Param(m_pszName, pszValue);
             SipPf_Strcpy(*ppCurrPos, pszTempValue);
-            SipEnc_UpdateCurrPos(ppCurrPos);
+            SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
             delete[] pszTempValue;
         }
         else
@@ -177,7 +177,7 @@ SIP_BOOL SipNameValue::Encode(
                 }
 
                 SipPf_Strcpy(*ppCurrPos, pszVal);
-                SipEnc_UpdateCurrPos(ppCurrPos);
+                SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
                 /*Condition to prevent last put of separator*/
                 if (sLocalCount < (nCount - SIP_ONE))
@@ -204,12 +204,12 @@ SIP_BOOL SipNameValue::Decode(
     const SIP_CHAR* pTempPos = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, EQUAL) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPos, pTempNext, EQUAL) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
 
-    m_pszName = SipCreateString(pStartPt, pTempPos);
+    m_pszName = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (m_pszName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -227,7 +227,7 @@ SIP_BOOL SipNameValue::Decode(
                         ((pParameterComponent->GetComponentType() == IParameterComponent::URI) &&
                                 (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))))
         {
-            SIP_CHAR* pszValue = SipCreateString(pszValuePtr, pEndPt);
+            SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pszValuePtr, pEndPt);
             if (pszValue == SIP_NULL)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -256,12 +256,13 @@ SIP_BOOL SipNameValue::Decode(
                 SIP_CHAR* pszValue = SIP_NULL;
                 pTempPos = SIP_NULL;
 
-                if (SipFindPreDelimiter(pszValuePtr, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
+                if (SipAbnfUtil::FindPreDelimiter(pszValuePtr, pEndPt, pTempPos, COMMA) ==
+                        SIP_FALSE)
                 {
                     pTempPos = pEndPt;
                 }
 
-                pszValue = SipCreateString(pszValuePtr, pTempPos);
+                pszValue = SipAbnfUtil::CreateString(pszValuePtr, pTempPos);
                 if (pszValue == SIP_NULL)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -384,7 +385,8 @@ SIP_BOOL SipParameters::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
         const SIP_CHAR* pTempPos = SIP_NULL;
         const SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, cDelimiter) == SIP_FALSE)
+        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPos, pTempNext, cDelimiter) ==
+                SIP_FALSE)
         {
             pTempPos = pEndPt;
         }

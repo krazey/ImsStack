@@ -123,7 +123,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszProtocolName);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
@@ -134,7 +134,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
         return SIP_FALSE;
     }
     SipPf_Strcpy(*ppCurrPos, m_pszProtocolVer);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
@@ -145,7 +145,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
         return SIP_FALSE;
     }
     SipPf_Strcpy(*ppCurrPos, m_pszTransport);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     /*put a space for LWS*/
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
@@ -160,7 +160,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
 
     // In case of IPv6 - Left Square and Right Square Bracket already included in Host
     SipPf_Strcpy(*ppCurrPos, m_pszHost);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     if (m_nPort != SIP_ZERO)
     {
@@ -171,7 +171,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
         SipMsgUtil::Encode(*ppCurrPos, COLON);
 
         SipPf_Strcpy(*ppCurrPos, szTmp);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
@@ -224,24 +224,24 @@ SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* 
 
     const SIP_CHAR* pTempPre = SIP_NULL;
     /*check for IPV6 address*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_SQUARE) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPre, LEFT_SQUARE) == SIP_TRUE)
     {
         m_eHostType = SipAddrSpec::HOST_IPV6;
         pStartPt = pTempPre + SIP_ONE;
         pTempPre = SIP_NULL;
-        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_SQUARE) == SIP_FALSE)
+        if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPre, RIGHT_SQUARE) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pTempPre = pTempPre + SIP_ONE;
     }
-    else if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_FALSE)
+    else if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPre, COLON) == SIP_FALSE)
     {
         pTempPre = pEndPt;
     }
 
-    m_pszHost = SipCreateString(pStartPt, pTempPre);
+    m_pszHost = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszHost == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -262,10 +262,10 @@ SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* 
     pStartPt = pTempPre;
     pTempPre = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPre, COLON) == SIP_TRUE)
     {
         pTempPre = pTempPre + SIP_TWO;
-        SIP_CHAR* pszPort = SipCreateString(pTempPre, pEndPt);
+        SIP_CHAR* pszPort = SipAbnfUtil::CreateString(pTempPre, pEndPt);
         if (pszPort == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -293,13 +293,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Search for the Protocol Name End*/
     /*sent-protocol = protocol-name SLASH protocol-version SLASH transport */
     /*Find First SLASH with Skipped LWS from both side*/
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: Protocol Name Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszProtocolName = SipCreateString(pStartPt, pTempPre);
+    m_pszProtocolName = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszProtocolName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -314,13 +314,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempNext = SIP_NULL;
 
     /*Find Next SLASH with Skipped LWS from both side*/
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: Protocol Version Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszProtocolVer = SipCreateString(pStartPt, pTempPre);
+    m_pszProtocolVer = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszProtocolVer == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -334,13 +334,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempNext = SIP_NULL;
 
     /*Find the LWS i.e. End of Transport*/
-    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipAbnfUtil::FindWhiteSpace(pStartPt, pEndPt, pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in Via", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszTransport = SipCreateString(pStartPt, pTempPre);
+    m_pszTransport = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszTransport == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipViaHeader::DecodeHdr: Memory Allocation Failed",
@@ -351,11 +351,12 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Skip Fw LWS And Get the Start of Sent by
       i.e. sent-by = host [ COLON port ]  */
     pTempPre = pTempPre + SIP_ONE;
-    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
     /*Now check for the Via Prm*/
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_FALSE)
     {
         pTempPre = pEndPt;
     }

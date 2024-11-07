@@ -233,7 +233,8 @@ SIP_BOOL SipHeaderList::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         const SIP_CHAR* pTempPre = SIP_NULL;
         const SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
+        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, COMMA) ==
+                SIP_FALSE)
         {
             pTempPre = pEndPt;
             pTempNext = pEndPt;

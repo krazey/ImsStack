@@ -89,7 +89,7 @@ SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
 
     // Date: Thu, 21 Feb 2002 13:02:03 GMT
     SipPf_Strcpy(*ppCurrPos, WEEKDAY[m_eWkDay]);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     **ppCurrPos = COMMA;
     (*ppCurrPos)++;
@@ -98,19 +98,19 @@ SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     (*ppCurrPos)++;
 
     SipPf_Sprintf(*ppCurrPos, "%02u %s %4u", m_nDate, MONTH[m_eMonth], m_nYear);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     **ppCurrPos = SPACE;
     (*ppCurrPos)++;
 
     SipPf_Sprintf(*ppCurrPos, "%02u:%02u:%02u", m_nHour, m_nMin, m_nSec);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     **ppCurrPos = SPACE;
     (*ppCurrPos)++;
 
     SipPf_Strcpy(*ppCurrPos, STR_GMT);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -128,13 +128,13 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COMMA) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszTempValue = SipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pszTempValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -160,14 +160,14 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempPos + SIP_THREE;
     pTempPos = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Get the value of date*/
-    pszTempValue = SipCreateString(pStartPt, pTempPos);
+    pszTempValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -187,13 +187,13 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempPos + SIP_TWO;
     pTempPos = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pszTempValue = SipCreateString(pStartPt, pTempPos);
+    pszTempValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -213,13 +213,13 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempPos + SIP_TWO;
     pTempPos = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pszTempValue = SipCreateString(pStartPt, pTempPos);
+    pszTempValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -241,13 +241,13 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempPos + SIP_TWO;
     pTempPos = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pszTempValue = SipCreateString(pStartPt, pTempPos);
+    pszTempValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -267,13 +267,13 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempPos + SIP_TWO;
     pTempPos = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pszTempValue = SipCreateString(pStartPt, pTempPos);
+    pszTempValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
@@ -293,13 +293,13 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempPos = SIP_NULL;
 
     /*Check validity of Sec*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pszTempValue = SipCreateString(pStartPt, pTempPos);
+    pszTempValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
@@ -317,7 +317,7 @@ SIP_BOOL SipDateHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Check for GMT*/
     pStartPt = pTempPos + SIP_TWO;
 
-    SIP_CHAR* pszTempGMT = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszTempGMT = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if ((pszTempGMT != SIP_NULL) && (SipPf_Strcmp(pszTempGMT, "GMT") != 0))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "GMT not matching", SIP_ZERO, SIP_ZERO);

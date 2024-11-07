@@ -126,7 +126,8 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -150,9 +151,9 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32
     // skip "sip:" from the user name
     const SIP_CHAR* pszSIPScheme = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pszSIPScheme, COLON) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pszSIPScheme, COLON) == SIP_TRUE)
     {
-        SIP_CHAR* pszTempScheme = SipCreateString(pStartPt, pszSIPScheme);
+        SIP_CHAR* pszTempScheme = SipAbnfUtil::CreateString(pStartPt, pszSIPScheme);
         if (SipPf_Stricmp(pszTempScheme, "sip") == SIP_ZERO)
         {
             pStartPt = pszSIPScheme + 2;

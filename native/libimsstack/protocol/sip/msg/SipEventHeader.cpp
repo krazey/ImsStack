@@ -88,7 +88,7 @@ SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     }
 
     SipPf_Strcpy(*ppCurrPos, pszValue);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SIP_UINT32 nSize = m_objEventTemplates.GetSize();
 
@@ -98,7 +98,7 @@ SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
         (*ppCurrPos)++;
 
         SipPf_Strcpy(*ppCurrPos, m_objEventTemplates.GetAt(nIndex));
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
@@ -116,7 +116,8 @@ SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -134,12 +135,12 @@ SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     const SIP_CHAR* pTempPos = SIP_NULL;
     /*Case of having event template*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SIP_DOT) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
 
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -164,7 +165,8 @@ SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     while (pStartPt < pEndPt)
     {
         pTempNext = SIP_NULL;
-        if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, SIP_DOT) == SIP_FALSE)
+        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPos, pTempNext, SIP_DOT) ==
+                SIP_FALSE)
         {
             pTempPos = pEndPt;
             pTempNext = pEndPt;
@@ -177,7 +179,7 @@ SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             return SIP_FALSE;
         }
 
-        SIP_CHAR* pTemplate = SipCreateString(pStartPt, pTempPos);
+        SIP_CHAR* pTemplate = SipAbnfUtil::CreateString(pStartPt, pTempPos);
         if (pTemplate == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);

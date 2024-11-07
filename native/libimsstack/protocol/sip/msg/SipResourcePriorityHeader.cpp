@@ -67,12 +67,12 @@ SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*b
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszNameSpace);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SIP_DOT);
 
     SipPf_Strcpy(*ppCurrPos, m_pszRPriority);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -98,7 +98,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPre, SIP_DOT) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipResourcePriorityHeader::DecodeHdr: Dot missing in ResourcePriority", SIP_ZERO,
@@ -106,7 +106,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
         return SIP_FALSE;
     }
 
-    m_pszNameSpace = SipCreateString(pStartPt, pTempPre);
+    m_pszNameSpace = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszNameSpace == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -115,7 +115,7 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT
     }
 
     pStartPt = pTempPre + SIP_TWO;
-    m_pszRPriority = SipCreateString(pStartPt, pEndPt);
+    m_pszRPriority = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszRPriority == SIP_NULL)
     {
         SIP_DEBUG_WARNING(

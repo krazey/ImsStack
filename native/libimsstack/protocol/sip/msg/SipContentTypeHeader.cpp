@@ -85,12 +85,12 @@ SIP_BOOL SipContentTypeHeader::EncodeHdr(
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszMType);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
     SipPf_Strcpy(*ppCurrPos, m_pszMSubType);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
@@ -131,13 +131,13 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
     /*Find the SLASH*/
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SLASH missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszMType = SipCreateString(pStartPt, pTempPre);
+    m_pszMType = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszMType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -148,12 +148,13 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
     pTempNext = SIP_NULL;
     pTempPre = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_FALSE)
     {
         pTempPre = pEndPt;
     }
 
-    m_pszMSubType = SipCreateString(pStartPt, pTempPre);
+    m_pszMSubType = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszMSubType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
@@ -214,7 +215,7 @@ SIP_CHAR* SipContentTypeHeader::StripDQUOTE(const SIP_CHAR* pszStr)
     const SIP_CHAR* pEndPtr = pszStr + nStrLen - SIP_ONE;
     if (IS_DQUOTE(*pszStr) && IS_DQUOTE(*pEndPtr))
     {
-        return SipCreateString(pszStr + SIP_ONE, pEndPtr - SIP_ONE);
+        return SipAbnfUtil::CreateString(pszStr + SIP_ONE, pEndPtr - SIP_ONE);
     }
     return SIP_NULL;
 }

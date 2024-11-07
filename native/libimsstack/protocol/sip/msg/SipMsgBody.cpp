@@ -253,7 +253,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*Get the position previous to ":"*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: colon not found", SIP_ZERO, SIP_ZERO);
@@ -261,13 +261,13 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     }
 
     const SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
-    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempNext, pEndPt);
 
     /*skip the WSP form back*/
-    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipAbnfUtil::SkipRightWhiteSpace(pStartPt, pTempPos);
 
     /*Create  the header name*/
-    SIP_CHAR* pszHdrName = SipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pszHdrName = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszHdrName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: Memory Allocation failed",
@@ -303,7 +303,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         pUnknown->SetHeaderName(pszHdrName);
         delete[] pszHdrName;
 
-        SIP_CHAR* pszHdrValue = SipCreateString(pTempNext, pEndPt);
+        SIP_CHAR* pszHdrValue = SipAbnfUtil::CreateString(pTempNext, pEndPt);
         if (pszHdrValue == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
@@ -549,7 +549,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
         SIP_UINT32 nDecLen = SIP_ZERO;
         const SIP_CHAR* pTempPos = SIP_NULL;
         // Fail condition to be added
-        SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd);
+        SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd);
         nDecLen = pTempPos - pStartPt + SIP_ONE;
 
         if (m_pMIMEHdrs->DecodeMIMEHdrs(pStartPt, nDecLen) == SIP_FALSE)
@@ -810,7 +810,7 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
     SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
-    SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
 
     /*Get the message bodies and encode them*/
     for (SIP_UINT32 nCount = SIP_ZERO; nCount < nNumBodies; nCount++)
@@ -835,7 +835,7 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
         SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
         SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
         SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
-        SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
     }
 
     /*End boundary*/
@@ -943,7 +943,7 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
     }
 
     /*Remove CRLF before boundary*/
-    pStartPt = SkipConsecutiveCRLFs(pStartPt);
+    pStartPt = SipAbnfUtil::SkipConsecutiveCrlf(pStartPt);
 
     /*Get the boundrary (Find start of Transport -padding)*/
     /*Update start pt aftr  "--" */
@@ -953,9 +953,9 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
     SIP_CHAR* pszTempBoundary = SIP_NULL;
     const SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_TRUE)
+    if (SipAbnfUtil::FindCrlf(pStartPt, pEndPt, pTempPos) == SIP_TRUE)
     {
-        pszTempBoundary = SipCreateString(pStartPt, pTempPos);
+        pszTempBoundary = SipAbnfUtil::CreateString(pStartPt, pTempPos);
         if (pszTempBoundary == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -983,7 +983,7 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
     /*Update the start point till the start of boundary*/
     pStartPt = pStartPt + nBoundaryLen + SIP_ONE;
     /*Update the Start point to the Start Of headers*/
-    pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
 
     SIP_BOOL bBodyEnd = SIP_FALSE;
     while ((pStartPt <= pEndPt) && (bBodyEnd == SIP_FALSE))
