@@ -63,11 +63,11 @@
     <int name="ims.ims_establishment_time_sec_int" value="300"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="1"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int-array name="permanent_pdn_failure_int_array" num="2">
+    <int-array name="ims.permanent_pdn_failure_int_array" num="2">
         <item value="28"/>
         <item value="33"/>
     </int-array>
-    <int-array name="rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="3">
+    <int-array name="ims.rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="3">
         <item value="0"/>
         <item value="1"/>
         <item value="9"/>

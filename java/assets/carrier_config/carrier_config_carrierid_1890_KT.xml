@@ -52,13 +52,13 @@
     <int name="ims.reg_retry_cnt_with_ipsec_on_auth_failure_int" value="0"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int name="imsemergency.roaming_preferred_ereg_int" value="2"/>
-    <int-array name="reg_permanent_err_max_cnt_int_array" num="1">
+    <int-array name="ims.reg_permanent_err_max_cnt_int_array" num="1">
         <item value="2"/>
     </int-array>
-    <int-array name="reg_retry_err_code_without_ipsec_int_array" num="1">
+    <int-array name="ims.reg_retry_err_code_without_ipsec_int_array" num="1">
         <item value="406"/>
     </int-array>
-    <int-array name="rereg_err_code_for_call_end_int_array" num="1">
+    <int-array name="ims.rereg_err_code_for_call_end_int_array" num="1">
         <item value="403"/>
     </int-array>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->

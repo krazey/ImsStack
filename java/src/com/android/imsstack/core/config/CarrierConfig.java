@@ -958,28 +958,29 @@ public class CarrierConfig {
                 KEY_IMS_VOICE_PREFIX + "volte_hys_time_sec_int";
 
         public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
-                "permanent_pdn_failure_int_array";
+                KEY_IMS_PREFIX + "permanent_pdn_failure_int_array";
         public static final String KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY =
-                "reg_err_code_for_pcscf_discovery_int_array";
+                KEY_IMS_PREFIX + "reg_err_code_for_pcscf_discovery_int_array";
         public static final String KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY =
-                "reg_permanent_err_max_cnt_int_array";
+                KEY_IMS_PREFIX + "reg_permanent_err_max_cnt_int_array";
         public static final String KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY =
-                "reg_retry_err_code_without_ipsec_int_array";
+                KEY_IMS_PREFIX + "reg_retry_err_code_without_ipsec_int_array";
         public static final String KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY =
-                "rereg_err_code_for_call_end_int_array";
+                KEY_IMS_PREFIX + "rereg_err_code_for_call_end_int_array";
         public static final String KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY =
-                "rereg_err_code_for_ims_pdn_reactivation_int_array";
+                KEY_IMS_PREFIX + "rereg_err_code_for_ims_pdn_reactivation_int_array";
         public static final String
                 KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
-                        "rereg_err_code_for_init_reg_with_available_pcscf_int_array";
+                        KEY_IMS_PREFIX
+                                + "rereg_err_code_for_init_reg_with_available_pcscf_int_array";
         public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
-                "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
+                KEY_IMS_PREFIX + "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
         public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY =
-                "sub_err_code_for_init_reg_with_next_pcscf_int_array";
+                KEY_IMS_PREFIX + "sub_err_code_for_init_reg_with_next_pcscf_int_array";
         public static final String KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY =
-                "sub_err_code_for_stopping_by_expiration_time_int_array";
+                KEY_IMS_PREFIX + "sub_err_code_for_stopping_by_expiration_time_int_array";
         public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
-                "supported_roaming_rats_int_array";
+                KEY_IMS_PREFIX + "supported_roaming_rats_int_array";
         public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
                 KEY_IMS_WFC_PREFIX + "vowifi_sub_err_code_for_init_reg_int_array";
         // Bundle {

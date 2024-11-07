@@ -379,27 +379,27 @@
     <int name="ims.usat_reg_event_download_policy_int" value="0"/>
     <int name="imsvoice.volte_hys_time_sec_int" value="0"/>
 
-    <int-array name="permanent_pdn_failure_int_array" num="0">
+    <int-array name="ims.permanent_pdn_failure_int_array" num="0">
     </int-array>
-    <int-array name="reg_err_code_for_pcscf_discovery_int_array" num="0">
+    <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="0">
     </int-array>
-    <int-array name="reg_permanent_err_max_cnt_int_array" num="0">
+    <int-array name="ims.reg_permanent_err_max_cnt_int_array" num="0">
     </int-array>
-    <int-array name="reg_retry_err_code_without_ipsec_int_array" num="0">
+    <int-array name="ims.reg_retry_err_code_without_ipsec_int_array" num="0">
     </int-array>
-    <int-array name="rereg_err_code_for_call_end_int_array" num="0">
+    <int-array name="ims.rereg_err_code_for_call_end_int_array" num="0">
     </int-array>
-    <int-array name="rereg_err_code_for_ims_pdn_reactivation_int_array" num="0">
+    <int-array name="ims.rereg_err_code_for_ims_pdn_reactivation_int_array" num="0">
     </int-array>
-    <int-array name="rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="0">
+    <int-array name="ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="0">
     </int-array>
-    <int-array name="rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="0">
+    <int-array name="ims.rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="0">
     </int-array>
-    <int-array name="sub_err_code_for_init_reg_with_next_pcscf_int_array" num="0">
+    <int-array name="ims.sub_err_code_for_init_reg_with_next_pcscf_int_array" num="0">
     </int-array>
-    <int-array name="sub_err_code_for_stopping_by_expiration_time_int_array" num="0">
+    <int-array name="ims.sub_err_code_for_stopping_by_expiration_time_int_array" num="0">
     </int-array>
-    <int-array name="supported_roaming_rats_int_array" num="0">
+    <int-array name="ims.supported_roaming_rats_int_array" num="0">
     </int-array>
     <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="0">
     </int-array>
