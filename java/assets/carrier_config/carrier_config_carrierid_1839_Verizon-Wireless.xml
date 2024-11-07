@@ -150,9 +150,9 @@
         </int-array>
     </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
-    <pbundle name="sub_err_code_for_terminated_bundle">
-        <int name="sub_err_code_for_terminated_with_retry_max_cnt_int" value="2"/>
-        <int-array name="sub_err_code_for_terminated_int_array" num="4">
+    <pbundle name="ims.sub_err_code_for_terminated_bundle">
+        <int name="ims.sub_err_code_for_terminated_with_retry_max_cnt_int" value="2"/>
+        <int-array name="ims.sub_err_code_for_terminated_int_array" num="4">
             <item value="400"/>
             <item value="403"/>
             <item value="404"/>

@@ -1057,11 +1057,11 @@ public class CarrierConfig {
         // }
         // Bundle {
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE =
-                "sub_err_code_for_terminated_bundle";
+                KEY_IMS_PREFIX + "sub_err_code_for_terminated_bundle";
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT =
-                "sub_err_code_for_terminated_with_retry_max_cnt_int";
+                KEY_IMS_PREFIX + "sub_err_code_for_terminated_with_retry_max_cnt_int";
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY =
-                "sub_err_code_for_terminated_int_array";
+                KEY_IMS_PREFIX + "sub_err_code_for_terminated_int_array";
         // }
         // Bundle {
         public static final String KEY_WFC_ERR_MESSAGE_BUNDLE =
