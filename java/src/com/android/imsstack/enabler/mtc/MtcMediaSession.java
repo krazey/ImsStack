@@ -386,6 +386,19 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     /**
+     * Notify an accumulated video data usage of the current session.
+     *
+     * @param bytes bytes of send and received rtp video data.
+     */
+    public void onNotifyVideoDataUsage(final long bytes) {
+        log("onNotifyVideoDataUsage bytes=" + bytes);
+
+        if (mVideoListener != null) {
+            mVideoListener.onMediaSessionDataUsageChanged(this, bytes);
+        }
+    }
+
+    /**
      * Notifies when the remote party has sent text message via RTT
      * @param rttMessage String containing the received characters.
      */
@@ -614,7 +627,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      */
     public void requestCallDataUsage() {
         log("requestCallDataUsage");
-        // TODO: add implementation
+
+        if (mMediaSession != null) {
+            mMediaSession.requestCallDataUsage();
+        }
     }
 
     public void notifyMediaInfoChanged(int mediaInfo, int intParam, String strParam) {

@@ -656,8 +656,8 @@ public class VideoSessionHandler extends MediaState {
     }
 
     private void handleVideoDataUsageNotification(final long bytes) {
-        if (mVideoSessionCallbackHandler != null) {
-            mVideoSessionCallbackHandler.onNotifyVideoDataUsage(bytes);
+        if (mMtcMediaVideoCallProvider != null) {
+            mMtcMediaVideoCallProvider.onNotifyVideoDataUsage(bytes);
         }
     }
 

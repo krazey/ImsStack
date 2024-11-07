@@ -293,7 +293,7 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
         // Receive Video Data Usage Notification
         mVideoSessionCallback.notifyVideoDataUsage(MediaTestUtils.DATA_BYTES);
         processAllMessages();
-        verify(mMockVideoSessionCallbackHandler)
+        verify(mMockMtcMediaSession)
                 .onNotifyVideoDataUsage(eq(MediaTestUtils.DATA_BYTES));
     }
 

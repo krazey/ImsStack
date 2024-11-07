@@ -103,6 +103,20 @@ public class MediaSession implements IMediaConnectionObserver {
         }
     }
 
+    /**
+     * request Video call data usage to the ImsMedia
+     */
+
+    public void requestCallDataUsage() {
+        ImsLog.v("requestCallDataUsage");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(MediaConstants.REQUEST_VIDEO_DATA_USAGE);
+        parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        parcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(parcel);
+    }
+
     @VisibleForTesting
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession,
             ImsMediaManager imsMediaManager, Executor executor) {
