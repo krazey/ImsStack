@@ -895,11 +895,11 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY[] =
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE[] =
-        "sub_err_code_for_init_reg_bundle";
+        KEY_IMS_PREFIX "sub_err_code_for_init_reg_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT[] =
-        "sub_err_code_for_init_reg_with_retry_max_cnt_int";
+        KEY_IMS_PREFIX "sub_err_code_for_init_reg_with_retry_max_cnt_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] =
-        "sub_err_code_for_init_reg_int_array";
+        KEY_IMS_PREFIX "sub_err_code_for_init_reg_int_array";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE[] =

@@ -98,9 +98,9 @@
         </int-array>
     </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="sub_err_code_for_init_reg_bundle">
-        <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
-        <int-array name="sub_err_code_for_init_reg_int_array" num="1">
+    <pbundle name="ims.sub_err_code_for_init_reg_bundle">
+        <int name="ims.sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
+        <int-array name="ims.sub_err_code_for_init_reg_int_array" num="1">
             <item value="0"/>
         </int-array>
     </pbundle>
