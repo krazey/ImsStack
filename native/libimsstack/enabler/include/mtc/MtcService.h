@@ -32,6 +32,7 @@ class IMtcAosConnector;
 class IMtcAosStateListener;
 class IMtcContext;
 class MtcAosEventHandler;
+class MtcNetworkWatcher;
 class MtcRoutingRejectHandler;
 
 class MtcService :
@@ -53,6 +54,10 @@ public:
     void RemoveAosStateListener(IN IMtcAosStateListener* piListener) override;
     void AddSrvccStateListener(IN ISrvccStateListener* piListener) override;
     void RemoveSrvccStateListener(IN ISrvccStateListener* piListener) override;
+    void AddNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener) override;
+    void RemoveNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener) override;
+    IMS_SINT32 GetRatType() const override;
+    IMS_SINT32 GetMobileRatType() const override;
 
     inline IMS_BOOL IsActive() const override { return m_eStatus == ServiceStatus::SERVICE_ACTIVE; }
     inline IMS_BOOL IsEmergency() const override { return m_eType == ServiceType::EMERGENCY; }
@@ -125,6 +130,7 @@ protected:
     IMtcAosConnector* m_pAosConnector;
     MtcAosEventHandler* m_pAosEventHandler;
     SrvccStateManager* m_pSrvccStateManager;
+    MtcNetworkWatcher* m_pNetworkWatcher;
     MtcRoutingRejectHandler* m_pRoutingRejectHandler;
     SuppStatus m_eTbcwStatus;
     SuppStatus m_eTirStatus;

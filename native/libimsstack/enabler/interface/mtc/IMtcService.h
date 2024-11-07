@@ -25,6 +25,7 @@ class ICoreService;
 class IJniMtcServiceThread;
 class IMtcAosConnector;
 class IMtcAosStateListener;
+class IMtcNetworkWatcherListener;
 class ISrvccStateListener;
 enum class ServiceStatus;
 enum class ServiceType;
@@ -37,51 +38,79 @@ public:
     virtual ~IMtcService() {}
 
     /**
-     * @brief Gets
+     * @brief Gets the service type.
      *
-     * @return
+     * @return The service type.
      */
     virtual ServiceType GetServiceType() const = 0;
 
     /**
-     * @brief Adds
+     * @brief Adds a listener for AOS state changes.
      *
-     * @param piListener
+     * @param piListener The listener to add.
      */
     virtual void AddAosStateListener(IN IMtcAosStateListener* piListener) = 0;
 
     /**
-     * @brief Removes
+     * @brief Removes a listener for AOS state changes.
      *
-     * @param piListener
+     * @param piListener The listener to remove.
      */
     virtual void RemoveAosStateListener(IN IMtcAosStateListener* piListener) = 0;
 
     /**
-     * @brief Adds
+     * @brief Removes a listener for SRVCC state changes.
      *
-     * @param piListener
+     * @param piListener The listener to remove.
      */
     virtual void AddSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
 
     /**
-     * @brief Removes
+     * @brief Removes a listener for SRVCC state changes.
      *
-     * @param piListener
+     * @param piListener The listener to remove.
      */
     virtual void RemoveSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
 
     /**
-     * @brief Checks
+     * @brief Adds a listener for network watcher events.
      *
-     * @return
+     * @param piListener The listener to add.
+     */
+    virtual void AddNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener) = 0;
+
+    /**
+     * @brief Removes a listener for network watcher events.
+     *
+     * @param piListener The listener to remove.
+     */
+    virtual void RemoveNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener) = 0;
+
+    /**
+     * @brief Gets the current RAT type.
+     *
+     * @return The current RAT type.
+     */
+    virtual IMS_SINT32 GetRatType() const = 0;
+
+    /**
+     * @brief Gets the current mobile RAT type.
+     *
+     * @return The current mobile RAT type.
+     */
+    virtual IMS_SINT32 GetMobileRatType() const = 0;
+
+    /**
+     * @brief Checks if the service is active.
+     *
+     * @return True if the service is active.
      */
     virtual IMS_BOOL IsActive() const = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if the service is in emergency mode.
      *
-     * @return
+     * @return True if the service is in emergency mode.
      */
     virtual IMS_BOOL IsEmergency() const = 0;
 
@@ -137,85 +166,87 @@ public:
     virtual IMS_BOOL IsCsfbAvailable() const = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the old service status.
      *
-     * @return
+     * @return The old service status.
      */
     virtual ServiceStatus GetOldStatus() const = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the current service status.
      *
-     * @return
+     * @return The current service status.
      */
     virtual ServiceStatus GetStatus() const = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the ICoreService object.
      *
-     * @return
+     * @return The ICoreService object.
      */
     virtual ICoreService* GetICoreService() const = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the IMtcAosConnector object.
      *
-     * @return
+     * @return The IMtcAosConnector object.
      */
     virtual IMtcAosConnector* GetAosConnector() const = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the IJniMtcServiceThread object.
      *
-     * @return
+     * @return The IJniMtcServiceThread object.
      */
     virtual IJniMtcServiceThread* GetJniServiceThread() const = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the current SRVCC state.
      *
-     * @return
+     * @return The current SRVCC state.
      */
     virtual SrvccState GetSrvccState() const = 0;
 
     /**
-     * @brief Updates
+     * @brief Updates the SRVCC state.
      *
-     * @param eState
+     * @param eState The new SRVCC state.
      */
     virtual void UpdateSrvccState(IN SrvccState eState) = 0;
 
     /**
-     * @brief Opens
+     * @brief Opens an emergency service.
      *
+     * @param eServiceType The type of emergency service to open.
      */
     virtual void OpenEmergencyService(IN ServiceType eServiceType) = 0;
 
     /**
-     * @brief Stops
-     *
+     * @brief Stops an emergency service.
      */
     virtual void StopEmergencyService() = 0;
 
     /**
-     * @brief Sends
+     * @brief Processes a test command.
      *
-     * @return
+     * @param nCommand The command to process.
+     * @param nWParam The first parameter for the command.
+     * @param nLParam The second parameter for the command.
      */
     virtual void ProcessTestCommand(
             IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam) = 0;
 
     /**
-     * @brief Sets
+     * @brief Sets the terminal-based call waiting (TBCW) status.
      *
-     * @param bEnabled
+     * @param bEnabled True to enable TBCW, false to disable it.
      */
     virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the terminal-based call waiting (TBCW) status.
      *
-     * @return
+     * @return The TBCW status.
      */
     virtual SuppStatus GetTbcwStatus() const = 0;
 
