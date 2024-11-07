@@ -109,7 +109,6 @@ protected:
     {
         m_pAosInfo->NotifyEmergencyCallState(bIsInitialized);
     }
-    void NotifyScbmState(IN IMS_UINT32 nState) { m_pAosInfo->NotifyScbmState(nState); }
     void NotifyPublishState(IN IMS_BOOL bIsStarted) { m_pAosInfo->NotifyPublishState(bIsStarted); }
     void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
     {
@@ -508,36 +507,6 @@ TEST_F(AosInfoTest, NotifyEmergencyCallState_Test)
 
     NotifyEmergencyCallState(IMS_TRUE);
     NotifyEmergencyCallState(IMS_FALSE);
-}
-
-TEST_F(AosInfoTest, NotifyScbmState_Test)
-{
-    // Expectation: Call AosRegistration::RequestCmd()
-    //      with (IAosRegistration::CMD_SCBM_STARTED) if param is SCBM_STARTED
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED) if param is SCBM_TERMINATED
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED_ECALL) if param is SCBM_TERMINATED_BY_ECALL
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED_ESMS) if param is SCBM_TERMINATED_BY_ESMS
-    //      No call if param is invalid
-
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
-
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_STARTED, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED_ECALL, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED_ESMS, _))
-            .Times(1);
-
-    NotifyScbmState(IImsAosInfo::SCBM_STARTED);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED_BY_ECALL);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED_BY_ESMS);
-    NotifyScbmState(0);
 }
 
 TEST_F(AosInfoTest, NotifyPublishState_Test)

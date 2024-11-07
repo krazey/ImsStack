@@ -113,30 +113,6 @@ public:
     // --------- Command Request [END] ---------
 };
 
-class AoSSCBMInfo
-{
-public:
-    enum
-    {
-        STARTED = 0,
-        TERMINATED,
-        TERMINATED_ECALL,
-        TERMINATED_ESMS,
-    };
-};
-
-class AoSRegisterInfo
-{
-public:
-    enum
-    {
-        ECALL_INIT = 0,
-        ECALL_DONE,
-        ESMS_INIT,
-        ESMS_DONE
-    };
-};
-
 class AoSIMSService
 {
 public:

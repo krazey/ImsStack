@@ -42,7 +42,6 @@ public:
     MOCK_METHOD(AString, GetSupportedHeaderValue, (), (override));
     MOCK_METHOD(AString, GetServiceRouteHeaderValue, (), (override));
     MOCK_METHOD(void, NotifyEmergencyCallState, (IN IMS_BOOL bIsInitialized), (override));
-    MOCK_METHOD(void, NotifyScbmState, (IN IMS_UINT32 nState), (override));
     MOCK_METHOD(void, NotifyPublishState, (IN IMS_BOOL bIsStarted), (override));
     MOCK_METHOD(void, NotifyEmergencySmsState, (IN IMS_BOOL bIsInitialized), (override));
     MOCK_METHOD(void, NotifyEpsfbCallState, (IN IMS_UINT32 nState), (override));
