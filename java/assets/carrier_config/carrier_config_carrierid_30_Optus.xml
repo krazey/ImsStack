@@ -26,7 +26,7 @@
         <item value="403"/>
     </int-array>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
-    <int name="reg_retry_default_policy_int" value="1"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
 
     <!-- Ut/Xcap Assets -->
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="true"/>

@@ -905,7 +905,7 @@ public class CarrierConfig {
                 KEY_IMS_WFC_PREFIX + "video_over_wifi_supported_without_voice_bool";
 
         public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
-                "contact_user_info_policy_for_non_reg_message_int";
+                KEY_IMS_PREFIX + "contact_user_info_policy_for_non_reg_message_int";
         public static final String KEY_EPDN_PREFERRED_IPTYPE_INT =
                 KEY_IMS_EMERGENCY_PREFIX + "epdn_preferred_iptype_int";
         public static final String KEY_EREG_RETRY_MAX_CNT_INT =
@@ -913,42 +913,47 @@ public class CarrierConfig {
         public static final String KEY_EREG_RETRY_TIMER_MILLIS_INT =
                 KEY_IMS_EMERGENCY_PREFIX + "ereg_retry_timer_millis_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
-                "geolocation_pidf_forming_policy_int";
+                KEY_IMS_PREFIX + "geolocation_pidf_forming_policy_int";
         public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
-                "ims_establishment_time_sec_int";
-        public static final String KEY_IMS_PREFERRED_IPTYPE_INT = "ims_preferred_iptype_int";
-        public static final String KEY_IMS_SIGNALLING_DSCP_INT = "ims_signalling_dscp_int";
+                KEY_IMS_PREFIX + "ims_establishment_time_sec_int";
+        public static final String KEY_IMS_PREFERRED_IPTYPE_INT =
+                KEY_IMS_PREFIX + "ims_preferred_iptype_int";
+        public static final String KEY_IMS_SIGNALLING_DSCP_INT =
+                KEY_IMS_PREFIX + "ims_signalling_dscp_int";
         public static final String KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT =
-                "reg_actual_wait_time_policy_int";
+                KEY_IMS_PREFIX + "reg_actual_wait_time_policy_int";
         public static final String KEY_REG_DEFAULT_WAIT_TIME_INT =
-                "reg_default_wait_time_int";
+                KEY_IMS_PREFIX + "reg_default_wait_time_int";
         public static final String KEY_REG_OUT_OF_SERVICE_POLICY_INT =
-                "reg_out_of_service_policy_int";
+                KEY_IMS_PREFIX + "reg_out_of_service_policy_int";
         public static final String KEY_REG_PCSCF_UPDATE_POLICY_INT =
-                "reg_pcscf_update_policy_int";
-        public static final String KEY_REG_RETRY_305_POLICY_INT = "reg_retry_305_policy_int";
-        public static final String KEY_REG_RETRY_503_POLICY_INT = "reg_retry_503_policy_int";
+                KEY_IMS_PREFIX + "reg_pcscf_update_policy_int";
+        public static final String KEY_REG_RETRY_305_POLICY_INT =
+                KEY_IMS_PREFIX + "reg_retry_305_policy_int";
+        public static final String KEY_REG_RETRY_503_POLICY_INT =
+                KEY_IMS_PREFIX + "reg_retry_503_policy_int";
         public static final String KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT =
-                "reg_retry_cnt_on_single_pcscf_int";
-        public static final String KEY_REG_RETRY_CNT_PER_PCSCF_INT = "reg_retry_cnt_per_pcscf_int";
+                KEY_IMS_PREFIX + "reg_retry_cnt_on_single_pcscf_int";
+        public static final String KEY_REG_RETRY_CNT_PER_PCSCF_INT =
+                KEY_IMS_PREFIX + "reg_retry_cnt_per_pcscf_int";
         public static final String KEY_REG_RETRY_CNT_RESET_POLICY_INT =
-                "reg_retry_cnt_reset_policy_int";
+                KEY_IMS_PREFIX + "reg_retry_cnt_reset_policy_int";
         public static final String KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT =
-                "reg_retry_cnt_with_ipsec_on_auth_failure_int";
+                KEY_IMS_PREFIX + "reg_retry_cnt_with_ipsec_on_auth_failure_int";
         public static final String KEY_REG_RETRY_DEFAULT_POLICY_INT =
-                "reg_retry_default_policy_int";
+                KEY_IMS_PREFIX + "reg_retry_default_policy_int";
         public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
-                "reg_retry_timer_f_policy_int";
+                KEY_IMS_PREFIX + "reg_retry_timer_f_policy_int";
         public static final String KEY_REG_TIMER_FOR_ECALL_MILLIS_INT =
                 KEY_IMS_EMERGENCY_PREFIX + "reg_timer_for_ecall_millis_int";
         public static final String KEY_REREG_RETRY_305_POLICY_INT =
-                "rereg_retry_305_policy_int";
+                KEY_IMS_PREFIX + "rereg_retry_305_policy_int";
         public static final String KEY_ROAMING_PREFERRED_EREG_INT =
                 KEY_IMS_EMERGENCY_PREFIX + "roaming_preferred_ereg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
-                "sip_message_threshold_for_transport_change_int";
+                KEY_IMS_PREFIX + "sip_message_threshold_for_transport_change_int";
         public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
-                "usat_reg_event_download_policy_int";
+                KEY_IMS_PREFIX + "usat_reg_event_download_policy_int";
         public static final String KEY_VOLTE_HYS_TIME_SEC_INT =
                 KEY_IMS_VOICE_PREFIX + "volte_hys_time_sec_int";
 

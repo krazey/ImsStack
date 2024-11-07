@@ -20,7 +20,7 @@
     <!-- Aos -->
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-    <int name="reg_out_of_service_policy_int" value="1"/>
+    <int name="ims.reg_out_of_service_policy_int" value="1"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>

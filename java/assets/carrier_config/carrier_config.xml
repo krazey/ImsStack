@@ -352,31 +352,31 @@
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="false"/>
     <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="false"/>
 
-    <int name="contact_user_info_policy_for_non_reg_message_int" value="1"/>
+    <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="1"/>
     <int name="imsemergency.epdn_preferred_iptype_int" value="1"/>
     <int name="imsemergency.ereg_retry_max_cnt_int" value="0"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>
-    <int name="geolocation_pidf_forming_policy_int" value="1"/>
-    <int name="ims_establishment_time_sec_int" value="0"/>
-    <int name="ims_preferred_iptype_int" value="1"/>
-    <int name="ims_signalling_dscp_int" value="46"/>
-    <int name="reg_actual_wait_time_policy_int" value="0"/>
-    <int name="reg_default_wait_time_int" value="0"/>
-    <int name="reg_out_of_service_policy_int" value="0"/>
-    <int name="reg_pcscf_update_policy_int" value="0"/>
-    <int name="reg_retry_305_policy_int" value="1"/>
-    <int name="reg_retry_503_policy_int" value="1"/>
-    <int name="reg_retry_cnt_on_single_pcscf_int" value="0"/>
-    <int name="reg_retry_cnt_per_pcscf_int" value="0"/>
-    <int name="reg_retry_cnt_reset_policy_int" value="0"/>
-    <int name="reg_retry_cnt_with_ipsec_on_auth_failure_int" value="3"/>
-    <int name="reg_retry_default_policy_int" value="0"/>
-    <int name="reg_retry_timer_f_policy_int" value="0"/>
+    <int name="ims.geolocation_pidf_forming_policy_int" value="1"/>
+    <int name="ims.ims_establishment_time_sec_int" value="0"/>
+    <int name="ims.ims_preferred_iptype_int" value="1"/>
+    <int name="ims.ims_signalling_dscp_int" value="46"/>
+    <int name="ims.reg_actual_wait_time_policy_int" value="0"/>
+    <int name="ims.reg_default_wait_time_int" value="0"/>
+    <int name="ims.reg_out_of_service_policy_int" value="0"/>
+    <int name="ims.reg_pcscf_update_policy_int" value="0"/>
+    <int name="ims.reg_retry_305_policy_int" value="1"/>
+    <int name="ims.reg_retry_503_policy_int" value="1"/>
+    <int name="ims.reg_retry_cnt_on_single_pcscf_int" value="0"/>
+    <int name="ims.reg_retry_cnt_per_pcscf_int" value="0"/>
+    <int name="ims.reg_retry_cnt_reset_policy_int" value="0"/>
+    <int name="ims.reg_retry_cnt_with_ipsec_on_auth_failure_int" value="3"/>
+    <int name="ims.reg_retry_default_policy_int" value="0"/>
+    <int name="ims.reg_retry_timer_f_policy_int" value="0"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="0"/>
-    <int name="rereg_retry_305_policy_int" value="1"/>
+    <int name="ims.rereg_retry_305_policy_int" value="1"/>
     <int name="imsemergency.roaming_preferred_ereg_int" value="-1"/>
-    <int name="sip_message_threshold_for_transport_change_int" value="200"/>
-    <int name="usat_reg_event_download_policy_int" value="0"/>
+    <int name="ims.sip_message_threshold_for_transport_change_int" value="200"/>
+    <int name="ims.usat_reg_event_download_policy_int" value="0"/>
     <int name="imsvoice.volte_hys_time_sec_int" value="0"/>
 
     <int-array name="permanent_pdn_failure_int_array" num="0">

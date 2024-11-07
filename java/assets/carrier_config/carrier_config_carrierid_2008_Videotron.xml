@@ -16,7 +16,7 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <int name="reg_retry_305_policy_int" value="3"/>
+    <int name="ims.reg_retry_305_policy_int" value="3"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>
