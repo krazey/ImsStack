@@ -777,6 +777,8 @@ public class CarrierConfig {
 
     /** Configuration items for internal assets. */
     public static class Assets {
+        public static final String KEY_IMS_SMS_PREFIX = "imssms.";
+
         // Ims General
         public static final String KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL =
                 "sdp_negotiation_required_for_non_rpr_bool";
@@ -871,7 +873,7 @@ public class CarrierConfig {
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 "sip_over_ipsec_enabled_in_roaming_bool";
         public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL =
-                "sms_over_ims_available_without_voice_capa_bool";
+                KEY_IMS_SMS_PREFIX + "sms_over_ims_available_without_voice_capa_bool";
         public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
                 "support_contact_user_info_bool";
         public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
