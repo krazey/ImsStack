@@ -191,7 +191,8 @@ protected:
     // Session class
     virtual Session* CreateSession();
     virtual SessionRefreshHelper* CreateRefreshHelper();
-    virtual IMS_RESULT HandleProvisionalResponse(IN ISipClientConnection* piScc);
+    virtual IMS_RESULT HandleProvisionalResponse(
+            IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod);
     virtual IMS_RESULT HandleRequestToUpdate(IN ISipServerConnection* piSsc);
     virtual IMS_RESULT HandleResponseToUpdate(IN ISipClientConnection* piScc);
     inline virtual IMS_BOOL HasPendingPrack() const { return IMS_FALSE; }

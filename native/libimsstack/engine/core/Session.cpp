@@ -3907,7 +3907,8 @@ PROTECTED VIRTUAL SessionRefreshHelper* Session::CreateRefreshHelper()
     return new SessionRefreshHelper(GetService(), this);
 }
 
-PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientConnection* piScc)
+PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod)
 {
     IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
@@ -3916,24 +3917,18 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
         if (IsConfigurationSet(CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED))
         {
             // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-            ImsList<Message*> objResponses;
+            ImsList<Message*> objResponses = GetPreviousResponses(nServiceMethod);
 
-            if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
+            if (!objResponses.IsEmpty())
             {
-                objResponses = GetPreviousResponses(IMessage::SESSION_START);
+                IMS_TRACE_D("100 Trying is received - handled by the application", 0, 0, 0);
+                PostMessage(
+                        AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
             }
-            else
-            {
-                objResponses = GetPreviousResponses(IMessage::SESSION_UPDATE);
-            }
-
-            IMS_TRACE_D(
-                    "100 Trying is received; It will be handled by the application...", 0, 0, 0);
-            PostMessage(AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
         }
         else
         {
-            IMS_TRACE_D("100 Trying is received; Ignore it...", 0, 0, 0);
+            IMS_TRACE_D("100 Trying is received - ignored", 0, 0, 0);
         }
 
         return IMS_SUCCESS;
@@ -3966,18 +3961,12 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
     }
 
     // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-    ImsList<Message*> objResponses;
+    ImsList<Message*> objResponses = GetPreviousResponses(nServiceMethod);
 
-    if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
+    if (!objResponses.IsEmpty())
     {
-        objResponses = GetPreviousResponses(IMessage::SESSION_START);
+        PostMessage(AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
     }
-    else
-    {
-        objResponses = GetPreviousResponses(IMessage::SESSION_UPDATE);
-    }
-
-    PostMessage(AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
 
     if (nStatusCode == SipStatusCode::SC_180)
     {
@@ -6079,7 +6068,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
     // Handle 1xx response first...
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        IMS_RESULT nResult = HandleProvisionalResponse(piScc);
+        IMS_RESULT nResult = HandleProvisionalResponse(piScc, nServiceMethod);
 
         if ((nState == STATE_NEGOTIATING) && SipStatusCode::IsProvisional(nStatusCode) &&
                 (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
