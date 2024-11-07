@@ -23,7 +23,7 @@
         <item value="1"/>
     </int-array>
     <int name="imswfc.registration_private_header_int" value="1"/>
-    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
     <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
 
     <!-- Ut/Xcap Config -->

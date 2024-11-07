@@ -777,6 +777,11 @@ public class CarrierConfig {
 
     /** Configuration items for internal assets. */
     public static class Assets {
+        public static final String KEY_IMS_EMERGENCY_PREFIX = "imsemergency.";
+        public static final String KEY_IMS_SMS_PREFIX = "imssms.";
+        public static final String KEY_IMS_VOICE_PREFIX = "imsvoice.";
+        public static final String KEY_IMS_WFC_PREFIX = "imswfc.";
+
         // Ims General
         public static final String KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL =
                 "sdp_negotiation_required_for_non_rpr_bool";
@@ -833,25 +838,25 @@ public class CarrierConfig {
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
                 "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
         public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
-                "ecall_based_on_p_associated_uri_of_normal_reg_bool";
+                KEY_IMS_EMERGENCY_PREFIX + "ecall_based_on_p_associated_uri_of_normal_reg_bool";
         public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
-                "ereg_on_random_pcscf_bool";
+                KEY_IMS_EMERGENCY_PREFIX + "ereg_on_random_pcscf_bool";
         public static final String KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL =
-                "ereg_set_tcp_only_in_roaming_bool";
+                KEY_IMS_EMERGENCY_PREFIX + "ereg_set_tcp_only_in_roaming_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
-                "ignore_vops_for_volte_enable_bool";
+                KEY_IMS_VOICE_PREFIX + "ignore_vops_for_volte_enable_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
                 "ims_dereg_on_3g_network_bool";
         public static final String KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
                 "init_ipsec_setting_with_new_pcscf_bool";
         public static final String KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL =
-                "keep_ereg_retry_on_wlan_bool";
+                KEY_IMS_EMERGENCY_PREFIX + "keep_ereg_retry_on_wlan_bool";
         public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
                 "no_init_reg_on_pcscf_change_bool";
         public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =
-                "plmn_block_with_timeout_on_voice_call_unavailable_bool";
+                KEY_IMS_VOICE_PREFIX + "plmn_block_with_timeout_on_voice_call_unavailable_bool";
         public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
                 "reg_contact_validation_bool";
         public static final String KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL =
@@ -863,25 +868,25 @@ public class CarrierConfig {
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
                 "required_init_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL =
-                "required_volte_block_by_ssac_bool";
+                KEY_IMS_VOICE_PREFIX + "required_volte_block_by_ssac_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
-                "required_wfc_block_by_airplane_mode_bool";
+                KEY_IMS_WFC_PREFIX + "required_wfc_block_by_airplane_mode_bool";
         public static final String KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL =
-                "rereg_with_changed_country_on_wifi_bool";
+                KEY_IMS_WFC_PREFIX + "rereg_with_changed_country_on_wifi_bool";
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 "sip_over_ipsec_enabled_in_roaming_bool";
         public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL =
-                "sms_over_ims_available_without_voice_capa_bool";
+                KEY_IMS_SMS_PREFIX + "sms_over_ims_available_without_voice_capa_bool";
         public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
                 "support_contact_user_info_bool";
         public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
-                "support_erereg_on_ipcan_change_bool";
+                KEY_IMS_EMERGENCY_PREFIX + "support_erereg_on_ipcan_change_bool";
         public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
                 "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
                 "support_verstat_for_reg_bool";
         public static final String KEY_SUPPORT_VIDEO_FOR_EREG_BOOL =
-                "support_video_for_ereg_bool";
+                KEY_IMS_EMERGENCY_PREFIX + "support_video_for_ereg_bool";
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
                         "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
@@ -893,17 +898,18 @@ public class CarrierConfig {
         public static final String KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL =
                 "use_security_server_port_in_reg_contact_of_init_reg_bool";
         public static final String KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL =
-                "use_wfc_country_code_availability_check_bool";
+                KEY_IMS_WFC_PREFIX + "use_wfc_country_code_availability_check_bool";
         public static final String KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL =
-                "video_over_wifi_supported_without_voice_bool";
+                KEY_IMS_WFC_PREFIX + "video_over_wifi_supported_without_voice_bool";
 
         public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
                 "contact_user_info_policy_for_non_reg_message_int";
         public static final String KEY_EPDN_PREFERRED_IPTYPE_INT =
-                "epdn_preferred_iptype_int";
-        public static final String KEY_EREG_RETRY_MAX_CNT_INT = "ereg_retry_max_cnt_int";
+                KEY_IMS_EMERGENCY_PREFIX + "epdn_preferred_iptype_int";
+        public static final String KEY_EREG_RETRY_MAX_CNT_INT =
+                KEY_IMS_EMERGENCY_PREFIX + "ereg_retry_max_cnt_int";
         public static final String KEY_EREG_RETRY_TIMER_MILLIS_INT =
-                "ereg_retry_timer_millis_int";
+                KEY_IMS_EMERGENCY_PREFIX + "ereg_retry_timer_millis_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
         public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
@@ -932,15 +938,17 @@ public class CarrierConfig {
         public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
                 "reg_retry_timer_f_policy_int";
         public static final String KEY_REG_TIMER_FOR_ECALL_MILLIS_INT =
-                "reg_timer_for_ecall_millis_int";
+                KEY_IMS_EMERGENCY_PREFIX + "reg_timer_for_ecall_millis_int";
         public static final String KEY_REREG_RETRY_305_POLICY_INT =
                 "rereg_retry_305_policy_int";
-        public static final String KEY_ROAMING_PREFERRED_EREG_INT = "roaming_preferred_ereg_int";
+        public static final String KEY_ROAMING_PREFERRED_EREG_INT =
+                KEY_IMS_EMERGENCY_PREFIX + "roaming_preferred_ereg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
         public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
                 "usat_reg_event_download_policy_int";
-        public static final String KEY_VOLTE_HYS_TIME_INT = "volte_hys_time_sec_int";
+        public static final String KEY_VOLTE_HYS_TIME_SEC_INT =
+                KEY_IMS_VOICE_PREFIX + "volte_hys_time_sec_int";
 
         public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
                 "permanent_pdn_failure_int_array";
@@ -966,7 +974,7 @@ public class CarrierConfig {
         public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
                 "supported_roaming_rats_int_array";
         public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
-                "vowifi_sub_err_code_for_init_reg_int_array";
+                KEY_IMS_WFC_PREFIX + "vowifi_sub_err_code_for_init_reg_int_array";
         // Bundle {
         public static final String KEY_EXTRA_REG_ERR_BUNDLE =
                 "extra_reg_err_bundle";
@@ -1054,19 +1062,19 @@ public class CarrierConfig {
         // }
         // Bundle {
         public static final String KEY_WFC_ERR_MESSAGE_BUNDLE =
-                "wfc_err_message_bundle";
+                KEY_IMS_WFC_PREFIX + "wfc_err_message_bundle";
         public static final String KEY_WFC_ERR_REG_403_STRING =
-                "wfc_err_reg_403_string";
+                KEY_IMS_WFC_PREFIX + "wfc_err_reg_403_string";
         public static final String KEY_WFC_ERR_REG_500_STRING =
-                "wfc_err_reg_500_string";
+                KEY_IMS_WFC_PREFIX + "wfc_err_reg_500_string";
         public static final String KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING =
-                "wfc_err_not_supported_country_string";
+                KEY_IMS_WFC_PREFIX + "wfc_err_not_supported_country_string";
         public static final String KEY_WFC_ERR_SUB_403_STRING =
-                "wfc_err_sub_403_string";
+                KEY_IMS_WFC_PREFIX + "wfc_err_sub_403_string";
         public static final String KEY_WFC_ERR_NOTIFY_TERMINATED_STRING =
-                "wfc_err_notify_terminated_string";
+                KEY_IMS_WFC_PREFIX + "wfc_err_notify_terminated_string";
         public static final String KEY_WFC_ERR_OTHER_FAILURES_STRING =
-                "wfc_err_other_failures_string";
+                KEY_IMS_WFC_PREFIX + "wfc_err_other_failures_string";
         // }
 
         // Media

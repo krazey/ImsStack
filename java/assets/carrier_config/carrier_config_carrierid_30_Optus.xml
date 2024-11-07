@@ -25,7 +25,7 @@
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
     <int name="reg_retry_default_policy_int" value="1"/>
 
     <!-- Ut/Xcap Assets -->

@@ -17,7 +17,7 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Aos -->
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Mtc Assets -->
     <int name="ims.geolocation_policy_for_location_based_call_int" value="13"/>

@@ -18,7 +18,7 @@
     <!-- Carrier configurations -->
 
     <!-- Aos -->
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
