@@ -1006,14 +1006,15 @@ public class CarrierConfig {
         // }
         // Bundle {
         public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE =
-                "notify_terminated_for_init_reg_bundle";
+                KEY_IMS_PREFIX + "notify_terminated_for_init_reg_bundle";
         public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT =
-                "notify_terminated_for_init_reg_with_wait_time_int";
+                KEY_IMS_PREFIX + "notify_terminated_for_init_reg_with_wait_time_int";
         public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY =
-                "notify_terminated_for_init_reg_used_event_int_array";
+                KEY_IMS_PREFIX + "notify_terminated_for_init_reg_used_event_int_array";
         public static final String
                 KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY =
-                        "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
+                        KEY_IMS_PREFIX
+                                + "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
         // }
         // Bundle {
         public static final String KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE =

@@ -853,14 +853,14 @@ const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY[
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE[] =
-        "notify_terminated_for_init_reg_bundle";
+        KEY_IMS_PREFIX "notify_terminated_for_init_reg_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT[] =
-        "notify_terminated_for_init_reg_with_wait_time_int";
+        KEY_IMS_PREFIX "notify_terminated_for_init_reg_with_wait_time_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY[] =
-        "notify_terminated_for_init_reg_used_event_int_array";
+        KEY_IMS_PREFIX "notify_terminated_for_init_reg_used_event_int_array";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY[] =
-                "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
+                KEY_IMS_PREFIX "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE[] =
