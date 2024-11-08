@@ -4298,8 +4298,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
     {
         if (SipStatusCode::IsFinalFailure(nStatusCode))
         {
-            if (m_bEps5GsOnly || IsErrorCodeExistedForSpecificRegistration(nStatusCode) ||
-                    IsErrorCodeExistedForSpecificRegistration(nStatusCode / 100))
+            if (m_bEps5GsOnly ||
+                    IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(), nStatusCode))
             {
                 if (IsPdnReactivationRequired())
                 {
@@ -4355,7 +4355,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
         if (m_bEps5GsOnly ||
-                IsErrorCodeExistedForSpecificRegistration(
+                IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(),
                         CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
         {
             if (IsPdnReactivationRequired())
@@ -4375,7 +4375,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
         return;
     }
 
-    if (IsErrorCodeExistedForSpecificRegistration(CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(),
+                CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
     {
         ProcessDefaultFlowRecovery_Start();
         return;
@@ -4409,7 +4410,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
 {
     // TODO: add the recovery for REASON_INTERNAL_ERROR
-    if (IsErrorCodeExistedForSpecificRegistration(CarrierConfig::Assets::REG_ERROR_CODE_OTHER))
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(),
+                CarrierConfig::Assets::REG_ERROR_CODE_OTHER))
     {
         ProcessDefaultFlowRecovery_Start();
         return;
@@ -4421,7 +4423,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_Others(IN IMS_SINT32 
                 CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
         {
             if (m_bEps5GsOnly ||
-                    IsErrorCodeExistedForSpecificRegistration(
+                    IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(),
                             CarrierConfig::Assets::REG_ERROR_CODE_TRANSPORT))
             {
                 if (IsPdnReactivationRequired())
@@ -4613,7 +4615,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32
                 CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
         {
             if (m_bEps5GsOnly ||
-                    IsErrorCodeExistedForSpecificRegistration(
+                    IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(),
                             CarrierConfig::Assets::REG_ERROR_CODE_TRANSPORT))
             {
                 if (IsPdnReactivationRequired())
@@ -6255,25 +6257,20 @@ IMS_BOOL AosRegistration::IsErrorCodeExisted(
 {
     for (int i = 0; i < objErrorCode.GetSize(); i++)
     {
-        if (nCode == objErrorCode.GetAt(i))
+        IMS_SINT32 nErrorCode = objErrorCode.GetAt(i);
+        if (nCode == nErrorCode)
         {
             return IMS_TRUE;
         }
-    }
 
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL AosRegistration::IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const
-{
-    ImsVector<IMS_SINT32>& objErrorCode = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode();
-
-    for (int i = 0; i < objErrorCode.GetSize(); i++)
-    {
-        if (nCode == objErrorCode.GetAt(i))
+        if (SipStatusCode::IsFinalFailure(nCode))
         {
-            return IMS_TRUE;
+            IMS_SINT32 nGroupCode = (nCode / 100);
+            if (nErrorCode == CarrierConfig::Assets::REG_ERROR_CODE_ALL_RESP ||
+                    nErrorCode == nGroupCode)
+            {
+                return IMS_TRUE;
+            }
         }
     }
 
