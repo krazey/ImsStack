@@ -890,7 +890,8 @@ public class CarrierConfig {
                 KEY_IMS_EMERGENCY_PREFIX + "support_video_for_ereg_bool";
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
-                        "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
+                        KEY_IMS_WFC_PREFIX
+                                + "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
         public static final String
                 KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
                         KEY_IMS_PREFIX
