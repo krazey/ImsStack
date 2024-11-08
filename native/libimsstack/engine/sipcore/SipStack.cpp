@@ -64,7 +64,7 @@ SIP_BOOL SipNetworkUtil::SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
     }
 
     SipTxnContextData* pTxnContextData =
-            static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
+            static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData);
 
     if (pTxnContextData == IMS_NULL)
     {
@@ -1172,11 +1172,11 @@ GLOBAL ImsList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 
         SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
 
-        IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
+        IMS_UINT32 nValueCount = pNameVal->m_objValueList.GetSize();
 
         for (IMS_UINT32 j = 0; j < nValueCount; ++j)
         {
-            IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
+            IMS_CHAR* pszValue = pNameVal->m_objValueList.GetAt(j);
 
             if (pszValue != IMS_NULL)
             {
@@ -1228,17 +1228,17 @@ GLOBAL ImsList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
             return objParams;
         }
 
-        if (pNameVal->m_valueList.IsEmpty())
+        if (pNameVal->m_objValueList.IsEmpty())
         {
             objParams.Append(pParameter);
             continue;
         }
 
-        IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
+        IMS_UINT32 nValueCount = pNameVal->m_objValueList.GetSize();
 
         for (IMS_UINT32 j = 0; j < nValueCount; ++j)
         {
-            IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
+            IMS_CHAR* pszValue = pNameVal->m_objValueList.GetAt(j);
 
             if (pszValue != IMS_NULL)
             {
@@ -4159,12 +4159,12 @@ GLOBAL void DestroyTxnContext(IN SipTxnContext* pContext)
     if (pContext != IMS_NULL)
     {
         SipTxnContextData* pTxnContextData =
-                static_cast<SipTxnContextData*>(pContext->pTxnContextData);
+                static_cast<SipTxnContextData*>(pContext->m_pTxnContextData);
 
         if (pTxnContextData != IMS_NULL)
         {
             delete pTxnContextData;
-            pContext->pTxnContextData = IMS_NULL;
+            pContext->m_pTxnContextData = IMS_NULL;
         }
 
         SipContextUtils::GetInstance()->Sip_DestroyTxnContext(pContext);
@@ -4263,12 +4263,12 @@ GLOBAL void InvokeTimerCallback(
 
 GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext)
 {
-    if ((pTv == IMS_NULL) || (pTxnContext->pSipTimerContext == IMS_NULL))
+    if ((pTv == IMS_NULL) || (pTxnContext->m_pSipTimerContext == IMS_NULL))
     {
         return;
     }
 
-    SipTxnTimerValues* pTxnTimerValues = pTxnContext->pSipTimerContext->pTxnSipTxnTimers;
+    SipTxnTimerValues* pTxnTimerValues = pTxnContext->m_pSipTimerContext->m_pTxnSipTxnTimers;
 
     if (pTxnTimerValues == IMS_NULL)
     {
@@ -4336,8 +4336,8 @@ GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnCo
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_K, pTv->GetValue(SipTimerValues::TIMER_K));
     }
 
-    pTxnContext->pSipTimerContext->nTimerOptions = nTxnTimerOptions;
-    pTxnContext->pSipTimerContext->pTxnSipTxnTimers = pTxnTimerValues;
+    pTxnContext->m_pSipTimerContext->m_nTimerOptions = nTxnTimerOptions;
+    pTxnContext->m_pSipTimerContext->m_pTxnSipTxnTimers = pTxnTimerValues;
 }
 
 GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
@@ -4485,14 +4485,14 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
 
     for (IMS_UINT32 i = 0; i < nListCount; ++i)
     {
-        SipNameValue* pNmVl = pSipUri->GetHdrParam(i);
+        SipNameValue* pNameValue = pSipUri->GetHdrParam(i);
 
-        if (pNmVl == IMS_NULL)
+        if (pNameValue == IMS_NULL)
         {
             continue;
         }
 
-        if (pNmVl->m_valueList.IsEmpty())
+        if (pNameValue->m_objValueList.IsEmpty())
         {
             pSipUri->SipDelete();
             return IMS_FALSE;
@@ -4502,9 +4502,9 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
 
         if (pHeader != IMS_NULL)
         {
-            pHeader->SetName(pNmVl->m_pszName);
+            pHeader->SetName(pNameValue->m_pszName);
 
-            IMS_CHAR* pszHdrVal = pNmVl->m_valueList.GetAt(0);
+            IMS_CHAR* pszHdrVal = pNameValue->m_objValueList.GetAt(0);
 
             AString strHdrValue(pszHdrVal);
 

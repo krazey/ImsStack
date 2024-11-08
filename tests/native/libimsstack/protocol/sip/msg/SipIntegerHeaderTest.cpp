@@ -325,8 +325,8 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     EXPECT_EQ(1, pMinSeHeader->GetParamCount());
     SipNameValue* pNameVal = pMinSeHeader->GetParam(0);
     EXPECT_STREQ("generic-param", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("generic-value", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("generic-value", pNameVal->m_objValueList.GetAt(0));
     pMinSeHeader->SipDelete();
 
     SipIntegerHeader* pSessionExpiresHeader = reinterpret_cast<SipIntegerHeader*>(
@@ -343,8 +343,8 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     EXPECT_EQ(1, pSessionExpiresHeader->GetParamCount());
     pNameVal = pSessionExpiresHeader->GetParam(0);
     EXPECT_STREQ("refresher", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("uas", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("uas", pNameVal->m_objValueList.GetAt(0));
     pSessionExpiresHeader->SipDelete();
 
     SipIntegerHeader* pFlowTimerHeader = reinterpret_cast<SipIntegerHeader*>(

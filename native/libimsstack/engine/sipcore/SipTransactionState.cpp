@@ -436,7 +436,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         }
     }
 
-    pTxnContext->pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
+    pTxnContext->m_pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
 
     ISipUserData objUserData;
     objUserData.SetUserData(static_cast<SIP_VOID*>(pTxnContext));

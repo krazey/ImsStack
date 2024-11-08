@@ -26,7 +26,7 @@ class SipNameValue : public SipRefBase
 {
 public:
     SIP_CHAR* m_pszName;
-    SipVector<SIP_CHAR*> m_valueList;
+    SipVector<SIP_CHAR*> m_objValueList;
     SIP_INT32 m_eParamType;
     SIP_CHAR m_Separator;
 

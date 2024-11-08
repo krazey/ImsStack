@@ -237,7 +237,7 @@ private:
     /* Current Value of Timer Duration */
     SIP_UINT32 m_nCurrentDuration;
 
-    SipTxnTimerValues objTxnTimerValues;
+    SipTxnTimerValues m_objTxnTimerValues;
 
 public:
     SipTxn();
@@ -276,7 +276,7 @@ public:
     SIP_VOID* GetTimerId();
     ISipUserData* GetUserData();
     SIP_INT32 GetMsgSentProto();
-    inline const SipTxnTimerValues& GetSipTxnTimers() const { return objTxnTimerValues; }
+    inline const SipTxnTimerValues& GetSipTxnTimers() const { return m_objTxnTimerValues; }
     /* Fill Transaction Properties */
     inline SIP_VOID SetTxnState(SIP_UINT16 nTxnState) { m_nTxnState = nTxnState; }
     inline SIP_VOID SetMaxDuration(SIP_UINT32 nMaxDuration) { m_nMaxDuration = nMaxDuration; }

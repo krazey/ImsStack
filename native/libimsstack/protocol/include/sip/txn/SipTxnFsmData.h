@@ -42,7 +42,7 @@ public:
     SipMessage* m_pSendSipMsg;
 
     /* Recv Txn handling: layer status on received side */
-    SIP_INT32 eTxnStatus;
+    SIP_INT32 m_eTxnStatus;
 
     /* Recv Txn handling: User while re-tranamission of message on receive of re-transmitted message
      */
@@ -53,8 +53,8 @@ public:
     SipTransportInfo* m_pTranspInfo;
 
     /* Used for both Send and Recv Txn */
-    SIP_BOOL bTxnTerminated;
-    SIP_BOOL bTxnCreated;
+    SIP_BOOL m_bTxnTerminated;
+    SIP_BOOL m_bTxnCreated;
 };
 
 #endif  //__SIP_TXN_FSM_DATA_H__

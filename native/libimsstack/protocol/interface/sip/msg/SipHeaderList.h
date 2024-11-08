@@ -22,7 +22,7 @@
 class SipHeaderList : public SipHeaderBase
 {
 private:
-    SipVector<SipHeaderBase*> m_headerList;
+    SipVector<SipHeaderBase*> m_objHeaderList;
 
 public:
     explicit SipHeaderList(SIP_INT32 eHdrType);
@@ -45,7 +45,7 @@ public:
     SIP_BOOL InsertHdrAtPos(SipHeaderBase* pHeader, SIP_UINT32 nIndex);
     void RemoveHdr(SIP_UINT32 nIndex);
 
-    inline SIP_UINT32 GetSize() const { return m_headerList.GetSize(); }
+    inline SIP_UINT32 GetSize() const { return m_objHeaderList.GetSize(); }
 
 private:
     ~SipHeaderList();

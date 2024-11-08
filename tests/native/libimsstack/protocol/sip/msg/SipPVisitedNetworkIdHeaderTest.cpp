@@ -84,8 +84,8 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
     EXPECT_EQ(1, pHeader->GetParamCount());
     SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("level", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("7", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("7", pNameVal->m_objValueList.GetAt(0));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipPVisitedNetworkIdHeader*>(

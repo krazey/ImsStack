@@ -109,8 +109,8 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
 
     /* Fill FSM data for stack manager */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
-    pFsmData->bTxnCreated = SIP_TRUE;
-    pFsmData->eTxnStatus = SipTxn::STATUS_NEW_REQ_RECVD;
+    pFsmData->m_bTxnCreated = SIP_TRUE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_NEW_REQ_RECVD;
 
     /* State Transition */
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TRYING_ST);
@@ -161,7 +161,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
                 // INVITE transaction exists,
                 // but the PRACK request which is not matched with RSeq is received.
                 // It needs to send 481 response.
-                pFsmData->eTxnStatus = SipTxn::STATUS_STRAY_PRACK;
+                pFsmData->m_eTxnStatus = SipTxn::STATUS_STRAY_PRACK;
             }
             else
             {
@@ -184,7 +184,7 @@ static SIP_BOOL NonInvSerFsm_TryingStRecvNonInvReqEvt(
        since previous req is already passed to TU and response is not been send, ignore the request
      */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
-    pFsmData->eTxnStatus = SipTxn::STATUS_IGNORE_REQ;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_IGNORE_REQ;
 
     /* Remain in same state */
     return SIP_TRUE;
@@ -197,7 +197,7 @@ static SIP_BOOL NonInvSerFsm_TryingStSend1xxRespEvt(
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Fill FSM data for stack manager */
-    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     pTxn->SetTxnState(SipTxn::NON_INV_SER_PROCEEDING_ST);
     return SIP_TRUE;
@@ -221,10 +221,10 @@ static SIP_BOOL NonInvSerFsm_TryingStSend2xx6xxRespEvt(
     /* Fill FSM data for stack manager */
     if (nNewTxnState == SipTxn::NON_INV_SER_TERMINATED_ST)
     {
-        pFsmData->bTxnTerminated = SIP_TRUE;
+        pFsmData->m_bTxnTerminated = SIP_TRUE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
     }
-    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     pTxn->SetTxnState(nNewTxnState);
 
@@ -249,7 +249,7 @@ static SIP_BOOL NonInvSerFsm_ProceedingStRecvNonInvReqEvt(
 
     /* This is receive of re-transmitted non-INVITE request.
        stack manager to send last response */
-    pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
     pFsmData->m_pOutUserData = pTxn->GetUserData();
     pFsmData->m_pTranspInfo = pTxn->GetTranspInfo();
 
@@ -264,7 +264,7 @@ static SIP_BOOL NonInvSerFsm_ProceedingStSend1xxRespEvt(
     (void)pnError;
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
-    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* No Change in State */
     return SIP_TRUE;
@@ -288,10 +288,10 @@ static SIP_BOOL NonInvSerFsm_ProceedingStSend2xx6xxRespEvt(
     /* Fill FSM data for stack manager */
     if (nNewTxnState == SipTxn::NON_INV_SER_TERMINATED_ST)
     {
-        pFsmData->bTxnTerminated = SIP_TRUE;
+        pFsmData->m_bTxnTerminated = SIP_TRUE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
     }
-    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     pTxn->SetTxnState(nNewTxnState);
     return SIP_TRUE;
@@ -315,7 +315,7 @@ static SIP_BOOL NonInvSerFsm_CompletedStRecvNonInvReqEvt(
 
     /* This is receive of re-transmitted non-INVITE request.
        stack manager to send last response */
-    pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
     pFsmData->m_pOutUserData = pTxn->GetUserData();
     pFsmData->m_pTranspInfo = pTxn->GetTranspInfo();
 

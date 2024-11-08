@@ -78,8 +78,8 @@ static SIP_BOOL InvSerFsm_IdleStRecvInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
 
     /* Fill FSM data for stack manager */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
-    pFsmData->bTxnCreated = SIP_TRUE;
-    pFsmData->eTxnStatus = SipTxn::STATUS_NEW_REQ_RECVD;
+    pFsmData->m_bTxnCreated = SIP_TRUE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_NEW_REQ_RECVD;
 
     /* State Transition */
     pTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
@@ -100,11 +100,11 @@ static SIP_BOOL InvSerFsm_ProceedingStRecvInvReqEvt(
     /* Check if TU has already send any 1xx response for INVITE else ignore the INVITE */
     if (pFsmData->m_pTranspInfo != SIP_NULL)
     {
-        pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+        pFsmData->m_eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
     }
     else
     {
-        pFsmData->eTxnStatus = SipTxn::STATUS_IGNORE_REQ;
+        pFsmData->m_eTxnStatus = SipTxn::STATUS_IGNORE_REQ;
     }
     /* Remain in same state */
     return SIP_TRUE;
@@ -179,7 +179,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSendNon100ProvRespEvt(
         pTxn->SetMaxDuration(nDurationTH);
     }
 
-    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* No Change in State, Be in proceeding state*/
 
@@ -231,7 +231,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
 
     pTxn->SetMaxDuration(nDurationTH);
 
-    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* State Transition */
     pTxn->SetTxnState(SipTxn::INV_SER_COMPLETED_ST);
@@ -256,15 +256,15 @@ static SIP_BOOL InvSerFsm_ProceedingStSend2xxSuccessRespEvt(
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     if (pTxn->StartTxnTimer(SipTxn::TIMER_H, nDurationTH, pnError) != SIP_FALSE)
     {
-        pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+        pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
         pTxn->SetMaxDuration(nDurationTH);
         pTxn->IncreaseDurationExpired(nDurationTH);
         pTxn->SetTxnState(SipTxn::INV_SER_COMPLETED_ST);
     }
     else
     {
-        pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
-        pFsmData->bTxnTerminated = SIP_TRUE;
+        pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+        pFsmData->m_bTxnTerminated = SIP_TRUE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
         pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
     }
@@ -355,7 +355,7 @@ static SIP_BOOL InvSerFsm_CompletedStRecvInvReqEvt(
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* This is receive of re-transmitted INVITE request. stack manager to send last response */
-    pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
     pFsmData->m_pOutUserData = pTxn->GetUserData();
     pFsmData->m_pTranspInfo = pTxn->GetTranspInfo();
 
@@ -394,7 +394,7 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
 
         nNextState = SipTxn::INV_SER_CONFIRMED_ST;
 
-        pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+        pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
 
         if (pTxn->StartTxnTimer(SipTxn::TIMER_I, nDurationTI, pnError) == SIP_FALSE)
@@ -407,7 +407,7 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
     else /* For Reliable Transport */
     {
         // TimerI = 0, for TCP.
-        pFsmData->bTxnTerminated = SIP_TRUE;
+        pFsmData->m_bTxnTerminated = SIP_TRUE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
         nNextState = SipTxn::INV_SER_TERMINATED_ST;
     }
@@ -501,7 +501,7 @@ static SIP_BOOL InvSerFsm_ConfirmedStRecvAckReqEvt(
 
     /* Fill FSM data for stack manager */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
-    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* Remain in same state */
     return SIP_TRUE;

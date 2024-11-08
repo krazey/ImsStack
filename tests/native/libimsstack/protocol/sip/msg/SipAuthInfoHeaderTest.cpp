@@ -56,8 +56,8 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
     const SipNameValue* pNmVl = pHeader->GetAiInfoVal(0);
     ASSERT_TRUE(pNmVl != nullptr);
     EXPECT_STREQ("nextnonce", pNmVl->m_pszName);
-    EXPECT_EQ(1, pNmVl->m_valueList.GetSize());
-    EXPECT_STREQ("\"123456789abcde123456789abcde\"", pNmVl->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNmVl->m_objValueList.GetSize());
+    EXPECT_STREQ("\"123456789abcde123456789abcde\"", pNmVl->m_objValueList.GetAt(0));
 
     pNmVl = pHeader->GetAiInfoVal(1);
     ASSERT_TRUE(pNmVl == nullptr);
@@ -100,14 +100,14 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
     pNmVl = pCopyHeader->GetAiInfoVal(0);
     ASSERT_TRUE(pNmVl != nullptr);
     EXPECT_STREQ("nextnonce", pNmVl->m_pszName);
-    EXPECT_EQ(1, pNmVl->m_valueList.GetSize());
-    EXPECT_STREQ("\"123456789abcde123456789abcde\"", pNmVl->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNmVl->m_objValueList.GetSize());
+    EXPECT_STREQ("\"123456789abcde123456789abcde\"", pNmVl->m_objValueList.GetAt(0));
 
     pNmVl = pCopyHeader->GetAiInfoVal(1);
     ASSERT_TRUE(pNmVl != nullptr);
     EXPECT_STREQ("nonce-count", pNmVl->m_pszName);
-    EXPECT_EQ(1, pNmVl->m_valueList.GetSize());
-    EXPECT_STREQ("\"3\"", pNmVl->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNmVl->m_objValueList.GetSize());
+    EXPECT_STREQ("\"3\"", pNmVl->m_objValueList.GetAt(0));
 
     pNmVl = pCopyHeader->GetAiInfoVal(2);
     ASSERT_TRUE(pNmVl == nullptr);

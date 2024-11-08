@@ -102,7 +102,7 @@ LOCAL SIP_VOID* SIPStackTxnLayer_CreateAckRequest(
 {
     SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
     SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->pTxnContextData)
+            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
             : IMS_NULL;
     SipClientTransactionState* pCtState = (pTxnContextData != IMS_NULL)
             ? reinterpret_cast<SipClientTransactionState*>(pTxnContextData->GetTxnState())
@@ -122,7 +122,7 @@ LOCAL SIP_VOID SIPStackTxnLayer_PreProcessMessageSentByStack(
 {
     SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
     SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->pTxnContextData)
+            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
             : IMS_NULL;
     SipTransactionState* pTState =
             (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL;
@@ -140,7 +140,7 @@ LOCAL SIP_VOID SIPStackTxnLayer_PostProcessMessageSentByStack(IN SIP_VOID* pvSip
 {
     SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
     SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->pTxnContextData)
+            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
             : IMS_NULL;
     SipTransactionState* pTState =
             (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL;
@@ -182,7 +182,7 @@ LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IM
     if (pTxnContext != IMS_NULL)
     {
         SipTxnContextData* pTxnContextData =
-                static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
+                static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData);
 
         if (pTxnContextData != IMS_NULL)
         {

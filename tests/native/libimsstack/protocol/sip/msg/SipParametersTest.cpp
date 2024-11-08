@@ -100,7 +100,7 @@ TEST_F(SipParametersTest, SetParam)
     ASSERT_TRUE(pNameValue != nullptr);
 
     EXPECT_EQ(0, pParameters->GetParamIndex(pParamName));
-    EXPECT_EQ(1, pNameValue->m_valueList.GetSize());
+    EXPECT_EQ(1, pNameValue->m_objValueList.GetSize());
 
     SIP_CHAR* pValue = pParameters->GetParamValue(pParamName, 0);
     EXPECT_STREQ("param-value1", pValue);
@@ -109,7 +109,7 @@ TEST_F(SipParametersTest, SetParam)
     /* Existing param to add null value to list - removes value at position, success */
     EXPECT_EQ(SIP_TRUE, pParameters->SetParam(pParamName, nullptr, 0));
 
-    EXPECT_EQ(0, pNameValue->m_valueList.GetSize());
+    EXPECT_EQ(0, pNameValue->m_objValueList.GetSize());
 
     delete pParameters;
 }
@@ -205,8 +205,8 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     SipNameValue* pNameVal = pParameters->GetParam(1);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("param value", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("param value", pNameVal->m_objValueList.GetAt(0));
 
     pCopyParameters = new SipParameters(*pParameters);
     ASSERT_TRUE(pCopyParameters != nullptr);
@@ -240,8 +240,8 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     pNameVal = pParameters->GetParam(1);
     EXPECT_STREQ("transport", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("$!&", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("$!&", pNameVal->m_objValueList.GetAt(0));
 
     pCopyParameters = new SipParameters(*pParameters);
     ASSERT_TRUE(pCopyParameters != nullptr);

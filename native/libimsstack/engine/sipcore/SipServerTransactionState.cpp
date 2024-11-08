@@ -197,7 +197,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         pTxnContextData->SetTxnState(this);
     }
 
-    pTxnContext->pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
+    pTxnContext->m_pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
     ISipUserData objUserData(static_cast<SIP_VOID*>(pTxnContext));
 
     /* BSP_TODO::

@@ -372,13 +372,13 @@ TEST_F(SipUriTest, DecodeSipUri)
     SipNameValue* pNameVal = pSipUri->GetUriParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyUriparam-name", pNameVal->m_pszName);
-    EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
+    EXPECT_EQ(0, pNameVal->m_objValueList.GetSize());
 
     pNameVal = pSipUri->GetUriParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("uriparam-name", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("uriparam-value", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("uriparam-value", pNameVal->m_objValueList.GetAt(0));
 
     pSipUri->SipDelete();
 
@@ -401,13 +401,13 @@ TEST_F(SipUriTest, DecodeSipUri)
     pNameVal = pSipUri->GetHdrParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyHeaderName", pNameVal->m_pszName);
-    EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
+    EXPECT_EQ(0, pNameVal->m_objValueList.GetSize());
 
     pNameVal = pSipUri->GetHdrParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("HeaderName", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("HeaderValue", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("HeaderValue", pNameVal->m_objValueList.GetAt(0));
 
     pSipUri->SipDelete();
 
@@ -429,25 +429,25 @@ uriparam-name=uriparam-value?OnlyHeaderName&HeaderName=HeaderValue",
     pNameVal = pSipUri->GetUriParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyUriparam-name", pNameVal->m_pszName);
-    EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
+    EXPECT_EQ(0, pNameVal->m_objValueList.GetSize());
 
     pNameVal = pSipUri->GetUriParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("uriparam-name", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("uriparam-value", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("uriparam-value", pNameVal->m_objValueList.GetAt(0));
 
     EXPECT_EQ(2, pSipUri->GetHdrParamCount());
     pNameVal = pSipUri->GetHdrParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyHeaderName", pNameVal->m_pszName);
-    EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
+    EXPECT_EQ(0, pNameVal->m_objValueList.GetSize());
 
     pNameVal = pSipUri->GetHdrParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("HeaderName", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("HeaderValue", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("HeaderValue", pNameVal->m_objValueList.GetAt(0));
 
     pSipUri->SipDelete();
 }

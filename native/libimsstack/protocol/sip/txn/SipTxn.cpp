@@ -56,10 +56,10 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
     m_eTxnType = eTxnType;
     m_pTxnKey = new SipTxnKey(pTxnKey, pnError);
 
-    if ((pSipTxnTimerContext != SIP_NULL) && (pSipTxnTimerContext->pTxnSipTxnTimers != SIP_NULL))
+    if ((pSipTxnTimerContext != SIP_NULL) && (pSipTxnTimerContext->m_pTxnSipTxnTimers != SIP_NULL))
     {
-        objTxnTimerValues.UpdateSipTimers(
-                pSipTxnTimerContext->nTimerOptions, pSipTxnTimerContext->pTxnSipTxnTimers);
+        m_objTxnTimerValues.UpdateSipTimers(
+                pSipTxnTimerContext->m_nTimerOptions, pSipTxnTimerContext->m_pTxnSipTxnTimers);
     }
 
     if (m_pTxnKey == SIP_NULL)

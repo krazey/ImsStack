@@ -157,7 +157,7 @@ SIP_BOOL SipAuthBase::SetParams(
         return SIP_FALSE;
     }
 
-    pNameValue->m_valueList.Add(pszTempVal);
+    pNameValue->m_objValueList.Add(pszTempVal);
     m_objAuthList.Add(pNameValue);
 
     return SIP_TRUE;
@@ -196,7 +196,7 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
         return SIP_NULL;
     }
 
-    const SipVector<SIP_CHAR*>& valueList = pTempNameValue->m_valueList;
+    const SipVector<SIP_CHAR*>& valueList = pTempNameValue->m_objValueList;
     if (valueList.IsEmpty() == SIP_TRUE)
     {
         return SIP_NULL;

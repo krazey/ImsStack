@@ -369,13 +369,13 @@ TEST_F(SipContentTypeHeaderTest, AcceptHeader_DecodeHdr)
 
     SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("q", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("0.4", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("0.4", pNameVal->m_objValueList.GetAt(0));
 
     pNameVal = pHeader->GetParam(1);
     EXPECT_STREQ("level", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("1", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("1", pNameVal->m_objValueList.GetAt(0));
 
     pHeader->SipDelete();
 

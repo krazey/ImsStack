@@ -20,7 +20,7 @@
 
 SipNameValue::SipNameValue() :
         m_pszName(SIP_NULL),
-        m_valueList(SipVector<SIP_CHAR*>()),
+        m_objValueList(SipVector<SIP_CHAR*>()),
         m_eParamType(SipParameters::GENERIC),
         m_Separator(',')
 {
@@ -28,15 +28,15 @@ SipNameValue::SipNameValue() :
 
 SipNameValue::SipNameValue(const SipNameValue& objNameValue) :
         m_pszName(SipPf_Strdup(objNameValue.m_pszName)),
-        m_valueList(SipVector<SIP_CHAR*>()),
+        m_objValueList(SipVector<SIP_CHAR*>()),
         m_eParamType(objNameValue.m_eParamType),
         m_Separator(objNameValue.m_Separator)
 {
-    SIP_UINT32 nSize = objNameValue.m_valueList.GetSize();
+    SIP_UINT32 nSize = objNameValue.m_objValueList.GetSize();
 
     for (SIP_UINT32 unCount = SIP_ZERO; unCount < nSize; unCount++)
     {
-        SIP_CHAR* pszElement = objNameValue.m_valueList.GetAt(unCount);
+        SIP_CHAR* pszElement = objNameValue.m_objValueList.GetAt(unCount);
 
         if (pszElement == SIP_NULL)
         {
@@ -44,7 +44,7 @@ SipNameValue::SipNameValue(const SipNameValue& objNameValue) :
         }
 
         SIP_CHAR* pszValue = SipPf_Strdup(pszElement);
-        m_valueList.Add(pszValue);
+        m_objValueList.Add(pszValue);
     }
 }
 
@@ -54,10 +54,10 @@ SipNameValue::~SipNameValue()
     {
         delete[] m_pszName;
     }
-    while (m_valueList.IsEmpty() != SIP_TRUE)
+    while (m_objValueList.IsEmpty() != SIP_TRUE)
     {
-        delete m_valueList.Top();
-        m_valueList.Pop();
+        delete m_objValueList.Top();
+        m_objValueList.Pop();
     }
 }
 
@@ -71,7 +71,7 @@ SIP_BOOL SipNameValue::Encode(
 
     objBuffer += m_pszName;
 
-    if (m_valueList.IsEmpty() != SIP_TRUE)
+    if (m_objValueList.IsEmpty() != SIP_TRUE)
     {
         objBuffer += EQUAL;
 
@@ -80,7 +80,7 @@ SIP_BOOL SipNameValue::Encode(
                         ((pParameterComponent->GetComponentType() == IParameterComponent::URI) &&
                                 (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))))
         {
-            SIP_CHAR* pszValue = m_valueList.GetAt(SIP_ZERO);
+            SIP_CHAR* pszValue = m_objValueList.GetAt(SIP_ZERO);
             SIP_CHAR* pszTempValue =
                     SipPercentEncoding::DoPercentEncoding_Param(m_pszName, pszValue);
             objBuffer += pszTempValue;
@@ -93,12 +93,12 @@ SIP_BOOL SipNameValue::Encode(
                 objBuffer += DQUOTE;
             }
 
-            SIP_UINT32 nSize = m_valueList.GetSize();
+            SIP_UINT32 nSize = m_objValueList.GetSize();
             SIP_UINT32 nIndex = SIP_ZERO;
 
             while (nIndex < nSize)
             {
-                const SIP_CHAR* pszValue = m_valueList.GetAt(nIndex);
+                const SIP_CHAR* pszValue = m_objValueList.GetAt(nIndex);
 
                 if (pszValue == SIP_NULL)
                 {
@@ -138,7 +138,7 @@ SIP_BOOL SipNameValue::Encode(
     SipPf_Strcpy(*ppCurrPos, m_pszName);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    if (m_valueList.IsEmpty() != SIP_TRUE)
+    if (m_objValueList.IsEmpty() != SIP_TRUE)
     {
         **ppCurrPos = EQUAL;
         (*ppCurrPos)++;
@@ -148,7 +148,7 @@ SIP_BOOL SipNameValue::Encode(
                         ((pParameterComponent->GetComponentType() == IParameterComponent::URI) &&
                                 (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))))
         {
-            SIP_CHAR* pszValue = m_valueList.GetAt(SIP_ZERO);
+            SIP_CHAR* pszValue = m_objValueList.GetAt(SIP_ZERO);
             SIP_CHAR* pszTempValue =
                     SipPercentEncoding::DoPercentEncoding_Param(m_pszName, pszValue);
             SipPf_Strcpy(*ppCurrPos, pszTempValue);
@@ -163,12 +163,12 @@ SIP_BOOL SipNameValue::Encode(
                 (*ppCurrPos)++;
             }
 
-            SIP_UINT32 nCount = m_valueList.GetSize();
+            SIP_UINT32 nCount = m_objValueList.GetSize();
             SIP_UINT32 sLocalCount = SIP_ZERO;
 
             while (sLocalCount < nCount)
             {
-                SIP_CHAR* pszVal = m_valueList.GetAt(sLocalCount);
+                SIP_CHAR* pszVal = m_objValueList.GetAt(sLocalCount);
                 if (pszVal == SIP_NULL)
                 {
                     SIP_DEBUG_WARNING(
@@ -241,7 +241,7 @@ SIP_BOOL SipNameValue::Decode(
             pszTempValue = SipPercentEncoding::DoPercentDecoding(pszValue);
 
             /*put the value in the value list*/
-            if (m_valueList.Add(pszTempValue) < SIP_ZERO)
+            if (m_objValueList.Add(pszTempValue) < SIP_ZERO)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                         "SipNameValue::DecUriNameVal:Adding in list failed", SIP_ZERO, SIP_ZERO);
@@ -270,7 +270,7 @@ SIP_BOOL SipNameValue::Decode(
                     return SIP_FALSE;
                 }
                 /*put the value in the value list*/
-                if (m_valueList.Add(pszValue) < SIP_ZERO)
+                if (m_objValueList.Add(pszValue) < SIP_ZERO)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                             "SipNameValue::DecHdrNameVal:Adding in list failed", SIP_ZERO,
@@ -466,7 +466,7 @@ SIP_BOOL SipParameters::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
 
     if (pszValue != SIP_NULL)
     {
-        pNameValue->m_valueList.Add(SipPf_Strdup(pszValue));
+        pNameValue->m_objValueList.Add(SipPf_Strdup(pszValue));
     }
 
     if (bFound == SIP_FALSE)
@@ -518,9 +518,9 @@ SIP_BOOL SipParameters::SetParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
     }
 
     /*If parameter already exists, update value*/
-    if (pNameValue->m_valueList.IsEmpty() != SIP_TRUE)
+    if (pNameValue->m_objValueList.IsEmpty() != SIP_TRUE)
     {
-        if (pNameValue->m_valueList.GetSize() <= nPos)
+        if (pNameValue->m_objValueList.GetSize() <= nPos)
         {
             return SIP_FALSE;
         }
@@ -528,15 +528,15 @@ SIP_BOOL SipParameters::SetParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
         /*If the new value is NULL, remove the existing value*/
         if ((pszValue == SIP_NULL) || (SipPf_Strlen(pszValue) == SIP_ZERO))
         {
-            delete pNameValue->m_valueList.GetAt(nPos);
-            pNameValue->m_valueList.RemoveAt(nPos);
+            delete pNameValue->m_objValueList.GetAt(nPos);
+            pNameValue->m_objValueList.RemoveAt(nPos);
         }
         else
         {
             SIP_CHAR* pszVal = SipPf_Strdup(pszValue);
-            delete pNameValue->m_valueList.GetAt(nPos);
-            pNameValue->m_valueList.RemoveAt(nPos);
-            pNameValue->m_valueList.InsertAt(pszVal, nPos);
+            delete pNameValue->m_objValueList.GetAt(nPos);
+            pNameValue->m_objValueList.RemoveAt(nPos);
+            pNameValue->m_objValueList.InsertAt(pszVal, nPos);
         }
     }
     else
@@ -545,7 +545,7 @@ SIP_BOOL SipParameters::SetParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
         if ((pszValue != SIP_NULL) && (SipPf_Strlen(pszValue) != SIP_ZERO))
         {
             SIP_CHAR* pszVal = SipPf_Strdup(pszValue);
-            pNameValue->m_valueList.InsertAt(pszVal, SIP_ZERO);
+            pNameValue->m_objValueList.InsertAt(pszVal, SIP_ZERO);
         }
     }
 
@@ -599,12 +599,12 @@ SIP_CHAR* SipParameters::GetParamValue(
         return SIP_NULL;
     }
 
-    if (pNameValue->m_valueList.GetSize() <= nPos)
+    if (pNameValue->m_objValueList.GetSize() <= nPos)
     {
         return SIP_NULL;
     }
 
-    SIP_CHAR* pszElement = pNameValue->m_valueList.GetAt(nPos);
+    SIP_CHAR* pszElement = pNameValue->m_objValueList.GetAt(nPos);
 
     return (pszElement != SIP_NULL) ? SipPf_Strdup(pszElement) : SIP_NULL;
 }

@@ -223,8 +223,8 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_EQ(1, pHeader->GetParamCount());
     SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("handling", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("optional", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("optional", pNameVal->m_objValueList.GetAt(0));
     pHeader->SipDelete();
 
     /* Decode with only value and empty parameters */
@@ -265,8 +265,8 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_EQ(1, pHeader->GetParamCount());
     pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
-    EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
-    EXPECT_STREQ("param-value", pNameVal->m_valueList.GetAt(0));
+    EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
+    EXPECT_STREQ("param-value", pNameVal->m_objValueList.GetAt(0));
     pHeader->SipDelete();
 }
 

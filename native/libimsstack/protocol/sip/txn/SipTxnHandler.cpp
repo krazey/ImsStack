@@ -145,10 +145,10 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
         break;
     }
 
-    pTxnInfo->bTxnTerminated = objTxnFsmData.bTxnTerminated;
-    pTxnInfo->bTxnCreated = objTxnFsmData.bTxnCreated;
+    pTxnInfo->m_bTxnTerminated = objTxnFsmData.m_bTxnTerminated;
+    pTxnInfo->m_bTxnCreated = objTxnFsmData.m_bTxnCreated;
 
-    if ((objTxnFsmData.bTxnCreated == SIP_TRUE) || (objTxnFsmData.bTxnTerminated == SIP_TRUE))
+    if ((objTxnFsmData.m_bTxnCreated == SIP_TRUE) || (objTxnFsmData.m_bTxnTerminated == SIP_TRUE))
     {
         pTxnInfo->m_pUserData = objTxnFsmData.m_pOutUserData;
     }
@@ -196,7 +196,7 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
             }
 
             /* INV Client Txn --> For INV 2xx case, txn is terminated */
-            if (objTxnFsmData.bTxnTerminated == SIP_TRUE)
+            if (objTxnFsmData.m_bTxnTerminated == SIP_TRUE)
             {
                 /* stack manager to Notifies to Transaction User using registered listener
                    and Delete Txn entry from DB and delete the instance*/
@@ -219,7 +219,7 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
             }
 
             /* INV Serv Txn --> For TCP, on ACK recv Txn is terminated */
-            if (objTxnFsmData.bTxnTerminated == SIP_TRUE)
+            if (objTxnFsmData.m_bTxnTerminated == SIP_TRUE)
             {
                 /* stack manager to Notifies to Transaction User using registered listener
                    and Delete Txn entry from DB and delete the instance*/
@@ -251,15 +251,15 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
         pTxnInfo->m_pSendSipMsg = objTxnFsmData.m_pSendSipMsg;
     }
 
-    if (objTxnFsmData.eTxnStatus == SipTxn::STATUS_RETRANSMISSION)
+    if (objTxnFsmData.m_eTxnStatus == SipTxn::STATUS_RETRANSMISSION)
     {
         pTxnInfo->m_pTranspInfo = objTxnFsmData.m_pTranspInfo;
     }
 
     pTxnInfo->m_pUserData = objTxnFsmData.m_pOutUserData;
-    pTxnInfo->bTxnTerminated = objTxnFsmData.bTxnTerminated;
-    pTxnInfo->bTxnCreated = objTxnFsmData.bTxnCreated;
-    pTxnInfo->eTxnStatus = objTxnFsmData.eTxnStatus;
+    pTxnInfo->m_bTxnTerminated = objTxnFsmData.m_bTxnTerminated;
+    pTxnInfo->m_bTxnCreated = objTxnFsmData.m_bTxnCreated;
+    pTxnInfo->m_eTxnStatus = objTxnFsmData.m_eTxnStatus;
 
     return SIP_TRUE;
 }
@@ -613,7 +613,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnSend(IN SIP_INT32 eTxnType, IN Si
         SIP_VOID* pUserData = pTxnFsmData->m_pUserData->GetUserData();
         if (pUserData != SIP_NULL)
         {
-            pSipTimerContext = (static_cast<SipTxnContext*>(pUserData))->pSipTimerContext;
+            pSipTimerContext = (static_cast<SipTxnContext*>(pUserData))->m_pSipTimerContext;
         }
     }
 
@@ -712,14 +712,14 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnSend(IN SIP_INT32 eTxnType, IN Si
         if (pUserData != SIP_NULL)
         {
             SipTimerContext* pTimerContext =
-                    (static_cast<SipTxnContext*>(pUserData))->pSipTimerContext;
+                    (static_cast<SipTxnContext*>(pUserData))->m_pSipTimerContext;
 
             if (pTimerContext != SIP_NULL)
             {
                 SipTxnTimerValues& objTimerValues =
                         const_cast<SipTxnTimerValues&>(pTxn->GetSipTxnTimers());
                 objTimerValues.UpdateSipTimers(
-                        pTimerContext->nTimerOptions, pTimerContext->pTxnSipTxnTimers);
+                        pTimerContext->m_nTimerOptions, pTimerContext->m_pTxnSipTxnTimers);
             }
         }
     }
@@ -833,7 +833,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
             SIP_VOID* objUserData = pTxnFsmData->m_pUserData->GetUserData();
             if (objUserData != SIP_NULL)
             {
-                pSipTimerContext = (static_cast<SipTxnContext*>(objUserData))->pSipTimerContext;
+                pSipTimerContext = (static_cast<SipTxnContext*>(objUserData))->m_pSipTimerContext;
             }
         }
 
