@@ -132,6 +132,36 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutPosition)
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
+TEST_F(GeolocationPidfCreatorTest, CreateWithoutPositionAsTuple)
+{
+    const IMS_BOOL bAny = IMS_FALSE;
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithoutPosition("entity_uri", IMS_TRUE, bAny, objContent));
+
+    const AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"entity_uri\">"
+            "<tuple id=\"VoLte\">"
+            "<status>"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "</cl:civicAddress>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "</gp:geopriv>"
+            "</status>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</tuple>"
+            "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionFailsWhenPositionUnknown)
 {
     const AString strUnknownPosition = "0.0";
@@ -222,6 +252,50 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPosition)
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
+            "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAsTuple)
+{
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithPosition("entity_uri", objContent));
+
+    const AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "<tuple id=\"VoLte\">"
+            "<status>"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "<cl:A1>state</cl:A1>"
+            "<cl:A2>city</cl:A2>"
+            "<cl:PC>postal</cl:PC>"
+            "</cl:civicAddress>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "</status>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</tuple>"
             "</presence>";
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
@@ -452,6 +526,47 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountry)
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
+TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryAsTuple)
+{
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
+
+    const AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "<tuple id=\"VoLte\">"
+            "<status>"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "</cl:civicAddress>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "</status>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</tuple>"
+            "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoUnknownCountry)
 {
     ByteArray objContent;
@@ -657,6 +772,44 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivic)
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
+            "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicAsTuple)
+{
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithoutCivic("entity_uri", objContent));
+
+    const AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "<tuple id=\"VoLte\">"
+            "<status>"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "</status>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</tuple>"
             "</presence>";
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
