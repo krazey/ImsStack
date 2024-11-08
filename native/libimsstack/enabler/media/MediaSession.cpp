@@ -290,10 +290,12 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
         }
 
         // audio
+        /*
         if (pMediaNego->GetAudioNego() != IMS_NULL)
         {
             m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
         }
+        */
 
         // video
         if (pMediaNego->GetVideoNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(*nVideoDirection))
