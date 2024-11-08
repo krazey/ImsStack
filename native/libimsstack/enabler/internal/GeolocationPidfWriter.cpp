@@ -28,6 +28,8 @@
 namespace enabler
 {
 
+Element* const Element::s_pEmptyElement = new Element{};
+
 PUBLIC VIRTUAL Element::~Element()
 {
     for (const Element* pElement : m_lstChildren)
@@ -42,6 +44,11 @@ PUBLIC VIRTUAL void Element::Write(IN_OUT IXmlStreamWriter& objWriter) const
     {
         pElement->Write(objWriter);
     }
+}
+
+PUBLIC VIRTUAL void Element::Append(IN Element* pElement)
+{
+    m_lstChildren.push_back(pElement);
 }
 
 PUBLIC VIRTUAL void PidfLoXml::Write(IN_OUT IXmlStreamWriter& objWriter) const
