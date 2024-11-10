@@ -130,7 +130,7 @@ public class TextSessionHandler extends MediaState {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("messageType = " + msg.what);
+            ImsLog.d("messageType = " + msg.what);
 
             // Till open session response is received, handling other commands has to wait
             try {
@@ -320,7 +320,7 @@ public class TextSessionHandler extends MediaState {
      * @param parcel parcel received from Media Native
      */
     public void onImsMediaTextMessage(final int requestType, Parcel parcel) {
-        ImsLog.v("requestType= " + requestType);
+        ImsLog.d("requestType= " + requestType);
 
         switch (requestType) {
             /** Requests (ImsStack -> ImsMedia) */
@@ -329,7 +329,7 @@ public class TextSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_OPENING);
                 String localIpAddress = parcel.readString();
                 int localPortNumber = parcel.readInt();
-                ImsLog.v("localIpAddress= " + localIpAddress
+                ImsLog.d("localIpAddress= " + localIpAddress
                         + " localPortNumber= " + localPortNumber);
 
                 Message.obtain(
@@ -356,7 +356,7 @@ public class TextSessionHandler extends MediaState {
             {
                 String remoteIpAddress = parcel.readString();
                 int remotePortNumber = parcel.readInt();
-                ImsLog.v("remoteIpAddress= " + remoteIpAddress
+                ImsLog.d("remoteIpAddress= " + remoteIpAddress
                         + " remotePortNumber= " + remotePortNumber);
 
                 Message.obtain(
@@ -368,7 +368,7 @@ public class TextSessionHandler extends MediaState {
             case MediaConstants.REQUEST_SEND_RTT:
             {
                 String rttMessage = parcel.readString();
-                ImsLog.v("rtt message");
+                ImsLog.d("rtt message");
 
                 Message.obtain(mTextMessageHandler, requestType, rttMessage).sendToTarget();
             }
@@ -378,7 +378,7 @@ public class TextSessionHandler extends MediaState {
             {
                 MediaQualityThreshold threshold =
                         MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("onTextSetMediaQualityThreshold: " + threshold.toString());
+                ImsLog.d("onTextSetMediaQualityThreshold: " + threshold.toString());
 
                 Message.obtain(mTextMessageHandler, requestType, threshold).sendToTarget();
             }

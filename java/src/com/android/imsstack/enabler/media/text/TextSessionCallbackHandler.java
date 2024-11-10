@@ -35,7 +35,7 @@ public class TextSessionCallbackHandler {
 
     public TextSessionCallbackHandler(@NonNull final IMtcMediaInterface mtcMediaInterface) {
         mMtcMediaInterface = mtcMediaInterface;
-        ImsLog.v("Constructor - Exit");
+        ImsLog.d("Constructor - Exit");
     }
 
     private IMtcMediaInterface getMtcMediaInterface() {
@@ -65,7 +65,7 @@ public class TextSessionCallbackHandler {
      * @param result The result of modify session
      */
     public void modifySessionResponse(TextConfig textConfig, int result) {
-        ImsLog.v("modifySessionResponse");
+        ImsLog.d("modifySessionResponse");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.RESPONSE_MODIFY_SESSION);
@@ -82,7 +82,7 @@ public class TextSessionCallbackHandler {
      * @param rttMessage String containing the received characters.
      */
     public void onRttReceived(@NonNull String rttMessage) {
-        ImsLog.v("onRttReceived");
+        ImsLog.d("onRttReceived");
 
         if (rttMessage != null) {
             getMtcMediaInterface().rttMessageReceived(rttMessage);
@@ -96,7 +96,7 @@ public class TextSessionCallbackHandler {
      * @param packetType either RTP or RTCP
      */
     public void onNotifyMediaInactivity(int packetType) {
-        ImsLog.v("onNotifyMediaInactivity");
+        ImsLog.d("onNotifyMediaInactivity");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.NOTIFY_MEDIA_INACTIVITY);
@@ -114,7 +114,7 @@ public class TextSessionCallbackHandler {
      * @param result QoS connection result
      */
     public void onNotifyQosInfo(@NonNull String remoteAddress, int remotePort, boolean result) {
-        ImsLog.v("onNotifyQosInfo remoteAddress= " + remoteAddress + " remotePort= " + remotePort
+        ImsLog.d("onNotifyQosInfo remoteAddress= " + remoteAddress + " remotePort= " + remotePort
                 + " result= " + result);
 
         Parcel parcel = Parcel.obtain();
