@@ -121,14 +121,20 @@ IMS_BOOL AudioController::UpdateSession(
     }
     else
     {
-        IMS_BOOL bResult = UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
-        UpdateQualityThreshold(nNegoId, pNego);
-        SetMediaQuality(nNegoId);
+        IMS_BOOL bResult = IMS_TRUE;
+        IMS_BOOL bNeedModify = UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
+        IMS_BOOL bNeedSetQuality = UpdateQualityThreshold(nNegoId, pNego);
 
-        if (bResult)
+        if (bNeedModify)
         {
-            return ModifySession(nNegoId);
+            bResult = ModifySession(nNegoId);
         }
+        if (bNeedSetQuality && bResult)
+        {
+            SetMediaQuality(nNegoId);
+        }
+
+        return bNeedModify && bResult;
     }
 
     return IMS_FALSE;
