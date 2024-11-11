@@ -419,7 +419,13 @@ IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
         if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioMediaSession::STATE_LIVE)
         {
             pAudioSession->UpdateAccessNetwork(accessNetwork);
-            return pAudioSession->Modify();
+            IMS_BOOL bResult = pAudioSession->Modify();
+            if (bResult)
+            {
+                pAudioSession->SetMediaQuality();
+            }
+
+            return bResult;
         }
     }
 
