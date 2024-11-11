@@ -345,7 +345,7 @@
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="ims.support_verstat_for_reg_bool" value="false"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="false"/>
-    <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
+    <boolean name="imswfc.support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
     <boolean name="ims.use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="ims.use_security_server_port_in_init_reg_bool" value="false"/>
     <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>
