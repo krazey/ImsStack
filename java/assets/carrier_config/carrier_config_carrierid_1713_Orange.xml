@@ -26,4 +26,8 @@
          <item value="159"/>
     </int-array>
 
+    <!-- Mts -->
+    <int name="sms_message_response_wait_timer_millis_int" value="8000"/>
+    <int name="sms_retry_policy_for_expiry_timer_f_int" value="4"/>
+
 </carrier_config>

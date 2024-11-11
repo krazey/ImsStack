@@ -1185,6 +1185,10 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT[] =
 const IMS_CHAR
         CarrierConfig::Assets::KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL[] =
                 "sms_report_generic_error_when_retry_after_not_possible_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT[] =
+        "sms_message_response_wait_timer_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
+        "sms_retry_policy_for_expiry_timer_f_int";
 
 // Uce
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =
