@@ -45,7 +45,7 @@
 #include "interface/MockIAosPcscf.h"
 #include "interface/MockIAosRegistration.h"
 
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 #include "ImsAosParameter.h"
 #include "app/AosEApplication.h"
@@ -466,7 +466,7 @@ TEST_F(AosEApplicationTest, ProcessMessage)
 
 TEST_F(AosEApplicationTest, ProcessRegStart)
 {
-    ImsMessage objMessage(MSG_REG_START, AoSRegType::TYPE_IPCAN_WLAN, 0);
+    ImsMessage objMessage(MSG_REG_START, AosRegType::TYPE_IPCAN_WLAN, 0);
     // STATE_CONNECTED
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis()).Times(0);
@@ -495,7 +495,7 @@ TEST_F(AosEApplicationTest, ProcessRegStart)
     m_pTestAosEApplication->StopTimer(TIMER_APP_CONNECTED);
 
     // STATE_CONNECTING - Connector::IsReady() return false, TYPE_IPCAN_MOBILE
-    objMessage.nWparam = AoSRegType::TYPE_IPCAN_MOBILE;
+    objMessage.nWparam = AosRegType::TYPE_IPCAN_MOBILE;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegTimerForEmcCall()).WillOnce(Return(0));
     EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
 }
@@ -504,7 +504,7 @@ TEST_F(AosEApplicationTest,
         ShouldStopAppConnectedTimerIfEpdgEnabledAndKeepERegOnWlanIsRequiredWhenEPdnIsAlreadyConnected)
 {
     // GIVEN
-    ImsMessage objMessage(MSG_REG_START, AoSRegType::TYPE_IPCAN_WLAN, 0);
+    ImsMessage objMessage(MSG_REG_START, AosRegType::TYPE_IPCAN_WLAN, 0);
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
     m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
 

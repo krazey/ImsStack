@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 #include "AString.h"
 #include "AStringArray.h"
@@ -1393,10 +1393,10 @@ TEST_F(AosApplicationTest, ProcessMessage)
     m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
     m_pAosApplication->SetRegRecoveryHeld(IMS_FALSE);
-    objMessage.nWparam = AoSRegRecoveryType::PCSCF_CHANGE;
+    objMessage.nWparam = AosRegRecoveryType::PCSCF_CHANGE;
     m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTING);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
-    objMessage.nWparam = AoSRegRecoveryType::KEEP_DATA_CONNECTION;
+    objMessage.nWparam = AosRegRecoveryType::KEEP_DATA_CONNECTION;
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
     objMessage.nWparam = 0;
     m_pAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
@@ -2423,14 +2423,14 @@ TEST_F(AosApplicationTest, Process)
     EXPECT_TRUE(m_pAosApplication->IsRegRecoveryHeld());
     // pending feature on, not held - recover reason PCSCF_CHANGE
     m_pAosApplication->SetImsCall(IMS_FALSE);
-    m_pAosApplication->SetRecoverReason(AoSRegRecoveryType::PCSCF_CHANGE);
+    m_pAosApplication->SetRecoverReason(AosRegRecoveryType::PCSCF_CHANGE);
     EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
     // pending feature on, not held - recover reason other
     m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
     m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
-    m_pAosApplication->SetRecoverReason(AoSRegRecoveryType::UNKNOWN);
+    m_pAosApplication->SetRecoverReason(AosRegRecoveryType::UNKNOWN);
     EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));

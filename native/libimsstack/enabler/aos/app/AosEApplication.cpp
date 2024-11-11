@@ -18,7 +18,7 @@
 #include "ImsEventDef.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosCallTracker.h"
@@ -191,7 +191,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
     {
         SetAppState(STATE_READY);
 
-        if (nIpcanType == AoSRegType::TYPE_IPCAN_WLAN)
+        if (nIpcanType == AosRegType::TYPE_IPCAN_WLAN)
         {
             A_IMS_TRACE_I(APPID, "ProcessRegStart :: nIpcanType(%d) , emergency over WLAN",
                     nIpcanType, 0, 0);

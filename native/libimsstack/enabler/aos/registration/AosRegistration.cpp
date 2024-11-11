@@ -48,7 +48,7 @@
 
 #include "GeolocationHelper.h"
 
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "IAosService.h"
 #include "ImsAosParameter.h"
 #include "interface/IAosAppContext.h"
@@ -493,17 +493,17 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
             break;
 
         case PROPERTY_PROTECTED:
-            nValue = AoSRegProtectedType::REG_UNPROTECTED;
+            nValue = AosRegProtectedType::REG_UNPROTECTED;
 
             if (GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
-                nValue = AoSRegProtectedType::REG_PROTECTED;
+                nValue = AosRegProtectedType::REG_PROTECTED;
             }
             else if (GetRegIpcanCategory() == IIpcan::CATEGORY_MOBILE)
             {
                 if (m_pIpsecHelper != IMS_NULL && m_pIpsecHelper->IsEstablished())
                 {
-                    nValue = AoSRegProtectedType::REG_PROTECTED;
+                    nValue = AosRegProtectedType::REG_PROTECTED;
                 }
             }
 
@@ -512,11 +512,11 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION:
             if (m_bCallingNumberVerificationSupported)
             {
-                nValue = AoSSupportability::SUPPORTED;
+                nValue = AosSupportability::SUPPORTED;
             }
             else
             {
-                nValue = AoSSupportability::NOT_SUPPORTED;
+                nValue = AosSupportability::NOT_SUPPORTED;
             }
             break;
 

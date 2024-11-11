@@ -46,7 +46,7 @@
 #include "../../../engine/interface/registration/MockIRegParameter.h"
 #include "../../../engine/interface/registration/MockIRegSubscription.h"
 
-#include "../../../enabler/interface/aos/AoSAppRequestType.h"
+#include "../../../enabler/interface/aos/AosAppRequestType.h"
 #include "../../../enabler/interface/aos/ImsAosParameter.h"
 
 #include "../../interface/aos/MockIAosService.h"
@@ -1254,25 +1254,25 @@ TEST_F(AosRegistrationTest, GetPropertyReturnsEachPropertyValue)
     m_pAosRegistration->CreateIpsecHelper();
     EXPECT_CALL(m_objMockAosIpsecHelper, IsEstablished()).WillOnce(Return(IMS_TRUE));
     m_pAosRegistration->GetProperty(IAosRegistration::PROPERTY_PROTECTED, nValue, strValue);
-    EXPECT_EQ(nValue, AoSRegProtectedType::REG_PROTECTED);
+    EXPECT_EQ(nValue, AosRegProtectedType::REG_PROTECTED);
 
     // PROPERTY_PROTECTED - IpcanCategory is CATEGORY_WLAN
     EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
             .WillOnce(Return(IIpcan::CATEGORY_WLAN));
     m_pAosRegistration->UpdateRegIpcanCategory();
     m_pAosRegistration->GetProperty(IAosRegistration::PROPERTY_PROTECTED, nValue, strValue);
-    EXPECT_EQ(nValue, AoSRegProtectedType::REG_PROTECTED);
+    EXPECT_EQ(nValue, AosRegProtectedType::REG_PROTECTED);
 
     // PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION - m_bCallingNumberVerificationSupported if false
     m_pAosRegistration->GetProperty(
             IAosRegistration::PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION, nValue, strValue);
-    EXPECT_EQ(nValue, AoSSupportability::NOT_SUPPORTED);
+    EXPECT_EQ(nValue, AosSupportability::NOT_SUPPORTED);
 
     // PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION - m_bCallingNumberVerificationSupported if true
     m_pAosRegistration->SetCallingNumberVerificationSupported(IMS_TRUE);
     m_pAosRegistration->GetProperty(
             IAosRegistration::PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION, nValue, strValue);
-    EXPECT_EQ(nValue, AoSSupportability::SUPPORTED);
+    EXPECT_EQ(nValue, AosSupportability::SUPPORTED);
 
     // PROPERTY_NETWORK_BINDING_FEATURES
     m_pAosRegistration->GetProperty(

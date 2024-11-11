@@ -16,7 +16,7 @@
 #ifndef AOS_APP_REQ_TYPE_H_
 #define AOS_APP_REQ_TYPE_H_
 
-class AoSAppRequest
+class AosAppRequest
 {
 public:
     // --------- Get Request [START] ---------
@@ -24,7 +24,7 @@ public:
     {
         STATE_NONE = 0,
 
-        // AoSRegMode class
+        // AosRegMode class
         STATE_REGISTRATION_MODE,
 
         // AosReason class
@@ -32,7 +32,7 @@ public:
         STATE_IMS_SUSPENDED_REASON,
 
         /*
-            AoSIMSService class
+            AosImsService class
             if state is available, enabler can request regi command or etc ..
         */
         STATE_IMS_SERVICE,
@@ -113,7 +113,7 @@ public:
     // --------- Command Request [END] ---------
 };
 
-class AoSIMSService
+class AosImsService
 {
 public:
     enum
@@ -126,18 +126,7 @@ public:
     };
 };
 
-class AoSIMSRetryCounter
-{
-public:
-    enum
-    {
-        RESET = 0,
-        INCREASE,
-        DECREASE
-    };
-};
-
-class AoSPCSCFRecovery
+class AosPcscfRecovery
 {
 public:
     enum
@@ -147,7 +136,7 @@ public:
     };
 };
 
-class AoSRegMode
+class AosRegMode
 {
 public:
     enum
@@ -160,7 +149,7 @@ public:
     };
 };
 
-class AoSRegRecoveryType
+class AosRegRecoveryType
 {
 public:
     enum
@@ -178,7 +167,7 @@ public:
     };
 };
 
-class AoSRegType
+class AosRegType
 {
 public:
     enum
@@ -188,47 +177,7 @@ public:
     };
 };
 
-class AoSServiceControlParam
-{
-public:
-    enum
-    {
-        /*
-         * Enablers (i.e. UC) realize that WiFi calling is not allowed
-         * in this location (country). AoS blocks WiFi calling service
-         * until UE moves to another country.
-         */
-        VOWIFI_BLOCKED_LOCATION = 1
-    };
-};
-
-class AoSNetWorkType
-{
-public:
-    enum
-    {
-        NW_TYPE_NONE = (0x00000000),
-        NW_TYPE_EPDG = (0x00010000),
-        NW_TYPE_AMPS = (0x00020000),
-        NW_TYPE_CDMA = (0x00040000),
-        NW_TYPE_GSM = (0x00080000),
-        NW_TYPE_HDR = (0x00100000),
-        NW_TYPE_WCDMA = (0x00200000),
-        NW_TYPE_GPS = (0x00400000),
-        NW_TYPE_EDGE = (0x00800000),
-        NW_TYPE_WLAN = (0x01000000),
-        NW_TYPE_CDMA1X = (0x02000000),
-        NW_TYPE_EVDODO = (0x04000000),
-        NW_TYPE_EVDORA = (0x08000000),
-        NW_TYPE_EHRPD = (0x10000000),
-        NW_TYPE_LTE = (0x20000000),
-        NW_TYPE_HSPA = (0x40000000),
-        NW_TYPE_NR = (0x80000000),
-        NW_TYPE__MAX
-    };
-};
-
-class AoSRegProtectedType
+class AosRegProtectedType
 {
 public:
     enum
@@ -238,51 +187,13 @@ public:
     };
 };
 
-class AoSSupportability
+class AosSupportability
 {
 public:
     enum
     {
         NOT_SUPPORTED = 0,
         SUPPORTED
-    };
-};
-
-class AoSFakeERegType
-{
-public:
-    enum
-    {
-        TYPE_SAME_PCSCF = 0,
-        TYPE_NEXT_PCSCF
-    };
-};
-
-class AoSRegFeatureType
-{
-public:
-    enum
-    {
-        TYPE_RCS_CHATBOT = (0x00000001),
-        TYPE_RCS_XBOT = (0x00000002),
-        TYPE_RCS_CHATBOT_SA = (0x00000004),
-        TYPE_RCS_HTTPFT = (0x00000008),
-        TYPE_RCS_GEOPUSH = (0x00000010),
-        TYPE_RCS_FTSMS = (0x00000020),
-        TYPE_RCS_GEOSMS = (0x00000040),
-        TYPE_RCS_PRESENCE = (0x00000080),
-        TYPE_RCS_MOBILITY = (0x00000100),
-        TYPE_RCS_TELEPHONY_CS = (0x00000200),
-        TYPE_RCS_CALL_COMPOSER = (0x00000400),
-        TYPE_RCS_SHARED_MAP = (0x00000800),
-        TYPE_RCS_SHARED_SKETCH = (0x00001000),
-        TYPE_RCS_CALL_UNANSWERED = (0x00002000),
-        TYPE_RCS_CPM_SESSION = (0x00004000),
-        TYPE_RCS_CPM_FT = (0x00008000),
-        TYPE_RCS_CPM_MSG = (0x00010000),
-        TYPE_RCS_CPM_LARGEMSG = (0x00020000),
-        TYPE_RCS_CPM_SYSMSG = (0x00040000),
-        TYPE_RCS_CANCEL_MSG = (0x00080000)
     };
 };
 
