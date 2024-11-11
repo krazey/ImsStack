@@ -19,6 +19,7 @@
     <boolean name="support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
@@ -26,7 +27,6 @@
         <item value="403"/>
     </int-array>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
 
     <!-- Ut/Xcap Assets -->
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="true"/>

@@ -61,11 +61,8 @@
 
     <!-- Aos -->
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="true"/>
-    <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
     <boolean name="ims.init_ipsec_setting_with_new_pcscf_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_in_roaming_bool" value="false"/>
-    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
-    <int name="imsemergency.epdn_preferred_iptype_int" value="0"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="1"/>
     <int name="ims.reg_out_of_service_policy_int" value="1"/>
     <int name="ims.reg_retry_305_policy_int" value="3"/>
@@ -99,6 +96,9 @@
             <item value="489"/>
         </int-array>
     </pbundle>
+    <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
+    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
+    <int name="imsemergency.epdn_preferred_iptype_int" value="0"/>
 
     <!-- Mtc -->
     <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">

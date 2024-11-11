@@ -36,7 +36,22 @@
     <int name="location_tolerable_distance_int" value="150"/>
 
     <!-- Aos -->
+    <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
+    <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
+    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
+    <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="true"/>
+    <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="2"/>
+    <int name="ims.ims_establishment_time_sec_int" value="300"/>
+    <int name="ims.isim_index_for_impu_int" value="0"/>
+    <int name="ims.reg_actual_wait_time_policy_int" value="1"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
+    <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
+    <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
+    <int-array name="ims.ims_identity_priority_int_array" num="1">
+        <item value="0"/>
+    </int-array>
     <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
         <item value="0"/>
         <item value="1"/>
@@ -46,24 +61,6 @@
         <item value="1"/>
         <item value="2"/>
     </int-array>
-    <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
-    <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
-    <int name="ims.isim_index_for_impu_int" value="0"/>
-    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
-    <int-array name="ims.ims_identity_priority_int_array" num="1">
-        <item value="0"/>
-    </int-array>
-
-    <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-    <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="true"/>
-    <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
-    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
-    <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="true"/>
-    <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="2"/>
-    <int name="ims.ims_establishment_time_sec_int" value="300"/>
-    <int name="ims.reg_actual_wait_time_policy_int" value="1"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.permanent_pdn_failure_int_array" num="2">
         <item value="28"/>
         <item value="33"/>
@@ -73,7 +70,6 @@
         <item value="1"/>
         <item value="9"/>
     </int-array>
-
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <pbundle name="ims.extra_reg_err_bundle">
         <int-array name="ims.extra_reg_err_code_int_array" num="2">
@@ -90,6 +86,8 @@
             <item value="0"/>
         </int-array>
     </pbundle>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
 
     <!-- Uce -->
     <int name="imsuce.anonymous_fetch_method_int" value="0"/>

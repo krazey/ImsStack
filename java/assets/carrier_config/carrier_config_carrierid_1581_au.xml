@@ -28,11 +28,9 @@
     </int-array>
 
     <!-- Aos -->
-    <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="true"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="3"/>
     <int name="ims.reg_retry_cnt_reset_policy_int" value="2"/>
     <int name="ims.rereg_retry_305_policy_int" value="0"/>
-
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <pbundle name="ims.extra_reg_err_bundle">
         <boolean name="ims.extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="true"/>
@@ -59,6 +57,7 @@
             <item value="10"/>
         </int-array>
     </pbundle>
+    <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="true"/>
 
     <!-- Mtc -->
     <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>

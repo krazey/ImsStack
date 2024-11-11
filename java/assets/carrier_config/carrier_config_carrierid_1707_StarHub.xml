@@ -16,6 +16,6 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <int name="imsemergency.wait_time_sec_for_release_epdn_after_ecall_end_int" value="240"/>
     <int name="ims.reg_retry_305_policy_int" value="2"/>
+    <int name="imsemergency.wait_time_sec_for_release_epdn_after_ecall_end_int" value="240"/>
 </carrier_config>

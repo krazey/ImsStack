@@ -19,13 +19,13 @@
     <boolean name="support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
-    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
     <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="true"/>
     <int-array name="ims.supported_roaming_rats_int_array" num="3">
         <item value="3"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN -->
         <item value="5"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN -->
         <item value="6"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN -->
     </int-array>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>

@@ -17,16 +17,15 @@
 <carrier_config>
     <!-- Ims General -->
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
-    <!-- Aos -->
-    <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
-    <boolean name="imswfc.required_wfc_block_by_airplane_mode_bool" value="true"/>
 
+    <!-- Aos -->
     <!-- USIM -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
-
-    <!-- LAST ACCESS NETWORK  INFO-->
+    <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
+    <boolean name="imswfc.required_wfc_block_by_airplane_mode_bool" value="true"/>
+    <!-- LAST ACCESS NETWORK INFO-->
     <int name="imswfc.registration_private_header_int" value="2"/>
 
     <!-- Ut/Xcap AOSP - Ut not supported -->

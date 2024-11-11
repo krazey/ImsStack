@@ -23,7 +23,6 @@
     <boolean name="ims.use_tcp_transport_for_register_bool" value="true"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
-
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
     <pbundle name="ims.sub_err_code_for_init_reg_bundle">
         <int name="ims.sub_err_code_for_init_reg_with_retry_max_cnt_int" value="2"/>

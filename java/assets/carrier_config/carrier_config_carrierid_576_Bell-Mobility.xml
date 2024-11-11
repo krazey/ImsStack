@@ -19,12 +19,12 @@
     <boolean name="support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
+    <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
+    <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="true"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
-    <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="true"/>
     <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
 
     <!-- MTC -->

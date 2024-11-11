@@ -19,11 +19,11 @@
     <boolean name="support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="2"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
-    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="2"/>
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>

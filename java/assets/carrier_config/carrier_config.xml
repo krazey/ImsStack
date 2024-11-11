@@ -317,46 +317,28 @@
     <int name="location_geodetic_shape_int" value="0"/>
     <boolean name="cellular_network_info_utc_offset_enabled_bool" value="false"/>
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">no</string>
+
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="true"/>
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
-    <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
-    <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="false"/>
-    <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="false"/>
     <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="true"/>
     <boolean name="ims.ims_dereg_on_3g_network_bool" value="false"/>
     <boolean name="ims.init_ipsec_setting_with_new_pcscf_bool" value="false"/>
-    <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="false"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="false"/>
-    <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="false"/>
     <boolean name="ims.reg_contact_validation_bool" value="false"/>
     <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="ims.remove_old_sa_on_establishing_sa_bool" value="false"/>
     <boolean name="ims.required_cdmaless_feature_tag_bool" value="false"/>
     <boolean name="ims.required_init_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
-    <boolean name="imsvoice.required_volte_block_by_ssac_bool" value="false"/>
-    <boolean name="imswfc.required_wfc_block_by_airplane_mode_bool" value="false"/>
-    <boolean name="imswfc.rereg_with_changed_country_on_wifi_bool" value="false"/>
     <boolean name="ims.sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
-    <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="true"/>
     <boolean name="ims.support_contact_user_info_bool" value="true"/>
-    <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="false"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="ims.support_verstat_for_reg_bool" value="false"/>
-    <boolean name="imsemergency.support_video_for_ereg_bool" value="false"/>
-    <boolean name="imswfc.support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
     <boolean name="ims.use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="ims.use_security_server_port_in_init_reg_bool" value="false"/>
     <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>
-    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="false"/>
-    <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="false"/>
-
     <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="1"/>
-    <int name="imsemergency.epdn_preferred_iptype_int" value="1"/>
-    <int name="imsemergency.ereg_retry_max_cnt_int" value="0"/>
-    <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>
     <int name="ims.geolocation_pidf_forming_policy_int" value="1"/>
     <int name="ims.ims_establishment_time_sec_int" value="0"/>
     <int name="ims.ims_preferred_iptype_int" value="1"/>
@@ -373,13 +355,9 @@
     <int name="ims.reg_retry_cnt_with_ipsec_on_auth_failure_int" value="3"/>
     <int name="ims.reg_retry_default_policy_int" value="0"/>
     <int name="ims.reg_retry_timer_f_policy_int" value="0"/>
-    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="0"/>
     <int name="ims.rereg_retry_305_policy_int" value="1"/>
-    <int name="imsemergency.roaming_preferred_ereg_int" value="-1"/>
     <int name="ims.sip_message_threshold_for_transport_change_int" value="200"/>
     <int name="ims.usat_reg_event_download_policy_int" value="0"/>
-    <int name="imsvoice.volte_hys_time_sec_int" value="0"/>
-
     <int-array name="ims.permanent_pdn_failure_int_array" num="0">
     </int-array>
     <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="0">
@@ -402,9 +380,6 @@
     </int-array>
     <int-array name="ims.supported_roaming_rats_int_array" num="0">
     </int-array>
-    <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="0">
-    </int-array>
-
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <pbundle name="ims.extra_reg_err_bundle">
         <boolean name="ims.extra_reg_err_code_as_failure_in_roaming_for_update_bool" value="false"/>
@@ -467,6 +442,29 @@
         <int-array name="ims.sub_err_code_for_terminated_int_array" num="0">
         </int-array>
     </pbundle>
+    <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
+    <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="false"/>
+    <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="false"/>
+    <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="false"/>
+    <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="false"/>
+    <boolean name="imsemergency.support_video_for_ereg_bool" value="false"/>
+    <int name="imsemergency.epdn_preferred_iptype_int" value="1"/>
+    <int name="imsemergency.ereg_retry_max_cnt_int" value="0"/>
+    <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>
+    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="0"/>
+    <int name="imsemergency.roaming_preferred_ereg_int" value="-1"/>
+    <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="true"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="true"/>
+    <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="false"/>
+    <boolean name="imsvoice.required_volte_block_by_ssac_bool" value="false"/>
+    <int name="imsvoice.volte_hys_time_sec_int" value="0"/>
+    <boolean name="imswfc.rereg_with_changed_country_on_wifi_bool" value="false"/>
+    <boolean name="imswfc.required_wfc_block_by_airplane_mode_bool" value="false"/>
+    <boolean name="imswfc.support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="false"/>
+    <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="false"/>
+    <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="0">
+    </int-array>
     <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
     <pbundle name="imswfc.wfc_err_message_bundle">
         <string name="imswfc.wfc_err_reg_403_string"></string>

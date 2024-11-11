@@ -32,13 +32,25 @@
     <int name="location_acquisition_policy_int" value="131328"/>
     <int name="location_validity_period_min_int" value="3"/>
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">True</string>
+
     <!-- Aos -->
+    <boolean name="ims.reg_contact_validation_bool" value="true"/>
+    <boolean name="ims.required_cdmaless_feature_tag_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
+    <boolean name="ims.use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
+    <int name="ims.ims_establishment_time_sec_int" value="120"/>
     <int name="ims.preferred_ims_dscp_int" value="2"/>
+    <int name="ims.reg_actual_wait_time_policy_int" value="3"/>
+    <int name="ims.reg_pcscf_update_policy_int" value="1"/>
+    <int name="ims.reg_retry_503_policy_int" value="0"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="0"/>
+    </int-array>
+    <int-array name="ims.reg_permanent_err_max_cnt_int_array" num="1">
+        <item value="2"/>
     </int-array>
     <int-array name="ims.registration_permanent_error_code_int_array" num="4">
         <item value="400"/>
@@ -46,41 +58,15 @@
         <item value="421"/>
         <item value="484"/>
     </int-array>
-    <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
-        <item value="3"/>
-        <item value="6"/>
-    </int-array>
-    <boolean name="imssms.support_limited_admin_sms_mode_bool" value="true"/>
-
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-    <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="true"/>
-    <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
-    <boolean name="ims.reg_contact_validation_bool" value="true"/>
-    <boolean name="ims.required_cdmaless_feature_tag_bool" value="true"/>
-    <boolean name="imsvoice.required_volte_block_by_ssac_bool" value="true"/>
-    <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="true"/>
-    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
-    <boolean name="imswfc.support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
-    <boolean name="ims.use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
-    <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="true"/>
-    <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="true"/>
-    <int name="ims.ims_establishment_time_sec_int" value="120"/>
-    <int name="ims.reg_actual_wait_time_policy_int" value="3"/>
-    <int name="ims.reg_pcscf_update_policy_int" value="1"/>
-    <int name="ims.reg_retry_503_policy_int" value="0"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int name="imsvoice.volte_hys_time_sec_int" value="60"/>
-    <int name="imsemergency.ereg_retry_max_cnt_int" value="1"/>
-    <int name="imsemergency.ereg_retry_timer_millis_int" value="2000"/>
-    <int-array name="ims.reg_permanent_err_max_cnt_int_array" num="1">
-        <item value="2"/>
-    </int-array>
     <int-array name="ims.sub_err_code_for_stopping_by_expiration_time_int_array" num="3">
         <item value="4"/>
         <item value="5"/>
         <item value="6"/>
     </int-array>
-
+    <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <pbundle name="ims.extra_reg_err_bundle">
         <int name="ims.extra_reg_err_final_type_int" value="2"/>
@@ -160,6 +146,19 @@
             <item value="420"/>
         </int-array>
     </pbundle>
+    <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="true"/>
+    <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="true"/>
+    <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="true"/>
+    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
+    <int name="imsemergency.ereg_retry_max_cnt_int" value="1"/>
+    <int name="imsemergency.ereg_retry_timer_millis_int" value="2000"/>
+    <boolean name="imssms.support_limited_admin_sms_mode_bool" value="true"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
+    <boolean name="imsvoice.required_volte_block_by_ssac_bool" value="true"/>
+    <int name="imsvoice.volte_hys_time_sec_int" value="60"/>
+    <boolean name="imswfc.support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
+    <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="true"/>
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>

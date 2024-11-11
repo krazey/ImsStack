@@ -18,6 +18,7 @@
     <!-- Ims General -->
     <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
     <int name="location_policy_update_type_int" value="2"/>
     <int name="location_acquisition_policy_int" value="610432"/>
     <int name="location_address_resolution_time_millis_int" value="1000"/>
@@ -26,18 +27,20 @@
     <int name="location_tolerable_distance_int" value="150"/>
     <int name="location_gps_searching_duration_sec_int" value="20"/>
     <int name="location_geodetic_shape_int" value="1"/>
+
     <!-- Aos -->
-    <int name="ims.sip_preferred_transport_int" value="1"/>
+    <boolean name="ims.required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
     <boolean name="ims.use_tcp_transport_for_register_bool" value="true"/>
-    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
-        <item value="0"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="1">
-        <item value="0"/>
-    </int-array>
+    <int name="ims.geolocation_pidf_forming_policy_int" value="3"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
+    <int name="ims.reg_actual_wait_time_policy_int" value="2"/>
+    <int name="ims.reg_retry_305_policy_int" value="0"/>
+    <int name="ims.reg_retry_503_policy_int" value="0"/>
+    <int name="ims.reg_retry_cnt_reset_policy_int" value="1"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int name="ims.sip_message_threshold_for_transport_change_int" value="340"/>
+    <int name="ims.sip_preferred_transport_int" value="1"/>
     <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="2">
         <item value="1"/>
         <item value="2"/>
@@ -46,32 +49,18 @@
         <item value="0"/>
         <item value="2"/>
     </int-array>
-
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
-
-    <int name="imswfc.registration_private_header_int" value="2"/>
-
-    <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-    <boolean name="ims.required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
-    <boolean name="imswfc.rereg_with_changed_country_on_wifi_bool" value="true"/>
-    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
-    <int name="ims.geolocation_pidf_forming_policy_int" value="3"/>
-    <int name="ims.reg_actual_wait_time_policy_int" value="2"/>
-    <int name="ims.reg_retry_305_policy_int" value="0"/>
-    <int name="ims.reg_retry_503_policy_int" value="0"/>
-    <int name="ims.reg_retry_cnt_reset_policy_int" value="1"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int name="ims.sip_message_threshold_for_transport_change_int" value="340"/>
+    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="1">
+        <item value="0"/>
+    </int-array>
     <int-array name="ims.sub_err_code_for_init_reg_with_next_pcscf_int_array" num="3">
         <item value="420"/>
         <item value="421"/>
         <item value="422"/>
     </int-array>
-    <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="1">
-        <item value="403"/>
-    </int-array>
-
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <pbundle name="ims.extra_reg_err_bundle">
         <int name="ims.extra_reg_err_final_type_int" value="4"/>
@@ -104,6 +93,14 @@
             <item value="0"/>
         </int-array>
     </pbundle>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
+    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <int name="imswfc.registration_private_header_int" value="2"/>
+    <boolean name="imswfc.rereg_with_changed_country_on_wifi_bool" value="true"/>
+    <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="1">
+        <item value="403"/>
+    </int-array>
     <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
     <pbundle name="imswfc.wfc_err_message_bundle">
         <string name="imswfc.wfc_err_reg_403_string">REG90 - Unable to Connect</string>

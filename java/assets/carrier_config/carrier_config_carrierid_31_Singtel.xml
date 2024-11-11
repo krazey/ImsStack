@@ -17,6 +17,7 @@
 <carrier_config>
     <!-- Aos -->
     <int name="imsemergency.wait_time_sec_for_release_epdn_after_ecall_end_int" value="240"/>
+
     <!-- Ut/Xcap Assets -->
     <boolean name="ut_support_cf_action_erasure_bool" value="false"/>
     <boolean name="ut_support_cfnr_timer_bool" value="false"/>

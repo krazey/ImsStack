@@ -43,10 +43,8 @@
 
     <!-- Aos -->
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="true"/>
-    <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
     <boolean name="ims.init_ipsec_setting_with_new_pcscf_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_in_roaming_bool" value="false"/>
-    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="1"/>
     <int name="ims.reg_out_of_service_policy_int" value="1"/>
     <int name="ims.reg_retry_cnt_on_single_pcscf_int" value="1"/>
@@ -61,7 +59,6 @@
     <int-array name="ims.rereg_err_code_for_call_end_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
     <pbundle name="ims.sub_err_code_for_terminated_bundle">
         <int name="ims.sub_err_code_for_terminated_with_retry_max_cnt_int" value="1"/>
@@ -69,6 +66,9 @@
             <item value="489"/>
         </int-array>
     </pbundle>
+    <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
+    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
 
     <!-- Mtc -->
     <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">

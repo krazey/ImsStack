@@ -17,14 +17,15 @@
 <carrier_config>
     <!-- Ims General -->
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+
     <!-- Aos -->
-    <!-- null encryption not supported -->
-    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="2">
-        <item value="1"/>
-        <item value="2"/>
-    </int-array>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
+    </int-array>
+    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="2">
+        <!-- null encryption not supported -->
+        <item value="1"/>
+        <item value="2"/>
     </int-array>
     <int name="imswfc.registration_private_header_int" value="2"/>
 
