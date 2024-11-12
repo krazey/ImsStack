@@ -36,6 +36,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCallManager.h"
+#include "call/termination/EmergencyStartErrorHandler.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
@@ -65,16 +66,7 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
     if (m_objContext.GetCallInfo().IsEmergency())
     {
-        // According to Domain Selection and legacy Call Framework behavior,
-        // IMS Stack should use same failure reason as normal call.
-        // Emergency Call is redialed for all reasons except
-        // CODE_USER_TERMINATED, CODE_USER_TERMINATED_BY_REMOTE, and CODE_SIP_USER_REJECTED
-        IMS_TRACE_D("Handle : Emergency Call Failure.", 0, 0, 0);
-
-        if (IsRedialEmergencyWithNextPcscfRequired(piMessage))
-        {
-            return HandleRedialEmergencyWithNextPcscf();
-        }
+        return EmergencyStartErrorHandler(m_objContext, m_objSession).Handle(piMessage);
     }
 
     if (IsTransactionTimeout(piMessage))
@@ -90,23 +82,12 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
-    if (m_objContext.GetCallInfo().IsEmergency())
-    {
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
-    }
-
     return HandleResponse(*piMessage);
 }
 
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
-    if (m_objContext.GetCallInfo().IsEmergency())
-    {
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
-    }
-
     const IMS_CHAR* pszKey = m_objContext.GetService().IsWlanIpCanType()
             ? ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT
             : ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT;
@@ -581,13 +562,6 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::HandleRedialEmergencyWithNextPcscf() const
-{
-    ControlAos(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF);
-    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
-}
-
-PRIVATE
 IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nExtraCode = m_objContext.GetMessageUtils().GetCauseFromReasonHeader(&objMessage);
@@ -612,11 +586,6 @@ IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 PRIVATE
 IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const
 {
-    if (m_objContext.GetCallInfo().IsEmergency())
-    {
-        return IMS_FALSE;
-    }
-
     if (!m_objContext.GetService().IsEpsCombinedAttach())
     {
         return IMS_FALSE;
@@ -723,40 +692,6 @@ IMS_BOOL StartErrorHandler::IsByMaxCallLimit(IN const IMessage& objMessage) cons
             m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
     const AString strNormalizedText = objValue.strText.SimplifyWsp().MakeLower();
     return strNormalizedText.Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW);
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsRedialEmergencyWithNextPcscfRequired(
-        IN const IMessage* piMessage) const
-{
-    if (!m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigEmergency::KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-    {
-        return IMS_FALSE;
-    }
-
-    if (!m_objContext.GetService().IsEmergency())
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_SINT32 nStatusCode =
-            (piMessage == IMS_NULL) ? SipStatusCode::SC_INVALID : piMessage->GetStatusCode();
-    if (nStatusCode >= SipStatusCode::SC_300 && nStatusCode < SipStatusCode::SC_400)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_objContext.GetMessageUtils().GetNumberOfPreviousResponses(
-                &m_objContext.GetSession()->GetISession(), IMessage::SESSION_START) > 1)
-    {
-        return IMS_FALSE;
-    }
-
-    // support re-dial emergency with next P-CSCF,
-    // an emergency call is over sos pdn,
-    // and it receives error response except 3xx before receiving 100 Trying.
-    return IMS_TRUE;
 }
 
 PRIVATE

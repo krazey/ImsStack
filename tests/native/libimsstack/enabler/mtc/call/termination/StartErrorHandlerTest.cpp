@@ -101,6 +101,7 @@ protected:
         ON_CALL(objMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
 
+        objCallInfo.eEmergencyType = EmergencyType::NONE;
         pHandler = new StartErrorHandler(objCallContext, objSession);
     }
 
@@ -180,41 +181,6 @@ protected:
         return objResult == CallReasonInfo(nCode, nExtraCode, strExtraMessage);
     }
 };
-
-TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByTransactionTimeoutOfEcc)
-{
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    SetMessageCode(SipStatusCode::SC_INVALID);
-
-    EXPECT_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-            .Times(2)
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(objMtcService, IsEmergency()).Times(1).WillOnce(Return(IMS_FALSE));
-
-    EXPECT_TRUE(
-            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
-    EXPECT_TRUE(
-            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
-}
-
-TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByNullIMessageOfEcc)
-{
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
-            .WillByDefault(Return(2));
-
-    CallReasonInfo objResult = pHandler->Handle(IMS_NULL);
-    EXPECT_TRUE(objResult ==
-            CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
-}
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
 {
@@ -347,23 +313,6 @@ TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfi
 
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-}
-
-TEST_F(StartErrorHandlerTest, HandleReturnsRedialEmergencyWithNextPcscf)
-{
-    SetMessageCode(SipStatusCode::SC_600);
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
-            .WillByDefault(Return(1));
-
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(1);
-    EXPECT_TRUE(
-            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF));
 }
 
 TEST_F(StartErrorHandlerTest, HandleRedirectionBy3xxResponses)
@@ -964,14 +913,6 @@ TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
 
     SetMessageCode(SipStatusCode::SC_603);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_USER_REJECTED, nAnyCause));
-}
-
-TEST_F(StartErrorHandlerTest, HandleResponseForEmergencyCall)
-{
-    SetMessageCode(SipStatusCode::SC_400);
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
-            EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }
 
 }  // namespace android
