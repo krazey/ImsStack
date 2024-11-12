@@ -38,7 +38,8 @@ __IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosEApplication::AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
-        AosApplication(piAppContext, strAppId)
+        AosApplication(piAppContext, strAppId),
+        m_bRegBlockInCbm(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosEApplication = %" PFLS_u "/%" PFLS_x, APPID,
             sizeof(AosEApplication), this);
@@ -60,6 +61,7 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
     switch (nCmdType)
     {
         case ImsAosControl::REGISTER_START:
+            SetRegBlockInCbm(IMS_FALSE);
             if (IsNotReady())
             {
                 return IMS_FALSE;
@@ -91,6 +93,11 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
             AosApplication::RequestCmd(nCmdType);
             break;
 
+        case CMD_ECALL_INIT:  // FALL-THROUGH
+        case CMD_ESMS_INIT:
+            SetRegBlockInCbm(IMS_FALSE);
+            break;
+
         default:
             bResult = IMS_FALSE;
             break;
@@ -103,6 +110,16 @@ PUBLIC VIRTUAL void AosEApplication::GetProperty(
         IN IMS_UINT32 /* nType */, OUT IMS_UINT32& /* nValue */, OUT AString& strValue)
 {
     strValue = AString::ConstNull();
+}
+
+PROTECTED void AosEApplication::SetRegBlockInCbm(IN IMS_BOOL bBlock)
+{
+    m_bRegBlockInCbm = bBlock;
+}
+
+PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
+{
+    return m_bRegBlockInCbm;
 }
 
 PROTECTED VIRTUAL void AosEApplication::ClearConnection()
@@ -249,12 +266,33 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& obj
             {
                 StopTimer(TIMER_APP_CONNECTED);
             }
-            m_piRegistration->Start();
-            SetAppState(STATE_CONNECTING);
+            if (!IsRegBlockInCbm())
+            {
+                if (m_piRegistration->IsInCallbackMode())
+                {
+                    SetRegBlockInCbm(IMS_TRUE);
+                }
+                m_piRegistration->Start();
+                SetAppState(STATE_CONNECTING);
+            }
+            else
+            {
+                if (!m_piRegistration->IsInCallbackMode())
+                {
+                    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+                }
+            }
             break;
 
         case CONNECTION_DEACTIVATED:
-            ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+            if (m_piRegistration->IsInCallbackMode())
+            {
+                m_pConnector->Start();
+            }
+            else
+            {
+                ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+            }
             break;
 
         default:
@@ -298,7 +336,18 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated_StateDisconnect
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionDeactivated(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    if (m_piRegistration->IsInCallbackMode())
+    {
+        CleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+        if (!IsEmergencyBlocked())
+        {
+            SetAppState(STATE_READY);
+        }
+    }
+    else
+    {
+        ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    }
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 nReason)
@@ -316,7 +365,22 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
     switch (nReason)
     {
         case AosConnector::REASON_IP_CHANGED:
-            ProcessCleanAll(AosReason::IP_CHANGED);
+            if (m_piRegistration->IsInCallbackMode())
+            {
+                CleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+                if (!IsRegBlockInCbm())
+                {
+                    SetAppState(STATE_CONNECTING);
+                    m_piRegistration->Start();
+                    Report_StateChanged(IMS_FALSE);
+                    SetRegBlockInCbm(IMS_TRUE);
+                    return;
+                }
+            }
+            else
+            {
+                ProcessCleanAll(AosReason::IP_CHANGED);
+            }
             break;
 
         case AosConnector::REASON_IPCAN_CAT_CHANGED:
@@ -453,6 +517,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStateCheck()
 PROTECTED VIRTUAL void AosEApplication::ProcessECallStarted()
 {
     SetImsCall(IMS_TRUE);
+    SetRegBlockInCbm(IMS_FALSE);
 
     if (m_piAppActivatedTimer != IMS_NULL)
     {

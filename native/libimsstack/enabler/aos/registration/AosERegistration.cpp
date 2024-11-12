@@ -131,6 +131,16 @@ PUBLIC VIRTUAL void AosERegistration::RequestCmd(
     }
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosERegistration::IsInCallbackMode()
+{
+    if (m_pEModeInfo == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_pEModeInfo->IsEcbm() || m_pEModeInfo->IsScbm();
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
 {
     A_IMS_TRACE_I(REGID, "OnMessage :: (%s)",
@@ -232,7 +242,6 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::CreateRegistration()
 
 PROTECTED VIRTUAL void AosERegistration::DestroyRegistration()
 {
-    ClearCbm();
     AosRegistration::DestroyRegistration();
 }
 
@@ -633,6 +642,7 @@ PROTECTED void AosERegistration::CallbackModeChanged(
         if (eState == EmergencyCallbackMode::STOP)
         {
             ProcessUnpredictableFailure();
+            ClearCbm();
         }
     }
 }

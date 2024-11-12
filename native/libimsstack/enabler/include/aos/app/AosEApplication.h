@@ -37,6 +37,9 @@ public:
     void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) override;
 
 protected:
+    void SetRegBlockInCbm(IN IMS_BOOL bBlock);
+    IMS_BOOL IsRegBlockInCbm() const;
+
     // Clean
     void ClearConnection() override;
     virtual void ProcessCleanAll(IN IMS_UINT32 nReason = 0);
@@ -98,5 +101,7 @@ protected:
     void CleanUp() override;
 
     static const IMS_UINT32 EPDN_RELEASE_DELAY_TIME_MILLIS = 2000;
+
+    IMS_BOOL m_bRegBlockInCbm;
 };
 #endif  // AOS_E_APPLICATION_H_

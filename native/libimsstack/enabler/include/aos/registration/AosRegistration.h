@@ -89,6 +89,7 @@ public:
     AosRegistrationType GetRegType() override;
     IMS_SINT32 GetImsRegType() override;
 
+    IMS_BOOL IsInCallbackMode() override;
     IMS_BOOL IsRegistered() override;
     IMS_BOOL IsRefreshing() override;
     IMS_BOOL IsRetryTimer() override;

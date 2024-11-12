@@ -876,6 +876,8 @@ TEST_F(AosHandleTest, ShouldNotifyECallInitiationWhenMtcRequestedEmergencyRegist
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ECALL_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::REGISTER_START, _));
 
     // WHEN
     m_pAosHandle->Control(ImsAosControl::REGISTER_START);
@@ -892,6 +894,8 @@ TEST_F(AosHandleTest, ShouldNotifyESmsInitiationWhenMtsRequestedEmergencyRegiste
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ESMS_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::REGISTER_START_WITH_WLAN, _));
 
     // WHEN
     m_pAosHandle->Control(ImsAosControl::REGISTER_START_WITH_WLAN);

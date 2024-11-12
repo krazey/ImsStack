@@ -778,7 +778,8 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_IpChanged()
 
     if (IsReady())
     {
-        if (CheckIpChangedForEmergency())
+        if (CheckIpChangedForEmergency() &&
+                !(GET_N_CONFIG(m_piAppContext->GetSlotId())->IsEmergencyCallbackModeSupported()))
         {
             A_IMS_TRACE_I(APPPROFILE, "AosConnection_IpChanged :: ip change is ignored", 0, 0, 0);
             return;
