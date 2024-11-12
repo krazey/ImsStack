@@ -266,7 +266,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     InitMediaSession();
     m_objContext.GetPreconditionManager().CreateQos(piSession);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
@@ -367,7 +367,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     m_objContext.GetCallInfo().eInitialCallType = m_objContext.GetSession()->GetCallType();
     InitMediaSession();
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }

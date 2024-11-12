@@ -343,7 +343,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();
@@ -370,7 +370,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateReceived(IN I
     IMtcSession* pMtcSession = m_objContext.GetSession();
     pMtcSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         if (pMtcSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -437,7 +437,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackReceived(IN ISession* pi
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
         const CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
@@ -478,7 +478,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
 
     pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();

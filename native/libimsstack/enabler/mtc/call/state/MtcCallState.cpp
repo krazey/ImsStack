@@ -593,11 +593,11 @@ void MtcCallState::InitMediaSession()
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage)
+IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN IMessage* piMessage)
 {
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
-        IMS_TRACE_D("OnSdpReceived - No SDP received.", 0, 0, 0);
+        IMS_TRACE_D("HandleReceivedSdp - No SDP received.", 0, 0, 0);
         if (IsAnswerMandatory(piSession, piMessage))
         {
             IMS_TRACE_E(0, "Answer must be included.", 0, 0, 0);
@@ -618,14 +618,14 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
 
     if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
     {
-        IMS_TRACE_D("OnSdpReceived - Nego SDP Failed", 0, 0, 0);
+        IMS_TRACE_D("HandleReceivedSdp - Nego SDP Failed", 0, 0, 0);
         // TODO: return fail reason? IMS_RESULT? it's always NEGOFAIL?
         return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 
     m_objContext.GetPreconditionManager().OnSdpReceived(piSession, piMessage);
 
-    IMS_TRACE_D("OnSdpReceived - Nego Done", 0, 0, 0);
+    IMS_TRACE_D("HandleReceivedSdp - Nego Done", 0, 0, 0);
     return CODE_NONE;
 }
 

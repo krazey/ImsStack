@@ -1174,6 +1174,9 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfCodeIs183ButNotN
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to make IMessage have SDP
 
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
@@ -1185,6 +1188,27 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfCodeIs183ButNotN
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsTerminatingIfSdpOaFails)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+    SetSdpOaFailure(objMessage);
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(SipStatusCode::SC_183));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveredSendsEarlyUpdateIfAvailable)
