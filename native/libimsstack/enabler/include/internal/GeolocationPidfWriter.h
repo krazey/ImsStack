@@ -32,6 +32,8 @@ class Element
 {
 public:
     virtual ~Element();
+    Element(IN const Element&) = delete;
+    Element& operator=(IN const Element&) = delete;
 
     virtual void Write(IN_OUT IXmlStreamWriter& objWriter) const;
     virtual void Append(IN Element* pElement);
@@ -78,6 +80,7 @@ public:
         GS = 1 << 4,
         CL = 1 << 5,
         CON = 1 << 6,
+        GBP = 1 << 7,
         ALL = ~0,
 
         COUNTRY = DM | GP | CL,
@@ -179,12 +182,27 @@ public:
 class UsageRules : public Element
 {
 public:
-    inline UsageRules() :
-            Element({})
+    explicit inline UsageRules(IN std::initializer_list<Element*> lstChildren) :
+            Element(lstChildren)
     {
     }
 
     void Write(IN_OUT IXmlStreamWriter& objWriter) const override;
+};
+
+class RetransmissionAllowed : public Element
+{
+public:
+    explicit inline RetransmissionAllowed(IN const AString& strRetransmissionAllowed) :
+            Element({}),
+            m_strRetransmissionAllowed(strRetransmissionAllowed)
+    {
+    }
+
+    void Write(IN_OUT IXmlStreamWriter& objWriter) const override;
+
+private:
+    const AString m_strRetransmissionAllowed;
 };
 
 class Method : public Element

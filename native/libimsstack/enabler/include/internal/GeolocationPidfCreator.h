@@ -112,6 +112,17 @@ public:
      */
     inline void SetTupleId(IN const AString& strId) { m_strTupleId = strId; }
 
+    /**
+     * Sets the text of <retransmission-allowed> element.
+     * The element will be omitted if empty.
+     *
+     * @param strRetransmissionAllowed Text to be set.
+     */
+    inline void SetRetransmissionAllowed(IN const AString& strRetransmissionAllowed)
+    {
+        m_strRetransmissionAllowed = strRetransmissionAllowed;
+    }
+
 private:
     ILocationProperties* GetLocationProperties(
             IN IMS_SINT32 nType = ILocationInfo::LOCATION_ALL) const;
@@ -150,6 +161,7 @@ private:
     AString m_strDeviceName;
     AString m_strDeviceId;
     AString m_strTupleId;
+    AString m_strRetransmissionAllowed;
 };
 
 #endif

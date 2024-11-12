@@ -316,6 +316,7 @@
     <int name="location_gps_searching_duration_sec_int" value="30"/>
     <int name="location_geodetic_shape_int" value="0"/>
     <boolean name="cellular_network_info_utc_offset_enabled_bool" value="false"/>
+    <string name="ims.retransmission_allowed_of_geolocation_pidf_string">no</string>
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="true"/>
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="false"/>

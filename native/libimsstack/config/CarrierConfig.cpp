@@ -680,6 +680,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_B
         "support_country_param_in_pani_header_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[] =
         "support_local_session_timer_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[] =
+        KEY_IMS_PREFIX "retransmission_allowed_of_geolocation_pidf_string";
 // Aos
 const IMS_CHAR CarrierConfig::Assets::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[] =
         KEY_IMS_PREFIX "block_pcscf_on_reg_failure_bool";

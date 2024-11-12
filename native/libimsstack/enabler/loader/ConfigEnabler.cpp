@@ -120,6 +120,9 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
         }
 
         pPidfCreator->SetFeatures(nFeatures);
+
+        pPidfCreator->SetRetransmissionAllowed(piCc->GetString(
+                CarrierConfig::Assets::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING));
     }
 
     IMS_SINT32 nSdpFeatures = SdpProfile::FEATURE_NONE;
