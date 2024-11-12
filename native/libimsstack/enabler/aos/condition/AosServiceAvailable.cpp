@@ -156,6 +156,8 @@ void AosServiceAvailable::HandleEvent(
     A_IMS_TRACE_I(
             AOSTAG, "HandleEvent :: E(%s)/S1(%d)/S2(%d)", EventToString(eEvent), nState, nStateEx);
 
+    IMS_BOOL bNotify = IMS_TRUE;
+
     switch (eEvent)
     {
         case EVENT_CALL:
@@ -168,6 +170,11 @@ void AosServiceAvailable::HandleEvent(
 
         case EVENT_BLOCK:
             HandleBlockChanged(nState, nStateEx);
+            break;
+
+        case EVENT_BLOCK_SILENT:
+            HandleBlockChanged(nState, nStateEx);
+            bNotify = IMS_FALSE;
             break;
 
         case EVENT_AIRPLANE:
@@ -194,7 +201,7 @@ void AosServiceAvailable::HandleEvent(
             break;
     }
 
-    Notify();
+    Notify(bNotify);
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(
@@ -266,7 +273,7 @@ PROTECTED VIRTUAL IMS_BOOL AosServiceAvailable::CheckServiceAvailable()
 }
 
 PROTECTED
-void AosServiceAvailable::Notify()
+void AosServiceAvailable::Notify(IN IMS_BOOL bNotify /*=IMS_TRUE*/)
 {
     IMS_BOOL bAvailable = CheckServiceAvailable();
 
@@ -291,7 +298,7 @@ void AosServiceAvailable::Notify()
 
         if (piListener != IMS_NULL)
         {
-            piListener->ServiceAvailable_Changed();
+            piListener->ServiceAvailable_Changed(bNotify);
         }
     }
 }
@@ -352,6 +359,9 @@ PROTECTED GLOBAL const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT3
 
         case EVENT_BLOCK:
             return "EVENT_BLOCK";
+
+        case EVENT_BLOCK_SILENT:
+            return "EVENT_BLOCK_SILENT";
 
         default:
             return "EVENT_INVALID";
