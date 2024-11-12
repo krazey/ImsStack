@@ -96,6 +96,7 @@ using ::testing::SetArgReferee;
     using Base::CheckPending;                                     \
     using Base::CleanUp;                                          \
     using Base::ClearIpsecBlock;                                  \
+    using Base::ClearPcscf;                                       \
     using Base::ClearRetryCount;                                  \
     using Base::ClearRetryTimers;                                 \
     using Base::ClearTimers;                                      \
@@ -6216,4 +6217,15 @@ TEST_F(AosRegistrationTest,
     m_pAosRegistration->Registration_UpdateFailed(IRegistration::REASON_NONE);
 
     // THEN: The GIVEN condition should be met
+}
+
+TEST_F(AosRegistrationTest, ShouldSetAllPcscfValidWhenClearPcscf)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosPcscf, SetAllPcscfValid());
+
+    // WHEN
+    m_pAosRegistration->ClearPcscf();
+
+    // THEN: The GIVEN condition should be met.
 }
