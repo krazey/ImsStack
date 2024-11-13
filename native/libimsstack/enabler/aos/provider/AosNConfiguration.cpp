@@ -854,6 +854,11 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForImsPd
     return m_objAsset.objReregErrCodeForImsPdnReactivation;
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetUnavailableFeaturesInLimitedReg()
+{
+    return m_objAsset.objUnavailableFeaturesInLimitedReg;
+}
+
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_nSlotId != nSlotId)
@@ -1442,6 +1447,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY);
     m_objAsset.objSupportedRoamingRats =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY);
+    m_objAsset.objUnavailableFeaturesInLimitedReg = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
 }

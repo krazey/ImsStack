@@ -789,6 +789,16 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY))
             .WillOnce(Return(objSupportedRoamingRats));
 
+    ImsVector<IMS_SINT32> objUnavailableFeaturesInLimitedReg;
+    objUnavailableFeaturesInLimitedReg.Clear();
+    objUnavailableFeaturesInLimitedReg.Add(CarrierConfig::Assets::REG_FEATURE_MMTEL);
+    objUnavailableFeaturesInLimitedReg.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    objUnavailableFeaturesInLimitedReg.Add(CarrierConfig::Assets::REG_FEATURE_TEXT);
+    objUnavailableFeaturesInLimitedReg.Add(CarrierConfig::Assets::REG_FEATURE_SMS);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Assets::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY))
+            .WillOnce(Return(objUnavailableFeaturesInLimitedReg));
+
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
     objVowifiSubErrorCodeForInitReg.Clear();
     objVowifiSubErrorCodeForInitReg.Add(0);
@@ -867,6 +877,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD,
             m_pAosNConfiguration->GetUsatRegEventDownloadPolicy());
     EXPECT_EQ(60, m_pAosNConfiguration->GetVolteHysTime());
+
+    ImsVector<IMS_SINT32> objFeatures = m_pAosNConfiguration->GetUnavailableFeaturesInLimitedReg();
+    EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_MMTEL));
+    EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_VIDEO));
+    EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_TEXT));
+    EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_SMS));
 
     ImsVector<IMS_SINT32> objErrCode = m_pAosNConfiguration->GetRegErrCodeForPcscfDiscovery();
     EXPECT_EQ(408, objErrCode.GetAt(0));
@@ -1265,4 +1281,25 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
             CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED));
     EXPECT_TRUE(m_pAosNConfiguration->IsWfcErrorMessageSupported(
             CarrierConfig::Assets::WFC_ERROR_OTHER_FAILURES));
+}
+
+TEST_F(AosNConfigurationTest, ShouldNoFeaturesContainedIfNoFeaturesUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeaturesInLimitedReg;
+    objUnavailableFeaturesInLimitedReg.Clear();
+    MockICarrierConfig objCarrierConfig;
+    ON_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Assets::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY))
+            .WillByDefault(Return(objUnavailableFeaturesInLimitedReg));
+
+    // WHEN
+    ImsVector<IMS_SINT32> objFeatures = m_pAosNConfiguration->GetUnavailableFeaturesInLimitedReg();
+
+    // THEN
+    EXPECT_EQ(objFeatures.GetSize(), 0);
+    EXPECT_FALSE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_MMTEL));
+    EXPECT_FALSE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_VIDEO));
+    EXPECT_FALSE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_TEXT));
+    EXPECT_FALSE(objFeatures.Contains(CarrierConfig::Assets::REG_FEATURE_SMS));
 }

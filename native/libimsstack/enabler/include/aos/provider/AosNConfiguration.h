@@ -189,6 +189,7 @@ public:
     ImsVector<IMS_SINT32>& GetReregErrCodeForCallEnd() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() override;
+    ImsVector<IMS_SINT32>& GetUnavailableFeaturesInLimitedReg() override;
 
 private:
     friend class AosBuildDirector;

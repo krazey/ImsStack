@@ -1457,6 +1457,18 @@ public:
      */
     virtual ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() = 0;
 
+    /**
+     * @brief List of features that unavailable in limited registration.
+     *        Possible values are,
+     *        CarrierConfig::Assets::REG_FEATURE_MMTEL
+     *        CarrierConfig::Assets::REG_FEATURE_VIDEO
+     *        CarrierConfig::Assets::REG_FEATURE_TEXT
+     *        CarrierConfig::Assets::REG_FEATURE_SMS
+     *
+     * @return vector features list
+     */
+    virtual ImsVector<IMS_SINT32>& GetUnavailableFeaturesInLimitedReg() = 0;
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,

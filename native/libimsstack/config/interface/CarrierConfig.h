@@ -942,6 +942,7 @@ public:
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY[];
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[];
         static const IMS_CHAR KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[];
+        static const IMS_CHAR KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY[];
         static const IMS_CHAR KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[];
 
         // Bundle {
@@ -1244,6 +1245,15 @@ public:
             USAT_REG_EVENT_NOT_DOWNLOAD = 0,
             USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1,
             USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2
+        };
+
+        // Registration Features
+        enum
+        {
+            REG_FEATURE_MMTEL = 0,
+            REG_FEATURE_VIDEO = 1,
+            REG_FEATURE_TEXT = 2,
+            REG_FEATURE_SMS = 3
         };
     };
 
