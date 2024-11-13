@@ -39,10 +39,24 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+#define DECLARE_USING(Base)
+
+class TestAosHandleMts : public AosHandleMts
+{
+public:
+    DECLARE_USING(AosHandleMts)
+
+    inline TestAosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
+            AosHandleMts(piAppContext, strAppId, strServiceId, nServiceType)
+    {
+    }
+};
+
 class AosHandleMtsTest : public ::testing::Test
 {
 public:
-    AosHandleMts* m_pAosHandleMts;
+    TestAosHandleMts* m_pAosHandleMts;
 
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
@@ -87,8 +101,8 @@ protected:
         const AString strAppId = AString("ims.app.mts.test");
         const AString strServiceId = AString("ims.service.mts.test");
         const IMS_UINT32 nServiceType = -1;
-        m_pAosHandleMts = new AosHandleMts(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                strAppId, strServiceId, nServiceType);
+        m_pAosHandleMts = new TestAosHandleMts(
+                &m_objMockIAosAppContext, strAppId, strServiceId, nServiceType);
 
         ASSERT_TRUE(m_pAosHandleMts != nullptr);
 
