@@ -545,6 +545,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_on_audio_qos_deactivation_int";
         public static final String KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL =
                 KEY_PREFIX + "enable_send_reinvite_on_rat_change_bool";
+        public static final String KEY_ALLOW_SDP_IN_PRACK_BOOL =
+                KEY_PREFIX + "allow_sdp_in_prack_bool";
         public static final String KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_INT =
                 KEY_PREFIX + "policy_for_media_type_restriction_on_cellular_int";
         public static final String KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING_INT =

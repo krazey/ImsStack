@@ -134,11 +134,14 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
             nStatusCode, bReliable, bIncludeSdp, IsCallWaiting());
 }
 
-PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bAllowReOffer)
+PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bSdpOfferRequired)
 {
-    IMS_TRACE_D("SendPrack", 0, 0, 0);
+    IMS_BOOL bAllowSdp = m_objContext.GetConfigurationProxy().GetBoolean(
+            ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL);
+    IMS_TRACE_D(
+            "SendPrack offer[%s] allow[%s]", _TRACE_B_(bSdpOfferRequired), _TRACE_B_(bAllowSdp), 0);
 
-    if (SetSdpToSend(bAllowReOffer) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(bSdpOfferRequired && bAllowSdp) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }

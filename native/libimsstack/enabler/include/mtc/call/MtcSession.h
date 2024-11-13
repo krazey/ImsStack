@@ -51,7 +51,7 @@ public:
 
     IMS_RESULT Start() override;
     IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable) override;
-    IMS_RESULT SendPrack(IN IMS_BOOL bAllowReOffer) override;
+    IMS_RESULT SendPrack(IN IMS_BOOL bSdpOfferRequired) override;
     IMS_RESULT RespondToPrack(IN IMS_SINT32 eStatusCode) override;
     IMS_RESULT SendEarlyUpdate(IN UpdateType eUpdateType) override;
     IMS_RESULT RespondToEarlyUpdate(IN IMS_SINT32 eStatusCode) override;

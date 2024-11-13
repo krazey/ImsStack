@@ -474,6 +474,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT
         KEY_IMS_VOICE_PREFIX "policy_on_audio_qos_deactivation_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "enable_send_reinvite_on_rat_change_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "allow_sdp_in_prack_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_media_type_restriction_on_cellular_int";
 const IMS_CHAR CarrierConfig::ImsVoice::

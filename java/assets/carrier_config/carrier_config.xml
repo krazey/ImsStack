@@ -72,6 +72,7 @@
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>
     <int name="imsrtt.policy_on_text_qos_deactivation_int" value="2"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="false"/>
+    <boolean name="imsvoice.allow_sdp_in_prack_bool" value="true"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_int" value="0"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_in_roaming_int" value="0"/>
     <int name="imsvoice.policy_of_local_numbers_int" value="2"/>
