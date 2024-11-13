@@ -20,12 +20,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class SscAuthAgentTest {
@@ -33,14 +39,25 @@ public class SscAuthAgentTest {
 
     private ISscAuthAgent mSscAuthAgent;
 
+    @Mock private CarrierConfig mMockCarrierConfig;
+    @Mock private ConfigInterface mMockConfigInterface;
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockCarrierConfig.getString(CarrierConfig.Assets.KEY_UT_NAF_FQDN_STRING))
+                .thenReturn(null);
+
         mSscAuthAgent = SscAuthAgent.getInstance(SLOT_0);
     }
 
     @After
     public void tearDown() {
         mSscAuthAgent.setIsCredentialInfoUpdated(false);
+        SscConfig.clear(SLOT_0);
     }
 
     @Test
@@ -86,7 +103,24 @@ public class SscAuthAgentTest {
 
         assertTrue(mSscAuthAgent.isCredentialInfoUpdated());
         assertEquals("3GPP-bootstrapping@test.3gpp.com" , mSscAuthAgent.getRealm());
-        assertEquals("test.3gpp.com" , mSscAuthAgent.getNafFqdnFromRealm());
+        assertEquals("test.3gpp.com" , mSscAuthAgent.getNafFqdn());
+    }
+
+    @Test
+    public void parse_wwwAuthenticateHeader_whenNafFqdnExistInConfig() {
+        String wwwAuthentication = "Digest realm=\"3GPP-bootstrapping@test.3gpp.com\","
+                + " algorithm=\"MD5\", qop=\"auth\","
+                + " nonce=\"o94MbTY+MMNkpAePG/jVd24yOzbEbJERo98ObjI7p9U=\","
+                + " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
+        String nafFqdn = "naf.xcap.3gpp.com";
+        when(mMockCarrierConfig.getString(CarrierConfig.Assets.KEY_UT_NAF_FQDN_STRING))
+                .thenReturn(nafFqdn);
+
+        mSscAuthAgent.parse(wwwAuthentication);
+
+        assertTrue(mSscAuthAgent.isCredentialInfoUpdated());
+        assertEquals("3GPP-bootstrapping@test.3gpp.com" , mSscAuthAgent.getRealm());
+        assertEquals("naf.xcap.3gpp.com" , mSscAuthAgent.getNafFqdn());
     }
 
     @Test
@@ -124,7 +158,7 @@ public class SscAuthAgentTest {
     }
 
     @Test
-    public void getNafFqdnFromRealm_whenNoRealm() {
-        assertNull(mSscAuthAgent.getNafFqdnFromRealm());
+    public void getNafFqdn_whenNoRealm() {
+        assertNull(mSscAuthAgent.getNafFqdn());
     }
 }

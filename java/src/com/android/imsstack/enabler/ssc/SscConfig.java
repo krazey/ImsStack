@@ -338,6 +338,10 @@ public final class SscConfig {
         return getInt(slotId, CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT);
     }
 
+    static String getNafFqdn(int slotId) {
+        return getString(slotId, CarrierConfig.Assets.KEY_UT_NAF_FQDN_STRING);
+    }
+
     // Specific APIs
     static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);
