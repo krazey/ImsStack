@@ -744,6 +744,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
             nTestStatusCode);
+    EXPECT_EQ(GetRejectStatusCode(CODE_SIP_REQUEST_PENDING), SipStatusCode::SC_491);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPGRADE), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_INTERNAL_ERROR), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED),

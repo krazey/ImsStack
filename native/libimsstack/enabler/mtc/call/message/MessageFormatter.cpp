@@ -818,6 +818,9 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
                 eStatusCode = SipStatusCode::SC_406;
             }
             break;
+        case CODE_SIP_REQUEST_PENDING:
+            eStatusCode = SipStatusCode::SC_491;
+            break;
         case CODE_REJECT_ONGOING_CALL_UPGRADE:
             eStatusCode = SipStatusCode::SC_486;
             break;
