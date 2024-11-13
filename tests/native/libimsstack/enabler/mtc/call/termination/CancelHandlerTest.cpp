@@ -89,6 +89,13 @@ TEST_F(CancelHandlerTest, HandleMessageWith200CallCompletedReturnsAnsweredElsewh
     EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
+TEST_F(CancelHandlerTest, HandleMessageWith200AnyTextReturnsAnsweredElsewhere)
+{
+    SetUpReasonHeader(SIP_PROTOCOL, 200, "\"any text\"");
+
+    EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
 TEST_F(CancelHandlerTest, HandleMessageWith600BusyEverywhereReturnsRejectedElsewhere)
 {
     SetUpReasonHeader(SIP_PROTOCOL, 600, "\"busy everywhere\"");
@@ -96,9 +103,23 @@ TEST_F(CancelHandlerTest, HandleMessageWith600BusyEverywhereReturnsRejectedElsew
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
+TEST_F(CancelHandlerTest, HandleMessageWith600AnyTextReturnsRejectedElsewhere)
+{
+    SetUpReasonHeader(SIP_PROTOCOL, 600, "\"any text\"");
+
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
 TEST_F(CancelHandlerTest, HandleMessageWith603DeclinedReturnsRejectedElsewhere)
 {
     SetUpReasonHeader(SIP_PROTOCOL, 603, "\"declined\"");
+
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, HandleMessageWith603AnyTextReturnsRejectedElsewhere)
+{
+    SetUpReasonHeader(SIP_PROTOCOL, 603, "\"any text\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }

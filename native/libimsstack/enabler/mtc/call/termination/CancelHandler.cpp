@@ -23,9 +23,6 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const AString SIP_PROTOCOL = "SIP";
-LOCAL const AString REASON_TEXT_CALL_BUSY = "busy everywhere";
-LOCAL const AString REASON_TEXT_CALL_COMPLETED = "call completed elsewhere";
-LOCAL const AString REASON_TEXT_CALL_DECLINED = "declined";
 
 LOCAL const AString REASON_TEXT_CALL_BUSY_VZW = "another device sent all devices busy response";
 LOCAL const AString REASON_TEXT_CALL_COMPLETED_VZW = "call completion elsewhere";
@@ -55,18 +52,6 @@ CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
 {
     const AString strNormalizedText = strText.SimplifyWsp().MakeLower();
 
-    if (nCause == SipStatusCode::SC_200 && strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED))
-    {
-        return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
-    }
-    else if ((nCause == SipStatusCode::SC_600 &&
-                     strNormalizedText.Contains(REASON_TEXT_CALL_BUSY)) ||
-            (nCause == SipStatusCode::SC_603 &&
-                    strNormalizedText.Contains(REASON_TEXT_CALL_DECLINED)))
-    {
-        return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
-    }
-
     if (strNormalizedText.Contains(REASON_TEXT_CALL_BUSY_VZW))
     {
         return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
@@ -76,5 +61,14 @@ CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
         return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
     }
 
-    return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
+    switch (nCause)
+    {
+        case SipStatusCode::SC_200:
+            return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
+        case SipStatusCode::SC_600:
+        case SipStatusCode::SC_603:
+            return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
+        default:
+            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
+    }
 }
