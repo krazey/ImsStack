@@ -579,10 +579,11 @@ TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerAct
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
 }
 
-TEST_F(UpdatingStateTest, SessionUpdateReceivedDoesNothingIfGlareTimerInActive)
+TEST_F(UpdatingStateTest, SessionUpdateReceivedRejectsIfGlareTimerInActive)
 {
     ON_CALL(objTimer, IsActive(MtcCallState::TIMER_GLARE_CONDITION))
             .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_SIP_REQUEST_PENDING)));
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdateReceived(&objSession));
 }
 

@@ -315,7 +315,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* p
 {
     if (m_objContext.GetTimer().IsActive(TIMER_GLARE_CONDITION))
     {
-        IMS_TRACE_I("SessionUpdateReceived during waiting glare condition timer", 0, 0, 0);
+        IMS_TRACE_I("SessionUpdateReceived - waiting glare condition timer", 0, 0, 0);
 
         NotifyFailure();
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
@@ -324,6 +324,11 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* p
                     return pState->SessionUpdateReceived(piSession);
                 });
         return CallStateName::ESTABLISHED;
+    }
+    else
+    {
+        IMS_TRACE_E(0, "SessionUpdateReceived - Update during previous transaction.", 0, 0, 0);
+        m_objContext.GetSession()->Reject(CallReasonInfo(CODE_SIP_REQUEST_PENDING));
     }
     return GetStateName();
 }
