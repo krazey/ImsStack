@@ -2732,6 +2732,7 @@ PROTECTED VIRTUAL void AosRegistration::ClearPcscf()
     if (piPcscf != IMS_NULL)
     {
         piPcscf->SetFirstPcscfIndex();
+        piPcscf->SetAllPcscfValid();
         piPcscf->ResetAllPcscfTried();
         piPcscf->ResetAllPcscfTriedCount();
     }
