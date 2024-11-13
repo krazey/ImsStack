@@ -49,6 +49,8 @@ public:
     virtual IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) const;
     virtual IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) const;
     virtual AString GetString(IN const IMS_CHAR* pszKey) const;
+    virtual ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey) const;
+    virtual ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey) const;
 
     virtual IMS_SINT32 GetIntFromArray(IN const IMS_CHAR* pszKey, IN const IMS_UINT32 nIndex) const;
     virtual AString GetStringFromArray(IN const IMS_CHAR* pszKey, IN const IMS_UINT32 nIndex) const;

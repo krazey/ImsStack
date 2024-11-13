@@ -31,7 +31,9 @@ LOCAL const IMS_CHAR INVALID_KEY_INT[] = "invalid_key_int";
 LOCAL const IMS_CHAR VALID_KEY_STRING[] = "valid_key_string";
 LOCAL const IMS_CHAR INVALID_KEY_STRING[] = "invalid_key_string";
 LOCAL const IMS_CHAR VALID_KEY_INT_ARRAY[] = "valid_key_int_array";
+LOCAL const IMS_CHAR INVALID_KEY_INT_ARRAY[] = "invalid_key_int_array";
 LOCAL const IMS_CHAR VALID_KEY_STRING_ARRAY[] = "valid_key_string_array";
+LOCAL const IMS_CHAR INVALID_KEY_STRING_ARRAY[] = "invalid_key_string_array";
 
 LOCAL const IMS_BOOL VALID_BOOL_VALUE = IMS_TRUE;
 LOCAL const IMS_BOOL INVALID_BOOL_VALUE = IMS_FALSE;
@@ -155,6 +157,28 @@ TEST_F(MtcConfigurationProxyTest, GetStringReturnsCachingValueIfExitsts)
 
     pProxy->OnRegistrationRefreshed();
     EXPECT_EQ(pProxy->GetString(INVALID_KEY_STRING), INVALID_STRING_VALUE);
+}
+
+TEST_F(MtcConfigurationProxyTest, GetIntArrayReturnsValue)
+{
+    EXPECT_EQ(pProxy->GetIntArray(VALID_KEY_INT_ARRAY), objIntArray);
+}
+
+TEST_F(MtcConfigurationProxyTest, GetIntArrayReturnsDefaultValueIfKeyIsInvalid)
+{
+    ImsVector<IMS_SINT32> objArray = pProxy->GetIntArray(INVALID_KEY_INT_ARRAY);
+    EXPECT_EQ(objArray.GetSize(), 0);
+}
+
+TEST_F(MtcConfigurationProxyTest, GetStringArrayReturnsValue)
+{
+    EXPECT_EQ(pProxy->GetStringArray(VALID_KEY_STRING_ARRAY), objStringArray);
+}
+
+TEST_F(MtcConfigurationProxyTest, GetStringArrayReturnsDefaultValueIfKeyIsInvalid)
+{
+    ImsVector<AString> objArray = pProxy->GetStringArray(INVALID_KEY_STRING_ARRAY);
+    EXPECT_EQ(objArray.GetSize(), 0);
 }
 
 TEST_F(MtcConfigurationProxyTest, ContainsIntValueReturnsTrue)

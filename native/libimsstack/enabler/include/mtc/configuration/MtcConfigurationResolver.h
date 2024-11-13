@@ -18,9 +18,11 @@
 #define MTC_CONFIGURATION_RESOLVER_H_
 
 #include "AString.h"
+#include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "ConfigDef.h"
 #include "ImsTypeDef.h"
+#include "TextParser.h"
 
 class MtcConfigurationProxy;
 
@@ -142,6 +144,25 @@ public:
             return objProxy.GetIntFromArray(
                     ConfigVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY, 1);
         }
+    }
+
+    inline static IMS_SINT32 LookupTerminateReasonCodeForEmergency(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
+    {
+        ImsVector<AString> objStringArray = objProxy.GetStringArray(
+                ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY);
+        for (IMS_UINT32 i = 0; i < objStringArray.GetSize(); ++i)
+        {
+            AString strItem = objStringArray.GetAt(i);
+            AString strStatusCode;
+            AString strCallReasonInfoCode;
+            strItem.SplitF(TextParser::CHAR_COLON, strStatusCode, strCallReasonInfoCode);
+            if (strStatusCode.ToInt32() == nStatusCode)
+            {
+                return strCallReasonInfoCode.ToInt32();
+            }
+        }
+        return CODE_NONE;
     }
 };
 
