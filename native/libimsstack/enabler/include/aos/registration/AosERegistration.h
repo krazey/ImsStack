@@ -94,6 +94,7 @@ protected:
     void ProcessAuthenticationFailed() final;
 
     void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) final;
+    void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(IN IMS_UINT32 nRetryAfter);
     void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
 
     void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
@@ -104,6 +105,7 @@ protected:
     void ProcessUpdateFailed_TxnTimeout() final;
     void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason) final;
 
+    void ProcessStopRetryTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
 
     void SetRefreshPolicy() final;
@@ -146,6 +148,7 @@ protected:
     void ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered);
     void ProcessRearrangePcscf();
     void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
+    void ProcessNormalDefaultFlowRecovery_Start();
 
     void SetReinitiationRequested(IN IMS_BOOL bRequest);
     void StartRegRetryTimer();

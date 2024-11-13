@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "AosCounter.h"
 #include "AString.h"
 #include "ImsMap.h"
 #include "CarrierConfig.h"
@@ -42,6 +43,7 @@
 #include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosPcscf.h"
 #include "interface/MockIAosRegistrationListener.h"
+#include "interface/MockIAosRetryRepository.h"
 #include "interface/MockIAosSubscriber.h"
 #include "interface/MockIAosTransaction.h"
 
@@ -58,16 +60,18 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)                                 \
-    using Base::ClearTimers;                                \
-    using Base::IsReregFailureReportOnIpcanChangeRequired;  \
-    using Base::IsTransactionStarted;                       \
-    using Base::SetImsCall;                                 \
-    using Base::SetReregFailureReportOnIpcanChangeRequired; \
-    using Base::SetState;                                   \
-    using Base::StopTimer;                                  \
-    using Base::UpdateTransactionStarted;                   \
-    using Base::UpdateRegIpcanCategory;                     \
+#define DECLARE_USING(Base)                                                  \
+    using Base::ClearTimers;                                                 \
+    using Base::IsReregFailureReportOnIpcanChangeRequired;                   \
+    using Base::IsTransactionStarted;                                        \
+    using Base::SetImsCall;                                                  \
+    using Base::SetReregFailureReportOnIpcanChangeRequired;                  \
+    using Base::SetState;                                                    \
+    using Base::StopTimer;                                                   \
+    using Base::UpdateTransactionStarted;                                    \
+    using Base::UpdateRegIpcanCategory;                                      \
+    using Base::ProcessDefaultFlowRecovery_Start;                            \
+    using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
     using Base::ProcessTransactionTimerExpired;
 
 const IMS_SINT32 SLOT_ID = 0;
@@ -81,9 +85,12 @@ public:
             AosERegistration(piAppContext, strRegId),
             m_piReg(IMS_NULL)
     {
+        m_pCounter = new AosCounter();
     }
+    inline ~TestAosERegistration() override { delete m_pCounter; }
     inline IRegistration* GetRegistration() override { return m_piReg; }
     inline void SetRegistrationForRegManager(IN IRegistration* piReg) { m_piReg = piReg; }
+    inline void SetRegParameter(IN IRegParameter* piRegParam) { m_piRegParameter = piRegParam; }
     inline void ClearEModeInfo()
     {
         if (m_pEModeInfo != IMS_NULL)
@@ -104,6 +111,22 @@ public:
     }
 
     inline void SetConsecutiveFailure(IN IMS_UINT32 nValue) { m_nConsecutiveFailure = nValue; }
+
+    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+
+    // Functions where calls are being counted
+    void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
+            IN IMS_UINT32 nRetryAfter) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);
+    }
+
+    void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosERegistration::StartTimer(nType, nDuration);
+    }
 
     FRIEND_TEST(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode);
     FRIEND_TEST(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetFakeMode);
@@ -181,6 +204,7 @@ public:
     FRIEND_TEST(AosERegistrationTest, GetPreferredRegSchemeWhenRoamingSchemeIsConfigured);
 
 private:
+    AosCounter* m_pCounter;
     IRegistration* m_piReg;
 };
 
@@ -199,6 +223,8 @@ public:
         AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration(SLOT_ID);
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
+        m_piAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
+        AosProvider::GetInstance()->SetRetryRepository(&m_objMockIAosRetryRepository, SLOT_ID);
         m_piAosService = AosProvider::GetInstance()->GetService(SLOT_ID);
         AosProvider::GetInstance()->SetService(&m_objMockIAosService, SLOT_ID);
         m_piAosTransaction = AosProvider::GetInstance()->GetTransaction(SLOT_ID);
@@ -214,6 +240,7 @@ public:
 
         AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, SLOT_ID);
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
+        AosProvider::GetInstance()->SetRetryRepository(m_piAosRetryRepository, SLOT_ID);
         AosProvider::GetInstance()->SetService(m_piAosService, SLOT_ID);
         AosProvider::GetInstance()->SetTransaction(m_piAosTransaction, SLOT_ID);
     }
@@ -224,6 +251,7 @@ public:
     AosStaticProfile* m_pAosStaticProfile;
     IAosCallTracker* m_piAosCallTracker;
     IAosNConfiguration* m_piAosNConfiguration;
+    IAosRetryRepository* m_piAosRetryRepository;
     IAosService* m_piAosService;
     IAosTransaction* m_piAosTransaction;
 
@@ -236,6 +264,7 @@ public:
     MockIAosNetTracker m_objMockIAosNetTracker;
     MockIAosPcscf m_objMockIAosPcscf;
     MockIAosRegistrationListener m_objMockIAosRegistrationListener;
+    MockIAosRetryRepository m_objMockIAosRetryRepository;
     MockIAosService m_objMockIAosService;
     MockIAosSubscriber m_objMockIAosSubscriber;
     MockIAosTransaction m_objMockIAosTransaction;
@@ -292,6 +321,8 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, GetRegistrationRetryMaxTime())
                 .WillByDefault(Return(1800000));
         ON_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsIpsecInitializedWithNewPcscf())
+                .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, GetRegistrationPreferredAccessTypeFeatureTag())
                 .WillByDefault(
                         Return(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED));
@@ -307,6 +338,9 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, IsUserInfoInContactSupported())
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+                .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
                 .WillByDefault(
                         Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
@@ -373,6 +407,7 @@ protected:
         m_pAosERegistration = new TestAosERegistration(
                 &m_objMockIAosAppContext, m_pAosStaticProfile->GetRegistrationId());
         m_pAosERegistration->SetRegistrationForRegManager(&m_objMockIRegistration);
+        m_pAosERegistration->SetRegParameter(&m_objMockIRegParameter);
         m_pAosERegistration->SetListener(&m_objMockIAosRegistrationListener);
     }
 
@@ -700,6 +735,18 @@ TEST_F(AosERegistrationTest, StartFailedWithTxnTimeoutWhenReinitiationIsRequeste
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
+TEST_F(AosERegistrationTest, StartWithSpecifiedIntervalPolicytWhenRetryRuleForERegIsTrue)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryRuleForERegUsed())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start();
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount(
+                      "ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy"),
+            1);
+}
+
 TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenFakeRegistration)
 {
     m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
@@ -745,6 +792,58 @@ TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringUpdateWhenNeitherEcbmNorSc
     m_pAosERegistration->ProcessDefaultFlowRecovery_Update();
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosERegistrationTest, StartRetryTimeIfPossibleToIncreaseCountWithRetryAfter)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
+}
+
+TEST_F(AosERegistrationTest, StartRetryTimerIfPossibleToIncreaseCountWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_TRUE));
+    ImsVector<IMS_SINT32> objInterval;
+    objInterval.Add(10000);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
+            .WillOnce(ReturnRef(objInterval));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
+}
+
+TEST_F(AosERegistrationTest, StartRetryTimerIfNotPossibleToIncreaseCountAndHasNextPcscf)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
+}
+
+TEST_F(AosERegistrationTest, ReportFailureIfNotPossibleToIncreaseCountAndNoPcscf)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
 }
 
 TEST_F(AosERegistrationTest, StartFailedWithStatusCode423)

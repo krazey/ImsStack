@@ -35,6 +35,7 @@
 #include "interface/IAosPcscf.h"
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
+#include "provider/AosRetryRepository.h"
 #include "registration/AosIpsecHelper.h"
 
 #include "registration/AosERegistration.h"
@@ -266,6 +267,12 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
         return;
     }
 
+    if (GET_N_CONFIG(m_nSlotId)->IsRegRetryRuleForERegUsed())
+    {
+        ProcessNormalDefaultFlowRecovery_Start();
+        return;
+    }
+
     if (IsFakeRegistration())
     {
         A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: fake E-REG is failed", 0, 0, 0);
@@ -284,6 +291,52 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
     SetState(STATE_REGSTOP);
     SetTraffic(IMS_FALSE);
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+}
+
+PROTECTED VIRTUAL void
+AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
+        IN IMS_UINT32 nRetryAfter)
+{
+    IMS_UINT32 nAwt = 0;
+    if (GET_N_CONFIG(m_nSlotId)->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+    {
+        if (AosProvider::GetInstance()
+                        ->GetRetryRepository(m_piContext->GetSlotId())
+                        ->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY))
+        {
+            if (nRetryAfter > 0)
+            {
+                nAwt = nRetryAfter;
+            }
+            else
+            {
+                const ImsVector<IMS_SINT32>& objInterval =
+                        GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
+
+                nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0) : RETRY_DEFAULT_WAIT_TIME;
+            }
+
+            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+            SetState(STATE_REGSTOP);
+        }
+        else
+        {
+            m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+            if (SetNextPcscf())
+            {
+                StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+                SetState(STATE_REGSTOP);
+            }
+            else
+            {
+                // For Emergency, reports that the status has changed after trying all retries.
+                A_IMS_TRACE_I(REGID, "StartWithSpecifiedIntervalPolicy :: all pcscfs were tried", 0,
+                        0, 0);
+                SetTraffic(IMS_FALSE);
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            }
+        }
+    }
 }
 
 PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
@@ -358,6 +411,26 @@ PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT3
     (void)nReason;
 
     ProcessDefaultFlowRecovery_Update();
+}
+
+PROTECTED VIRTUAL void AosERegistration::ProcessStopRetryTimerExpired()
+{
+    StopTimer(TIMER_STOP_RETRY);
+
+    if (!IsRetryHeld())
+    {
+        return;
+    }
+
+    if (SendRegister(GetState() != STATE_REFRESHSTOP))
+    {
+        SetRetryState();
+    }
+    else
+    {
+        ProcessUnpredictableFailure();
+        return;
+    }
 }
 
 PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
@@ -850,6 +923,18 @@ PROTECTED void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRe
     }
 
     ReportTryingState();
+}
+
+PROTECTED void AosERegistration::ProcessNormalDefaultFlowRecovery_Start()
+{
+    A_IMS_TRACE_I(REGID, "ProcessNormalDefaultFlowRecovery_Start", 0, 0, 0);
+
+    IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+
+    // It's only for awt policy is CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL and
+    // KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL is true.
+    // If you need to follow the normal reg retry rule, update it below.
+    ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);
 }
 
 PROTECTED void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
