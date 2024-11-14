@@ -143,11 +143,9 @@
         <item value="2"/>
     </int-array>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
-
-    <!-- Ut/Xcap Assets -->
-    <boolean name="ut_oir_tir_always_temporary_mode_bool" value="false"/>
+    <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="false"/>
 
     <!-- MTC -->
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>

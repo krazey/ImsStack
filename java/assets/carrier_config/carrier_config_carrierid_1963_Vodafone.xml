@@ -25,7 +25,7 @@
 
     <!-- Ut/Xcap AOSP -->
     <int name="imsss.ut_as_server_port_int" value="8090"/>
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/MyService</string>
 
     <!-- USSD overIMS if volte registered -->

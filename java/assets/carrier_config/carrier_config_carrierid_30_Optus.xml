@@ -28,6 +28,6 @@
     </int-array>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
-    <!-- Ut/Xcap Assets -->
-    <boolean name="ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>

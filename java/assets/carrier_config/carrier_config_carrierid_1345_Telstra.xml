@@ -26,7 +26,7 @@
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
     <int name="imswfc.registration_private_header_int" value="1"/>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="1">
         <item value="33"/>
     </int-array>

@@ -105,13 +105,11 @@
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
     </int-array>
-
-    <!-- Ut/Xcap Assets -->
-    <boolean name="ut_query_cf_all_and_cf_all_conditional_support_bool" value="false"/>
-    <boolean name="ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <boolean name="imsss.ut_query_cf_all_and_cf_all_conditional_support_bool" value="false"/>
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>
