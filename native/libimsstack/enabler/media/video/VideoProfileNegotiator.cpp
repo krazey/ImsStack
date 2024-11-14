@@ -625,7 +625,8 @@ IMS_BOOL VideoProfileNegotiator::SetClosestAvc(
         return IMS_FALSE;
     }
 
-    VideoProfile::AvcFmtp* pAvcFmtp = (VideoProfile::AvcFmtp*)pNegoPayload->GetFmtp();
+    VideoProfile::VideoFmtp* pAvcFmtp =
+            static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
 
     if (pAvcFmtp == IMS_NULL)
     {
@@ -641,8 +642,8 @@ IMS_BOOL VideoProfileNegotiator::SetClosestAvc(
             nLocalIndex++)
     {
         VideoProfile::Payload* pPayload = pLocalProfile->GetPayloadAt(nLocalIndex);
-        VideoProfile::AvcFmtp* pTempLocalFmtp =
-                static_cast<VideoProfile::AvcFmtp*>(pPayload->GetFmtp());
+        VideoProfile::VideoFmtp* pTempLocalFmtp =
+                static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp());
 
         if (pTempLocalFmtp->GetLevel() <= pAvcFmtp->GetLevel())
         {
@@ -659,9 +660,8 @@ IMS_BOOL VideoProfileNegotiator::SetClosestAvc(
         pAvcFmtp->SetResolution(eProperResolution);
     }
 
-    IMS_TRACE_D("SetClosestAvc() - payload[%d], profile[%s], resolution[%d]",
-            pNegoPayload->GetRtpMap().GetPayloadNumber(), pAvcFmtp->GetProfileLevelId().GetStr(),
-            pAvcFmtp->GetResolution());
+    IMS_TRACE_D("SetClosestAvc() - payload[%d], resolution[%d]",
+            pNegoPayload->GetRtpMap().GetPayloadNumber(), pAvcFmtp->GetResolution(), 0);
 
     return IMS_TRUE;
 }
@@ -675,14 +675,14 @@ IMS_BOOL VideoProfileNegotiator::SetClosestHevc(
         return IMS_FALSE;
     }
 
-    VideoProfile::HevcFmtp* fmtp = static_cast<VideoProfile::HevcFmtp*>(pNegoPayload->GetFmtp());
+    VideoProfile::VideoFmtp* fmtp = static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
     if (fmtp == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    VideoProfile::HevcFmtp* pTempLocalFmtp =
-            static_cast<VideoProfile::HevcFmtp*>(pMatchedPeerPayload->GetFmtp());
+    VideoProfile::VideoFmtp* pTempLocalFmtp =
+            static_cast<VideoProfile::VideoFmtp*>(pMatchedPeerPayload->GetFmtp());
     fmtp->SetResolution(pTempLocalFmtp->GetResolution());
 
     IMS_TRACE_D("SetClosestHevc() - payload[%d], resolution[%d]",
