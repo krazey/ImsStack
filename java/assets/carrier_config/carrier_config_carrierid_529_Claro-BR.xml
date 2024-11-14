@@ -15,6 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap Assets -->
-    <boolean name="ut_support_cfnr_timer_bool" value="false"/>
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
 </carrier_config>

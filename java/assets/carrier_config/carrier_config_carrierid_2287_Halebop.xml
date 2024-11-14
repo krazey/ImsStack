@@ -15,6 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
 </carrier_config>

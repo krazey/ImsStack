@@ -15,6 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap Assets -->
-    <string name="ut_naf_fqdn_string">naf.ims.mnc390.mcc313.3gppnetwork.org</string>
+    <!-- Ut/Xcap -->
+    <string name="imsss.ut_naf_fqdn_string">naf.ims.mnc390.mcc313.3gppnetwork.org</string>
 </carrier_config>

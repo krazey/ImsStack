@@ -15,6 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_uri_type_for_cf_target_number_int" value="1"/>
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_uri_type_for_cf_target_number_int" value="1"/>
 </carrier_config>

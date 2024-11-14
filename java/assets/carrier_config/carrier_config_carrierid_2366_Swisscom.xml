@@ -25,7 +25,6 @@
         <item value="403"/>
         <item value="404"/>
     </int-array>
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_max_retry_count_int" value="2"/>
-    <int name="ut_uri_type_for_cf_target_number_int" value="1"/>
+    <int name="imsss.ut_max_retry_count_int" value="2"/>
+    <int name="imsss.ut_uri_type_for_cf_target_number_int" value="1"/>
 </carrier_config>

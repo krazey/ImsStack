@@ -22,7 +22,7 @@
     <!-- Mtc Assets -->
     <int name="ims.geolocation_policy_for_location_based_call_int" value="13"/>
 
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
 
 </carrier_config>

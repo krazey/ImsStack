@@ -23,8 +23,8 @@
         <item value="1"/>
     </int-array>
 
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_oir_network_default_operation_int" value="1"/>
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_oir_network_default_operation_int" value="1"/>
 
     <!-- USSD over IMS -->
     <int name="carrier_ussd_method_int" value="1"/>
