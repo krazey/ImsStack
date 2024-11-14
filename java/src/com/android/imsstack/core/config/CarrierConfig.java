@@ -298,9 +298,7 @@ public class CarrierConfig {
         CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT,
         CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY,
         CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY,
-        CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY,
-        CarrierConfigManager.ImsSs.KEY_TERMINAL_BASED_CALL_WAITING_SYNC_TYPE_INT,
-        CarrierConfigManager.ImsSs.KEY_TERMINAL_BASED_CALL_WAITING_DEFAULT_ENABLED_BOOL
+        CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY
     };
 
     /** Configuration items for generic IMS. */
@@ -455,10 +453,47 @@ public class CarrierConfig {
                 KEY_PREFIX + "ut_sm_cause_permanent_block_int_array";
         public static final String KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "ut_http_permanent_error_code_int_array";
-        public static final String KEY_TERMINAL_BASED_CALL_WAIT_SYNC_INT =
-                KEY_PREFIX + "terminal_based_call_wait_sync_int";
-        public static final String KEY_TERMINAL_BASED_CALL_WAIT_DEFAULT_ACTIVATED_BOOL =
-                KEY_PREFIX + "terminal_based_call_wait_default_activated_bool";
+        public static final String KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY =
+                KEY_PREFIX + "ut_sm_cause_temporary_block_int_array";
+        public static final String KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY =
+                KEY_PREFIX + "ut_http_temporary_error_code_int_array";
+        public static final String KEY_UT_MAX_RETRY_COUNT_INT =
+                KEY_PREFIX + "ut_max_retry_count_int";
+        public static final String KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT =
+                KEY_PREFIX + "ut_temporary_block_timer_min_int";
+        public static final String KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL =
+                KEY_PREFIX + "ut_support_cf_action_erasure_bool";
+        public static final String KEY_UT_SUPPORT_CFNR_TIMER_BOOL =
+                KEY_PREFIX + "ut_support_cfnr_timer_bool";
+        public static final String KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL =
+                KEY_PREFIX + "ut_query_cf_all_and_cf_all_conditional_support_bool";
+        public static final String KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT =
+                KEY_PREFIX + "ut_oir_network_default_operation_int";
+        public static final String KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL =
+                KEY_PREFIX + "ut_oir_tir_always_temporary_mode_bool";
+        public static final String KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT =
+                KEY_PREFIX + "ut_temporary_block_timer_with_any_reason_sec_int";
+        public static final String KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING =
+                KEY_PREFIX + "ut_target_address_phone_context_string";
+        public static final String KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING =
+                KEY_PREFIX + "ut_target_address_country_code_replace_to_zero_string";
+        public static final String KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING =
+                KEY_PREFIX + "ut_target_address_zero_replace_to_country_code_string";
+        public static final String KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT =
+                KEY_PREFIX + "ut_xcap_apn_inactivity_timer_sec_int";
+        public static final String KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL =
+                KEY_PREFIX + "ut_display_error_phrase_with_409_error_bool";
+        public static final String KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL =
+                KEY_PREFIX + "ut_omit_namespace_of_document_element_bool";
+        public static final String KEY_UT_OMIT_NAMESPACE_SS_BOOL =
+                KEY_PREFIX + "ut_omit_namespace_ss_bool";
+        public static final String KEY_UT_OMIT_NAMESPACE_CP_BOOL =
+                KEY_PREFIX + "ut_omit_namespace_cp_bool";
+        public static final String KEY_UT_INSERT_NEW_RULE_BOOL =
+                KEY_PREFIX + "ut_insert_new_rule_bool";
+        public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT =
+                KEY_PREFIX + "ut_uri_type_for_cf_target_number_int";
+        public static final String KEY_UT_NAF_FQDN_STRING = KEY_PREFIX + "ut_naf_fqdn_string";
 
         private ImsSs() {}
     }
@@ -1203,44 +1238,6 @@ public class CarrierConfig {
         public static final String KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL =
                 "sms_geolocation_pidf_for_emergency_bool";
 
-        // Ut/Xcap
-        public static final String KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY =
-                "ut_sm_cause_temporary_block_int_array";
-        public static final String KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY =
-                "ut_http_temporary_error_code_int_array";
-        public static final String KEY_UT_MAX_RETRY_COUNT_INT = "ut_max_retry_count_int";
-        public static final String KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT =
-                "ut_temporary_block_timer_min_int";
-        public static final String KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL =
-                "ut_support_cf_action_erasure_bool";
-        public static final String KEY_UT_SUPPORT_CFNR_TIMER_BOOL =
-                "ut_support_cfnr_timer_bool";
-        public static final String KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL =
-                "ut_query_cf_all_and_cf_all_conditional_support_bool";
-        public static final String KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT =
-                "ut_oir_network_default_operation_int";
-        public static final String KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL =
-                "ut_oir_tir_always_temporary_mode_bool";
-        public static final String KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT =
-                "ut_temporary_block_timer_with_any_reason_sec_int";
-        public static final String KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING =
-                "ut_target_address_phone_context_string";
-        public static final String KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING =
-                "ut_target_address_country_code_replace_to_zero_string";
-        public static final String KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING =
-                "ut_target_address_zero_replace_to_country_code_string";
-        public static final String KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT =
-                "ut_xcap_apn_inactivity_timer_sec_int";
-        public static final String KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL =
-                "ut_display_error_phrase_with_409_error_bool";
-        public static final String KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL =
-                "ut_omit_namespace_of_document_element_bool";
-        public static final String KEY_UT_OMIT_NAMESPACE_SS_BOOL = "ut_omit_namespace_ss_bool";
-        public static final String KEY_UT_OMIT_NAMESPACE_CP_BOOL = "ut_omit_namespace_cp_bool";
-        public static final String KEY_UT_INSERT_NEW_RULE_BOOL = "ut_insert_new_rule_bool";
-        public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT =
-                "ut_uri_type_for_cf_target_number_int";
-        public static final String KEY_UT_NAF_FQDN_STRING = "ut_naf_fqdn_string";
         // Uce
         public static final String KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL =
                 "add_video_tag_contact_header_in_publish_bool";

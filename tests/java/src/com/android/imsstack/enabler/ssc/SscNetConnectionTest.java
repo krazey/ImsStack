@@ -79,7 +79,7 @@ public class SscNetConnectionTest {
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT))
+                CarrierConfig.ImsSs.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT))
                 .thenReturn(INACTIVITY_TIME_SEC);
         SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 

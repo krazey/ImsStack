@@ -174,12 +174,12 @@ public class SscXmlGovTest {
         replaceInstance(SscXmlGov.class, "mSscXmlParser", mSscXmlGov, mMockXmlParser);
         when(mMockXmlParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
                 .thenReturn(false);
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
                 .thenReturn(false);
         when(mMockCarrierConfig
-                .getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
+                .getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
                 .thenReturn(true);
 
         SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
@@ -203,12 +203,12 @@ public class SscXmlGovTest {
         replaceInstance(SscXmlGov.class, "mSscXmlParser", mSscXmlGov, mMockXmlParser);
         when(mMockXmlParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
                 .thenReturn(true);
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
                 .thenReturn(true);
         when(mMockCarrierConfig
-                .getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
+                .getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
                 .thenReturn(false);
 
         SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
