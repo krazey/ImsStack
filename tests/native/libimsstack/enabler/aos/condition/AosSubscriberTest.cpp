@@ -20,14 +20,17 @@
 #include "interface/IAosAppContext.h"
 #include "interface/IAosSubscriberListener.h"
 #include "condition/AosSubscriber.h"
+#include "provider/AosProvider.h"
 
 #include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosRegistration.h"
 #include "interface/MockIAosSubscriberListener.h"
 #include "interface/MockIAosSubscriberManager.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnPointee;
 using ::testing::ReturnRef;
@@ -64,19 +67,28 @@ class AosSubscriberTest : public ::testing::Test
 {
 public:
     TestAosSubscriber* m_pAosSubscriber;
-    MockIAosAppContext m_objMockIAosAppContext;
-    MockIAosRegistration m_objMockIAosRegistration;
-    MockIAosSubscriberListener m_objMockListener;
+
+    IAosNConfiguration* m_piAosNConfiguration;
+
+    NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
+    NiceMock<MockIAosRegistration> m_objMockIAosRegistration;
+    NiceMock<MockIAosSubscriberListener> m_objMockListener;
+    NiceMock<MockIAosNConfiguration> m_objMockIAosNConfiguration;
 
 protected:
     virtual void SetUp() override
     {
+        ReplaceOriginWithMock();
+
+        // MockIAosAppContext
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
-
         ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
-
         ON_CALL(m_objMockIAosAppContext, GetRegistration())
                 .WillByDefault(Return(&m_objMockIAosRegistration));
+
+        // MockIAosNConfiguration
+        ON_CALL(m_objMockIAosNConfiguration, IsERegUsingFirstImpuInIsim())
+                .WillByDefault(Return(IMS_FALSE));
 
         m_pAosSubscriber = new TestAosSubscriber(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosSubscriber != nullptr);
@@ -87,10 +99,23 @@ protected:
 
     virtual void TearDown() override
     {
+        RestoreOriginInstance();
+
         if (m_pAosSubscriber)
         {
             delete m_pAosSubscriber;
         }
+    }
+
+    void ReplaceOriginWithMock()
+    {
+        m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
+    }
+
+    void RestoreOriginInstance()
+    {
+        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
     }
 };
 
@@ -217,6 +242,33 @@ TEST_F(AosSubscriberTest, GetConfiguredImpus_ManagerReturn)
     EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     EXPECT_EQ(m_pAosSubscriber->GetConfiguredImpus().GetCount(), 3);
+}
+
+TEST_F(AosSubscriberTest, ReturnsOrderedImpusWhenEmergencyTypeAndUseERegUsingFirstImpuInIsim)
+{
+    // GIVEN
+    AStringArray objOrderedPuids;
+    objOrderedPuids.AddElement(AString("PUID0"));
+    objOrderedPuids.AddElement(AString("PUID1"));
+    objOrderedPuids.AddElement(AString("PUID2"));
+    objOrderedPuids.AddElement(AString("PUID3"));
+
+    MockIAosSubscriberManager objMockIAosSubscriberManager;
+    EXPECT_CALL(objMockIAosSubscriberManager, GetOrderedImpus())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objOrderedPuids));
+
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+    m_pAosSubscriber->SetRegType(AosRegistrationType::EMERGENCY);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsERegUsingFirstImpuInIsim())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_UINT32 nCount = m_pAosSubscriber->GetConfiguredImpus().GetCount();
+
+    // THEN
+    EXPECT_EQ(nCount, objOrderedPuids.GetCount());
 }
 
 TEST_F(AosSubscriberTest, GetFakeImpus_ManagerNull)

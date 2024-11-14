@@ -99,6 +99,8 @@ public:
 
     inline void SetPuids(IN AStringArray& objPuids) { m_objPuids = objPuids; }
 
+    inline void SetOrderedPuids(IN AStringArray& objPuids) { m_objOrderedPuids = objPuids; }
+
     inline void SetPuidsForFake(IN AStringArray& objPuids) { m_objPuidsForFake = objPuids; }
 
     inline ITimer* GetTimerToIccLoadedWaiting() { return m_piTimerToIccLoadedWaiting; }
@@ -252,6 +254,7 @@ public:
     MockIAosNConfiguration m_objMockIAosNConfiguration;
 
     AStringArray m_objValidPuids;
+    AStringArray m_objOrderedPuids;
     AStringArray m_objEmptyPuids;
     AStringArray m_objOutPuids;
 
@@ -310,6 +313,12 @@ protected:
         m_objValidPuids.AddElement(AString("sip:user1@ims.com"));
         m_objValidPuids.AddElement(AString("sip:user2@ims.com"));
         m_objValidPuids.AddElement(AString("sip:user3@ims.com"));
+
+        m_objOrderedPuids.AddElement(AString("sip:user0@ims.com"));
+        m_objOrderedPuids.AddElement(AString("sip:user1@ims.com"));
+        m_objOrderedPuids.AddElement(AString("sip:user2@ims.com"));
+        m_objOrderedPuids.AddElement(AString("sip:user3@ims.com"));
+        m_objOrderedPuids.AddElement(AString("sip:user4@ims.com"));
 
         ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
                 .WillByDefault(ReturnRef(m_objValidPuids));
@@ -614,6 +623,33 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetConfiguredImpusForNormal)
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
+}
+
+TEST_F(AosSubscriberManagerTest, SucceedsGetOrderedImpus)
+{
+    // GIVEN
+    m_pSubscriberManager->SetOrderedPuids(m_objOrderedPuids);
+    IMS_UINT32 nExpectCount = m_objOrderedPuids.GetCount();
+
+    // WHEN
+    IMS_UINT32 nResultCount = m_pSubscriberManager->GetOrderedImpus().GetCount();
+
+    // THEN
+    EXPECT_EQ(nResultCount, nExpectCount);
+}
+
+TEST_F(AosSubscriberManagerTest, SucceedsGetOrderedImpusWhenOrderedImpuIsEmpty)
+{
+    // GIVEN
+    m_pSubscriberManager->SetOrderedPuids(m_objEmptyPuids);
+    m_pSubscriberManager->SetPuids(m_objValidPuids);
+    IMS_UINT32 nExpectCount = m_objValidPuids.GetCount();
+
+    // WHEN
+    IMS_UINT32 nResultCount = m_pSubscriberManager->GetOrderedImpus().GetCount();
+
+    // THEN
+    EXPECT_EQ(nResultCount, nExpectCount);
 }
 
 TEST_F(AosSubscriberManagerTest, FailedGetFakeImpusWhenSubscriberConfigIsNull)

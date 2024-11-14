@@ -182,6 +182,11 @@ const AStringArray& AosSubscriberManager::GetConfiguredImpus() const
     return m_objPuids;
 }
 
+const AStringArray& AosSubscriberManager::GetOrderedImpus() const
+{
+    return (!m_objOrderedPuids.IsEmpty()) ? m_objOrderedPuids : m_objPuids;
+}
+
 PUBLIC
 const AStringArray& AosSubscriberManager::GetConfiguredImpusForFake() const
 {
@@ -315,6 +320,8 @@ PROTECTED
 void AosSubscriberManager::ClearAll()
 {
     m_objPuids.RemoveAllElements();
+    m_objOrderedPuids.RemoveAllElements();
+
     SetProvisioned(IMS_FALSE);
 }
 
@@ -635,8 +642,18 @@ IMS_BOOL AosSubscriberManager::UpdateImpuFromIsim(OUT AStringArray& objImpus)
         return (objImpus.GetCount() > 0) ? IMS_TRUE : IMS_FALSE;
     }
 
-    AString strImpu = m_piSubscriberConfig->GetPublicUserIds().GetElementAt(
-            (objValidImpus.GetCount() == 1) ? 0 : GetIsimAt());
+    // Stores ordered IMPU lists.
+    AStringArray objPublicUserIds = m_piSubscriberConfig->GetPublicUserIds();
+    for (int i = 0; i < objPublicUserIds.GetCount(); i++)
+    {
+        if (objPublicUserIds.GetElementAt(i).GetLength() > 0)
+        {
+            m_objOrderedPuids.AddElement(objPublicUserIds.GetElementAt(i));
+        }
+    }
+
+    AString strImpu =
+            objPublicUserIds.GetElementAt((objValidImpus.GetCount() == 1) ? 0 : GetIsimAt());
 
     if (strImpu.GetLength() == 0)
     {

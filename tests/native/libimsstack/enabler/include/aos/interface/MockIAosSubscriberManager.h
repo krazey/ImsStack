@@ -36,6 +36,7 @@ public:
     MOCK_METHOD(void, RemoveListenerForMonitor, (IN IAosSubscriberManagerListener* piListener),
             (override));
     MOCK_METHOD(const AStringArray&, GetConfiguredImpus, (), (const, override));
+    MOCK_METHOD(const AStringArray&, GetOrderedImpus, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetConfiguredImpusForFake, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetFakeImpus, (), (const, override));
     MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (IN IMS_SINT32 nType),

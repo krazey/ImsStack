@@ -53,6 +53,7 @@ public:
     void RemoveListenerForMonitor(IN IAosSubscriberManagerListener* piListener) override;
 
     const AStringArray& GetConfiguredImpus() const override;
+    const AStringArray& GetOrderedImpus() const override;
     const AStringArray& GetConfiguredImpusForFake() const override;
     const AStringArray& GetFakeImpus() const override;
 
@@ -208,6 +209,7 @@ protected:
     AosIsimState m_eNotifyIsimState;
 
     AStringArray m_objPuids;
+    AStringArray m_objOrderedPuids;
     AStringArray m_objPuidsForFake;
 
     AString m_strPriority;
