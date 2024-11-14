@@ -56,65 +56,65 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                        \
-    using Base::SetState;                          \
-    using Base::GetState;                          \
-    using Base::RemoveBlock;                       \
-    using Base::SetSuspendedReason;                \
-    using Base::SetHandleState;                    \
-    using Base::Init;                              \
+    using Base::AddBlock;                          \
+    using Base::BackupAllBlocks;                   \
+    using Base::CheckSuspended;                    \
     using Base::CleanUp;                           \
-    using Base::IsHandleBlocked;                   \
-    using Base::SetReason;                         \
     using Base::ClearSuspendedReason;              \
+    using Base::GetAosFeature;                     \
     using Base::GetAppState;                       \
     using Base::GetImsAosReason;                   \
     using Base::GetImsAosReasonForSuspend;         \
-    using Base::IsEpdgEnabled;                     \
-    using Base::IsEqualNetworkType;                \
-    using Base::IsCapabilityExisted;               \
-    using Base::IsCapabilityExistedForNetworkType; \
-    using Base::IsNetworkTypeMatchedToRat;         \
-    using Base::GetNetworkType;                    \
-    using Base::GetMobileNetworkType;              \
     using Base::GetMobileChangingNetworkType;      \
-    using Base::GetAosFeature;                     \
-    using Base::ReevaluateBlocks;                  \
-    using Base::UpdateIpcan;                       \
-    using Base::PreProcessBlock;                   \
-    using Base::ProcessBlock;                      \
-    using Base::ProcessFeatureBlock;               \
-    using Base::ProcessCheckBlock;                 \
-    using Base::ProcessUnavailableFeature;         \
-    using Base::ProcessUnavailableFeatureChanged;  \
-    using Base::BackupAllBlocks;                   \
+    using Base::GetMobileNetworkType;              \
+    using Base::GetNetworkType;                    \
+    using Base::GetState;                          \
     using Base::HoldBlockForInvalidNetwork;        \
+    using Base::Init;                              \
+    using Base::InitializeFeatureTags;             \
+    using Base::InitializeHoldingBlocksPolicy;     \
+    using Base::Is3G;                              \
     using Base::IsBlockForMobile;                  \
     using Base::IsBlockForWifi;                    \
-    using Base::InitializeHoldingBlocksPolicy;     \
-    using Base::InitializeFeatureTags;             \
-    using Base::ProcessImsSuspended;               \
-    using Base::ProcessImsResumed;                 \
-    using Base::CheckSuspended;                    \
-    using Base::ResetSuspendedReason;              \
-    using Base::ReportRegState;                    \
-    using Base::ProcessCapabilitiesChanged;        \
-    using Base::ProcessNetworkChanged;             \
-    using Base::ProcessVopsStateChanged;           \
-    using Base::ProcessPsRoamingStateChanged;      \
+    using Base::IsCapabilityExisted;               \
+    using Base::IsCapabilityExistedForNetworkType; \
+    using Base::IsEmergencyService;                \
+    using Base::IsEpdgEnabled;                     \
+    using Base::IsEqualNetworkType;                \
+    using Base::IsHandleBlocked;                   \
+    using Base::IsNetworkTypeMatchedToRat;         \
+    using Base::IsRoaming;                         \
     using Base::IsSupportedNetworkType;            \
     using Base::IsSupportedNetworkTypeForCellular; \
-    using Base::StateToString;                     \
     using Base::MsgToString;                       \
+    using Base::PreProcessBlock;                   \
+    using Base::ProcessBlock;                      \
+    using Base::ProcessCapabilitiesChanged;        \
+    using Base::ProcessCheckBlock;                 \
+    using Base::ProcessFeatureBlock;               \
+    using Base::ProcessImsResumed;                 \
+    using Base::ProcessImsSuspended;               \
+    using Base::ProcessNetworkChanged;             \
+    using Base::ProcessPsRoamingStateChanged;      \
+    using Base::ProcessUnavailableFeature;         \
+    using Base::ProcessUnavailableFeatureChanged;  \
+    using Base::ProcessVopsStateChanged;           \
     using Base::RadioTypeToString;                 \
-    using Base::ServiceTypeToString;               \
+    using Base::ReevaluateBlocks;                  \
     using Base::ReevaluateUnavailableFeature;      \
-    using Base::Is3G;                              \
-    using Base::IsEmergencyService;                \
-    using Base::IsRoaming;                         \
-    using Base::StateConnecting;                   \
+    using Base::RemoveBlock;                       \
+    using Base::ReportRegState;                    \
+    using Base::ResetSuspendedReason;              \
+    using Base::ServiceTypeToString;               \
+    using Base::SetHandleState;                    \
+    using Base::SetReason;                         \
+    using Base::SetState;                          \
+    using Base::SetSuspendedReason;                \
     using Base::StateConnected;                    \
+    using Base::StateConnecting;                   \
     using Base::StateDisconnecting;                \
-    using Base::AddBlock;
+    using Base::StateToString;                     \
+    using Base::UpdateIpcan;
 
 class TestAosHandle : public AosHandle
 {
