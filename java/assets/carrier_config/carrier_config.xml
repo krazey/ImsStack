@@ -471,6 +471,7 @@
     <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="false"/>
     <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="false"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="false"/>
+    <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="false"/>
     <int name="imsemergency.epdn_preferred_iptype_int" value="1"/>
     <int name="imsemergency.ereg_retry_max_cnt_int" value="0"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>

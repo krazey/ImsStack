@@ -896,6 +896,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] 
         KEY_IMS_EMERGENCY_PREFIX "support_erereg_on_ipcan_change_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_video_for_ereg_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[] =
+        KEY_IMS_EMERGENCY_PREFIX "use_reg_retry_rule_for_ereg_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_EPDN_PREFERRED_IPTYPE_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "epdn_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_EREG_RETRY_MAX_CNT_INT[] =

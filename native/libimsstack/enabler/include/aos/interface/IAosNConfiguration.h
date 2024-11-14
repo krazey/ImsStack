@@ -212,6 +212,13 @@ public:
     virtual IMS_BOOL IsIpsecEnabled() const = 0;
 
     /**
+     * @brief Returns whether to follow reg retry rule when emergency registration failed.
+     *
+     * @return IMS_BOOL Return whether to be applied or not
+     */
+    virtual IMS_BOOL IsRegRetryRuleForERegUsed() const = 0;
+
+    /**
      * @brief Returns whether the security server port is used in reg contact of
      *        initial registration.
      *

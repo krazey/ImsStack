@@ -227,6 +227,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecEnabled() const
     return m_objCarrierConfig.bSipOverIpsecEnabled;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRetryRuleForERegUsed() const
+{
+    return m_objAsset.bUseRetryRuleForEReg;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSecurityServerPortInRegContactOfInitRegUsed() const
 {
     return m_objAsset.bUseSecurityServerPortInRegContactOfInitReg;
@@ -1367,6 +1372,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Assets::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
+    m_objAsset.bUseRetryRuleForEReg =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL);
     m_objAsset.bUseSecurityServerPortInInitReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL);
     m_objAsset.bUseSecurityServerPortInRegContactOfInitReg = piCc->GetBoolean(

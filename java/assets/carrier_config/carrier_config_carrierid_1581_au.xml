@@ -58,6 +58,7 @@
         </int-array>
     </pbundle>
     <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="true"/>
+    <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="true"/>
 
     <!-- Mtc -->
     <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>

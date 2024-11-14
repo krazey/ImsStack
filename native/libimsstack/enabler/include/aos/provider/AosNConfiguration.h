@@ -66,6 +66,7 @@ public:
     IMS_BOOL IsRegRetryIntervalsUsedForSub() const override;
     IMS_BOOL IsSmsOverIpEnabled() const override;
     IMS_BOOL IsIpsecEnabled() const override;
+    IMS_BOOL IsRegRetryRuleForERegUsed() const override;
     IMS_BOOL IsSecurityServerPortInRegContactOfInitRegUsed() const override;
     IMS_BOOL IsSecurityServerPortInInitRegUsed() const override;
     IMS_BOOL IsOldSaOnEstablishingSaRemoved() const override;

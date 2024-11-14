@@ -51,6 +51,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRegRetryIntervalsUsedForSub, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverIpEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIpsecEnabled, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsRegRetryRuleForERegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInRegContactOfInitRegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInInitRegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsOldSaOnEstablishingSaRemoved, (), (const, override));
