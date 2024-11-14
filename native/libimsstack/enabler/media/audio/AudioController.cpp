@@ -28,7 +28,8 @@ AudioController::AudioController() :
         m_eUpdateCondition(EARLY_SESSION),
         m_objLocalAddr(IpAddress::IPv6NONE),
         m_nPort(0),
-        m_nCurrentActiveNegoId(UNDEFINED_NEGO_ID)
+        m_nCurrentActiveNegoId(UNDEFINED_NEGO_ID),
+        m_pAudioConfig(IMS_NULL)
 {
     m_listAudioSession.Clear();
 }
@@ -355,10 +356,12 @@ IMS_BOOL AudioController::UpdateRtpConfig(
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->UpdateRtpConfig(nAccessNetwork,
+        AudioConfig* pAudioConfig = pAudioSession->UpdateRtpConfig(nAccessNetwork,
                 pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
+
+        return IsAudioConfigChanged(pAudioConfig);
     }
 
     IMS_TRACE_E(0, "UpdateRtpConfig() - invalid param", 0, 0, 0);
@@ -598,4 +601,24 @@ void AudioController::ClearSession()
     }
 
     m_listAudioSession.Clear();
+}
+
+PROTECTED
+IMS_BOOL AudioController::IsAudioConfigChanged(IN AudioConfig* pAudioConfig)
+{
+    if (pAudioConfig == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_pAudioConfig == IMS_NULL || *m_pAudioConfig != *pAudioConfig)
+    {
+        IMS_TRACE_D("IsAudioConfigChanged() - RtpConfig changed", 0, 0, 0);
+        m_pAudioConfig = pAudioConfig;
+        return IMS_TRUE;
+    }
+
+    IMS_TRACE_D("IsAudioConfigChanged() - Same RtpConfig", 0, 0, 0);
+
+    return IMS_FALSE;
 }
