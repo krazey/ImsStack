@@ -49,6 +49,10 @@
     <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
 
+    <!-- Mts -->
+    <int name="sms_message_response_wait_timer_millis_int" value="10000"/>
+    <int name="sms_retry_policy_for_expiry_timer_f_int" value="4"/>
+
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
