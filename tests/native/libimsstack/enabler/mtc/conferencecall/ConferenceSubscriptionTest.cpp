@@ -55,6 +55,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
+using ::testing::SafeMatcherCast;
 
 namespace android
 {
@@ -523,6 +524,36 @@ TEST_F(ConferenceSubscriptionTest,
 
     pConferenceSubscription->SubscriptionStartFailed(&objSubscription);
     EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::SUBSCRIBING);
+}
+
+TEST_F(ConferenceSubscriptionTest, SubscriptionStartFailedBy403AndStartedPutsConfigurationToCache)
+{
+    SetConferenceSubscription(IMS_FALSE);
+
+    // Sets state to Subscribing.
+    ON_CALL(objSubscription, GetNextRequest).WillByDefault(ReturnNull());
+    ON_CALL(objSubscription, Subscribe).WillByDefault(Return(IMS_SUCCESS));
+    pConferenceSubscription->Subscribe(AString::ConstEmpty());
+    EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::SUBSCRIBING);
+
+    // Tests.
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_403));
+    ON_CALL(objSubscription, GetPreviousResponse).WillByDefault(Return(&objMessage));
+
+    MockISubscription objNewSubscription;
+    // Dialog type is changed to In-Dialog after receiving 403 so objISession is used.
+    EXPECT_CALL(objSubsHolder, GetISubscription(&objISession, _))
+            .WillOnce(Return(&objNewSubscription));
+    EXPECT_CALL(objNewSubscription, Subscribe).WillOnce(Return(IMS_SUCCESS));
+
+    pConferenceSubscription->SubscriptionStartFailed(&objSubscription);
+    EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::SUBSCRIBING);
+
+    EXPECT_CALL(objConfigurationProxy,
+            PutCache(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT,
+                    SafeMatcherCast<IMS_SINT32>(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG)));
+    pConferenceSubscription->SubscriptionStarted(&objSubscription);
 }
 
 TEST_F(ConferenceSubscriptionTest, SubscriptionStartFailedBy423NotifiesFailedIfNoMinExpires)

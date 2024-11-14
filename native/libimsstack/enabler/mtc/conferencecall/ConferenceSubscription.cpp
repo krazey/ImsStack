@@ -15,6 +15,7 @@
  */
 
 #include "AString.h"
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IMessage.h"
@@ -41,6 +42,7 @@
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceSubscription.h"
 #include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
 #include "utility/IMessageUtils.h"
@@ -90,8 +92,6 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStarted(IN ISubscription
     (void)piSubscription;
     IMS_TRACE_I("SubscriptionStarted", 0, 0, 0);
 
-    // TODO: THIS CAN BE CALLED EVEN UN-SUBSCRIBE IS SUCCEEDED
-
     if (GetState() == SubscriptionState::SUBSCRIBING)
     {
         SetState(SubscriptionState::ACTIVE);
@@ -99,7 +99,9 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStarted(IN ISubscription
 
         if (m_nDialogType == CONF_SUBSCRIPTION_DIALOG_TYPE_FALLBACK)
         {
-            // TODO: update DB cache. fallback should be maintained within Registration.
+            m_objContext.GetConfigurationProxy().PutCache(
+                    ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT,
+                    ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG);
         }
     }
     else if (GetState() == SubscriptionState::UNSUBSCRIBING)
