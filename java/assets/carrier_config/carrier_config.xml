@@ -238,10 +238,29 @@
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <int name="imsss.terminal_based_call_wait_sync_int" value="0"/>
-    <boolean name="imsss.terminal_based_call_wait_default_activated_bool" value="true"/>
-    <int-array name="imsss.ut_terminal_based_services_int_array" num="0">
+    <int-array name="imsss.ut_sm_cause_temporary_block_int_array" num="0">
     </int-array>
+    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="0">
+    </int-array>
+    <int name="imsss.ut_max_retry_count_int" value="0"/>
+    <int name="imsss.ut_temporary_block_timer_min_int" value="1"/>
+    <boolean name="imsss.ut_support_cf_action_erasure_bool" value="true"/>
+    <boolean name="imsss.ut_support_cfnr_timer_bool" value="true"/>
+    <boolean name="imsss.ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
+    <int name="imsss.ut_oir_network_default_operation_int" value="0"/>
+    <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="true"/>
+    <int name="imsss.ut_temporary_block_timer_with_any_reason_sec_int" value="10"/>
+    <string name="imsss.ut_target_address_phone_context_string"></string>
+    <string name="imsss.ut_target_address_country_code_replace_to_zero_string"></string>
+    <string name="imsss.ut_target_address_zero_replace_to_country_code_string"></string>
+    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="120"/>
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="false"/>
+    <boolean name="imsss.ut_omit_namespace_of_document_element_bool" value="false"/>
+    <boolean name="imsss.ut_omit_namespace_ss_bool" value="false"/>
+    <boolean name="imsss.ut_omit_namespace_cp_bool" value="false"/>
+    <boolean name="imsss.ut_insert_new_rule_bool" value="false"/>
+    <int name="imsss.ut_uri_type_for_cf_target_number_int" value="0"/>
+    <string name="imsss.ut_naf_fqdn_string"></string>
 
     <!-- Uce -->
     <int name="imsuce.expire_value_publish_sec_int" value="0"/>
@@ -658,31 +677,6 @@
     <boolean name="sms_report_generic_error_when_retry_after_not_possible_bool" value="false"/>
     <int name="sms_message_response_wait_timer_millis_int" value="0"/>
     <int name="sms_retry_policy_for_expiry_timer_f_int" value="3"/>
-
-    <!-- Ut/Xcap -->
-    <int-array name="ut_sm_cause_temporary_block_int_array" num="0">
-    </int-array>
-    <int-array name="ut_http_temporary_error_code_int_array" num="0">
-    </int-array>
-    <int name="ut_max_retry_count_int" value="0"/>
-    <int name="ut_temporary_block_timer_min_int" value="1"/>
-    <boolean name="ut_support_cf_action_erasure_bool" value="true"/>
-    <boolean name="ut_support_cfnr_timer_bool" value="true"/>
-    <boolean name="ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
-    <int name="ut_oir_network_default_operation_int" value="0"/>
-    <boolean name="ut_oir_tir_always_temporary_mode_bool" value="true"/>
-    <int name="ut_temporary_block_timer_with_any_reason_sec_int" value="10"/>
-    <string name="ut_target_address_phone_context_string">""</string>
-    <string name="ut_target_address_country_code_replace_to_zero_string">""</string>
-    <string name="ut_target_address_zero_replace_to_country_code_string">""</string>
-    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="120"/>
-    <boolean name="ut_display_error_phrase_with_409_error_bool" value="false"/>
-    <boolean name="ut_omit_namespace_of_document_element_bool" value="false"/>
-    <boolean name="ut_omit_namespace_ss_bool" value="false"/>
-    <boolean name="ut_omit_namespace_cp_bool" value="false"/>
-    <boolean name="ut_insert_new_rule_bool" value="false"/>
-    <int name="ut_uri_type_for_cf_target_number_int" value="0"/>
-    <string name="ut_naf_fqdn_string"></string>
 
     <!-- Uce -->
     <boolean name="add_video_tag_contact_header_in_publish_bool" value="false"/>

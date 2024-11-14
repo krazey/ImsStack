@@ -48,7 +48,7 @@ public class SscAuthAgentTest {
 
         SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        when(mMockCarrierConfig.getString(CarrierConfig.Assets.KEY_UT_NAF_FQDN_STRING))
+        when(mMockCarrierConfig.getString(CarrierConfig.ImsSs.KEY_UT_NAF_FQDN_STRING))
                 .thenReturn(null);
 
         mSscAuthAgent = SscAuthAgent.getInstance(SLOT_0);
@@ -113,7 +113,7 @@ public class SscAuthAgentTest {
                 + " nonce=\"o94MbTY+MMNkpAePG/jVd24yOzbEbJERo98ObjI7p9U=\","
                 + " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
         String nafFqdn = "naf.xcap.3gpp.com";
-        when(mMockCarrierConfig.getString(CarrierConfig.Assets.KEY_UT_NAF_FQDN_STRING))
+        when(mMockCarrierConfig.getString(CarrierConfig.ImsSs.KEY_UT_NAF_FQDN_STRING))
                 .thenReturn(nafFqdn);
 
         mSscAuthAgent.parse(wwwAuthentication);

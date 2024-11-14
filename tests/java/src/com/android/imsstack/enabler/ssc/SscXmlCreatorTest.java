@@ -108,7 +108,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
 
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_NOT_PROVISIONED);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
@@ -123,7 +123,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
 
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_TEMP_MODE_RESTRICTED);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
@@ -144,7 +144,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
 
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_TEMP_MODE_ALLOWED);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
@@ -165,7 +165,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_DEFAULT);
 
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_TEMP_MODE_WITHOUT_DEFAULT_BEHAVIOUR);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
@@ -198,7 +198,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_SUPPRESSION);
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
 
@@ -218,7 +218,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_SUPPRESSION);
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
 
@@ -243,7 +243,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.OIR, SscConstant.OIR_SUPPRESSION);
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
 
         Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
 
@@ -274,7 +274,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_NOT_PROVISIONED);
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
 
@@ -294,7 +294,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_NOT_PROVISIONED);
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(true);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
 
@@ -314,7 +314,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_PROVISIONED);
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
 
         Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
 
@@ -339,7 +339,7 @@ public class SscXmlCreatorTest {
         SscServiceData updateData = getUpdateData(ESsType.TIR, SscConstant.TIR_PROVISIONED);
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL)).thenReturn(false);
 
         Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
 
@@ -910,7 +910,7 @@ public class SscXmlCreatorTest {
         String ruleConditionTag = SscXmlFormat.getRuleConditionTag(SLOT_0, SscXmlFormat.CD,
                 condition);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
@@ -961,7 +961,7 @@ public class SscXmlCreatorTest {
         SscXmlFormat.setMediaCapability(SLOT_0, SscXmlFormat.SC_CD, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 false);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
@@ -1008,7 +1008,7 @@ public class SscXmlCreatorTest {
         SscXmlFormat.setMediaCapability(SLOT_0, SscXmlFormat.SC_CD, SscXmlFormat.MEDIA_TYPE_AUDIO,
                 true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
@@ -1058,7 +1058,7 @@ public class SscXmlCreatorTest {
         SscXmlFormat.setMediaCapability(SLOT_0, SscXmlFormat.SC_CD, SscXmlFormat.MEDIA_TYPE_VIDEO,
                 true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
@@ -1108,7 +1108,7 @@ public class SscXmlCreatorTest {
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
         when(mMockSscUtils.getUriFromNumber(SLOT_0, targetNumber)).thenReturn(targetNumber);
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_REGISTRATION,
@@ -1153,7 +1153,7 @@ public class SscXmlCreatorTest {
         updateTagsAndRules(doc);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_DEACTIVATION,
@@ -1199,7 +1199,7 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ERASURE,
@@ -1246,7 +1246,7 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CD, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCfData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
@@ -1303,7 +1303,7 @@ public class SscXmlCreatorTest {
         updateTagsAndRules(doc);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CB, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCbData(ESsType.ICB, action, condition);
@@ -1354,7 +1354,7 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CB, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCbData(ESsType.OCB, SscConstant.STATUS_ENABLE,
@@ -1405,7 +1405,7 @@ public class SscXmlCreatorTest {
                 condition);
         SscXmlFormat.setProvisionStatus(SLOT_0, SscXmlFormat.SC_CB, condition, true);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL))
                 .thenReturn(true);
 
         SscServiceData insertData = getInsertCbData(ESsType.ICB, action, condition);

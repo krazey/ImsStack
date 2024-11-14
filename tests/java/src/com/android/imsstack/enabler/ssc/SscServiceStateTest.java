@@ -66,7 +66,7 @@ import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.config.CarrierConfig.Assets;
+import com.android.imsstack.core.config.CarrierConfig.ImsSs;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
@@ -132,10 +132,10 @@ public class SscServiceStateTest {
                 CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL))
                 .thenReturn(true);
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT))
+                CarrierConfig.ImsSs.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT))
                 .thenReturn(mBlockTimer);
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT)).thenReturn(mBlockTimer);
+                CarrierConfig.ImsSs.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT)).thenReturn(mBlockTimer);
 
         when(mMockTimerInterface.startTimer(anyLong(), any(TimerInterface.Listener.class)))
                 .thenReturn(mTimerId);
@@ -487,7 +487,7 @@ public class SscServiceStateTest {
                 CarrierConfig.ImsSs.KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY))
                 .thenReturn(emptyBlockErrorCodes);
         when(mMockCarrierConfig.getIntArray(
-                CarrierConfig.Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
+                CarrierConfig.ImsSs.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
                 .thenReturn(emptyBlockErrorCodes);
         assertEquals(true, mSscServiceState.isUtAvailable());
 
@@ -501,7 +501,7 @@ public class SscServiceStateTest {
     public void testSetErrorResponseCode_codeTempBlock() {
         int[] tempBlockErrorCodes = {480};
         int errorCode = 480;
-        when(mMockCarrierConfig.getIntArray(Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
+        when(mMockCarrierConfig.getIntArray(ImsSs.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
                 .thenReturn(tempBlockErrorCodes);
         createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -536,7 +536,7 @@ public class SscServiceStateTest {
         int[] tempBlockSmCodes = {33};
         int smCause = 33;
         when(mMockCarrierConfig.getIntArray(
-                CarrierConfig.Assets.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY))
+                CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY))
                 .thenReturn(tempBlockSmCodes);
         createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -652,7 +652,7 @@ public class SscServiceStateTest {
     public void testSscServiceStateHandler_utBlockTimerExpired() {
         int[] tempBlockErrorCodes = {480};
         int errorCode = 480;
-        when(mMockCarrierConfig.getIntArray(Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
+        when(mMockCarrierConfig.getIntArray(ImsSs.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
                 .thenReturn(tempBlockErrorCodes);
         createAndInitSscServiceState();
         mSscServiceState.setErrorResponseCode(errorCode);
