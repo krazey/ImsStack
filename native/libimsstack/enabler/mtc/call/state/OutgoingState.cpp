@@ -37,6 +37,7 @@
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/OutgoingState.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
+#include "call/termination/EmergencyStartErrorHandler.h"
 #include "call/termination/StartErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
@@ -136,7 +137,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
 
         // change the reason code for CSFB in this case. discuss if extra code is needed for csfb.
         objReason.nCode = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-        m_objContext.GetUiNotifier().SendStartFailed(objReason);
+        OnStartFailed(piSession, objReason);
 
         return CallStateName::TERMINATING;
     }
@@ -220,7 +221,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
         return HandleSilentRedial(piSession, objReason);
     }
 
-    OnStartFailed(piSession, objReason);
+    OnStartFailed(piSession, objReason, IMS_TRUE);
     return CallStateName::TERMINATING;
 }
 
@@ -775,7 +776,7 @@ IMS_BOOL OutgoingState::HandleB1TimerAfterTerminate(
     // To set Reason Header.
     const CallReasonInfo objNewReason(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
     HandleCancel(&piMtcSession->GetISession(), objNewReason);
-    m_objContext.GetUiNotifier().SendStartFailed(objNewReason);
+    OnStartFailed(&piMtcSession->GetISession(), objNewReason);
 
     return IMS_TRUE;
 }
@@ -857,13 +858,26 @@ void OutgoingState::OnStarted(IN ISession* piSession)
 }
 
 PRIVATE
-void OutgoingState::OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason)
+void OutgoingState::OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason,
+        IN IMS_BOOL bReasonFromErrorHandler /* = IMS_FALSE*/)
 {
     // TODO : need to modify this after emergency domain selection policy is decided.
     if (objReason.nCode == CODE_SIP_ALTERNATE_EMERGENCY_CALL &&
             objReason.nExtraCode == EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
     {
         HandleCountrySpecificServiceUrn(piSession->GetPreviousResponse(IMessage::SESSION_START));
+    }
+
+    if (m_objContext.GetCallInfo().IsEmergency() && !bReasonFromErrorHandler)
+    {
+        const auto objMaybeOverriddenReason =
+                EmergencyStartErrorHandler::MaybeGetOverriddenCallReasonInfo(
+                        m_objContext.GetConfigurationProxy(), objReason);
+        if (objMaybeOverriddenReason)
+        {
+            IMS_TRACE_I("OnStartFailed : Override CallReasonInfo for emergency call", 0, 0, 0);
+            return m_objContext.GetUiNotifier().SendStartFailed(objMaybeOverriddenReason.value());
+        }
     }
 
     m_objContext.GetUiNotifier().SendStartFailed(objReason);

@@ -79,7 +79,8 @@ private:
     CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
     void OnStarted(IN ISession* piSession);
-    void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason);
+    void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason,
+            IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
     void OnSessionForked(IN ISession* piOriginSession);
 
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;

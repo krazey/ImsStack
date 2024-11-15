@@ -420,6 +420,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "release_emergency_pdn_with_emergency_call_fail_bool";
         public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
                 KEY_PREFIX + "emergency_call_current_location_discovery_supported_bool";
+        public static final String KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY =
+                KEY_PREFIX + "reject_code_require_immediate_termination_string_array";
 
         private ImsEmergency() {}
     }

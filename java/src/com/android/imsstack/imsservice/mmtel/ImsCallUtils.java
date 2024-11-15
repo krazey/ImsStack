@@ -1080,6 +1080,10 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_SIP_USER_REJECTED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_GLOBAL_ERROR,
                 ImsReasonInfo.CODE_SIP_GLOBAL_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_EMERGENCY_TEMP_FAILURE,
+                ImsReasonInfo.CODE_EMERGENCY_TEMP_FAILURE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_EMERGENCY_PERM_FAILURE,
+                ImsReasonInfo.CODE_EMERGENCY_PERM_FAILURE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_METHOD_NOT_ALLOWED,
                 ImsReasonInfo.CODE_SIP_METHOD_NOT_ALLOWED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_PROXY_AUTHENTICATION_REQUIRED,

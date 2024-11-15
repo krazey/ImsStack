@@ -35,6 +35,8 @@ public:
     MOCK_METHOD(IMS_BOOL, GetBoolean, (IN const IMS_CHAR*), (const, override));
     MOCK_METHOD(IMS_SINT32, GetInt, (IN const IMS_CHAR*), (const, override));
     MOCK_METHOD(AString, GetString, (IN const IMS_CHAR*), (const, override));
+    MOCK_METHOD(ImsVector<IMS_SINT32>, GetIntArray, (IN const IMS_CHAR*), (const, override));
+    MOCK_METHOD(ImsVector<AString>, GetStringArray, (IN const IMS_CHAR*), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIntFromArray, (IN const IMS_CHAR*, IN const IMS_UINT32),
             (const, override));
     MOCK_METHOD(AString, GetStringFromArray, (IN const IMS_CHAR*, IN const IMS_UINT32),

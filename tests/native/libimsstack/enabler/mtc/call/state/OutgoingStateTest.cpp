@@ -851,6 +851,11 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
             GetBoolean(ConfigEmergency::
                             KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ImsVector<AString> objArrary;
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(
+                    ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY))
+            .WillByDefault(Return(objArrary));
     ON_CALL(objService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
     ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))

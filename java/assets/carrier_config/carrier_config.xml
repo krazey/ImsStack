@@ -116,7 +116,8 @@
     <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
-
+    <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
+    </string-array>
     <!-- Emergency -->
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_provisional_to_final_response_timer_millis_int" value="15000"/>

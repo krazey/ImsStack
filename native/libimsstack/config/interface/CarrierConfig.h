@@ -286,6 +286,7 @@ public:
         static const IMS_CHAR KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING[];
         static const IMS_CHAR KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT[];
         static const IMS_CHAR KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT[];
+        static const IMS_CHAR KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[];
 
         // Preferred Emergency Registration Type
         enum

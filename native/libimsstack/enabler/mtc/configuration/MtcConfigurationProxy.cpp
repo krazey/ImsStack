@@ -78,6 +78,20 @@ PUBLIC VIRTUAL AString MtcConfigurationProxy::GetString(IN const IMS_CHAR* pszKe
     return m_piCc->GetString(pszKey);
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32> MtcConfigurationProxy::GetIntArray(
+        IN const IMS_CHAR* pszKey) const
+{
+    IMS_ASSERT(ValidateSuffix(pszKey, SUFFIX_INT_ARRAY));
+    return m_piCc->GetIntArray(pszKey);
+}
+
+PUBLIC VIRTUAL ImsVector<AString> MtcConfigurationProxy::GetStringArray(
+        IN const IMS_CHAR* pszKey) const
+{
+    IMS_ASSERT(ValidateSuffix(pszKey, SUFFIX_STRING_ARRAY));
+    return m_piCc->GetStringArray(pszKey);
+}
+
 PUBLIC VIRTUAL IMS_BOOL MtcConfigurationProxy::Contains(
         IN const IMS_CHAR* pszKey, IN IMS_SINT32 nValue) const
 {
