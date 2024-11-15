@@ -2770,7 +2770,7 @@ TEST_F(AosRegistrationTest, IgnoreForbiddenFailedIfErrorCodeIsNotPermanentCode)
 TEST_F(AosRegistrationTest, ReportFailureWhenForbiddenFailIfForbiddenCountIsGreaterThanMaxCount)
 {
     ImsVector<IMS_SINT32> objErrCode;
-    objErrCode.Add(403);
+    objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_4XX);
     ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
             .WillByDefault(ReturnRef(objErrCode));
     ImsVector<IMS_SINT32> objCount;
@@ -3936,7 +3936,10 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfNoRetryAfterWhenStartFailedWith
 
 TEST_F(AosRegistrationTest, TriggerPdnReactivationWhenStartFailedWithFinalResponse)
 {
-    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
+    ImsVector<IMS_SINT32> objExtraRegErrCode;
+    objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_4XX);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
+            .WillByDefault(ReturnRef(objExtraRegErrCode));
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
             .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
