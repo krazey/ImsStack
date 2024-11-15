@@ -813,7 +813,15 @@ IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessa
     if (eMethod.Equals(SipMethod::PRACK))
     {
         // RFC 6337. Table 1. Case 4, 5
-        return IMS_TRUE;
+        IMessage& objPrackMessage = *piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+        if (objPrackMessage.GetState() == IMessage::STATE_SENT)
+        {
+            return m_objContext.GetMessageUtils().HasSdp(&objPrackMessage);
+        }
+        else
+        {
+            return IMS_TRUE;
+        }
     }
 
     if (eMethod.Equals(SipMethod::UPDATE))

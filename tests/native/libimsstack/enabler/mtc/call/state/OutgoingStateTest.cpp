@@ -1234,6 +1234,35 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsTerminatingIfSdpOaFails)
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
+TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfNoSdpOa)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    SipMethod objPrackMethod = SipMethod::PRACK;
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objPrackMethod));
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+
+    MockIMessage objPreviousPrackMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objPreviousPrackMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objPreviousPrackMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPreviousPrackMessage, GetState()).WillByDefault(Return(IMessage::STATE_SENT));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionPrackDeliveredSendsEarlyUpdateIfAvailable)
 {
     MockIMessage objMessage;
