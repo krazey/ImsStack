@@ -318,6 +318,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_sip_session_id_header_bool";
         public static final String KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY =
                 KEY_PREFIX + "pcscf_discovery_method_int_array";
+        public static final String KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING =
+                KEY_PREFIX + "retransmission_allowed_of_geolocation_pidf_string";
         // Aos
         public static final String KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "ims_identity_priority_int_array";
@@ -398,6 +400,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_18x_timer_millis_int";
         public static final String KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT =
                 KEY_PREFIX + "policy_for_emergency_urn_escv_mapping_int";
+        public static final String KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING =
+                KEY_PREFIX + "p_emergency_info_header_in_invite_string";
         public static final String KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL =
                 KEY_PREFIX + "support_ecbm_for_volte_bool";
         public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
@@ -422,6 +426,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_call_current_location_discovery_supported_bool";
         public static final String KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY =
                 KEY_PREFIX + "reject_code_require_immediate_termination_string_array";
+        public static final String KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT =
+                KEY_PREFIX + "call_periodic_location_discovery_method_int";
+        public static final String KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "call_periodic_location_discovery_timer_millis_int";
 
         private ImsEmergency() {}
     }
@@ -429,8 +437,10 @@ public class CarrierConfig {
     /** Configuration items for RTT. */
     public static class ImsRtt {
         public static final String KEY_PREFIX = "imsrtt.";
+        // Mtc
         public static final String KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT =
                 KEY_PREFIX + "policy_on_text_qos_deactivation_int";
+        // Media
         public static final String KEY_TEXT_RTCP_INTERVAL_INT_ARRAY =
                 KEY_PREFIX + "text_rtcp_interval_int_array";
 
@@ -735,6 +745,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_mergeable_on_conference_on_hold_bool";
         public static final String KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL =
                 KEY_PREFIX + "check_ui_condition_for_incoming_resume_bool";
+        public static final String KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY =
+                KEY_PREFIX + "registration_to_18x_timer_millis_int_array";
         // Media
         public static final String KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY =
                 KEY_PREFIX + "audio_jitter_buffer_size_int_array";
@@ -757,8 +769,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_on_video_qos_deactivation_int";
         public static final String KEY_SUPPORT_EARLY_SESSION_BOOL =
                 KEY_PREFIX + "support_early_session_bool";
-        public static final String KEY_ALLOW_TEXT_WITH_VIDEO_BOOL =
-                KEY_PREFIX + "allow_text_with_video_bool";
+        public static final String KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT =
+                KEY_PREFIX + "policy_for_text_with_video_int";
         public static final String KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT =
                 KEY_PREFIX + "minimum_battery_level_for_limit_video_call_int";
         public static final String KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL =
@@ -802,6 +814,7 @@ public class CarrierConfig {
         public static final String KEY_PREFIX = "imswfc.";
         public static final String KEY_REGISTRATION_PRIVATE_HEADER_INT =
                 KEY_PREFIX + "registration_private_header_int";
+        // Mtc
         public static final String KEY_COUNTRY_CODE_INT =
                 KEY_PREFIX + "country_code_int";
         public static final String KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL =
