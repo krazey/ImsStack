@@ -29,5 +29,5 @@
     <int name="imsss.ut_as_server_port_int" value="8080"/>
 
     <!-- Media -->
-    <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
 </carrier_config>

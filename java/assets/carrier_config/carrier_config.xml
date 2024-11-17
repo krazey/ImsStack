@@ -200,7 +200,7 @@
             </int-array>
         </pbundle>
     </pbundle>
-    <boolean name="video_codec_hevc_priority_order_bool" value="false"/>
+    <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="false"/>
     <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>
@@ -219,7 +219,7 @@
         <item value="5"/>
         <item value="5"/>
     </int-array>
-    <boolean name="incoming_dtmf_tone_play_support_bool" value="false"/>
+    <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="false"/>
     <int name="imsvt.video_avpf_feature_int" value="0"/>
     <int-array name="imsvt.video_codec_bitrate_int_array" num="2">
         <item value="384"/>
@@ -624,65 +624,65 @@
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="0"/>
 
     <!-- Media -->
-    <boolean name="support_multi_config_in_early_session_bool" value="false"/>
-    <boolean name="media_session_level_bandwidth_bool" value="false"/>
-    <boolean name="sdp_answer_full_capability_bool" value="false"/>
-    <boolean name="sdp_reoffer_full_capability_bool" value="false"/>
+    <boolean name="imsvoice.support_multi_config_in_early_session_bool" value="false"/>
+    <boolean name="imsvoice.media_session_level_bandwidth_bool" value="false"/>
+    <boolean name="imsvoice.sdp_answer_full_capability_bool" value="false"/>
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
 
-    <int-array name="audio_rtp_port_range_int_array" num="2">
+    <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
-    <boolean name="audio_bw_nego_option_bool" value="false"/>
-    <boolean name="audio_evs_support_bool" value="false"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
+    <boolean name="imsvoice.audio_evs_support_bool" value="false"/>
     <boolean name="media_anbr_capability_in_modem_bool" value="false"/>
-    <int name="audio_ptime_millis_int" value="20"/>
-    <int name="audio_maxptime_millis_int" value="240"/>
-    <int name="audio_maxred_int" value="220"/>
-    <int name="audio_rtp_dscp_int" value="46"/>
-    <boolean name="audio_show_codec_attribute_modeset_bool" value="false"/>
-    <int-array name="audio_amrwb_codec_attribute_default_modeset_int_array" num="3">
+    <int name="imsvoice.audio_ptime_millis_int" value="20"/>
+    <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int name="imsvoice.audio_rtp_dscp_int" value="46"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_modeset_bool" value="false"/>
+    <int-array name="imsvoice.audio_amrwb_codec_attribute_default_modeset_int_array" num="3">
         <item value="0"/>
         <item value="1"/>
         <item value="2"/>
     </int-array>
-    <int-array name="audio_amrnb_codec_attribute_default_modeset_int_array" num="4">
+    <int-array name="imsvoice.audio_amrnb_codec_attribute_default_modeset_int_array" num="4">
         <item value="0"/>
         <item value="2"/>
         <item value="4"/>
         <item value="7"/>
     </int-array>
-    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
-    <int name="audio_telephone_event_duration_millis_int" value="200"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <int name="imsvoice.audio_telephone_event_duration_millis_int" value="200"/>
     <string-array name="imsvoice.audio_candidate_attribute_string_array" num="0">
     </string-array>
-    <boolean name="audio_rtcpxr_enable_bool" value="false"/>
-    <boolean name="audio_rtcpxr_statistics_bool" value="false"/>
-    <boolean name="audio_rtcpxr_voip_metrics_bool" value="false"/>
-    <boolean name="audio_rtcpxr_packet_loss_rle_bool" value="false"/>
-    <boolean name="audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
+    <boolean name="imsvoice.audio_rtcpxr_enable_bool" value="false"/>
+    <boolean name="imsvoice.audio_rtcpxr_statistics_bool" value="false"/>
+    <boolean name="imsvoice.audio_rtcpxr_voip_metrics_bool" value="false"/>
+    <boolean name="imsvoice.audio_rtcpxr_packet_loss_rle_bool" value="false"/>
+    <boolean name="imsvoice.audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
 
-    <int-array name="video_rtp_port_range_int_array" num="2">
+    <int-array name="imsvt.video_rtp_port_range_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
-    <int name="video_cvo_value_int" value="1"/>
-    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
-    <boolean name="video_avpf_enable_bool" value="false"/>
-    <int name="video_iframe_interval_sec_int" value="1"/>
-    <int name="video_send_periodic_sps_pps_int" value="2"/>
-    <boolean name="video_bw_nego_option_bool" value="false"/>
-    <int name="video_lowest_bitrate_bps_int" value="0"/>
-    <int-array name="text_rtp_port_range_int_array" num="2">
+    <int name="imsvt.video_cvo_value_int" value="1"/>
+    <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
+    <boolean name="imsvt.video_avpf_enable_bool" value="false"/>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
+    <int name="imsvt.video_send_periodic_sps_pps_int" value="2"/>
+    <boolean name="imsvt.video_bw_nego_option_bool" value="false"/>
+    <int name="imsvt.video_lowest_bitrate_bps_int" value="0"/>
+    <int-array name="imsrtt.text_rtp_port_range_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
-    <boolean name="text_codec_empty_redundant_bool" value="true"/>
-    <int name="text_rtp_dscp_int" value="46"/>
-    <int name="text_codec_redundancy_level_int" value="-1"/>
-    <int name="text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="text_rtcp_inactivity_timer_millis_int" value="20000"/>
+    <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
+    <int name="imsrtt.text_rtp_dscp_int" value="46"/>
+    <int name="imsrtt.text_codec_redundancy_level_int" value="-1"/>
+    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
+    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="20000"/>
     <boolean name="dynamic_video_quality_supported_bool" value="false"/>
 
     <!-- TODO Media - to testcases-->
@@ -690,9 +690,9 @@
     <int name="asset_evs_codec_attribute_mode_switch_int" value="-1"/>
 
     <!-- Media additional for CallFeature-->
-    <boolean name="audio_hold_with_direction_inactive_bool" value="false"/>
-    <boolean name="video_hold_with_direction_inactive_bool" value="false"/>
-    <boolean name="text_hold_with_direction_inactive_bool" value="false"/>
+    <boolean name="imsvoice.audio_hold_with_direction_inactive_bool" value="false"/>
+    <boolean name="imsvt.video_hold_with_direction_inactive_bool" value="false"/>
+    <boolean name="imsrtt.text_hold_with_direction_inactive_bool" value="false"/>
 
     <!-- Mts -->
     <int name="imssms.sms_request_uri_type_int" value="-1"/>
