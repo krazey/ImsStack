@@ -274,6 +274,18 @@ const IMS_CHAR CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT[] =
 // Public carrier-config - ends
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT[] =
         KEY_IMS_RTT_PREFIX "policy_on_text_qos_deactivation_int";
+const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[] =
+        KEY_IMS_RTT_PREFIX "text_rtp_port_range_int_array";
+const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[] =
+        KEY_IMS_RTT_PREFIX "text_codec_empty_redundant_bool";
+const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTP_DSCP_INT[] =
+        KEY_IMS_RTT_PREFIX "text_rtp_dscp_int";
+const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[] =
+        KEY_IMS_RTT_PREFIX "text_codec_redundancy_level_int";
+const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[] =
+        KEY_IMS_RTT_PREFIX "text_rtp_inactivity_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[] =
+        KEY_IMS_RTT_PREFIX "text_rtcp_inactivity_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_RTT_PREFIX "text_rtcp_interval_int_array";
 
@@ -1113,85 +1125,86 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE
         KEY_IMS_EMERGENCY_PREFIX "reject_code_require_perm_failure_int_array";
 
 // Media
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
-        "audio_rtp_port_range_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL[] = "audio_bw_nego_option_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT[] = "audio_ptime_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT[] = "audio_maxptime_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT[] = "audio_maxred_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT[] = "audio_rtp_dscp_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL[] =
-        "audio_show_codec_attribute_modeset_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[] =
-        "audio_amrwb_codec_attribute_default_modeset_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[] =
-        "audio_amrnb_codec_attribute_default_modeset_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL[] =
-        "audio_show_codec_attribute_dtx_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL[] =
-        "audio_show_codec_attribute_amrwbio_modeset_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT[] =
-        "audio_telephone_event_duration_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[] =
-        "audio_candidate_attribute_string_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL[] = "audio_rtcpxr_enable_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL[] =
-        "audio_rtcpxr_statistics_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL[] =
-        "audio_rtcpxr_voip_metrics_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[] =
-        "audio_rtcpxr_packet_loss_rle_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[] =
-        "audio_rtcpxr_packet_duplicate_rle_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING[] =
-        "avc_sprop_parameter_sets_string";
-const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[] =
-        "hevc_payload_type_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE[] =
-        "hevc_payload_description_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_SPROP_PARAMETER_SETS_STRING[] =
-        "hevc_sprop_parameter_sets_string";
-const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PROFILE_INT[] = "hevc_profile_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_LEVEL_INT[] = "hevc_level_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY[] =
-        "video_rtp_port_range_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT[] = "video_cvo_value_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT[] =
-        "video_sdp_offer_cap_nego_for_avpf_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL[] = "video_avpf_enable_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[] =
-        "video_iframe_interval_sec_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[] =
-        "video_send_periodic_sps_pps_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL[] = "video_bw_nego_option_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT[] =
-        "video_lowest_bitrate_bps_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[] =
-        "text_rtp_port_range_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[] =
-        "text_codec_empty_redundant_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT[] = "text_rtp_dscp_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[] =
-        "support_multi_config_in_early_session_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL[] = "audio_evs_support_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL[] =
-        "media_anbr_capability_in_modem_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[] =
-        "media_session_level_bandwidth_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
-        "sdp_answer_full_capability_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[] =
-        "sdp_reoffer_full_capability_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[] =
-        "text_codec_redundancy_level_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[] =
-        "text_rtp_inactivity_timer_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[] =
-        "text_rtcp_inactivity_timer_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[] =
-        "incoming_dtmf_tone_play_support_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[] =
-        "video_codec_hevc_priority_order_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "audio_rtp_port_range_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_BW_NEGO_OPTION_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_bw_nego_option_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_PTIME_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "audio_ptime_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "audio_maxptime_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_MAXRED_INT[] =
+        KEY_IMS_VOICE_PREFIX "audio_maxred_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTP_DSCP_INT[] =
+        KEY_IMS_VOICE_PREFIX "audio_rtp_dscp_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_show_codec_attribute_modeset_bool";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[] =
+                KEY_IMS_VOICE_PREFIX "audio_amrwb_codec_attribute_default_modeset_int_array";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[] =
+                KEY_IMS_VOICE_PREFIX "audio_amrnb_codec_attribute_default_modeset_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_show_codec_attribute_dtx_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_show_codec_attribute_amrwbio_modeset_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "audio_telephone_event_duration_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "audio_candidate_attribute_string_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_enable_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_statistics_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_voip_metrics_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_packet_loss_rle_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_rtcpxr_packet_duplicate_rle_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "support_multi_config_in_early_session_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_EVS_SUPPORT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "audio_evs_support_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "media_anbr_capability_in_modem_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "media_session_level_bandwidth_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "sdp_answer_full_capability_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "sdp_reoffer_full_capability_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "incoming_dtmf_tone_play_support_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_AVC_SPROP_PARAMETER_SETS_STRING[] =
+        KEY_IMS_VT_PREFIX "avc_sprop_parameter_sets_string";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[] =
+        KEY_IMS_VT_PREFIX "hevc_payload_type_int_array";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE[] =
+        KEY_IMS_VT_PREFIX "hevc_payload_description_bundle";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_SPROP_PARAMETER_SETS_STRING[] =
+        KEY_IMS_VT_PREFIX "hevc_sprop_parameter_sets_string";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_PROFILE_INT[] = KEY_IMS_VT_PREFIX "hevc_profile_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_LEVEL_INT[] = KEY_IMS_VT_PREFIX "hevc_level_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY[] =
+        KEY_IMS_VT_PREFIX "video_rtp_port_range_int_array";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_CVO_VALUE_INT[] =
+        KEY_IMS_VT_PREFIX "video_cvo_value_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT[] =
+        KEY_IMS_VT_PREFIX "video_sdp_offer_cap_nego_for_avpf_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_AVPF_ENABLE_BOOL[] =
+        KEY_IMS_VT_PREFIX "video_avpf_enable_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[] =
+        KEY_IMS_VT_PREFIX "video_iframe_interval_sec_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[] =
+        KEY_IMS_VT_PREFIX "video_send_periodic_sps_pps_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_BW_NEGO_OPTION_BOOL[] =
+        KEY_IMS_VT_PREFIX "video_bw_nego_option_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_LOWEST_BITRATE_BPS_INT[] =
+        KEY_IMS_VT_PREFIX "video_lowest_bitrate_bps_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[] =
+        KEY_IMS_VT_PREFIX "video_codec_hevc_priority_order_bool";
 
 // Mts
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REQUEST_URI_TYPE_INT[] =

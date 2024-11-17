@@ -323,6 +323,12 @@ public:
         // Public carrier-config - ends
         static const IMS_CHAR KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT[];
         static const IMS_CHAR KEY_TEXT_RTCP_INTERVAL_INT_ARRAY[];
+        static const IMS_CHAR KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[];
+        static const IMS_CHAR KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[];
+        static const IMS_CHAR KEY_TEXT_RTP_DSCP_INT[];
+        static const IMS_CHAR KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[];
+        static const IMS_CHAR KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[];
+        static const IMS_CHAR KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
     };
 
     class ImsSms
@@ -554,6 +560,31 @@ public:
         static const IMS_CHAR KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[];
         static const IMS_CHAR KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY[];
         static const IMS_CHAR KEY_EVS_AMRWB_IO_MODE_SET_INT[];
+        static const IMS_CHAR KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[];
+        static const IMS_CHAR KEY_AUDIO_BW_NEGO_OPTION_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_PTIME_MILLIS_INT[];
+        static const IMS_CHAR KEY_AUDIO_MAXPTIME_MILLIS_INT[];
+        static const IMS_CHAR KEY_AUDIO_MAXRED_INT[];
+        static const IMS_CHAR KEY_AUDIO_RTP_DSCP_INT[];
+        static const IMS_CHAR KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[];
+        static const IMS_CHAR KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY[];
+        static const IMS_CHAR KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT[];
+        static const IMS_CHAR KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY[];
+        static const IMS_CHAR KEY_AUDIO_RTCPXR_ENABLE_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_RTCPXR_STATISTICS_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL[];
+        static const IMS_CHAR KEY_AUDIO_EVS_SUPPORT_BOOL[];
+        static const IMS_CHAR KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL[];
+        static const IMS_CHAR KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[];
+        static const IMS_CHAR KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[];
+        static const IMS_CHAR KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[];
+        static const IMS_CHAR KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[];
 
         // Session refresher types
         enum
@@ -848,6 +879,19 @@ public:
         static const IMS_CHAR KEY_VIDEO_CODEC_FRAME_SIZE_STRING_ARRAY[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_PROFILE_INT_ARRAY[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_LEVEL_INT_ARRAY[];
+        static const IMS_CHAR KEY_AVC_SPROP_PARAMETER_SETS_STRING[];
+        static const IMS_CHAR KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[];
+        static const IMS_CHAR KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE[];
+        static const IMS_CHAR KEY_HEVC_SPROP_PARAMETER_SETS_STRING[];
+        static const IMS_CHAR KEY_HEVC_PROFILE_INT[];
+        static const IMS_CHAR KEY_HEVC_LEVEL_INT[];
+        static const IMS_CHAR KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY[];
+        static const IMS_CHAR KEY_VIDEO_CVO_VALUE_INT[];
+        static const IMS_CHAR KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT[];
+        static const IMS_CHAR KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[];
+        static const IMS_CHAR KEY_VIDEO_BW_NEGO_OPTION_BOOL[];
+        static const IMS_CHAR KEY_VIDEO_LOWEST_BITRATE_BPS_INT[];
+        static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[];
 
         // Policy of supporting text and video media in a call
         enum
@@ -1100,6 +1144,29 @@ public:
         static const IMS_CHAR KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[];
+
+        // Mts
+        static const IMS_CHAR KEY_SMS_REQUEST_URI_TYPE_INT[];
+        static const IMS_CHAR KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[];
+        static const IMS_CHAR KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[];
+        static const IMS_CHAR KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_403_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_404_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_406_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_408_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_500_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_503_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_POLICY_FOR_504_RESPONSE_INT[];
+        static const IMS_CHAR KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL[];
+        static const IMS_CHAR KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT[];
+        static const IMS_CHAR KEY_SMS_RETRY_AFTER_MAX_COUNT_INT[];
+        static const IMS_CHAR KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL[];
+        static const IMS_CHAR KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT[];
+        static const IMS_CHAR KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[];
+
+        // Uce
+        static const IMS_CHAR KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[];
 
         // registration retry sip 305 policy
         enum
