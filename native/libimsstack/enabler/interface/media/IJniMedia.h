@@ -299,7 +299,7 @@ class ImsMediaMsgSetMediaQualityParam : public ImsMediaMsgParamBase
 public:
     explicit ImsMediaMsgSetMediaQualityParam(const MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
-            m_bRtpInactivityFwkTimer(IMS_TRUE),
+            m_bRtpInactivityFwkTimer(IMS_FALSE),
             m_objMediaQualityThreshold(MediaQualityThreshold()) {};
     virtual ~ImsMediaMsgSetMediaQualityParam() {}
 

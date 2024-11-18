@@ -589,9 +589,9 @@ public class AudioSessionHandler extends MediaState {
 
             case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
             {
-                Boolean needFwkTimer = parcel.readBoolean();
                 MediaQualityThreshold threshold =
                     MediaQualityThreshold.CREATOR.createFromParcel(parcel);
+                Boolean needFwkTimer = parcel.readBoolean();
                 ImsLog.d("MediaQualityThreshold: " + threshold.toString() + ", needFwkTimer="
                         + needFwkTimer);
 
