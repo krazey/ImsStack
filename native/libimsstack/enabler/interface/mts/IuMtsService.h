@@ -42,7 +42,8 @@ enum
     MO_SUCCESS = 1,
     MO_ERROR_GENERIC = 2,
     MO_ERROR_RETRY = 3,
-    MO_ERROR_BY_RETRY_AFTER = 4,
+    MO_ERROR_FALLBACK = 4,
+    MO_ERROR_BY_RETRY_AFTER = 5,  // Internal usage
 };
 
 enum

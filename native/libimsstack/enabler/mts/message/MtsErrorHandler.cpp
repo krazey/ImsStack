@@ -50,17 +50,23 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService* piMtsService,
         IN MtsDynamicLoader* pMtsDynamicLoader, IN const IMessage* piMessage)
 {
     IMS_SINT32 nResult = MO_ERROR_RETRY;
-    IMS_SINT32 nStatusCode =
-            (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
     ImsVector<IMS_SINT32> objGenericErrorCodes = m_piCarrierConfig->GetIntArray(
             CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY);
-    for (IMS_UINT32 i = 0; i < objGenericErrorCodes.GetSize(); i++)
+    if (piMessage != IMS_NULL)
     {
-        if (objGenericErrorCodes.GetAt(i) == nStatusCode)
+        if (objGenericErrorCodes.Contains(piMessage->GetStatusCode()))
         {
             nResult = MO_ERROR_GENERIC;
-            break;
         }
+    }
+    else if (objGenericErrorCodes.Contains(SipStatusCode::SC_INVALID))
+    {
+        nResult = MO_ERROR_GENERIC;
+    }
+    else if (m_piCarrierConfig->GetInt(
+                     CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT) > 0)
+    {
+        nResult = MO_ERROR_FALLBACK;
     }
 
     IMS_SINT32 nPolicy = GetRegistrationRecoveryPolicy(piMessage);

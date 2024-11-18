@@ -32,6 +32,8 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+const LOCAL IMS_SINT32 MESSAGE_RESPONSE_WAIT_TIMER = 8000;
+
 namespace android
 {
 
@@ -75,16 +77,19 @@ TEST_F(MtsErrorHandlerTest, Handle403Error)
 {
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_400);
-    objArray.Push(SipStatusCode::SC_403);
-    objArray.Push(SipStatusCode::SC_404);
-    objArray.Push(SipStatusCode::SC_406);
-    objArray.Push(SipStatusCode::SC_408);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_400);
+    objErrorCodes.Push(SipStatusCode::SC_403);
+    objErrorCodes.Push(SipStatusCode::SC_404);
+    objErrorCodes.Push(SipStatusCode::SC_406);
+    objErrorCodes.Push(SipStatusCode::SC_408);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_403_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -102,16 +107,19 @@ TEST_F(MtsErrorHandlerTest, Handle404Error)
 {
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_404));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_400);
-    objArray.Push(SipStatusCode::SC_403);
-    objArray.Push(SipStatusCode::SC_404);
-    objArray.Push(SipStatusCode::SC_406);
-    objArray.Push(SipStatusCode::SC_408);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_400);
+    objErrorCodes.Push(SipStatusCode::SC_403);
+    objErrorCodes.Push(SipStatusCode::SC_404);
+    objErrorCodes.Push(SipStatusCode::SC_406);
+    objErrorCodes.Push(SipStatusCode::SC_408);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_404_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -128,16 +136,19 @@ TEST_F(MtsErrorHandlerTest, Handle406Error)
 {
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_406));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_400);
-    objArray.Push(SipStatusCode::SC_403);
-    objArray.Push(SipStatusCode::SC_404);
-    objArray.Push(SipStatusCode::SC_406);
-    objArray.Push(SipStatusCode::SC_408);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_400);
+    objErrorCodes.Push(SipStatusCode::SC_403);
+    objErrorCodes.Push(SipStatusCode::SC_404);
+    objErrorCodes.Push(SipStatusCode::SC_406);
+    objErrorCodes.Push(SipStatusCode::SC_408);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_406_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -155,16 +166,19 @@ TEST_F(MtsErrorHandlerTest, Handle408Error)
 {
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_408));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_400);
-    objArray.Push(SipStatusCode::SC_403);
-    objArray.Push(SipStatusCode::SC_404);
-    objArray.Push(SipStatusCode::SC_406);
-    objArray.Push(SipStatusCode::SC_408);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_400);
+    objErrorCodes.Push(SipStatusCode::SC_403);
+    objErrorCodes.Push(SipStatusCode::SC_404);
+    objErrorCodes.Push(SipStatusCode::SC_406);
+    objErrorCodes.Push(SipStatusCode::SC_408);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_408_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -184,14 +198,17 @@ TEST_F(MtsErrorHandlerTest, Handle500Error)
 {
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_500));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_500);
-    objArray.Push(SipStatusCode::SC_503);
-    objArray.Push(SipStatusCode::SC_504);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+    objErrorCodes.Push(SipStatusCode::SC_503);
+    objErrorCodes.Push(SipStatusCode::SC_504);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_500_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -211,14 +228,17 @@ TEST_F(MtsErrorHandlerTest, Handle503Error)
 {
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_500);
-    objArray.Push(SipStatusCode::SC_503);
-    objArray.Push(SipStatusCode::SC_504);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+    objErrorCodes.Push(SipStatusCode::SC_503);
+    objErrorCodes.Push(SipStatusCode::SC_504);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -240,14 +260,17 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(objMockMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_500);
-    objArray.Push(SipStatusCode::SC_503);
-    objArray.Push(SipStatusCode::SC_504);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+    objErrorCodes.Push(SipStatusCode::SC_503);
+    objErrorCodes.Push(SipStatusCode::SC_504);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -267,14 +290,17 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(objMockMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_500);
-    objArray.Push(SipStatusCode::SC_503);
-    objArray.Push(SipStatusCode::SC_504);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+    objErrorCodes.Push(SipStatusCode::SC_503);
+    objErrorCodes.Push(SipStatusCode::SC_504);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -291,14 +317,17 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
 {
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_504));
 
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_500);
-    objArray.Push(SipStatusCode::SC_503);
-    objArray.Push(SipStatusCode::SC_504);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+    objErrorCodes.Push(SipStatusCode::SC_503);
+    objErrorCodes.Push(SipStatusCode::SC_504);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_504_RESPONSE_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -316,14 +345,17 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
 
 TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportGenericError)
 {
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_406);
-    objArray.Push(SipStatusCode::SC_503);
-    objArray.Push(SipStatusCode::SC_INVALID);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_406);
+    objErrorCodes.Push(SipStatusCode::SC_503);
+    objErrorCodes.Push(SipStatusCode::SC_INVALID);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -340,13 +372,16 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportGenericError)
 
 TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportErrorRetry)
 {
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(SipStatusCode::SC_406);
-    objArray.Push(SipStatusCode::SC_503);
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_406);
+    objErrorCodes.Push(SipStatusCode::SC_503);
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
-            .WillByDefault(Return(objArray));
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(0));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT,
                     MTS_REG_RECOVERY_POLICY_NONE))
@@ -359,6 +394,32 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportErrorRetry)
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader);
     EXPECT_EQ(nResult, MO_ERROR_RETRY);
+}
+
+TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportFallback)
+{
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_406);
+    objErrorCodes.Push(SipStatusCode::SC_503);
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT,
+                    MTS_REG_RECOVERY_POLICY_NONE))
+            .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
+
+    EXPECT_CALL(objMockMtsService,
+            RequestRegistrationRecovery(
+                    ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
+            .Times(1);
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader);
+    EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 
 }  // namespace android
