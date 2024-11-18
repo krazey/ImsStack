@@ -37,6 +37,7 @@ public:
             bInitializeIpsecWithNewPcscf(IMS_FALSE),
             bKeepERegRetryOnWlan(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
+            bPlmnBlockWithTimeoutOnFailureWithAllPcscfs(IMS_FALSE),
             bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
             bRegRetryWithIpVerFallback(IMS_FALSE),
@@ -117,6 +118,7 @@ public:
     IMS_BOOL bInitializeIpsecWithNewPcscf;
     IMS_BOOL bKeepERegRetryOnWlan;
     IMS_BOOL bNoInitRegOnPcscfChange;
+    IMS_BOOL bPlmnBlockWithTimeoutOnFailureWithAllPcscfs;
     IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
     IMS_BOOL bRegContactValidation;
     IMS_BOOL bRegRetryWithIpVerFallback;

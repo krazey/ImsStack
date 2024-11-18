@@ -384,6 +384,12 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsContactUriValidationChecked() const
     return m_objAsset.bRegContactValidation;
 }
 
+PUBLIC VIRTUAL IMS_BOOL
+AosNConfiguration::IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported() const
+{
+    return m_objAsset.bPlmnBlockWithTimeoutOnFailureWithAllPcscfs;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRetryWithIpVerFallback() const
 {
     return m_objAsset.bRegRetryWithIpVerFallback;
@@ -1332,6 +1338,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL);
     m_objAsset.bRegContactValidation =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL);
+    m_objAsset.bPlmnBlockWithTimeoutOnFailureWithAllPcscfs = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL);
     m_objAsset.bRegRetryWithIpVerFallback =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =

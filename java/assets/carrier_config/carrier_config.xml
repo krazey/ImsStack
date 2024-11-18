@@ -348,6 +348,7 @@
     <boolean name="ims.init_ipsec_setting_with_new_pcscf_bool" value="false"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="false"/>
     <boolean name="ims.reg_contact_validation_bool" value="false"/>
+    <boolean name="ims.reg_plmn_block_with_timeout_on_failure_with_all_pcscfs_bool" value="false"/>
     <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="ims.remove_old_sa_on_establishing_sa_bool" value="false"/>
     <boolean name="ims.required_cdmaless_feature_tag_bool" value="false"/>
