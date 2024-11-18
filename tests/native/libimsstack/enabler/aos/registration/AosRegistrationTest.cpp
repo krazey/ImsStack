@@ -3266,6 +3266,8 @@ TEST_F(AosRegistrationTest, ResetPcscfTriedIfAllPcscfTriedWhenStartWithSpecified
     ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported())
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(3));
