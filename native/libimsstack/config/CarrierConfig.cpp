@@ -1066,6 +1066,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEA
         KEY_IMS_VOICE_PREFIX "initialize_p_early_media_when_no_header_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_local_ringback_tone_with_180_response_int";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT[] =
+                KEY_IMS_VOICE_PREFIX "mo_call_request_timeout_for_eps_fallback_trigger_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "eps_fallback_watchdog_time_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL[] =

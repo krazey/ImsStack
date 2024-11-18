@@ -88,6 +88,11 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
+    if (EpsFallbackTrigger::ShouldTriggerByMoRequestTimeout(m_objContext))
+    {
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
+    }
+
     const IMS_CHAR* pszKey = m_objContext.GetService().IsWlanIpCanType()
             ? ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT
             : ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT;
@@ -531,12 +536,6 @@ CallReasonInfo StartErrorHandler::Handle6xxResponse(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
 {
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
-            m_objContext.GetService().IsNr())
-    {
-        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
-    }
-
     if (m_objContext.GetConfigurationProxy().GetBoolean(
                 ConfigAssets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL) &&
             !IsRoaming())
@@ -575,12 +574,7 @@ IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage)
 PRIVATE
 IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 {
-    if (piMessage == IMS_NULL)
-    {
-        return IMS_TRUE;
-    }
-
-    return piMessage->GetStatusCode() == SipStatusCode::SC_INVALID;
+    return piMessage == IMS_NULL;
 }
 
 PRIVATE

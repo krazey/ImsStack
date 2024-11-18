@@ -989,12 +989,7 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) con
         return;
     }
 
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) == IMS_FALSE)
-    {
-        return;
-    }
-
-    if (m_objContext.GetService().IsNr() == IMS_FALSE)
+    if (!EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(m_objContext))
     {
         return;
     }

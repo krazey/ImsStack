@@ -66,11 +66,22 @@ PUBLIC VIRTUAL EpsFallbackTrigger::~EpsFallbackTrigger()
     }
 }
 
-PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::IsRequired(
-        IN const MtcConfigurationProxy& objConfigProxy)
+PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(
+        IN IMtcCallContext& objContext)
 {
-    // without Watchdog timer, EPS fallback due to network no response isn't supported, either.
-    return objConfigProxy.GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT) > 0;
+    // Start only if Teps_fb_watchdog > 0 by Verizon's requirement
+    return objContext.GetService().IsNr() &&
+            objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT) > 0;
+}
+
+PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByMoRequestTimeout(
+        IN IMtcCallContext& objContext)
+{
+    return objContext.GetService().IsNr() &&
+            objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT) >=
+            0;
 }
 
 PUBLIC

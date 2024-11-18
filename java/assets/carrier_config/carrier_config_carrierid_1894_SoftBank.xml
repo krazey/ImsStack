@@ -78,7 +78,7 @@
     <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
     <int name="imsvoice.session_refresh_method_int" value="1"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="0"/>
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="-1"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="false"/>
     <boolean name="imsemergency.emergency_callback_mode_supported_bool" value="true"/>
     <boolean name="imsemergency.emergency_qos_precondition_supported_bool" value="true"/>
@@ -94,7 +94,7 @@
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="0"/>
     <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
-    <int name="imsvoice.eps_fallback_watchdog_time_millis_int" value="0"/>
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="10000"/>
     <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="6">
         <item value="0:1503"/> <!-- 0:CODE_NETWORK_RESP_TIMEOUT -->
         <item value="403:332"/> <!-- 403:CODE_SIP_FORBIDDEN -->

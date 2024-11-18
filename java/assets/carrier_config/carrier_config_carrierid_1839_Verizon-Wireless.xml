@@ -220,6 +220,7 @@
     </int-array>
     <boolean name="imsvoice.use_carrier_specific_contact_header_for_options_response_bool" value="true"/>
     <boolean name="imsvoice.use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="6000"/>
     <int name="imsvoice.eps_fallback_watchdog_time_millis_int" value="6000"/>
     <boolean name="imsvoice.eps_fallback_trigger_by_rrc_reject_wait_time_bool" value="true"/>
     <int name="imsvoice.send_udp_keep_alive_interval_time_millis_int" value="2000"/>

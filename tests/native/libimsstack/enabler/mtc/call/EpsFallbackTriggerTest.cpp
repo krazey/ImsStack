@@ -86,19 +86,63 @@ protected:
     }
 };
 
-TEST_F(EpsFallbackTriggerTest, IsRequiredChecksWatchdogTimeConfiguration)
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfNotInNr)
 {
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
-            .WillByDefault(Return(-1));
-    EXPECT_FALSE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfConfigIsZeroOrBelow)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(0));
-    EXPECT_FALSE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
 
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
-            .WillByDefault(Return(6000));
-    EXPECT_TRUE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
+            .WillByDefault(Return(-1));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfConfigIsGreaterThanZero)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfNotInNr)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfConfigIsNegative)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(-1));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfConfigIsPositive)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
 }
 
 TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)

@@ -545,11 +545,9 @@ TEST_F(IncomingStateTest, SendUpdateBySrvccByFailed)
 TEST_F(IncomingStateTest, OnAosConnectedInvokesPreconditionManagerIpCanChanged)
 {
     IMS_UINT32 nAnyAosReason = 1;
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
-            .WillByDefault(Return(0));
-    EXPECT_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).Times(0);
-    EXPECT_CALL(objPreconditionManager, HandleQosOnIpcanChanged);
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objPreconditionManager, HandleQosOnIpcanChanged);
     EXPECT_EQ(CallStateName::INCOMING,
             pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
 }
@@ -565,9 +563,9 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
             .WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    SetParamsForIncomingCallReceived();
 
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
-    SetParamsForIncomingCallReceived();
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(CallStateName::ALERTING,
             pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));

@@ -37,7 +37,9 @@ public:
     EpsFallbackTrigger(IN const EpsFallbackTrigger&) = delete;
     EpsFallbackTrigger& operator=(IN const EpsFallbackTrigger&) = delete;
 
-    static IMS_BOOL IsRequired(IN const MtcConfigurationProxy& objConfigProxy);
+    static IMS_BOOL ShouldTriggerByWatchdogTimer(IN IMtcCallContext& objContext);
+    static IMS_BOOL ShouldTriggerByMoRequestTimeout(IN IMtcCallContext& objContext);
+
     virtual void StartWatchdog();
     virtual void OnEpsFallbackCompleted();
     void Timer_TimerExpired(IN ITimer* piTimer) override;

@@ -287,8 +287,7 @@ PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
     IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
     m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
 
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
-            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger() &&
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger() &&
             !m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();

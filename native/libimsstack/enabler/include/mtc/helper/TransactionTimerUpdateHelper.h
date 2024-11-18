@@ -39,13 +39,16 @@ public:
 
 private:
     void UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue);
-    IMS_BOOL IsNeedToUpdate() const;
+    IMS_BOOL MayUpdateForEpsFallbackTrigger();
+    IMS_BOOL MayUpdateForTcallTimerExpiry();
+    IMS_SINT32 GetPolicyForTcallTimerExpiry(
+            IN const IMS_BOOL bEmergency, IN const IMS_BOOL bWifi) const;
 
+    IMtcCallContext& m_objContext;
     const ISipConfig* m_pSipConfig;
-    IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy& m_objConfiguration;
-    IMS_BOOL m_bEmergency;
-    IMS_BOOL m_bWifi;
+
+    IMS_BOOL m_bUpdated;
 };
 
 #endif

@@ -666,18 +666,15 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
                                 : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
     }
 
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
     {
-        if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
-        {
-            m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-            return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
-                    CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT));
-        }
-        else if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
-        {
-            m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        }
+        m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
+        return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
+                CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT));
+    }
+    else if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
+    {
+        m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
     }
 
     m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
