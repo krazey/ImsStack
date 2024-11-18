@@ -299,7 +299,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkResponseSetsStatus
 
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkResponseSetsTimer)
 {
-    EXPECT_CALL(objTimer, SetTimer(12000, pEpsFbTrigger));
+    EXPECT_CALL(objTimer, SetTimer(20000, pEpsFbTrigger));
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
     EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
     EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
@@ -323,7 +323,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerSetsStatus)
 
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerSetsTimer)
 {
-    EXPECT_CALL(objTimer, SetTimer(12000, pEpsFbTrigger));
+    EXPECT_CALL(objTimer, SetTimer(20000, pEpsFbTrigger));
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
     EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
     EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
