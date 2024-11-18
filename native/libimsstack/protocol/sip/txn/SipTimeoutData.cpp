@@ -19,7 +19,7 @@
 
 SipTimeoutData::SipTimeoutData()
 {
-    m_eTxnType = SipTxn::INVALID_TXN;
+    m_eTxnType = SipTxn::INVALID;
     m_eTimerType = SipTxn::TIMER_TYPE_INVALID;
     m_pTxnKey = SIP_NULL;
 }

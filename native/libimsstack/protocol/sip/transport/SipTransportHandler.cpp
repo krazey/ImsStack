@@ -139,22 +139,22 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
         if ((SipPf_Strcmp(SipMsgUtil::METHOD_ACK, pTxnKey->GetMethod()) == SIP_EQUALS) ||
                 (SipPf_Strcmp(SipMsgUtil::METHOD_INVITE, pTxnKey->GetMethod()) == SIP_EQUALS))
         {
-            pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
+            pTxnKey->SetTxnType(SipTxn::INVITE_SERVER);
         }
         else
         {
-            pTxnKey->SetTxnType(SipTxn::NON_INV_SER_TXN);
+            pTxnKey->SetTxnType(SipTxn::NON_INVITE_SERVER);
         }
     }
     else
     {
         if (SipPf_Strcmp(SipMsgUtil::METHOD_INVITE, pTxnKey->GetMethod()) == SIP_EQUALS)
         {
-            pTxnKey->SetTxnType(SipTxn::INV_CLI_TXN);
+            pTxnKey->SetTxnType(SipTxn::INVITE_CLIENT);
         }
         else
         {
-            pTxnKey->SetTxnType(SipTxn::NON_INV_CLI_TXN);
+            pTxnKey->SetTxnType(SipTxn::NON_INVITE_CLIENT);
         }
     }
 

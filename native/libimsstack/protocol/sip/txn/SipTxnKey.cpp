@@ -32,7 +32,7 @@ SipTxnKey::SipTxnKey() :
         m_pszFromTag(SIP_NULL),
         m_pszCallId(SIP_NULL),
         m_nRespCode(SIP_ZERO),
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
 }
@@ -50,7 +50,7 @@ SipTxnKey::SipTxnKey(SipTxnKey* pTxnKey, SIP_UINT16* pnError) :
         m_pszFromTag(SIP_NULL),
         m_pszCallId(SIP_NULL),
         m_nRespCode(SIP_ZERO),
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
     Init(pTxnKey, pnError);
@@ -69,7 +69,7 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
         m_pszFromTag(SIP_NULL),
         m_pszCallId(SIP_NULL),
         m_nRespCode(SIP_ZERO),
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
     m_eMsgType = pSipMsg->GetMsgType();
@@ -348,7 +348,8 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 
         // Successful response & received ACK request : always new one
         // Test equipment issue: same transaction key - cseq / via-branch / from-tag / to-tag
-        if (pGeneratedKey->m_eTxnType == SipTxn::INV_SER_TXN && m_eTxnType == SipTxn::INV_SER_TXN)
+        if (pGeneratedKey->m_eTxnType == SipTxn::INVITE_SERVER &&
+                m_eTxnType == SipTxn::INVITE_SERVER)
         {
             if (SipMsgUtil::IsSuccessfulResponse(m_nRespCode))
             {
@@ -515,6 +516,6 @@ SIP_VOID SipTxnKey::Clear()
     m_nViaHostPort = SIP_ZERO;
     m_nCseqNum = SIP_ZERO;
     m_nRespCode = SIP_ZERO;
-    m_eTxnType = SipTxn::INVALID_TXN;
+    m_eTxnType = SipTxn::INVALID;
     m_nRules = RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH;
 }

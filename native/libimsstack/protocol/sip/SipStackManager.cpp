@@ -349,7 +349,7 @@ stack user must process this request and can decide whether to ignore or not
                                                                : "retransmission or stray",
                 0);
 
-        pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
+        pTxnKey->SetTxnType(SipTxn::INVITE_SERVER);
         pTxnKey->SetResponseCode(200);
         *ppTxnKey = pTxnKey;
         return SIP_TRUE;
