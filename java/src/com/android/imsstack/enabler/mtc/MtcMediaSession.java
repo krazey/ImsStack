@@ -704,7 +704,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             CarrierConfig cc = config.getCarrierConfig();
             if (cc != null) {
                 bIncomingDtmfTonePlaySupported = cc.getBoolean(
-                        CarrierConfig.Assets.KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL, false);
+                        CarrierConfig.ImsVoice.KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL, false);
             }
         }
 
