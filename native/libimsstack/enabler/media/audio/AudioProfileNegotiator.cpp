@@ -283,6 +283,8 @@ AudioProfile::AmrFmtp* AudioProfileNegotiator::NegotiateAmrFmtp(IN AudioProfile*
     pAmrFmtp->SetModeChangeNeighbor(pSrcFmtp->GetModeChangeNeighbor());
     pAmrFmtp->SetShowModeChangePeriod(pSrcFmtp->IsModeChangePeriodVisible());
     pAmrFmtp->SetModeChangePeriod(pSrcFmtp->GetModeChangePeriod());
+    pAmrFmtp->SetShowOctetAlign(pSrcFmtp->IsOctetAlignVisible());
+    pAmrFmtp->SetOctetAlign(pSrcFmtp->GetOctetAlign());
 
     return pAmrFmtp;
 }
