@@ -166,12 +166,11 @@ public:
     SIP_BOOL EncodeHeaderParameters(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
     SIP_BOOL EncodeParameters(AStringBuffer& objBuffer) const;
     virtual SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
-    virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
-    virtual SIP_BOOL EncodeHdr(
-            SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions)
+    virtual SIP_BOOL Encode(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    virtual SIP_BOOL Encode(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions)
     {
         (void)nMsgOptions;
-        return EncodeHdr(ppMsgBuffCurrPos, bParams);
+        return Encode(ppMsgBuffCurrPos, bParams);
     }
     SIP_BOOL DecodeHeaderParameters(
             const SIP_CHAR* pStart, const SIP_CHAR* pEnd, const SIP_CHAR cDelimiter);
@@ -237,8 +236,9 @@ public:
     SIP_BOOL SetAddrSpec(SipAddrSpec* pAddrSpec);
     SipNameAddr* GetNameAddr();
     SIP_CHAR* GetTag();
+
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    virtual SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
     virtual SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     inline SIP_BOOL IsValidHeader() const override

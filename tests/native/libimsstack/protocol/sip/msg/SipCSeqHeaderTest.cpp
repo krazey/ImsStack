@@ -48,7 +48,7 @@ TEST_F(SipCSeqHeaderTest, IsValidHeader)
     pHeader->SipDelete();
 }
 
-TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipCSeqHeaderTest, EncodeAndDecode)
 {
     SipCSeqHeader* pHeader = reinterpret_cast<SipCSeqHeader*>(
             SipCSeqHeader::GetNewObj(SipHeaderBase::CSEQ, nullptr));
@@ -62,7 +62,7 @@ TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr)
 
     AStringBuffer objBuffer(256);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
@@ -84,7 +84,7 @@ TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pCopyHeader != nullptr);
     pHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("1 INVITE", &(aBuffer[0]));
     EXPECT_STREQ("1 INVITE", objBuffer.GetCharString());

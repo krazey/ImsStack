@@ -383,7 +383,7 @@ SIP_BOOL SipHeaders::EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOp
         }
 
         SipEncodeHdrName(arMandatoryHeaders[nIndex], ppCurrPos, nMsgOptions);
-        if (pHeaderObj->EncodeHdr(ppCurrPos) == SIP_FALSE)
+        if (pHeaderObj->Encode(ppCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Mandatory header %d encode fail",
                     arMandatoryHeaders[nIndex], SIP_ZERO);
@@ -403,7 +403,7 @@ SIP_BOOL SipHeaders::EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOpti
     if (pTemp != SIP_NULL)
     {
         SipEncodeHdrName(SipHeaderBase::CONTENT_TYPE, ppCurrPos, nMsgOptions);
-        if (pTemp->EncodeHdr(ppCurrPos) == SIP_FALSE)
+        if (pTemp->Encode(ppCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content type encode fail", SIP_ZERO, SIP_ZERO);
             pTemp->SipDelete();
@@ -415,7 +415,7 @@ SIP_BOOL SipHeaders::EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOpti
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
+SIP_BOOL SipHeaders::Encode(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 {
     if (EncodeMandatoryHdrs(ppCurrPos, nMsgOptions) == SIP_FALSE)
     {
@@ -440,7 +440,7 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
         {
             SipEncodeHdrName(nHdr, ppCurrPos, nMsgOptions);
 
-            if (pHeaderObj->EncodeHdr(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
+            if (pHeaderObj->Encode(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode %d header Fail", nHdr, SIP_ZERO);
                 pHeaderObj->SipDelete();
@@ -462,7 +462,7 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 
     if (pHeaderObj != SIP_NULL)
     {
-        if (pHeaderObj->EncodeHdr(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
+        if (pHeaderObj->Encode(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODENCODER, "Encode Unknown header Fail", SIP_ZERO, SIP_ZERO);

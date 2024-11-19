@@ -49,7 +49,7 @@ TEST_F(SipAuthBaseTest, IsValidHeader)
     pHeader->SipDelete();
 }
 
-TEST_F(SipAuthBaseTest, EncodeAndEncodeHdr)
+TEST_F(SipAuthBaseTest, Encode)
 {
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
@@ -63,12 +63,12 @@ TEST_F(SipAuthBaseTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetValue("Digest");
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetParams("realm", "abcd.example.com", SIP_FALSE);
     pHeader->SetParams("uri", "abc@xyz.com", SIP_TRUE);
@@ -78,7 +78,7 @@ TEST_F(SipAuthBaseTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("Digest", pCopyHeader->GetValue());
     EXPECT_STREQ("Digest", pHeader->GetValue());

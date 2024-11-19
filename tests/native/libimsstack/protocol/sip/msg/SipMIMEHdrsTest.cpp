@@ -147,7 +147,7 @@ TEST_F(SipMIMEHdrsTest, SetAndGetHeaders)
     pMimeHeaders->SipDelete();
 }
 
-TEST_F(SipMIMEHdrsTest, EncodeMIMEHdrs)
+TEST_F(SipMIMEHdrsTest, Encode)
 {
     SipMIMEHdrs* pMimeHeaders = new SipMIMEHdrs();
     ASSERT_TRUE(pMimeHeaders != nullptr);
@@ -158,7 +158,7 @@ TEST_F(SipMIMEHdrsTest, EncodeMIMEHdrs)
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
 
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->EncodeMIMEHdrs(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->Encode(&pBuff));
 
     EXPECT_STREQ("", &(aBuffer[0]));
 
@@ -195,7 +195,7 @@ TEST_F(SipMIMEHdrsTest, EncodeMIMEHdrs)
 
     pUnknownHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->EncodeMIMEHdrs(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->Encode(&pBuff));
 
     const SIP_CHAR* pMimeHdrs = "Content-Type: mediaType/mediaSubType\r\n\
 UnknownHeaderName1: UnknownHeaderValue1\r\nUnknownHeaderName2: UnknownHeaderValue2\r\n";
@@ -250,7 +250,7 @@ UnknownHeaderName1: UnknownHeaderValue1\r\nUnknownHeaderName2: UnknownHeaderValu
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
 
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->EncodeMIMEHdrs(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->Encode(&pBuff));
     EXPECT_STREQ(pMimeHdrs, &(aBuffer[0]));
 
     pMimeHeaders->SipDelete();

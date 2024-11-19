@@ -55,7 +55,6 @@ private:
     ~SipUri();
 
 public:
-    /*constructor*/
     SipUri();
     SipUri(const SipUri& objSipUri);
 
@@ -107,7 +106,7 @@ public:
     }
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
-    SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos);
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     static const SIP_CHAR* GetSchemeString(UriType eUriType);
@@ -138,9 +137,7 @@ public:
     SipAddrSpec(const SipAddrSpec& objAddressSpec);
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
-
-    /*Function for encoding*/
-    SIP_BOOL EncodeAddrSpec(SIP_CHAR** ppCurrPos) const;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos) const;
 
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     /*function for getting the header type*/
@@ -174,7 +171,7 @@ public:
     SIP_BOOL SetAddrSpec(SipAddrSpec* pSipAddrSpec);
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
-    SIP_BOOL EncodeNameAddr(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 

@@ -25,14 +25,11 @@ protected:
     SipVector<SipNameValue*> m_objAuthList;
 
 public:
-    /*constructor*/
     explicit SipAuthBase(SIP_INT32 eHdrType);
     SipAuthBase(const SipAuthBase& objHeader);
 
-    /*virtual methods*/
-    /*Function for encoding of headers*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 

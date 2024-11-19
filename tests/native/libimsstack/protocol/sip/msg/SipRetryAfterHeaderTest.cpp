@@ -108,7 +108,7 @@ TEST_F(SipRetryAfterHeaderTest, Encode)
     pHeader->SipDelete();
 }
 
-TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipRetryAfterHeaderTest, EncodeAndDecode)
 {
     SipRetryAfterHeader* pHeader = reinterpret_cast<SipRetryAfterHeader*>(
             SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, nullptr));
@@ -133,7 +133,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("20", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -154,7 +154,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("30(sip server overloaded)", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -176,7 +176,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15(sip server overloaded);duration=4800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -198,7 +198,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15(sip server overloaded);duration=4800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -220,7 +220,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15( sip server overloaded );duration=4800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -243,7 +243,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15();duration=1800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();

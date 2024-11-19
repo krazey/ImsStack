@@ -54,8 +54,7 @@ SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams)
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipRetryAfterHeader::EncodeHdr(
-        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipRetryAfterHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN];
     SipPf_Sprintf(szLen, "%u", m_nDeltaSec);

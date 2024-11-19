@@ -43,7 +43,7 @@ SIP_VOID SipBadHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
     SipMsgUtil::SetValue(pszHdrName, m_pszHdrName);
 }
 
-SIP_BOOL SipBadHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipBadHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     (void)ppCurrPos;
     (void)bParams;

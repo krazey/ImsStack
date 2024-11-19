@@ -67,11 +67,11 @@ SIP_BOOL SipUnknownHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) co
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUnknownHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipUnknownHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pszHdrName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Header name not found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Missing header name", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

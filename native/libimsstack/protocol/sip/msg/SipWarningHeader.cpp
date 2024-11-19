@@ -76,12 +76,12 @@ SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/
     return SIP_TRUE;
 }
 
-SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipWarningHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "Missing Warn Agent or Warn Text", SIP_ZERO, SIP_ZERO);
+                ESIPTRACE_MODENCODER, "Missing warn-agent or warn-text", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

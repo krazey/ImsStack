@@ -114,7 +114,7 @@ TEST_F(SipParametersTest, SetParam)
     delete pParameters;
 }
 
-TEST_F(SipParametersTest, DecodeAndEncodeHdr)
+TEST_F(SipParametersTest, DecodeAndEncode)
 {
     SipParameters* pParameters = new SipParameters();
     ASSERT_TRUE(pParameters != nullptr);

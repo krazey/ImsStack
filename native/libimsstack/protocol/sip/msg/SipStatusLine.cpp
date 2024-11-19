@@ -58,7 +58,7 @@ SipStatusLine::~SipStatusLine()
     }
 }
 
-SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipStatusLine::Encode(SIP_CHAR** ppCurrPos)
 {
     /*check for existence of version, status code and reason phrase*/
     if (m_pszStatusCode == SIP_NULL)

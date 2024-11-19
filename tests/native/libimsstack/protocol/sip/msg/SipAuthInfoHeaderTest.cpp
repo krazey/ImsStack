@@ -29,7 +29,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
+TEST_F(SipAuthInfoHeaderTest, DecodeAndEncode)
 {
     SipAuthInfoHeader* pHeader = reinterpret_cast<SipAuthInfoHeader*>(
             SipAuthInfoHeader::GetNewObj(SipHeaderBase::AUTHENTICATION_INFO, nullptr));
@@ -48,7 +48,7 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
 
     /* Empty object, fail */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     /* Single info, success */
     EXPECT_EQ(SIP_TRUE, pHeader->Decode("nextnonce=\"123456789abcde123456789abcde\"", 40));
@@ -69,7 +69,7 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
     pHeader->SipDelete();
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
 
     pCopyHeader->SipDelete();
 
@@ -95,7 +95,7 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
 
     pNmVl = pCopyHeader->GetAiInfoVal(0);
     ASSERT_TRUE(pNmVl != nullptr);

@@ -203,7 +203,7 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipUri::Encode(SIP_CHAR** ppCurrPos)
 {
     /* encoding of user info
        userinfo = ( user / telephone-subscriber ) [ ":" password ] "@"  */
@@ -271,8 +271,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
     }
     else
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "EncodeSipUri: Host value Missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Host value Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -616,7 +615,7 @@ SIP_BOOL SipAddrSpec::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
+SIP_BOOL SipAddrSpec::Encode(SIP_CHAR** ppCurrPos) const
 {
     if (m_pSipUri != SIP_NULL)
     {
@@ -632,9 +631,9 @@ SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
 
         SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
-        if (m_pSipUri->EncodeSipUri(ppCurrPos) == SIP_FALSE)
+        if (m_pSipUri->Encode(ppCurrPos) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Uri Encoding error", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipUri: Encoding error", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -645,7 +644,7 @@ SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
     }
     else
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No Uri set for encoding", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No URI for encoding", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return SIP_TRUE;
@@ -795,11 +794,11 @@ SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipNameAddr::Encode(SIP_CHAR** ppCurrPos)
 {
     if (m_pAddrSpec == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No Addr Spec", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No addr-spec", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -818,9 +817,9 @@ SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
 
     SipMsgUtil::Encode(*ppCurrPos, LEFT_ANGLE);
 
-    if (m_pAddrSpec->EncodeAddrSpec(ppCurrPos) == SIP_FALSE)
+    if (m_pAddrSpec->Encode(ppCurrPos) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Addr Spec failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encoding Addr Spec failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

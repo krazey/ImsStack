@@ -47,7 +47,7 @@ SIP_BOOL SipInfoBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipInfoBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipInfoBase::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     const SIP_CHAR* pszValue = GetValue();
 

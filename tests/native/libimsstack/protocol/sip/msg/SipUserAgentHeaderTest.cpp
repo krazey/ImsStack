@@ -49,7 +49,7 @@ TEST_F(SipUserAgentHeaderTest, Encode)
     pHeader->SipDelete();
 }
 
-TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipUserAgentHeaderTest, EncodeAndDecode)
 {
     SipUserAgentHeader* pHeader = reinterpret_cast<SipUserAgentHeader*>(
             SipUserAgentHeader::GetNewObj(SipHeaderBase::USER_AGENT, nullptr));
@@ -77,7 +77,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->IsValidHeader());
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("ims", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -98,7 +98,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("ims (comment message)", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -119,7 +119,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("(comment message)", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -140,7 +140,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("ims (comment message) 2.0", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -161,7 +161,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("ims () user-agent", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();

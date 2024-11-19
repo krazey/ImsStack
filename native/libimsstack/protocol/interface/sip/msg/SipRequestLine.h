@@ -28,14 +28,11 @@ private:
     SIP_CHAR* m_pszSipVersion;
 
 public:
-    /*Constructor*/
     SipRequestLine();
-
     SipRequestLine(const SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* pszSipVersion);
     SipRequestLine(const SipRequestLine& objHeader);
 
-    /*Function for encoding*/
-    SIP_BOOL EncodeRequestLine(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 

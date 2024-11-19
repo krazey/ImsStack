@@ -108,7 +108,7 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
     pHeaderList->SipDelete();
 }
 
-TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
+TEST_F(SipHeaderListTest, DecodeAndEncode)
 {
     SipHeaderList* pHeaderList = reinterpret_cast<SipHeaderList*>(
             SipHeaderList::GetNewListObj(SipHeaderBase::ALLOW, nullptr));
@@ -116,7 +116,8 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
 
     /* Allow empty header allowed, success */
     EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("", 0));
-    EXPECT_EQ(SIP_FALSE, pHeaderList->EncodeHdr(nullptr));
+    EXPECT_EQ(SIP_FALSE, pHeaderList->Encode(nullptr));
+
     AStringBuffer objBuffer(256);
     EXPECT_EQ(SIP_TRUE, pHeaderList->Encode(objBuffer, SIP_TRUE));
 
@@ -137,7 +138,7 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     SIP_CHAR* pBuff = &(aBuffer[0]);
 
     /* Normal Encode - single line, success */
-    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->Encode(&pBuff));
 
     EXPECT_STREQ("INVITE,ACK,UPDATE,REFER", &(aBuffer[0]));
 
@@ -146,7 +147,7 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
 
     /* multi line encode, success */
     EXPECT_EQ(SIP_TRUE,
-            pCopyHeaderList->EncodeHdr(&pBuff, SIP_FALSE,
+            pCopyHeaderList->Encode(&pBuff, SIP_FALSE,
                     (SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE |
                             SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)));
 
@@ -174,7 +175,7 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->Encode(&pBuff));
 
     pData = "nextnonce=\"abcdefgh\",nonce-count=\"3\"\r\n\
 Authentication-Info: nonce-count=\"2\"";

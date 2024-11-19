@@ -91,7 +91,7 @@ SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipAuthInfoHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
     {

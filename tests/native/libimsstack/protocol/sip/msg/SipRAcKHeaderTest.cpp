@@ -44,7 +44,7 @@ TEST_F(SipRAcKHeaderTest, IsValidHeader)
     pHeader->SipDelete();
 }
 
-TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipRAcKHeaderTest, EncodeAndDecode)
 {
     SipRAcKHeader* pHeader = reinterpret_cast<SipRAcKHeader*>(
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, nullptr));
@@ -58,7 +58,7 @@ TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
 
     AStringBuffer objBuffer(256);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
     EXPECT_EQ(SIP_FALSE, pHeader->Decode("2", 1));
@@ -78,7 +78,7 @@ TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pCopyHeader != nullptr);
     pHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("7183 1 INVITE", &(aBuffer[0]));
     EXPECT_STREQ("7183 1 INVITE", objBuffer.GetCharString());

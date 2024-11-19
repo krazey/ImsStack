@@ -29,7 +29,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipWarningHeaderTest, Encode)
 {
     SipWarningHeader* pHeader = reinterpret_cast<SipWarningHeader*>(
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
@@ -44,32 +44,32 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
     AStringBuffer objValue(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetWarnCode(99);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetWarnCode(1000);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetWarnCode(300);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetWarnAgent("Warn-Agent");
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetWarnText("Warn-Text");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("300 Warn-Agent Warn-Text", objValue.GetCharString());
     EXPECT_STREQ("300 Warn-Agent Warn-Text", &(aBuffer[0]));
@@ -89,7 +89,7 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("300 Warn-Agent \"Warn Text\"", objValue.GetCharString());
     EXPECT_STREQ("300 Warn-Agent \"Warn Text\"", &(aBuffer[0]));

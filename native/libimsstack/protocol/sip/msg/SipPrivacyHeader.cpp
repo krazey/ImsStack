@@ -74,7 +74,7 @@ SIP_BOOL SipPrivacyHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/
     return SIP_TRUE;
 }
 
-SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipPrivacyHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     SIP_UINT32 nCount = m_objPrivacyList.GetSize();
 

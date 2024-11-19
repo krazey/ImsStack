@@ -25,9 +25,10 @@ public:
     SipRequestDispositionHeader(const SipRequestDispositionHeader& objHeader);
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     static const SIP_CHAR* GetDirectiveString(SIP_UINT32 nIndex);
     inline static SIP_UINT16 GetDirectiveSize() { return MAX_DIRECTIVE_SIZE; }
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipRequestDispositionHeader();

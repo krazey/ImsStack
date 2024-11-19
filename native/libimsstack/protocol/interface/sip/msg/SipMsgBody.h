@@ -46,7 +46,7 @@ public:
     SipMIMEHdrs();
     SipMIMEHdrs(const SipMIMEHdrs& objMimeHdr);
 
-    SIP_BOOL EncodeMIMEHdrs(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 

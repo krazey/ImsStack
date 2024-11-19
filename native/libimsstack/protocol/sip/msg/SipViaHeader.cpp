@@ -110,7 +110,7 @@ SIP_BOOL SipViaHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipViaHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     /* Encoding of header value*/
     /*Encode sent protocol
@@ -118,7 +118,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     /*protocol name*/
     if (m_pszProtocolName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing Protocol ", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing protocol", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -130,7 +130,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     /*protocol-version*/
     if (m_pszProtocolVer == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing Protocol Version ", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing protocol version", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     SipPf_Strcpy(*ppCurrPos, m_pszProtocolVer);
@@ -141,7 +141,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     /*transport*/
     if (m_pszTransport == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing Transport ", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing transport protocol", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     SipPf_Strcpy(*ppCurrPos, m_pszTransport);
@@ -154,7 +154,7 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     /*sent-by = host [ COLON port ] */
     if (m_pszHost == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing Host ", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing host", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

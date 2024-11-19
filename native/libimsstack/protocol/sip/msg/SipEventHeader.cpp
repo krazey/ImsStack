@@ -78,7 +78,7 @@ SIP_BOOL SipEventHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) cons
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
+SIP_BOOL SipEventHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
     const SIP_CHAR* pszValue = GetValue();
     if (pszValue == SIP_NULL)
