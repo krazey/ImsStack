@@ -350,6 +350,7 @@
     <boolean name="ims.reg_contact_validation_bool" value="false"/>
     <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="ims.remove_old_sa_on_establishing_sa_bool" value="false"/>
+    <boolean name="ims.request_ims_pdn_without_mmtel_bool" value="false"/>
     <boolean name="ims.required_cdmaless_feature_tag_bool" value="false"/>
     <boolean name="ims.required_init_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
     <boolean name="ims.sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
