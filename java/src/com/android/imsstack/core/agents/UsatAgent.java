@@ -160,12 +160,7 @@ public class UsatAgent extends Handler implements UsatInterface {
     @Override
     public boolean isServiceAvailable(@Usat.ServiceType int serviceType) {
         byte[] ust = mSim.getUsimServiceTable();
-
-        if (ust != null) {
-            return isServiceAvailable(ust, serviceType);
-        }
-
-        return false;
+        return ust.length != 0 && isServiceAvailable(ust, serviceType);
     }
 
     @Override

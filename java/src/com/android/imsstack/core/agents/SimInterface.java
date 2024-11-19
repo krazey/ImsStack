@@ -81,9 +81,9 @@ public interface SimInterface extends IAgent {
     /**
      * Returns the USIM service table that contains a bit field of enabled services.
      *
-     * @return The value of USIM service table.
+     * @return The value of the USIM service table or an empty byte array if not available.
      */
-    byte[] getUsimServiceTable();
+    @NonNull byte[] getUsimServiceTable();
 
     /**
      * Returns the SMS center address.
