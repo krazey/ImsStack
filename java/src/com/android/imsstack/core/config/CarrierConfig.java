@@ -430,6 +430,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_periodic_location_discovery_method_int";
         public static final String KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT =
                 KEY_PREFIX + "call_periodic_location_discovery_timer_millis_int";
+        public static final String KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY =
+                KEY_PREFIX + "reject_code_require_temp_failure_int_array";
+        public static final String KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY =
+                KEY_PREFIX + "reject_code_require_perm_failure_int_array";
 
         private ImsEmergency() {}
     }

@@ -1097,6 +1097,10 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_P_EMERGENCY_INFO_HEADER_IN_INVIT
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX "reject_code_require_immediate_termination_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "reject_code_require_temp_failure_int_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "reject_code_require_perm_failure_int_array";
 
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
