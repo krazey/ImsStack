@@ -692,7 +692,7 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsg
         return SIP_FALSE;
     }
 
-    pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
 
     if (pStartPt >= pEndPt)
     {
@@ -706,7 +706,7 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsg
     SIP_BOOL bHdrEnd = SIP_FALSE;
     const SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
+    if (SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "no CRLF found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -788,7 +788,7 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsg
         pTempPos = SIP_NULL;
 
         /*find next terminating CRLF*/
-        if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
+        if (SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "no CRLF found", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -1002,7 +1002,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         return SIP_FALSE;
     }
 
-    pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
 
     if (pStartPt >= pEndPt)
     {
@@ -1016,7 +1016,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     SIP_BOOL bHdrEnd = SIP_FALSE;
     const SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
+    if (SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Incomplete message", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -1028,7 +1028,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
 
     /*Now determine for request line or status line*/
     /*Find the first token*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid start line", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -1095,7 +1095,7 @@ SIP_BOOL SipMessage::Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
     while ((pStartPt < pEndPt) && (bHdrEnd == SIP_FALSE))
     {
         /*find next terminating CRLF*/
-        if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
+        if (SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Incomplete message", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;

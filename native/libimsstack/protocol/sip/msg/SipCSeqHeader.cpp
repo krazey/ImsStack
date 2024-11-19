@@ -68,10 +68,10 @@ SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
 
     SipPf_Sprintf(szBuf, "%u", m_nSeq);
     SipPf_Strcpy(*ppCurrPos, szBuf);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
     SipPf_Strcpy(*ppCurrPos, m_pszMethod);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -92,13 +92,13 @@ SIP_BOOL SipCSeqHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipAbnfUtil::FindWhiteSpace(pStartPt, pEndPt, pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS missing in Cseq", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszSeq = SipCreateString(pStartPt, pTempPre);
+    SIP_CHAR* pszSeq = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (pszSeq == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation fail", SIP_ZERO, SIP_ZERO);
@@ -115,9 +115,9 @@ SIP_BOOL SipCSeqHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     delete[] pszSeq;
 
     pTempPre = pTempPre + SIP_ONE;
-    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempPre, pEndPt);
 
-    m_pszMethod = SipCreateString(pStartPt, pEndPt);
+    m_pszMethod = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);

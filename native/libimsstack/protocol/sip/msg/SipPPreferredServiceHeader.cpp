@@ -41,10 +41,10 @@ SIP_BOOL SipPPreferredServiceHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32
     }
 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SipSkipFwLWS(pStartPt, pEndPt);
+    SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
 
     // validate urn:urn-7 mandatory prefix
-    SIP_CHAR* pszTempString = SipCreateString(pStartPt, pStartPt + SIP_NINE);
+    SIP_CHAR* pszTempString = SipAbnfUtil::CreateString(pStartPt, pStartPt + SIP_NINE);
     if (SipPf_Stricmp("urn:urn-7:", pszTempString) != SIP_ZERO)
     {
         SIP_DEBUG_WARNING(
@@ -66,7 +66,8 @@ SIP_BOOL SipPPreferredServiceHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
     // Find First dot and validate SubService Id
-    if (SipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pTempCurr, pEndPt, pTempPre, pTempNext, SIP_DOT) ==
+            SIP_TRUE)
     {
         while (pTempNext <= pEndPt)
         {
@@ -99,7 +100,7 @@ SIP_BOOL SipPPreferredServiceHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32
     }
 
     // create the service and copy
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);

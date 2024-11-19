@@ -92,7 +92,7 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
             SipMsgUtil::Encode(*ppCurrPos, SIP_SEMI);
         }
         SipPf_Strcpy(*ppCurrPos, pszPrivacy);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     }
     return SIP_TRUE;
 }
@@ -123,12 +123,12 @@ SIP_BOOL SipPrivacyHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         const SIP_CHAR* pTempPos = SIP_NULL;
 
-        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_FALSE)
+        if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SIP_SEMI) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
 
-        SIP_CHAR* pszPrivacy = SipCreateString(pStartPt, pTempPos);
+        SIP_CHAR* pszPrivacy = SipAbnfUtil::CreateString(pStartPt, pTempPos);
         if (pszPrivacy == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -149,7 +149,7 @@ SIP_BOOL SipPrivacyHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         else
         {
             pStartPt = pTempPos + SIP_TWO;
-            pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
+            pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
             if (pStartPt > pEndPt)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No Parameter Present", SIP_ZERO, SIP_ZERO);

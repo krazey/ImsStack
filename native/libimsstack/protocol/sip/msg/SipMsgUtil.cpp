@@ -237,7 +237,7 @@ SIP_BOOL SipMsgUtil::IsValidAddress(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*Find the Start of header parameter*/
-    if (SipFindPostDelimiter(pStartPt, pEndPt, &pTempLoc, QMARK) == SIP_FALSE)
+    if (SipAbnfUtil::FindPostDelimiter(pStartPt, pEndPt, pTempLoc, QMARK) == SIP_FALSE)
     {
         return SIP_TRUE;
     }
@@ -245,7 +245,7 @@ SIP_BOOL SipMsgUtil::IsValidAddress(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen
     pStartPt = pTempLoc;
     pTempLoc = SIP_NULL;
 
-    if (SipFindPostDelimiter(pStartPt, pEndPt, &pTempLoc, PERCENT) == SIP_FALSE)
+    if (SipAbnfUtil::FindPostDelimiter(pStartPt, pEndPt, pTempLoc, PERCENT) == SIP_FALSE)
     {
         return SIP_TRUE;
     }

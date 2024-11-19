@@ -698,7 +698,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     {
         SIP_UINT32 uiDecLen = 0;
 
-        SipFindTerminatingCRLF(pucStartPt, pucEndPt, &pucTempPos, &bHdrEnd);
+        SipAbnfUtil::FindTerminatingCrlf(pucStartPt, pucEndPt, pucTempPos, bHdrEnd);
 
         uiDecLen = pucTempPos - pucStartPt + SIP_ONE;
 
@@ -730,7 +730,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     {
         SIP_UINT32 uiDecLen = 0;
 
-        SipFindTerminatingCRLF(pucStartPt, pucEndPt, &pucTempPos, &bHdrEnd);
+        SipAbnfUtil::FindTerminatingCrlf(pucStartPt, pucEndPt, pucTempPos, bHdrEnd);
 
         uiDecLen = pucTempPos - pucStartPt + SIP_ONE;
 

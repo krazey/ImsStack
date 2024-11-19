@@ -80,7 +80,7 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
     /* Encode Sip Version*/
     SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     /* Put a space */
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
@@ -88,14 +88,14 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
     /*Encode Status Code*/
     SipPf_Strcpy(*ppCurrPos, m_pszStatusCode);
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     /* Put a space */
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     SipPf_Strcpy(*ppCurrPos, m_pszReasonPhrase);
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -135,13 +135,13 @@ SIP_BOOL SipStatusLine::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempLoc = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszSipVersion = SipCreateString(pStartPt, pTempLoc);
+    m_pszSipVersion = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (m_pszSipVersion == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -152,13 +152,13 @@ SIP_BOOL SipStatusLine::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*Find the endpoint of status code*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszStatusCode = SipCreateString(pStartPt, pTempLoc);
+    m_pszStatusCode = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (m_pszStatusCode == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -167,7 +167,7 @@ SIP_BOOL SipStatusLine::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Update the start point to the start of reason phrase*/
     pStartPt = pTempLoc + SIP_TWO;
-    m_pszReasonPhrase = SipCreateString(pStartPt, pEndPt);
+    m_pszReasonPhrase = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszReasonPhrase == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No reason phrase present in response line",

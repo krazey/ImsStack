@@ -62,7 +62,7 @@ SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/
     objBuffer += m_pszWarnAgent;
     objBuffer += SPACE;
 
-    if (HasSpace(m_pszWarnText))
+    if (SipAbnfUtil::HasSpace(m_pszWarnText))
     {
         objBuffer += DQUOTE;
         objBuffer += m_pszWarnText;
@@ -89,28 +89,28 @@ SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     SipPf_Sprintf(szLen, "%u", m_nWarnCode);
 
     SipPf_Strcpy(*ppCurrPos, szLen);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     SipPf_Strcpy(*ppCurrPos, m_pszWarnAgent);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
-    if (HasSpace(m_pszWarnText))
+    if (SipAbnfUtil::HasSpace(m_pszWarnText))
     {
         SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
 
         SipPf_Strcpy(*ppCurrPos, m_pszWarnText);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
         SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
     }
     else
     {
         SipPf_Strcpy(*ppCurrPos, m_pszWarnText);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -137,13 +137,13 @@ SIP_BOOL SipWarningHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempLoc = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszWarnCode = SipCreateString(pStartPt, pTempLoc);
+    SIP_CHAR* pszWarnCode = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (pszWarnCode == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -162,13 +162,13 @@ SIP_BOOL SipWarningHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*Find the endpoint of Warn Agent*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszWarnAgent = SipCreateString(pStartPt, pTempLoc);
+    m_pszWarnAgent = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (m_pszWarnAgent == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -177,7 +177,7 @@ SIP_BOOL SipWarningHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Update the start point to the start of Warn text*/
     pStartPt = pTempLoc + SIP_TWO;
-    m_pszWarnText = SipCreateString(pStartPt, pEndPt);
+    m_pszWarnText = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszWarnText == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);

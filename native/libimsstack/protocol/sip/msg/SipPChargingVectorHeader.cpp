@@ -93,7 +93,8 @@ SIP_BOOL SipPChargingVectorHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 n
     const SIP_CHAR* pTempNext = SIP_NULL;
     /*Header value is the first node of SipParameterList
       and the other Node will contain SIP parameter*/
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {

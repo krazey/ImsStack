@@ -78,7 +78,7 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pszTimeVal);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     /*Encoding of Delay*/
     if (m_pszDelay != SIP_NULL)
@@ -86,7 +86,7 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
         SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
         SipPf_Strcpy(*ppCurrPos, m_pszDelay);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -113,12 +113,12 @@ SIP_BOOL SipTimeStampHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempPre = SIP_NULL;
     /*Find the LWS i.e. End of Transport*/
-    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipAbnfUtil::FindWhiteSpace(pStartPt, pEndPt, pTempPre) == SIP_FALSE)
     {
         pTempPre = pEndPt;
     }
 
-    m_pszTimeVal = SipCreateString(pStartPt, pTempPre);
+    m_pszTimeVal = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (m_pszTimeVal == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -129,8 +129,8 @@ SIP_BOOL SipTimeStampHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen
     {
         /*point to the start of the LWS*/
         pTempPre = pTempPre + SIP_ONE;
-        pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
-        m_pszDelay = SipCreateString(pStartPt, pEndPt);
+        pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempPre, pEndPt);
+        m_pszDelay = SipAbnfUtil::CreateString(pStartPt, pEndPt);
         if (m_pszDelay == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);

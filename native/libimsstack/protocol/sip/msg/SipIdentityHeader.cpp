@@ -85,19 +85,19 @@ SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     }
 
     SipPf_Strcpy(*ppCurrPos, m_pSignedIdentityDigest);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, SIP_SEMI);
 
     SipPf_Strcpy(*ppCurrPos, "info");
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, EQUAL);
 
     SipMsgUtil::Encode(*ppCurrPos, LEFT_ANGLE);
 
     SipPf_Strcpy(*ppCurrPos, m_pInfo);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     SipMsgUtil::Encode(*ppCurrPos, RIGHT_ANGLE);
 
@@ -117,12 +117,13 @@ SIP_BOOL SipIdentityHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_FALSE)
     {
         return SIP_FALSE;
     }
 
-    m_pSignedIdentityDigest = SipCreateString(pStartPt, pTempPre);
+    m_pSignedIdentityDigest = SipAbnfUtil::CreateString(pStartPt, pTempPre);
 
     if (m_pSignedIdentityDigest == SIP_NULL)
     {
@@ -133,7 +134,7 @@ SIP_BOOL SipIdentityHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempPre = SIP_NULL;
     pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, EQUAL) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, EQUAL) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -147,7 +148,7 @@ SIP_BOOL SipIdentityHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempPre = SIP_NULL;
     pTempNext = SIP_NULL;
 
-    if (SipFindPostDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_ANGLE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPostDelimiter(pStartPt, pEndPt, pTempPre, LEFT_ANGLE) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -155,12 +156,12 @@ SIP_BOOL SipIdentityHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempPre;
     pTempPre = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_ANGLE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPre, RIGHT_ANGLE) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
 
-    m_pInfo = SipCreateString(pStartPt, pTempPre);
+    m_pInfo = SipAbnfUtil::CreateString(pStartPt, pTempPre);
 
     if (m_pInfo == SIP_NULL)
     {
@@ -170,7 +171,8 @@ SIP_BOOL SipIdentityHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = pTempPre + SIP_TWO;
     pTempPre = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         return DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI);
     }

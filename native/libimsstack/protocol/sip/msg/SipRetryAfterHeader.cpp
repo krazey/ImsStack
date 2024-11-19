@@ -61,13 +61,13 @@ SIP_BOOL SipRetryAfterHeader::EncodeHdr(
     SipPf_Sprintf(szLen, "%u", m_nDeltaSec);
 
     SipPf_Strcpy(*ppCurrPos, szLen);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     if (m_pszComment != SIP_NULL)
     {
         SipMsgUtil::Encode(*ppCurrPos, LPARAN);
         SipPf_Strcpy(*ppCurrPos, m_pszComment);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
         SipMsgUtil::Encode(*ppCurrPos, RPARAN);
     }
 
@@ -101,7 +101,8 @@ SIP_BOOL SipRetryAfterHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         return SIP_FALSE;
     }
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if ((pCommentEnd == SIP_NULL) || ((pTempPre + 1) > pCommentEnd))
         {
@@ -132,7 +133,8 @@ SIP_BOOL SipRetryAfterHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         }
         else
         {
-            m_pszComment = SipCreateString(pCommentStart + SIP_ONE, pCommentEnd - SIP_ONE);
+            m_pszComment =
+                    SipAbnfUtil::CreateString(pCommentStart + SIP_ONE, pCommentEnd - SIP_ONE);
         }
 
         if (m_pszComment == SIP_NULL)
@@ -143,9 +145,9 @@ SIP_BOOL SipRetryAfterHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         pEndPt = pCommentStart - 1;
     }
 
-    pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
+    pEndPt = SipAbnfUtil::SkipWhiteSpaceFromRight(pStartPt, pEndPt);
     /*Now decode the delta sec value*/
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);

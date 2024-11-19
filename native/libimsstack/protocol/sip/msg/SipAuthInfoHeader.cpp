@@ -151,7 +151,7 @@ SIP_BOOL SipAuthInfoHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         const SIP_CHAR* pTempPos = SIP_NULL;
 
-        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
+        if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COMMA) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }

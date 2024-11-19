@@ -499,25 +499,25 @@ SIP_BOOL SipHeaders::Decode(
     /*Skip The LWS form the back*/
     /*Update the End point*/
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
+    pEndPt = SipAbnfUtil::SkipWhiteSpaceFromRight(pStartPt, pEndPt);
 
     const SIP_CHAR* pTempPos = SIP_NULL;
 
     /*Get the position previous to ":"*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "colon not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     const SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
-    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempNext, pEndPt);
 
     /*skip the WSP form back*/
-    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipAbnfUtil::SkipRightWhiteSpace(pStartPt, pTempPos);
 
     /*Create  the header name*/
-    *ppHdrName = SipCreateString(pStartPt, pTempPos);
+    *ppHdrName = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (*ppHdrName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -533,7 +533,7 @@ SIP_BOOL SipHeaders::Decode(
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Single value header %d appears more than once",
                 eHdrType, SIP_ZERO);
-        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        *ppHdrBody = SipAbnfUtil::CreateString(pTempNext, pEndPt);
         return SIP_FALSE;
     }
 
@@ -562,7 +562,7 @@ SIP_BOOL SipHeaders::Decode(
         }
 
         pUnknown->SetHeaderName(*ppHdrName);
-        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        *ppHdrBody = SipAbnfUtil::CreateString(pTempNext, pEndPt);
         if (*ppHdrBody == SIP_NULL)
         {
             pUnknown->SipDelete();
@@ -594,7 +594,7 @@ SIP_BOOL SipHeaders::Decode(
         /*Update the length for decoding*/
         nDecLen = pEndPt - pStartPt + SIP_ONE;
 
-        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        *ppHdrBody = SipAbnfUtil::CreateString(pTempNext, pEndPt);
 
         if (pHeader->Decode(pStartPt, nDecLen) == SIP_FALSE)
         {
@@ -622,7 +622,7 @@ SIP_BOOL SipHeaders::SipEncodeHdrName(
     }
 
     SipPf_Strcpy(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
-    SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
 
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
 
@@ -649,7 +649,7 @@ SIP_BOOL SipHeaders::SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgB
         SipPf_Strcpy(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
     }
 
-    SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, SPACE);
 

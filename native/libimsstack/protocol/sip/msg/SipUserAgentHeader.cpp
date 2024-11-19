@@ -91,7 +91,7 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
         }
         SIP_CHAR* pszVal = m_objProductList.GetAt(nIndex);
         SipPf_Strcpy(*ppCurrPos, pszVal);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -120,7 +120,7 @@ SIP_BOOL SipUserAgentHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen
             return SIP_FALSE;
         }
 
-        if (SipFindLWS(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
+        if (SipAbnfUtil::FindWhiteSpace(pStartPt, pEndPt, pTempPos) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
@@ -133,7 +133,7 @@ SIP_BOOL SipUserAgentHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen
             pTempPos = pCommentEnd;
         }
 
-        SIP_CHAR* pszUserAgent = SipCreateString(pStartPt, pTempPos);
+        SIP_CHAR* pszUserAgent = SipAbnfUtil::CreateString(pStartPt, pTempPos);
         if (pszUserAgent == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
@@ -154,7 +154,7 @@ SIP_BOOL SipUserAgentHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen
         else
         {
             pTempPos = pTempPos + SIP_ONE;
-            pStartPt = SipSkipFwLWS(pTempPos, pEndPt);
+            pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempPos, pEndPt);
             pTempPos = SIP_NULL;
         }
     }
