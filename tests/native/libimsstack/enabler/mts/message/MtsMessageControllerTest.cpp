@@ -39,6 +39,8 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+const LOCAL IMS_SINT32 MESSAGE_RESPONSE_WAIT_TIMER = 8000;
+
 namespace android
 {
 
@@ -1029,7 +1031,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     pMtsMessageController->PageMessageDeliveryFailed(IMS_NULL);
 }
 
-TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDeliveryFailed)
+TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsUserFailure)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
@@ -1064,7 +1066,51 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDeliveryFailed)
             GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
-    EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
+    EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_GENERIC, _, _)).Times(1);
+    pMtsMessageController->NotifyMoSms(
+            SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
+    pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
+}
+
+TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
+{
+    IMS_BOOL bEmergency = IMS_FALSE;
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SipAddress objSipAddress;
+    objSipAddress.Create(strTargetAddress);
+    AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
+    ImsList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
+    ImsVector<IMS_SINT32> objArray;
+    objArray.Push(SipStatusCode::SC_406);
+
+    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    pContent->Append((IMS_BYTE)0x02);                     // message reference
+    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtsService, GetICoreService(bEmergency))
+            .WillByDefault(Return(&objMockCoreService));
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(nullptr));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            .WillByDefault(Return(objArray));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
+
+    EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_FALLBACK, _, _)).Times(1);
     pMtsMessageController->NotifyMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);

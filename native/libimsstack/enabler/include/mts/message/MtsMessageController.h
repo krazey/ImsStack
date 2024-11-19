@@ -23,6 +23,7 @@
 #include "ITimer.h"
 #include "ImsActivityEx.h"
 #include "MtsDef.h"
+#include "helper/MtsTransactionTimerUpdateHelper.h"
 #include <functional>
 
 class IMessage;
@@ -126,6 +127,7 @@ private:
     ITimer* m_piRetryAfterTimer;
     std::function<void()> m_objRetryFunction;
     ByteArray* m_pRetryContent;
+    MtsTransactionTimerUpdateHelper m_objTimerUpdateHelper;
 };
 
 #endif
