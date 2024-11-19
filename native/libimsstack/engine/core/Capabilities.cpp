@@ -497,8 +497,7 @@ PUBLIC GLOBAL IMS_RESULT Capabilities::HandleOptionsRequestWithinDialog(
 
     if (!pCapabilities->ServerConnection_NotifyRequest(piSsc))
     {
-        delete pCapabilities;
-
+        pCapabilities->Destroy();
         IMS_TRACE_E(0, "Handling Capabilities failed", 0, 0, 0);
         return IMS_SUCCESS;
     }

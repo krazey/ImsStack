@@ -154,6 +154,7 @@ PUBLIC VIRTUAL void Session::Destroy()
 {
     CleanupOnDestroy();
     ServiceMethod::Destroy();
+    GetService()->DeregisterMethod(this);
 }
 
 PUBLIC VIRTUAL void Session::SetMessageMediator(IN IMessageMediator* piMediator)
@@ -5170,9 +5171,6 @@ void Session::CleanupOnDestroy()
 
     // 'Replaces' header handling ...
     RemoveSessionFromCallControlHelper();
-
-    // Clean up the resources
-    GetService()->DeregisterMethod(this);
 }
 
 PRIVATE
@@ -5882,7 +5880,7 @@ IMS_RESULT Session::HandleRequestToRefer(IN ISipServerConnection* piSsc)
 
     if (!pReference->ServerConnection_NotifyRequest(piSsc))
     {
-        delete pReference;
+        pReference->Destroy();
         Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Handling Reference failed", 0, 0, 0);

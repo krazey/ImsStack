@@ -100,6 +100,7 @@ PUBLIC VIRTUAL void Subscription::Destroy()
 {
     CleanupOnDestroy();
     ServiceMethod::Destroy();
+    GetService()->DeregisterMethod(this);
 }
 
 PUBLIC VIRTUAL void Subscription::SetMessageMediator(IN IMessageMediator* piMediator)
@@ -1004,8 +1005,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::ForkedDialog_NotifyRequest(IN ISipServe
 
     if (!m_objForkedSubscriptions.Append(pSubscription))
     {
-        delete pSubscription;
-
+        pSubscription->Destroy();
         GetService()->SendResponse(piSsc, SipStatusCode::SC_500);
         piSsc->Close();
         return IMS_FALSE;
@@ -1203,9 +1203,6 @@ void Subscription::CleanupOnDestroy()
     // CALLER_PREFERENCE_MANAGER
     ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->DestroyPreferenceWrapper(
             GetName());
-
-    // Clean up the resources
-    GetService()->DeregisterMethod(this);
 }
 
 PRIVATE
