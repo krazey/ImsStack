@@ -63,6 +63,9 @@
         <item value="5"/>
         <item value="6"/>
     </int-array>
+    <int-array name="ims.unavailable_features_in_limited_reg_int_array" num="1">
+        <item value="1"/>
+    </int-array>
     <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
         <item value="3"/>
         <item value="6"/>

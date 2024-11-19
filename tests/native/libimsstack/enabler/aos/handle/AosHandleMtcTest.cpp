@@ -56,7 +56,8 @@ using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)       \
     using Base::IsBlockForMobile; \
-    using Base::IsBlockForWifi;
+    using Base::IsBlockForWifi;   \
+    using Base::Request;
 
 class TestAosHandleMtc : public AosHandleMtc
 {
@@ -1304,6 +1305,105 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test4)
     RemoveFeature(ImsAosFeature::VIDEO);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldBlockMmtelFeatureIfRegModeChangedToLimitedWhileMmtelIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_MMTEL);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN
+    m_pAosHandleMtc->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_ADD);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_MMTEL));
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldUnblockMmtelFeatureIfRegModeChangedToNormalWhileMmtelIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_MMTEL);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+    AddBlock(AosHandle::BLOCK_LIMITED_MMTEL);
+
+    // WHEN
+    m_pAosHandleMtc->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_MMTEL));
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldBlockVideoFeatureIfRegModeChangedToLimitedWhileVideoIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN
+    m_pAosHandleMtc->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_ADD);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_VIDEO));
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldUnblockVideoFeatureIfRegModeChangedToNormalWhileVideoIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+    AddBlock(AosHandle::BLOCK_LIMITED_VIDEO);
+
+    // WHEN
+    m_pAosHandleMtc->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_VIDEO));
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldBlockTextFeatureIfRegModeChangedToLimitedWhileTextIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_TEXT);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN
+    m_pAosHandleMtc->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_ADD);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_TEXT));
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldUnblockTextFeatureIfRegModeChangedToNormalWhileTextIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_TEXT);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+    AddBlock(AosHandle::BLOCK_LIMITED_TEXT);
+
+    // WHEN
+    m_pAosHandleMtc->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_TEXT));
 }
 
 TEST_F(AosHandleMtcTest, CheckSuspended_WifiTest)

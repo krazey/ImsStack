@@ -639,6 +639,8 @@ void AosRegistration::SetMode(IN IMS_UINT32 nMode)
 {
     A_IMS_TRACE_I(REGID, "SetMode :: (%s)", AosProvider::GetLog()->RegModeToString(nMode), 0, 0);
     m_nRegMode = nMode;
+
+    UpdateModeToHandles();
 }
 
 PROTECTED
@@ -6236,6 +6238,19 @@ void AosRegistration::UpdateCallingNumberVerification()
             IMS_TRACE_I("Calling number verification is not supported", 0, 0, 0);
         }
     */
+}
+
+PRIVATE
+void AosRegistration::UpdateModeToHandles()
+{
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+
+    for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
+    {
+        IAosHandle* piHandle = objHandles.GetValueAt(i);
+        piHandle->Request(IAosHandle::TYPE_LIMITED_MODE,
+                (GetMode() == MODE_LIMITED) ? IAosHandle::STATE_ADD : IAosHandle::STATE_REMOVE);
+    }
 }
 
 PRIVATE

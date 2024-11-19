@@ -1198,6 +1198,41 @@ TEST_F(AosRegistrationTest, RegistrationModeIsUpdatedWhenSetMode)
     EXPECT_EQ(m_pAosRegistration->GetMode(), IAosRegistration::MODE_FAKE);
 }
 
+TEST_F(AosRegistrationTest, ShouldUpdateLimitedModeToHandleWhenSetModeToLimited)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosHandle, Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_ADD));
+
+    // WHEN
+    m_pAosRegistration->SetMode(IAosRegistration::MODE_LIMITED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldUpdateNormalModeToHandleWhenSetModeToNormal)
+{
+    // GIVEN
+    EXPECT_CALL(
+            m_objMockIAosHandle, Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE));
+
+    // WHEN
+    m_pAosRegistration->SetMode(IAosRegistration::MODE_NORMAL);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldUpdateNormalModeToHandleWhenSetModeToFake)
+{
+    // GIVEN
+    EXPECT_CALL(
+            m_objMockIAosHandle, Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE));
+
+    // WHEN
+    m_pAosRegistration->SetMode(IAosRegistration::MODE_FAKE);
+
+    // THEN: The GIVEN condition should be met.
+}
+
 TEST_F(AosRegistrationTest, GetPropertyReturnsEachPropertyValue)
 {
     IMS_UINT32 nValue;

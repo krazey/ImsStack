@@ -401,6 +401,8 @@
     </int-array>
     <int-array name="ims.supported_roaming_rats_int_array" num="0">
     </int-array>
+    <int-array name="ims.unavailable_features_in_limited_reg_int_array" num="0">
+    </int-array>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <pbundle name="ims.extra_reg_err_bundle">
         <boolean name="ims.extra_reg_err_code_as_failure_in_roaming_for_update_bool" value="false"/>

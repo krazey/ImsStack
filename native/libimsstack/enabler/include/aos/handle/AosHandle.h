@@ -166,7 +166,13 @@ public:
         BLOCK_VOPS = 0x80,
         BLOCK_SSAC = 0x100,
         BLOCK_NETWORK = 0x200,
-        BLOCK_3G = 0x400
+        BLOCK_3G = 0x400,
+
+        // Limited features
+        BLOCK_LIMITED_MMTEL = 0x800,
+        BLOCK_LIMITED_VIDEO = 0x1000,
+        BLOCK_LIMITED_TEXT = 0x2000,
+        BLOCK_LIMITED_SMS = 0x4000
     };
 
 protected:
@@ -191,6 +197,7 @@ protected:
     IMS_BOOL IsDataConnected();
     IMS_BOOL IsEmergencyService();
     IMS_BOOL IsRoaming() const;
+    IMS_BOOL IsFeatureUnavailableInLimitedReg(IN IMS_UINT32 nFeature) const;
 
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;

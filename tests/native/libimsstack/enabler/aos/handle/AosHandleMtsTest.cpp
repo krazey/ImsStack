@@ -39,7 +39,8 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)
+#define DECLARE_USING(Base) \
+    using Base::Request;
 
 class TestAosHandleMts : public AosHandleMts
 {
@@ -563,4 +564,37 @@ TEST_F(AosHandleMtsTest, Handle_Notify_Test3)
 
     Handle_Notify(ImsAosService::MTC, IMS_FALSE);
     EXPECT_FALSE(IsBlocked());
+}
+
+TEST_F(AosHandleMtsTest,
+        ShouldBlockSmsFeatureIfRegModeChangedToLimitedWhileSmsIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_SMS);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN
+    m_pAosHandleMts->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_ADD);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
+}
+
+TEST_F(AosHandleMtsTest,
+        ShouldUnblockSmsFeatureIfRegModeChangedToNormalWhileSmsIsUnavailableInLimitedReg)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_SMS);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+    AddBlock(AosHandle::BLOCK_LIMITED_SMS);
+
+    // WHEN
+    m_pAosHandleMts->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
 }

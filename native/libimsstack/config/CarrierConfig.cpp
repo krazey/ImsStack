@@ -795,6 +795,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATIO
         KEY_IMS_PREFIX "sub_err_code_for_stopping_by_expiration_time_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[] =
         KEY_IMS_PREFIX "supported_roaming_rats_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY[] =
+        KEY_IMS_PREFIX "unavailable_features_in_limited_reg_int_array";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_BUNDLE[] =
         KEY_IMS_PREFIX "extra_reg_err_bundle";

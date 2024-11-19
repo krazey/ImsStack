@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "AosReason.h"
+#include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ImsEventDef.h"
@@ -84,6 +85,7 @@ using ::testing::ReturnRef;
     using Base::IsHandleBlocked;                   \
     using Base::IsNetworkTypeMatchedToRat;         \
     using Base::IsRoaming;                         \
+    using Base::IsFeatureUnavailableInLimitedReg;  \
     using Base::IsSupportedNetworkType;            \
     using Base::IsSupportedNetworkTypeForCellular; \
     using Base::MsgToString;                       \
@@ -1731,9 +1733,29 @@ TEST_F(AosHandleTest, GetAosFeature_Test)
     EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_NONE), ImsAosFeature::NONE);
 }
 
-TEST_F(AosHandleTest, ShouldReturnTextFeatureIfTheBlockReasonForTextCapabilityIsGiven)
+TEST_F(AosHandleTest, ShouldReturnTextFeatureForTextCapabilityBlockReason)
 {
     EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_TEXT_CAPABILITY), ImsAosFeature::TEXT);
+}
+
+TEST_F(AosHandleTest, ShouldReturnMmtelFeatureForLimitedMmtelBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_MMTEL), ImsAosFeature::MMTEL);
+}
+
+TEST_F(AosHandleTest, ShouldReturnVideoFeatureForLimitedVideoBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_VIDEO), ImsAosFeature::VIDEO);
+}
+
+TEST_F(AosHandleTest, ShouldReturnTextFeatureForLimitedTextBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_TEXT), ImsAosFeature::TEXT);
+}
+
+TEST_F(AosHandleTest, ShouldReturnSmsFeatureForLimitedSmsBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_SMS), ImsAosFeature::SMSIP);
 }
 
 TEST_F(AosHandleTest, BackupAllBlocks_Test1)
@@ -4535,6 +4557,32 @@ TEST_F(AosHandleTest, SetCapabilityToTheGivenValue)
 
     // THEN
     EXPECT_TRUE(IsEqualCapabilities(m_pAosHandle->GetCapabilities(), objNewCapabilities));
+}
+
+TEST_F(AosHandleTest, ShouldReturnTrueIfTheUnavailableFeatureListContainsTheGivenFeature)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandle->IsFeatureUnavailableInLimitedReg(
+            CarrierConfig::Assets::REG_FEATURE_VIDEO));
+}
+
+TEST_F(AosHandleTest, ShouldReturnFalseIfTheUnavailableFeatureListNotContainTheGivenFeature)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandle->IsFeatureUnavailableInLimitedReg(
+            CarrierConfig::Assets::REG_FEATURE_MMTEL));
 }
 
 TEST_F(AosHandleTest, ProcessNetworkChanged_Test)

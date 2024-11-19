@@ -398,6 +398,7 @@ private:
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
     void UpdateCallingNumberVerification();
+    void UpdateModeToHandles();
     void NotifyTechnologyChangeFailed();
 
     IMS_BOOL IsErrorCodeExisted(

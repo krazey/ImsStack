@@ -49,6 +49,9 @@ protected:
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const override;
     void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked) override;
 
+    // IAosHandle
+    void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
+
 private:
     IMS_BOOL m_bMtcBlocked;
     IMS_UINT32 m_nSupportedRats;
