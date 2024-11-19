@@ -79,7 +79,7 @@ SIP_VOID SipRetryAfterHeader::SetComment(const SIP_CHAR* pszComment)
     SipMsgUtil::SetValue(pszComment, m_pszComment);
 }
 
-SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRetryAfterHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -137,8 +137,7 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDe
 
         if (m_pszComment == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pEndPt = pCommentStart - 1;
@@ -149,15 +148,14 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDe
     SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (SipPf_Atoi_Unsigned(pszValue, m_nDeltaSec) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:Retry After value is not valid",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Retry-After value is not valid", SIP_ZERO, SIP_ZERO);
         delete[] pszValue;
         return SIP_FALSE;
     }

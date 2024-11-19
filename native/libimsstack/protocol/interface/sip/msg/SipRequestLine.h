@@ -37,8 +37,7 @@ public:
     /*Function for encoding*/
     SIP_BOOL EncodeRequestLine(SIP_CHAR** ppCurrPos);
 
-    /*Function for decoding*/
-    SIP_BOOL DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     SIP_VOID SetMethod(const SIP_CHAR* pMethod);
     SIP_VOID SetSipVersion(const SIP_CHAR* pszVer);

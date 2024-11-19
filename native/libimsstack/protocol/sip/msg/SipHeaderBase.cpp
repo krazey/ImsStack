@@ -337,7 +337,7 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(
 
     if (m_pParameters == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -349,7 +349,7 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipHeaderBase::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -518,7 +518,7 @@ SIP_BOOL SipNameAddrHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*=
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipNameAddrHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -537,7 +537,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
             if (SetValue("*") == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(
-                        ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+                        ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
             }
             return SIP_TRUE;
@@ -549,7 +549,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
 
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, RIGHT_ANGLE) == SIP_TRUE)
     {
-        if (m_pNameAddr->DecodeNameAddr(pStartPt, pTempPre) == SIP_FALSE)
+        if (m_pNameAddr->Decode(pStartPt, pTempPre) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
@@ -583,7 +583,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
             return SIP_FALSE;
         }
 
-        if (pAddrSpec->DecodeAddrSpec(pStartPt, nLen) == SIP_FALSE)
+        if (pAddrSpec->Decode(pStartPt, nLen) == SIP_FALSE)
         {
             pAddrSpec->SipDelete();
             return SIP_FALSE;

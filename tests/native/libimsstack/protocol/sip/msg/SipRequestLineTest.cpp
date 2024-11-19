@@ -42,7 +42,7 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode("sip:user@host", 13));
 
     pRequestLine->SetReqUri(pSipAddrSpec);
     pSipAddrSpec->SipDelete();
@@ -50,7 +50,7 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode("sip:user@host", 13));
 
     /* Calling SetReqUri again to verify already set uri is deleted and assigned new uri */
     pRequestLine->SetReqUri(pSipAddrSpec);
@@ -101,7 +101,7 @@ TEST_F(SipRequestLineTest, EncodeRequestLine)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode("sip:user@host", 13));
 
     pRequestLine = new SipRequestLine("INVITE", pSipAddrSpec, SIP_SIPVER);
     ASSERT_TRUE(pRequestLine != nullptr);
@@ -113,23 +113,23 @@ TEST_F(SipRequestLineTest, EncodeRequestLine)
     pRequestLine->SipDelete();
 }
 
-TEST_F(SipRequestLineTest, DecodeRequestLine)
+TEST_F(SipRequestLineTest, Decode)
 {
     SipRequestLine* pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pRequestLine->DecodeRequestLine("", 0));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Decode("", 0));
 
-    EXPECT_EQ(SIP_FALSE, pRequestLine->DecodeRequestLine("MESSAGE", 7));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Decode("MESSAGE", 7));
 
-    EXPECT_EQ(SIP_FALSE, pRequestLine->DecodeRequestLine("MESSAGE sip:abcd", 16));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Decode("MESSAGE sip:abcd", 16));
 
     pRequestLine->SipDelete();
 
     pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pRequestLine->DecodeRequestLine("MESSAGE sip:abcd SIP/2.0", 24));
+    EXPECT_EQ(SIP_TRUE, pRequestLine->Decode("MESSAGE sip:abcd SIP/2.0", 24));
 
     pRequestLine->SipDelete();
 }

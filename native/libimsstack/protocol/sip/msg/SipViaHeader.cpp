@@ -231,7 +231,7 @@ SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* 
         pTempPre = SIP_NULL;
         if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_SQUARE) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid host[IPV6]", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pTempPre = pTempPre + SIP_ONE;
@@ -244,7 +244,7 @@ SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* 
     m_pszHost = SipCreateString(pStartPt, pTempPre);
     if (m_pszHost == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -255,7 +255,7 @@ SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* 
     }
     else if (m_eHostType == SipAddrSpec::HOST_IPV6)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid host[IPV6]", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -268,7 +268,7 @@ SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* 
         SIP_CHAR* pszPort = SipCreateString(pTempPre, pEndPt);
         if (pszPort == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         m_nPort = SipPf_Atoi(pszPort);
@@ -278,7 +278,7 @@ SIP_BOOL SipViaHeader::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipViaHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -295,15 +295,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Find First SLASH with Skipped LWS from both side*/
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Protocol Name Missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Protocol name missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     m_pszProtocolName = SipCreateString(pStartPt, pTempPre);
     if (m_pszProtocolName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -316,15 +314,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Find Next SLASH with Skipped LWS from both side*/
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Protocol Version Missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Protocol version missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     m_pszProtocolVer = SipCreateString(pStartPt, pTempPre);
     if (m_pszProtocolVer == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -336,15 +332,13 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Find the LWS i.e. End of Transport*/
     if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in Via", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS missing in Via", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     m_pszTransport = SipCreateString(pStartPt, pTempPre);
     if (m_pszTransport == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipViaHeader::DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -362,8 +356,8 @@ SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (DecodeHostPort(pStartPt, pTempPre) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Host Port Decoding Fail in via",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Host Port decoding fail in Via", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

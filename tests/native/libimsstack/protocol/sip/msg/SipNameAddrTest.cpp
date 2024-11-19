@@ -69,12 +69,12 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
     EXPECT_EQ(SIP_FALSE, pSipNameAddr->EncodeNameAddr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pSipNameAddr->Encode(objBuffer, SIP_FALSE));
 
-    EXPECT_EQ(SIP_FALSE, pSipNameAddr->DecodeNameAddr(nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE, pSipNameAddr->Decode(nullptr, nullptr));
 
     const SIP_CHAR* pNameAddress = "DisplayName <http://absoluteuri.addrspec";
     const SIP_CHAR* pEnd = pNameAddress + SipPf_Strlen(pNameAddress) - SIP_ONE;
 
-    EXPECT_EQ(SIP_TRUE, pSipNameAddr->DecodeNameAddr(pNameAddress, pEnd));
+    EXPECT_EQ(SIP_TRUE, pSipNameAddr->Decode(pNameAddress, pEnd));
 
     EXPECT_STREQ("DisplayName", pSipNameAddr->GetDisplayName());
 
@@ -90,7 +90,7 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
 
     pNameAddress = "<http://absoluteuri.addrspec";
     pEnd = pNameAddress + SipPf_Strlen(pNameAddress) - SIP_ONE;
-    EXPECT_EQ(SIP_TRUE, pSipNameAddr->DecodeNameAddr(pNameAddress, pEnd));
+    EXPECT_EQ(SIP_TRUE, pSipNameAddr->Decode(pNameAddress, pEnd));
 
     EXPECT_STREQ(nullptr, pSipNameAddr->GetDisplayName());
 
@@ -110,7 +110,7 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
 
     pNameAddress = "\"QuotedDispName\"<http://absoluteuri.addrspec";
     pEnd = pNameAddress + SipPf_Strlen(pNameAddress) - SIP_ONE;
-    EXPECT_EQ(SIP_TRUE, pSipNameAddr->DecodeNameAddr(pNameAddress, pEnd));
+    EXPECT_EQ(SIP_TRUE, pSipNameAddr->Decode(pNameAddress, pEnd));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);

@@ -81,7 +81,7 @@ SIP_VOID SipCSeqHeader::SetMethod(const SIP_CHAR* pszMethod)
     SipMsgUtil::SetValue(pszMethod, m_pszMethod);
 }
 
-SIP_BOOL SipCSeqHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipCSeqHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -101,13 +101,13 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pszSeq = SipCreateString(pStartPt, pTempPre);
     if (pszSeq == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (SipPf_Atoi_Unsigned(pszSeq, m_nSeq) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq Value", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq value", SIP_ZERO, SIP_ZERO);
         delete[] pszSeq;
         return SIP_FALSE;
     }

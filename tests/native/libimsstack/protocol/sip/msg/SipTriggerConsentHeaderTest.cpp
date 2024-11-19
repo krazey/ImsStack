@@ -127,7 +127,7 @@ TEST_F(SipTriggerConsentHeaderTest, EncodeHdr)
 
     /* Valid value */
     const SIP_CHAR* pValue = "sip:123@example.com";
-    pSipUri->DecodeSipUri(pValue, SipPf_Strlen(pValue));
+    pSipUri->Decode(pValue, SipPf_Strlen(pValue));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
@@ -165,20 +165,20 @@ TEST_F(SipTriggerConsentHeaderTest, Encode)
 
     /* Valid value */
     const SIP_CHAR* pValue = "sip:123@example.com";
-    pSipUri->DecodeSipUri(pValue, SipPf_Strlen(pValue));
+    pSipUri->Decode(pValue, SipPf_Strlen(pValue));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ(pValue, objBuffer.GetCharString());
     pHeader->SipDelete();
 }
 
-TEST_F(SipTriggerConsentHeaderTest, DecodeHdr)
+TEST_F(SipTriggerConsentHeaderTest, Decode)
 {
     SipTriggerConsentHeader* pHeader = reinterpret_cast<SipTriggerConsentHeader*>(
             SipTriggerConsentHeader::GetNewObj(SipHeaderBase::TRIGGER_CONSENT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty header not allowed */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(SIP_NULL, 0));
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
 
@@ -187,7 +187,7 @@ TEST_F(SipTriggerConsentHeaderTest, DecodeHdr)
 
     /* Invalid sipuri value*/
     EXPECT_EQ(SIP_FALSE,
-            pHeader->DecodeHdr(
+            pHeader->Decode(
                     "urii:value@example.com:[789", SipPf_Strlen("urii:value@example.com:[789")));
     pHeader->SipDelete();
 
@@ -195,7 +195,7 @@ TEST_F(SipTriggerConsentHeaderTest, DecodeHdr)
             SipTriggerConsentHeader::GetNewObj(SipHeaderBase::TRIGGER_CONSENT, nullptr));
     /* Decode invalid value */
     const SIP_CHAR* pValue = "sip:1111@example.com;=\"sip:friends@";
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipTriggerConsentHeader*>(
@@ -203,7 +203,7 @@ TEST_F(SipTriggerConsentHeaderTest, DecodeHdr)
 
     /* Decode valid value */
     pValue = "sip:1111@example.com;target-uri=\"sip:friends@example.com\"";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     const SIP_INT32 BUFFER_SIZE = 4096;
@@ -220,7 +220,7 @@ TEST_F(SipTriggerConsentHeaderTest, DecodeHdr)
             SipTriggerConsentHeader::GetNewObj(SipHeaderBase::TRIGGER_CONSENT, nullptr));
     /* Decode valid value */
     pValue = "<sip:1111@example.com>";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
     SipUri* pSipUri = pHeader->GetSipUri();
     ASSERT_TRUE(pSipUri != nullptr);
     pSipUri->SipDelete();

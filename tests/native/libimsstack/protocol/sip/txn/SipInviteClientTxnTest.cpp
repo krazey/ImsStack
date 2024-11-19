@@ -69,7 +69,7 @@ CSeq: 1 INVITE\r\n\
 
         SipHeaderBase* pRespRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
         ASSERT_TRUE(pRespRSeqHdr != nullptr);
-        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->DecodeHdr("2", 1));
+        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->Decode("2", 1));
 
         EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespRSeqHdr));
         pRespRSeqHdr->SipDelete();
@@ -322,8 +322,8 @@ RSeq: 2\r\n\
     const SIP_CHAR* pCallIdValue = "1332a-3c0d31@2409:192.168.35.156";
     const SIP_CHAR* pFromValue = "<sip:user@host>;tag=a89";
 
-    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, SipPf_Strlen(pFromValue)));
-    EXPECT_EQ(SIP_TRUE, pCallIDHdr->DecodeHdr(pCallIdValue, SipPf_Strlen(pCallIdValue)));
+    EXPECT_EQ(SIP_TRUE, pFromHdr->Decode(pFromValue, SipPf_Strlen(pFromValue)));
+    EXPECT_EQ(SIP_TRUE, pCallIDHdr->Decode(pCallIdValue, SipPf_Strlen(pCallIdValue)));
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pFromHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pCallIDHdr));
@@ -346,8 +346,8 @@ RSeq: 2\r\n\
     const SIP_CHAR* pToValue = "<sip:userA@host>;tag=one";
     pFromValue = "<sip:user@host>;tag=abcd";
 
-    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, SipPf_Strlen(pFromValue)));
-    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, SipPf_Strlen(pToValue)));
+    EXPECT_EQ(SIP_TRUE, pFromHdr->Decode(pFromValue, SipPf_Strlen(pFromValue)));
+    EXPECT_EQ(SIP_TRUE, pToHdr->Decode(pToValue, SipPf_Strlen(pToValue)));
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pFromHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
@@ -368,8 +368,8 @@ RSeq: 2\r\n\
     ASSERT_TRUE(pRSeqHdr != nullptr);
 
     pToValue = "<sip:userA@host>;tag=too";
-    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, SipPf_Strlen(pToValue)));
-    EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr("90", 1));
+    EXPECT_EQ(SIP_TRUE, pToHdr->Decode(pToValue, SipPf_Strlen(pToValue)));
+    EXPECT_EQ(SIP_TRUE, pRSeqHdr->Decode("90", 1));
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pRSeqHdr));

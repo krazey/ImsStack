@@ -253,75 +253,75 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     pMaxBreadthHeader->SipDelete();
 }
 
-TEST_F(SipIntegerHeaderTest, DecodeHdr)
+TEST_F(SipIntegerHeaderTest, Decode)
 {
     SipIntegerHeader* pContentLengthHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::CONTENT_LENGTH));
     ASSERT_TRUE(pContentLengthHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pContentLengthHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->DecodeHdr("20", 2));
+    EXPECT_EQ(SIP_FALSE, pContentLengthHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Decode("20", 2));
     EXPECT_EQ(20, pContentLengthHeader->GetValueInt());
     pContentLengthHeader->SipDelete();
     pContentLengthHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::CONTENT_LENGTH));
     ASSERT_TRUE(pContentLengthHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->DecodeHdr("0", 1));
+    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Decode("0", 1));
     EXPECT_EQ(0, pContentLengthHeader->GetValueInt());
 
     SipIntegerHeader* pExpiresHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::EXPIRES_SEC));
     ASSERT_TRUE(pExpiresHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pExpiresHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pExpiresHeader->DecodeHdr("120", 3));
+    EXPECT_EQ(SIP_FALSE, pExpiresHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pExpiresHeader->Decode("120", 3));
     EXPECT_EQ(120, pExpiresHeader->GetValueInt());
     pExpiresHeader->SipDelete();
 
     SipIntegerHeader* pMinExpiresHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MIN_EXPIRES));
     ASSERT_TRUE(pMinExpiresHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pMinExpiresHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pMinExpiresHeader->DecodeHdr("90", 2));
+    EXPECT_EQ(SIP_FALSE, pMinExpiresHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pMinExpiresHeader->Decode("90", 2));
     EXPECT_EQ(90, pMinExpiresHeader->GetValueInt());
     pMinExpiresHeader->SipDelete();
 
     SipIntegerHeader* pMaxForwardsHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS));
     ASSERT_TRUE(pMaxForwardsHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pMaxForwardsHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->DecodeHdr("250", 3));
+    EXPECT_EQ(SIP_FALSE, pMaxForwardsHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->Decode("250", 3));
     EXPECT_EQ(250, pMaxForwardsHeader->GetValueInt());
     pMaxForwardsHeader->SipDelete();
     pMaxForwardsHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS));
     ASSERT_TRUE(pMaxForwardsHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->DecodeHdr("256", 3));
+    EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->Decode("256", 3));
     pMaxForwardsHeader->SipDelete();
 
     SipIntegerHeader* pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));
     ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->DecodeHdr("0", 1));
-    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->DecodeHdr("999", 3));
+    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->Decode("0", 1));
+    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->Decode("999", 3));
     EXPECT_EQ(999, pGeoLocationErrorHeader->GetValueInt());
     pGeoLocationErrorHeader->SipDelete();
     pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));
     ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->DecodeHdr("10000", 5));
+    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->Decode("10000", 5));
     pGeoLocationErrorHeader->SipDelete();
 
     SipIntegerHeader* pMinSeHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MIN_SE));
     ASSERT_TRUE(pMinSeHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pMinSeHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pMinSeHeader->DecodeHdr("1400", 4));
+    EXPECT_EQ(SIP_FALSE, pMinSeHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pMinSeHeader->Decode("1400", 4));
     EXPECT_EQ(1400, pMinSeHeader->GetValueInt());
     pMinSeHeader->SipDelete();
     pMinSeHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MIN_SE));
     ASSERT_TRUE(pMinSeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMinSeHeader->DecodeHdr("1400;generic-param=generic-value", 32));
+    EXPECT_EQ(SIP_TRUE, pMinSeHeader->Decode("1400;generic-param=generic-value", 32));
     EXPECT_EQ(1, pMinSeHeader->GetParamCount());
     SipNameValue* pNameVal = pMinSeHeader->GetParam(0);
     EXPECT_STREQ("generic-param", pNameVal->m_pszName);
@@ -332,14 +332,14 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     SipIntegerHeader* pSessionExpiresHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::SESSION_EXPIRES));
     ASSERT_TRUE(pSessionExpiresHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pSessionExpiresHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->DecodeHdr("3600", 4));
+    EXPECT_EQ(SIP_FALSE, pSessionExpiresHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->Decode("3600", 4));
     EXPECT_EQ(3600, pSessionExpiresHeader->GetValueInt());
     pSessionExpiresHeader->SipDelete();
     pSessionExpiresHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::SESSION_EXPIRES));
     ASSERT_TRUE(pSessionExpiresHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->DecodeHdr("1600;refresher=uas", 18));
+    EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->Decode("1600;refresher=uas", 18));
     EXPECT_EQ(1, pSessionExpiresHeader->GetParamCount());
     pNameVal = pSessionExpiresHeader->GetParam(0);
     EXPECT_STREQ("refresher", pNameVal->m_pszName);
@@ -350,16 +350,16 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     SipIntegerHeader* pFlowTimerHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::FLOW_TIMER));
     ASSERT_TRUE(pFlowTimerHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pFlowTimerHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pFlowTimerHeader->DecodeHdr("8", 1));
+    EXPECT_EQ(SIP_FALSE, pFlowTimerHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pFlowTimerHeader->Decode("8", 1));
     EXPECT_EQ(8, pFlowTimerHeader->GetValueInt());
     pFlowTimerHeader->SipDelete();
 
     SipIntegerHeader* pMaxBreadthHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_BREADTH));
     ASSERT_TRUE(pMaxBreadthHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pMaxBreadthHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_TRUE, pMaxBreadthHeader->DecodeHdr("13", 2));
+    EXPECT_EQ(SIP_FALSE, pMaxBreadthHeader->Decode("", 0));
+    EXPECT_EQ(SIP_TRUE, pMaxBreadthHeader->Decode("13", 2));
     EXPECT_EQ(13, pMaxBreadthHeader->GetValueInt());
     pMaxBreadthHeader->SipDelete();
 }

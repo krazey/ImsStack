@@ -192,7 +192,7 @@ SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 nIndex)
     return pHdr;
 }
 
-SIP_BOOL SipHeaderList::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipHeaderList::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -205,20 +205,20 @@ SIP_BOOL SipHeaderList::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SipHeaderBase* pHdrBase = GetListObj();
         if (pHdrBase == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pHdrBase->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+        if (pHdrBase->Decode(pStartPt, nDecLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr Decoding Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Header decoding failed", SIP_ZERO, SIP_ZERO);
             pHdrBase->SipDelete();
             return SIP_FALSE;
         }
 
         if (AddHeader(pHdrBase) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list failed", SIP_ZERO, SIP_ZERO);
             pHdrBase->SipDelete();
             return SIP_FALSE;
         }
@@ -242,21 +242,21 @@ SIP_BOOL SipHeaderList::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SipHeaderBase* pHdrBase = GetListObj();
         if (pHdrBase == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         SIP_UINT32 nLen = pTempPre - pStartPt + SIP_ONE;
-        if (pHdrBase->DecodeHdr(pStartPt, nLen) == SIP_FALSE)
+        if (pHdrBase->Decode(pStartPt, nLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr Decoding Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Header decoding failed", SIP_ZERO, SIP_ZERO);
             pHdrBase->SipDelete();
             return SIP_FALSE;
         }
 
         if (AddHeader(pHdrBase) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list failed", SIP_ZERO, SIP_ZERO);
             pHdrBase->SipDelete();
             return SIP_FALSE;
         }

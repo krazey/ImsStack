@@ -61,8 +61,6 @@ public:
 
     SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const override;
 
-    SIP_BOOL DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
-
     SIP_VOID SetUser(const SIP_CHAR* pszUser);
 
     SIP_VOID SetPassword(const SIP_CHAR* pszPass);
@@ -110,7 +108,7 @@ public:
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
     SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
-    SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     static const SIP_CHAR* GetSchemeString(UriType eUriType);
 };
@@ -144,8 +142,7 @@ public:
     /*Function for encoding*/
     SIP_BOOL EncodeAddrSpec(SIP_CHAR** ppCurrPos) const;
 
-    /*Function for decoding*/
-    SIP_BOOL DecodeAddrSpec(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     /*function for getting the header type*/
     inline SipUri::UriType GetUriScheme() const { return m_eUriType; }
 
@@ -179,8 +176,7 @@ public:
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
     SIP_BOOL EncodeNameAddr(SIP_CHAR** ppCurrPos);
 
-    /*Function for decoding*/
-    SIP_BOOL DecodeNameAddr(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
     SipAddrSpec* GetAddrSpec();
 

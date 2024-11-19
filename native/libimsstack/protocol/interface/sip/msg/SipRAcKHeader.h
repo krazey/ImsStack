@@ -40,7 +40,7 @@ public:
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetMethod(const SIP_CHAR* pszMethod);
 

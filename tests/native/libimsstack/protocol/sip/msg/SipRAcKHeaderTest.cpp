@@ -60,18 +60,18 @@ TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
 
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("2", 1));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("2 ", 2));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(" 2", 2));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("INVITE", 6));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(" INVITE", 7));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("99 INVITE", 9));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(" 99 INVITE", 10));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("212 7", 5));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("212 7 ", 6));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("2", 1));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("2 ", 2));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(" 2", 2));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("INVITE", 6));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(" INVITE", 7));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("99 INVITE", 9));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(" 99 INVITE", 10));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("212 7", 5));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("212 7 ", 6));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("7183 1 INVITE", 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("7183 1 INVITE", 13));
 
     SipRAcKHeader* pCopyHeader = reinterpret_cast<SipRAcKHeader*>(
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, pHeader));

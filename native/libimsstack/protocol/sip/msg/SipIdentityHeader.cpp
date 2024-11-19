@@ -104,7 +104,7 @@ SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipIdentityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipIdentityHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {

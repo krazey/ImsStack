@@ -80,12 +80,11 @@ SIP_BOOL SipPChargingVectorHeader::EncodeHdr(
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipPChargingVectorHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPChargingVectorHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "SipPChargingVectorHeader::DecodeHdr", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -98,9 +97,8 @@ SIP_BOOL SipPChargingVectorHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT3
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipPChargingVectorHeader::DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO,
-                    SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Header parameters decoding failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pEndPt = pTempPre;
@@ -110,23 +108,20 @@ SIP_BOOL SipPChargingVectorHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT3
     m_pChargingVectorList = new SipNameValue();
     if (m_pChargingVectorList == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipAuthInfoHeader::DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (m_pChargingVectorList->Decode(pStartPt, pEndPt) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name value decoding failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     // charge vector should be icid-value
     if ((GetHdrType() == SipHeaderBase::P_CHARGING_VECTOR) &&
             (SipPf_Stricmp("icid-value", m_pChargingVectorList->m_pszName) != SIP_ZERO))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid header value", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

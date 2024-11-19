@@ -29,9 +29,9 @@ SipReferSubHeader::SipReferSubHeader(const SipReferSubHeader& objHeader) :
 
 SipReferSubHeader::~SipReferSubHeader() {}
 
-SIP_BOOL SipReferSubHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipReferSubHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+    if (SipHeaderBase::Decode(pStartPt, nDecLen) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -41,8 +41,8 @@ SIP_BOOL SipReferSubHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     if ((pszValue != SIP_NULL) && (SipPf_Stricmp(pszValue, "true") != SIP_ZERO) &&
             (SipPf_Stricmp(pszValue, "false") != SIP_ZERO))
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "Invalid Only true or false allowed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid value, only true or false allowed",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

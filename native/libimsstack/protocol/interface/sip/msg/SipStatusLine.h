@@ -44,14 +44,12 @@ public:
     /*Function for encoding*/
     SIP_BOOL EncodeStatusLine(SIP_CHAR** ppCurrPos);
 
-    /*Function for decoding*/
-    SIP_BOOL DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     SIP_VOID SetStatusCode(const SIP_CHAR* pszStatusCode);
     SIP_VOID SetSipVersion(const SIP_CHAR* pszVer);
     SIP_VOID SetReasonPhrase(const SIP_CHAR* pszReasonPhrase);
 
-    /*Get methods*/
     inline const SIP_CHAR* GetStatusCode() const { return m_pszStatusCode; }
 
     SIP_BOOL GetStatusCode(SIP_INT16* pnStatusCode) const;

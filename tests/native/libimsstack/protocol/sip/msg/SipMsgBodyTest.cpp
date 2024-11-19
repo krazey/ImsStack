@@ -110,7 +110,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     SipContentTypeHeader* pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("multipart/mixed;boundary=abcxz", 30));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->Decode("multipart/mixed;boundary=abcxz", 30));
     EXPECT_EQ(SIP_TRUE, pMessageBodyLevel1->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 
@@ -122,7 +122,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("application/test;boundary=12345", 31));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->Decode("application/test;boundary=12345", 31));
     EXPECT_EQ(SIP_TRUE, pMessageBodyLevel2->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 
@@ -239,7 +239,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     SipContentTypeHeader* pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("multipart/mixed;boundary=abcxz", 30));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->Decode("multipart/mixed;boundary=abcxz", 30));
     EXPECT_EQ(SIP_TRUE, pMessageBody->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 
@@ -249,7 +249,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("application/sdp", 15));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->Decode("application/sdp", 15));
     EXPECT_EQ(SIP_TRUE, pBody1->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 

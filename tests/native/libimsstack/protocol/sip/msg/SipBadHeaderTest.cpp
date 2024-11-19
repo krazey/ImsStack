@@ -62,12 +62,12 @@ TEST_F(SipBadHeaderTest, EncodeHdr)
     pHeader->SipDelete();
 }
 
-TEST_F(SipBadHeaderTest, DecodeHdr)
+TEST_F(SipBadHeaderTest, Decode)
 {
     SipBadHeader* pHeader = new SipBadHeader();
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(SIP_NULL, 0));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pHeader->SipDelete();

@@ -97,7 +97,7 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUserAgentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipUserAgentHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -136,16 +136,14 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDec
         SIP_CHAR* pszUserAgent = SipCreateString(pStartPt, pTempPos);
         if (pszUserAgent == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Put the value into list*/
         if (m_objProductList.Add(pszUserAgent) < SIP_ZERO)
         {
             delete[] pszUserAgent;
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Adding in list failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 

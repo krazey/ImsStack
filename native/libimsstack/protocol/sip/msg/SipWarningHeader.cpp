@@ -126,7 +126,7 @@ SIP_VOID SipWarningHeader::SetWarnText(const SIP_CHAR* pszWarnText)
     SipMsgUtil::SetValue(pszWarnText, m_pszWarnText);
 }
 
-SIP_BOOL SipWarningHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipWarningHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -139,15 +139,14 @@ SIP_BOOL SipWarningHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
 
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Space Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pszWarnCode = SipCreateString(pStartPt, pTempLoc);
     if (pszWarnCode == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -155,8 +154,7 @@ SIP_BOOL SipWarningHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     delete[] pszWarnCode;
     if ((m_nWarnCode < MIN_WARNCODE) || (m_nWarnCode > MAX_WARNCODE))
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Warn code Value is not valid", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Warn code value is not valid", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -166,15 +164,14 @@ SIP_BOOL SipWarningHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     /*Find the endpoint of Warn Agent*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Space Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     m_pszWarnAgent = SipCreateString(pStartPt, pTempLoc);
     if (m_pszWarnAgent == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -183,8 +180,7 @@ SIP_BOOL SipWarningHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     m_pszWarnText = SipCreateString(pStartPt, pEndPt);
     if (m_pszWarnText == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

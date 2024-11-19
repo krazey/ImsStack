@@ -127,15 +127,15 @@ TEST_F(SipNameAddrHeaderTest, EncodeHdr)
     pHeader = nullptr;
 }
 
-TEST_F(SipNameAddrHeaderTest, DecodeHdr)
+TEST_F(SipNameAddrHeaderTest, Decode)
 {
     SipNameAddrHeader* pHeader = reinterpret_cast<SipNameAddrHeader*>(
             SipNameAddrHeader::GetNewObj(SipHeaderBase::CONTACT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(nullptr, 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(nullptr, 0));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("*", 1));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("*", 1));
     EXPECT_STREQ("*", pHeader->GetValue());
     EXPECT_EQ(0, pHeader->GetParamCount());
 
@@ -146,7 +146,7 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
             SipNameAddrHeader::GetNewObj(SipHeaderBase::FROM, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* Only Value without display name */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("www.absolute-uri.com/abcd", 25));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("www.absolute-uri.com/abcd", 25));
     SipNameAddr* pNameAddress = pHeader->GetNameAddr();
     EXPECT_TRUE(pNameAddress->GetDisplayName() == nullptr);
     SipAddrSpec* pAddressSpec = pNameAddress->GetAddrSpec();
@@ -165,7 +165,7 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipNameAddrHeader*>(
             SipNameAddrHeader::GetNewObj(SipHeaderBase::FROM, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("DisplayName <www.absolute-uri.com/abcd>", 39));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("DisplayName <www.absolute-uri.com/abcd>", 39));
     pNameAddress = pHeader->GetNameAddr();
     EXPECT_STREQ("DisplayName", pNameAddress->GetDisplayName());
     pAddressSpec = pNameAddress->GetAddrSpec();
@@ -185,8 +185,8 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
             SipNameAddrHeader::GetNewObj(SipHeaderBase::FROM, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr("DisplayName <www.absolute-uri.com/abcd>;tag=tag-value", 53));
+    EXPECT_EQ(
+            SIP_TRUE, pHeader->Decode("DisplayName <www.absolute-uri.com/abcd>;tag=tag-value", 53));
     pNameAddress = pHeader->GetNameAddr();
     EXPECT_STREQ("DisplayName", pNameAddress->GetDisplayName());
     pAddressSpec = pNameAddress->GetAddrSpec();
@@ -207,7 +207,7 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
             SipNameAddrHeader::GetNewObj(SipHeaderBase::FROM, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("www.absolute-uri.com/abcd;param-name=param-value", 48));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("www.absolute-uri.com/abcd;param-name=param-value", 48));
     pNameAddress = pHeader->GetNameAddr();
     EXPECT_TRUE(pNameAddress->GetDisplayName() == nullptr);
     pAddressSpec = pNameAddress->GetAddrSpec();

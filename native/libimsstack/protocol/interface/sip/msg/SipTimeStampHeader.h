@@ -41,16 +41,12 @@ public:
     /*Function for encoding of headers*/
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetTimeVal(const SIP_CHAR* pszTimeVal);
     SIP_VOID SetDelay(const SIP_CHAR* pszDelay);
 
-    /*Gets */
     inline const SIP_CHAR* GetTimeVal() const { return m_pszTimeVal; }
-
-    /*Gets */
     inline const SIP_CHAR* GetDelay() const { return m_pszDelay; }
     inline SIP_BOOL IsValidHeader() const override
     {

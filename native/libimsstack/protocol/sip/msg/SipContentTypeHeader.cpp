@@ -119,7 +119,7 @@ SIP_CHAR* SipContentTypeHeader::GetBoundary()
     return pszStripDquoteVal;
 }
 
-SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipContentTypeHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -140,7 +140,7 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
     m_pszMType = SipCreateString(pStartPt, pTempPre);
     if (m_pszMType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -156,7 +156,7 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nD
     m_pszMSubType = SipCreateString(pStartPt, pTempPre);
     if (m_pszMSubType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

@@ -88,7 +88,7 @@ SIP_BOOL SipUnknownHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUnknownHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipUnknownHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     (void)pStartPt;
     (void)nDecLen;

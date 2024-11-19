@@ -64,7 +64,7 @@ CSeq: 1 INVITE\r\n\
 
         SipHeaderBase* pRespRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
         ASSERT_TRUE(pRespRSeqHdr != nullptr);
-        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->DecodeHdr("2", 1));
+        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->Decode("2", 1));
 
         EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespRSeqHdr));
         pRespRSeqHdr->SipDelete();
