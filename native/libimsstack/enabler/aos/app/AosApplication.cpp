@@ -2165,7 +2165,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK)
     {
         PerformRatBlockActions(IMS_TRUE);
-        NotifyDeregistered(AosReasonCode::RAT_BLOCK);
+
+        /*
+         * (b/379769225) Change the reason from RAT_BLOCK to PLMN_BLOCK.
+         * Original code:
+         *   NotifyDeregistered(AosReasonCode::RAT_BLOCK);
+         */
+        NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
         return;
     }
 
@@ -2385,7 +2391,14 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
 
 PROTECTED VIRTUAL void AosApplication::ProcessRatBlockTimerExpired()
 {
-    NotifyDeregistered(AosReasonCode::CLEAR_RAT_BLOCKS);
+    /*
+     * (b/379769225) Do not clear RAT blocks upon TIMER_RAT_BLOCK expiry
+     * This logic is left in place for potential future use.
+     *
+     * Original code:
+     *   NotifyDeregistered(AosReasonCode::CLEAR_RAT_BLOCKS);
+     */
+
     m_pConnector->Stop();
     PerformRatBlockActions(IMS_FALSE);
 }
