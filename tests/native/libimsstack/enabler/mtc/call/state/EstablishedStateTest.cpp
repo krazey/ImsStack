@@ -893,6 +893,20 @@ TEST_F(EstablishedStateTest, HoldInvokesSendHeldWithAudioDirectionActive)
     pEstablishedState->Hold(objMediaInfo);
 }
 
+TEST_F(EstablishedStateTest, HoldInvokesHoldFailed)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED))
+            .WillByDefault(Return(IMS_FALSE));
+
+    objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
+    MediaInfo objNewMediaInfo;
+    objNewMediaInfo.eAudioDirection = DIRECTION_SEND;
+    EXPECT_CALL(objUiNotifier, SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED)));
+
+    pEstablishedState->Hold(objNewMediaInfo);
+}
+
 TEST_F(EstablishedStateTest, HoldInvokesHandleUpdate)
 {
     ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
@@ -922,6 +936,20 @@ TEST_F(EstablishedStateTest, ResumePushesPendingOperation)
 
     pEstablishedState->Resume(objMediaInfo);
     pEstablishedState->Resume(objMediaInfo);
+}
+
+TEST_F(EstablishedStateTest, ResumeInvokesResumeFailed)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED))
+            .WillByDefault(Return(IMS_FALSE));
+
+    objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
+    MediaInfo objNewMediaInfo;
+    objNewMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    EXPECT_CALL(objUiNotifier, SendResumeFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED)));
+
+    pEstablishedState->Resume(objNewMediaInfo);
 }
 
 TEST_F(EstablishedStateTest, ResumeInvokesHandleUpdate)

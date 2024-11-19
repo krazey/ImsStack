@@ -43,7 +43,6 @@ public:
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
     inline void SetPendingUpdate() { m_bHasPendingUpdate = IMS_TRUE; }
-    MediaInfo GetModifiedMediaInfoWithOriginalAudioDir() const;
 
     IMS_BOOL IsHeld() const;
     IMS_BOOL IsHeldBy() const;
@@ -61,7 +60,12 @@ public:
      */
     IMS_BOOL IsModified() const;
     IMS_BOOL IsDowngraded() const;
+    MediaInfo GetModifiedMediaInfoWithOriginalAudioDir() const;
     inline IMS_BOOL HasPendingUpdate() const { return m_bHasPendingUpdate; }
+    static IMS_BOOL IsValidHoldDirection(
+            IN IMS_SINT32 eCurrentAudioDir, IN IMS_SINT32 eTargetAudioDir);
+    static IMS_BOOL IsValidResumeDirection(
+            IN IMS_SINT32 eCurrentAudioDir, IN IMS_SINT32 eTargetAudioDir);
 
 private:
     // This returns the original CallType before this update is successfully completed.

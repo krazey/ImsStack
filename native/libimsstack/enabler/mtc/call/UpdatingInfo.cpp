@@ -237,6 +237,34 @@ MediaInfo UpdatingInfo::GetModifiedMediaInfoWithOriginalAudioDir() const
     return objInfoForUpdatedNotiying;
 }
 
+PUBLIC GLOBAL IMS_BOOL UpdatingInfo::IsValidHoldDirection(
+        IN IMS_SINT32 eCurrentAudioDir, IN IMS_SINT32 eTargetAudioDir)
+{
+    if ((eTargetAudioDir == DIRECTION_SEND && eCurrentAudioDir == DIRECTION_RECEIVE) ||
+            (eTargetAudioDir == DIRECTION_INACTIVE && eCurrentAudioDir == DIRECTION_SEND_RECEIVE))
+    {
+        IMS_TRACE_E(0, "hold race condition happened", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
+PUBLIC GLOBAL IMS_BOOL UpdatingInfo::IsValidResumeDirection(
+        IN IMS_SINT32 eCurrentAudioDir, IN IMS_SINT32 eTargetAudioDir)
+{
+    // If the AP IMS has a conventional unhold feature(b/364186357) in the future,
+    // A first condition below has to be modified.
+    if ((eTargetAudioDir == DIRECTION_SEND_RECEIVE && eCurrentAudioDir == DIRECTION_INACTIVE) ||
+            (eTargetAudioDir == DIRECTION_RECEIVE && eCurrentAudioDir == DIRECTION_SEND))
+    {
+        IMS_TRACE_E(0, "resume race condition happened", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
 PRIVATE
 CallType UpdatingInfo::GetCurrentCallType() const
 {
