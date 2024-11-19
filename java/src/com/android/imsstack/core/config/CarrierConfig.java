@@ -731,6 +731,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_local_ringback_tone_with_180_response_int";
         public static final String KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT =
                 KEY_PREFIX + "eps_fallback_watchdog_time_millis_int";
+        public static final String KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL =
+                KEY_PREFIX + "eps_fallback_trigger_by_rrc_reject_wait_time_bool";
         public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =
                 KEY_PREFIX + "send_udp_keep_alive_interval_time_millis_int";
         public static final String KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT =

@@ -488,10 +488,7 @@ CallStateName IdleState::ContinueStartUssi()
 
 IMS_BOOL IdleState::IsEpsFallbackRequired(IN const CallReasonInfo& objReason) const
 {
-    if (m_objContext.GetCallInfo().ePeerType == PeerType::MT ||
-            !EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) ||
-            !m_objContext.GetService().IsNr())
-
+    if (m_objContext.GetCallInfo().ePeerType != PeerType::MO || !m_objContext.GetService().IsNr())
     {
         return IMS_FALSE;
     }
@@ -500,15 +497,18 @@ IMS_BOOL IdleState::IsEpsFallbackRequired(IN const CallReasonInfo& objReason) co
     {
         return IMS_TRUE;
     }
-
-    const IMS_UINT32 nWaitTimeMillis = objReason.nExtraCode;
-    const IMS_UINT32 nTimerVzw = m_objContext.GetConfigurationProxy().GetInt(
-            ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT);
-    if (objReason.nCode == CODE_INTERNAL_RRC_REJECT && nWaitTimeMillis >= nTimerVzw)
+    else if (objReason.nCode == CODE_INTERNAL_RRC_REJECT &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL))
     {
-        return IMS_TRUE;
-    }
+        const IMS_UINT32 nRrcRejectWaitTimeMillis = objReason.nExtraCode;
+        const IMS_UINT32 nMoCallRequestTimeoutMillis = m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT);
+        IMS_TRACE_D("RRC reject wait time: %d, MO call request timeout duration: %d",
+                nRrcRejectWaitTimeMillis, nMoCallRequestTimeoutMillis, 0);
 
+        return nRrcRejectWaitTimeMillis >= nMoCallRequestTimeoutMillis;
+    }
     return IMS_FALSE;
 }
 
