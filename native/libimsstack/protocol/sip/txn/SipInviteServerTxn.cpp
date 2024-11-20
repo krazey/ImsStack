@@ -250,15 +250,15 @@ static SIP_BOOL ProceedingState_Send2xxResponse(SipTxn* pTxn, SIP_VOID* pvData, 
     pTxn->InitRetransmissionInfo();
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_H);
+    SIP_UINT32 nDurationTL = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_L);
 
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
-    if (pTxn->StartTxnTimer(SipTxn::TIMER_H, nDurationTH, pnError) != SIP_FALSE)
+    if (pTxn->StartTxnTimer(SipTxn::TIMER_L, nDurationTL, pnError) != SIP_FALSE)
     {
         pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
-        pTxn->SetMaxDuration(nDurationTH);
-        pTxn->IncreaseDurationExpired(nDurationTH);
-        pTxn->SetTxnState(SipTxn::INV_SER_COMPLETED_ST);
+        pTxn->SetMaxDuration(nDurationTL);
+        pTxn->IncreaseDurationExpired(nDurationTL);
+        pTxn->SetTxnState(SipTxn::INV_SER_ACCEPTED_ST);
     }
     else
     {
@@ -275,7 +275,6 @@ static SIP_BOOL ProceedingState_TransportError(SipTxn* pTxn, SIP_VOID* pvData, S
 {
     (void)pvData;
     (void)pnError;
-    pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
     return SIP_TRUE;
 }
 
@@ -345,6 +344,57 @@ static SIP_BOOL ProceedingState_Timer_G_H_Timeout(
     return SIP_TRUE;
 }
 
+static SIP_BOOL AcceptedState_ReceiveInviteRequest(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+{
+    (void)pnError;
+
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
+
+    /* This is the reception of re-transmitted INVITE request.
+       Stack manager to send last response. */
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_IGNORE_REQ;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->m_pTranspInfo = pTxn->GetTranspInfo();
+
+    /* Remain in same state */
+
+    return SIP_TRUE;
+}
+
+static SIP_BOOL AcceptedState_Send2xxResponse(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+{
+    (void)pnError;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+
+    /* Remain in same state */
+    return SIP_TRUE;
+}
+
+static SIP_BOOL AcceptedState_TransportError(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+{
+    (void)pnError;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
+
+    /* Fill FSM data for stack manager */
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_ERROR_ON_SEND;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+
+    /* Remain in same state*/
+    return SIP_TRUE;
+}
+
+static SIP_BOOL AcceptedState_Timer_L_Timeout(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+{
+    (void)pnError;
+    (void)pvData;
+
+    pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
+    return SIP_TRUE;
+}
+
 static SIP_BOOL CompletedState_ReceiveInviteRequest(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
@@ -366,9 +416,6 @@ static SIP_BOOL CompletedState_TransportError(SipTxn* pTxn, SIP_VOID* pvData, SI
 {
     (void)pvData;
     (void)pnError;
-
-    pTxn->StopTxnTimer();
-    pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
     return SIP_TRUE;
 }
 
@@ -529,6 +576,7 @@ SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INV
         HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
         HandleInvalidStateEvent
     },
     /* PROCEEDING State:: S1*/
@@ -540,10 +588,24 @@ SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INV
         ProceedingState_TransportError, /* SipTxn::INV_SER_TRANSP_ERROR_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
         ProceedingState_Timer_G_H_Timeout, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
-        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
         HandleInvalidStateEvent
     },
-    /* COMPLETE State:: S2*/
+    /* ACCEPTED State:: S2*/
+    {
+        AcceptedState_ReceiveInviteRequest, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_SEND_FAILURE_RESP_EVT*/
+        AcceptedState_Send2xxResponse, /* SipTxn::INV_SER_SEND_2XX_RESP_EVT */
+        AcceptedState_TransportError, /* SipTxn::INV_SER_TRANSP_ERROR_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
+        AcceptedState_Timer_L_Timeout, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
+        HandleInvalidStateEvent
+    },
+    /* COMPLETE State:: S3*/
     {
         CompletedState_ReceiveInviteRequest, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT */
@@ -553,9 +615,10 @@ SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INV
         CompletedState_ReceiveAckRequest, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
         CompletedState_Timer_G_H_Timeout, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
         HandleInvalidStateEvent
     },
-    /* CONFIRMED State:: S3*/
+    /* CONFIRMED State:: S4*/
     {
         HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT */
@@ -565,9 +628,10 @@ SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INV
         ConfirmedState_ReceiveAckRequest, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
         ConfirmedState_Timer_I_Timeout, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
         HandleInvalidStateEvent
     },
-    /* TERMINATED State:: S4*/
+    /* TERMINATED State:: S5*/
     {
         HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT */
@@ -577,9 +641,10 @@ SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INV
         HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
         HandleInvalidStateEvent
     },
-    /* Invalid State:: S4*/
+    /* Invalid State:: S6*/
     {
         HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT */
@@ -589,6 +654,7 @@ SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INV
         HandleInvalidStateEvent, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT */
         HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT */
+        HandleInvalidStateEvent, /* SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT */
         HandleInvalidStateEvent
     }
 };

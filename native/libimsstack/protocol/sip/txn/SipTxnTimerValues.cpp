@@ -33,6 +33,7 @@ SipTxnTimerValues::SipTxnTimerValues() :
         m_nTimerI_Value(SIP_ZERO),
         m_nTimerJ_Value(SIP_ZERO),
         m_nTimerK_Value(SIP_ZERO),
+        m_nTimerL_Value(SIP_ZERO),
         m_nTimerM_Value(SIP_ZERO)
 {
     SipConfiguration* pConfig = SipConfiguration::GetInstance();
@@ -50,6 +51,7 @@ SipTxnTimerValues::SipTxnTimerValues() :
     m_nTimerI_Value = pConfig->GetTimerI();
     m_nTimerJ_Value = pConfig->GetTimerJ();
     m_nTimerK_Value = pConfig->GetTimerK();
+    m_nTimerL_Value = pConfig->GetTimerL();
     m_nTimerM_Value = pConfig->GetTimerM();
 }
 
@@ -122,12 +124,16 @@ SIP_VOID SipTxnTimerValues::SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur
             m_nTimerK_Value = nDur;
         }
         break;
+        case SipTxn::TIMER_L:
+        {
+            m_nTimerL_Value = nDur;
+        }
+        break;
         case SipTxn::TIMER_M:
         {
             m_nTimerM_Value = nDur;
         }
         break;
-
         default:
             break;
     }
@@ -199,6 +205,11 @@ SIP_UINT32 SipTxnTimerValues::GetTimerValue(SIP_UINT32 nTimerType) const
         case SipTxn::TIMER_K:
         {
             return m_nTimerK_Value;
+        }
+        break;
+        case SipTxn::TIMER_L:
+        {
+            return m_nTimerL_Value;
         }
         break;
         case SipTxn::TIMER_M:
@@ -291,9 +302,14 @@ SIP_BOOL SipTxnTimerValues::UpdateSipTimers(
         SetTimerValue(SipTxn::TIMER_J, ptrTxnSipTxnTimers->m_nTimerJ_Value);
     }
 
-    if (IsTimerSet(nTimerOptions, SipTxn::TIMER_K) == SIP_TRUE)
+    if (IsTimerSet(nTimerOptions, TV_TIMER_K) == SIP_TRUE)
     {
         SetTimerValue(SipTxn::TIMER_K, ptrTxnSipTxnTimers->m_nTimerK_Value);
+    }
+
+    if (IsTimerSet(nTimerOptions, TV_TIMER_L) == SIP_TRUE)
+    {
+        SetTimerValue(SipTxn::TIMER_L, ptrTxnSipTxnTimers->m_nTimerL_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_M) == SIP_TRUE)
@@ -314,11 +330,10 @@ SIP_VOID SipTxnTimerValues::PrintSIPTxnTimerValues() const
 {
     SIP_CHAR szTimerLog[SIP_TRACE_MAX_SIZE] = {SIP_ZERO};
     SIP_CHAR const* pTimerVal =
-            "(T1|T2|A|B|D|E|F|G|H|I|J|K|M)=%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d";
-
+            "(T1|T2|A|B|D|E|F|G|H|I|J|K|L|M)=%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d";
     SipPf_Sprintf(szTimerLog, pTimerVal, m_nT1Value, m_nT2Value, m_nTimerA_Value, m_nTimerB_Value,
             m_nTimerD_Value, m_nTimerE_Value, m_nTimerF_Value, m_nTimerG_Value, m_nTimerH_Value,
-            m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value, m_nTimerM_Value);
+            m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value, m_nTimerL_Value, m_nTimerM_Value);
 
     SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER, "SIPTimer%s", szTimerLog, SIP_ZERO);
 }

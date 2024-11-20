@@ -360,25 +360,28 @@ TEST_F(SipTxnTest, InvokeFsm_InviteServer)
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
-    /* Calling Inv ser fsm send 2xx resp event and timer H will be started
+    /* Calling Inv ser fsm send 2xx resp event and timer L will be started
         state will be moved to completed state */
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_SEND_2XX_RESP_EVT, pTxnFsmData, &nError));
-    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+    EXPECT_EQ(SipTxn::INV_SER_ACCEPTED_ST, pTxn->GetTxnState());
     pTxn->SetMaxDuration(140000);
 
-    /* Invoking timeout callback for Timer H */
+    EXPECT_EQ(SIP_FALSE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_ACK_REQ_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SipTxn::INV_SER_ACCEPTED_ST, pTxn->GetTxnState());
+
+    /* Invoking timeout callback for Timer L */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMER_H);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_L);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
-    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+    EXPECT_EQ(SipTxn::INV_SER_TERMINATED_ST, pTxn->GetTxnState());
 
     /* Calling timeout with not matching TxnKey */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey());
-    pTimeoutData->SetTimerType(SipTxn::TIMER_H);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_L);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
-    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+    EXPECT_EQ(SipTxn::INV_SER_TERMINATED_ST, pTxn->GetTxnState());
 
     /* start invalid timer in Inv Ser txn and  invoking timeout with invalid timer type*/
     EXPECT_EQ(SIP_TRUE, pTxn->StartTxnTimer(SipTxn::TIMER_TYPE_INVALID, 1000, &nError));
@@ -386,6 +389,36 @@ TEST_F(SipTxnTest, InvokeFsm_InviteServer)
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
     pTimeoutData->SetTimerType(SipTxn::TIMER_TYPE_INVALID);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
+
+    delete pSipTranspParam;
+    pTxn->SipDelete();
+    delete pSipUserData;
+    delete pTxnFsmData;
+    pTxnKey->SipDelete();
+    delete pSipTxnTimerContext;
+
+    pSipUserData = new ISipUserData(SIP_NULL);
+    pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+
+    pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
+    pTxnKey = new SipTxnKey(pSipMsg, &nError);
+    pSipTxnTimerContext = new SipTimerContext();
+
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    /* Calling Inv ser fsm with recv invite event state will be moved to proceeding state*/
+    EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_INV_REQ_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SipTxn::INV_SER_PROCEEDING_ST, pTxn->GetTxnState());
+
+    EXPECT_EQ(
+            SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_SEND_FAILURE_RESP_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+
+    pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
+    pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+    pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
+    pTxn->UpdateTranspInfo(pTranspInfo);
 
     /* Calling Inv ser fsm with recv ACK in completed state
        event in UDP timer I will start */

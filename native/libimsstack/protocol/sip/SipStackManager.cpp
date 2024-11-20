@@ -237,13 +237,8 @@ stack user must process this request and can decide whether to ignore or not
     {
         if (objTranspHandler.IsInviteTxnPresentForAckTxn(pTxnKey) != SIP_TRUE)
         {
-            *peTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+            *peTxnStatus = SipTxn::STATUS_IGNORE_REQ;
         }
-
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage :: ACK - %s",
-                (*peTxnStatus == SipTxn::STATUS_NEW_REQ_RECVD) ? "new request"
-                                                               : "retransmission or stray",
-                0);
 
         pTxnKey->SetTxnType(SipTxn::INVITE_SERVER);
         pTxnKey->SetResponseCode(200);

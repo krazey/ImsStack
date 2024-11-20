@@ -778,7 +778,7 @@ TEST_F(SipTxnHandlerTest, OnRecvTranspError)
     true but txn is not passed. Inorder to test if txn is null OnRecvTranspError will be failed */
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
-    pTxnKey->SipDelete();
+    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
 
     /* Calling with valid SipTxnKey by creating with INVITE req message
     first calling send txn to add txn to list.

@@ -103,6 +103,7 @@ public:
         TIMER_I,
         TIMER_J,
         TIMER_K,
+        TIMER_L,
         TIMER_M,
         TIMER_OTHER,
         TIMER_TYPE_INVALID
@@ -143,6 +144,7 @@ public:
         INV_SER_RECV_ACK_REQ_EVT,
         INV_SER_TIMER_G_H_TIME_OUT_EVT,
         INV_SER_TIMER_I_TIME_OUT_EVT,
+        INV_SER_TIMER_L_TIME_OUT_EVT,
         INV_SER_INVALID_EVT
     };
 
@@ -151,6 +153,7 @@ public:
     {
         INV_SER_IDLE_ST = 0,
         INV_SER_PROCEEDING_ST,
+        INV_SER_ACCEPTED_ST,
         INV_SER_COMPLETED_ST,
         INV_SER_CONFIRMED_ST,
         INV_SER_TERMINATED_ST,

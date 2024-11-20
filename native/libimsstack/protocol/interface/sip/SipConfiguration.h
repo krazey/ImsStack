@@ -94,6 +94,10 @@ public:
     SIP_VOID SetTimerK(SIP_UINT32 nDur) { m_nTimerK_T4 = nDur; }
     inline SIP_UINT32 GetTimerK() const { return m_nTimerK_T4; }
 
+    /*Timer L Wait time for absorbing INVITE retransmits and ACK receipt */
+    SIP_VOID SetTimerL(SIP_UINT32 nDur) { m_nTimerL = nDur; }
+    inline SIP_UINT32 GetTimerL() const { return m_nTimerL; }
+
     /*Timer M Wait time for retransmission of 2xx or forked 2xx */
     SIP_VOID SetTimerM(SIP_UINT32 nDur) { m_nTimerM = nDur; }
     inline SIP_UINT32 GetTimerM() const { return m_nTimerM; }
@@ -132,6 +136,8 @@ private:
     SIP_UINT32 m_nTimerJ_T3;
     /*Timer K Wait time for response retransmits*/
     SIP_UINT32 m_nTimerK_T4;
+    /*Timer L Wait time for absorbing INVITE retransmits and ACK receipt*/
+    SIP_UINT32 m_nTimerL;
     /*Timer M Wait time for retransmission of 2xx or forked 2xx*/
     SIP_UINT32 m_nTimerM;
 };
