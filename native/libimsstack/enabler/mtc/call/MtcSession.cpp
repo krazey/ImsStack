@@ -329,7 +329,10 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
             break;
     }
 
-    UpdateCapabilityFromMessage(objRequest);
+    if (eType != RequestType::ACK)
+    {
+        UpdateCapabilityFromMessage(objRequest);
+    }
 }
 
 PUBLIC VIRTUAL void MtcSession::HandleResponse(

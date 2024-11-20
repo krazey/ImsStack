@@ -1063,6 +1063,20 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithInitia
     EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
 }
 
+TEST_F(MtcSessionTest, HandleAckRequestDoesNotUpdateCapability)
+{
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    RequestType eType = RequestType::ACK;
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_TRUE(pMtcSession->IsVideoCapable());
+    EXPECT_TRUE(pMtcSession->IsRttCapable());
+}
+
 TEST_F(MtcSessionTest, HandleResponseInvokesSetCallTypeIfDifferentCallType)
 {
     CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
