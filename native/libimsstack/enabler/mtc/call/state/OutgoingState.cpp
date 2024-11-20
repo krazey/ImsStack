@@ -297,10 +297,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
-
-    // TODO: which operator requires this?
-    // m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
-
     m_objContext.GetMediaManager().UpdatePemType(piSession, piMessage);
 
     if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
@@ -345,7 +341,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
     m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddISession(
             m_objContext.GetCallKey(), piForkedSession);
 
-    m_objContext.CreateSession(piForkedSession);  // TODO: Need HandleResponse?
+    m_objContext.CreateSession(piForkedSession);
     m_objContext.GetMediaManager().CreateMediaProfile(piForkedSession, IMS_TRUE, IMS_TRUE);
     m_objContext.GetPreconditionManager().CreateQos(piForkedSession);
 
@@ -498,7 +494,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
-    // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
@@ -695,7 +690,6 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
             return GetStateName();
         case TIMER_MO_18X_WAIT:
         {
-            // TODO: fail reason name.
             CallReasonInfo objReason(CODE_TIMEOUT_1XX_WAITING);
             HandleCancel(GetISession(), objReason);
             OnStartFailed(GetISession(), objReason);
@@ -703,7 +697,6 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
         }
         case TIMER_MO_NOANSWER:
         {
-            // TODO: fail reason name.
             CallReasonInfo objReason(CODE_TIMEOUT_NO_ANSWER);
             HandleCancel(GetISession(), objReason);
             OnStartFailed(GetISession(), objReason);
