@@ -802,8 +802,7 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
     /*Encoding Of Boundary*/
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
-    SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
-    SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
+    SipAbnfUtil::Append(*ppMsgBuffCurrPos, pszBoundary);
 
     /*Get the message bodies and encode them*/
     for (SIP_UINT32 nCount = SIP_ZERO; nCount < nNumBodies; nCount++)
@@ -827,8 +826,7 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
         SipMsgUtil::EncodeCrlf(*ppMsgBuffCurrPos);
         SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
         SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
-        SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
-        SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
+        SipAbnfUtil::Append(*ppMsgBuffCurrPos, pszBoundary);
     }
 
     /*End boundary*/

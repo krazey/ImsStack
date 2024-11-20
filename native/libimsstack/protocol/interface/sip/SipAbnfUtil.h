@@ -205,6 +205,8 @@ public:
 
     static SIP_VOID UpdateCurrentPosition(SIP_CHAR*& pMsgBuffer);
 
+    static SIP_VOID Append(SIP_CHAR*& pMsgBuffer, const SIP_CHAR* pszSrc);
+
     static SIP_BOOL FindWhiteSpace(
             const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR*& pTempLoc);
 

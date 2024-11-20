@@ -60,8 +60,7 @@ SIP_BOOL SipInfoBase::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = 
     **ppCurrPos = LEFT_ANGLE;
     (*ppCurrPos)++;
 
-    SipPf_Strcpy(*ppCurrPos, pszValue);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, pszValue);
 
     **ppCurrPos = RIGHT_ANGLE;
     (*ppCurrPos)++;

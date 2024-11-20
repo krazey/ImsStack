@@ -85,32 +85,21 @@ SIP_BOOL SipWarningHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
         return SIP_FALSE;
     }
 
-    SIP_CHAR szLen[SipMsgUtil::MAX_INT_VALUE_LEN];
-    SipPf_Sprintf(szLen, "%u", m_nWarnCode);
-
-    SipPf_Strcpy(*ppCurrPos, szLen);
+    SipPf_Sprintf(*ppCurrPos, "%u", m_nWarnCode);
     SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszWarnAgent);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pszWarnAgent);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
     if (SipAbnfUtil::HasSpace(m_pszWarnText))
     {
         SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
-
-        SipPf_Strcpy(*ppCurrPos, m_pszWarnText);
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+        SipAbnfUtil::Append(*ppCurrPos, m_pszWarnText);
         SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
     }
     else
     {
-        SipPf_Strcpy(*ppCurrPos, m_pszWarnText);
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszWarnText);
     }
 
     return SIP_TRUE;

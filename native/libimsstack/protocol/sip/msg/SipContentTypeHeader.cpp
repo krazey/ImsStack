@@ -83,13 +83,9 @@ SIP_BOOL SipContentTypeHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*D
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszMType);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pszMType);
     SipMsgUtil::Encode(*ppCurrPos, SLASH);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszMSubType);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszMSubType);
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }

@@ -66,13 +66,9 @@ SIP_BOOL SipResourcePriorityHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bPar
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszNameSpace);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pszNameSpace);
     SipMsgUtil::Encode(*ppCurrPos, SIP_DOT);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszRPriority);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszRPriority);
 
     return SIP_TRUE;
 }

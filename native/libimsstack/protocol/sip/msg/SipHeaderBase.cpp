@@ -321,8 +321,7 @@ SIP_BOOL SipHeaderBase::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TR
         return IsEmptyHeaderBodyAllowed();
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszValue);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszValue);
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }

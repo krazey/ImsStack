@@ -84,21 +84,12 @@ SIP_BOOL SipIdentityHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pSignedIdentityDigest);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pSignedIdentityDigest);
     SipMsgUtil::Encode(*ppCurrPos, SIP_SEMI);
-
-    SipPf_Strcpy(*ppCurrPos, "info");
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, "info");
     SipMsgUtil::Encode(*ppCurrPos, EQUAL);
-
     SipMsgUtil::Encode(*ppCurrPos, LEFT_ANGLE);
-
-    SipPf_Strcpy(*ppCurrPos, m_pInfo);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pInfo);
     SipMsgUtil::Encode(*ppCurrPos, RIGHT_ANGLE);
 
     return EncodeHeaderParameters(ppCurrPos, bParams);

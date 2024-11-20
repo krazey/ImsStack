@@ -621,11 +621,8 @@ SIP_BOOL SipHeaders::SipEncodeHdrName(
         return SIP_TRUE;
     }
 
-    SipPf_Strcpy(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
-    SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
-
+    SipAbnfUtil::Append(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
-
     SipMsgUtil::Encode(*ppMsgBuffCurrPos, SPACE);
 
     return SIP_TRUE;

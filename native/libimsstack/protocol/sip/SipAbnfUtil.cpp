@@ -15,6 +15,7 @@
  */
 #include "SipAbnfUtil.h"
 #include "platform/SipMemory.h"
+#include "platform/SipString.h"
 
 SIP_BOOL SipAbnfUtil::HasSpace(const SIP_CHAR* pszValue)
 {
@@ -92,6 +93,12 @@ SIP_VOID SipAbnfUtil::UpdateCurrentPosition(SIP_CHAR*& pMsgBuffer)
     {
         pMsgBuffer++;
     }
+}
+
+SIP_VOID SipAbnfUtil::Append(SIP_CHAR*& pMsgBuffer, const SIP_CHAR* pszSrc)
+{
+    SipPf_Strcpy(pMsgBuffer, pszSrc);
+    UpdateCurrentPosition(pMsgBuffer);
 }
 
 SIP_BOOL SipAbnfUtil::FindWhiteSpace(

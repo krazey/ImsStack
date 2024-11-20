@@ -76,16 +76,12 @@ SIP_BOOL SipTimeStampHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = S
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszTimeVal);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszTimeVal);
 
-    /*Encoding of Delay*/
     if (m_pszDelay != SIP_NULL)
     {
         SipMsgUtil::Encode(*ppCurrPos, SPACE);
-
-        SipPf_Strcpy(*ppCurrPos, m_pszDelay);
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszDelay);
     }
 
     return SIP_TRUE;

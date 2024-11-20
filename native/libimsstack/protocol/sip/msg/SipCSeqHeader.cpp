@@ -63,15 +63,10 @@ SIP_BOOL SipCSeqHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TR
         return SIP_FALSE;
     }
 
-    const SIP_UINT16 MAX_CSEQ_LEN = 11;
-    SIP_CHAR szBuf[MAX_CSEQ_LEN];
-
-    SipPf_Sprintf(szBuf, "%u", m_nSeq);
-    SipPf_Strcpy(*ppCurrPos, szBuf);
+    SipPf_Sprintf(*ppCurrPos, "%u", m_nSeq);
     SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-    SipPf_Strcpy(*ppCurrPos, m_pszMethod);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszMethod);
 
     return SIP_TRUE;
 }

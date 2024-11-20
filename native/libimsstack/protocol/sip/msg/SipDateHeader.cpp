@@ -86,8 +86,7 @@ SIP_BOOL SipDateHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TR
     }
 
     // Date: Thu, 21 Feb 2002 13:02:03 GMT
-    SipPf_Strcpy(*ppCurrPos, WEEKDAY[m_eWkDay]);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, WEEKDAY[m_eWkDay]);
 
     **ppCurrPos = COMMA;
     (*ppCurrPos)++;
@@ -107,8 +106,7 @@ SIP_BOOL SipDateHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TR
     **ppCurrPos = SPACE;
     (*ppCurrPos)++;
 
-    SipPf_Strcpy(*ppCurrPos, STR_GMT);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, STR_GMT);
 
     return SIP_TRUE;
 }

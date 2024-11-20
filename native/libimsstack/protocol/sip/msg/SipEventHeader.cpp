@@ -87,8 +87,7 @@ SIP_BOOL SipEventHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, pszValue);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, pszValue);
 
     SIP_UINT32 nSize = m_objEventTemplates.GetSize();
 
@@ -97,8 +96,7 @@ SIP_BOOL SipEventHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
         *(*ppCurrPos) = SIP_DOT;
         (*ppCurrPos)++;
 
-        SipPf_Strcpy(*ppCurrPos, m_objEventTemplates.GetAt(nIndex));
-        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_objEventTemplates.GetAt(nIndex));
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);

@@ -122,9 +122,7 @@ SIP_BOOL SipViaHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default =
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszProtocolName);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pszProtocolName);
     SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
     /*protocol-version*/
@@ -133,9 +131,7 @@ SIP_BOOL SipViaHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default =
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing protocol version", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    SipPf_Strcpy(*ppCurrPos, m_pszProtocolVer);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
+    SipAbnfUtil::Append(*ppCurrPos, m_pszProtocolVer);
     SipMsgUtil::Encode(*ppCurrPos, SLASH);
 
     /*transport*/
@@ -144,13 +140,9 @@ SIP_BOOL SipViaHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default =
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing transport protocol", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    SipPf_Strcpy(*ppCurrPos, m_pszTransport);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
-
-    /*put a space for LWS*/
+    SipAbnfUtil::Append(*ppCurrPos, m_pszTransport);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
 
-    /*Encode sent by*/
     /*sent-by = host [ COLON port ] */
     if (m_pszHost == SIP_NULL)
     {
@@ -159,18 +151,12 @@ SIP_BOOL SipViaHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default =
     }
 
     // In case of IPv6 - Left Square and Right Square Bracket already included in Host
-    SipPf_Strcpy(*ppCurrPos, m_pszHost);
-    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszHost);
 
     if (m_nPort != SIP_ZERO)
     {
-        const SIP_UINT16 MAX_PORT_LEN = 6;
-        SIP_CHAR szTmp[MAX_PORT_LEN];
-        SipPf_Sprintf(szTmp, "%u", m_nPort);
-
         SipMsgUtil::Encode(*ppCurrPos, COLON);
-
-        SipPf_Strcpy(*ppCurrPos, szTmp);
+        SipPf_Sprintf(*ppCurrPos, "%u", m_nPort);
         SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
     }
 
