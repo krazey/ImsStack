@@ -41,7 +41,7 @@ public:
      *
      * @param bConfirmed it is IMS_TRUE when the session changed to confirmed session
      */
-    void SetConfirmSession(IN IMS_BOOL bConfirmed);
+    void SetCallSessionState(IN IMS_BOOL bConfirmed);
 
     /**
      * @brief Send dtmf digit to ImsMedia module
