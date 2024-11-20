@@ -98,6 +98,12 @@ TEST_F(JniMtcCallTest, DestructorInvokesDetach)
     EXPECT_CALL(objMockController, Detach(IMtcCall::CALL_KEY_INVALID));
 }
 
+TEST_F(JniMtcCallTest, DestructorDoesNotInvokeDetachIfNativeEnablerIsNull)
+{
+    JniEnablerConnector::GetInstance().SetNativeEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
+    EXPECT_CALL(objMockController, Detach(_)).Times(0);
+}
+
 TEST_F(JniMtcCallTest, SendDataOpenInvokesOpenAndAttach)
 {
     CallKey nValidKey = 1;
@@ -374,6 +380,16 @@ TEST_F(JniMtcCallTest, SendDataEctStartBlind)
     objParcel.setDataPosition(0);
 
     EXPECT_CALL(objMockController, Transfer(_, _)).Times(1);
+
+    pJniCall->SendData(objParcel);
+}
+
+TEST_F(JniMtcCallTest, SendDataOpenDoesNotInvokeOpenIfNativeEnablerIsNull)
+{
+    JniEnablerConnector::GetInstance().SetNativeEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
+
+    EXPECT_CALL(objMockController, Open(_, _)).Times(0);
+    EXPECT_CALL(objMockController, Attach(_)).Times(0);
 
     pJniCall->SendData(objParcel);
 }
