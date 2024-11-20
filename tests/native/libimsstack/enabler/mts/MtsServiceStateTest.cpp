@@ -156,4 +156,51 @@ TEST_F(MtsServiceStateTest, LimitedStateBySmsOverIpConfiguration)
     EXPECT_EQ(pMtsServiceState->GetState(), STATE_LIMITED);
 }
 
+TEST_F(MtsServiceStateTest, ObjectInitializedBeforeCarrierConfigLoaded)
+{
+    ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+
+    MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
+
+    EXPECT_CALL(
+            objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+            .Times(2)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            .Times(2)
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    pMtsServiceState->Init(&objMockIImsAos);
+    pMtsServiceState->OnImsConnected();
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_LIMITED);
+
+    pMtsServiceState->CarrierConfig_NotifyConfigChanged(SLOT_ID);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
+}
+
+TEST_F(MtsServiceStateTest, NotifyConfigChangedWithMismatchedSimSlot)
+{
+    ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+
+    MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
+
+    EXPECT_CALL(
+            objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            .WillOnce(Return(IMS_FALSE));
+
+    pMtsServiceState->Init(&objMockIImsAos);
+    pMtsServiceState->OnImsConnected();
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
+
+    pMtsServiceState->CarrierConfig_NotifyConfigChanged(SLOT_ID + 1);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
+}
+
 }  // namespace android

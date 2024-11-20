@@ -17,15 +17,19 @@
 #ifndef MTS_SERVICESTATE_H_
 #define MTS_SERVICESTATE_H_
 
+#include "ICarrierConfigListener.h"
 #include "IMtsServiceState.h"
 
 class IImsAos;
 
-class MtsServiceState final : public IMtsServiceState
+class MtsServiceState final : public ICarrierConfigListener, public IMtsServiceState
 {
 public:
     explicit MtsServiceState(IN IMS_SINT32 nSlotId);
     ~MtsServiceState();
+
+    // ICarrierConfigListener
+    void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
     // IMtsServiceState
     void Init(IN IImsAos* piImsAos) override;
@@ -42,8 +46,8 @@ public:
     IMS_BOOL IsMtServiceBlocked() const override;
 
 private:
+    IMS_BOOL LoadCarrierConfig(IN const ICarrierConfig& objCc);
     void SetImsSuspendState(IN IMS_BOOL bState);
-    void SetSmsOverIpState(IN IMS_BOOL bState);
     void Update();
 
     IImsAos* m_piImsAos;
