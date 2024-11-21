@@ -1112,6 +1112,8 @@ public class CarrierConfig {
                 KEY_IMS_EMERGENCY_PREFIX + "roaming_preferred_ereg_int";
         public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL =
                 KEY_IMS_SMS_PREFIX + "sms_over_ims_available_without_voice_capa_bool";
+        public static final String KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL =
+                KEY_IMS_SMS_PREFIX + "support_sms_capability_in_wifi_roaming_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
                 KEY_IMS_VOICE_PREFIX + "ignore_vops_for_volte_enable_bool";
         public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =

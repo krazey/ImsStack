@@ -120,6 +120,9 @@ public class ImsRegistrationTrackerTest {
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets
                 .KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL)))
                 .thenReturn(true);
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets
+                .KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL)))
+                .thenReturn(true);
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager
                 .KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)))
                 .thenReturn(false);
@@ -578,6 +581,37 @@ public class ImsRegistrationTrackerTest {
                 IAosRegistrationListener.Capability.SMS);
 
         capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NR,
+                IAosRegistrationListener.Capability.SMS);
+
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+    }
+
+    @Test
+    public void testchangeCapabilities_SmsCapabilityInRoaming() {
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager.ImsSms
+                .KEY_SMS_OVER_IMS_SUPPORTED_BOOL)))
+                .thenReturn(true);
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets
+                .KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL)))
+                .thenReturn(false);
+
+        int[] intArray = {AccessNetworkType.EUTRAN, AccessNetworkType.IWLAN};
+
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY))
+                .thenReturn(intArray);
+
+        when(mMockIDcNetWatcher.isRoaming()).thenReturn(true);
+
+        CapabilityPairs capabilityPairs = new CapabilityPairs(
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.SMS);
+
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        when(mMockIDcNetWatcher.isRoaming()).thenReturn(false);
+
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
                 IAosRegistrationListener.Capability.SMS);
 
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());

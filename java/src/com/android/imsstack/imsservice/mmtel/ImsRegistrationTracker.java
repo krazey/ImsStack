@@ -371,7 +371,9 @@ public class ImsRegistrationTracker {
                     } else if (supportedRats[i] == AccessNetworkType.NGRAN) {
                         capabilityPairs.addCapability(NetworkType.NR, Capability.SMS);
                     } else if (supportedRats[i] == AccessNetworkType.IWLAN) {
-                        capabilityPairs.addCapability(NetworkType.IWLAN, Capability.SMS);
+                        if (!isRoaming() || isSmsCapabilitySupportedInWifiRoaming()) {
+                            capabilityPairs.addCapability(NetworkType.IWLAN, Capability.SMS);
+                        }
                     }
                 }
                 logi("createSmsCapabilityPairs" + capabilityPairs);
@@ -450,6 +452,14 @@ public class ImsRegistrationTracker {
                     CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY);
         }
         return new int[]{};
+    }
+
+    private boolean isSmsCapabilitySupportedInWifiRoaming() {
+        ConfigInterface config = getConfigInterface(mContext.getSlotId());
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        return cc != null && cc.getBoolean(
+                CarrierConfig.Assets
+                .KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL);
     }
 
     private boolean isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming() {
