@@ -17,6 +17,7 @@
 #include "ISubscriberConfig.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
+#include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosSubscriberListener.h"
 #include "interface/IAosSubscriberManager.h"
@@ -89,9 +90,18 @@ PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetConfiguredImpus() const
 
     if (m_eRegType == AosRegistrationType::FAKE)
     {
+        A_IMS_TRACE_D(APPPROFILE, "GetConfiguredImpus: Configured IMPU for fake", 0, 0, 0);
         return m_piSubscriberManager->GetConfiguredImpusForFake();
     }
 
+    if (m_eRegType == AosRegistrationType::EMERGENCY &&
+            GET_N_CONFIG(m_nSlotId)->IsERegUsingFirstImpuInIsim())
+    {
+        A_IMS_TRACE_D(APPPROFILE, "GetConfiguredImpus: Ordered IMPUs", 0, 0, 0);
+        return m_piSubscriberManager->GetOrderedImpus();
+    }
+
+    A_IMS_TRACE_D(APPPROFILE, "GetConfiguredImpus: Configured IMPU", 0, 0, 0);
     return m_piSubscriberManager->GetConfiguredImpus();
 }
 

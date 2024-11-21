@@ -313,6 +313,18 @@ public:
     virtual IMS_BOOL IsERegWithOnlyTcpInRoaming() const = 0;
 
     /**
+     * @brief Flag specifying if the first public user identity to the list stored in the ISIM is
+     *        used in emergency registration requests.
+     *
+     *        If this is set as TRUE, the first public user identity in the ISIM will be used for
+     *        emergency IMS registration.
+     *
+     * @return IMS_BOOL Return whether to use the first public user identity in the ISIM for
+     *         emergency registration.
+     */
+    virtual IMS_BOOL IsERegUsingFirstImpuInIsim() const = 0;
+
+    /**
      * @brief Flag specifying if emergency re-registration is required after handover.
      *
      *        If this is set as TRUE, emergency re-registration will be conducted
