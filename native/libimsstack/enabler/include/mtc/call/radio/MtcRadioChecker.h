@@ -113,6 +113,7 @@ private:
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi, IN CallKey nCallKey);
     void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);
+    IMS_BOOL IsCallTerminated(IN CallKey nKey);
 
 private:
     IMtcContext& m_objContext;
