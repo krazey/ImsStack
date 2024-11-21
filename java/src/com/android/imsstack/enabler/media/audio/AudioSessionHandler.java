@@ -896,9 +896,8 @@ public class AudioSessionHandler extends MediaState {
 
     private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold mediaThreshold,
             Boolean needFwkTimer) {
-        if (mMediaConfig.updateMediaQualityThreshold(mediaThreshold, needFwkTimer)) {
-            setAudioQualityThreshold();
-        }
+        mMediaConfig.updateMediaQualityThreshold(mediaThreshold, needFwkTimer);
+        setAudioQualityThreshold();
     }
 
     private void handleAudioSetQnsMediaThreshold(MediaThreshold mediaThreshold) {

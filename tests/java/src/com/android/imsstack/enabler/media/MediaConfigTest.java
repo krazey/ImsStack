@@ -115,6 +115,24 @@ public class MediaConfigTest {
     }
 
     @Test
+    public void testMediaQualityThresholdwithoutQnsThreshold() {
+        MediaQualityThreshold mediaQualityThreshold = MediaTestUtils.createMediaQualityThreshold();
+        MediaThreshold mediaThreshold = MediaTestUtils.createMediaThreshold();
+        mMediaConfig.updateMediaQualityThreshold(mediaThreshold);
+        mMediaConfig.updateMediaQualityThreshold(mediaQualityThreshold, false);
+        MediaQualityThreshold expectedThreshold = new MediaQualityThreshold.Builder()
+                .setRtpInactivityTimerMillis(new int[]{ 10000, 20000})
+                .setRtcpInactivityTimerMillis(MediaTestUtils.RTCP_TIMEOUT)
+                .setRtpHysteresisTimeInMillis(MediaTestUtils.RTP_HYSTERESIS_TIME)
+                .setRtpPacketLossDurationMillis(MediaTestUtils.PACKET_LOSS_DURATION)
+                .setRtpPacketLossRate(MediaTestUtils.PACKET_LOSS_RATE)
+                .setRtpJitterMillis(MediaTestUtils.JITTER_THRESHOLD)
+                .setNotifyCurrentStatus(MediaTestUtils.NOTIFY_STATUS)
+                .build();
+        assertTrue(mMediaConfig.getMediaQualityThreshold().equals(expectedThreshold));
+    }
+
+    @Test
     public void testClearQnsMediaThreshold() {
         MediaQualityThreshold mediaQualityThreshold = MediaTestUtils.createMediaQualityThreshold();
         MediaThreshold mediaThreshold = MediaTestUtils.createMediaThreshold();

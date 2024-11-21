@@ -119,16 +119,12 @@ public class MediaConfig {
      * @param mediaThreshold object to set the threshold for media quality status notifications
      * @param needFwkTimer boolean to check if the telephony framework needs timer for the RTP
      *        inactivity for the QNS
-     *
-     * @return boolean return true if MediaQualityThreshold is set
      */
-    public boolean updateMediaQualityThreshold(MediaQualityThreshold mediaThreshold,
+    public void updateMediaQualityThreshold(MediaQualityThreshold mediaThreshold,
             boolean needFwkTimer) {
-        if (mRtcpInactivityTimer == mediaThreshold.getRtcpInactivityTimerMillis()
-                && Arrays.equals(mRtpInactivityImsTimer,
-                    mediaThreshold.getRtpInactivityTimerMillis())) {
-            return false;
-        }
+       // set even if threshold values are not changed,
+       // because FwkTimer may or maynot have been set
+
         // update Rtcp Inactivity Timer
         mRtcpInactivityTimer = mediaThreshold.getRtcpInactivityTimerMillis();
         // update Rtp Inactivity Timer
@@ -141,8 +137,6 @@ public class MediaConfig {
             mRtpInactivityCombinedTimer = Arrays.copyOf(mRtpInactivityImsTimer,
                 mRtpInactivityImsTimer.length);
         }
-
-        return true;
     }
 
     /**
