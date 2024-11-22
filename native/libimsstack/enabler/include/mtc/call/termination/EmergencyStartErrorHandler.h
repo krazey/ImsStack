@@ -60,6 +60,7 @@ public:
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
 
 private:
+    IMS_SINT32 GetCrossSimRedialingReasonCode(IN IMS_SINT32 nStatusCode) const;
     IMS_SINT32 GetExtraCode(IN IMS_SINT32 nCode, IN const IMessage* piMessage) const;
     IMS_BOOL IsRedialEmergencyWithNextPcscfRequired(IN const IMessage* piMessage) const;
     CallReasonInfo HandleRedialEmergencyWithNextPcscf() const;

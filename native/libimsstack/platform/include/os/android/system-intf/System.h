@@ -83,7 +83,7 @@ public:
     IMS_SINT32 GetTtyMode(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetRttMode(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId) override;
-
+    IMS_BOOL IsCrossSimRedialingAvailable(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetDeviceName(OUT AString& strDeviceName) override;
 
     ////

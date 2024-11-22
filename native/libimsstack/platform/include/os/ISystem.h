@@ -69,7 +69,7 @@ public:
     virtual IMS_SINT32 GetTtyMode(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetRttMode(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId) = 0;
-
+    virtual IMS_BOOL IsCrossSimRedialingAvailable(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetDeviceName(OUT AString& strDeviceName) = 0;
 
     ////

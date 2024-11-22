@@ -125,6 +125,9 @@
     <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">
         <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
+    <int-array name="imsemergency.reject_code_require_temp_failure_int_array" num="1">
+        <item value="403"/>
+    </int-array>
 
     <!-- Mts -->
     <int-array name="sms_generic_error_codes_int_array" num="1">

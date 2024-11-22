@@ -2598,6 +2598,26 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testSystemCallIsCrossSimRedialingAvailable() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        int slotId = 1;
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE);
+            data.writeInt(slotId);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mDefaultSystemCall).isCrossSimRedialingAvailable(eq(slotId));
+    }
+
+    @Test
+    @SmallTest
     public void testSystemCallGetCarrierConfig() {
         setUpSystemInterface();
         setUpSystem();

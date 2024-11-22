@@ -22,6 +22,7 @@
 #include "PlatformContext.h"
 #include "SipStatusCode.h"
 #include "TestConfigService.h"
+#include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/termination/EmergencyStartErrorHandler.h"
@@ -50,6 +51,7 @@ public:
     TestConfigService* m_pConfigService;
     EmergencyStartErrorHandler* pHandler;
     ImsVector<AString> objConfigurationArrary;
+    TestPhoneInfoService m_objPhoneInfoService;
 
 protected:
     virtual void SetUp() override
@@ -58,6 +60,8 @@ protected:
         m_pConfigService->SetCarrierConfig(&(m_pConfigService->GetMockCarrierConfig()));
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, m_pConfigService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
 
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(objConfigurationProxy));
@@ -73,6 +77,7 @@ protected:
     virtual void TearDown() override
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         delete m_pConfigService;
         delete pHandler;
@@ -169,6 +174,52 @@ TEST_F(EmergencyStartErrorHandlerTest, RejectCodeRequireImmediateTermination)
 TEST_F(EmergencyStartErrorHandlerTest, RejectCodeNotRequireImmediateTermination)
 {
     SetNotRequireImmediateTerminationCode(486);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, RejectCodeRequireTempFailure)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objPhoneInfoService.GetMockCallInfo(), IsCrossSimRedialingAvailable)
+            .WillByDefault(Return(IMS_TRUE));
+    SetNotRequireImmediateTerminationCode(486);
+    EXPECT_TRUE(CheckHandleResult(CODE_EMERGENCY_TEMP_FAILURE, -1));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, RejectCodeRequirePermFailure)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY, 486))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objPhoneInfoService.GetMockCallInfo(), IsCrossSimRedialingAvailable)
+            .WillByDefault(Return(IMS_TRUE));
+    SetNotRequireImmediateTerminationCode(486);
+    EXPECT_TRUE(CheckHandleResult(CODE_EMERGENCY_PERM_FAILURE, -1));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, RejectCodeNotRequireCrossSimRedialing)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY, 486))
+            .WillByDefault(Return(IMS_FALSE));
+    SetNotRequireImmediateTerminationCode(486);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, 486))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objPhoneInfoService.GetMockCallInfo(), IsCrossSimRedialingAvailable)
+            .WillByDefault(Return(IMS_FALSE));
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }

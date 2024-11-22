@@ -16,6 +16,7 @@
 
 #include "IMessage.h"
 #include "ImsAosParameter.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -73,9 +74,15 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
 {
     IMS_SINT32 nStatusCode =
             (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
-    IMS_SINT32 nCallReasonInfoCode =
-            MtcConfigurationResolver::LookupTerminateReasonCodeForEmergency(
-                    m_objContext.GetConfigurationProxy(), nStatusCode);
+
+    IMS_SINT32 nCallReasonInfoCode = GetCrossSimRedialingReasonCode(nStatusCode);
+    if (nCallReasonInfoCode != CODE_NONE)
+    {
+        return CallReasonInfo(nCallReasonInfoCode);
+    }
+
+    nCallReasonInfoCode = MtcConfigurationResolver::LookupTerminateReasonCodeForEmergency(
+            m_objContext.GetConfigurationProxy(), nStatusCode);
     if (nCallReasonInfoCode != CODE_NONE)
     {
         return CallReasonInfo(nCallReasonInfoCode, GetExtraCode(nCallReasonInfoCode, piMessage));
@@ -87,6 +94,35 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
     }
 
     return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+}
+
+PRIVATE
+IMS_SINT32 EmergencyStartErrorHandler::GetCrossSimRedialingReasonCode(
+        IN IMS_SINT32 nStatusCode) const
+{
+    IMS_SINT32 nCallReasonInfoCode = CODE_NONE;
+    // Since inclusion in both is not an expected behavior, priority is arbitrarily given to
+    // CODE_EMERGENCY_TEMP_FAILURE.
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY, nStatusCode))
+    {
+        nCallReasonInfoCode = CODE_EMERGENCY_TEMP_FAILURE;
+    }
+    else if (m_objContext.GetConfigurationProxy().Contains(
+                     ConfigEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY, nStatusCode))
+    {
+        nCallReasonInfoCode = CODE_EMERGENCY_PERM_FAILURE;
+    }
+
+    if (nCallReasonInfoCode != CODE_NONE &&
+            PhoneInfoService::GetPhoneInfoService()
+                    ->GetCallInfo(m_objContext.GetSlotId())
+                    ->IsCrossSimRedialingAvailable())
+    {
+        return nCallReasonInfoCode;
+    }
+
+    return CODE_NONE;
 }
 
 PRIVATE

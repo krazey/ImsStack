@@ -596,6 +596,12 @@ IMS_SINT32 System::GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
+IMS_BOOL System::IsCrossSimRedialingAvailable(IN IMS_SINT32 nSlotId)
+{
+    return (GetInt2(SystemConstants::IS_CROSS_SIM_REDIALING_AVAILABLE, nSlotId) == 1);
+}
+
+PUBLIC
 IMS_SINT32 System::GetDeviceName(OUT AString& strDeviceName)
 {
     return GetString(SystemConstants::GET_DEVICE_NAME, strDeviceName);

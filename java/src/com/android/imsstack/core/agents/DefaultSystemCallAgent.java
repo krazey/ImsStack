@@ -16,7 +16,10 @@
 
 package com.android.imsstack.core.agents;
 
+import android.telephony.TelephonyManager;
+
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.system.DefaultSystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
 
@@ -174,5 +177,30 @@ public final class DefaultSystemCallAgent implements DefaultSystemCallInterface 
         if (traffic != null) {
             traffic.setTrafficPriority(priorityType, slotId);
         }
+    }
+
+    /**
+     * Excluding the slot provided as an input parameter, the SIM state of other slots is checked
+     * to determine and return the availability of cross SIM redialing.
+     *
+     * @param slotId The slot ID where the emergency call connection failed.
+     * @return {@code true} if cross SIM redialing is available, {@code false} otherwise.
+     */
+    @Override
+    public boolean isCrossSimRedialingAvailable(int slotId) {
+        TelephonyManagerProxy tmp =
+                AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        for (int i = 0; i < tmp.getActiveModemCount(); i++) {
+            if (i == slotId) {
+                continue;
+            }
+            int simState = tmp.getSimState(i);
+            if (simState == TelephonyManager.SIM_STATE_READY
+                    || simState == TelephonyManager.SIM_STATE_PRESENT) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

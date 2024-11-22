@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents;
 import static android.provider.Settings.Global.DEVICE_NAME;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,9 +32,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.telephony.TelephonyManager;
+
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
 
@@ -61,6 +65,7 @@ public class DefaultSystemCallAgentTest {
     @Mock private ImsTrafficInterface mImsTrafficInterface;
 
     private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
 
     @Before
@@ -69,6 +74,8 @@ public class DefaultSystemCallAgentTest {
 
         mTestAppContext = new TestAppContext();
         mTestAppContext.setUp();
+
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
 
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, mPreferenceInterface);
@@ -96,6 +103,7 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, null);
         SystemInterface.setSystemInterface(null);
 
+        mTelephonyManagerProxy = null;
         mImsTrafficInterface = null;
         mTimerAgent = null;
         mWifiInterface = null;
@@ -241,5 +249,27 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
         mDefaultSystemCallAgent.setTrafficPriority(TEST_PRIORITY_TYPE, SLOT0);
         verifyNoMoreInteractions(mImsTrafficInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsCrossSimRedialingAvailable() {
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(1);
+        assertFalse(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
+
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getSimState(eq(SLOT1))).thenReturn(
+                TelephonyManager.SIM_STATE_NOT_READY);
+        assertFalse(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
+
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getSimState(eq(SLOT1))).thenReturn(
+                TelephonyManager.SIM_STATE_READY);
+        assertTrue(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
+
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getSimState(eq(SLOT1))).thenReturn(
+                TelephonyManager.SIM_STATE_PRESENT);
+        assertTrue(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
     }
 }

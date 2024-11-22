@@ -91,6 +91,7 @@ public interface SystemConstants {
     int GET_TTY_MODE = CATEGORY_BASE + 203;
     int GET_RTT_MODE = CATEGORY_BASE + 204;
     int GET_CS_CALL_STATE_IN_OTHER_SLOT = CATEGORY_BASE + 205;
+    int IS_CROSS_SIM_REDIALING_AVAILABLE = CATEGORY_BASE + 206;
 
     /**
      * Network-related information (mobile)
