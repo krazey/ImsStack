@@ -612,8 +612,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "short_call_code_int_array";
         public static final String KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL =
                 KEY_PREFIX + "allow_multiple_call_including_video_call_bool";
-        public static final String KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY =
-                KEY_PREFIX + "reject_code_for_csfb_int_array";
+        public static final String KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY =
+                KEY_PREFIX + "reject_code_and_reason_code_set_string_array";
+        public static final String KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY =
+                KEY_PREFIX + "reject_code_and_action_set_string_array";
         public static final String KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT =
                 KEY_PREFIX + "silent_redial_max_retry_count_int";
         public static final String KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT =

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "ByteArray.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
@@ -23,6 +24,7 @@
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
+#include "ImsVector.h"
 #include "MockIMessage.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
@@ -45,6 +47,7 @@
 #include "media/MockIMtcMediaManager.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
+#include <initializer_list>
 
 using ::testing::_;
 using ::testing::Return;
@@ -69,6 +72,7 @@ public:
     Ims3gppData objIms3gppData;
     TestConfigService* m_pConfigService;
     MockIMtcCallManager objCallManager;
+    ImsVector<AString> objActionSets;
 
     StartErrorHandler* pHandler;
 
@@ -127,11 +131,34 @@ protected:
         ON_CALL(*pMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
     }
 
-    void SetCsfbConfig(IN IMS_SINT32 nStatusCode)
+    void SetActionConfig(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nSingleAction)
     {
+        SetActionConfigs(nStatusCode, {nSingleAction});
+    }
+
+    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += ":";
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += ",";
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
         ON_CALL(*pConfigurationProxy,
-                Contains(ConfigVoice::KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY, nStatusCode))
-                .WillByDefault(Return(IMS_TRUE));
+                GetStringArray(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
     }
 
     void SetTcallTimerConfig(IN IMS_SINT32 nPolicy)
@@ -325,7 +352,7 @@ TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfi
 {
     const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_408;
     SetMessageCode(ANY_REJECT_CODE);
-    SetCsfbConfig(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigVoice::START_ERROR_ACTION_CSFB);
 
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
@@ -335,6 +362,7 @@ TEST_F(StartErrorHandlerTest, HandleRedirectionBy3xxResponses)
 {
     const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_300;
     SetMessageCode(ANY_REJECT_CODE);
+    SetActionConfig(ANY_REJECT_CODE, ConfigVoice::START_ERROR_ACTION_REDIRECTION_BY_CONTACT);
 
     AString strAnyContactUri("sip:anyContactUri");
     ON_CALL(objMessageUtils, GetHeaderValue(pMessage, ISipHeader::CONTACT_NORMAL, _))
@@ -345,15 +373,13 @@ TEST_F(StartErrorHandlerTest, HandleRedirectionBy3xxResponses)
     ON_CALL(objMessageUtils, GetHeaderValue(pMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(""));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, ANY_REJECT_CODE));
-
-    SetCsfbConfig(ANY_REJECT_CODE);
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle380Response)
 {
     SetMessageCode(SipStatusCode::SC_380);
+    SetActionConfig(SipStatusCode::SC_380,
+            ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL);
 
     ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(pMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(EXTRA_CODE_EMERGENCYSERVICE_INVALID));
@@ -368,15 +394,13 @@ TEST_F(StartErrorHandlerTest, Handle380Response)
     objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
     ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
-
-    SetCsfbConfig(SipStatusCode::SC_380);
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCall)
 {
     SetMessageCode(SipStatusCode::SC_380);
+    SetActionConfig(SipStatusCode::SC_380,
+            ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL);
 
     IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_POLICE;
     // by configuration
@@ -505,6 +529,8 @@ TEST_F(StartErrorHandlerTest, Handle4xxResponses)
 TEST_F(StartErrorHandlerTest, Handle403Response)
 {
     SetMessageCode(SipStatusCode::SC_403);
+    SetActionConfig(
+            SipStatusCode::SC_403, ConfigVoice::START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY);
 
     // SIP_403_POLICY_TERMINATE_CALL case
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT))
@@ -544,6 +570,8 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
 TEST_F(StartErrorHandlerTest, Handle403ResponseForMaxCallLimitInReasonHeader)
 {
     SetMessageCode(SipStatusCode::SC_403);
+    SetActionConfig(SipStatusCode::SC_403,
+            ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE_MAX_CALL_LIMIT);
     ReasonHeaderValue objValue;
     objValue.strText = "Simultaneous Call Limit Has Already Been Reached";
     ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(pMessage, _))
@@ -552,22 +580,11 @@ TEST_F(StartErrorHandlerTest, Handle403ResponseForMaxCallLimitInReasonHeader)
     EXPECT_TRUE(CheckHandleResult(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED));
 }
 
-TEST_F(StartErrorHandlerTest, Handle403ResponseForMaxCallLimitInReasonPhrase)
-{
-    SetMessageCode(SipStatusCode::SC_403);
-    ReasonHeaderValue objValue;
-    ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(pMessage, _))
-            .WillByDefault(Return(objValue));
-
-    AString strReasonPhrase = "Simultaneous Call Limit Has Already Been Reached";
-    ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
-
-    EXPECT_TRUE(CheckHandleResult(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED));
-}
-
 TEST_F(StartErrorHandlerTest, Handle404Response)
 {
     SetMessageCode(SipStatusCode::SC_404);
+    SetActionConfig(SipStatusCode::SC_404, ConfigVoice::START_ERROR_ACTION_USSI_CSFB);
+
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_FOUND, SipStatusCode::SC_404));
 
     objCallInfo.bUssi = IMS_TRUE;
@@ -584,6 +601,8 @@ TEST_F(StartErrorHandlerTest, Handle407Response)
 TEST_F(StartErrorHandlerTest, Handle488Response)
 {
     SetMessageCode(SipStatusCode::SC_488);
+    SetActionConfig(
+            SipStatusCode::SC_488, ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT);
 
     // 1. SDP body exists and get the supported media type from it.
     ON_CALL(objMessageUtils, HasSdp(pMessage)).WillByDefault(Return(IMS_TRUE));
@@ -608,11 +627,6 @@ TEST_F(StartErrorHandlerTest, Handle488Response)
     // 3. No SDP body and it's not required to CSFB.
     ON_CALL(objMessageUtils, HasSdp(pMessage)).WillByDefault(Return(IMS_FALSE));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488));
-
-    // 4. No SDP body and it's required to CSFB.
-    SetCsfbConfig(SipStatusCode::SC_488);
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle5xxResponses)
@@ -636,6 +650,9 @@ TEST_F(StartErrorHandlerTest, Handle5xxResponses)
 TEST_F(StartErrorHandlerTest, Handle500Response)
 {
     SetMessageCode(SipStatusCode::SC_500);
+    SetActionConfig(
+            SipStatusCode::SC_500, ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_RESPONSE_SOURCE);
+
     ON_CALL(objMessageUtils,
             IsHeaderPresent(pMessage, ISipHeader::RETRY_AFTER_SEC, AString::ConstNull()))
             .WillByDefault(Return(IMS_TRUE));
@@ -664,8 +681,11 @@ TEST_F(StartErrorHandlerTest, Handle500Response)
 TEST_F(StartErrorHandlerTest,
         Handle503ResponseWithoutRetryAfterWithCsfbConfigEnabledInvokesCsfbWithoutSettingTimer)
 {
-    SetCsfbConfig(SipStatusCode::SC_503);
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfigs(SipStatusCode::SC_503,
+            {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER,
+                    ConfigVoice::START_ERROR_ACTION_CSFB});
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(-1));
 
@@ -682,6 +702,8 @@ TEST_F(StartErrorHandlerTest,
 TEST_F(StartErrorHandlerTest, Handle503ResponseWithActiveCallReturnsServiceUnavailable)
 {
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfig(SipStatusCode::SC_503, ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER);
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(-1));
 
@@ -697,6 +719,8 @@ TEST_F(StartErrorHandlerTest,
         Handle503ResponseWithoutRetryAfterInvokesCallTerminatingIfAosConnectorIsNull)
 {
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfig(SipStatusCode::SC_503, ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER);
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(-1));
 
@@ -714,6 +738,8 @@ TEST_F(StartErrorHandlerTest,
 TEST_F(StartErrorHandlerTest, Handle503ResponseWithoutRetryAfterInvokesCallingAosAndRedialing)
 {
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfig(SipStatusCode::SC_503, ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER);
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(-1));
 
@@ -725,8 +751,11 @@ TEST_F(StartErrorHandlerTest,
         Handle503ResponseWithRetryAfterAndCsfbConfigEnabledInvokesCsfbWithSettingTimer)
 {
     IMS_SINT32 nAnyRetryAfter = 10;
-    SetCsfbConfig(SipStatusCode::SC_503);
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfigs(SipStatusCode::SC_503,
+            {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER,
+                    ConfigVoice::START_ERROR_ACTION_CSFB});
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
@@ -751,6 +780,8 @@ TEST_F(StartErrorHandlerTest,
 {
     IMS_SINT32 nAnyRetryAfter = 10;
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfig(SipStatusCode::SC_503, ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER);
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
@@ -774,6 +805,10 @@ TEST_F(StartErrorHandlerTest,
 {
     IMS_SINT32 nAnyRetryAfter = 10;
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfigs(SipStatusCode::SC_503,
+            {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER,
+                    ConfigVoice::START_ERROR_ACTION_CSFB});
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
@@ -798,6 +833,8 @@ TEST_F(StartErrorHandlerTest,
 {
     IMS_SINT32 nAnyRetryAfter = 10;
     SetMessageCode(SipStatusCode::SC_503);
+    SetActionConfig(SipStatusCode::SC_503, ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER);
+
     ON_CALL(objMessageUtils, GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
@@ -821,6 +858,8 @@ TEST_F(StartErrorHandlerTest,
 TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistration)
 {
     SetMessageCode(SipStatusCode::SC_504);
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
 
     AString strPathHeader("sip:anyPath");
     ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strPathHeader)));
@@ -849,20 +888,20 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistration)
     objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
     ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
-
-    SetCsfbConfig(SipStatusCode::SC_504);
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigNotAvailable)
 {
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
 TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRegisterNextPcscf)
 {
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
@@ -871,6 +910,8 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRegisterNextPcscf)
 
 TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverRegistration)
 {
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
@@ -879,8 +920,10 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverRegistration)
 
 TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverByNetworkContext)
 {
+    SetActionConfigs(SipStatusCode::SC_504,
+            {ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY,
+                    ConfigVoice::START_ERROR_ACTION_CSFB});
     SetUp504RegRestoration(ConfigVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT);
-    SetCsfbConfig(SipStatusCode::SC_504);
 
     // combined attached case
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
@@ -896,6 +939,8 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverByNetworkContext
 
 TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverWithoutPdnReconnection)
 {
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
     SetUp504RegRestoration(
             ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT);
 

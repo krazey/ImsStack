@@ -158,9 +158,6 @@
         <item value="811"/>
     </int-array>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
-    <int-array name="imsvoice.reject_code_for_csfb_int_array" num="1">
-        <item value="380"/>
-    </int-array>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="0"/>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="1"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="0"/>

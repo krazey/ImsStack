@@ -146,23 +146,65 @@ public:
         }
     }
 
+    inline static ImsVector<IMS_SINT32> LookupActionForStatusCode(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
+    {
+        ImsVector<IMS_SINT32> objActions;
+        AString strActions = ExtractConfigValue(
+                objProxy, ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY, nStatusCode);
+        if (strActions.GetLength() > 0)
+        {
+            ImsList<AString> strActionArray = strActions.Split(TextParser::CHAR_COMMA);
+            for (IMS_UINT32 j = 0; j < strActionArray.GetSize(); ++j)
+            {
+                objActions.Add(strActionArray.GetAt(j).ToInt32());
+            }
+        }
+        return objActions;
+    }
+
     inline static IMS_SINT32 LookupTerminateReasonCodeForEmergency(
             IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
     {
-        ImsVector<AString> objStringArray = objProxy.GetStringArray(
-                ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY);
-        for (IMS_UINT32 i = 0; i < objStringArray.GetSize(); ++i)
+        AString strReasonCode = ExtractConfigValue(objProxy,
+                ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY,
+                nStatusCode);
+        if (strReasonCode.GetLength() > 0)
         {
-            AString strItem = objStringArray.GetAt(i);
-            AString strStatusCode;
-            AString strCallReasonInfoCode;
-            strItem.SplitF(TextParser::CHAR_COLON, strStatusCode, strCallReasonInfoCode);
-            if (strStatusCode.ToInt32() == nStatusCode)
-            {
-                return strCallReasonInfoCode.ToInt32();
-            }
+            return strReasonCode.ToInt32();
         }
         return CODE_NONE;
+    }
+
+    inline static IMS_SINT32 LookupReasonCodeByStatusCodeForNormal(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
+    {
+        AString strReasonCode = ExtractConfigValue(objProxy,
+                ConfigVoice::KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY, nStatusCode);
+        if (strReasonCode.GetLength() > 0)
+        {
+            return strReasonCode.ToInt32();
+        }
+        return CODE_NONE;
+    }
+
+private:
+    inline static AString ExtractConfigValue(IN const MtcConfigurationProxy& objProxy,
+            IN const IMS_CHAR* pszConfigKey, IN IMS_SINT32 nKey)
+    {
+        ImsVector<AString> objKeyValueArray = objProxy.GetStringArray(pszConfigKey);
+        for (IMS_UINT32 i = 0; i < objKeyValueArray.GetSize(); ++i)
+        {
+            AString strItem = objKeyValueArray.GetAt(i);
+            AString strKey;
+            AString strValue;
+            strItem.SplitF(TextParser::CHAR_COLON, strKey, strValue);
+            if (strKey.ToInt32() == nKey)
+            {
+                return strValue;
+            }
+        }
+        return AString::ConstNull();
     }
 };
 
