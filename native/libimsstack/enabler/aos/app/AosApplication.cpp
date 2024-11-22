@@ -2372,7 +2372,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
     AString strNa;
     IMS_UINT32 nFailureCount;
     m_piRegistration->GetProperty(
-            IAosRegistration::PROPERTY_PDN_REACIVATE_WAIT_TIME, nFailureCount, strNa);
+            IAosRegistration::PROPERTY_REG_FAILURE_COUNT, nFailureCount, strNa);
 
     if (m_piContext->GetConnection()->GetState() != IAosConnection::STATE_ACTIVE)
     {
