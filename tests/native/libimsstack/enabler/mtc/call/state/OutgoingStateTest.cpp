@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "Engine.h"
@@ -22,6 +23,7 @@
 #include "ISipHeader.h"
 #include "Ims3gpp.h"
 #include "ImsAosReason.h"
+#include "ImsVector.h"
 #include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
@@ -60,6 +62,7 @@
 #include "precondition/QosDef.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
+#include <initializer_list>
 
 using ::testing::_;
 using ::testing::Return;
@@ -97,6 +100,7 @@ public:
     ImsList<IMtcSession*> objSessions;
     MockIMtcCallManager objCallManager;
     TestConfigService* pConfigService;
+    ImsVector<AString> objActionSets;
 
 protected:
     virtual void SetUp() override
@@ -193,9 +197,7 @@ protected:
         {
             ON_CALL(*pMessage, GetStatusCode).WillByDefault(Return(eStatusCode));
         }
-        ON_CALL(*pConfigurationProxy,
-                Contains(ConfigVoice::KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY, eStatusCode))
-                .WillByDefault(Return(bCsfb));
+
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(bWiFi));
         ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(bCsfb));
         if (bWiFi)
@@ -210,6 +212,31 @@ protected:
                     GetInt(ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT))
                     .WillByDefault(Return(nPolicyOfTimerB));
         }
+    }
+
+    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += ":";
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += ",";
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
+        ON_CALL(*pConfigurationProxy,
+                GetStringArray(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
     }
 
     MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag)
@@ -697,6 +724,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsSipNotAcceptableReasonIfSilentRe
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_488, IMS_FALSE, 0, IMS_FALSE);
+    SetActionConfigs(SipStatusCode::SC_488,
+            {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT});
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMediaManager, GetSupportedMediaTypesFromSdp(&objSession))
@@ -717,6 +746,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsSipRedirectedReasonIfSilentRedia
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_301, IMS_FALSE, 0, IMS_FALSE);
+    SetActionConfigs(
+            SipStatusCode::SC_301, {ConfigVoice::START_ERROR_ACTION_REDIRECTION_BY_CONTACT});
     AString strContactToRedirect("sip:contactToRedirect");
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(strContactToRedirect));
@@ -736,6 +767,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedInvokesStartFailed)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_600, IMS_TRUE, 0, IMS_FALSE);
+    SetActionConfigs(SipStatusCode::SC_600, {ConfigVoice::START_ERROR_ACTION_CSFB});
 
     EXPECT_CALL(objUiNotifier,
             SendStartFailed(CallReasonInfo(
@@ -754,6 +786,8 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(_, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_380, IMS_FALSE, 0, IMS_FALSE);
+    SetActionConfigs(SipStatusCode::SC_380,
+            {ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL});
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigEmergency::
                             KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
@@ -874,6 +908,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
             .WillByDefault(Return(&objMessage));
 
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    SetActionConfigs(SipStatusCode::SC_503, {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
 
