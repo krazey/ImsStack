@@ -118,7 +118,7 @@ public class MtsController {
             }
 
             mUseDialedNumber = cc.getBoolean(
-                    CarrierConfig.Assets.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL);
+                    CarrierConfig.ImsSms.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL);
         } else {
             ImsLog.w(mSlotId, "config is null");
             return;

@@ -656,7 +656,7 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
     {
         ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
         IMS_BOOL bSupportPidf = piCc->GetBoolean(
-                CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL);
+                CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL);
 
         if (bSupportPidf)
         {

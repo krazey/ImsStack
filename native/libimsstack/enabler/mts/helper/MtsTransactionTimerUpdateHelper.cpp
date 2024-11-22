@@ -53,7 +53,7 @@ void MtsTransactionTimerUpdateHelper::SetMessageTransactionTimer(IN const IMS_SI
     }
 
     UpdateTimer(m_piCarrierConfig->GetInt(
-            CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT));
+            CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT));
 }
 
 PUBLIC
@@ -105,7 +105,7 @@ PRIVATE
 IMS_BOOL MtsTransactionTimerUpdateHelper::IsNeedToUpdate(IN IMS_SINT32 nMti) const
 {
     IMS_SINT32 nMilliSeconds = m_piCarrierConfig->GetInt(
-            CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT);
+            CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT);
 
     return (nMilliSeconds > 0) && (nMti == SMS_3GPP_MTI_RP_DATA_FROM_MS);
 }

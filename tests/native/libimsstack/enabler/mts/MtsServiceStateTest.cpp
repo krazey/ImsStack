@@ -80,7 +80,7 @@ TEST_F(MtsServiceStateTest, BlockMoSmsByImsiBasedSipUri)
     ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     pMtsServiceState->Init(&objMockIImsAos);
 
@@ -99,7 +99,7 @@ TEST_F(MtsServiceStateTest, AllowMoSmsByImsiBasedSipUri)
     ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     pMtsServiceState->Init(&objMockIImsAos);
 
@@ -118,7 +118,7 @@ TEST_F(MtsServiceStateTest, CheckServiceStateByImsConnection)
     ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     pMtsServiceState->Init(&objMockIImsAos);
 
@@ -148,7 +148,7 @@ TEST_F(MtsServiceStateTest, LimitedStateBySmsOverIpConfiguration)
     ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     pMtsServiceState->Init(&objMockIImsAos);
 
@@ -169,7 +169,7 @@ TEST_F(MtsServiceStateTest, ObjectInitializedBeforeCarrierConfigLoaded)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
             .Times(2)
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -192,7 +192,7 @@ TEST_F(MtsServiceStateTest, NotifyConfigChangedWithMismatchedSimSlot)
             objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
             .WillOnce(Return(IMS_FALSE));
 
     pMtsServiceState->Init(&objMockIImsAos);

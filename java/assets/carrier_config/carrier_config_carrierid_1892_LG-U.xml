@@ -258,5 +258,5 @@
     </string-array>
 
     <!-- Mts -->
-    <int name="sms_request_uri_type_int" value="1"/>
+    <int name="imssms.sms_request_uri_type_int" value="1"/>
 </carrier_config>
