@@ -222,12 +222,8 @@ CallReasonInfo StartErrorHandler::HandleSilentReinviteBySdpContent(
 
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleSilentReinviteByRetryAfter(
-        IN const IMessage& /*objMessage*/) const
+        IN const IMessage& objMessage) const
 {
-    // TODO: b/361207658
-    // Enable this implementation using a different CL to track the history of a newly added
-    // feature. The CL will include the configuration change for the carriers.
-    /*
     IMS_TRACE_I("HandleSilentReinviteByRetryAfter", 0, 0, 0);
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
@@ -238,8 +234,6 @@ CallReasonInfo StartErrorHandler::HandleSilentReinviteByRetryAfter(
     AString strRetryAfter;
     strRetryAfter.SetNumber(nRetryAfter * 1000);
     return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfter);
-    */
-    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE

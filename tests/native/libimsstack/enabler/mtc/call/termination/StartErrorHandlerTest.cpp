@@ -629,6 +629,34 @@ TEST_F(StartErrorHandlerTest, Handle488Response)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488));
 }
 
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteByRetryAfterReturnsCodeNoneIfRetryAfterIsZero)
+{
+    SetMessageCode(SipStatusCode::SC_413);
+    SetActionConfig(
+            SipStatusCode::SC_413, ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER);
+
+    ON_CALL(objMessageUtils,
+            GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
+            .WillByDefault(Return(0));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REQUEST_ENTITY_TOO_LARGE, SipStatusCode::SC_413));
+}
+
+TEST_F(StartErrorHandlerTest,
+        HandleSilentReinviteByRetryAfterReturnsInternalRedialIfRetryAfterIsPositive)
+{
+    SetMessageCode(SipStatusCode::SC_413);
+    SetActionConfig(
+            SipStatusCode::SC_413, ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER);
+    const IMS_SINT32 nPositiveRetryAfter = 1;
+
+    ON_CALL(objMessageUtils,
+            GetHeaderValueInt(pMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
+            .WillByDefault(Return(nPositiveRetryAfter));
+    const AString strRetryAfterInMillis("1000");
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis));
+}
+
 TEST_F(StartErrorHandlerTest, Handle5xxResponses)
 {
     SetMessageCode(SipStatusCode::SC_501);
