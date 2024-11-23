@@ -76,6 +76,7 @@
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_int" value="0"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_in_roaming_int" value="0"/>
     <int name="imsvoice.policy_of_local_numbers_int" value="2"/>
+    <int name="imsvoice.silent_redial_max_duration_millis_int" value="30000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="1"/>
     <int-array name="imsvoice.short_call_code_int_array" num="0">
@@ -103,7 +104,7 @@
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
     <int name="imswfc.country_code_int" value="0"/>
-    <int name="imsvoice.silent_redial_max_retry_count_int" value="0"/>
+    <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="1"/>
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="0"/>
     <boolean name="imsvt.support_early_session_bool" value="false"/>

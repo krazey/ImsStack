@@ -36,6 +36,7 @@ public:
         SSAC_VIDEO_BARRING,
         PRE_ALERTING_GUARD,
         REGISTRATION_TO_18X,
+        SILENT_REDIAL_MAX_DURATION,
     };
 
     virtual ~IPassiveTimerHolder() = default;
