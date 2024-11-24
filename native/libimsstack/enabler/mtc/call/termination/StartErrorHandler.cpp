@@ -247,36 +247,41 @@ CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy
         IN const IMessage& objMessage) const
 {
     IMS_TRACE_I("HandleRegistrationRestorationOnIms3gppByPolicy", 0, 0, 0);
-    // TODO: b/378600862 - configuration required.
-    if (m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader()) ||
-            m_objContext.GetMessageUtils().ContainsAddressInPaid(
-                    &objMessage, GetServiceRouteHeader()))
+    if (m_objContext.GetConfigurationProxy().GetBoolean(ConfigVoice::
+                        KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
     {
-        if (IsInitialRegistrationRequired(objMessage))
+        if (!m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader()) &&
+                !m_objContext.GetMessageUtils().ContainsAddressInPaid(
+                        &objMessage, GetServiceRouteHeader()))
         {
-            const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                    ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT);
-            switch (nPolicy)
-            {
-                case ConfigVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
-                    break;
-                case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
-                    if (m_objContext.GetService().IsEpsCombinedAttach())
-                    {
-                        break;
-                    }
-                    __IMS_FALLTHROUGH__
-                case ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
-                    ControlAos(ImsAosControl::PCSCF_NEXT);
-                    break;
+            IMS_TRACE_E(0, "P-Asserted-Identity header validation failed.", 0, 0, 0);
+            return CallReasonInfo(CODE_NONE);
+        }
+    }
 
-                case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION:
-                    // If there is an operator that requires PDN reconnect, AoS I/F should be added.
-                case ConfigVoice::
-                        REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
-                    ControlAos(ImsAosControl::REGISTER_REINITIATE);
+    if (IsInitialRegistrationRequired(objMessage))
+    {
+        const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT);
+        switch (nPolicy)
+        {
+            case ConfigVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
+                break;
+            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
+                if (m_objContext.GetService().IsEpsCombinedAttach())
+                {
                     break;
-            }
+                }
+                __IMS_FALLTHROUGH__
+            case ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
+                ControlAos(ImsAosControl::PCSCF_NEXT);
+                break;
+
+            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION:
+                // If there is an operator that requires PDN reconnect, AoS I/F should be added.
+            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
+                ControlAos(ImsAosControl::REGISTER_REINITIATE);
+                break;
         }
     }
 

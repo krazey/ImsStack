@@ -475,6 +475,10 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC
         KEY_IMS_VOICE_PREFIX "session_refresh_trigger_interval_sec_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT[] =
         KEY_IMS_VOICE_PREFIX "registration_restoration_mode_on_504_for_invite_int";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL[] =
+                KEY_IMS_VOICE_PREFIX
+        "registration_restoration_for_invite_require_header_validation_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_on_audio_qos_deactivation_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL[] =
