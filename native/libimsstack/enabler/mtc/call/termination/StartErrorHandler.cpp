@@ -125,7 +125,40 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
         }
     }
 
-    return GetDefaultCallReasonInfo(*piMessage);
+    return GetDefaultCallReasonInfo(m_objContext, *piMessage);
+}
+
+PUBLIC GLOBAL CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfo(
+        IN IMtcCallContext& objContext, IN const IMessage& objMessage)
+{
+    const IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
+    IMS_SINT32 nReasonCode = MtcConfigurationResolver::LookupReasonCodeByStatusCodeForNormal(
+            objContext.GetConfigurationProxy(), nStatusCode);
+    if (nReasonCode == CODE_NONE)
+    {
+        auto it = s_defaultStatusCodeAndReasonCodeMap.find(nStatusCode);
+        if (it != s_defaultStatusCodeAndReasonCodeMap.end())
+        {
+            nReasonCode = it->second;
+        }
+        else
+        {
+            nReasonCode = CODE_SIP_SERVER_ERROR;
+        }
+    }
+    IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
+    return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objContext, objMessage));
+}
+
+PUBLIC GLOBAL IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(
+        IN IMtcCallContext& objContext, IN const IMessage& objMessage)
+{
+    IMS_SINT32 nExtraCode = objContext.GetMessageUtils().GetCauseFromReasonHeader(&objMessage);
+    if (nExtraCode == -1)
+    {
+        nExtraCode = objMessage.GetStatusCode();
+    }
+    return nExtraCode;
 }
 
 PRIVATE
@@ -465,7 +498,8 @@ CallReasonInfo StartErrorHandler::HandleTerminateByResponseSource(
         if (IsIpcanResourceUnavailable(objMessage))
         {
             // TS 24.229 5.1.3.1: There's the method to examine headers but no further behavior.
-            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
+            return CallReasonInfo(
+                    CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(m_objContext, objMessage));
         }
     }
 
@@ -498,39 +532,6 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
 
     ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
     return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfo(IN const IMessage& objMessage) const
-{
-    const IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-    IMS_SINT32 nReasonCode = MtcConfigurationResolver::LookupReasonCodeByStatusCodeForNormal(
-            m_objContext.GetConfigurationProxy(), nStatusCode);
-    if (nReasonCode == CODE_NONE)
-    {
-        auto it = s_defaultStatusCodeAndReasonCodeMap.find(nStatusCode);
-        if (it != s_defaultStatusCodeAndReasonCodeMap.end())
-        {
-            nReasonCode = it->second;
-        }
-        else
-        {
-            nReasonCode = CODE_SIP_SERVER_ERROR;
-        }
-    }
-    IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
-    return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objMessage));
-}
-
-PRIVATE
-IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage) const
-{
-    IMS_SINT32 nExtraCode = m_objContext.GetMessageUtils().GetCauseFromReasonHeader(&objMessage);
-    if (nExtraCode == -1)
-    {
-        nExtraCode = objMessage.GetStatusCode();
-    }
-    return nExtraCode;
 }
 
 PRIVATE

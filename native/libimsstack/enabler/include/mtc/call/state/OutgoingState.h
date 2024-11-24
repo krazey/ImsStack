@@ -77,7 +77,7 @@ protected:
 private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
     CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode);
-    CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
+    CallStateName HandleSilentRedial(IN const CallReasonInfo& objReason);
     void OnStarted(IN IMtcSession& objMtcSession);
     void OnStartFailed(
             IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);

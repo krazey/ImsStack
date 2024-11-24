@@ -45,6 +45,11 @@ public:
      */
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
 
+    static CallReasonInfo GetDefaultCallReasonInfo(
+            IN IMtcCallContext& objContext, IN const IMessage& objMessage);
+    static IMS_SINT32 GetDefaultExtraCode(
+            IN IMtcCallContext& objContext, IN const IMessage& objMessage);
+
 private:
     CallReasonInfo HandleTransactionTimeout() const;
     CallReasonInfo HandleCsfb(IN const IMessage& objMessage) const;
@@ -63,8 +68,6 @@ private:
     CallReasonInfo HandleTerminateByResponseSource(IN const IMessage& objMessage) const;
 
     CallReasonInfo HandleRedialByNetworkContext() const;
-    CallReasonInfo GetDefaultCallReasonInfo(IN const IMessage& objMessage) const;
-    IMS_SINT32 GetDefaultExtraCode(IN const IMessage& objMessage) const;
 
     static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;

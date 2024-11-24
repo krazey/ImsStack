@@ -221,7 +221,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
             return GetStateName();
         }
 
-        return HandleSilentRedial(piSession, objReason);
+        return HandleSilentRedial(objReason);
     }
 
     OnStartFailed(objReason, IMS_TRUE);
@@ -278,7 +278,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
             return GetStateName();
         }
 
-        return HandleSilentRedial(piSession, objReason);
+        return HandleSilentRedial(objReason);
     }
 
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
@@ -683,17 +683,16 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
     if (m_bWaitingRedial)
     {
         m_bWaitingRedial = IMS_FALSE;
-        return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
-                CallReasonInfo(CODE_INTERNAL_REDIAL,
-                        m_objContext.GetCallInfo().IsEmergency()
-                                ? EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF
-                                : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
+        return HandleSilentRedial(CallReasonInfo(CODE_INTERNAL_REDIAL,
+                m_objContext.GetCallInfo().IsEmergency()
+                        ? EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF
+                        : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
     }
 
     if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
+        return HandleSilentRedial(
                 CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
     }
     else if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
@@ -822,8 +821,7 @@ CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SI
 }
 
 PRIVATE
-CallStateName OutgoingState::HandleSilentRedial(
-        IN ISession* piSession, IN const CallReasonInfo& objReason)
+CallStateName OutgoingState::HandleSilentRedial(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("HandleSilentRedial", 0, 0, 0);
 
@@ -834,30 +832,11 @@ CallStateName OutgoingState::HandleSilentRedial(
         return GetStateName();
     }
 
-    IMS_RESULT nResult =
+    CallReasonInfo objResult =
             m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason).Redial();
-
-    if (nResult == IMS_FAILURE)
+    if (objResult.nCode != CODE_NONE)
     {
-        CallReasonInfo objReasonToUi(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
-        IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
-                piSession, IMessage::SESSION_START);
-        if (piResponse != IMS_NULL)
-        {
-            IMS_SINT32 nLastResponseCode = piResponse->GetStatusCode();
-            if (nLastResponseCode == SipStatusCode::SC_488)
-            {
-                objReasonToUi.nCode = CODE_SIP_NOT_ACCEPTABLE;
-                objReasonToUi.nExtraCode = nLastResponseCode;
-            }
-            else if (nLastResponseCode >= SipStatusCode::SC_300 &&
-                    nLastResponseCode < SipStatusCode::SC_400)
-            {
-                objReasonToUi.nCode = CODE_SIP_REDIRECTED;
-                objReasonToUi.nExtraCode = nLastResponseCode;
-            }
-        }
-        OnStartFailed(objReasonToUi);
+        OnStartFailed(objResult);
         return CallStateName::TERMINATING;
     }
 
