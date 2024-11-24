@@ -21,6 +21,7 @@
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
+#include "SipMethod.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
@@ -574,7 +575,28 @@ TEST_F(MtcSessionTest, UpdateUpdatesForLocation)
 TEST_F(MtcSessionTest, AcceptUpdateAcceptsUpdate)
 {
     CreateMtcSession();
+    SetUpForSetSdp(NegotiationState::STATE_NEGOTIATED, IMS_SUCCESS);
 
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _));
+    EXPECT_CALL(*pMessageSender, AcceptUpdate).Times(1);
+
+    pMtcSession->AcceptUpdate();
+}
+
+TEST_F(MtcSessionTest, AcceptUpdateDoesNotSetSdpIfMethodIsUpdate)
+{
+    CreateMtcSession();
+    SetUpForSetSdp(NegotiationState::STATE_NEGOTIATED, IMS_SUCCESS);
+
+    SipMethod objSipMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(0);
     EXPECT_CALL(*pMessageSender, AcceptUpdate).Times(1);
 
     pMtcSession->AcceptUpdate();
@@ -584,6 +606,10 @@ TEST_F(MtcSessionTest, AcceptUpdateReturnsFailureIfSetSdpFails)
 {
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_NEGOTIATED, IMS_FAILURE);
+
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
 
     EXPECT_CALL(*pMessageSender, AcceptUpdate).Times(0);
 
