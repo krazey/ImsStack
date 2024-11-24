@@ -306,6 +306,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
             SetInConference(objRequest);
             break;
 
+        case RequestType::PRACK:
         case RequestType::EARLY_UPDATE:
             UpdateCallTypeFromMessage(objRequest, IMS_TRUE);
             break;
