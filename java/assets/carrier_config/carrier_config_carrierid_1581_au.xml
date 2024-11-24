@@ -65,6 +65,72 @@
     <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
+    <int name="imsvoice.silent_redial_max_duration_millis_int" value="45000"/>
+    <int name="imsvoice.silent_redial_max_retry_count_int" value="5"/>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="61">
+        <item value="300:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="301:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="302:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="305:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB -->
+        <item value="400:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="401:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="402:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="403:3,7"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, HANDLE_FORBIDDEN_BY_POLICY -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="405:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="406:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="407:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="408:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="410:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="412:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="414:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="415:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="416:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="417:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="420:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="423:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="424:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="428:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="429:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="430:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="433:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="436:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="437:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="438:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="439:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="440:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="469:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="470:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="481:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="482:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="483:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="484:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="485:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="487:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="488:3,2"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE_BY_SDP_CONTENT -->
+        <item value="489:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="491:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="493:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="494:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="499:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="500:3,12"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TERMINATE_BY_RESPONSE_SOURCE -->
+        <item value="501:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="502:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="503:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="505:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="513:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="580:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="600:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="604:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:3,2"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
+
     <int-array name="imsemergency.reject_code_require_perm_failure_int_array" num="35">
         <item value="400"/>
         <item value="401"/>
