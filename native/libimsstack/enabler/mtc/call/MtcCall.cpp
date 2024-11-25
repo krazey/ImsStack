@@ -36,6 +36,7 @@
 #include "call/MtcSession.h"
 #include "call/block/MtcBlockChecker.h"
 #include "call/message/MessageSender.h"
+#include "call/state/MtcCallState.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "emergency/CurrentLocationDiscoveryController.h"
 #include "helper/ICallStateProxy.h"
@@ -533,7 +534,7 @@ PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 PUBLIC VIRTUAL void MtcCall::RunPendingOperationIfPossible()
 {
     while (m_objPendingOperationHolder.HasPendingOperation() &&
-            GetState() == CallStateName::ESTABLISHED)
+            GetState() == CallStateName::ESTABLISHED && !IsInUpdateAfterConnectedDelay())
     {
         IMS_TRACE_I("RunPendingOperationIfPossible : key[%d]", m_nKey, 0, 0);
         m_objStateMachine.RunStateOperation(m_objPendingOperationHolder.PopPendingOperation());
@@ -1277,4 +1278,10 @@ void MtcCall::OnAttached()
                     return pState->OnAttached();
                 });
     }
+}
+
+PRIVATE
+IMS_BOOL MtcCall::IsInUpdateAfterConnectedDelay() const
+{
+    return GetTimer().IsActive(MtcCallState::TimerType::TIMER_DELAY_UPDATE_AFTER_CONNECTED);
 }

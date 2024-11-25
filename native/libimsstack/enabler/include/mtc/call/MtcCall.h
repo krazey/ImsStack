@@ -174,7 +174,7 @@ public:
     void DeleteUpdatingInfo() override;
     void RunPendingOperationIfPossible() override;
 
-    inline MtcTimerWrapper& GetTimer() override { return *m_pTimer; }
+    inline MtcTimerWrapper& GetTimer() const override { return *m_pTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
     {
         return m_objSupplementaryService;
@@ -323,6 +323,7 @@ private:
     static CallKey CreateCallKey();
     void OnInternalFailure();
     void OnAttached();
+    IMS_BOOL IsInUpdateAfterConnectedDelay() const;
 
     IMtcContext& m_objContext;
     IMtcService& m_objService;

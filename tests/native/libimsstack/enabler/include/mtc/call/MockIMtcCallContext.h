@@ -69,7 +69,7 @@ public:
     MOCK_METHOD(IMtcUiNotifier&, GetUiNotifier, (), (override));
     MOCK_METHOD(IMtcMediaManager&, GetMediaManager, (), (override));
     MOCK_METHOD(IMtcPreconditionManager&, GetPreconditionManager, (), (override));
-    MOCK_METHOD(MtcTimerWrapper&, GetTimer, (), (override));
+    MOCK_METHOD(MtcTimerWrapper&, GetTimer, (), (const, override));
     MOCK_METHOD(MtcSupplementaryService&, GetSupplementaryService, (), (override));
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
     MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));

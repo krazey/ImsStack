@@ -41,6 +41,7 @@
 #include "call/radio/MockIMtcRadioChecker.h"
 #include "call/state/MockIMtcCallState.h"
 #include "call/state/MockMtcCallStateMachine.h"
+#include "call/state/MtcCallState.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/MockIConferenceManager.h"
 #include "configuration/MockMtcConfigurationProxy.h"
@@ -977,6 +978,29 @@ TEST_F(MtcCallTest, RunPendingOperationIfPossibledRunsAllPendingOperationIfAllRe
 
     objCall.RunPendingOperationIfPossible();
     EXPECT_FALSE(objCall.GetPendingOperationHolder().HasPendingOperation());
+}
+
+TEST_F(MtcCallTest, RunPendingOperationIfPossibledNotRunPendingOperationIfInDelay)
+{
+    std::function<IMtcCall::State(IMtcCallState*)> objPendingOperationReturnEstablished =
+            [](IMtcCallState* /* pState */)
+    {
+        return CallStateName::ESTABLISHED;
+    };
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+
+    EXPECT_CALL(*pState, GetStateName).WillRepeatedly(Return(CallStateName::ESTABLISHED));
+
+    objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
+
+    EXPECT_CALL(static_cast<MockMtcTimerWrapper&>(objCall.GetTimer()),
+            IsActive(MtcCallState::TimerType::TIMER_DELAY_UPDATE_AFTER_CONNECTED))
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    objCall.RunPendingOperationIfPossible();
+    EXPECT_TRUE(objCall.GetPendingOperationHolder().HasPendingOperation());
 }
 
 TEST_F(MtcCallTest, RunPendingOperationIfPossibledNotRunsAllPendingOperationIfReturnUpdating)
