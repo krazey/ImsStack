@@ -599,7 +599,7 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
     objHeaders.Append("<urn:service:sos>");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
@@ -665,25 +665,31 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
+            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+
+    objHeaders.SetAt("<urn:service:sos.country-specific.xy.567>", 0);
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC);
 
     objHeaders.SetAt("<urn:nonserviceurn>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
     objHeaders.SetAt("<urn:service:>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
     objHeaders.Clear();
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 }
 
 TEST_F(MessageUtilsTest, GetCauseFromReasonHeader)

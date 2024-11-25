@@ -606,7 +606,9 @@ PUBLIC IMS_SINT32 MessageUtils::GetSosTypeFromServiceUrn(IN const IMessage* piMe
     if (GetUrnValue(piMessage, MessageUtil::STR_SERVICE, eHeaderType, strValue, strHeaderName) ==
             IMS_FAILURE)
     {
-        return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
+        // b/236411658 case seems to be controlled by APDS, not IMS Stack so we might be able to
+        // use GENERIC urn if there is no Contact header without any configuration.
+        return EXTRA_CODE_EMERGENCYSERVICE_GENERIC;
     }
 
     if (!strValue.StartsWith(MessageUtil::STR_SOS))
@@ -653,6 +655,10 @@ PUBLIC IMS_SINT32 MessageUtils::GetSosTypeFromServiceUrn(IN const IMessage* piMe
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_POLICE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_POLICE;
+    }
+    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_COUNTRY_SPECIFIC))
+    {
+        return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
     }
     else if (strValue.MakeLower().Contains(MessageUtil::STR_SOS_COUNTRY_SPECIFIC))
     {
