@@ -174,17 +174,10 @@ protected:
     void SetUp504RegRestoration(IN IMS_SINT32 nPolicy)
     {
         SetMessageCode(SipStatusCode::SC_504);
-
-        AString strPathHeader("sip:anyPath");
-        ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strPathHeader)));
-        AString strServiceRoute("sip:anyServiceRoute");
-        ON_CALL(objAosConnector, GetServiceRouteHeaderValue)
-                .WillByDefault(Return(AString(strServiceRoute)));
-
-        ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strPathHeader))
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::
+                                KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strServiceRoute))
-                .WillByDefault(Return(IMS_TRUE));
 
         objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
         objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
@@ -855,11 +848,19 @@ TEST_F(StartErrorHandlerTest,
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "10000"));
 }
 
-TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistration)
+TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistrationByHeaderValidation)
 {
     SetMessageCode(SipStatusCode::SC_504);
     SetActionConfig(SipStatusCode::SC_504,
             ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     AString strPathHeader("sip:anyPath");
     ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strPathHeader)));
@@ -873,9 +874,96 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistration)
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+}
 
+TEST_F(StartErrorHandlerTest, Handle504ResponseRestoresRegistrationWithHeaderValidation)
+{
+    SetMessageCode(SipStatusCode::SC_504);
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    AString strPathHeader("sip:anyPath");
+    ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strPathHeader)));
+    AString strServiceRoute("sip:anyServiceRoute");
+    ON_CALL(objAosConnector, GetServiceRouteHeaderValue)
+            .WillByDefault(Return(AString(strServiceRoute)));
+
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strPathHeader))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strServiceRoute))
             .WillByDefault(Return(IMS_TRUE));
+
+    objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
+    objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
+    objIms3gppData.eAlternativeServiceAction =
+            Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION;
+    ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
+
+    EXPECT_CALL(objAosConnector, Control(_)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+}
+
+TEST_F(StartErrorHandlerTest, Handle504ResponsetRestoresRegistrationWithoutHeaderValidation)
+{
+    SetMessageCode(SipStatusCode::SC_504);
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    AString strPathHeader("sip:anyPath");
+    ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strPathHeader)));
+    AString strServiceRoute("sip:anyServiceRoute");
+    ON_CALL(objAosConnector, GetServiceRouteHeaderValue)
+            .WillByDefault(Return(AString(strServiceRoute)));
+
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strPathHeader))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strServiceRoute))
+            .WillByDefault(Return(IMS_FALSE));
+
+    objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
+    objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
+    objIms3gppData.eAlternativeServiceAction =
+            Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION;
+    ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
+
+    EXPECT_CALL(objAosConnector, Control(_)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    EXPECT_CALL(objAosConnector, Control(_)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+}
+
+TEST_F(StartErrorHandlerTest, Handle504ResponseDoesNotRestoreRegistrationByIms3gppValidation)
+{
+    SetMessageCode(SipStatusCode::SC_504);
+    SetActionConfig(SipStatusCode::SC_504,
+            ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
 
     Ims3gppData objIms3gppData;
     ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
