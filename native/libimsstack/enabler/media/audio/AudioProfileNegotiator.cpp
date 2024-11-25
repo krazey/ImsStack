@@ -229,9 +229,9 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
     {
         // Set the index of negotiated payload from the list.
         pPeerProfile->SetNegotiatedPayloadIndex(nPayloadIndex);
-        // set nego payload index at src profile
+        // set remote payload index at local profile
         pLocalProfile->SetNegotiatedPayloadIndex(nSrcPayloadIndex);
-        IMS_TRACE_D("NegotiateAmr() - nego payload index[%d]",
+        IMS_TRACE_D("NegotiateAmr() - remote payload index[%d]",
                 pLocalProfile->GetNegotiatedPayloadIndex(), 0, 0);
 
         // MT case : change src PT# to dest PT#
@@ -323,10 +323,10 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateEvs(IN AudioProfile* pLo
     {
         // Set the index of negotiated payload from the list
         pPeerProfile->SetNegotiatedPayloadIndex(nPayloadIndex);
-        // set nego payload index at src profile
+        // set remote payload index at local profile
         pLocalProfile->SetNegotiatedPayloadIndex(nSrcPayloadIndex);
 
-        // MT case : change src PT# to dest PT#
+        // MT case : change local PT# to remote PT#
         if (m_bIsOfferReceived == IMS_TRUE && pLocalProfile->GetNegotiatedPayloadIndex() != -1)
         {
             AudioProfile::Payload* pTempNegoSrcPayload =
@@ -797,15 +797,15 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
         }
 
         // 2.2 Normal Case
-        if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
+        if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE)
         {
-            // if RS/RR is used for RTCP Nego value
+            // if RS/RR is used for RTCP remote value
             pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
             pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
         }
         else
         {
-            // default case (RS/RR is not negotiated value)
+            // default case (Local value is used instead of remote value.)
             pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
             pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
         }
@@ -818,9 +818,8 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
         {
             pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegoticatedCodec);
 
-            // if GetBandwidthNegoOption is BW_OPTION_NEGOTIATED_VALUE, use lower AS value
-            if ((pConfig->GetBandwidthNegoOption() ==
-                        MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE) &&
+            // if GetBandwidthNegoOption is BW_OPTION_REMOTE_VALUE, use lower AS value
+            if ((pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE) &&
                     (nAsValueOfNegoticatedCodec > pPeerProfile->GetBandwidthAs()) &&
                     (pPeerProfile->GetBandwidthAs() > 0))
             {
@@ -854,9 +853,9 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
             }
 
             // 3.2.2 Normal Case
-            if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
+            if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE)
             {
-                // if RS/RR is used for RTCP Nego value
+                // if RS/RR is used for RTCP remote  value
                 IMS_TRACE_D("MakeNegotiatedBandwidth() - use peer RS[%d] RR[%d]",
                         pPeerProfile->GetBandwidthRs(), pPeerProfile->GetBandwidthRr(), 0);
                 pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
@@ -864,7 +863,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
             }
             else
             {
-                // default case (RS/RR is not negotiated value)
+                // default case (Local value is used instead of remote value.)
                 pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
                 pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
             }
@@ -946,7 +945,7 @@ IMS_BOOL AudioProfileNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile
                 }
 
                 // condition check....
-                // need to return nego BW and BR, ModeSet(AMR IO Mode.). also default values...
+                // need to return remote BW and BR, ModeSet(AMR IO Mode.). also default values...
                 if (legacyCheck == 0)
                 {
                     // IR92 rel15 EVS Br/Bw check.
@@ -1816,7 +1815,7 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                     {
                         continue;
                     }
-                    // need to return nego BW and BR, ModeSet(AMR IO Mode.). also default values...
+                    // need to return remote BW and BR, ModeSet(AMR IO Mode.). also default values.
                     if (legacyCheck == 0)
                     {
                         // IR92 rel15 EVS Br/Bw check.
