@@ -47,7 +47,7 @@ AudioController::~AudioController()
 }
 
 PUBLIC
-void AudioController::SetConfirmSession(IN IMS_BOOL bConfirmed)
+void AudioController::SetCallSessionState(IN IMS_BOOL bConfirmed)
 {
     if (bConfirmed)
     {

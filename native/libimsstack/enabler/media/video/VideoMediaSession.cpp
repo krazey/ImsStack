@@ -321,7 +321,7 @@ void VideoMediaSession::SetMtu(IN IMS_SINT32 nMtu)
 
 PUBLIC
 IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
-        IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp)
+        IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp)
 {
     /** TODO_MEDIA need to get real value when it's ready. */
     if (bActiveSession)
@@ -331,7 +331,8 @@ IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
 
         m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
                 (bEnableRtcp) ? m_pConfig->GetRtcpInactivityTimerMillis() : 0);
-        m_objMediaQualityThreshold.setVideoBitrateBps(m_pConfig->GetVideoLowestBitrateBps());
+        m_objMediaQualityThreshold.setVideoBitrateBps(
+                (bConfirmedSession) ? m_pConfig->GetVideoLowestBitrateBps() : 0);
     }
     else
     {
@@ -341,13 +342,16 @@ IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
         m_objMediaQualityThreshold.setVideoBitrateBps(0);
     }
 
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], VideoLowestBitrate[%d]",
-            bActiveSession, m_objMediaQualityThreshold.getVideoBitrateBps(), 0);
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - RtpInactivity[%d], RtcpInactivity[%d]",
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - ActiveSession[%d], ConfirmedSession[%d], "
+                "EnableRtcp[%d]",
+            bActiveSession, bConfirmedSession, bEnableRtcp);
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - RtpInactivity[%d], RtcpInactivity[%d], "
+                "VideoLowestBitrate[%d]",
             (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
                     ? -1
                     : m_objMediaQualityThreshold.getRtpInactivityTimerMillis().front(),
-            m_objMediaQualityThreshold.getRtcpInactivityTimerMillis(), 0);
+            m_objMediaQualityThreshold.getRtcpInactivityTimerMillis(),
+            m_objMediaQualityThreshold.getVideoBitrateBps());
 
     return IMS_TRUE;
 }

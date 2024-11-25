@@ -23,6 +23,8 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC
 VideoController::VideoController() :
         m_pSession(IMS_NULL),
+        m_eCallState(EARLY_SESSION),
+        m_objLocalAddr(IpAddress::IPv6NONE),
         m_nPort(0)
 {
 }
@@ -35,6 +37,12 @@ VideoController::~VideoController()
         delete m_pSession;
         m_pSession = NULL;
     }
+}
+
+PUBLIC
+void VideoController::SetCallSessionState(IN IMS_BOOL bConfirmed)
+{
+    m_eCallState = (bConfirmed) ? CONFIRMED_SESSION : EARLY_SESSION;
 }
 
 PUBLIC
@@ -209,7 +217,7 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
     IMS_BOOL bActiveSession =
             (m_pSession->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE : IMS_FALSE;
 
-    return m_pSession->UpdateMediaQualityThreshold(bActiveSession, bEnableRtcp);
+    return m_pSession->UpdateMediaQualityThreshold(bActiveSession, m_eCallState, bEnableRtcp);
 }
 
 PUBLIC

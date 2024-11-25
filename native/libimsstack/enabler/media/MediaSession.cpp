@@ -765,7 +765,8 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             }
             break;
         case SET_CONFIRMED_SESSION:
-            m_objAudioController.SetConfirmSession(param1);
+            m_objAudioController.SetCallSessionState(param1);
+            m_objVideoController.SetCallSessionState(param1);
             m_bSessionConfirmed = (param1 > 0);
             break;
         case SET_DIRECTION:

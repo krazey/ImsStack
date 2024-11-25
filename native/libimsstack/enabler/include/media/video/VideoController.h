@@ -26,8 +26,22 @@
 class VideoController
 {
 public:
+    enum VideoCallSessionState
+    {
+        EARLY_SESSION = 0,
+        CONFIRMED_SESSION,  // in confirmed already
+    };
+
     VideoController();
-    ~VideoController();
+    virtual ~VideoController();
+
+    /**
+     * @brief Set the update condition for next transition
+     *
+     * @param bConfirmed it is IMS_TRUE when the session changed to confirmed session
+     */
+    void SetCallSessionState(IN IMS_BOOL bConfirmed);
+
     IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
     /**
@@ -112,6 +126,7 @@ public:
 
 private:
     VideoMediaSession* m_pSession;
+    IMS_UINT32 m_eCallState;
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
 };
