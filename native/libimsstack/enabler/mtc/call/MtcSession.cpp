@@ -245,8 +245,9 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::AcceptUpdate()
 {
-    IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(
-            m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE));
+    IMessage* piMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(piMessage) &&
+            piMessage->GetMethod().Equals(SipMethod::INVITE);
     IMS_TRACE_D("AcceptUpdate Offerless case[%s]", _TRACE_B_(bAnswerForOfferlessReInvite), 0, 0);
 
     // bAnswerForOfferlessReInvite should allow re-offer.
