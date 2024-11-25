@@ -25,8 +25,10 @@
 #include "call/MtcCallController.h"
 #include "conferencecall/MockIConferenceController.h"
 #include "conferencecall/MockIConferenceManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "ect/MockIEctManager.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/OperationAsyncRunner.h"
 #include <functional>
 #include <gtest/gtest.h>
@@ -50,6 +52,8 @@ public:
     MockIMtcCallManager objCallManager;
     MockIEctManager objEctManager;
     MockICallStateProxy objCallStateProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
+    MockIPassiveTimerHolder objPassiveTimer;
 
 protected:
     virtual void SetUp() override
@@ -58,6 +62,8 @@ protected:
         ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
         ON_CALL(objContext, GetEctManager).WillByDefault(ReturnRef(objEctManager));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
 
         pCallController = new MtcCallController(objContext);
     }

@@ -606,6 +606,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_media_type_restriction_on_cellular_in_roaming_int";
         public static final String KEY_POLICY_OF_LOCAL_NUMBERS_INT =
                 KEY_PREFIX + "policy_of_local_numbers_int";
+        public static final String KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT =
+                KEY_PREFIX + "silent_redial_max_duration_millis_int";
         public static final String KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT =
                 KEY_PREFIX + "silent_redial_interval_millis_int";
         public static final String KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT =
