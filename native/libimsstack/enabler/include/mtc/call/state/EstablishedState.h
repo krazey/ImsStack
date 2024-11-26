@@ -17,6 +17,7 @@
 #ifndef ESTABLISHED_STATE_H_
 #define ESTABLISHED_STATE_H_
 
+#include "CallReasonInfo.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
@@ -70,8 +71,8 @@ protected:
 private:
     IMS_RESULT HandleUpdate(
             IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo);
-    IMS_RESULT HandleReceivedUpdate(OUT CallStateName& eStateName);
-    IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
+    CallReasonInfo HandleReceivedUpdate(OUT CallStateName& eStateName);
+    CallReasonInfo HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
     IMS_BOOL IsConferenceCallParticipant() const;
     ImsList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
     CallStateName Downgrade(IN CallType eCallType);

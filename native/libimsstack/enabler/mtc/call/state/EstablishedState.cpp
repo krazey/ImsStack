@@ -197,9 +197,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     // TODO, conference
 
-    IMS_RESULT eResult = IMS_SUCCESS;
     CallStateName eStateName = CallStateName::UPDATING;
-
+    CallReasonInfo objResultReason(CODE_NONE);
     if (m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
         auto pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
@@ -208,25 +207,25 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
         if (objResult.eStatus == IMtcBlockChecker::Result::Status::UNBLOCKED)
         {
-            eResult = HandleReceivedUpdate(eStateName);
+            objResultReason = HandleReceivedUpdate(eStateName);
         }
         else
         {
-            // Restore the CallType that was changed by MtcSession#HandleRequest.
-            pSession->SetCallType(pSession->GetPreviousCallType());
-            pSession->Reject(objResult.objReason);
-            m_objContext.GetMediaManager().FinalizeSdp(piSession);
-            eStateName = CallStateName::ESTABLISHED;
+            objResultReason = objResult.objReason;
         }
     }
     else
     {
-        eResult = HandleReceivedUpdateWithoutOffer(eStateName);
+        objResultReason = HandleReceivedUpdateWithoutOffer(eStateName);
     }
 
-    if (eResult != IMS_SUCCESS)
+    if (objResultReason.nCode != CODE_NONE)
     {
-        // TODO
+        // Restore the CallType that was changed by MtcSession#HandleRequest.
+        pSession->SetCallType(pSession->GetPreviousCallType());
+        pSession->Reject(objResultReason);
+        m_objContext.GetMediaManager().FinalizeSdp(piSession);
+        eStateName = CallStateName::ESTABLISHED;
     }
 
     if (eStateName == CallStateName::ESTABLISHED)
@@ -546,14 +545,15 @@ IMS_RESULT EstablishedState::HandleUpdate(
 }
 
 PRIVATE
-IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
+CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 {
     IMS_TRACE_D("HandleReceivedUpdate", 0, 0, 0);
     IMtcSession* pMtcSession = m_objContext.GetSession();
     ISession& objSession = pMtcSession->GetISession();
-    if (m_objContext.GetMediaManager().NegotiateSdp(&objSession) == IMS_FAILURE)
+    NegotiationResult eNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
+    if (eNegoResult != NegotiationResult::NO_ERROR)
     {
-        // TODO
+        return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult);
     }
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
@@ -586,7 +586,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
                     m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession));
         }
 
-        return IMS_SUCCESS;
+        return CallReasonInfo(CODE_NONE);
     }
 
     if (m_objContext.GetUpdatingInfo().IsResumedBy() &&
@@ -598,7 +598,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
                 m_objContext.GetConfigurationProxy().GetInt(
                         ConfigVt::KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT));
 
-        return IMS_SUCCESS;
+        return CallReasonInfo(CODE_NONE);
     }
 
     IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
@@ -616,11 +616,11 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
         // TODO
     }
 
-    return IMS_SUCCESS;
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName)
+CallReasonInfo EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName)
 {
     IMS_TRACE_D("HandleReceivedUpdateWithoutOffer", 0, 0, 0);
     eStateName = CallStateName::UPDATING;
@@ -643,7 +643,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName&
         // TODO
     }
 
-    return IMS_SUCCESS;
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE

@@ -699,7 +699,7 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
 
     if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
     {
-        // TODO
+        IMS_TRACE_E(0, "Negotiation failed. Keep the call just in case there is RTP.", 0, 0, 0);
     }
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
