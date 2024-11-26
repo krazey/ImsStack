@@ -174,21 +174,21 @@ void AudioMediaSession::SetConfig(IN AudioConfiguration* pConfig)
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
+AudioConfig* AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
         IN AudioProfile* pNegoProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL)
     {
         IMS_TRACE_E(0, "UpdateRtpConfig() - invalid profile", 0, 0, 0);
-        return IMS_FALSE;
+        return IMS_NULL;
     }
 
     if (pNegoProfile->GetPayloadList().GetSize() == 0 ||
             pPeerProfile->GetPayloadList().GetSize() == 0)
     {
         IMS_TRACE_E(0, "UpdateRtpConfig() - no payload to update", 0, 0, 0);
-        return IMS_FALSE;
+        return IMS_NULL;
     }
 
     // Get Negotiated Payload from negotiated Payload index...
@@ -212,7 +212,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     if (pNegoPayload == IMS_NULL || pPeerPayload == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_NULL;
     }
 
     AudioConfig objAudioConfig;
@@ -307,7 +307,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
                 REINTERPRET_CAST(AudioProfile::AmrFmtp*, pNegoPayload->GetFmtp());
         if (pFmtp == IMS_NULL)
         {
-            return IMS_FALSE;
+            return IMS_NULL;
         }
 
         if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
@@ -362,7 +362,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
                 REINTERPRET_CAST(AudioProfile::EvsFmtp*, pPeerPayload->GetFmtp());
         if (pFmtp == IMS_NULL)
         {
-            return IMS_FALSE;
+            return IMS_NULL;
         }
         objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_EVS);
         objAudioConfig.setSamplingRateKHz(
@@ -428,7 +428,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     else
     {
         IMS_TRACE_E(0, "UpdateRtpConfig() - Invalid - state[%d]", m_nState, 0, 0);
-        return IMS_FALSE;
+        return IMS_NULL;
     }
 
     IMS_TRACE_D("UpdateRtpConfig() - CodecType[%d], SamplingRate[%d]",
@@ -483,7 +483,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
         if (objAudioConfig == *pPrevAudioConfig)
         {
-            return IMS_FALSE;
+            return pPrevAudioConfig;
         }
 
         delete m_pRtpConfig;
@@ -491,7 +491,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     m_pRtpConfig = new AudioConfig(objAudioConfig);
 
-    return IMS_TRUE;
+    return REINTERPRET_CAST(AudioConfig*, m_pRtpConfig);
 }
 
 PUBLIC

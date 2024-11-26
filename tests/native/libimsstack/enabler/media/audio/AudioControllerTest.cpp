@@ -30,10 +30,26 @@ const AString LOCAL_IP = "127.0.0.1";
 const IMS_UINT32 LOCAL_PORT = 20000;
 const IMS_UINT32 ACCESS_NETWORK = MediaNetworkConnectionWatcher::EUTRAN;
 
+class FakeAudioController : public AudioController
+{
+public:
+    FakeAudioController() :
+            AudioController()
+    {
+    }
+
+    virtual ~FakeAudioController() {}
+
+    IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig) override
+    {
+        return AudioController::IsAudioConfigChanged(pAudioConfig);
+    }
+};
+
 class AudioControllerTest : public ::testing::Test
 {
 public:
-    AudioController* m_pController;
+    FakeAudioController* m_pController;
     AudioConfiguration* m_pConfig;
     FakeIMediaSessionListener m_objFakeListener;
     MockIMediaSessionListener m_objListener;
@@ -47,7 +63,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_pController = new AudioController();
+        m_pController = new FakeAudioController();
         m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
         m_pConfig->Create(ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID));
         m_pAudioNego = new MockAudioNego(DEFAULT_SLOT_ID);
@@ -217,4 +233,21 @@ TEST_F(AudioControllerTest, testInactivityTimer)
     m_pController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, inactivityTime3);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId1), inactivityTime1);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId2), inactivityTime3);
+}
+
+TEST_F(AudioControllerTest, testIsAudioConfigChanged)
+{
+    AudioConfig* pAudioConfig1 = new AudioConfig();
+    AudioConfig* pAudioConfig2 = new AudioConfig();
+    pAudioConfig2->setAccessNetwork(5);
+
+    EXPECT_EQ(m_pController->IsAudioConfigChanged(IMS_NULL), IMS_FALSE);
+    EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig1), IMS_TRUE);
+    EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig1), IMS_FALSE);
+    EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig2), IMS_TRUE);
+    EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig2), IMS_FALSE);
+    EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig1), IMS_TRUE);
+
+    delete pAudioConfig1;
+    delete pAudioConfig2;
 }

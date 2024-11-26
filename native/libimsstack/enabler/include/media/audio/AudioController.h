@@ -17,6 +17,8 @@
 #ifndef AUDIO_CONTROLLER_H_
 #define AUDIO_CONTROLLER_H_
 
+#include <AudioConfig.h>
+
 #include "MediaDef.h"
 #include "IMediaSessionListener.h"
 #include "config/AudioConfiguration.h"
@@ -34,7 +36,7 @@ public:
     };
 
     AudioController();
-    ~AudioController();
+    virtual ~AudioController();
 
     /**
      * @brief Set the update condition for next transition
@@ -238,6 +240,9 @@ public:
     IMS_BOOL NotifyAnbrReceived(
             IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
 
+protected:
+    virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);
+
 private:
     AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = UNDEFINED_NEGO_ID);
     void ClearSession();
@@ -248,6 +253,7 @@ private:
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
     IMS_UINTP m_nCurrentActiveNegoId;
+    AudioConfig* m_pAudioConfig;
 };
 
 #endif

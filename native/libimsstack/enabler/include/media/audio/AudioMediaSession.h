@@ -122,7 +122,7 @@ public:
      * @param pNegoProfile : negotiated profile of the SDP negotiation
      * return IMS_BOOL : false for not updated parameter, true for there is updates
      */
-    IMS_BOOL UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork, IN AudioProfile* pLocalProfile,
+    AudioConfig* UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork, IN AudioProfile* pLocalProfile,
             IN AudioProfile* pPeerProfile, IN AudioProfile* pNegoProfile);
 
     /**
