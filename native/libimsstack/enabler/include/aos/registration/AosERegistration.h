@@ -151,6 +151,7 @@ protected:
     void ProcessNormalDefaultFlowRecovery_Start();
 
     void SetReinitiationRequested(IN IMS_BOOL bRequest);
+    void SetCallbackMode(IN EmergencyCallbackModeType eType, IN IMS_BOOL bEnable);
     void StartRegRetryTimer();
 
     IMS_UINT32 GetPreferredRegScheme();

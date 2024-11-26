@@ -72,7 +72,8 @@ using ::testing::ReturnRef;
     using Base::UpdateRegIpcanCategory;                                      \
     using Base::ProcessDefaultFlowRecovery_Start;                            \
     using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
-    using Base::ProcessTransactionTimerExpired;
+    using Base::ProcessTransactionTimerExpired;                              \
+    using Base::CallbackModeChanged;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -187,8 +188,6 @@ public:
     FRIEND_TEST(AosERegistrationTest, CallbackModeChangedWhenEmergencyCallbackModeNotSupported);
     FRIEND_TEST(AosERegistrationTest, CallbackModeChangedAsStartForCallType);
     FRIEND_TEST(AosERegistrationTest, CallbackModeChangedAsStartForSmsTypeDuringRegisteredState);
-    FRIEND_TEST(AosERegistrationTest, CallbackModeChangedAsStopForCallType);
-    FRIEND_TEST(AosERegistrationTest, CallbackModeChangedAsStopForSmsType);
     FRIEND_TEST(AosERegistrationTest, RefreshIsRequiredByCbmIfESmsIsSet);
     FRIEND_TEST(AosERegistrationTest, RefreshIsRequiredByCbmWhenReRegTried);
     FRIEND_TEST(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegTried);
@@ -1247,33 +1246,32 @@ TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForSmsTypeDuringRegistere
     EXPECT_FALSE(m_pAosERegistration->m_bIsTransactionStarted);
 }
 
-TEST_F(AosERegistrationTest, CallbackModeChangedAsStopForCallType)
+TEST_F(AosERegistrationTest, EcbmIsFalseWhenStoppingEcbmCalled)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
-    m_pAosERegistration->m_pEModeInfo->SetEcbm(IMS_TRUE);
+    m_pAosERegistration->CreateEModeInfo();
+    m_pAosERegistration->GetEModeInfo()->SetEcbm(IMS_TRUE);
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosERegistration->CallbackModeChanged(
             EmergencyCallbackModeType::CALL, EmergencyCallbackMode::STOP, 300);
 
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
 }
 
-TEST_F(AosERegistrationTest, CallbackModeChangedAsStopForSmsType)
+TEST_F(AosERegistrationTest, ScbmIsOnlyFalseWhenStoppingScbmCalledAfterBothEcbmAndScbmAreStarted)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
-    m_pAosERegistration->m_pEModeInfo->SetEcbm(IMS_TRUE);
-    m_pAosERegistration->m_pEModeInfo->SetScbm(IMS_TRUE);
+    m_pAosERegistration->CreateEModeInfo();
+    m_pAosERegistration->GetEModeInfo()->SetEcbm(IMS_TRUE);
+    m_pAosERegistration->GetEModeInfo()->SetESms(IMS_TRUE);
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosERegistration->CallbackModeChanged(
             EmergencyCallbackModeType::SMS, EmergencyCallbackMode::STOP, 300);
 
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
+    EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
 }
 
 TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmIfESmsIsSet)
