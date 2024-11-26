@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "FeatureCaps.h"
+#include "MediaNego.h"
 #include "MockICoreService.h"
 #include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
@@ -402,6 +403,31 @@ TEST_F(MessageFormatterTest, FormRejectMessageFailureCase)
     IMS_RESULT nResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupported)
+{
+    const AString strUnsupportedValue("any value");
+    CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS, -1, strUnsupportedValue);
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, strUnsupportedValue, ISipHeader::UNSUPPORTED, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptable)
+{
+    const AString strWarning("305 IMS-client Incompatible media format");
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_INVALID_DESCRIPTOR);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 }
 
 TEST_F(MessageFormatterTest, FormAckMessageNormalCase)
