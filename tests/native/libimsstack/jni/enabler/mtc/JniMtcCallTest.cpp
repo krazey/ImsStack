@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "BaseThread.h"
+#include "EnablerUtils.h"
+#include "ImsProcess.h"
 #include "IuMtcCall.h"
 #include "JniEnablerConnector.h"
 #include "JniMtcCall.h"
@@ -35,6 +38,11 @@ MATCHER_P(IsSameMessageType, type, "")
     android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(arg);
     IMS_UINT32 eType = pParcel->readInt32();
     return type == eType;
+}
+
+MATCHER_P(IsSameImsMessage, type, "")
+{
+    return type == arg.nMSG;
 }
 
 LOCAL const IMS_SINT32 SLOT_ID = 0;
@@ -74,6 +82,14 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
         pThreadService->SetThread(&objMockThread);
 
+        // EnablerThread
+        auto fnEntry = []() -> BaseThread*
+        {
+            return new BaseThread();
+        };
+        ImsProcess::GetInstance()->LoadThread(
+                EnablerUtils::GetEnablerThreadName(SLOT_ID), fnEntry, 0);
+
         pJniCall = new TestJniMtcCall(reinterpret_cast<Jni_SendDataToJava>(0x01), SLOT_ID);
     }
 
@@ -83,6 +99,7 @@ protected:
         JniEnablerConnector::GetInstance().SetNativeEnabler(
                 SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
 
+        ImsProcess::GetInstance()->UnloadAppThread(EnablerUtils::GetEnablerThreadName(SLOT_ID));
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
     }
@@ -102,6 +119,12 @@ TEST_F(JniMtcCallTest, DestructorDoesNotInvokeDetachIfNativeEnablerIsNull)
 {
     JniEnablerConnector::GetInstance().SetNativeEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockController, Detach(_)).Times(0);
+}
+
+TEST_F(JniMtcCallTest, DestroyPostsMessageDestroy)
+{
+    EXPECT_CALL(objMockThread, PostMessageI(IsSameImsMessage(-1)));
+    pJniCall->Destroy();
 }
 
 TEST_F(JniMtcCallTest, SendDataOpenInvokesOpenAndAttach)
