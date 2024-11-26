@@ -67,7 +67,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, SetMessageTransactionTimerWhenNoUpda
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
 
     EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
@@ -80,7 +80,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, SetMessageTransactionTimerWhenUpdate
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
 
     EXPECT_CALL(
@@ -95,7 +95,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, ResetMessageTransactionTimerWhenNoUp
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
 
     EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
@@ -108,7 +108,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, ResetMessageTransactionTimerWhenUpda
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
@@ -124,7 +124,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, UpdateTimerDoesNothingIfInvalidParam
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
@@ -140,7 +140,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, UpdateTimerDoesNothingIfConfigIsNull
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper =
             MtsTransactionTimerUpdateHelper(&objConfigService.GetMockCarrierConfig(), IMS_NULL);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
 
     EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
@@ -153,7 +153,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, UpdateTimerDoesNothingIfConfigVIsNul
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
     ON_CALL(objSipConfig, GetSipConfigV).WillByDefault(Return(nullptr));
 
@@ -167,7 +167,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, UpdateTimerDoesNothingIfConfigurable
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
     ON_CALL(objSipConfigV, GetConfigurable).WillByDefault(Return(nullptr));
 
@@ -181,7 +181,7 @@ TEST_F(MtsTransactionTimerUpdateHelperTest, UpdateTimerDoesNothingIfUpdateFailed
     MtsTransactionTimerUpdateHelper objMtsUpdateHelper = MtsTransactionTimerUpdateHelper(
             &objConfigService.GetMockCarrierConfig(), &objSipConfig);
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
     ON_CALL(objConfigurable, Update).WillByDefault(Return(IMS_FALSE));
 

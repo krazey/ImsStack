@@ -167,7 +167,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
@@ -1063,7 +1063,7 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsUserFailure)
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_GENERIC, _, _)).Times(1);
@@ -1104,10 +1104,10 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
             .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_FALLBACK, _, _)).Times(1);
@@ -1223,10 +1223,10 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
             .WillByDefault(Return(5));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
             .WillByDefault(Return(45));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
@@ -1299,10 +1299,10 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxDuration)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
             .WillByDefault(Return(3));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
             .WillByDefault(Return(45));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
@@ -1357,10 +1357,10 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxCount)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
             .WillByDefault(Return(3));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
             .WillByDefault(Return(45));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));

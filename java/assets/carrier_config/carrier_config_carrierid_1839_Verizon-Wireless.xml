@@ -299,9 +299,9 @@
     </int-array>
 
     <!-- Mts -->
-    <boolean name="sms_use_dialed_number_for_request_uri_bool" value="true"/>
-    <boolean name="sms_allow_imsi_based_sip_uri_bool" value="true"/>
-    <int name="sms_policy_for_503_response_int" value="5"/>
+    <boolean name="imssms.sms_use_dialed_number_for_request_uri_bool" value="true"/>
+    <boolean name="imssms.sms_allow_imsi_based_sip_uri_bool" value="true"/>
+    <int name="imssms.sms_reg_policy_for_503_response_int" value="5"/>
 
     <!-- Uce -->
     <int name="imsuce.expire_value_publish_sec_int" value="1200"/>

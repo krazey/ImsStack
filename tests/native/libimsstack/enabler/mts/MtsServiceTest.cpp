@@ -80,7 +80,7 @@ protected:
                 GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(objConfigService.GetMockCarrierConfig(),
-                GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+                GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
                 .WillByDefault(Return(IMS_FALSE));
 
         objConnector.SetCoreService(ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY),

@@ -419,5 +419,5 @@
     <boolean name="add_video_tag_contact_header_in_publish_bool" value="true"/>
 
     <!-- Mts -->
-    <int name="sms_request_uri_type_int" value="0"/>
+    <int name="imssms.sms_request_uri_type_int" value="0"/>
 </carrier_config>

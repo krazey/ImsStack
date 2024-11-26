@@ -1192,42 +1192,43 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[]
         "video_codec_hevc_priority_order_bool";
 
 // Mts
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] = "sms_request_uri_type_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
-        "sms_use_dialed_number_for_request_uri_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[] =
-        "sms_allow_imsi_based_sip_uri_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[] =
-        "sms_generic_error_codes_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
-        "sms_policy_for_expiry_timer_f_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_403_RESPONSE_INT[] =
-        "sms_policy_for_403_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_404_RESPONSE_INT[] =
-        "sms_policy_for_404_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_406_RESPONSE_INT[] =
-        "sms_policy_for_406_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_408_RESPONSE_INT[] =
-        "sms_policy_for_408_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_500_RESPONSE_INT[] =
-        "sms_policy_for_500_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT[] =
-        "sms_policy_for_503_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_504_RESPONSE_INT[] =
-        "sms_policy_for_504_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL[] =
-        "sms_geolocation_pidf_for_emergency_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT[] =
-        "sms_retry_after_max_time_sec_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT[] =
-        "sms_retry_after_max_count_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REQUEST_URI_TYPE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_request_uri_type_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
+        KEY_IMS_SMS_PREFIX "sms_use_dialed_number_for_request_uri_bool";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[] =
+        KEY_IMS_SMS_PREFIX "sms_allow_imsi_based_sip_uri_bool";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[] =
+        KEY_IMS_SMS_PREFIX "sms_generic_error_codes_int_array";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_expiry_timer_f_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_403_RESPONSE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_403_response_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_404_RESPONSE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_404_response_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_406_RESPONSE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_406_response_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_408_RESPONSE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_408_response_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_500_RESPONSE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_500_response_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_503_response_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_504_RESPONSE_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_reg_policy_for_504_response_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL[] =
+        KEY_IMS_SMS_PREFIX "sms_geolocation_pidf_for_emergency_bool";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_retry_after_max_time_sec_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_retry_after_max_count_int";
 const IMS_CHAR
-        CarrierConfig::Assets::KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL[] =
-                "sms_report_generic_error_when_retry_after_not_possible_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT[] =
-        "sms_message_response_wait_timer_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
-        "sms_retry_policy_for_expiry_timer_f_int";
+        CarrierConfig::ImsSms::KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL[] =
+                KEY_IMS_SMS_PREFIX "sms_report_generic_error_when_retry_after_not_possible_bool";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_message_response_wait_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
+        KEY_IMS_SMS_PREFIX "sms_retry_policy_for_expiry_timer_f_int";
 
 // Uce
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =

@@ -61,8 +61,8 @@
     <int name="imswfc.country_code_int" value="1"/>
 
     <!-- Mts -->
-    <int name="sms_message_response_wait_timer_millis_int" value="10000"/>
-    <int name="sms_retry_policy_for_expiry_timer_f_int" value="4"/>
+    <int name="imssms.sms_message_response_wait_timer_millis_int" value="10000"/>
+    <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="4"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>

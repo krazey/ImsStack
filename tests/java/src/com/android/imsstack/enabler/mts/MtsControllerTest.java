@@ -103,7 +103,7 @@ public class MtsControllerTest {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
 
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL)))
+                eq(CarrierConfig.ImsSms.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL)))
                 .thenReturn(true);
 
         mMtsController = new MtsController(mMockIBaseContext, Looper.getMainLooper());

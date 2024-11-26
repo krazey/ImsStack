@@ -205,7 +205,7 @@ IMS_BOOL MtsServiceState::LoadCarrierConfig(IN const ICarrierConfig& objCc)
     }
 
     IMS_BOOL bAllowImsiBasedSipUri =
-            objCc.GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL);
+            objCc.GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL);
     if (m_bAllowImsiBasedSipUri != bAllowImsiBasedSipUri)
     {
         IMS_TRACE_I("LoadCarrierConfig : AllowImsiBasedSipUri - Old(%s) -> New(%s)",

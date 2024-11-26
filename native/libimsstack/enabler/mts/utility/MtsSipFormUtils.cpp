@@ -287,7 +287,7 @@ PRIVATE
 IMS_SINT32 MtsSipFormUtils::GetRequestUriType()
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
-    IMS_SINT32 nValue = piCc->GetInt(CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT);
+    IMS_SINT32 nValue = piCc->GetInt(CarrierConfig::ImsSms::KEY_SMS_REQUEST_URI_TYPE_INT);
 
     if (nValue == URI_SCHEME_UNKNOWN)
     {
