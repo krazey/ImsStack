@@ -90,8 +90,6 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
             ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
                     CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
     {
-        // TODO(Mts): Request SMS RAT SELECTION
-
         if (m_pSmsInfo != IMS_NULL)
         {
             delete m_pSmsInfo;
