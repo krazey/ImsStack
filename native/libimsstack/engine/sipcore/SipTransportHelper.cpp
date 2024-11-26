@@ -1034,7 +1034,8 @@ SipSocket* SipTransportHelper::LookupStreamSocket(IN const SipSocketAddress& obj
         IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
 
         if (objIp.Equals(objSockAddr.GetIpAddress()) &&
-                (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())))
+                (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())) &&
+                !pSocket->IsClosedOrBeingClosed())
         {
             IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s", SipDebug::GetIp(objIp), nPort,
                     strNearEnd.GetStr());
@@ -1071,7 +1072,7 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
     {
         SipSocket* pSocket = m_objSockets.GetAt(i);
 
-        if (pSocket->Equals(objFarEnd))
+        if (pSocket->Equals(objFarEnd) && !pSocket->IsClosedOrBeingClosed())
         {
             objCandidates.Prepend(pSocket);
         }

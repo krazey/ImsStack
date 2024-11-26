@@ -74,6 +74,10 @@ public:
     inline IMS_SINT32 GetState() const { return m_nState; }
     inline IMS_SINT32 GetType() const { return m_objSockAddr.GetType(); }
     inline IMS_BOOL IsSocketForcinlyClosed() const { return m_bForcinglyClosed; }
+    IMS_BOOL IsClosedOrBeingClosed() const
+    {
+        return m_piSocket != IMS_NULL ? m_piSocket->IsClosedOrBeingClosed() : IMS_TRUE;
+    }
 
 protected:
     // ISocketListener interface

@@ -68,6 +68,10 @@ protected:
     IMS_BOOL Equals(IN const ISocket* piSocket) override;
     IMS_SINT32 GetOption(IN IMS_SINT32 nOption) override;
     IMS_BOOL SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue) override;
+    IMS_BOOL IsClosedOrBeingClosed() const override
+    {
+        return GetCloseReason() != CLOSE_REASON_UNKNOWN;
+    }
 
     // ImsSocket class
     void Destroy() override;

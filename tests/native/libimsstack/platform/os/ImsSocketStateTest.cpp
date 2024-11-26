@@ -114,6 +114,8 @@ public:
         return IMS_TRUE;
     }
 
+    IMS_BOOL IsClosedOrBeingClosed() const override { return IMS_FALSE; }
+
     void Destroy() override {}
     void DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/) override {}
     SOCKET_RESULT Abort() override { return RESULT_SUCCESS; }
