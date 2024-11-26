@@ -82,8 +82,6 @@ public:
         STATUS_ERROR_ON_SEND,
         /* When txn handler fails to handle receive message --> failure conditions */
         STATUS_INVALID_MESSAGE,
-        /*For Handling Stray 2xx*/
-        STATUS_2XX_STRAY_RESP,
         STATUS_STRAY_PRACK,
         STATUS_INVALID
 
@@ -105,6 +103,7 @@ public:
         TIMER_I,
         TIMER_J,
         TIMER_K,
+        TIMER_M,
         TIMER_OTHER,
         TIMER_TYPE_INVALID
     };
@@ -118,6 +117,7 @@ public:
         INV_CLI_RECV_2XX_RESP_EVT,
         INV_CLI_RECV_FAILURE_RESP_EVT,
         INV_CLI_TRANSP_ERROR_EVT,
+        INV_CLI_TIMER_M_TIME_OUT_EVT,
         INV_CLI_INVALID_EVT
     };
 
@@ -127,6 +127,7 @@ public:
         INV_CLI_IDLE_ST = 0,
         INV_CLI_CALLING_ST,
         INV_CLI_PROCEEDING_ST,
+        INV_CLI_ACCEPTED_ST,
         INV_CLI_COMPLETED_ST,
         INV_CLI_TERMINATED_ST,
         INV_CLI_INVALID_ST

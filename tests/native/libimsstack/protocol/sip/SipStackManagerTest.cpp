@@ -244,14 +244,15 @@ Content-Length: 0\r\n\
 
     EXPECT_STREQ(pTxnKey->GetToTag(), "dcba");
 
+    pSipStackManager->TerminateTxn(pTxnKey);
     pTxnKey->SipDelete();
     pTxnKey = SIP_NULL;
 
-    /* In case of retransmitted 2xx for INVITE, return as stray message */
+    /* In case of no-txn retransmitted 2xx for INVITE, return as ignored message */
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
                     &eTxnStatus, &pTxnKey, &nError));
-    EXPECT_EQ(SipTxn::STATUS_2XX_STRAY_RESP, eTxnStatus);
+    EXPECT_EQ(SipTxn::STATUS_IGNORE_RESP, eTxnStatus);
 
     pRespSipMessage->SipDelete();
     /* Invite client check for send receive - End */

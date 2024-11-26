@@ -239,6 +239,10 @@ TEST_F(SipInviteClientTxnTest, CallingState)
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
 
+    EXPECT_EQ(SIP_FALSE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
@@ -381,6 +385,10 @@ RSeq: 2\r\n\
     pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
+    EXPECT_EQ(SIP_FALSE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
 
     EXPECT_EQ(SIP_TRUE,

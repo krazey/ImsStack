@@ -720,6 +720,10 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
             {
                 nEvent = SipTxn::INV_CLI_TIMER_D_TIME_OUT_EVT;
             }
+            else if (eTimerType == SipTxn::TIMER_M)
+            {
+                nEvent = SipTxn::INV_CLI_TIMER_M_TIME_OUT_EVT;
+            }
             else
             {
                 nEvent = SipTxn::INV_CLI_INVALID_EVT;

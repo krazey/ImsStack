@@ -39,6 +39,7 @@ class SipTxnTimerValues
     SIP_UINT32 m_nTimerI_Value;
     SIP_UINT32 m_nTimerJ_Value;
     SIP_UINT32 m_nTimerK_Value;
+    SIP_UINT32 m_nTimerM_Value;
 
 public:
     SipTxnTimerValues();
@@ -68,7 +69,8 @@ private:
         TV_TIMER_I = 0x0400,
         TV_TIMER_J = 0x0800,
         TV_TIMER_K = 0x1000,
-        TV_ALL = 0x1FFF
+        TV_TIMER_M = 0x2000,
+        TV_ALL = 0x3FFF
     };
 };
 

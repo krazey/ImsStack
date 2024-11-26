@@ -369,7 +369,7 @@ stack user must process this request and can decide whether to ignore or not
 
             if (SipMsgUtil::IsSuccessfulResponse(nStatusCode))
             {
-                *peTxnStatus = SipTxn::STATUS_2XX_STRAY_RESP;
+                *peTxnStatus = SipTxn::STATUS_IGNORE_RESP;
 
                 pTxnKey->SipDelete();
 
@@ -548,15 +548,7 @@ stack user must process this request and can decide whether to ignore or not
            Delete Txn entry from DB and delete the instance*/
         objTxnHandler.DeleteTxn(pTxnKey);
 
-        if (pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
-        {
-            /* return the key to update the to-tag */
-            *ppTxnKey = pTxnKey;
-        }
-        else
-        {
-            pTxnKey->SipDelete();
-        }
+        pTxnKey->SipDelete();
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn: Txn Terminated", SIP_ZERO, SIP_ZERO);
     }
@@ -565,6 +557,16 @@ stack user must process this request and can decide whether to ignore or not
     {
         /* return Key of newly created txn */
         *ppTxnKey = pTxnKey;
+    }
+    else if (pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
+    {
+        SIP_UINT16 nStatusCode = pSipMsg->GetStatusCode();
+
+        if (SipMsgUtil::IsSuccessfulResponse(nStatusCode))
+        {
+            /* return the key to update the to-tag */
+            *ppTxnKey = pTxnKey;
+        }
     }
     else
     {
