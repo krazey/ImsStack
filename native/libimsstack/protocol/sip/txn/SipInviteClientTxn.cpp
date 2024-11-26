@@ -55,30 +55,23 @@ static SIP_BOOL HandleFailureResponse(IN SipTxn* pTxn, IN_OUT SipTxnFsmData* pFs
     const SipTxnTimerValues& pSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nDurationTD = pSipTxnTimers.GetTimerValue(SipTxn::TIMER_D);
 
-    /* On basis of Transport Start Timer */
-    SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
+    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "HandleFailureResponse: TimerD: %d", nDurationTD, 0);
 
-    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "HandleFailureResponse: Transport %d , TimerD: %d",
-            eTranspMsgSentProtocol, nDurationTD);
+    // INVITE client transaction always starts the Timer D regardless of
+    // the transport protocol to handle the transport layer's exceptional cases
+    // while sending an ACK request - i.e. TCP connection lost, UDP socket closed.
+    if (pTxn->StartTxnTimer(SipTxn::TIMER_D, nDurationTD, pnError) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "HandleFailureResponse: Starting Timer_D failed.",
+                SIP_ZERO, SIP_ZERO);
+        pSipAckMsg->SipDelete();
+        return SIP_FALSE;
+    }
 
-    /* For Unreliable Transport */
-    if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
-    {
-        if (pTxn->StartTxnTimer(SipTxn::TIMER_D, nDurationTD, pnError) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "HandleFailureResponse: Starting Timer_D failed.",
-                    SIP_ZERO, SIP_ZERO);
-            pSipAckMsg->SipDelete();
-            return SIP_FALSE;
-        }
-        /* State Transition */
-        *pNewTxnState = SipTxn::INV_CLI_COMPLETED_ST;
-    }
-    else /* For Reliable Transport */
-    {
-        /* State Transition for Reliable Transport */
-        *pNewTxnState = SipTxn::INV_CLI_TERMINATED_ST;
-    }
+    // Actual state transition - UDP: COMPLETED, TCP: TERMINATED
+    // To improve the ACK request handling, the INVITE client transaction is transited to
+    // COMPLETED state regardless of the transport protocol.
+    *pNewTxnState = SipTxn::INV_CLI_COMPLETED_ST;
 
     /* OUT Paramet Set */
     pFsmData->m_pSendSipMsg = pSipAckMsg;
