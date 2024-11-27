@@ -46,7 +46,7 @@ JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nS
 
 JniMtcCall::~JniMtcCall()
 {
-    IMS_TRACE_D("~JniMtcCall", 0, 0, 0);
+    IMS_TRACE_D("~JniMtcCall CallKey[%d]", m_nCallKey, 0, 0);
 
     JniEnablerConnector::GetInstance().SetJniEnabler(
             GetSlotId(), EnablerType::MTC_CALL, IMS_NULL, m_nCallKey);
@@ -61,6 +61,16 @@ JniMtcCall::~JniMtcCall()
     {
         piCallController->Detach(m_nCallKey);
     }
+}
+
+PUBLIC VIRTUAL void JniMtcCall::Destroy()
+{
+    IMS_TRACE_D("Destroy", 0, 0, 0);
+    ImsMessage objMsg(MSG_DESTROY, 0, 0, this);
+    IThread* piThread = ImsProcess::GetInstance()
+                                ->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId))
+                                ->GetThread();
+    piThread->PostMessageI(objMsg);
 }
 
 PUBLIC VIRTUAL int JniMtcCall::SendData(IN const android::Parcel& objParcel)
@@ -121,7 +131,7 @@ PUBLIC VIRTUAL IJniEnablerThread* JniMtcCall::GetJniThread() const
 PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
         IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
-    IMS_TRACE_D("HandleCallMessage() Message=[%d]", nMsg, 0, 0);
+    IMS_TRACE_D("HandleCallMessage() CallKey[%d] Message=[%d]", m_nCallKey, nMsg, 0);
     IMtcCallController* piCallController = GetCallController();
     if (!piCallController)
     {

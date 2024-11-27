@@ -368,7 +368,7 @@ static void JniIms_nativeReleaseInterface(JNIEnv* /*env*/, jobject /*object*/, j
 
     if (pService != IMS_NULL)
     {
-        delete pService;
+        pService->Destroy();
     }
 }
 
