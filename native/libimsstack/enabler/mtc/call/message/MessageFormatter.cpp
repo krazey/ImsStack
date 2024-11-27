@@ -25,6 +25,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsIdentity.h"
+#include "MediaNego.h"
 #include "MtcDef.h"
 #include "Replaces.h"
 #include "ServiceTrace.h"
@@ -259,6 +260,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormRejectMessage(
 
     eStatusCode = GetRejectStatusCode(objReason);
     GetRejectPhrase(objReason, strPhrase);
+    SetHeadersForReject(objReason);
 
     // If PIDF-LO shouldn't be added to reject messages for re-INVITE, need a fix
     if (m_objContext.GetConfigurationProxy().Contains(
@@ -266,13 +268,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormRejectMessage(
                 static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_FAILURE_RESPONSE)))
     {
         SetLocation();
-    }
-
-    if (objReason.nCode == CODE_REJECT_UNSUPPORTED_SIP_HEADERS &&
-            objReason.strExtraMessage.GetLength() > 0)
-    {
-        m_objContext.GetMessageUtils().AddValueIfNotExists(
-                m_piNextMessage, objReason.strExtraMessage, ISipHeader::UNSUPPORTED);
     }
 
     return IMS_SUCCESS;
@@ -691,6 +686,50 @@ void MessageFormatter::SetReplacesHeader()
             objDialogInfo.strCallId, objDialogInfo.strLocalTag, objDialogInfo.strRemoteTag);
     m_objContext.GetMessageUtils().AddValueIfNotExists(
             m_piNextMessage, objReplaces.ToString(IMS_FALSE), ISipHeader::REPLACES);
+}
+
+PRIVATE
+void MessageFormatter::SetHeadersForReject(IN const CallReasonInfo& objReason)
+{
+    switch (objReason.nCode)
+    {
+        case CODE_REJECT_UNSUPPORTED_SIP_HEADERS:
+            // RFC 3261 8.2.2.3
+            if (objReason.strExtraMessage.GetLength() <= 0)
+            {
+                return;
+            }
+            IMS_TRACE_D("SetHeadersForReject : CODE_REJECT_UNSUPPORTED_SIP_HEADERS", 0, 0, 0);
+            m_objContext.GetMessageUtils().AddValueIfNotExists(
+                    m_piNextMessage, objReason.strExtraMessage, ISipHeader::UNSUPPORTED);
+            break;
+        case CODE_MEDIA_NOT_ACCEPTABLE:
+        {
+            IMS_TRACE_D("SetHeadersForReject : CODE_MEDIA_NOT_ACCEPTABLE", 0, 0, 0);
+            // RFC 3261 20.43
+            AString strWarning;
+            switch (objReason.nExtraCode)
+            {
+                case MediaNego::ERROR_INVALID_DESCRIPTOR:
+                    strWarning = "305 IMS-client Incompatible media format";
+                    break;
+                case MediaNego::ERROR_IP_MISMATCH:
+                    strWarning = "301 IMS-client Incompatible network address formats";
+                    break;
+                default:
+                    strWarning = "304 IMS-client Media type not available";
+                    break;
+            }
+            m_objContext.GetMessageUtils().SetHeader(
+                    m_piNextMessage, strWarning, ISipHeader::WARNING);
+        }
+        break;
+        case CODE_SIP_NOT_ACCEPTABLE:
+            // TODO: b/360734176 - In case the response code is 488, Warning header SHOULD be added.
+            break;
+        default:
+            break;
+    }
 }
 
 PRIVATE

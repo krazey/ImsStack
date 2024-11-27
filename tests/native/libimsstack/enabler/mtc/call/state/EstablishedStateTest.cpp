@@ -18,6 +18,7 @@
 #include "CarrierConfig.h"
 #include "ISipClientConnection.h"
 #include "ImsTypeDef.h"
+#include "MediaNego.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
@@ -534,12 +535,33 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
             CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
+TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfMediaNegoFailed)
+{
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+
+    NegotiationResult eNegoFailReason = MediaNego::ERROR_NO_CODEC_MATCHED;
+    CallReasonInfo objMediaNegoFailReason(CODE_MEDIA_NOT_ACCEPTABLE, eNegoFailReason);
+    ON_CALL(objMockMediaManager, NegotiateSdp).WillByDefault(Return(eNegoFailReason));
+    CallType eAnyCallType = CallType::VIDEO_RTT;
+    EXPECT_CALL(objMockMtcSession, GetPreviousCallType()).WillOnce(Return(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, SetCallType(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, Reject(objMediaNegoFailReason));
+    EXPECT_CALL(objMockMediaManager, FinalizeSdp(&objMockISession));
+
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
 TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
 {
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objMockMediaManager, NegotiateSdp).WillByDefault(Return(MediaNego::NO_ERROR));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
     objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
