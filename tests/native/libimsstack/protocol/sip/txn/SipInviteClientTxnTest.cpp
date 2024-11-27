@@ -407,6 +407,14 @@ RSeq: 2\r\n\
     pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
     /* Calling without passing transport info will be considered as reliable */
+
+    /* Calling once to make startTimer for timer D failure */
+    EXPECT_EQ(SIP_FALSE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST]
+                                 [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](
+                                         pTxn, pTxnFsmData, &nError));
+
+    /* Calling again to make startTimer for timer D success */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST]
                                  [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](

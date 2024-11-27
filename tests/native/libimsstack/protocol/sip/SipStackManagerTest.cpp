@@ -336,6 +336,9 @@ Content-Length: 0\r\n\
     pRespSipMessage->SipDelete();
 
     objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+
+    // Clear INVITE client transaction.
+    pTxn->RemoveFromTxnPool();
     /* Invite client with fail response receive, response with failure ACK - End */
 
     /* Invite server check for send receive - Start */
@@ -355,7 +358,7 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SIP_TRUE, pMessage->Decode(pReqMsg, nLength));
 
     /* Pass valid arguments, success */
-    EXPECT_EQ(SIP_TRUE,
+    ASSERT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(
                     pMessage, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
 
