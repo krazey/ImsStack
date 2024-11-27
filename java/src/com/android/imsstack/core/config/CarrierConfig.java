@@ -599,6 +599,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reattempt_registration_publish_response_int_array";
         public static final String KEY_REATTEMPT_REGISTRATION_SUBSCRIBE_RESPONSE_INT_ARRAY =
                 KEY_PREFIX + "reattempt_registration_subscribe_response_int_array";
+        public static final String KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL =
+                KEY_PREFIX + "add_video_tag_contact_header_in_publish_bool";
 
         private ImsUce() {}
     }
@@ -1304,10 +1306,6 @@ public class CarrierConfig {
                 "video_hold_with_direction_inactive_bool";
         public static final String KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
                 "text_hold_with_direction_inactive_bool";
-
-        // Uce
-        public static final String KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL =
-                "add_video_tag_contact_header_in_publish_bool";
 
         // Indicates preferred IP version
         public static final int IPV4_PREFERRED = 0;

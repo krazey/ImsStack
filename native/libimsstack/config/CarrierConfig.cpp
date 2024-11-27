@@ -342,6 +342,8 @@ const IMS_CHAR CarrierConfig::ImsUce::KEY_REATTEMPT_REGISTRATION_PUBLISH_RESPONS
         KEY_IMS_UCE_PREFIX "reattempt_registration_publish_response_int_array";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_REATTEMPT_REGISTRATION_SUBSCRIBE_RESPONSE_INT_ARRAY[] =
         KEY_IMS_UCE_PREFIX "reattempt_registration_subscribe_response_int_array";
+const IMS_CHAR CarrierConfig::ImsUce::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =
+        KEY_IMS_UCE_PREFIX "add_video_tag_contact_header_in_publish_bool";
 
 //// ImsVoice
 #define KEY_IMS_VOICE_PREFIX "imsvoice."
@@ -1229,10 +1231,6 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS
         KEY_IMS_SMS_PREFIX "sms_message_response_wait_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
         KEY_IMS_SMS_PREFIX "sms_retry_policy_for_expiry_timer_f_int";
-
-// Uce
-const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =
-        "add_video_tag_contact_header_in_publish_bool";
 
 PUBLIC GLOBAL IMS_BOOL CarrierConfig::IsVoLteEnabled(IN IMS_SINT32 nSlotId)
 {

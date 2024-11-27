@@ -318,6 +318,7 @@
     </int-array>
     <int-array name="imsuce.reattempt_registration_subscribe_response_int_array" num="0">
     </int-array>
+    <boolean name="imsuce.add_video_tag_contact_header_in_publish_bool" value="false"/>
 
     <!-- Acs -->
     <int name="imsacs.refresh_ratio_int" value="100"/>
@@ -713,8 +714,5 @@
     <boolean name="imssms.sms_report_generic_error_when_retry_after_not_possible_bool" value="false"/>
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="0"/>
     <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="3"/>
-
-    <!-- Uce -->
-    <boolean name="add_video_tag_contact_header_in_publish_bool" value="false"/>
 
 </carrier_config>

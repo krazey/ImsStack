@@ -389,6 +389,7 @@ public:
         static const IMS_CHAR KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_TIME_SEC_INT_ARRAY[];
         static const IMS_CHAR KEY_REATTEMPT_REGISTRATION_PUBLISH_RESPONSE_INT_ARRAY[];
         static const IMS_CHAR KEY_REATTEMPT_REGISTRATION_SUBSCRIBE_RESPONSE_INT_ARRAY[];
+        static const IMS_CHAR KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[];
     };
 
     class ImsVoice
@@ -1099,9 +1100,6 @@ public:
         static const IMS_CHAR KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[];
-
-        // Uce
-        static const IMS_CHAR KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[];
 
         // registration retry sip 305 policy
         enum
