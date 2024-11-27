@@ -27,6 +27,13 @@ public interface IServiceStateTracker {
     public boolean isServiceRegistered(int serviceType);
 
     /**
+     * When an emergency call ends, if the emergency service state is ES_UNAVAILABLE, change it to
+     * ES_IDLE to ensure the next emergency call attempt.
+     *
+     */
+    void handleEmergencyCallDestroyed();
+
+    /**
      * Adds a listener to monitor the Mtc service state change.
      *
      * @param listener The listener to be set.

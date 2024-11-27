@@ -104,6 +104,14 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     }
 
     @Override
+    public void handleEmergencyCallDestroyed() {
+        if (isEmergencyServiceState(IUMtcService.ES_UNAVAILABLE)) {
+            setEmergencyServiceState(IUMtcService.ES_IDLE);
+            setEmergencyServiceReason(IUMtcService.ES_IDLE_REASON_NONE);
+        }
+    }
+
+    @Override
     public void addListener(Listener listener) {
         mListeners.add(listener);
 

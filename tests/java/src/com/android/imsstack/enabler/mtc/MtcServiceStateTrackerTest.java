@@ -295,4 +295,19 @@ public class MtcServiceStateTrackerTest extends ImsStackTest {
 
         assertEquals(0, mMsgWhat);
     }
+
+    @Test
+    public void testHandleEmergencyCallDestroyed() {
+        mTestMtcServiceStateTracker.setEmergencyServiceState(IUMtcService.ES_OPENED);
+        mTestMtcServiceStateTracker.handleEmergencyCallDestroyed();
+        assertTrue(mTestMtcServiceStateTracker.isEmergencyServiceState(IUMtcService.ES_OPENED));
+
+        mTestMtcServiceStateTracker.setEmergencyServiceState(IUMtcService.ES_UNAVAILABLE);
+        mTestMtcServiceStateTracker.setEmergencyServiceReason(
+                IUMtcService.ES_UNAVAILABLE_REASON_NONE);
+        mTestMtcServiceStateTracker.handleEmergencyCallDestroyed();
+        assertTrue(mTestMtcServiceStateTracker.isEmergencyServiceState(IUMtcService.ES_IDLE));
+        assertTrue(mTestMtcServiceStateTracker.isEmergencyServiceState(
+                IUMtcService.ES_IDLE_REASON_NONE));
+    }
 }
