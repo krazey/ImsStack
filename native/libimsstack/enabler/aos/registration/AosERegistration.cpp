@@ -683,14 +683,7 @@ PROTECTED void AosERegistration::CallbackModeChanged(
 
     if (eState == EmergencyCallbackMode::START)
     {
-        if (eType == EmergencyCallbackModeType::CALL)
-        {
-            m_pEModeInfo->SetEcbm(IMS_TRUE);
-        }
-        else
-        {
-            m_pEModeInfo->SetScbm(IMS_TRUE);
-        }
+        SetCallbackMode(eType, IMS_TRUE);
 
         m_pEModeInfo->SetCbmDuration(nDuration);
         m_pEModeInfo->SetCbmBeginTime(IMS_SYS_GetTimeInSeconds());
@@ -703,19 +696,16 @@ PROTECTED void AosERegistration::CallbackModeChanged(
     }
     else
     {
-        if (eType == EmergencyCallbackModeType::CALL)
-        {
-            m_pEModeInfo->SetEcbm(IMS_FALSE);
-        }
-        else
-        {
-            m_pEModeInfo->SetScbm(IMS_FALSE);
-        }
-
+        SetCallbackMode(eType, IMS_FALSE);
         if (eState == EmergencyCallbackMode::STOP)
         {
-            ProcessUnpredictableFailure();
-            ClearCbm();
+            if (!IsInCallbackMode())
+            {
+                ProcessUnpredictableFailure();
+                ClearCbm();
+            }
+            A_IMS_TRACE_I(REGID, "Current callback mode status:: Ecbm(%d), Scbm(%d)",
+                    m_pEModeInfo->IsEcbm(), m_pEModeInfo->IsScbm(), 0);
         }
     }
 }
@@ -942,6 +932,19 @@ PROTECTED void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
     A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
 
     m_bReinitiationRequested = bRequest;
+}
+
+PROTECTED void AosERegistration::SetCallbackMode(
+        IN EmergencyCallbackModeType eType, IN IMS_BOOL bEnable)
+{
+    if (eType == EmergencyCallbackModeType::CALL)
+    {
+        m_pEModeInfo->SetEcbm(bEnable);
+    }
+    else
+    {
+        m_pEModeInfo->SetScbm(bEnable);
+    }
 }
 
 PROTECTED void AosERegistration::StartRegRetryTimer()
