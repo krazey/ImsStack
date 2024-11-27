@@ -322,18 +322,19 @@ IMS_BOOL SipTransport::InitTransportOnMessageReceived(IN ::SipMessage* /*pSipMsg
 }
 
 PUBLIC
-IMS_BOOL SipTransport::SendToNetwork(
-        IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN IMS_BOOL bNotifyError /*= IMS_TRUE*/)
+IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
+        IN const SipProfile* pProfile, IN IMS_BOOL bNotifyError /*= IMS_TRUE*/)
 {
-    // Find a socket to send an SIP message
+    // Find a socket to send an SIP message, and if not found, try to create a new socket.
+    m_pSocket = (m_pSocket == IMS_NULL) ? LookupSocket() : m_pSocket;
+
     if (m_pSocket == IMS_NULL)
     {
-        m_pSocket = LookupSocket();
+        ReserveResource(pProfile);
 
         if (m_pSocket == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Can't find a proper SIP socket information from the transport layer.",
-                    0, 0, 0);
+            IMS_TRACE_E(0, "Can't find a proper SIP socket from the transport layer.", 0, 0, 0);
             goto EXIT_SendToNetwork;
         }
     }

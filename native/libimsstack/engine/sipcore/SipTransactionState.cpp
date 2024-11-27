@@ -276,7 +276,8 @@ PUBLIC VIRTUAL IMS_RESULT SipTransactionState::RetransmitMessage()
         return IMS_FAILURE;
     }
 
-    if (!m_pTransport->SendToNetwork(objBuffer.GetData(), objBuffer.GetLength(), IMS_FALSE))
+    if (!m_pTransport->SendToNetwork(
+                objBuffer.GetData(), objBuffer.GetLength(), GetSipProfile(), IMS_FALSE))
     {
         IMS_TRACE_E(0, "Retransmitting ACK or 2xx to INVITE request failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -340,7 +341,7 @@ IMS_BOOL SipTransactionState::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_S
         return IMS_FALSE;
     }
 
-    return m_pTransport->SendToNetwork(pBuffer, nBuffLen);
+    return m_pTransport->SendToNetwork(pBuffer, nBuffLen, GetSipProfile());
 }
 
 PUBLIC
