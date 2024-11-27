@@ -794,6 +794,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT[] =
         KEY_IMS_PREFIX "rereg_retry_305_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
         KEY_IMS_PREFIX "sip_message_threshold_for_transport_change_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUB_RETRY_503_POLICY_INT[] =
+        KEY_IMS_PREFIX "sub_retry_503_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[] =
         KEY_IMS_PREFIX "usat_reg_event_download_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =

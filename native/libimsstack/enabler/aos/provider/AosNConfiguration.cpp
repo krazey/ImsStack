@@ -581,6 +581,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportC
     return m_objAsset.nSipMessageThresholdForTransportChange;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSubRetrySip503CodePolicy() const
+{
+    return m_objAsset.nSubRetry503Policy;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUsatRegEventDownloadPolicy() const
 {
     return m_objAsset.nUsatRegEventDownloadPolicy;
@@ -1445,6 +1450,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EREG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
+    m_objAsset.nSubRetry503Policy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_SUB_RETRY_503_POLICY_INT);
     m_objAsset.nUsatRegEventDownloadPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT);
     m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT);

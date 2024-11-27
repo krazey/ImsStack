@@ -717,6 +717,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
             .WillOnce(Return(200));
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_SUB_RETRY_503_POLICY_INT, -1))
+            .WillOnce(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD));
@@ -888,6 +890,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL,
             m_pAosNConfiguration->GetRoamingPreferredEmcReg());
     EXPECT_EQ(200, m_pAosNConfiguration->GetSipMessageThresholdForTransportChange());
+    EXPECT_EQ(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP,
+            m_pAosNConfiguration->GetSubRetrySip503CodePolicy());
     EXPECT_EQ(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD,
             m_pAosNConfiguration->GetUsatRegEventDownloadPolicy());
     EXPECT_EQ(60, m_pAosNConfiguration->GetVolteHysTime());
