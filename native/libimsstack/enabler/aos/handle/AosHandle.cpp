@@ -1011,15 +1011,14 @@ void AosHandle::ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bA
 }
 
 PROTECTED
-void AosHandle::ProcessUnavailableFeatureChanged()
+void AosHandle::ProcessFeatureChangedWithoutReg()
 {
     IMS_UINT32 nState = GetState();
-    A_IMS_TRACE_I(APPPROFILE,
-            "ProcessUnavailableFeatureChanged :: Unavailable feature has changed, nState [%s]",
+    A_IMS_TRACE_I(APPPROFILE, "ProcessFeatureChangedWithoutReg :: nState [%s]",
             StateToString(nState), 0, 0);
 
     IAosRegistration* piRegistration = m_piAppContext->GetRegistration();
-    piRegistration->RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG);
+    piRegistration->RequestCmd(IAosRegistration::CMD_UPDATE_FEATURE_WITHOUT_REG);
 
     if (nState == STATE_CONNECTED && m_piListener != IMS_NULL)
     {

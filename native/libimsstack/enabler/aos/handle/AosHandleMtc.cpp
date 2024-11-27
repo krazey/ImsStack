@@ -687,7 +687,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
 
     if (nOldUnavailableFeature != m_objFeatureTagList.GetUnavailableFeatures())
     {
-        ProcessUnavailableFeatureChanged();
+        ProcessFeatureChangedWithoutReg();
     }
 }
 
