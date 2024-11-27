@@ -82,6 +82,7 @@ public class UsatAgentTest {
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         when(mSimInterface.getSlotId()).thenReturn(SLOT0);
+        when(mSimInterface.getUsimServiceTable()).thenReturn(new byte[0]);
 
         mUsatAgent = new UsatAgent(mSimInterface);
     }
@@ -165,7 +166,7 @@ public class UsatAgentTest {
     @Test
     @SmallTest
     public void testIsServiceAvailable_noUsimServiceTable() {
-        when(mSimInterface.getUsimServiceTable()).thenReturn(null);
+        when(mSimInterface.getUsimServiceTable()).thenReturn(new byte[0]);
 
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_CALL_CONTROL));
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));

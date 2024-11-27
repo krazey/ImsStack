@@ -74,13 +74,13 @@ public final class SimAgent implements SimInterface {
     /** USIM states */
     private int mSimCardState = Sim.STATE_UNKNOWN;
     private int mSimState = Sim.STATE_UNKNOWN;
-    private byte[] mUst; // Cached USIM service table
+    private byte[] mUst = new byte[0]; // Cached USIM service table
     private final UsatAgent mUsatAgent;
     private final Set<Sim.Listener> mListeners = new CopyOnWriteArraySet<>();
 
     /** ISIM states */
     private int mIsimState = Sim.ISIM_STATE_UNKNOWN;
-    private byte[] mIsimIst; // Cached ISIM service table
+    private byte[] mIsimIst = new byte[0]; // Cached ISIM service table
     private String mIsimDomain;
     private String mIsimImpi;
     private final List<String> mIsimImpu = new ArrayList<>();
@@ -187,7 +187,7 @@ public final class SimAgent implements SimInterface {
     }
 
     @Override
-    public byte[] getUsimServiceTable() {
+    public @NonNull byte[] getUsimServiceTable() {
         return mUst;
     }
 
@@ -231,7 +231,7 @@ public final class SimAgent implements SimInterface {
     }
 
     @Override
-    public byte[] getIsimServiceTable() {
+    public @NonNull byte[] getIsimServiceTable() {
         return mIsimIst;
     }
 
@@ -252,7 +252,7 @@ public final class SimAgent implements SimInterface {
 
     @Override
     public boolean isGbaAvailable() {
-        if (mIsimIst != null && mIsimIst.length > 0) {
+        if (mIsimIst.length > 0) {
             return (mIsimIst[0] & 0x02) != 0;
         }
 
@@ -391,18 +391,15 @@ public final class SimAgent implements SimInterface {
     }
 
     private void clearSimRecords() {
-        mUst = null;
+        mUst = new byte[0];
     }
 
     private void loadSimRecords() {
         TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
 
         if (tmp != null) {
-            String serviceTable = tmp.getSimServiceTable(Sim.APP_TYPE_USIM);
-
-            mUst = ImsUtils.hexStringToBytes(serviceTable);
-
-            logi(this, "SimRecords: ust=" + serviceTable);
+            mUst = tmp.getSimServiceTable(Sim.APP_TYPE_USIM);
+            logi(this, "SimRecords: ust=" + ImsUtils.bytesToHexString(mUst));
         }
     }
 
@@ -484,7 +481,7 @@ public final class SimAgent implements SimInterface {
     }
 
     private void clearIsimRecords() {
-        mIsimIst = null;
+        mIsimIst = new byte[0];
         mIsimImpi = null;
         mIsimDomain = null;
         mIsimImpu.clear();
@@ -494,8 +491,7 @@ public final class SimAgent implements SimInterface {
         TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
 
         if (tmp != null) {
-            String serviceTable = tmp.getSimServiceTable(Sim.APP_TYPE_ISIM);
-            mIsimIst = ImsUtils.hexStringToBytes(serviceTable);
+            mIsimIst = tmp.getSimServiceTable(Sim.APP_TYPE_ISIM);
             mIsimDomain = tmp.getIsimDomain();
 
             try {
@@ -518,7 +514,7 @@ public final class SimAgent implements SimInterface {
                 mIsimImpu.add(uri.toString());
             }
 
-            logi(this, "IsimRecords: ist=" + serviceTable
+            logi(this, "IsimRecords: ist=" + ImsUtils.bytesToHexString(mIsimIst)
                     + ", impi=" + ImsLog.hiddenString(mIsimImpi)
                     + ", domain=" + ImsLog.hiddenString(mIsimDomain)
                     + ", impu=" + ImsLog.hiddenString(mIsimImpu.toArray(new String[0])));

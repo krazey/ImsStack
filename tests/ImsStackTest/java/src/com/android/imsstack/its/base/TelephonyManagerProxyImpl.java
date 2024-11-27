@@ -229,7 +229,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
-    public String getSimServiceTable(@UiccAppType int appType) {
+    public @NonNull byte[] getSimServiceTable(@UiccAppType int appType) {
         return mSimInfoRecord.getServiceTable(appType);
     }
 
@@ -507,7 +507,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setCountryIso("");
         mSimInfoRecord.setGroupIdLevel1(null);
         mSimInfoRecord.setOperatorName(TestConstants.OPERATOR_ALPHA_LONG);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, "00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, new byte[0]);
     }
 
     /**
@@ -528,7 +528,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setCountryIso("");
         mSimInfoRecord.setGroupIdLevel1(null);
         mSimInfoRecord.setOperatorName(null);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, "00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, new byte[0]);
     }
 
     /**
@@ -554,7 +554,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setIsimDomain(domain);
         mSimInfoRecord.setIsimPrivateUserIdentity(impi);
         mSimInfoRecord.setIsimPublicUserIdentities(impus);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, "00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, new byte[0]);
     }
 
     /**
@@ -575,7 +575,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setIsimDomain(null);
         mSimInfoRecord.setIsimPrivateUserIdentity(null);
         mSimInfoRecord.setIsimPublicUserIdentities(null);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, "00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, new byte[0]);
     }
 
     /**
@@ -709,8 +709,8 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      * @param appType The targeted application.
      * @param serviceTable The service table value.
      */
-    public void setSimServiceTable(@UiccAppType int appType, String serviceTable) {
-        mSimInfoRecord.setServiceTable(appType, serviceTable);
+    public void setSimServiceTable(@UiccAppType int appType, byte[] serviceTable) {
+        mSimInfoRecord.setServiceTable(appType, serviceTable != null ? serviceTable : new byte[0]);
     }
 
     /**
@@ -1022,11 +1022,11 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         private String mCountryIso = "";
         private String mSerialNumber;
         private String mGroupIdLevel1;
-        private String mServiceTable = "0x00";
+        private byte[] mServiceTable;
 
         /** ISIM records */
         private @UiccAppType int mIsimAppType = TelephonyManager.APPTYPE_UNKNOWN;
-        private String mIsimServiceTable = "0x00";
+        private byte[] mIsimServiceTable;
         private String mIsimDomain;
         private String mIsimPrivateUserIdentity;
         private List<Uri> mIsimPublicUserIdentities = Collections.emptyList();
@@ -1092,7 +1092,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             return mOperatorName;
         }
 
-        String getServiceTable(@UiccAppType int appType) {
+        byte[] getServiceTable(@UiccAppType int appType) {
             if (appType == TelephonyManager.APPTYPE_ISIM) {
                 return mIsimServiceTable;
             }
@@ -1163,7 +1163,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             mOperatorName = operatorName;
         }
 
-        void setServiceTable(@UiccAppType int appType, String serviceTable) {
+        void setServiceTable(@UiccAppType int appType, byte[] serviceTable) {
             if (appType == TelephonyManager.APPTYPE_ISIM) {
                 mIsimServiceTable = serviceTable;
             } else if (appType == TelephonyManager.APPTYPE_USIM) {

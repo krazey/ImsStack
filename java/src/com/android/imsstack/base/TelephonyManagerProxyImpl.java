@@ -18,6 +18,7 @@ package com.android.imsstack.base;
 import android.annotation.CallbackExecutor;
 import android.content.Context;
 import android.net.Uri;
+import android.os.OutcomeReceiver;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.UiccAppType;
 import android.telephony.Annotation.UiccAppTypeExt;
@@ -36,10 +37,14 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.imsstack.util.MessageExecutor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An implementation class to access the APIs of {@link TelephonyManager}.
@@ -47,7 +52,8 @@ import java.util.concurrent.Executor;
 public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
-
+    private final MessageExecutor mExecutor =
+            new MessageExecutor(TelephonyManagerProxyImpl.class.getSimpleName());
     TelephonyManagerProxyImpl(@NonNull Context context) {
         mContext = context;
         mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
@@ -209,9 +215,30 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
-    public String getSimServiceTable(@UiccAppType int appType) {
+    public @NonNull byte[] getSimServiceTable(@UiccAppType int appType) {
         TelephonyManager tm = getTelephonyManager();
-        return tm != null ? tm.getSimServiceTable(appType) : null;
+        if (tm == null) {
+            return new byte[0];
+        }
+        CompletableFuture<byte[]> future = new CompletableFuture<>();
+        OutcomeReceiver<byte[], Exception> callback = new OutcomeReceiver<>() {
+            @Override
+            public void onResult(byte[] serviceTable) {
+                future.complete(serviceTable);
+            }
+            @Override
+            public void onError(@NonNull Exception ex) {
+                future.complete(new byte[0]);
+            }
+        };
+
+        tm.getSimServiceTable(appType, mExecutor, callback);
+
+        try {
+            return future.get(1, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            return new byte[0];
+        }
     }
 
     @Override

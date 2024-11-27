@@ -15,12 +15,14 @@
  */
 package com.android.imsstack.base;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.OutcomeReceiver;
 import android.telephony.CellInfo;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -86,7 +89,7 @@ public class TelephonyManagerProxyImplTest {
         assertNotNull(telephonyManagerProxy);
         verify(mTelephonyManager).createForSubscriptionId(eq(TestAppContext.SUB_ID_1));
 
-        // EXpected that the TelephonyManager is null.
+        // Expected that the TelephonyManager is null.
         mContextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
         assertThrows(IllegalStateException.class, () -> {
             mTelephonyManagerProxy.createForSubscriptionId(TestAppContext.SUB_ID_1);
@@ -178,9 +181,6 @@ public class TelephonyManagerProxyImplTest {
         mTelephonyManagerProxy.getSimOperatorName();
         verify(mTelephonyManager).getSimOperatorName();
 
-        mTelephonyManagerProxy.getSimServiceTable(TelephonyManager.APPTYPE_ISIM);
-        verify(mTelephonyManager).getSimServiceTable(eq(TelephonyManager.APPTYPE_ISIM));
-
         mTelephonyManagerProxy.getIsimDomain();
         verify(mTelephonyManager).getIsimDomain();
 
@@ -255,7 +255,8 @@ public class TelephonyManagerProxyImplTest {
         assertNull(mTelephonyManagerProxy.getSimSerialNumber());
         assertNull(mTelephonyManagerProxy.getGroupIdLevel1());
         assertEquals("", mTelephonyManagerProxy.getSimOperatorName());
-        assertNull(mTelephonyManagerProxy.getSimServiceTable(TelephonyManager.APPTYPE_ISIM));
+        assertArrayEquals(new byte[0],
+                mTelephonyManagerProxy.getSimServiceTable(TelephonyManager.APPTYPE_ISIM));
         assertNull(mTelephonyManagerProxy.getIsimDomain());
         assertThrows(IllegalStateException.class, () -> {
             mTelephonyManagerProxy.getImsPrivateUserIdentity();
@@ -287,7 +288,7 @@ public class TelephonyManagerProxyImplTest {
         mTelephonyManagerProxy.sendEnvelopeWithStatus(content);
         verify(mTelephonyManager).sendEnvelopeWithStatus(eq(content));
 
-        // EXpected that the TelephonyManager is null.
+        // Expected that the TelephonyManager is null.
         setUpTelephonyManagerNull();
         assertEquals("", mTelephonyManagerProxy.sendEnvelopeWithStatus(content));
     }
@@ -301,7 +302,7 @@ public class TelephonyManagerProxyImplTest {
         mTelephonyManagerProxy.requestCellInfoUpdate(executor, cellInfoCallback);
         verify(mTelephonyManager).requestCellInfoUpdate(eq(executor), eq(cellInfoCallback));
 
-        // EXpected that the TelephonyManager is null.
+        // Expected that the TelephonyManager is null.
         setUpTelephonyManagerNull();
         mTelephonyManagerProxy.requestCellInfoUpdate(executor, cellInfoCallback);
 
@@ -325,12 +326,20 @@ public class TelephonyManagerProxyImplTest {
                 eq(TelephonyManager.APPTYPE_ISIM), eq(nafId), eq(securityProtocol), eq(false),
                 eq(executor), eq(callback));
 
-        // EXpected that the TelephonyManager is null.
+        // Expected that the TelephonyManager is null.
         setUpTelephonyManagerNull();
         mTelephonyManagerProxy.bootstrapAuthenticationRequest(
                 TelephonyManager.APPTYPE_ISIM, nafId, securityProtocol, false, executor, callback);
         verify(callback).onAuthenticationFailure(
                 eq(TelephonyManager.GBA_FAILURE_REASON_FEATURE_NOT_READY));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetSimServiceTableForIsim() {
+        mTelephonyManagerProxy.getSimServiceTable(TelephonyManager.APPTYPE_ISIM);
+        verify(mTelephonyManager).getSimServiceTable(eq(TelephonyManager.APPTYPE_ISIM),
+                any(Executor.class), any(OutcomeReceiver.class));
     }
 
     private void setUpTelephonyManagerNull() {
