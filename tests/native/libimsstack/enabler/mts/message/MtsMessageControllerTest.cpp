@@ -1107,8 +1107,8 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT, _))
-            .WillByDefault(Return(MESSAGE_RESPONSE_WAIT_TIMER));
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT, _))
+            .WillByDefault(Return(MO_ERROR_FALLBACK));
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_FALLBACK, _, _)).Times(1);
     pMtsMessageController->NotifyMoSms(
