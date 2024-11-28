@@ -39,6 +39,7 @@ public class MtcEmergencyServiceManager {
     private ECallStateListener mECallStateListener = null;
     private final ICallStateTracker mCallStateTracker;
     private int mEmergencyType;
+    private boolean mIsStopEmergencyServiceRequired;
 
     public MtcEmergencyServiceManager(IBaseContext context, ICallStateTracker callStateTracker) {
         mContext = context;
@@ -107,6 +108,7 @@ public class MtcEmergencyServiceManager {
         }
 
         mCallStateTracker.addListener(mECallStateListener);
+        mIsStopEmergencyServiceRequired = true;
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
@@ -146,8 +148,7 @@ public class MtcEmergencyServiceManager {
 
     private void onEsIdle() {
         log("onEsIdle");
-
-        releaseCall();
+        mIsStopEmergencyServiceRequired = false;
     }
 
     private void onEsOpening() {
@@ -156,6 +157,7 @@ public class MtcEmergencyServiceManager {
 
     private void onEsOpened(int serviceType) {
         log("onEsOpened :: serviceType=" + serviceType);
+        mIsStopEmergencyServiceRequired = false;
 
         if (mCall == null) {
             return;
@@ -163,12 +165,11 @@ public class MtcEmergencyServiceManager {
 
         mCall.createNativeCallObject();
         mCall.open(serviceType, mEmergencyType, false, false);
-        releaseCall();
     }
 
     private void onEsUnavailable() {
         log("onEsUnavailable");
-        releaseCall();
+        mIsStopEmergencyServiceRequired = false;
     }
 
     private int convertEmergencyRoutingToServiceType(
@@ -234,8 +235,14 @@ public class MtcEmergencyServiceManager {
                 return;
             }
 
+            IServiceStateTracker sst = mContext.getServiceStateTracker();
+            sst.handleEmergencyCallDestroyed();
+
             releaseCall();
-            stopEmergencyService();
+            if (mIsStopEmergencyServiceRequired) {
+                mIsStopEmergencyServiceRequired = false;
+                stopEmergencyService();
+            }
         }
     }
 }
