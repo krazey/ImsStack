@@ -211,7 +211,6 @@
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
-    <int name="imsvoice.maximum_wait_timer_for_geolocation_pidf_info_millis_int" value="2000"/>
     <int-array name="imsvt.vilte_to_volte_retry_failure_response_code_int_array" num="0"></int-array>
     <boolean name="imswfc.enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
     <int name="imsvoice.policy_qos_precondition_mechanism_while_call_modification_int" value="0"/>

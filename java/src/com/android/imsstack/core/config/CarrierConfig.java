@@ -772,8 +772,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "enable_registration_recovery_when_call_retry_unavailable_bool";
         public static final String KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL =
                 KEY_PREFIX + "check_server_outage_reason_for_vxlte_call_bool";
-        public static final String KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT =
-                KEY_PREFIX + "maximum_wait_timer_for_geolocation_pidf_info_millis_int";
         public static final String KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL =
                 KEY_PREFIX + "maintain_multiple_early_sessions_by_forking_bool";
         public static final String KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL =
