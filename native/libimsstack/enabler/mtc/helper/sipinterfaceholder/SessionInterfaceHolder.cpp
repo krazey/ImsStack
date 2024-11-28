@@ -51,10 +51,22 @@ SessionInterfaceHolder::~SessionInterfaceHolder()
     m_objSessionRecords.clear();
 }
 
+PUBLIC VIRTUAL void SessionInterfaceHolder::SessionStarted(IN ISession* piSession)
+{
+    IMS_TRACE_D("SessionStarted", 0, 0, 0);
+    piSession->SendAck();
+    piSession->Terminate();
+}
+
+PUBLIC VIRTUAL void SessionInterfaceHolder::SessionStartFailed(IN ISession* piSession)
+{
+    IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
+    ReleaseISession(piSession, IMS_TRUE, IMS_TRUE);
+}
+
 PUBLIC VIRTUAL void SessionInterfaceHolder::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
-
     ReleaseISession(piSession, IMS_TRUE, IMS_TRUE);
 }
 

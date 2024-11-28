@@ -61,7 +61,7 @@ protected:
     }
 };
 
-TEST_F(SessionInterfaceHolderTest, HolderDoesNothingForSessionListenerExceptTerminated)
+TEST_F(SessionInterfaceHolderTest, HolderDoesNothingForUnexpectedSessionListeners)
 {
     MockIReference objMockIReference;
     MockISipServerConnection objMockServerConnection;
@@ -70,7 +70,6 @@ TEST_F(SessionInterfaceHolderTest, HolderDoesNothingForSessionListenerExceptTerm
 
     pHolder->SessionAlerting(&objMockISession);
     pHolder->SessionReferenceReceived(&objMockISession, &objMockIReference);
-    pHolder->SessionStarted(&objMockISession);
     pHolder->SessionStartFailed(&objMockISession);
     pHolder->SessionUpdated(&objMockISession);
     pHolder->SessionUpdateFailed(&objMockISession);
@@ -90,6 +89,25 @@ TEST_F(SessionInterfaceHolderTest, HolderDoesNothingForSessionListenerExceptTerm
     pHolder->SessionTransactionReceived(&objMockISession, &objMockServerConnection);
 
     EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
+}
+
+TEST_F(SessionInterfaceHolderTest, SendsAckAndTerminatesIfSessionStarted)
+{
+    EXPECT_CALL(objMockISession, SendAck).Times(1);
+    EXPECT_CALL(objMockISession, Terminate).Times(1);
+
+    pHolder->SessionStarted(&objMockISession);
+}
+
+TEST_F(SessionInterfaceHolderTest, StopsTimerIfSessionStartFailed)
+{
+    EXPECT_CALL(objMockISession, Destroy()).Times(1);
+
+    pHolder->AddISession(CALL_KEY_1, &objMockISession);
+    pHolder->SessionStartFailed(&objMockISession);
+
+    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISession));
+    EXPECT_EQ(pHolder->GetSessionCount(), 0);
 }
 
 TEST_F(SessionInterfaceHolderTest, StopsTimerIfSessionTerminated)

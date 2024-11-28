@@ -39,8 +39,8 @@ public:
     // ISessionListener interface implementation
     inline void SessionAlerting(IN ISession*) override {}
     inline void SessionReferenceReceived(IN ISession*, IN IReference*) override {}
-    inline void SessionStarted(IN ISession*) override {}
-    inline void SessionStartFailed(IN ISession*) override {}
+    void SessionStarted(IN ISession* piSession) override;
+    void SessionStartFailed(IN ISession* piSession) override;
     void SessionTerminated(IN ISession* piSession) override;
     inline void SessionUpdated(IN ISession*) override {}
     inline void SessionUpdateFailed(IN ISession*) override {}
