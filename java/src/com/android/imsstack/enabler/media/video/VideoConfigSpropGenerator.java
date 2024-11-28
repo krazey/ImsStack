@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.media;
 
 import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.ImsVt;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.VideoConfig;
@@ -181,27 +182,32 @@ public class VideoConfigSpropGenerator {
         }
 
         private VideoConfig[] readVideoConfigs(CarrierConfig carrierConfig) {
+            if (!carrierConfig.getBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL)) {
+                ImsLog.e(mSlotId, "readVideoConfigs: VT not enabled for this carrier");
+                return null;
+            }
+
             PersistableBundle videoPayloadTypes = carrierConfig.getBundle(
                     ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
             if (videoPayloadTypes == null || videoPayloadTypes.isEmpty()) {
-                ImsLog.e(mSlotId, "makeVideoConfig: Unable to read video payload types from"
+                ImsLog.e(mSlotId, "readVideoConfigs: Unable to read video payload types from"
                         + "carrier config.");
                 return null;
             }
 
-            ImsLog.i(mSlotId, "makeVideoConfig.videoPayloadTypes: " + videoPayloadTypes);
+            ImsLog.i(mSlotId, "readVideoConfigs.videoPayloadTypes: " + videoPayloadTypes);
 
             ArrayList<VideoConfig> videoConfigs = new ArrayList<VideoConfig>();
 
             int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
                     CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
             if (hevcPayloadTypes != null && hevcPayloadTypes.length > 0) {
-                ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadTypes: "
+                ImsLog.i(mSlotId, "readVideoConfigs.hevcPayloadTypes: "
                         + Arrays.toString(hevcPayloadTypes));
 
                 PersistableBundle hevcPayloadDescriptions = carrierConfig.getBundle(
                         CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
-                ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadDescription: "
+                ImsLog.i(mSlotId, "readVideoConfigs.hevcPayloadDescription: "
                         + hevcPayloadDescriptions);
 
                 for (int payloadTypeIdx = 0; (payloadTypeIdx < hevcPayloadTypes.length)
@@ -247,7 +253,7 @@ public class VideoConfigSpropGenerator {
             if (h264PayloadTypes != null && h264PayloadTypes.length > 0) {
                 PersistableBundle h264PayloadDescriptions = carrierConfig.getBundle(
                         ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
-                ImsLog.i(mSlotId, "makeVideoConfig.h264PayloadDescription: "
+                ImsLog.i(mSlotId, "readVideoConfigs.h264PayloadDescription: "
                         + h264PayloadDescriptions);
 
                 for (int payloadTypeIdx = 0; (payloadTypeIdx < h264PayloadTypes.length)
@@ -286,14 +292,14 @@ public class VideoConfigSpropGenerator {
                                 .build();
                         videoConfigs.add(videoConfig);
                     } else {
-                        ImsLog.e(mSlotId, "makeVideoConfig: profileLevelStr is empty for"
+                        ImsLog.e(mSlotId, "readVideoConfigs: profileLevelStr is empty for"
                                 + "payloadType:" + payloadType);
                     }
                 }
             }
 
             if (videoConfigs.isEmpty()) {
-                ImsLog.e(mSlotId, "makeVideoConfig: videoConfigs is empty");
+                ImsLog.e(mSlotId, "readVideoConfigs: videoConfigs is empty");
                 return null;
             }
 
