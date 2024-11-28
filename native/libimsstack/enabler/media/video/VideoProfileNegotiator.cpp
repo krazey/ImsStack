@@ -1209,8 +1209,8 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfigu
         }
 
         // 2.2 Normal Case
-        // if RS/RR is used for RTCP Nego value
-        if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
+        // if RS/RR is used for RTCP remote value
+        if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE)
         {
             pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
             pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
@@ -1227,9 +1227,7 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfigu
         // 1. Set Negotiated AS Value
         if (nAsValueOfNegoticatedCodec > 0)
         {
-            // if GetBandwidthNegoOption is BW_OPTION_NEGOTIATED_VALUE, use lower AS value
-            if (pConfig->GetBandwidthNegoOption() ==
-                            MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE &&
+            if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE &&
                     nAsValueOfNegoticatedCodec > pPeerProfile->GetBandwidthAs() &&
                     pPeerProfile->GetBandwidthAs() > 0)
             {
@@ -1274,7 +1272,7 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfigu
             }
 
             // 3.2.2 Normal Case
-            if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
+            if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE)
             {
                 // only use rtcp when rtcp state is enable
                 pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
@@ -1282,7 +1280,7 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfigu
             }
             else
             {
-                // default case (RS/RR is not negotiated value)
+                // default case (Local values ​​are used instead of remote values.)
                 pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
                 pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
             }

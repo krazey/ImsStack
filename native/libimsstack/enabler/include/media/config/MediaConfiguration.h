@@ -166,14 +166,14 @@ public:
 
     /*
         Bandwidth_option_value
-        BW_OPTION_SOURCE_VALUE : Use Source Profile's AS/RS/RR Value
-        BW_OPTION_NEGOTIATED_VALUE : Use Negotiated AS/RS/RR Value
-                                    (compare source profile and dest profile)
+        BW_OPTION_LOCAL_VALUE : Use Local Profile's AS/RS/RR Value
+        BW_OPTION_REMOTE_VALUE : Use Remote Profile's AS/RS/RR Value (If sdp negotiationsucceeds,
+                the value of remote profile is used as negotiated profile.)
     */
     enum
     {
-        BW_OPTION_SOURCE_VALUE = 0,
-        BW_OPTION_NEGOTIATED_VALUE = 1
+        BW_OPTION_LOCAL_VALUE = 0,
+        BW_OPTION_REMOTE_VALUE = 1
     };
 
     /** check SDPOfferCapNegForAVPF option
