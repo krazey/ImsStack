@@ -508,6 +508,13 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_423(IN IMS_BO
 
 PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_503(IN IMS_BOOL bIsRefreshed)
 {
+    if (GET_N_CONFIG(m_piContext->GetSlotId())->GetSubRetrySip503CodePolicy() !=
+            CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP)
+    {
+        return IMS_FALSE;
+    }
+
+    // This is in accordance with the 3GPP TS24.229 5.1.2A.1.6 specification.
     IMS_SINT32 nRetryAfter =
             AosUtil::GetInstance()->GetRetryAfterValue(m_piRegSubscription->GetPreviousResponse());
 
