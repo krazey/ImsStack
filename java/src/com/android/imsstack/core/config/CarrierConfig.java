@@ -444,7 +444,18 @@ public class CarrierConfig {
         // Mtc
         public static final String KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT =
                 KEY_PREFIX + "policy_on_text_qos_deactivation_int";
-        // Media
+        public static final String KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY =
+                KEY_PREFIX + "text_rtp_port_range_int_array";
+        public static final String KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL =
+                KEY_PREFIX + "text_codec_empty_redundant_bool";
+        public static final String KEY_TEXT_RTP_DSCP_INT =
+                KEY_PREFIX + "text_rtp_dscp_int";
+        public static final String KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT =
+                KEY_PREFIX + "text_codec_redundancy_level_int";
+        public static final String KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "text_rtp_inactivity_timer_millis_int";
+        public static final String KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "text_rtcp_inactivity_timer_millis_int";
         public static final String KEY_TEXT_RTCP_INTERVAL_INT_ARRAY =
                 KEY_PREFIX + "text_rtcp_interval_int_array";
 
@@ -800,6 +811,56 @@ public class CarrierConfig {
         public static final String KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY =
                 KEY_PREFIX + "registration_to_18x_timer_millis_int_array";
         // Media
+        public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
+                KEY_PREFIX + "audio_rtp_port_range_int_array";
+        public static final String KEY_AUDIO_BW_NEGO_OPTION_BOOL =
+                KEY_PREFIX + "audio_bw_nego_option_bool";
+        public static final String KEY_AUDIO_PTIME_MILLIS_INT =
+                KEY_PREFIX + "audio_ptime_millis_int";
+        public static final String KEY_AUDIO_MAXPTIME_MILLIS_INT =
+                KEY_PREFIX + "audio_maxptime_millis_int";
+        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL =
+                KEY_PREFIX + "audio_show_codec_attribute_modeset_bool";
+        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL =
+                KEY_PREFIX + "audio_show_codec_attribute_dtx_bool";
+        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL =
+                KEY_PREFIX + "audio_show_codec_attribute_amrwbio_modeset_bool";
+        public static final String KEY_AUDIO_RTP_DSCP_INT =
+                KEY_PREFIX + "audio_rtp_dscp_int";
+        public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT =
+                KEY_PREFIX + "audio_telephone_event_duration_millis_int";
+        public static final String KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY =
+                KEY_PREFIX + "audio_candidate_attribute_string_array";
+        public static final String KEY_AUDIO_RTCPXR_ENABLE_BOOL =
+                KEY_PREFIX + "audio_rtcpxr_enable_bool";
+        public static final String KEY_AUDIO_RTCPXR_STATISTICS_BOOL =
+                KEY_PREFIX + "audio_rtcpxr_statistics_bool";
+        public static final String KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL =
+                KEY_PREFIX + "audio_rtcpxr_voip_metrics_bool";
+        public static final String KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL =
+                KEY_PREFIX + "audio_rtcpxr_packet_loss_rle_bool";
+        public static final String KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL =
+                KEY_PREFIX + "audio_rtcpxr_packet_duplicate_rle_bool";
+        public static final String KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL =
+                KEY_PREFIX + "support_multi_config_in_early_session_bool";
+        public static final String KEY_AUDIO_MAXRED_INT =
+                KEY_PREFIX + "audio_maxred_int";
+        public static final String KEY_AUDIO_EVS_SUPPORT_BOOL =
+                KEY_PREFIX + "audio_evs_support_bool";
+        public static final String KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL =
+                KEY_PREFIX + "media_anbr_capability_in_modem_bool";
+        public static final String KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL =
+                KEY_PREFIX + "media_session_level_bandwidth_bool";
+        public static final String KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL =
+                KEY_PREFIX + "sdp_answer_full_capability_bool";
+        public static final String KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL =
+                KEY_PREFIX + "sdp_reoffer_full_capability_bool";
+        public static final String KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
+                KEY_PREFIX + "audio_amrwb_codec_attribute_default_modeset_int_array";
+        public static final String KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
+                KEY_PREFIX + "audio_amrnb_codec_attribute_default_modeset_int_array";
+        public static final String KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL =
+                KEY_PREFIX + "incoming_dtmf_tone_play_support_bool";
         public static final String KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY =
                 KEY_PREFIX + "audio_jitter_buffer_size_int_array";
         public static final String KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY =
@@ -840,6 +901,34 @@ public class CarrierConfig {
         public static final String KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL =
                 KEY_PREFIX + "one_way_video_call_by_remote_end_supported_bool";
         // Media
+        public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
+                KEY_PREFIX + "video_rtp_port_range_int_array";
+        public static final String KEY_VIDEO_CVO_VALUE_INT =
+                KEY_PREFIX + "video_cvo_value_int";
+        public static final String KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT =
+                KEY_PREFIX + "video_sdp_offer_cap_nego_for_avpf_int";
+        public static final String KEY_VIDEO_AVPF_ENABLE_BOOL =
+                KEY_PREFIX + "video_avpf_enable_bool";
+        public static final String KEY_VIDEO_IFRAME_INTERVAL_SEC_INT =
+                KEY_PREFIX + "video_iframe_interval_sec_int";
+        public static final String KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT =
+                KEY_PREFIX + "video_send_periodic_sps_pps_int";
+        public static final String KEY_AVC_SPROP_PARAMETER_SETS_STRING =
+                KEY_PREFIX + "avc_sprop_parameter_sets_string";
+        public static final String KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY =
+                KEY_PREFIX + "hevc_payload_type_int_array";
+        public static final String KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE =
+                KEY_PREFIX + "hevc_payload_description_bundle";
+        public static final String KEY_HEVC_SPROP_PARAMETER_SETS_STRING =
+                KEY_PREFIX + "hevc_sprop_parameter_sets_string";
+        public static final String KEY_HEVC_PROFILE_INT =
+                KEY_PREFIX + "hevc_profile_int";
+        public static final String KEY_HEVC_LEVEL_INT =
+                KEY_PREFIX + "hevc_level_int";
+        public static final String KEY_VIDEO_BW_NEGO_OPTION_BOOL =
+                KEY_PREFIX + "video_bw_nego_option_bool";
+        public static final String KEY_VIDEO_LOWEST_BITRATE_BPS_INT =
+                KEY_PREFIX + "video_lowest_bitrate_bps_int";
         public static final String KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY =
                 KEY_PREFIX + "video_rtcp_interval_int_array";
         public static final String KEY_VIDEO_AVPF_FEATURE_INT =
@@ -856,6 +945,11 @@ public class CarrierConfig {
                 KEY_PREFIX + "video_codec_hevc_level_int_array";
         public static final String KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING =
                 KEY_PREFIX + "h264_video_codec_attribute_profile_level_id_string";
+        public static final String KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL =
+                KEY_PREFIX + "dynamic_video_quality_supported_bool";
+        public static final String KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL =
+                KEY_PREFIX + "video_codec_hevc_priority_order_bool";
+
                 // TODO Media - item in Bundle - added to change the internal xml for test
 
         private ImsVt() {}
@@ -1202,102 +1296,6 @@ public class CarrierConfig {
         public static final String KEY_WFC_ERR_OTHER_FAILURES_STRING =
                 KEY_IMS_WFC_PREFIX + "wfc_err_other_failures_string";
         // }
-
-        // Media
-        public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
-                "audio_rtp_port_range_int_array";
-        public static final String KEY_AUDIO_BW_NEGO_OPTION_BOOL =
-                "audio_bw_nego_option_bool";
-        public static final String KEY_AUDIO_PTIME_MILLIS_INT =
-                "audio_ptime_millis_int";
-        public static final String KEY_AUDIO_MAXPTIME_MILLIS_INT =
-                "audio_maxptime_millis_int";
-        public static final String KEY_AUDIO_MAXRED_INT =
-                "audio_maxred_int";
-        public static final String KEY_AUDIO_RTP_DSCP_INT =
-                "audio_rtp_dscp_int";
-        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL =
-                "audio_show_codec_attribute_modeset_bool";
-        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL =
-                "audio_show_codec_attribute_dtx_bool";
-        public static final String KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL =
-                "audio_show_codec_attribute_amrwbio_modeset_bool";
-        public static final String KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
-                "audio_amrwb_codec_attribute_default_modeset_int_array";
-        public static final String KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
-                "audio_amrnb_codec_attribute_default_modeset_int_array";
-        public static final String KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT =
-                "audio_telephone_event_duration_millis_int";
-        public static final String KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY =
-                "audio_candidate_attribute_string_array";
-        public static final String KEY_AUDIO_RTCPXR_ENABLE_BOOL =
-                "audio_rtcpxr_enable_bool";
-        public static final String KEY_AUDIO_RTCPXR_STATISTICS_BOOL =
-                "audio_rtcpxr_statistics_bool";
-        public static final String KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL =
-                "audio_rtcpxr_voip_metrics_bool";
-        public static final String KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL =
-                "audio_rtcpxr_packet_loss_rle_bool";
-        public static final String KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL =
-                "audio_rtcpxr_packet_duplicate_rle_bool";
-        public static final String KEY_AVC_SPROP_PARAMETER_SETS_STRING =
-                "avc_sprop_parameter_sets_string";
-        public static final String KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY =
-                "hevc_payload_type_int_array";
-        public static final String KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE =
-                "hevc_payload_description_bundle";
-        public static final String KEY_HEVC_SPROP_PARAMETER_SETS_STRING =
-                "hevc_sprop_parameter_sets_string";
-        public static final String KEY_HEVC_PROFILE_INT =
-                "hevc_profile_int";
-        public static final String KEY_HEVC_LEVEL_INT =
-                "hevc_level_int";
-        public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
-                "video_rtp_port_range_int_array";
-        public static final String KEY_VIDEO_CVO_VALUE_INT =
-                "video_cvo_value_int";
-        public static final String KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT =
-                "video_sdp_offer_cap_nego_for_avpf_int";
-        public static final String KEY_VIDEO_AVPF_ENABLE_BOOL =
-                "video_avpf_enable_bool";
-        public static final String KEY_VIDEO_IFRAME_INTERVAL_SEC_INT =
-                "video_iframe_interval_sec_int";
-        public static final String KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT =
-                "video_send_periodic_sps_pps_int";
-        public static final String KEY_VIDEO_BW_NEGO_OPTION_BOOL =
-                "video_bw_nego_option_bool";
-        public static final String KEY_VIDEO_LOWEST_BITRATE_BPS_INT =
-                "video_lowest_bitrate_bps_int";
-        public static final String KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY =
-                "text_rtp_port_range_int_array";
-        public static final String KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL =
-                "text_codec_empty_redundant_bool";
-        public static final String KEY_TEXT_RTP_DSCP_INT =
-                "text_rtp_dscp_int";
-        public static final String KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL =
-                "support_multi_config_in_early_session_bool";
-        public static final String KEY_AUDIO_EVS_SUPPORT_BOOL =
-                "audio_evs_support_bool";
-        public static final String KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL =
-                "media_anbr_capability_in_modem_bool";
-        public static final String KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL =
-                "media_session_level_bandwidth_bool";
-        public static final String KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL =
-                "sdp_answer_full_capability_bool";
-        public static final String KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL =
-                "sdp_reoffer_full_capability_bool";
-        public static final String KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT =
-                "text_codec_redundancy_level_int";
-        public static final String KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT =
-                "text_rtp_inactivity_timer_millis_int";
-        public static final String KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT =
-                "text_rtcp_inactivity_timer_millis_int";
-        public static final String KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL =
-                "dynamic_video_quality_supported_bool";
-        public static final String KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL =
-                "incoming_dtmf_tone_play_support_bool";
-        public static final String KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL =
-                "video_codec_hevc_priority_order_bool";
 
         // TODO Media additional for CallFeature
         public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =

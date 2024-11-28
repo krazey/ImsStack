@@ -127,7 +127,7 @@ TEST_F(CodecEvsConfigTest, GetShowEvsDtx)
     IMS_BOOL bShowEvsDtx = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE))
             .WillByDefault(Return(bShowEvsDtx));
 
     GetReadyToCreate();
@@ -275,7 +275,7 @@ TEST_F(CodecEvsConfigTest, GetShowEvsAmrWbIoModeSet)
     IMS_BOOL bShowEvsAmrWbIoModeSet = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
                     IMS_FALSE))
             .WillByDefault(Return(bShowEvsAmrWbIoModeSet));
 

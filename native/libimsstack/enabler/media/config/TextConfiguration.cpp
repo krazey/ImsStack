@@ -47,7 +47,7 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
     }
 
     // Media Configuration attributes
-    SetPorts(piCc, CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY);
+    SetPorts(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY);
 
     m_nAsBandwidthKbps =
@@ -58,10 +58,10 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT, DEFAULT_RS);
 
     m_nRtpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT,
+            piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTP_INACTIVITY);
     m_nRtcpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+            piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTCP_INACTIVITY);
 
     IMS_TRACE_D("Create - RtpInactivityTimerMillis[%d] RtcpInactivityTimerMillis[%d]",
@@ -70,10 +70,10 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
-    m_nTextDscp = piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT, DEFAULT_TEXT_DSCP);
+    m_nTextDscp = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RTP_DSCP_INT, DEFAULT_TEXT_DSCP);
 
     m_bTextCodecEmptyRedundantEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL, DEFAULT_EMPTY_REDUNDANT);
+            CarrierConfig::ImsRtt::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL, DEFAULT_EMPTY_REDUNDANT);
 
     if (!CreateCodecConfigs(piCc))
     {

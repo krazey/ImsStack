@@ -61,13 +61,13 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
     piCc->AddListener(this);
 
     m_bIsSessLevelBW =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
     m_bAnbrSupported =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
-    m_bSupportMultiConfigInEarlySession =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
+    m_bSupportMultiConfigInEarlySession = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
     m_bSdpReofferFullCapability =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL);
 
     if (m_pAudioConfig == IMS_NULL)
     {

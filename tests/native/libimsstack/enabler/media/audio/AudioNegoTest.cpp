@@ -124,7 +124,7 @@ protected:
     void PrepareEvsConfig()
     {
         ON_CALL(*m_pMockICarrierConfig,
-                GetBoolean(CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL,
+                GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_EVS_SUPPORT_BOOL,
                         AudioConfiguration::DEFAULT_SUPPORT_EVS))
                 .WillByDefault(Return(IMS_TRUE));
 

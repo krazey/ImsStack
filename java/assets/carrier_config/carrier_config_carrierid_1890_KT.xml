@@ -136,25 +136,25 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
-    <int-array name="audio_rtp_port_range_int_array" num="2">
+    <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="49152"/>
         <item value="65535"/>
     </int-array>
-    <boolean name="audio_evs_support_bool" value="true"/>
+    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
 
-    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
 
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
 
-    <int-array name="video_rtp_port_range_int_array" num="2">
+    <int-array name="imsvt.video_rtp_port_range_int_array" num="2">
         <item value="49154"/>
         <item value="65535"/>
     </int-array>
-    <int name="video_cvo_value_int" value="-1"/>
+    <int name="imsvt.video_cvo_value_int" value="-1"/>
     <string-array name="imsvoice.audio_candidate_attribute_string_array" num="1">
         <item value="1, UDP, 1119400811, 10.3.210.77, 49152, typ, host"/>
     </string-array>

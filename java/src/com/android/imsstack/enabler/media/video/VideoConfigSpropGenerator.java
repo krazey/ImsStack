@@ -26,7 +26,6 @@ import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.config.CarrierConfig.Assets;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -195,14 +194,14 @@ public class VideoConfigSpropGenerator {
             ArrayList<VideoConfig> videoConfigs = new ArrayList<VideoConfig>();
 
             int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
-                    CarrierConfig.Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+                    CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
             if (hevcPayloadTypes != null && hevcPayloadTypes.length > 0) {
                 ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadTypes: "
                         + Arrays.toString(hevcPayloadTypes));
 
                 PersistableBundle hevcPayloadDescriptions = carrierConfig.getBundle(
-                        Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
-                ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadDesc: "
+                        CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
+                ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadDescription: "
                         + hevcPayloadDescriptions);
 
                 for (int payloadTypeIdx = 0; (payloadTypeIdx < hevcPayloadTypes.length)
@@ -214,7 +213,7 @@ public class VideoConfigSpropGenerator {
 
                     // Check if SPROP already exists.
                     String sprop = hevcPayloadDesc.getString(
-                            Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING, null);
+                            CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING, null);
                     if (sprop != null && !sprop.isEmpty()) {
                         // SPROP already exists in carrier config. No need to generate again.
                         continue;
@@ -230,8 +229,9 @@ public class VideoConfigSpropGenerator {
                             .setTxPayloadTypeNumber((byte) payloadType)
                             .setCodecType(VideoConfig.VIDEO_CODEC_HEVC)
                             .setCodecProfile(hevcPayloadDesc
-                                    .getInt(Assets.KEY_HEVC_PROFILE_INT))
-                            .setCodecLevel(hevcPayloadDesc.getInt(Assets.KEY_HEVC_LEVEL_INT))
+                                    .getInt(CarrierConfig.ImsVt.KEY_HEVC_PROFILE_INT))
+                            .setCodecLevel(hevcPayloadDesc.getInt(
+                                    CarrierConfig.ImsVt.KEY_HEVC_LEVEL_INT))
                             .setResolutionWidth(resolution[0])
                             .setResolutionHeight(resolution[1])
                             .setFramerate(hevcPayloadDesc.getInt(
@@ -247,7 +247,7 @@ public class VideoConfigSpropGenerator {
             if (h264PayloadTypes != null && h264PayloadTypes.length > 0) {
                 PersistableBundle h264PayloadDescriptions = carrierConfig.getBundle(
                         ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
-                ImsLog.i(mSlotId, "makeVideoConfig.h264PayloadDesc: "
+                ImsLog.i(mSlotId, "makeVideoConfig.h264PayloadDescription: "
                         + h264PayloadDescriptions);
 
                 for (int payloadTypeIdx = 0; (payloadTypeIdx < h264PayloadTypes.length)
@@ -259,7 +259,7 @@ public class VideoConfigSpropGenerator {
 
                     // Check if SPROP already exists.
                     String sprop = h264PayloadDesc.getString(
-                            CarrierConfig.Assets.KEY_AVC_SPROP_PARAMETER_SETS_STRING,
+                            CarrierConfig.ImsVt.KEY_AVC_SPROP_PARAMETER_SETS_STRING,
                             null);
                     if (sprop != null && !sprop.isEmpty()) {
                         // SPROP already exists in carrier config. No need to generate again.
@@ -272,8 +272,8 @@ public class VideoConfigSpropGenerator {
                         continue;
                     }
 
-                    String profileLevelStr = h264PayloadDesc.getString(CarrierConfig.ImsVt
-                            .KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING);
+                    String profileLevelStr = h264PayloadDesc.getString(
+                            ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING);
                     if (profileLevelStr != null && !profileLevelStr.isEmpty()) {
                         VideoConfig videoConfig = new VideoConfig.Builder()
                                 .setTxPayloadTypeNumber((byte) payloadType)
@@ -312,18 +312,20 @@ public class VideoConfigSpropGenerator {
                     ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
             int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
-                    CarrierConfig.Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+                    CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
             if (hevcPayloadTypes != null) {
                 for (int hevcPayloadType : hevcPayloadTypes) {
                     if (hevcPayloadType == payloadType) {
                         PersistableBundle hevcPayloadDescriptions = configBundle
-                                .getPersistableBundle(Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
+                                .getPersistableBundle(
+                                CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
                         if (hevcPayloadDescriptions != null) {
                             PersistableBundle hevcPayloadDesc = hevcPayloadDescriptions
                                     .getPersistableBundle("" + payloadType);
                             if (hevcPayloadDesc != null) {
                                 hevcPayloadDesc.putString(
-                                        Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING, sprop);
+                                        CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
+                                        sprop);
                             }
                             return;
                         }
@@ -342,8 +344,8 @@ public class VideoConfigSpropGenerator {
                             PersistableBundle h264PayloadDesc = h264PayloadDescriptions
                                     .getPersistableBundle("" + payloadType);
                             if (h264PayloadDesc != null) {
-                                h264PayloadDesc.putString(CarrierConfig.Assets
-                                                .KEY_AVC_SPROP_PARAMETER_SETS_STRING,
+                                h264PayloadDesc.putString(CarrierConfig.ImsVt
+                                        .KEY_AVC_SPROP_PARAMETER_SETS_STRING,
                                         sprop);
                             }
                             return;

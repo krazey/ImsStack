@@ -66,12 +66,12 @@ TEST_F(MediaSessionConfigTest, GetConfigTest)
     MediaSessionConfig* m_pConfig = new MediaSessionConfig(DEFAULT_SLOT_ID, MEDIA_SERVICE_DEFAULT);
     EXPECT_TRUE(m_pConfig->Create(DEFAULT_SLOT_ID));
     EXPECT_EQ(m_pConfig->IsSessionLevelBandwidth(),
-            GetBoolean(CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL));
+            GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL));
     EXPECT_EQ(m_pConfig->IsAnbrSupported(),
-            GetBoolean(CarrierConfig::Assets::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL));
+            GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL));
     EXPECT_EQ(m_pConfig->IsSupportMultiConfigInEarlySession(),
-            GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL));
+            GetBoolean(CarrierConfig::ImsVoice::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL));
     EXPECT_EQ(m_pConfig->IsSdpReofferFullCapability(),
-            GetBoolean(CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL));
+            GetBoolean(CarrierConfig::ImsVoice::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL));
     delete m_pConfig;
 }

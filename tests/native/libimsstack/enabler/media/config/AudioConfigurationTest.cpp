@@ -115,7 +115,7 @@ TEST_F(AudioConfigurationTest, IsEvsSupported)
     IMS_BOOL bEvsSupport = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL, DEFAULT_SUPPORT_EVS))
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_EVS_SUPPORT_BOOL, DEFAULT_SUPPORT_EVS))
             .WillByDefault(Return(bEvsSupport));
 
     GetReadyToCreate();
@@ -129,7 +129,7 @@ TEST_F(AudioConfigurationTest, GetPtime)
     IMS_SINT32 nAudioPtime = 20;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT, DEFAULT_PTIME))
+            GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_PTIME_MILLIS_INT, DEFAULT_PTIME))
             .WillByDefault(Return(nAudioPtime));
 
     GetReadyToCreate();
@@ -143,7 +143,7 @@ TEST_F(AudioConfigurationTest, GetMaxPtime)
     IMS_SINT32 nAudioMaxPtime = 20;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT, DEFAULT_MAX_PTIME))
+            GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_MILLIS_INT, DEFAULT_MAX_PTIME))
             .WillByDefault(Return(nAudioMaxPtime));
 
     GetReadyToCreate();
@@ -157,7 +157,7 @@ TEST_F(AudioConfigurationTest, GetMaxRed)
     IMS_SINT32 nAudioMaxRed = 220;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT, DEFAULT_MAX_RED))
+            GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXRED_INT, DEFAULT_MAX_RED))
             .WillByDefault(Return(nAudioMaxRed));
 
     GetReadyToCreate();
@@ -172,7 +172,7 @@ TEST_F(AudioConfigurationTest, GetBandwidthNegoOption)
 
     ON_CALL(*m_pMockICarrierConfig,
             GetBoolean(
-                    CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION))
+                    CarrierConfig::ImsVoice::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION))
             .WillByDefault(Return(bAudioBwNegoOptionEnabled));
 
     GetReadyToCreate();
@@ -186,7 +186,7 @@ TEST_F(AudioConfigurationTest, GetRtpDscp)
     IMS_SINT32 nAudioRtpDscp = 46;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP))
+            GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP))
             .WillByDefault(Return(nAudioRtpDscp));
 
     GetReadyToCreate();
@@ -230,22 +230,22 @@ TEST_F(AudioConfigurationTest, IsRtcpXrEnabled)
     IMS_BOOL bAudioRtcpxrPacketDuplicateRleEnabled = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR))
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR))
             .WillByDefault(Return(bAudioRtcpxrEnabled));
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL,
                     DEFAULT_RTCPXR_STATISTICS))
             .WillByDefault(Return(bAudioRtcpxrStatisticsEnabled));
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL,
                     DEFAULT_RTCPXR_VOIP_METRICS))
             .WillByDefault(Return(bAudioRtcpxrVoipMetricsEnabled));
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_LOSS_RLE))
             .WillByDefault(Return(bAudioRtcpxrPacketLossRleEnabled));
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE))
             .WillByDefault(Return(bAudioRtcpxrPacketDuplicateRleEnabled));
 
@@ -264,7 +264,7 @@ TEST_F(AudioConfigurationTest, GetDtmfDuration)
     IMS_SINT32 nDtmfDuration = 100;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
+            GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
                     DEFAULT_DTMF_DURATION))
             .WillByDefault(Return(nDtmfDuration));
 
@@ -280,7 +280,7 @@ TEST_F(AudioConfigurationTest, GetConfigCandidateAttr)
     objAudioCandidateAttribute.Push("2, UDP, 1119400811, 10.3.210.77, 7010, typ, host");
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetStringArray(CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY))
+            GetStringArray(CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY))
             .WillByDefault(Return(objAudioCandidateAttribute));
 
     GetReadyToCreate();
@@ -299,7 +299,7 @@ TEST_F(AudioConfigurationTest, GetAudioPort)
     objAudioPortRtp.Push(nAudioRtpEnd);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY))
             .WillByDefault(Return(objAudioPortRtp));
 
     GetReadyToCreate();

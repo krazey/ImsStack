@@ -94,7 +94,7 @@ public final class CallFeature {
 
     public static boolean isDynamicVideoQualitySupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL);
+                .getBoolean(CarrierConfig.ImsVt.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL);
     }
 
     public static boolean isOneWayVideoCallByLocalEndSupported(int slotId) {

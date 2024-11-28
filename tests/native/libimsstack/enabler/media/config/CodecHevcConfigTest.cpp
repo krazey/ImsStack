@@ -84,7 +84,7 @@ protected:
         strPayloadTypeNumber.SetNumber(m_nHevcPayloadTypeNumber);
 
         ON_CALL(*m_pMockICarrierConfig,
-                GetBundle(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
+                GetBundle(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pVideoBundle));
         ON_CALL(*m_pVideoBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pVideoSubBundle));
@@ -186,7 +186,7 @@ TEST_F(CodecHevcConfigTest, GetSpropParameterSets)
             "wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,"
             "AAAAAUQBwPPAAhA=");
     ON_CALL(*m_pVideoSubBundle,
-            GetString(CarrierConfig::Assets::KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
+            GetString(CarrierConfig::ImsVt::KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
                     AString::ConstNull()))
             .WillByDefault(Return(strSpropParameterSets));
 
@@ -199,8 +199,7 @@ TEST_F(CodecHevcConfigTest, GetSpropParameterSets)
 TEST_F(CodecHevcConfigTest, GetHevcProfile)
 {
     IMS_SINT32 nHevcProfile = 3;
-    ON_CALL(*m_pVideoSubBundle,
-            GetInt(CarrierConfig::Assets::KEY_HEVC_PROFILE_INT, DEFAULT_PROFILE))
+    ON_CALL(*m_pVideoSubBundle, GetInt(CarrierConfig::ImsVt::KEY_HEVC_PROFILE_INT, DEFAULT_PROFILE))
             .WillByDefault(Return(nHevcProfile));
 
     GetReadyToCreate();
@@ -212,7 +211,7 @@ TEST_F(CodecHevcConfigTest, GetHevcProfile)
 TEST_F(CodecHevcConfigTest, GetHevcLevel)
 {
     IMS_SINT32 nHevcLevel = 3;
-    ON_CALL(*m_pVideoSubBundle, GetInt(CarrierConfig::Assets::KEY_HEVC_LEVEL_INT, DEFAULT_LEVEL))
+    ON_CALL(*m_pVideoSubBundle, GetInt(CarrierConfig::ImsVt::KEY_HEVC_LEVEL_INT, DEFAULT_LEVEL))
             .WillByDefault(Return(nHevcLevel));
 
     GetReadyToCreate();

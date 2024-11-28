@@ -118,13 +118,12 @@ protected:
     void PrepareHevcConfig()
     {
         m_objHevcPayloadType.Add(HEVC_PAYLOAD);
-        ON_CALL(*m_pVideoBundle,
-                GetIntArray(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY))
+        ON_CALL(*m_pVideoBundle, GetIntArray(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY))
                 .WillByDefault(Return(m_objHevcPayloadType));
 
         m_pHevcBundle = new MockICarrierConfig();
         ON_CALL(*m_pMockICarrierConfig,
-                GetBundle(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
+                GetBundle(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pHevcBundle));
 
         m_strHevcPayloadTypeNumber.SetNumber(HEVC_PAYLOAD);

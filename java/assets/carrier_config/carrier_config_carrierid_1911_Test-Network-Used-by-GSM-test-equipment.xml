@@ -84,14 +84,14 @@
         </pbundle>
     </pbundle>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
-        <int-array name="hevc_payload_type_int_array" num="1">
+        <int-array name="imsvt.hevc_payload_type_int_array" num="1">
             <item value="125"/>
         </int-array>
         <int-array name="imsvt.h264_payload_type_int_array" num="1">
             <item value="119"/>
         </int-array>
     </pbundle>
-    <pbundle name="hevc_payload_description_bundle">
+    <pbundle name="imsvt.hevc_payload_description_bundle">
         <pbundle name="125">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="30"/>
@@ -99,9 +99,9 @@
                 <item value="480"/>
                 <item value="640"/>
             </int-array>
-            <string name="hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
-            <int name="hevc_profile_int" value="1"/>
-            <int name="hevc_level_int" value="93"/>
+            <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
+            <int name="imsvt.hevc_profile_int" value="1"/>
+            <int name="imsvt.hevc_level_int" value="93"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvt.h264_payload_description_bundle">
@@ -115,23 +115,23 @@
             </int-array>
         </pbundle>
     </pbundle>
-    <boolean name="video_codec_hevc_priority_order_bool" value="true"/>
-    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
 
-    <int name="video_cvo_value_int" value="4"/>
-    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
-    <boolean name="video_avpf_enable_bool" value="true"/>
+    <int name="imsvt.video_cvo_value_int" value="4"/>
+    <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
+    <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>
 
     <!-- Media common configuration -->
-    <int name="audio_maxred_int" value="220"/>
-    <int name="audio_ptime_millis_int" value="20"/>
-    <int name="audio_maxptime_millis_int" value="240"/>
-    <boolean name="audio_bw_nego_option_bool" value="true"/>
-    <boolean name="audio_evs_support_bool" value="true"/>
-    <boolean name="sdp_reoffer_full_capability_bool" value="false"/>
-    <boolean name="media_session_level_bandwidth_bool" value="true"/>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int name="imsvoice.audio_ptime_millis_int" value="20"/>
+    <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
+    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
+    <boolean name="imsvoice.media_session_level_bandwidth_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
     <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>

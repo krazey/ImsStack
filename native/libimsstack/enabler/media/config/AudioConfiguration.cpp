@@ -68,7 +68,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     }
 
     // Media Configuration attributes
-    SetPorts(piCc, CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY);
+    SetPorts(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY);
 
     m_nAsBandwidthKbps =
@@ -89,21 +89,22 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
                     DEFAULT_RTCP_INACTIVITY);
 
     m_bAudioBwNegoOptionEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
+            CarrierConfig::ImsVoice::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
 
     // Audio Configuration attributes
     m_bEvsSupported = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL, DEFAULT_SUPPORT_EVS);
-    m_nAudioPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT, DEFAULT_PTIME);
+            CarrierConfig::ImsVoice::KEY_AUDIO_EVS_SUPPORT_BOOL, DEFAULT_SUPPORT_EVS);
+    m_nAudioPtime =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_PTIME_MILLIS_INT, DEFAULT_PTIME);
     m_nAudioMaxPtime =
-            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT, DEFAULT_MAX_PTIME);
-    m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT, DEFAULT_MAX_RED);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_MILLIS_INT, DEFAULT_MAX_PTIME);
+    m_nAudioMaxRed = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXRED_INT, DEFAULT_MAX_RED);
 
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
     m_nAudioRtpDscp =
-            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP);
 
     ImsVector<IMS_SINT32> objAudioJitterBufferSize =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY);
@@ -124,26 +125,27 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
         }
     }
 
-    m_objAudioCandidateAttribute =
-            piCc->GetStringArray(CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
+    m_objAudioCandidateAttribute = piCc->GetStringArray(
+            CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
 
     // rtcp-xr
     m_bAudioRtcpxrEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR);
     m_bAudioRtcpxrStatisticsEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL, DEFAULT_RTCPXR_STATISTICS);
-    m_bAudioRtcpxrVoipMetricsEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL, DEFAULT_RTCPXR_VOIP_METRICS);
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL, DEFAULT_RTCPXR_STATISTICS);
+    m_bAudioRtcpxrVoipMetricsEnabled =
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL,
+                    DEFAULT_RTCPXR_VOIP_METRICS);
     m_bAudioRtcpxrPacketLossRleEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_LOSS_RLE);
     m_bAudioRtcpxrPacketDuplicateRleEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE);
 
     // DTMF Duration Parameter
     m_nDtmfDuration =
-            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
                     DEFAULT_DTMF_DURATION);
 
     // Creates a codec configuration

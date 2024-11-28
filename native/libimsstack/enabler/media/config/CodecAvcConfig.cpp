@@ -89,7 +89,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
             DEFAULT_PACKETIZATION_MODE);
 
     m_strSpropParameterSets = piCcSubBundle->GetString(
-            CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
+            CarrierConfig::ImsVt::KEY_AVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
 
     m_bIncludeSpropParameterSets = (m_strSpropParameterSets.GetLength() > 0) ? IMS_TRUE : IMS_FALSE;
 

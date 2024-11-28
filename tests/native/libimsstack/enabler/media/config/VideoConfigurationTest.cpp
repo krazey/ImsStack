@@ -124,7 +124,7 @@ TEST_F(VideoConfigurationTest, GetVideoSendPeriodicSpsPps)
     IMS_SINT32 nVideoSendPeriodicSpsPps = 2;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT,
                     DEFAULT_SEND_PERIODIC_SPS_PPS))
             .WillByDefault(Return(nVideoSendPeriodicSpsPps));
 
@@ -139,7 +139,7 @@ TEST_F(VideoConfigurationTest, GetCvoId)
     IMS_SINT32 nCvoId = 1;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT, DEFAULT_CVO_ID))
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_CVO_VALUE_INT, DEFAULT_CVO_ID))
             .WillByDefault(Return(nCvoId));
 
     GetReadyToCreate();
@@ -165,7 +165,7 @@ TEST_F(VideoConfigurationTest, GetConfigVideoAvpfFeature)
     nVideoAvpfFeature |= bVideoAvpfFirEnabled << 4;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL, DEFAULT_AVPF_ENABLED))
+            GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_ENABLE_BOOL, DEFAULT_AVPF_ENABLED))
             .WillByDefault(Return(bVideoAvpfEnabled));
     ON_CALL(*m_pMockICarrierConfig,
             GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT, DEFAULT_AVPF_FEATURE))
@@ -188,7 +188,7 @@ TEST_F(VideoConfigurationTest, GetSdpOfferCapNegoForAvpf)
     IMS_SINT32 nSdpOfferCapNegoForAvpf = 1;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT,
                     DEFAULT_AVPF_CAPA_NEGO))
             .WillByDefault(Return(nSdpOfferCapNegoForAvpf));
 
@@ -204,7 +204,7 @@ TEST_F(VideoConfigurationTest, GetVideoIframeIntervalSec)
     IMS_SINT32 nVideoIframeIntervalSec = 2;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT,
                     DEFAULT_I_FRAME_INTERVAL))
             .WillByDefault(Return(nVideoIframeIntervalSec));
 
@@ -219,8 +219,7 @@ TEST_F(VideoConfigurationTest, GetBandwidthNegoOption)
     IMS_BOOL bVideoBwNegoOptionEnabled = 2;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(
-                    CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION))
+            GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION))
             .WillByDefault(Return(bVideoBwNegoOptionEnabled));
 
     GetReadyToCreate();
@@ -254,7 +253,7 @@ TEST_F(VideoConfigurationTest, GetVideoPort)
     objVideoPortRtp.Push(nVideoRtpEnd);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY))
             .WillByDefault(Return(objVideoPortRtp));
 
     GetReadyToCreate();
@@ -335,7 +334,7 @@ TEST_F(VideoConfigurationTest, GetVideoLowestBitrateBps)
     IMS_SINT32 nVideoLowestBitrateBps = 90000;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_LOWEST_BITRATE_BPS_INT,
                     DEFAULT_VIDEO_LOWEST_BITRATE))
             .WillByDefault(Return(nVideoLowestBitrateBps));
 

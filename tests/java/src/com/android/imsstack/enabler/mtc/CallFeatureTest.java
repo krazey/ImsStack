@@ -116,7 +116,7 @@ public class CallFeatureTest {
         assertFalse(CallFeature.isTextDirectionInactiveOnRttCallHold(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL))
+                CarrierConfig.ImsVt.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isDynamicVideoQualitySupported(SLOT_ID));

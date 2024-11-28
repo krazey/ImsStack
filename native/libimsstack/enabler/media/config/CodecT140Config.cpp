@@ -44,7 +44,7 @@ IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
     // T140/RED parameters
     if (GetCodec() == ImsCodec::TEXT_RED)
     {
-        m_nRedLevel = piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT);
+        m_nRedLevel = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT);
     }
     m_nTextSamplingRate = DEFAULT_TEXT_SAMPLING_RATE;
 

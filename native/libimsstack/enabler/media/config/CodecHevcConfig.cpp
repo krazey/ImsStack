@@ -59,7 +59,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
     CodecVideoConfig::Create(piCc);
 
     ICarrierConfig* piCcBundle =
-            piCc->GetBundle(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
+            piCc->GetBundle(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
     {
@@ -97,13 +97,13 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
             DEFAULT_PACKETIZATION_MODE);
 
     m_strSpropParameterSets = piCcSubBundle->GetString(
-            CarrierConfig::Assets::KEY_HEVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
+            CarrierConfig::ImsVt::KEY_HEVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
 
-    m_nHevcProfile = piCcSubBundle->GetInt(
-            CarrierConfig::Assets::KEY_HEVC_PROFILE_INT, DEFAULT_HEVC_PROFILE);
+    m_nHevcProfile =
+            piCcSubBundle->GetInt(CarrierConfig::ImsVt::KEY_HEVC_PROFILE_INT, DEFAULT_HEVC_PROFILE);
 
     m_nHevcLevel =
-            piCcSubBundle->GetInt(CarrierConfig::Assets::KEY_HEVC_LEVEL_INT, DEFAULT_HEVC_LEVEL);
+            piCcSubBundle->GetInt(CarrierConfig::ImsVt::KEY_HEVC_LEVEL_INT, DEFAULT_HEVC_LEVEL);
 
     piCcSubBundle->ReleaseBundle();
     piCcBundle->ReleaseBundle();
