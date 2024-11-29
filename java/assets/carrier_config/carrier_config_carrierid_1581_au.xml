@@ -61,7 +61,30 @@
     <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="true"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="0"/>
 
+    <!-- Mtc public -->
+    <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
+    <int name="ims.sip_timer_t4_millis_int" value="17000"/>
+    <int name="ims.sip_timer_b_millis_int" value="10000"/>
+    <int name="ims.sip_timer_c_millis_int" value="180000"/>
+    <int name="ims.sip_timer_d_millis_int" value="128000"/>
+    <int name="ims.sip_timer_h_millis_int" value="30000"/>
+    <int name="imsvoice.session_refresh_method_int" value="1"/>
+    <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
+    <int name="imsvoice.minimum_session_expires_timer_sec_int" value="90"/>
+
+    <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
+    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
+    <int name="imsvoice.ringing_timer_millis_int" value="80000"/>
+    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
+    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
+    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="10000"/>
+    <boolean name="imsvt.video_qos_precondition_supported_bool" value="true"/>
+    <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
+
     <!-- Mtc -->
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="5"/> <!-- MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF -->
+    <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
+    <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="500"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
