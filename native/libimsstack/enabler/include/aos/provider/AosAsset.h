@@ -35,6 +35,7 @@ public:
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
+            bImsiBasedUriPrioritized(IMS_FALSE),
             bInitializeIpsecWithNewPcscf(IMS_FALSE),
             bKeepERegRetryOnWlan(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
@@ -120,6 +121,7 @@ public:
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
+    IMS_BOOL bImsiBasedUriPrioritized;
     IMS_BOOL bInitializeIpsecWithNewPcscf;
     IMS_BOOL bKeepERegRetryOnWlan;
     IMS_BOOL bNoInitRegOnPcscfChange;

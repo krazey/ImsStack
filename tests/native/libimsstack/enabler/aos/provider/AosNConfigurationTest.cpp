@@ -557,6 +557,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_IMSI_BASED_URI_PRIORITIZED_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(
                     CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -833,6 +836,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
     EXPECT_TRUE(m_pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(m_pAosNConfiguration->IsDeregOn3gNetwork());
+    EXPECT_FALSE(m_pAosNConfiguration->IsImsiBasedUriPrioritized());
     EXPECT_FALSE(m_pAosNConfiguration->IsIpsecInitializedWithNewPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsKeepERegRetryOnWlanRequired());
     EXPECT_FALSE(m_pAosNConfiguration->IsNoInitRegOnPcscfChange());

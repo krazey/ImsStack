@@ -316,6 +316,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDeregOn3gNetwork() const
     return m_objAsset.bImsDeregOn3gNetwork;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsiBasedUriPrioritized() const
+{
+    return m_objAsset.bImsiBasedUriPrioritized;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecInitializedWithNewPcscf() const
 {
     return m_objAsset.bInitializeIpsecWithNewPcscf;
@@ -1350,6 +1355,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bImsDeregOn3gNetwork =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL);
+    m_objAsset.bImsiBasedUriPrioritized =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_IMSI_BASED_URI_PRIORITIZED_BOOL);
     m_objAsset.bInitializeIpsecWithNewPcscf =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
     m_objAsset.bKeepERegRetryOnWlan =

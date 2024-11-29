@@ -723,6 +723,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS
         KEY_IMS_PREFIX "hold_reg_with_ipcan_changed_during_ims_call_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[] =
         KEY_IMS_PREFIX "ims_dereg_on_3g_network_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_IMSI_BASED_URI_PRIORITIZED_BOOL[] =
+        KEY_IMS_PREFIX "imsi_based_uri_prioritized_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL[] =
         KEY_IMS_PREFIX "init_ipsec_setting_with_new_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL[] =

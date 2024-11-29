@@ -351,6 +351,13 @@ public:
     virtual IMS_BOOL IsDeregOn3gNetwork() const = 0;
 
     /**
+     * @brief Check if IMSI-based URI should be prioritized.
+     *
+     * @return IMS_TRUE if IMSI-based URI should be prioritized, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsImsiBasedUriPrioritized() const = 0;
+
+    /**
      * @brief Flag indicating whether ipsec setting is initialized with new pcscf.
      *
      * @return IMS_BOOL Return whether initialize ipsec wetting with new pcscf or not.

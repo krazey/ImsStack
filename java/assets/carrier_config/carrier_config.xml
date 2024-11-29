@@ -370,6 +370,7 @@
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
     <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
     <boolean name="ims.ims_dereg_on_3g_network_bool" value="false"/>
+    <boolean name="ims.imsi_based_uri_prioritized_bool" value="false"/>
     <boolean name="ims.init_ipsec_setting_with_new_pcscf_bool" value="false"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="false"/>
     <boolean name="ims.reg_contact_validation_bool" value="false"/>

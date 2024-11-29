@@ -1038,6 +1038,8 @@ public class CarrierConfig {
                 KEY_IMS_PREFIX + "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
                 KEY_IMS_PREFIX + "ims_dereg_on_3g_network_bool";
+        public static final String KEY_IMSI_BASED_URI_PRIORITIZED_BOOL =
+                KEY_IMS_PREFIX + "imsi_based_uri_prioritized_bool";
         public static final String KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
                 KEY_IMS_PREFIX + "init_ipsec_setting_with_new_pcscf_bool";
         public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
