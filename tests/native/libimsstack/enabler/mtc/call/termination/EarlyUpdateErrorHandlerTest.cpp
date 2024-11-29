@@ -172,7 +172,7 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithCombinedAttachReturnsCsR
             GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
-    ON_CALL(objMtcService, IsEpsCombinedAttach).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(
             objPassiveTimer, AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _))
@@ -193,7 +193,7 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithNotCombinedAttachReturns
             GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
-    ON_CALL(objMtcService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMtcService, GetAosConnector).Times(0);
     EXPECT_CALL(

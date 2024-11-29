@@ -104,6 +104,10 @@
         <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
+    <int-array name="imsvoice.csfb_block_condition_int_array" num="2">
+        <item value="0"/> <!-- CSFB_BLOCK_CONDITION_EPS_ONLY_ATTACH -->
+        <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
+    </int-array>
     <int name="imswfc.country_code_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="1"/>

@@ -60,6 +60,7 @@ public:
     IMS_BOOL IsEpsCombinedAttach() const override;
     IMS_BOOL IsRoaming() const override;
     IMS_BOOL IsWlanIpCanType() const override;
+    IMS_BOOL IsCsfbAvailable() const override;
     inline ServiceStatus GetOldStatus() const override { return m_eOldStatus; }
     inline ServiceStatus GetStatus() const override { return m_eStatus; }
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }

@@ -73,7 +73,7 @@ private:
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;
     IMS_BOOL IsByMaxCallLimit(IN const IMessage& objMessage) const;
     IMS_BOOL IsRoaming() const;
-    IMS_BOOL IsCsfbActionRequired(IN IMS_SINT32 nStatusCode) const;
+    IMS_BOOL IsCsfbActionRequiredStatusCode(IN IMS_SINT32 nStatusCode) const;
 
     void ControlAos(IN IMS_UINT32 nCommand) const;
     IMS_BOOL RegisterFor503(IN IMS_SINT32 nRetryAfter) const;

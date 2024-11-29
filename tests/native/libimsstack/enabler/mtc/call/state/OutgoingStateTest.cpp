@@ -199,7 +199,7 @@ protected:
         }
 
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(bWiFi));
-        ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(bCsfb));
+        ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(bCsfb));
         if (bWiFi)
         {
             ON_CALL(*pConfigurationProxy,
@@ -1050,7 +1050,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)
             GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
-    ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(IMS_SUCCESS));
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));

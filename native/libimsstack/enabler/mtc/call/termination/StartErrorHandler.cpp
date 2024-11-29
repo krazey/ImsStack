@@ -150,7 +150,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
@@ -164,7 +164,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case ConfigVoice::
                 MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
@@ -186,7 +186,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleCsfb(IN const IMessage& /*objMessage*/) const
 {
     IMS_TRACE_I("HandleCsfb", 0, 0, 0);
-    if (m_objContext.GetService().IsEpsCombinedAttach())
+    if (m_objContext.GetService().IsCsfbAvailable())
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
@@ -262,7 +262,7 @@ CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy
             case ConfigVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
                 break;
             case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
-                if (m_objContext.GetService().IsEpsCombinedAttach())
+                if (m_objContext.GetService().IsCsfbAvailable())
                 {
                     break;
                 }
@@ -337,7 +337,7 @@ CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& /*o
             break;
 
         case ConfigVoice::SIP_403_POLICY_CSFB:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 return CallReasonInfo(
                         CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
@@ -345,7 +345,7 @@ CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& /*o
             break;
 
         case ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
                 return CallReasonInfo(
@@ -373,7 +373,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleUssiCsfb(IN const IMessage& /*objMessage*/) const
 {
     IMS_TRACE_I("HandleUssiCsfb", 0, 0, 0);
-    if (m_objContext.GetCallInfo().bUssi && m_objContext.GetService().IsEpsCombinedAttach())
+    if (m_objContext.GetCallInfo().bUssi && m_objContext.GetService().IsCsfbAvailable())
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
@@ -388,8 +388,8 @@ CallReasonInfo StartErrorHandler::HandleBlockCallByTimer(IN const IMessage& objM
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
     IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
-    if (m_objContext.GetService().IsEpsCombinedAttach() &&
-            IsCsfbActionRequired(objMessage.GetStatusCode()))
+    if (m_objContext.GetService().IsCsfbAvailable() &&
+            IsCsfbActionRequiredStatusCode(objMessage.GetStatusCode()))
     {
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(
@@ -411,7 +411,7 @@ CallReasonInfo StartErrorHandler::HandleBlockCallByTimer(IN const IMessage& objM
         return CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR);
     }
 
-    if (m_objContext.GetService().IsEpsCombinedAttach())
+    if (m_objContext.GetService().IsCsfbAvailable())
     {
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(
@@ -454,13 +454,13 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
     IMS_TRACE_I("HandleRedialByNetworkContext", 0, 0, 0);
     if (m_objContext.GetConfigurationProxy().GetBoolean(
                 ConfigAssets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL) &&
-            !IsRoaming())
+            !m_objContext.GetService().IsRoaming())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
     }
 
-    if (!m_objContext.GetService().IsEpsCombinedAttach())
+    if (!m_objContext.GetService().IsCsfbAvailable())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
@@ -594,14 +594,7 @@ IMS_BOOL StartErrorHandler::IsByMaxCallLimit(IN const IMessage& objMessage) cons
 }
 
 PRIVATE
-IMS_BOOL StartErrorHandler::IsRoaming() const
-{
-    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
-            IMS_ROAMING_STATE_ON;
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsCsfbActionRequired(IN IMS_SINT32 nStatusCode) const
+IMS_BOOL StartErrorHandler::IsCsfbActionRequiredStatusCode(IN IMS_SINT32 nStatusCode) const
 {
     return MtcConfigurationResolver::LookupActionForStatusCode(
             m_objContext.GetConfigurationProxy(), nStatusCode)

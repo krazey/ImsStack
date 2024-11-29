@@ -176,6 +176,51 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
     return m_pAosConnector->GetIpcanType() == IIpcan::CATEGORY_WLAN;
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsCsfbAvailable() const
+{
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH) &&
+            !IsEpsCombinedAttach())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_NR) &&
+            IsNr())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_WIFI) &&
+            IsWlanIpCanType())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_ROAMING) &&
+            IsRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_HOME) &&
+            !IsRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
 PUBLIC VIRTUAL IJniMtcServiceThread* MtcService::GetJniServiceThread() const
 {
     IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(

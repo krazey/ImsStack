@@ -25,6 +25,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/MtcCallManager.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
+#include "call/termination/StartErrorHandler.h"
 #include "call/termination/UpdateErrorHandler.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/IPassiveTimerHolder.h"
@@ -99,7 +100,7 @@ CallReasonInfo EarlyUpdateErrorHandler::Handle503Response(IN const IMessage& obj
         return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR);
     }
 
-    if (m_objContext.GetService().IsEpsCombinedAttach())
+    if (m_objContext.GetService().IsCsfbAvailable())
     {
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(

@@ -117,6 +117,19 @@ public:
     virtual IMS_BOOL IsWlanIpCanType() const = 0;
 
     /**
+     * @brief Checks if CSFB is available based on the UE's network status and carrier
+     *        configuration.
+     *
+     * This method evaluates the UE's network conditions, including NR, EPS Attach Type, Roaming,
+     * and WiFi status, against the CSFB block conditions specified in the carrier configuration
+     * {@link ConfigVoice#KEY_CSFB_BLOCK_CONDITION_INT_ARRAY}.
+     *
+     * @return True if CSFB is available based on the network status and carrier configuration;
+     *         False otherwise.
+     */
+    virtual IMS_BOOL IsCsfbAvailable() const = 0;
+
+    /**
      * @brief Gets
      *
      * @return
