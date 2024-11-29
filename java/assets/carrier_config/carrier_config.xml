@@ -351,11 +351,11 @@
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="true"/>
     <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="false"/>
     <boolean name="support_sdp_precondition_bool" value="true"/>
-    <boolean name="hide_mac_address_in_pani_header_bool" value="false"/>
     <boolean name="support_country_param_in_pani_header_bool" value="false"/>
     <boolean name="support_local_session_timer_bool" value="false"/>
     <boolean name="imsemergency.support_ecbm_for_volte_bool" value="false"/>
     <boolean name="imsemergency.support_ecbm_for_vowifi_bool" value="false"/>
+    <int name="hide_mac_address_in_pani_header_int" value="1"/>
     <int name="location_policy_update_type_int" value="0"/>
     <boolean name="location_allow_mock_location_update_bool" value="false"/>
     <int name="location_acquisition_policy_int" value="0"/>

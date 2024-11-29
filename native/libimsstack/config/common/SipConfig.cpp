@@ -73,6 +73,7 @@ SipConfig::SipConfig(IN IMS_SINT32 nSlotId) :
         m_nTimerValue100Trying(200),
         m_nTcpCriterionLength(TCP_CRITERION_LEN),
         m_objTcpTimerValues(SipConfig::TcpTimerValues()),
+        m_nHideMacInPaniHeader(HIDE_MAC_IN_PANI),
         m_nRegExpiresMask(EXPIRES_NONE),
         m_nRegExpiration(DEFAULT_EXPIRATION),
         m_bRegSubscription(IMS_TRUE),
@@ -184,6 +185,9 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
     m_nTcpCriterionLength = piCc->GetInt(CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
 
     m_nTransportType = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT);
+
+    m_nHideMacInPaniHeader =
+            piCc->GetInt(CarrierConfig::Assets::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT);
 
     m_nRegExpiration = piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT);
     m_nRegExpiresMask = EXPIRES_NONE;
@@ -472,11 +476,6 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
     {
         nSipFeatureCaps |=
                 SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST;
-    }
-
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_BOOL))
-    {
-        nSipFeatureCaps |= SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER;
     }
 
     if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL))
