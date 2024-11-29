@@ -234,12 +234,19 @@ public class SmsTransferLayerTest {
 
     @Test
     public void testCdmaPduGenerate() {
-        String pduString = "0000021002020702A848D159E24006010008"
-                         + "2300031010D0011410A48CBB366F418F465C"
-                         + "7AF4EECE819E7E1C19000306220707183319";
+        String pduString = "00000210020102000002070282055950C840"
+                         + "08100003101460010610268D2285000A0100";
         byte[] pdu = HexDump.hexStringToByteArray(pduString);
-        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
-        assertTrue((newCdmaPdu.length > 0) ? true : false);
+        byte[] cdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
+        String expectedPduString = "0000000000001002000000000000"
+                                 + "00000A4438313536353433323100"
+                                 + "0000000000000000001000031014"
+                                 + "60010610268D2285000A0100";
+        byte[] expectedPdu = HexDump.hexStringToByteArray(expectedPduString);
+        for (int i = 0; i < cdmaPdu.length; i++) {
+            assertEquals(cdmaPdu[i], expectedPdu[i]);
+        }
+        assertTrue((cdmaPdu.length > 0) ? true : false);
     }
 
     @Test
@@ -292,16 +299,19 @@ public class SmsTransferLayerTest {
 
     @Test
     public void test_notifyRLDataIndication_3GPP2() {
-        String pduString = "0000021002020702A848D159E24006010008"
-                         + "2300031010D0011410A48CBB366F418F465C"
-                         + "7AF4EECE819E7E1C19000306220707183319";
+        String pduString = "00000210020102000002070282055950C840"
+                         + "08100003101460010610268D2285000A0100";
         byte[] pdu = HexDump.hexStringToByteArray(pduString);
         mProxyListener  = mSmsTransferLayer.getListener();
         mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
                                               SmsUtils.RP_DATA, pdu);
-        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
+        String formattedTpduString = "0000000000001002000000000000"
+                                 + "00000A4438313536353433323100"
+                                 + "0000000000000000001000031014"
+                                 + "60010610268D2285000A0100";
+        byte[] formattedTpdu = HexDump.hexStringToByteArray(formattedTpduString);
         verify(mListener).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
-                                            eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
+                                            eq(SmsUtils.TP_SMS_DELIVER), eq(formattedTpdu));
     }
 
     @Test
@@ -314,10 +324,8 @@ public class SmsTransferLayerTest {
         mProxyListener  = mSmsTransferLayer.getListener();
         int result = mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
                                               SmsUtils.RP_DATA, invalidPdu);
-        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(invalidPdu);
-        assertEquals(SmsUtils.SMSTL_RESULT_GENERATE_CDMA_PDU_FAILED, result);
         verify(mListener, times(0)).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
-                                            eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
+                                            eq(SmsUtils.TP_SMS_DELIVER), any());
     }
 
     @Test

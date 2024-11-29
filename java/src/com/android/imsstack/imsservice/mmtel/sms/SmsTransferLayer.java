@@ -33,10 +33,19 @@ import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
+import com.android.internal.telephony.cdma.sms.CdmaSmsSubaddress;
+import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.uicc.IccUtils;
+import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.HexDump;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -573,72 +582,17 @@ public class SmsTransferLayer {
      */
     protected byte[] generateCdmaPdu(byte[] pdu) {
         logi("generateCdmaPdu:");
-        if (DBG) {
-            log("Incoming pdu = " + ImsLog.hiddenString(IccUtils
-                                        .bytesToHexString(pdu)));
-        }
-        com.android.internal.telephony.cdma.SmsMessage cdmaMsg = null;
         if (pdu == null) {
             loge("pdu is null");
             return new byte[0];
         }
-
-        int pduLength = pdu.length;
-        logi("Original pdu length = " + pduLength);
-        if (pduLength <= 0 || pduLength > MAX_CDMA_PDU_LENGTH) {
-            loge("Invalid pdu length");
-            return new byte[0];
-        }
-
-        byte[] cdmaPdu = new byte[pduLength + 2];
-        //TODO: BugId: b/240369384, Need to check the behaviour at modem side
-        /* The first byte should be interpreted as per 3GPP2 C.S0023 3.4.27
-         * It is a status field, we have hardcoded as
-         * ‘001’ Message received by MS from network,
-         * which means message read
-         */
-        cdmaPdu[0] = 0x01;
-        cdmaPdu[1] = (byte) pduLength;
-        System.arraycopy(pdu, 0, cdmaPdu, 2, pduLength);
-
         if (DBG) {
-            log("EfRecord Pdu = "
-                    + ImsLog.hiddenString(IccUtils.bytesToHexString(cdmaPdu)));
+            log("Incoming pdu = " + ImsLog.hiddenString(IccUtils
+                                        .bytesToHexString(pdu)));
         }
-
-        if (cdmaPdu != null && cdmaPdu.length > 0) {
-            cdmaMsg =  com.android.internal.telephony.cdma.SmsMessage
-                                            .createFromEfRecord(0, cdmaPdu);
-
-            if (cdmaMsg != null) {
-                if (DBG) {
-                    log("Originating Address = "
-                            + ImsLog.hiddenString(cdmaMsg.getOriginatingAddress()));
-                    log("Message Body = " + ImsLog.hiddenString(cdmaMsg.getMessageBody()));
-                }
-                /* generates framework compatible CDMA PDU */
-                cdmaMsg.createPdu();
-                log("cdmaMsg.mPdu = "
-                        + ImsLog.hiddenString(IccUtils.bytesToHexString(cdmaMsg.getPdu())));
-            } else {
-                loge("cdmaMsg is null");
-            }
-        }
-
-        return ((cdmaMsg != null) ? cdmaMsg.getPdu() : new byte[0]);
-
-    }
-
-    private static void log(String s) {
-        ImsLog.d(TAG + s);
-    }
-
-    private static void loge(String s) {
-        ImsLog.e(TAG + s);
-    }
-
-    private static void logi(String s) {
-        ImsLog.i(TAG + s);
+        CdmaSmsMessageHelper cdmaMsg = new CdmaSmsMessageHelper();
+        cdmaMsg.parseCdmaPdu(pdu);
+        return cdmaMsg.formatPdu();
     }
 
     class SmsRLListenerProxy implements SmsRelayLayer.Listener {
@@ -668,6 +622,8 @@ public class SmsTransferLayer {
                     }
                     synchronized (mLock) {
                         logi("calling notifySmsReceived");
+                        log("CdmaSmsMessage: tpdu= "
+                        + ImsLog.hiddenString(IccUtils.bytesToHexString(cdmaPdu)));
                         return listener.notifySmsReceived(token, smsFormat,
                                                 SmsUtils.TP_SMS_DELIVER, cdmaPdu);
                     }
@@ -724,5 +680,17 @@ public class SmsTransferLayer {
                 loge("notifyRLReportIndication Failed: " + e.getMessage());
             }
         }
+    }
+
+    private static void log(String s) {
+        ImsLog.d(TAG + s);
+    }
+
+    private static void loge(String s) {
+        ImsLog.e(TAG + s);
+    }
+
+    private static void logi(String s) {
+        ImsLog.i(TAG + s);
     }
 }
