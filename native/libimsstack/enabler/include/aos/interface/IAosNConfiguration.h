@@ -842,6 +842,19 @@ public:
     virtual IMS_SINT32 GetSipMessageThresholdForTransportChange() const = 0;
 
     /**
+     * @brief Indicate the SIP 503 response policy for subscription (reg event package)
+     *
+     *        Possible values are,
+     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT
+     *         - Follow default retry operation. (Retry SUBSCRIBE message after retry-after or AWT)
+     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP
+     *         - Follow 3GPP 24.229.
+     *
+     * @return IMS_SINT32 Return the SIP 503 response policy
+     */
+    virtual IMS_SINT32 GetSubRetrySip503CodePolicy() const = 0;
+
+    /**
      * @brief Indicate the USAT IMS registration event download policy.
      *
      *        Specify the support policy of USAT IMS registration event download

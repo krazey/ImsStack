@@ -405,6 +405,7 @@
     <int name="ims.reg_retry_timer_f_policy_int" value="0"/>
     <int name="ims.rereg_retry_305_policy_int" value="1"/>
     <int name="ims.sip_message_threshold_for_transport_change_int" value="200"/>
+    <int name="ims.sub_retry_503_policy_int" value="1"/>
     <int name="ims.usat_reg_event_download_policy_int" value="0"/>
     <int-array name="ims.permanent_pdn_failure_int_array" num="0">
     </int-array>

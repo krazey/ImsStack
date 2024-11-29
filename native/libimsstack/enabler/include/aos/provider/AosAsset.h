@@ -88,6 +88,7 @@ public:
             nRoamingPreferredEmcReg(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
             nSipMessageThresholdForTransportChange(200),
+            nSubRetry503Policy(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP),
             nUsatRegEventDownloadPolicy(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD),
             nVolteHysTimeSec(0),
             objRegErrCodeForPcscfDiscovery(ImsVector<IMS_SINT32>()),
@@ -169,6 +170,7 @@ public:
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nRoamingPreferredEmcReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
+    IMS_SINT32 nSubRetry503Policy;
     IMS_SINT32 nUsatRegEventDownloadPolicy;
     IMS_SINT32 nVolteHysTimeSec;
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;

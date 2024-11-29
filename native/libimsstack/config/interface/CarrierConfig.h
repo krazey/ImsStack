@@ -1019,6 +1019,7 @@ public:
         static const IMS_CHAR KEY_REREG_RETRY_305_POLICY_INT[];
         static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
         static const IMS_CHAR KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[];
+        static const IMS_CHAR KEY_SUB_RETRY_503_POLICY_INT[];
         static const IMS_CHAR KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[];
         static const IMS_CHAR KEY_VOLTE_HYS_TIME_SEC_INT[];
 
@@ -1167,7 +1168,7 @@ public:
         // Uce
         static const IMS_CHAR KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[];
 
-        // registration retry sip 305 policy
+        // Registration retry sip 305 policy
         enum
         {
             SIP_305_CODE_POLICY_DEFAULT = 0,
@@ -1192,7 +1193,7 @@ public:
             DEFAULT_RETRY_POLICY_NEXT_PCSCF = 2
         };
 
-        // registration retry sip 503 policy
+        // Registration and Subscription(reg event package) retry sip 503 policy
         enum
         {
             SIP_503_CODE_POLICY_DEFAULT = 0,
