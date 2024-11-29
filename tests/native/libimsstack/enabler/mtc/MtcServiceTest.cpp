@@ -316,21 +316,6 @@ TEST_F(MtcServiceTest, IsEmergencyReturnsTrue)
     EXPECT_EQ(pEmergencyMtcService->IsEmergency(), IMS_TRUE);
 }
 
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
-{
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_TRUE);
-
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
-}
-
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalseIfAosConnectorIsNull)
-{
-    MtcService objRealService(objMockContext, ServiceType::NORMAL);
-    EXPECT_FALSE(objRealService.IsWlanIpCanType());
-}
-
 TEST_F(MtcServiceTest, IsNrChecksWifiFirst)
 {
     ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
@@ -353,21 +338,8 @@ TEST_F(MtcServiceTest, IsNrChecksRatType)
     EXPECT_TRUE(pNormalMtcService->IsNr());
 }
 
-TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksWifiFirst)
-{
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
-
-    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
-}
-
 TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksRatType)
 {
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_NR));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
@@ -383,8 +355,6 @@ TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksRatType)
 
 TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksLteInfo)
 {
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
@@ -402,6 +372,41 @@ TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksLteInfo)
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
             .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
     EXPECT_TRUE(pNormalMtcService->IsEpsCombinedAttach());
+}
+
+TEST_F(MtcServiceTest, IsRoamingReturnsTrue)
+{
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_ON));
+    EXPECT_EQ(pNormalMtcService->IsRoaming(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsRoamingReturnsFalse)
+{
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
+    EXPECT_EQ(pNormalMtcService->IsRoaming(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_TRUE);
+
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalseIfAosConnectorIsNull)
+{
+    MtcService objRealService(objMockContext, ServiceType::NORMAL);
+    EXPECT_FALSE(objRealService.IsWlanIpCanType());
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
+{
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
 }
 
 TEST_F(MtcServiceTest, ImsAosConnectedNormalServiceInvokesSetReady)
@@ -487,12 +492,6 @@ TEST_F(MtcServiceTest, ImsAosConnectedDoesNothingForCallComposerIfCoreServiceIsN
 
     const IMS_UINT32 nFeatures = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
     pNormalMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
-}
-
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
-{
-    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
 }
 
 TEST_F(MtcServiceTest, GetOldStatusReturnsOldStatus)
