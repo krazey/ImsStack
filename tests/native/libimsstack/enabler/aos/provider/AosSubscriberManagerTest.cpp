@@ -47,10 +47,11 @@ using ::testing::SetArgPointee;
 const IMS_UINT32 TIMER_ICC_LOADED_WAITING = 100;
 const IMS_UINT32 TIMER_PHONE_RESTART_RECOVERY = 101;
 
-#define DECLARE_USING(Base)     \
-    using Base::Init;           \
-    using Base::SetProvisioned; \
-    using Base::IsTimerRunning; \
+#define DECLARE_USING(Base)      \
+    using Base::CheckIsimValues; \
+    using Base::Init;            \
+    using Base::IsTimerRunning;  \
+    using Base::SetProvisioned;  \
     using Base::StartTimer;
 
 class TestAosSubscriberManager : public AosSubscriberManager
@@ -117,6 +118,16 @@ public:
         m_piTimerToPhoneRestartRecovery = piTimer;
     }
 
+    inline void SetImsIdentityPriority(IN ImsVector<IMS_SINT32> objImsIdentityPriority)
+    {
+        m_objImsIdentityPriority = objImsIdentityPriority;
+    }
+
+    inline void SetImsiBasedUriPrioritized(IN IMS_BOOL bEnable)
+    {
+        m_bPrioritizeImsiBasedUri = bEnable;
+    }
+
     // TEST : GetIsimAt
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetIsimAt);
     // TEST : ConfigureAsDefault
@@ -133,13 +144,6 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenSubscriberConfigFakeIsNull);
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenGetInvalidPuids);
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenGetInvalidImpu);
-    // TEST : CheckIsimValues
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenIsimIsNotSupport);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenImpuIsEmpty);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenImpuIsInvalid);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenInvalidImpi);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenInvalidHdn);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueCheckIsimValues);
     // TEST : UpdateImpuFromIsim
     FRIEND_TEST(AosSubscriberManagerTest, FailedGetImpuFromIsimWhenGetEmptyPuids);
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetImpuWhenLimitedAdminSmsModeAndOneValidImpu);
@@ -1100,6 +1104,30 @@ TEST_F(AosSubscriberManagerTest, ReturnsTrueCheckIsimValues)
     EXPECT_TRUE(bResult);
 }
 
+TEST_F(AosSubscriberManagerTest, ReturnsTrueCheckIsimValuesWhenInvalidImpuButUseImsiBasedUri)
+{
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
+            .WillByDefault(ReturnRef(m_objEmptyPuids));
+
+    AString strEmptyImpi;
+    ON_CALL(m_objMockISubscriberConfig, GetPrivateUserId()).WillByDefault(ReturnRef(strEmptyImpi));
+
+    AString strEmptyHomeDomainName;
+    ON_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
+            .WillByDefault(ReturnRef(strEmptyHomeDomainName));
+
+    m_pSubscriberManager->SetImsiBasedUriPrioritized(IMS_TRUE);
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->CheckIsimValues();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
 TEST_F(AosSubscriberManagerTest, FailedGetImpuFromIsimWhenGetEmptyPuids)
 {
     // GIVEN
@@ -1648,7 +1676,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfiguration)
 
     m_pSubscriberManager->m_nIsimIndexForImpu = 0;
     m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
@@ -1684,7 +1712,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsS
 
     m_pSubscriberManager->m_nIsimIndexForImpu = 0;
     m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
@@ -1718,7 +1746,7 @@ TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenNConfigIsNull)
 
     m_pSubscriberManager->m_nIsimIndexForImpu = 0;
     m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
 
@@ -1742,7 +1770,7 @@ TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration
 
     m_pSubscriberManager->m_nIsimIndexForImpu = 0;
     m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(0));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
@@ -1841,7 +1869,7 @@ TEST_F(AosSubscriberManagerTest, FailedFallbackOnNotifyErrorWhenTimerIsRunning)
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->GetTimerToPhoneRestartRecovery(), nullptr);
@@ -1950,7 +1978,7 @@ TEST_F(AosSubscriberManagerTest, ReturnsEmptyWhenIdentityPriorityToStringWithEmp
     // GIVEN
     ImsVector<IMS_SINT32> objImsIdentityPriority;
 
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     // WHEN
     // THEN
@@ -1964,7 +1992,7 @@ TEST_F(AosSubscriberManagerTest, ReturnsIsimUsimWhenIdentityPriorityToStringWith
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
 
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     // WHEN
     // THEN
@@ -1980,7 +2008,7 @@ TEST_F(AosSubscriberManagerTest,
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     // WHEN
     // THEN
@@ -1993,7 +2021,7 @@ TEST_F(AosSubscriberManagerTest, ReturnsConfWhenIdentityPriorityToStringWithConf
     ImsVector<IMS_SINT32> objImsIdentityPriority;
 
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF);
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+    m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     // WHEN
     // THEN

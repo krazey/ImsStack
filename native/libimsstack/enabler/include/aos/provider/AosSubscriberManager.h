@@ -96,6 +96,7 @@ protected:
     void ConfigureAsFake();
 
     IMS_BOOL CheckIsimValues();
+    IMS_BOOL IsValidImpu(IN const AStringArray& objImpus);
 
     ISubscriberConfig* GetSubscriberConfiguration(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
@@ -219,6 +220,7 @@ protected:
     // Carrier Configuration
     IMS_UINT32 m_nIsimIndexForImpu;
     IMS_BOOL m_bSupportLimitedAdminSmsMode;
+    IMS_BOOL m_bPrioritizeImsiBasedUri;
     ImsVector<IMS_SINT32> m_objImsIdentityPriority;
 
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
