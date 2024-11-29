@@ -153,16 +153,17 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsNr() const
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsEpsCombinedAttach() const
 {
-    if (IsWlanIpCanType())
-    {
-        return IMS_FALSE;
-    }
-
     return PhoneInfoService::GetPhoneInfoService()
                     ->GetNetworkWatcher(m_objContext.GetSlotId())
                     ->GetNetRadioTechType() == NW_REPORT_RADIO_LTE &&
             m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_LTE_INFO) ==
             IMS_LTE_INFO_COMBINED_ATTACHED;
+}
+
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsRoaming() const
+{
+    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
+            IMS_ROAMING_STATE_ON;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const

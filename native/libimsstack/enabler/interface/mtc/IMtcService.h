@@ -103,6 +103,13 @@ public:
     virtual IMS_BOOL IsEpsCombinedAttach() const = 0;
 
     /**
+     * @brief Checks if the UE is currently in a roaming network.
+     *
+     * @return True if it's in a roaming network.
+     */
+    virtual IMS_BOOL IsRoaming() const = 0;
+
+    /**
      * @brief Checks if the UE is currently registered through an ePDG.
      *
      * @return True if it's in ePDG.
