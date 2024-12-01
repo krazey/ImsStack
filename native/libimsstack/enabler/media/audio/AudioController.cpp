@@ -111,7 +111,7 @@ IMS_BOOL AudioController::UpdateSession(
 
     IMS_BOOL bAnbrResult = UpdateAnbrEnabledConfig(
             nNegoId, pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported());
-    IMS_TRACE_D("UpdateSession() - res: %d, anbr enable: %d", bAnbrResult,
+    IMS_TRACE_D("UpdateSession() - res[%d], anbr enabled[%d]", bAnbrResult,
             pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported(), 0);
 
     if (m_eCallState == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
@@ -507,7 +507,7 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
             }
         }
 
-        IMS_TRACE_I("UpdateMediaDirection() - bRestore[%d], PrevDirection[%d], eTempDirection[%d]",
+        IMS_TRACE_I("UpdateMediaDirection() - Restore[%d], PrevDirection[%d], TempDirection[%d]",
                 bRestore, pAudioSession->GetPrevDirection(), eTempDirection);
 
         pAudioSession->SetDirection(eTempDirection);

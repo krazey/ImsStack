@@ -197,7 +197,7 @@ IMS_BOOL AudioSdpParser::ParseFmtp(IN const SdpAvCodec* pSdpCodec,
         {
             const AString& strTmp = objSplitColon.GetAt(i);
             IMS_TRACE_D(
-                    "ParseFmtp() - Invalid fmtp parameter(%s) at index[%d]", strTmp.GetStr(), i, 0);
+                    "ParseFmtp() - Invalid fmtp parameter[%s] at index[%d]", strTmp.GetStr(), i, 0);
             continue;
         }
 
@@ -350,7 +350,7 @@ IMS_BOOL AudioSdpParser::ParseModeSet(
         }
         pFmtp->SetShowModeSet(IMS_TRUE);
 
-        IMS_TRACE_D("ParseModeSet() - modset list[%d], visible[%d]", pFmtp->GetModeSetList(),
+        IMS_TRACE_D("ParseModeSet() - modeSetList[%d], visible[%d]", pFmtp->GetModeSetList(),
                 pFmtp->IsModeSetVisible(), 0);
 
         return IMS_TRUE;
@@ -591,8 +591,8 @@ IMS_BOOL AudioSdpParser::ParseBr(
             }
         }
 
-        IMS_TRACE_D(
-                "ParseBr() - br[%d], visible[%d]", pFmtp->GetBrList(), pFmtp->IsBrListVisible(), 0);
+        IMS_TRACE_D("ParseBr() - brList[%d], visible[%d]", pFmtp->GetBrList(),
+                pFmtp->IsBrListVisible(), 0);
 
         return IMS_TRUE;
     }
@@ -654,8 +654,8 @@ IMS_BOOL AudioSdpParser::ParseBw(
             }
         }
 
-        IMS_TRACE_D(
-                "ParseBw() - bw[%d], visible[%d]", pFmtp->GetBwList(), pFmtp->IsBwListVisible(), 0);
+        IMS_TRACE_D("ParseBw() - bwList[%d], visible[%d]", pFmtp->GetBwList(),
+                pFmtp->IsBwListVisible(), 0);
 
         return IMS_TRUE;
     }
@@ -1052,7 +1052,7 @@ void AudioSdpParser::ParseMaxPtime(IN IMediaDescriptor* pDescriptor, OUT AudioPr
 
     pProfile->SetMaxPtime(pDescriptor->GetAttributeInt(SdpAttribute::MAXPTIME));
 
-    IMS_TRACE_D("ParseMaxPtime() - maxptime[%d]", pProfile->GetMaxPtime(), 0, 0);
+    IMS_TRACE_D("ParseMaxPtime() - maxPtime[%d]", pProfile->GetMaxPtime(), 0, 0);
 }
 
 PRIVATE

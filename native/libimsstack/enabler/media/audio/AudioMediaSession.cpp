@@ -71,7 +71,7 @@ PUBLIC VIRTUAL void AudioMediaSession::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if ((m_piNetworkToneWaitTimer != IMS_NULL) && (m_piNetworkToneWaitTimer == piTimer))
     {
-        IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
+        IMS_TRACE_D("Timer_TimerExpired()", 0, 0, 0);
 
         NetworkToneTimerExpired();
     }
@@ -79,7 +79,7 @@ PUBLIC VIRTUAL void AudioMediaSession::Timer_TimerExpired(IN ITimer* piTimer)
 
 PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
 {
-    IMS_TRACE_D("NetworkToneTimerExpired : networktone time[%d]", m_nNetworkToneTimer, 0, 0);
+    IMS_TRACE_D("NetworkToneTimerExpired() - networktone time[%d]", m_nNetworkToneTimer, 0, 0);
 
     if (m_nNetworkToneTimer > 0)
     {
@@ -96,7 +96,7 @@ PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
 PRIVATE
 IMS_RESULT AudioMediaSession::StartTimer(IN IMS_SINT32 nDuration)
 {
-    IMS_TRACE_D("StartTimer : duration[%d]", nDuration, 0, 0);
+    IMS_TRACE_D("StartTimer() - duration[%d]", nDuration, 0, 0);
 
     if (m_piNetworkToneWaitTimer == IMS_NULL)
     {
@@ -121,7 +121,7 @@ void AudioMediaSession::StopTimer()
         return;
     }
 
-    IMS_TRACE_D("StopTimer", 0, 0, 0);
+    IMS_TRACE_D("StopTimer()", 0, 0, 0);
 
     m_piNetworkToneWaitTimer->KillTimer();
     TimerService::GetTimerService()->DestroyTimer(m_piNetworkToneWaitTimer);
@@ -131,7 +131,7 @@ void AudioMediaSession::StopTimer()
 PUBLIC
 void AudioMediaSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 {
-    IMS_TRACE_D("SetServiceType - ServiceType[%d]", eServiceType, 0, 0);
+    IMS_TRACE_D("SetServiceType() - ServiceType[%d]", eServiceType, 0, 0);
     m_eServiceType = eServiceType;
 }
 
@@ -139,7 +139,7 @@ void AudioMediaSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 PUBLIC
 MEDIA_SERVICE_TYPE AudioMediaSession::GetServiceType()
 {
-    IMS_TRACE_D("GetServiceType - ServiceType[%d]", m_eServiceType, 0, 0);
+    IMS_TRACE_D("GetServiceType() - ServiceType[%d]", m_eServiceType, 0, 0);
 
     return m_eServiceType;
 }
@@ -195,7 +195,7 @@ AudioConfig* AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwo
     AudioProfile::Payload* pPeerPayload;
     AudioProfile::Payload* pNegoPayload;
 
-    IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nDestPIndex[%d], nSrcIndex[%d]",
+    IMS_TRACE_D("UpdateRtpConfig() - Negotiated PeerPayloadIndex[%d], LocalPayloadIndex[%d]",
             pPeerProfile->GetNegotiatedPayloadIndex(), pLocalProfile->GetNegotiatedPayloadIndex(),
             0);
 
@@ -427,7 +427,7 @@ AudioConfig* AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwo
     }
     else
     {
-        IMS_TRACE_E(0, "UpdateRtpConfig() - Invalid - state[%d]", m_nState, 0, 0);
+        IMS_TRACE_E(0, "UpdateRtpConfig() - Invalid state[%d]", m_nState, 0, 0);
         return IMS_NULL;
     }
 
@@ -469,8 +469,8 @@ AudioConfig* AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwo
     }
     objAudioConfig.setAnbrMode(objAnbr);
 
-    IMS_TRACE_D("UpdateRtpConfig() - DtmfTxPayloadTypeNumber[%d],"
-                "DtmfRxPayloadTypeNumber[%d],DtmfsamplingRateKHz[%d] ",
+    IMS_TRACE_D("UpdateRtpConfig() - DtmfTxPayloadTypeNumber[%d], "
+                "DtmfRxPayloadTypeNumber[%d], DtmfsamplingRateKHz[%d]",
             objAudioConfig.getTxDtmfPayloadTypeNumber(),
             objAudioConfig.getRxDtmfPayloadTypeNumber(), objAudioConfig.getDtmfsamplingRateKHz());
     IMS_TRACE_D("UpdateRtpConfig() - Anbr UL CodecMode[%d], Anbr DL CodecMode[%d]",
@@ -706,7 +706,7 @@ IMS_BOOL AudioMediaSession::SendDtmf(IN IMS_CHAR cDtmfCode)
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("SendDtmf() - state[%d], cDtmfCode[%d], nDuration[%d]", m_nState, cDtmfCode,
+    IMS_TRACE_I("SendDtmf() - state[%d], DtmfCode[%d], DtmfDuration[%d]", m_nState, cDtmfCode,
             m_pConfig->GetDtmfDuration());
     IMS_BOOL bResult = IMS_FALSE;
 
@@ -853,7 +853,7 @@ IMS_SINT32 AudioMediaSession::ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_
             // TODO: need to add for EVS 24.4kbps
             break;
         default:
-            IMS_TRACE_D("Enter default - Error", 0, 0, 0);
+            IMS_TRACE_D("Invalid CodecType", 0, 0, 0);
             break;
     }
     IMS_TRACE_D(

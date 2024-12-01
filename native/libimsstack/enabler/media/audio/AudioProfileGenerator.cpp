@@ -171,7 +171,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
         return IMS_NULL;
     }
 
-    IMS_TRACE_I("CreateAmrPayload", 0, 0, 0);
+    IMS_TRACE_I("CreateAmrPayload()", 0, 0, 0);
 
     CodecAmrConfig* pAmrConfig = static_cast<CodecAmrConfig*>(pCodecConfig);
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
@@ -205,7 +205,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
             pAmrConfig->GetSamplingRate(), pAmrConfig->GetChannel());
     pAmrPayload->SetFmtp(pAmrFmtp);
 
-    IMS_TRACE_D("CreateAmrPayload() codec(%s), SamplingRate(%d)",
+    IMS_TRACE_D("CreateAmrPayload() - Codec[%s], SamplingRate[%d]",
             ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetSamplingRate(), 0);
 
     return pAmrPayload;
@@ -219,7 +219,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
         return IMS_NULL;
     }
 
-    IMS_TRACE_I("CreateEvsPayload", 0, 0, 0);
+    IMS_TRACE_I("CreateEvsPayload()", 0, 0, 0);
 
     CodecEvsConfig* pEvsConfig = static_cast<CodecEvsConfig*>(pCodecConfig);
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
@@ -306,7 +306,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
         pEvsFmtp->SetChAwRecv(-1);
     }
 
-    IMS_TRACE_D("EVS - GetShowDtx: %d GetShowAmrModeSet: %d", pEvsConfig->GetShowDtx(),
+    IMS_TRACE_D("CreateEvsPayload() - ShowDtx[%d], ShowAmrModeSet[%d]", pEvsConfig->GetShowDtx(),
             pEvsConfig->GetShowAmrModeSet(), 0);
 
     // set EVS codec fmtp
@@ -326,7 +326,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
         return IMS_NULL;
     }
 
-    IMS_TRACE_I("CreateTelephoneEventPayload", 0, 0, 0);
+    IMS_TRACE_I("CreateTelephoneEventPayload()", 0, 0, 0);
 
     CodecTelephoneEventConfig* pDtmfConfig = static_cast<CodecTelephoneEventConfig*>(pCodecConfig);
     AString strCodecName;
@@ -341,7 +341,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
             pDtmfConfig->GetPayloadType(), strCodecName, pDtmfConfig->GetSamplingRate(), 0);
     pTelephoneEventPayload->SetFmtp(pTelephoneEventFmtp);
 
-    IMS_TRACE_D("CreateTelephoneEventPayload() codec(%s), SamplingRate(%d)",
+    IMS_TRACE_D("CreateTelephoneEventPayload() - Codec[%s], SamplingRate[%d]",
             ImsCodec::CodecToString(pDtmfConfig->GetCodec()), pDtmfConfig->GetSamplingRate(), 0);
 
     return pTelephoneEventPayload;
@@ -355,7 +355,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreatePcmPayload(
         return IMS_NULL;
     }
 
-    IMS_TRACE_I("CreatePcmPayload", 0, 0, 0);
+    IMS_TRACE_I("CreatePcmPayload()", 0, 0, 0);
 
     AudioProfile::Payload* pPcmPayload = new AudioProfile::Payload();
     AString strCodecName;
