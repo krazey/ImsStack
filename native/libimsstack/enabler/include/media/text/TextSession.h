@@ -71,14 +71,6 @@ public:
     IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp);
 
     /**
-     * @brief Set the local ip address and port number
-     *
-     * @param objLocalAddr The local ip address
-     * @param nPort The local port number
-     */
-    void UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
-
-    /**
      * @brief Handles the message from the telecom
      *
      * @param nMsg The message type
@@ -125,8 +117,6 @@ private:
     TextConfiguration* GetConfiguration();
 
     MediaQualityThreshold m_objMediaQualityThreshold;
-    IpAddress m_objLocalAddress;
-    IMS_SINT32 m_nLocalPort;
 };
 
 #endif

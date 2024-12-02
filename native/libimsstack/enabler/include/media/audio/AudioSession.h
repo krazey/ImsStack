@@ -141,14 +141,6 @@ public:
             IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp);
 
     /**
-     * @brief Set the local ip address and port number
-     *
-     * @param objLocalAddr The local ip address
-     * @param nPort The local port number
-     */
-    void SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
-
-    /**
      * @brief Get the rtcp is enabled
      */
     IMS_BOOL GetEnabledRtcp();
@@ -250,8 +242,6 @@ private:
 
 protected:
     MediaQualityThreshold m_objMediaQualityThreshold;
-    IpAddress m_objLocalAddress;
-    IMS_SINT32 m_nLocalPort;
     ImsList<IMS_UINTP> m_listNegoId;
     IMS_SINT32 m_nNetworkToneTimer;
     IMS_SINT32 m_nRtpInactivityTimer;

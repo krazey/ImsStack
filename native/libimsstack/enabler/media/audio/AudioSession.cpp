@@ -41,8 +41,6 @@ PUBLIC
 AudioSession::AudioSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
-        m_objLocalAddress(IpAddress::IPv6NONE),
-        m_nLocalPort(0),
         m_nNetworkToneTimer(0),
         m_nRtpInactivityTimer(0),
         m_nRtcpInactivityTimer(0),
@@ -211,7 +209,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     AudioConfig objAudioConfig;
 
     // Setting the network properties
-    SetLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
+    UpdateLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     objAudioConfig.setAccessNetwork(nAccessNetwork);
     objAudioConfig.setTxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
 
@@ -535,16 +533,6 @@ IMS_BOOL AudioSession::UpdateMediaQualityThreshold(
             m_objMediaQualityThreshold.getRtcpInactivityTimerMillis());
 
     return IMS_TRUE;
-}
-
-PUBLIC
-void AudioSession::SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
-{
-    m_objLocalAddress = objLocalAddr;
-    m_nLocalPort = nPort;
-
-    IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
-            m_objLocalAddress.ToString().GetStr(), m_nLocalPort, 0);
 }
 
 PUBLIC

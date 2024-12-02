@@ -155,7 +155,7 @@ IMS_BOOL AudioController::OpenSession(IN IMS_UINTP nNegoId)
 
     if (pAudioSession != IMS_NULL && m_eMediaState == AudioSession::STATE_NONE)
     {
-        pAudioSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
+        pAudioSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
 
         if (pAudioSession->Open() == IMS_TRUE)
         {

@@ -101,9 +101,19 @@ public:
      */
     virtual void SetAnbrMode(AnbrMode AnbrMode);
 
+    /**
+     * @brief Update the local ip address and port number
+     *
+     * @param objLocalAddr The local ip address
+     * @param nPort The local port number
+     */
+    void UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
+
 protected:
     IMS_SINT32 m_nSlotId;
     MediaConfiguration* m_pConfiguration;
+    IpAddress m_objLocalAddress;
+    IMS_SINT32 m_nLocalPort;
     IMediaSessionListener* m_piMediaSessionListener;
     MediaEnvironment* m_pEnvironment;
     RtpConfig* m_pRtpConfig;

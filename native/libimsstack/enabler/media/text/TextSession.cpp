@@ -37,9 +37,7 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextSession::TextSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
-        m_objMediaQualityThreshold(MediaQualityThreshold()),
-        m_objLocalAddress(IpAddress::IPv6NONE),
-        m_nLocalPort(0)
+        m_objMediaQualityThreshold(MediaQualityThreshold())
 {
     IMS_TRACE_I("+TextSession()", 0, 0, 0);
 
@@ -222,20 +220,6 @@ IMS_BOOL TextSession::UpdateMediaQualityThreshold(
             m_objMediaQualityThreshold.getRtcpInactivityTimerMillis());
 
     return IMS_TRUE;
-}
-
-PUBLIC
-void TextSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
-{
-    if (!objLocalAddr.ToString().IsNULL())
-    {
-        m_objLocalAddress = objLocalAddr;
-    }
-
-    m_nLocalPort = nPort;
-
-    IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
-            m_objLocalAddress.ToString().GetStr(), m_nLocalPort, 0);
 }
 
 PUBLIC

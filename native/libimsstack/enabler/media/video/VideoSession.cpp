@@ -38,8 +38,6 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC VideoSession::VideoSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
-        m_objLocalAddress(IpAddress::IPv6NONE),
-        m_nLocalPort(0),
         m_nCameraId(CAMERA_ID_NONE),
         m_nCameraZoom(-1),
         m_bPreviewSurfaceSet(IMS_FALSE),
@@ -359,20 +357,6 @@ IMS_BOOL VideoSession::UpdateMediaQualityThreshold(
             m_objMediaQualityThreshold.getVideoBitrateBps());
 
     return IMS_TRUE;
-}
-
-PUBLIC
-void VideoSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
-{
-    if (!objLocalAddr.ToString().IsNULL())
-    {
-        m_objLocalAddress = objLocalAddr;
-    }
-
-    m_nLocalPort = nPort;
-
-    IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
-            m_objLocalAddress.ToString().GetStr(), m_nLocalPort, 0);
 }
 
 PUBLIC
