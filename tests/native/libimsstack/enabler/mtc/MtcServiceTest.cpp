@@ -37,7 +37,6 @@
 #include "MockISession.h"
 #include "MtcService.h"
 #include "PlatformContext.h"
-#include "TestConfigService.h"
 #include "TestConnector.h"
 #include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallManager.h"
@@ -116,7 +115,6 @@ public:
     MockIJniEnabler objMockJniEnabler;
     MockIJniMtcServiceThread objMockServiceThread;
     JniEnablerConnector* pConnector;
-    TestConfigService objConfigService;
     TestPhoneInfoService objPhoneInfoService;
     MockIMtcImsEventReceiver objEventReceiver;
     TestConnector objConnector;
@@ -153,8 +151,6 @@ protected:
         ON_CALL(objMockContext, GetImsEventReceiver).WillByDefault(ReturnRef(objEventReceiver));
 
         PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_CONFIG, &objConfigService);
-        PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
         pNormalMtcService = CreateNormalService();
@@ -163,7 +159,6 @@ protected:
 
     virtual void TearDown() override
     {
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         delete pMockEmergencyManager;
@@ -689,34 +684,6 @@ TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
     EXPECT_EQ(pNormalMtcService->GetSrvccState(), SrvccState::STARTED);
 }
 
-TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
-{
-    EXPECT_EQ(SuppStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
-
-    ImsVector<IMS_SINT32> objTbcw;
-    objTbcw.Add(0);
-    ImsVector<IMS_SINT32> objNoTbcw;
-
-    EXPECT_CALL(objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
-            .WillOnce(Return(objNoTbcw))
-            .WillOnce(Return(objTbcw))
-            .WillOnce(Return(objNoTbcw))
-            .WillOnce(Return(objTbcw));
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_EQ(SuppStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_EQ(SuppStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTbcwStatus());
-}
-
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 {
     EXPECT_CALL(*pMockEmergencyManager, StartOpen(ServiceType::EMERGENCY)).Times(1);
@@ -741,6 +708,17 @@ TEST_F(MtcServiceTest, ProcessTestCommandChangesInternalAosState)
     pNormalMtcService->ProcessTestCommand(1 /* TEST_COMMAND_AOS_DISCONNECTED */, nReason, 0);
 
     pNormalMtcService->ProcessTestCommand(2 /* Not defined */, 0, 0);
+}
+
+TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
+{
+    EXPECT_EQ(SuppStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
+
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
+    EXPECT_EQ(SuppStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTbcwStatus());
+
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
+    EXPECT_EQ(SuppStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
 }
 
 TEST_F(MtcServiceTest, SetAndCheckTerminalBasedTir)

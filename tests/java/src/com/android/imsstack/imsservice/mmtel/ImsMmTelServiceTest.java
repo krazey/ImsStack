@@ -428,6 +428,18 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void testSetTerminalBasedCallWaitingStatus() {
+        MmTelFeatureRegistry.Listener mMmtelFeatureListener =
+                Mockito.mock(MmTelFeatureRegistry.Listener.class);
+        mMmTelFeatureRegistry.addListener(mMmtelFeatureListener);
+
+        mMmTelFeature.setTerminalBasedCallWaitingStatus(false);
+        verify(mMmtelFeatureListener).onTerminalBasedCallWaitingStatusChanged();
+
+        mMmTelFeatureRegistry.removeListener(mMmtelFeatureListener);
+    }
+
+    @Test
     public void testNotifySrvccStates() {
         MmTelFeatureRegistry.Listener mMmtelFeatureListener =
                 Mockito.mock(MmTelFeatureRegistry.Listener.class);

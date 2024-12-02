@@ -34,6 +34,7 @@ import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.ImsMmTelManager;
+import android.telephony.ims.ImsService;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
@@ -100,6 +101,13 @@ public class MmTelFeatureRegistryTest {
 
     @Test
     @SmallTest
+    public void testGetTerminalBasedServiceCapabilities() {
+        assertTrue((ImsService.CAPABILITY_TERMINAL_BASED_CALL_WAITING
+                & mMmTelFeatureRegistry.getTerminalBasedServiceCapabilities()) > 0);
+    }
+
+    @Test
+    @SmallTest
     public void testSetTerminalBasedCallWaitingStatus() {
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
         assertTrue(mMmTelFeatureRegistry.isTerminalBasedCallWaitingEnabled());
@@ -154,18 +162,18 @@ public class MmTelFeatureRegistryTest {
         verify(mListener, never()).onSrvccStateChanged(anyInt());
 
         mMmTelFeatureRegistry.addListener(mListener);
-        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
-        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(false);
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
+        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED);
 
         verify(mListener, times(2)).onTerminalBasedCallWaitingStatusChanged();
         verify(mListener, times(2)).onSrvccStateChanged(anyInt());
 
         mMmTelFeatureRegistry.removeListener(mListener);
-        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
-        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(false);
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
+        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED);
 
         verifyNoMoreInteractions(mListener);

@@ -28,6 +28,7 @@ import android.telephony.ims.stub.SipTransportImplBase;
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
@@ -97,7 +98,8 @@ public class ImsService extends android.telephony.ims.ImsService {
         //logi("getImsServiceCapabilities:CAPABILITY_SIP_DELEGATE_CREATION");
         //return CAPABILITY_SIP_DELEGATE_CREATION;
         logi(this, "getImsServiceCapabilities");
-        return super.getImsServiceCapabilities();
+        return (super.getImsServiceCapabilities()
+                | MmTelFeatureRegistry.getTerminalBasedServiceCapabilities());
 
         // TODO: Replace above return statement with below for Simultaneous calling support.
         // return (super.getImsServiceCapabilities() |

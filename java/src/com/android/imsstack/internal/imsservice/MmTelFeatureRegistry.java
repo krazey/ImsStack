@@ -16,6 +16,8 @@
 
 package com.android.imsstack.internal.imsservice;
 
+import static android.telephony.ims.ImsService.ImsServiceCapability;
+
 import android.annotation.Nullable;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -24,6 +26,7 @@ import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.ImsMmTelManager;
+import android.telephony.ims.ImsService;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ContentProviderProxy;
@@ -48,6 +51,10 @@ public class MmTelFeatureRegistry {
     public static final int SRVCC_STATE_COMPLETED = 1;
     public static final int SRVCC_STATE_FAILED = 2;
     public static final int SRVCC_STATE_CANCELED = 3;
+
+    public static @ImsServiceCapability long getTerminalBasedServiceCapabilities() {
+        return ImsService.CAPABILITY_TERMINAL_BASED_CALL_WAITING;
+    }
 
     /**
      * Notifies the components who monitor this class that any states have changed.
@@ -325,7 +332,9 @@ public class MmTelFeatureRegistry {
     @VisibleForTesting
     public static final String RTT_MODE_SETTING = "dialer_rtt_configuration";
     private final int mSlotId;
-    private volatile boolean mTerminalBasedCallWaitingEnabled;
+    private volatile boolean mTerminalBasedCallWaitingEnabled =
+            (ImsService.CAPABILITY_TERMINAL_BASED_CALL_WAITING
+            & getTerminalBasedServiceCapabilities()) > 0;
     private volatile int mSrvccState = SRVCC_STATE_NONE;
     private volatile int mTtyMode = TelecomManager.TTY_MODE_OFF;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -369,7 +378,7 @@ public class MmTelFeatureRegistry {
 
     /**
      * Sets the terminal-based call waiting status.
-     *updateServiceSettings
+     *
      * @param enabled The flag specifying that the service is capable.
      */
     public void setTerminalBasedCallWaitingStatus(boolean enabled) {

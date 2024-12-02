@@ -337,6 +337,11 @@ public class ImsMmTelService extends MmTelFeature
     }
 
     @Override
+    public void setTerminalBasedCallWaitingStatus(boolean enabled) {
+        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(enabled);
+    }
+
+    @Override
     public void notifySrvccStarted(Consumer<List<SrvccCall>> consumer) {
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
 
