@@ -235,6 +235,7 @@ protected:
     virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
     virtual IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const;
 
+    virtual void ReevaluateCapabilities(IN IMS_BOOL bNetworkChanged);
     virtual void ReevaluateUnavailableFeature();
 
     virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);

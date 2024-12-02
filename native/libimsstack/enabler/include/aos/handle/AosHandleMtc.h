@@ -70,6 +70,7 @@ protected:
     void ProcessVopsStateChanged(
             IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE) override;
 
+    void ReevaluateCapabilities(IN IMS_BOOL bNetworkChanged) override;
     void ReevaluateUnavailableFeature() override;
 
     // IAosHandle

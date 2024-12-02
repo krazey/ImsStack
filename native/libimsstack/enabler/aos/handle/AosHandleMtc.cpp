@@ -456,20 +456,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
     }
 
     // Manage current blocks
-    ProcessBlock(GetVoiceBlockReasonForIpcan(),
-            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE));
-
-    ProcessBlock(GetVideoBlockReasonForIpcan(),
-            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO));
-
-    ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
-            (!IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER) &&
-                    !IsCapabilityExistedForNetworkType(
-                            m_nNetworkType, AosCapability::CALL_COMPOSER_BUSINESS_ONLY)),
-            IMS_FALSE);
-
-    ProcessBlock(BLOCK_TEXT_CAPABILITY,
-            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::TEXT), IMS_FALSE);
+    ReevaluateCapabilities(IMS_FALSE);
 
     // Manage holding blocks
     if (IsEpdgEnabled())
@@ -525,27 +512,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             }
         }
 
-        IMS_BOOL bIsVoiceCapable =
-                IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE);
-        IMS_BOOL bIsVideoCapable =
-                IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO);
-
-        if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
-        {
-            ReevaluateUnavailableFeature();
-            ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
-        }
-        else
-        {
-            ProcessBlock(GetVoiceBlockReasonForIpcan(), !bIsVoiceCapable);
-            ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
-        }
-
-        ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
-                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER),
-                IMS_FALSE);
-        ProcessBlock(BLOCK_TEXT_CAPABILITY,
-                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::TEXT), IMS_FALSE);
+        ReevaluateCapabilities(IMS_TRUE);
 
         if (GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
         {
@@ -652,6 +619,34 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(
 
         ProcessBlock(BLOCK_VOPS, IMS_FALSE);
     }
+}
+
+PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities(IN IMS_BOOL bNetworkChanged)
+{
+    IMS_BOOL bIsVoiceCapable =
+            IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE);
+    IMS_BOOL bIsVideoCapable =
+            IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO);
+    IMS_BOOL bIsTextCapable =
+            IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::TEXT);
+    IMS_BOOL bIsCallComposerCapable =
+            IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER);
+    IMS_BOOL bIsB2cCallComposerCapable = IsCapabilityExistedForNetworkType(
+            m_nNetworkType, AosCapability::CALL_COMPOSER_BUSINESS_ONLY);
+
+    if (bNetworkChanged && GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+    {
+        ReevaluateUnavailableFeature();
+    }
+    else
+    {
+        ProcessBlock(GetVoiceBlockReasonForIpcan(), !bIsVoiceCapable);
+    }
+
+    ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
+    ProcessBlock(BLOCK_TEXT_CAPABILITY, !bIsTextCapable, IMS_FALSE);
+    ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
+            (!bIsCallComposerCapable && !bIsB2cCallComposerCapable), IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
