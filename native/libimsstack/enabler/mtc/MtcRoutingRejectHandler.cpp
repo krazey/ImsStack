@@ -23,11 +23,11 @@
 #include "MtcRoutingRejectHandler.h"
 #include "ServiceTrace.h"
 #include "SipMethod.h"
+#include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const IMS_CHAR REASON_PHRASE_VZW_ON_EHRPD[] = "On eHRPD";
-LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOWIFI_OFF[] = "VoWiFi OFF";
 LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOLTE_OFF[] = "VoLTE setting OFF";
 LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOPS_OFF[] = "VOPS OFF";
 
@@ -92,7 +92,11 @@ SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
             if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED) !=
                     IMS_WFC_ON)
             {
-                return SipStatusCode(SipStatusCode::SC_486, REASON_PHRASE_VZW_VOWIFI_OFF);
+                return SipStatusCode(SipStatusCode::SC_486,
+                        m_objContext.GetConfigurationProxy()
+                                .GetString(ConfigVoice::
+                                                KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING)
+                                .GetStr());
             }
             break;
 

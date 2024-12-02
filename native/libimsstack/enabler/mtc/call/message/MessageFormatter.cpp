@@ -843,9 +843,7 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
             strPhrase = GetRejectPhrase(RejectType::ON_CS_CALL);
             break;
         case CODE_LOCAL_CALL_BUSY:
-            strPhrase = objReason.nExtraCode == EXTRA_CODE_RTT_ON
-                    ? REASON_PHRASE_RTT_ON
-                    : GetRejectPhrase(RejectType::ON_CONNECTING_CALL);
+            strPhrase = GetRejectPhraseForLocalCallBusy(objReason.nExtraCode);
             break;
         case CODE_REJECT_ONGOING_CALL_SETUP:
             strPhrase = GetRejectPhrase(RejectType::ON_CONNECTING_CALL);
@@ -955,6 +953,21 @@ AString MessageFormatter::GetRejectPhrase(IN RejectType eType)
 {
     return MtcConfigurationResolver::GetRejectReasonPhrase(
             m_objContext.GetConfigurationProxy(), eType);
+}
+
+PRIVATE
+AString MessageFormatter::GetRejectPhraseForLocalCallBusy(IN IMS_SINT32 nExtraCode)
+{
+    switch (nExtraCode)
+    {
+        case EXTRA_CODE_RTT_ON:
+            return REASON_PHRASE_RTT_ON;
+        case EXTRA_CODE_VOWIFI_OFF:
+            return m_objContext.GetConfigurationProxy().GetString(
+                    ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING);
+        default:
+            return GetRejectPhrase(RejectType::ON_CONNECTING_CALL);
+    }
 }
 
 PRIVATE

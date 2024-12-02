@@ -46,6 +46,7 @@
 #include "call/block/RetryAfterBlockRule.h"
 #include "call/block/SsacBlockRule.h"
 #include "call/block/VopsBlockRule.h"
+#include "call/block/WfcBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/IdleState.h"
 #include "conferencecall/ConferenceDef.h"
@@ -538,6 +539,7 @@ ImsList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     ImsList<IMtcBlockRule*> lstRules;
 
     lstRules.Append(new VopsBlockRule(m_objContext));
+    lstRules.Append(new WfcBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     lstRules.Append(new NetworkBlockRule(m_objContext,
             *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId())));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
