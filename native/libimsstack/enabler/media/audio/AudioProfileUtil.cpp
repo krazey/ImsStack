@@ -79,7 +79,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
 
     pAudioProfile->SetSupportRtcpXr(pConfig->IsRtcpXrEnabled());
 
-    IMS_TRACE_D("SetRtcpXr() Support Rtcp-Xr[%d]", pAudioProfile->IsRtcpXrSupported(), 0, 0);
+    IMS_TRACE_D("SetRtcpXr() - Support Rtcp-Xr[%d]", pAudioProfile->IsRtcpXrSupported(), 0, 0);
 
     if (pAudioProfile->IsRtcpXrSupported() == IMS_TRUE)
     {
@@ -100,11 +100,11 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
             pAudioProfile->GetRtcpXrAttr().SetSupportPacketDuplicatedRle(IMS_TRUE);
         }
 
-        IMS_TRACE_D("SetRtcpXr() VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
+        IMS_TRACE_D("SetRtcpXr() - VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
                 pAudioProfile->GetRtcpXrAttr().IsVoipMetricsSupported(),
                 pAudioProfile->GetRtcpXrAttr().IsStatisticMetricsSupported(),
                 pAudioProfile->GetRtcpXrAttr().IsPacketLossRleSupported());
-        IMS_TRACE_D("SetRtcpXr() PacketDuplicatedRl[%d]",
+        IMS_TRACE_D("SetRtcpXr() - PacketDuplicatedRl[%d]",
                 pAudioProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported(), 0, 0);
     }
 
@@ -153,8 +153,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
         IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6, IN IMS_SINT32 nModeSet,
         IN IMS_BOOL bGetMaxValue /*= IMS_FALSE*/)
 {
-    IMS_TRACE_D("ConvertToBandwidthAS() - Entered. eCodec[%d] nOctet[%d] nModeSet[%d]", eCodec,
-            nOctet, nModeSet);
+    IMS_TRACE_D(
+            "ConvertToBandwidthAS() - Codec[%d], Octet[%d], ModeSet[%d]", eCodec, nOctet, nModeSet);
 
     IMS_SINT32 nResultAs = -1;
 
@@ -183,7 +183,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
 
     nResultAs = pArrAmr[nModeSet];
 
-    IMS_TRACE_D("ConvertToBandwidthAS() - Ended : IPv6[%d], nAs[%d]", bIpV6, nResultAs, 0);
+    IMS_TRACE_D("ConvertToBandwidthAS() - IPv6[%d], As[%d]", bIpV6, nResultAs, 0);
     return nResultAs;
 }
 
@@ -191,8 +191,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
         IN IMS_BOOL bIpV6, IN IMS_SINT32 nCodecFormat, IN IMS_SINT32 nCodecMode,
         IN IMS_BOOL bGetMaxValue)
 {
-    IMS_TRACE_D("ConvertToBandwidthAS() - Entered. eCodec[%d] bIpV6[%d] nCodecFormat[%d]", eCodec,
-            bIpV6, nCodecFormat);
+    IMS_TRACE_D("ConvertToBandwidthAS() - Codec[%d], IpV6[%d], CodecFormat[%d]", eCodec, bIpV6,
+            nCodecFormat);
 
     IMS_SINT32 nResultAs = -1;
 
@@ -216,7 +216,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
     }
 
     nResultAs = pArrEvs[nCodecMode];
-    IMS_TRACE_D("ConvertToBandwidthAS() - Ended : nAs[%d]", nResultAs, 0, 0);
+    IMS_TRACE_D("ConvertToBandwidthAS() - As[%d]", nResultAs, 0, 0);
 
     return nResultAs;
 }
@@ -224,7 +224,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
 PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToModeSet(
         IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6, IN IMS_SINT32 nAs)
 {
-    IMS_TRACE_D("ConvertToModeSet() eCodec[%d], nOctet[%d], nAs[%d]", eCodec, nOctet, nAs);
+    IMS_TRACE_D("ConvertToModeSet() - Codec[%d], Octet[%d], As[%d]", eCodec, nOctet, nAs);
 
     IMS_SINT32 nModeSet = -1;
     const IMS_SINT32* pArrAmr;
@@ -257,7 +257,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToModeSet(
         }
     }
 
-    IMS_TRACE_D("ConvertToModeSet() - Result : bIpV6[%d]m nModeSet[%d]", bIpV6, nModeSet, 0);
+    IMS_TRACE_D("ConvertToModeSet() - IpV6[%d], ModeSet[%d]", bIpV6, nModeSet, 0);
     return nModeSet;
 }
 
@@ -401,7 +401,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
     pAudioProfile->SetBandwidthAs(pConfig->GetAsBandwidthKbps());
 
     MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pConfig);
-    IMS_TRACE_D("UpdateAudioProfileBandwidth() update AS[%d]", nAsMax, 0, 0);
+    IMS_TRACE_D("UpdateAudioProfileBandwidth() - updatedAS[%d]", nAsMax, 0, 0);
 
     return IMS_TRUE;
 }
@@ -541,12 +541,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
 
         if (pAmrFmtp->GetModeSetList() > 0)
         {
-            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->GetModeSetList(), 0, 0);
+            IMS_TRACE_D("GetModesetList() - ModesetList[%d]", pAmrFmtp->GetModeSetList(), 0, 0);
             return pAmrFmtp->GetModeSetList();
         }
         else
         {
-            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->GetDefaultRtpModeSet(), 0, 0);
+            IMS_TRACE_D("GetModesetList() - DefaultModeSet[%d]", pAmrFmtp->GetDefaultRtpModeSet(),
+                    0, 0);
             return pAmrFmtp->GetDefaultRtpModeSet();
         }
     }
@@ -564,13 +565,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
         {
             if (pEvsFmtp->GetBrList() == 0)
             {
-                IMS_TRACE_D(
-                        "BrList is 0 -> GetModesetList is %d", EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
+                IMS_TRACE_D("GetModesetList() - BrList is 0, ModesetList[%d]",
+                        EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
                 return EVS_PRIMARY_MODE_MAX_MODESET;
             }
             else
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetBrList(), 0, 0);
+                IMS_TRACE_D("GetModesetList() - BrList[%d]", pEvsFmtp->GetBrList(), 0, 0);
                 return pEvsFmtp->GetBrList();
             }
         }
@@ -578,12 +579,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
         {
             if (pEvsFmtp->GetModeSetList() > 0)
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetModeSetList(), 0, 0);
+                IMS_TRACE_D("GetModesetList() - ModeSetList[%d]", pEvsFmtp->GetModeSetList(), 0, 0);
                 return pEvsFmtp->GetModeSetList();
             }
             else
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetDefaultRtpModeSet(), 0, 0);
+                IMS_TRACE_D("GetModesetList() - DefaultModeSet[%d]",
+                        pEvsFmtp->GetDefaultRtpModeSet(), 0, 0);
                 return pEvsFmtp->GetDefaultRtpModeSet();
             }
         }
@@ -604,7 +606,7 @@ PUBLIC GLOBAL void AudioProfileUtil::SetAnbr(
         if (pMediaSessionConfig != IMS_NULL)
         {
             pProfile->SetAnbr(pMediaSessionConfig->IsAnbrSupported());
-            IMS_TRACE_D("SetAnbr anbr : %d", pProfile->IsAnbrSupported(), 0, 0);
+            IMS_TRACE_D("SetAnbr() - anbr[%d]", pProfile->IsAnbrSupported(), 0, 0);
         }
     }
 }

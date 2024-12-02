@@ -178,7 +178,7 @@ void AudioSdpGenerator::GenerateMaxPtime(
     if (nMaxPtime != AudioProfile::DEFAULT_MAXPTIME)
     {
         pDescriptor->AddAttributeInt(SdpAttribute::MAXPTIME, nMaxPtime);
-        IMS_TRACE_D("GenerateMaxPtime() - nMaxPtime[%d]", nMaxPtime, 0, 0);
+        IMS_TRACE_D("GenerateMaxPtime() - MaxPtime[%d]", nMaxPtime, 0, 0);
     }
 }
 
@@ -324,7 +324,7 @@ PROTECTED void AudioSdpGenerator::AddModeSetListToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeSetListToFmtp() mode-set list=%d, visible mode-set=%d",
+    IMS_TRACE_I("AddModeSetListToFmtp() - modeSetList[%d], visible modeSet[%d]",
             pFmtp->GetModeSetList(), pFmtp->IsModeSetVisible(), 0);
 
     if (pFmtp->GetModeSetList() != 0 && pFmtp->IsModeSetVisible() == IMS_TRUE)
@@ -357,7 +357,7 @@ PROTECTED void AudioSdpGenerator::AddModeChangeCapabilityToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, visible=%d",
+    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() - mode-change-capability[%d], visible[%d]",
             pFmtp->GetModeChangeCapability(), pFmtp->IsModeChangeCapabilityVisible(), 0);
 
     if (pFmtp->IsModeChangeCapabilityVisible() == IMS_TRUE)
@@ -378,7 +378,7 @@ PROTECTED void AudioSdpGenerator::AddModeChangePeriodToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, visible=%d",
+    IMS_TRACE_I("AddModeChangePeriodToFmtp() - mode-change-period[%d], visible[%d]",
             pFmtp->GetModeChangePeriod(), pFmtp->IsModeChangePeriodVisible(), 0);
 
     if (pFmtp->IsModeChangePeriodVisible() == IMS_TRUE)
@@ -399,7 +399,7 @@ PROTECTED void AudioSdpGenerator::AddModeChangeNeighborToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, visible=%d",
+    IMS_TRACE_I("AddModeChangeNeighborToFmtp() - mode-change-neighbor[%d], visible[%d]",
             pFmtp->GetModeChangeNeighbor(), pFmtp->IsModeChangeNeighborVisible(), 0);
 
     if (pFmtp->IsModeChangeNeighborVisible() == IMS_TRUE)
@@ -420,7 +420,7 @@ PROTECTED void AudioSdpGenerator::AddMaxRedToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, visible=%d", pFmtp->GetMaxRed(),
+    IMS_TRACE_I("AddMaxRedToFmtp() - max-red[%d], visible[%d]", pFmtp->GetMaxRed(),
             pFmtp->IsMaxRedVisible(), 0);
 
     if (pFmtp->IsMaxRedVisible() == IMS_TRUE)
@@ -441,7 +441,7 @@ PROTECTED void AudioSdpGenerator::AddOctetAlignToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddOctetAlignToFmtp() octet-align=%d, visible=%d", pFmtp->GetOctetAlign(),
+    IMS_TRACE_I("AddOctetAlignToFmtp() - octet-align[%d], visible[%d]", pFmtp->GetOctetAlign(),
             pFmtp->IsOctetAlignVisible(), 0);
 
     if (pFmtp->IsOctetAlignVisible() == IMS_TRUE)
@@ -462,8 +462,8 @@ PROTECTED void AudioSdpGenerator::AddDtxToFmtp(
         return;
     }
 
-    IMS_TRACE_I(
-            "AddDtxToFmtp() dtx=%d, visible=%d", pFmtp->IsDtxEnabled(), pFmtp->IsDtxVisible(), 0);
+    IMS_TRACE_I("AddDtxToFmtp() - dtx[%d], visible[%d]", pFmtp->IsDtxEnabled(),
+            pFmtp->IsDtxVisible(), 0);
 
     if (pFmtp->IsDtxVisible() == IMS_TRUE)
     {
@@ -483,7 +483,7 @@ PROTECTED void AudioSdpGenerator::AddHfOnlyToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddHfOnlyToFmtp() hf-only=%d, visible=%d", pFmtp->GetHfOnly(),
+    IMS_TRACE_I("AddHfOnlyToFmtp() - hf-only[%d], visible[%d]", pFmtp->GetHfOnly(),
             pFmtp->IsHfOnlyVisible(), 0);
 
     if (pFmtp->IsHfOnlyVisible() == IMS_TRUE)
@@ -504,7 +504,7 @@ PROTECTED void AudioSdpGenerator::AddEvsModeSwitchToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddEvsModeSwitchToFmtp() evs-mode-switch=%d, visible=%d",
+    IMS_TRACE_I("AddEvsModeSwitchToFmtp() - evs-mode-switch[%d], visible[%d]",
             pFmtp->GetEvsModeSwitch(), pFmtp->IsEvsModeSwitchVisible(), 0);
 
     if (pFmtp->IsEvsModeSwitchVisible() == IMS_TRUE)
@@ -524,7 +524,7 @@ PROTECTED void AudioSdpGenerator::AddBwToFmtp(IN AudioProfile::EvsFmtp* pFmtp, O
         return;
     }
 
-    IMS_TRACE_I("AddBwToFmtp() bw-list=%d, visible=%d", pFmtp->GetBwList(),
+    IMS_TRACE_I("AddBwToFmtp() - bw-list[%d], visible[%d]", pFmtp->GetBwList(),
             pFmtp->IsBwListVisible(), 0);
 
     if (pFmtp->GetBwList() != 0 && pFmtp->IsBwListVisible())
@@ -579,7 +579,7 @@ PROTECTED void AudioSdpGenerator::AddBrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, O
         return;
     }
 
-    IMS_TRACE_I("AddBrToFmtp() br-list=%d, visible=%d", pFmtp->GetBrList(),
+    IMS_TRACE_I("AddBrToFmtp() - br-list[%d], visible[%d]", pFmtp->GetBrList(),
             pFmtp->IsBrListVisible(), 0);
 
     if (pFmtp->IsBrListVisible() == IMS_TRUE)
@@ -630,7 +630,7 @@ PROTECTED void AudioSdpGenerator::AddCmrToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddCmrToFmtp() cmr=%d, visible=%d", pFmtp->GetCmr(), pFmtp->IsCmrVisible(), 0);
+    IMS_TRACE_I("AddCmrToFmtp() - cmr[%d], visible[%d]", pFmtp->GetCmr(), pFmtp->IsCmrVisible(), 0);
 
     if (pFmtp->IsCmrVisible() == IMS_TRUE && pFmtp->GetEvsModeSwitch() != 1)
     {
@@ -650,7 +650,7 @@ PROTECTED void AudioSdpGenerator::AddChannelAwModeToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddChannelAwModeToFmtp() ch-aw-recv=%d, visible=%d", pFmtp->GetChAwRecv(),
+    IMS_TRACE_I("AddChannelAwModeToFmtp() - ch-aw-recv[%d], visible[%d]", pFmtp->GetChAwRecv(),
             pFmtp->IsChannelAwModeVisible(), 0);
 
     if (pFmtp->IsChannelAwModeVisible() == IMS_TRUE && pFmtp->GetEvsModeSwitch() != 1)
@@ -671,7 +671,7 @@ PROTECTED void AudioSdpGenerator::AddBwSendToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddBwSendToFmtp() bw-send=%d", pFmtp->GetBwSend(), 0, 0);
+    IMS_TRACE_I("AddBwSendToFmtp() - bw-send[%d]", pFmtp->GetBwSend(), 0, 0);
 
     if (pFmtp->GetBwSend() != 0)
     {
@@ -721,7 +721,7 @@ PROTECTED void AudioSdpGenerator::AddBwRecvToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddBwRecvToFmtp() bw-recv=%d", pFmtp->GetBwRecv(), 0, 0);
+    IMS_TRACE_I("AddBwRecvToFmtp() - bw-recv[%d]", pFmtp->GetBwRecv(), 0, 0);
 
     if (pFmtp->GetBwRecv() != 0)
     {
@@ -771,7 +771,7 @@ PROTECTED void AudioSdpGenerator::AddBrSendToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddBrSendToFmtp() br-send=%d", pFmtp->GetBwSend(), 0, 0);
+    IMS_TRACE_I("AddBrSendToFmtp() - br-send[%d]", pFmtp->GetBwSend(), 0, 0);
 
     if (pFmtp->GetBrSend() != 0)
     {
@@ -821,7 +821,7 @@ PROTECTED void AudioSdpGenerator::AddBrRecvToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddBrRecvToFmtp() br-recv=%d", pFmtp->GetBwRecv(), 0, 0);
+    IMS_TRACE_I("AddBrRecvToFmtp() - br-recv[%d]", pFmtp->GetBwRecv(), 0, 0);
 
     if (pFmtp->GetBrRecv() != 0)
     {

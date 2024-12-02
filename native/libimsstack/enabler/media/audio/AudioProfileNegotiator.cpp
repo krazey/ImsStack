@@ -229,7 +229,7 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
     {
         // Set the index of negotiated payload from the list.
         pPeerProfile->SetNegotiatedPayloadIndex(nPayloadIndex);
-        // set remote payload index at local profile
+        // Set remote payload index at local profile
         pLocalProfile->SetNegotiatedPayloadIndex(nSrcPayloadIndex);
         IMS_TRACE_D("NegotiateAmr() - remote payload index[%d]",
                 pLocalProfile->GetNegotiatedPayloadIndex(), 0, 0);
@@ -944,8 +944,7 @@ IMS_BOOL AudioProfileNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile
                     continue;
                 }
 
-                // condition check....
-                // need to return remote BW and BR, ModeSet(AMR IO Mode.). also default values...
+                // TODO : Consider the return logic for remote BW, BR, ModeSet and default values
                 if (legacyCheck == 0)
                 {
                     // IR92 rel15 EVS Br/Bw check.

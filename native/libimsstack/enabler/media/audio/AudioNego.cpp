@@ -395,7 +395,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormReoffer() pDescriptor[%" PFLS_x "], eDir[%d], m_listOaModel.GetSize[%d]",
+    IMS_TRACE_I("FormReoffer() pDescriptor[%" PFLS_x "], eDir[%d], listOaModel Size[%d]",
             pDescriptor, eDir, m_listOaModel.GetSize());
     IMS_TRACE_D("FormReoffer() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
@@ -470,8 +470,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             }
             else
             {
-                IMS_TRACE_I(
-                        "FormReoffer() - reuse previous profile, m_bSdpReofferFullCapability[%d]",
+                IMS_TRACE_I("FormReoffer() - reuse previous profile, SdpReofferFullCapability[%d]",
                         pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
 
                 if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
@@ -613,7 +612,7 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    IMS_TRACE_I("NegotiateAnswer() Entered", 0, 0, 0);
+    IMS_TRACE_I("NegotiateAnswer()", 0, 0, 0);
 
     // Get the latest OAmodel from list
     OaModel* pNewOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
