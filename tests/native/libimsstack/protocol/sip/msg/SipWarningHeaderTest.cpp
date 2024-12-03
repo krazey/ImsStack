@@ -66,13 +66,13 @@ TEST_F(SipWarningHeaderTest, Encode)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
-    pHeader->SetWarnText("Warn-Text");
+    pHeader->SetWarnText("\"Warn-Text\"");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
-    EXPECT_STREQ("300 Warn-Agent Warn-Text", objValue.GetCharString());
-    EXPECT_STREQ("300 Warn-Agent Warn-Text", &(aBuffer[0]));
+    EXPECT_STREQ("300 Warn-Agent \"Warn-Text\"", objValue.GetCharString());
+    EXPECT_STREQ("300 Warn-Agent \"Warn-Text\"", &(aBuffer[0]));
 
     pHeader->SipDelete();
 
@@ -82,6 +82,18 @@ TEST_F(SipWarningHeaderTest, Encode)
 
     pHeader->SetWarnCode(300);
     pHeader->SetWarnAgent("Warn-Agent");
+    pHeader->SetWarnText("\"Warn Text\"");
+
+    objValue = AString::ConstNull();
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+
+    EXPECT_STREQ("300 Warn-Agent \"Warn Text\"", objValue.GetCharString());
+    EXPECT_STREQ("300 Warn-Agent \"Warn Text\"", &(aBuffer[0]));
+
     pHeader->SetWarnText("Warn Text");
 
     objValue = AString::ConstNull();
@@ -93,6 +105,42 @@ TEST_F(SipWarningHeaderTest, Encode)
 
     EXPECT_STREQ("300 Warn-Agent \"Warn Text\"", objValue.GetCharString());
     EXPECT_STREQ("300 Warn-Agent \"Warn Text\"", &(aBuffer[0]));
+
+    pHeader->SetWarnText("W");
+
+    objValue = AString::ConstNull();
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+
+    EXPECT_STREQ("300 Warn-Agent \"W\"", objValue.GetCharString());
+    EXPECT_STREQ("300 Warn-Agent \"W\"", &(aBuffer[0]));
+
+    pHeader->SetWarnText("");
+
+    objValue = AString::ConstNull();
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+
+    EXPECT_STREQ("300 Warn-Agent \"\"", objValue.GetCharString());
+    EXPECT_STREQ("300 Warn-Agent \"\"", &(aBuffer[0]));
+
+    pHeader->SetWarnText(SIP_NULL);
+
+    objValue = AString::ConstNull();
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+
+    EXPECT_STREQ("300 Warn-Agent \"\"", objValue.GetCharString());
+    EXPECT_STREQ("300 Warn-Agent \"\"", &(aBuffer[0]));
 
     pHeader->SipDelete();
 }
@@ -137,11 +185,35 @@ TEST_F(SipWarningHeaderTest, Decode)
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->Decode("301 warn-agent warn-text", 24));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("301 warn-agent wrong-warn-test", 30));
+
+    pHeader->SipDelete();
+
+    pHeader = reinterpret_cast<SipWarningHeader*>(
+            SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("301 warn-agent \"wrong-warn-test", 31));
+
+    pHeader->SipDelete();
+
+    pHeader = reinterpret_cast<SipWarningHeader*>(
+            SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("301 warn-agent wrong-warn-test\"", 31));
+
+    pHeader->SipDelete();
+
+    pHeader = reinterpret_cast<SipWarningHeader*>(
+            SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("301 warn-agent \"warn-text\"", 26));
 
     EXPECT_EQ(301, pHeader->GetWarnCode());
     EXPECT_STREQ("warn-agent", pHeader->GetWarnAgent());
-    EXPECT_STREQ("warn-text", pHeader->GetWarnText());
+    EXPECT_STREQ("\"warn-text\"", pHeader->GetWarnText());
 
     pHeader->SipDelete();
 }

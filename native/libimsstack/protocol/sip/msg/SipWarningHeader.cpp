@@ -61,17 +61,7 @@ SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/
     objBuffer += SPACE;
     objBuffer += m_pszWarnAgent;
     objBuffer += SPACE;
-
-    if (SipAbnfUtil::HasSpace(m_pszWarnText))
-    {
-        objBuffer += DQUOTE;
-        objBuffer += m_pszWarnText;
-        objBuffer += DQUOTE;
-    }
-    else
-    {
-        objBuffer += m_pszWarnText;
-    }
+    objBuffer += m_pszWarnText;
 
     return SIP_TRUE;
 }
@@ -90,17 +80,7 @@ SIP_BOOL SipWarningHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
     SipAbnfUtil::Append(*ppCurrPos, m_pszWarnAgent);
     SipMsgUtil::Encode(*ppCurrPos, SPACE);
-
-    if (SipAbnfUtil::HasSpace(m_pszWarnText))
-    {
-        SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
-        SipAbnfUtil::Append(*ppCurrPos, m_pszWarnText);
-        SipMsgUtil::Encode(*ppCurrPos, SIP_DQUOTE);
-    }
-    else
-    {
-        SipAbnfUtil::Append(*ppCurrPos, m_pszWarnText);
-    }
+    SipAbnfUtil::Append(*ppCurrPos, m_pszWarnText);
 
     return SIP_TRUE;
 }
@@ -112,7 +92,29 @@ SIP_VOID SipWarningHeader::SetWarnAgent(const SIP_CHAR* pszWarnAgent)
 
 SIP_VOID SipWarningHeader::SetWarnText(const SIP_CHAR* pszWarnText)
 {
-    SipMsgUtil::SetValue(pszWarnText, m_pszWarnText);
+    const SIP_CHAR* pszTempWarnText = pszWarnText;
+    SIP_INT32 nLength = SipPf_Strlen(pszTempWarnText);
+
+    if (nLength == SIP_ZERO)
+    {
+        pszTempWarnText = "\"\"";
+        nLength = 2;
+    }
+
+    const SIP_CHAR* pszEnd = pszTempWarnText + nLength - SIP_ONE;
+
+    if (IS_DQUOTE(*pszTempWarnText) && IS_DQUOTE(*pszEnd))
+    {
+        SipMsgUtil::SetValue(pszTempWarnText, m_pszWarnText);
+    }
+    else
+    {
+        // 2 DQUOTE + null character.
+        SIP_CHAR* pszNewWarnText = new SIP_CHAR[nLength + 3];
+        SipPf_Snprintf(pszNewWarnText, nLength + 3, "\"%s\"", pszWarnText);
+        SipMsgUtil::SetValue(pszNewWarnText, m_pszWarnText);
+        delete[] pszNewWarnText;
+    }
 }
 
 SIP_BOOL SipWarningHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
@@ -166,6 +168,13 @@ SIP_BOOL SipWarningHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Update the start point to the start of Warn text*/
     pStartPt = pTempLoc + SIP_TWO;
+
+    if (!IS_DQUOTE(*pStartPt) || !IS_DQUOTE(*pEndPt))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid warn-text", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     m_pszWarnText = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszWarnText == SIP_NULL)
     {
