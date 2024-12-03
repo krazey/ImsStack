@@ -542,7 +542,7 @@
     <int name="imsvoice.media_type_for_offerless_invite_int" value="0"/>
     <int name="imsvoice.media_type_for_offerless_reinvite_int" value="0"/>
     <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
-    <int name="imsvoice.oip_type_for_unavailable_int" value="1"/>
+    <int name="imsvoice.oip_type_for_unavailable_int" value="2"/>
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="false"/>
     <int name="imsvoice.delay_update_after_connected_timer_millis_int" value="0"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="0"/>

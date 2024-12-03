@@ -233,9 +233,10 @@ public class ImsCallUtils {
             oir = ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED;
         } else if (incomingCall.OIPType == IncomingMtcCall.OIPTYPE_UNKNOWN) {
             oir = ImsCallProfile.OIR_PRESENTATION_UNKNOWN;
-        } else if (incomingCall.OIPType == (IncomingMtcCall.OIPTYPE_UNKNOWN + 1)) {
-            // FIXME: The constant value SHOULD be defined if it's used...
+        } else if (incomingCall.OIPType == (IncomingMtcCall.OIPTYPE_PAYPHONE)) {
             oir = ImsCallProfile.OIR_PRESENTATION_PAYPHONE;
+        } else if (incomingCall.OIPType == (IncomingMtcCall.OIPTYPE_UNAVAILABLE)) {
+            oir = ImsCallProfile.OIR_PRESENTATION_UNAVAILABLE;
         }
 
         profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR, oir);

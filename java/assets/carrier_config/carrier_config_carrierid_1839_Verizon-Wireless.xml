@@ -199,7 +199,6 @@
     </string-array>
     <boolean name="imsemergency.block_wifi_emergency_call_if_not_provisioned_bool" value="true"/>
     <boolean name="imsvoice.support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
-    <int name="imsvoice.oip_type_for_unavailable_int" value="1"/>
     <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
     <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
     <int name="imsvoice.media_type_for_offerless_reinvite_int" value="1"/>
