@@ -42,6 +42,8 @@ public class IncomingMtcCall implements Parcelable {
     public static final int OIPTYPE_IDENTITY     = 1;
     public static final int OIPTYPE_RESTRICTED   = 2;
     public static final int OIPTYPE_UNKNOWN      = 3;
+    public static final int OIPTYPE_PAYPHONE     = 4;
+    public static final int OIPTYPE_UNAVAILABLE  = 5;
 
     /* CDIVCAUSE_nCDIVCause :: Incoming CDIV Cause */
     // No CDIV, strListCDIVHistory is empty
