@@ -161,16 +161,16 @@ const IMS_CHAR CarrierConfig::Ims::KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY[] 
 // }
 // Public carrier-config - ends
 
+// Ims General
 const IMS_CHAR CarrierConfig::Ims::KEY_SIP_COMPACT_FORM_ENABLED_BOOL[] =
         KEY_IMS_PREFIX "sip_compact_form_enabled_bool";
 const IMS_CHAR
         CarrierConfig::Ims::KEY_ALLOW_SIP_UDP_FALLBACK_ON_TCP_CONNECTION_SETUP_FAILED_BOOL[] =
                 KEY_IMS_PREFIX "allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool";
-const IMS_CHAR
-        CarrierConfig::Ims::KEY_ALLOW_ALGORITHM_PARAMETER_IN_SIP_AUTHORIZATION_HEADER_BOOL[] =
-                KEY_IMS_PREFIX "allow_algorithm_parameter_in_sip_authorization_header_bool";
-const IMS_CHAR CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_ONLY_FOR_UA_STRING_BOOL[] =
-        KEY_IMS_PREFIX "use_sip_user_agent_header_only_for_ua_string_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_ALGORITHM_PARAM_IN_SIP_AUTHORIZATION_HEADER_BOOL[] =
+        KEY_IMS_PREFIX "allow_algorithm_param_in_sip_authorization_header_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_IN_UA_STRING_BOOL[] =
+        KEY_IMS_PREFIX "use_sip_user_agent_header_in_ua_string_bool";
 const IMS_CHAR
         CarrierConfig::Ims::KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[] =
                 KEY_IMS_PREFIX "allow_sip_p_access_network_info_header_in_initial_register_bool";
@@ -178,6 +178,36 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[] =
         KEY_IMS_PREFIX "support_sip_session_id_header_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
         KEY_IMS_PREFIX "pcscf_discovery_method_int_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL[] =
+        KEY_IMS_PREFIX "sdp_negotiation_required_for_non_rpr_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL[] =
+        KEY_IMS_PREFIX "request_uri_validation_required_in_mid_dialog_bool";
+const IMS_CHAR
+        CarrierConfig::Ims::KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL[] =
+                KEY_IMS_PREFIX "session_timer_update_required_in_session_update_by_reinvite_bool";
+const IMS_CHAR CarrierConfig::Ims::
+        KEY_ALLOW_SIP_INSTANCE_PARAM_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL[] =
+                KEY_IMS_PREFIX "allow_sip_instance_param_in_contact_for_non_register_request_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_SIP_TIMER_100_TRYING_MILLIS_INT[] =
+        KEY_IMS_PREFIX "sip_timer_100_trying_millis_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL[] =
+        KEY_IMS_PREFIX "use_reset_when_closing_sip_tcp_connection_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_USE_TUPLE_ELEMENT_IN_GEOLOCATION_PIDF_BOOL[] =
+        KEY_IMS_PREFIX "use_tuple_element_in_geolocation_pidf_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_IN_GEOLOCATION_PIDF_BOOL[] =
+        KEY_IMS_PREFIX "allow_unknown_country_element_in_geolocation_pidf_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL[] =
+        KEY_IMS_PREFIX "set_sdp_direction_attribute_for_removed_media_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SDP_PRECONDITION_BOOL[] =
+        KEY_IMS_PREFIX "support_sdp_precondition_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT[] =
+        KEY_IMS_PREFIX "hide_mac_address_in_pani_header_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL[] =
+        KEY_IMS_PREFIX "support_country_param_in_pani_header_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[] =
+        KEY_IMS_PREFIX "support_local_session_timer_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[] =
+        KEY_IMS_PREFIX "retransmission_allowed_of_geolocation_pidf_string";
 
 // Aos
 const IMS_CHAR CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[] =
@@ -681,39 +711,6 @@ const IMS_CHAR CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY[] 
 // Public carrier-config - ends
 
 //// Assets
-// Ims General
-const IMS_CHAR CarrierConfig::Assets::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL[] =
-        "sdp_negotiation_required_for_non_rpr_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL[] =
-        "request_uri_validation_required_in_mid_dialog_bool";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL[] =
-                "session_timer_update_required_in_session_update_by_reinvite_bool";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_ALLOW_SIP_INSTANCE_PARAMETER_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL[] =
-                "allow_sip_instance_parameter_in_contact_for_non_register_request_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SIP_TIMER_100_TRYING_MILLIS_INT[] =
-        "sip_timer_100_trying_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL[] =
-        "use_reset_when_closing_sip_tcp_connection_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_TUPLE_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL[] =
-        "use_tuple_element_for_geolocation_pidf_bool";
-const IMS_CHAR
-        CarrierConfig::Assets::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL[] =
-                "allow_unknown_country_element_for_geolocation_pidf_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL[] =
-        "set_sdp_direction_attribute_for_removed_media_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_SDP_PRECONDITION_BOOL[] =
-        "support_sdp_precondition_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT[] =
-        "hide_mac_address_in_pani_header_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL[] =
-        "support_country_param_in_pani_header_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[] =
-        "support_local_session_timer_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[] =
-        KEY_IMS_PREFIX "retransmission_allowed_of_geolocation_pidf_string";
-
 // Aos
 const IMS_CHAR CarrierConfig::Assets::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[] =
         KEY_IMS_PREFIX "block_pcscf_on_reg_failure_bool";

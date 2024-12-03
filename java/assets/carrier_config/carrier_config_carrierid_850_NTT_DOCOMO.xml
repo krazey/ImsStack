@@ -18,7 +18,7 @@
     <!-- Carrier configurations -->
     <!-- Ims General -->
     <boolean name="ims.allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool" value="true"/>
-    <boolean name="request_uri_validation_required_in_mid_dialog_bool" value="false"/>
+    <boolean name="ims.request_uri_validation_required_in_mid_dialog_bool" value="false"/>
 
     <!-- Aos -->
     <int name="ims.isim_index_for_impu_int" value="0"/>
@@ -36,8 +36,8 @@
 
     <!-- Assets: non-carrier configurations -->
     <!-- Ims General -->
-    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
-    <int name="sip_timer_100_trying_millis_int" value="0"/>
+    <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <int name="ims.sip_timer_100_trying_millis_int" value="0"/>
 
     <!-- Aos -->
     <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="2"/>

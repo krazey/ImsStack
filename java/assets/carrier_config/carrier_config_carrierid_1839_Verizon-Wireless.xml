@@ -18,20 +18,20 @@
     <!-- Ims General -->
     <boolean name="support_emergency_sms_over_ims_bool" value="true"/>
     <boolean name="carrier_wfc_ims_available_bool" value="true"/>
-    <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
-    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
-    <boolean name="allow_sip_instance_parameter_in_contact_for_non_register_request_bool" value="true"/>
-    <boolean name="use_reset_when_closing_sip_tcp_connection_bool" value="true"/>
-    <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="true"/>
+    <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="true"/>
+    <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
+    <boolean name="ims.use_reset_when_closing_sip_tcp_connection_bool" value="true"/>
+    <boolean name="ims.set_sdp_direction_attribute_for_removed_media_bool" value="true"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
-    <boolean name="support_local_session_timer_bool" value="true"/>
+    <boolean name="ims.support_local_session_timer_bool" value="true"/>
     <boolean name="imsemergency.support_ecbm_for_volte_bool" value="true"/>
     <boolean name="imsemergency.support_ecbm_for_vowifi_bool" value="true"/>
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
-    <int name="hide_mac_address_in_pani_header_int" value="2"/>
-    <int name="location_policy_update_type_int" value="1"/>
-    <int name="location_acquisition_policy_int" value="131328"/>
-    <int name="location_validity_period_min_int" value="3"/>
+    <int name="ims.hide_mac_address_in_pani_header_int" value="2"/>
+    <int name="ims.location_policy_update_type_int" value="1"/>
+    <int name="ims.location_acquisition_policy_int" value="131328"/>
+    <int name="ims.location_validity_period_min_int" value="3"/>
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">True</string>
 
     <!-- Aos -->

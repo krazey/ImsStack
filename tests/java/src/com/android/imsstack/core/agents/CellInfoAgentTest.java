@@ -357,7 +357,7 @@ public class CellInfoAgentTest {
         processAllMessages();
         when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
         when(mCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
                 .thenReturn(true);
 
         ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
@@ -378,7 +378,7 @@ public class CellInfoAgentTest {
         processAllMessages();
         when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
         when(mCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
                 .thenReturn(false);
 
         ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =

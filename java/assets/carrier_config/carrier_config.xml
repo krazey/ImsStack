@@ -19,8 +19,8 @@
     <!-- Ims General -->
     <boolean name="ims.sip_compact_form_enabled_bool" value="false"/>
     <boolean name="ims.allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool" value="false"/>
-    <boolean name="ims.allow_algorithm_parameter_in_sip_authorization_header_bool" value="false"/>
-    <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="false"/>
+    <boolean name="ims.allow_algorithm_param_in_sip_authorization_header_bool" value="false"/>
+    <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="false"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="false"/>
     <boolean name="ims.support_sip_session_id_header_bool" value="false"/>
     <int-array name="ims.pcscf_discovery_method_int_array" num="1">
@@ -341,31 +341,31 @@
     <!-- Assets: non-carrier configurations -->
 
     <!-- Ims General -->
-    <boolean name="sdp_negotiation_required_for_non_rpr_bool" value="false"/>
-    <boolean name="request_uri_validation_required_in_mid_dialog_bool" value="true"/>
-    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="true"/>
-    <boolean name="allow_sip_instance_parameter_in_contact_for_non_register_request_bool" value="false"/>
-    <int name="sip_timer_100_trying_millis_int" value="200"/>
-    <boolean name="use_reset_when_closing_sip_tcp_connection_bool" value="false"/>
-    <boolean name="use_tuple_element_for_geolocation_pidf_bool" value="false"/>
-    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="true"/>
-    <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="false"/>
-    <boolean name="support_sdp_precondition_bool" value="true"/>
-    <boolean name="support_country_param_in_pani_header_bool" value="false"/>
-    <boolean name="support_local_session_timer_bool" value="false"/>
+    <boolean name="ims.sdp_negotiation_required_for_non_rpr_bool" value="false"/>
+    <boolean name="ims.request_uri_validation_required_in_mid_dialog_bool" value="true"/>
+    <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="true"/>
+    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="false"/>
+    <int name="ims.sip_timer_100_trying_millis_int" value="200"/>
+    <boolean name="ims.use_reset_when_closing_sip_tcp_connection_bool" value="false"/>
+    <boolean name="ims.use_tuple_element_in_geolocation_pidf_bool" value="false"/>
+    <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="true"/>
+    <boolean name="ims.set_sdp_direction_attribute_for_removed_media_bool" value="false"/>
+    <boolean name="ims.support_sdp_precondition_bool" value="true"/>
+    <int name="ims.hide_mac_address_in_pani_header_int" value="1"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="false"/>
+    <boolean name="ims.support_local_session_timer_bool" value="false"/>
     <boolean name="imsemergency.support_ecbm_for_volte_bool" value="false"/>
     <boolean name="imsemergency.support_ecbm_for_vowifi_bool" value="false"/>
-    <int name="hide_mac_address_in_pani_header_int" value="1"/>
-    <int name="location_policy_update_type_int" value="0"/>
-    <boolean name="location_allow_mock_location_update_bool" value="false"/>
-    <int name="location_acquisition_policy_int" value="0"/>
-    <int name="location_address_resolution_time_millis_int" value="2000"/>
-    <int name="location_validity_period_min_int" value="0"/>
-    <int name="location_address_validity_period_min_int" value="0"/>
-    <int name="location_tolerable_distance_int" value="0"/>
-    <int name="location_gps_searching_duration_sec_int" value="30"/>
-    <int name="location_geodetic_shape_int" value="0"/>
-    <boolean name="cellular_network_info_utc_offset_enabled_bool" value="false"/>
+    <int name="ims.location_policy_update_type_int" value="0"/>
+    <boolean name="ims.location_allow_mock_location_update_bool" value="false"/>
+    <int name="ims.location_acquisition_policy_int" value="0"/>
+    <int name="ims.location_address_resolution_time_millis_int" value="2000"/>
+    <int name="ims.location_validity_period_min_int" value="0"/>
+    <int name="ims.location_address_validity_period_min_int" value="0"/>
+    <int name="ims.location_tolerable_distance_int" value="0"/>
+    <int name="ims.location_gps_searching_duration_sec_int" value="30"/>
+    <int name="ims.location_geodetic_shape_int" value="0"/>
+    <boolean name="ims.cellular_network_info_utc_offset_enabled_bool" value="false"/>
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">no</string>
 
     <!-- Aos -->

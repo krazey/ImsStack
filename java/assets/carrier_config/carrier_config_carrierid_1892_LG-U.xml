@@ -17,8 +17,8 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Ims General -->
-    <boolean name="ims.allow_algorithm_parameter_in_sip_authorization_header_bool" value="true"/>
-    <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
+    <boolean name="ims.allow_algorithm_param_in_sip_authorization_header_bool" value="true"/>
+    <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="true"/>
 
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
     <!-- IPSEC_ON -->
@@ -55,9 +55,9 @@
 
     <!-- Assets: non-carrier configurations -->
     <!-- Ims General -->
-    <boolean name="support_sdp_precondition_bool" value="false"/>
-    <boolean name="sdp_negotiation_required_for_non_rpr_bool" value="true"/>
-    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <boolean name="ims.support_sdp_precondition_bool" value="false"/>
+    <boolean name="ims.sdp_negotiation_required_for_non_rpr_bool" value="true"/>
+    <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="true"/>

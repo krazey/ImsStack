@@ -85,9 +85,9 @@ public class CarrierConfigMenuTest {
     private static final String TEST_CONFIG_STRING_ARRAY =
             CarrierConfig.ImsVt.KEY_VIDEO_CODEC_FRAME_SIZE_STRING_ARRAY;
     private static final String TEST_ASSETS_CONFIG_BOOLEAN =
-            CarrierConfig.Assets.KEY_SUPPORT_SDP_PRECONDITION_BOOL;
+            CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL;
     private static final String TEST_ASSETS_CONFIG_INT =
-            CarrierConfig.Assets.KEY_SIP_TIMER_100_TRYING_MILLIS_INT;
+            CarrierConfig.Ims.KEY_SIP_TIMER_100_TRYING_MILLIS_INT;
     private static final String TEST_ASSETS_CONFIG_STRING =
             CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING;
     private static final String TEST_ASSETS_CONFIG_INT_ARRAY =

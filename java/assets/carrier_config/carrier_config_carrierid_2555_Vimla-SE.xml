@@ -29,14 +29,14 @@
         <item value="0"/> <!-- NORMAL_LTE -->
         <item value="0"/> <!-- NORMAL_WIFI -->
     </int-array>
-    <int name="location_policy_update_type_int" value="2"/>
-    <int name="location_acquisition_policy_int" value="86672"/>
-    <int name="location_address_resolution_time_millis_int" value="3000"/>
-    <int name="location_validity_period_min_int" value="30"/>
-    <int name="location_address_validity_period_min_int" value="30"/>
-    <int name="location_tolerable_distance_int" value="150"/>
-    <int name="location_gps_searching_duration_sec_int" value="20"/>
-    <int name="location_geodetic_shape_int" value="0"/>
+    <int name="ims.location_policy_update_type_int" value="2"/>
+    <int name="ims.location_acquisition_policy_int" value="86672"/>
+    <int name="ims.location_address_resolution_time_millis_int" value="3000"/>
+    <int name="ims.location_validity_period_min_int" value="30"/>
+    <int name="ims.location_address_validity_period_min_int" value="30"/>
+    <int name="ims.location_tolerable_distance_int" value="150"/>
+    <int name="ims.location_gps_searching_duration_sec_int" value="20"/>
+    <int name="ims.location_geodetic_shape_int" value="0"/>
     <int name="imsemergency.call_periodic_location_discovery_method_int" value="1"/>
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="30000"/>
 </carrier_config>

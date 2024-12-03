@@ -22,9 +22,9 @@
     </int-array>
 
     <!-- Ims General -->
-    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
-    <boolean name="use_tuple_element_for_geolocation_pidf_bool" value="true"/>
-    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <boolean name="ims.use_tuple_element_in_geolocation_pidf_bool" value="true"/>
+    <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="200"/>
 
     <!-- Aos -->

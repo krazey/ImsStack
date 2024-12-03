@@ -85,34 +85,34 @@ public class LocationAgentTest {
     public void testUpdateLocationPolicyWhenCarrierConfigChanged() {
         when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
         when(mSubsInfoInterface.isTestModeEnabled()).thenReturn(true);
-        when(mCarrierConfig.getInt(eq(CarrierConfig.Assets.KEY_LOCATION_POLICY_UPDATE_TYPE_INT)))
+        when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_POLICY_UPDATE_TYPE_INT)))
                 .thenReturn(CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ALWAYS);
         int configuredPolicy = LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING
                 | LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
-        when(mCarrierConfig.getInt(eq(CarrierConfig.Assets.KEY_LOCATION_ACQUISITION_POLICY_INT)))
+        when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_ACQUISITION_POLICY_INT)))
                 .thenReturn(configuredPolicy);
         when(mCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL)))
+                eq(CarrierConfig.Ims.KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL)))
                 .thenReturn(true);
         int addressResolutionTime = 1000;
         when(mCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT)))
+                eq(CarrierConfig.Ims.KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT)))
                 .thenReturn(addressResolutionTime);
         int validityMinutes = 1000;
-        when(mCarrierConfig.getInt(eq(CarrierConfig.Assets.KEY_LOCATION_VALIDITY_PERIOD_MIN_INT)))
+        when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_VALIDITY_PERIOD_MIN_INT)))
                 .thenReturn(validityMinutes);
         int locationValidityMinutes = 1000;
         when(mCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT)))
+                eq(CarrierConfig.Ims.KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT)))
                 .thenReturn(locationValidityMinutes);
         int addressTolerableDistance = 150;
-        when(mCarrierConfig.getInt(eq(CarrierConfig.Assets.KEY_LOCATION_TOLERABLE_DISTANCE_INT)))
+        when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_TOLERABLE_DISTANCE_INT)))
                 .thenReturn(addressTolerableDistance);
         int gpsSearchingDuration = 20;
         when(mCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT)))
+                eq(CarrierConfig.Ims.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT)))
                 .thenReturn(gpsSearchingDuration);
-        when(mCarrierConfig.getInt(eq(CarrierConfig.Assets.KEY_LOCATION_GEODETIC_SHAPE_INT)))
+        when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_GEODETIC_SHAPE_INT)))
                 .thenReturn(CarrierConfig.Assets.GEODETIC_SHAPE_ELLIPSOID);
 
         ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
