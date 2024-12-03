@@ -469,6 +469,8 @@ protected:
         LISTENER_CALL_STARTED = 0x00000004
     };
 
+    static constexpr const IMS_CHAR* WARNING_304 = "304 IMS-client \"Media Type Not Available\"";
+
 private:
     IMS_SINT32 m_nState;
     // Call state

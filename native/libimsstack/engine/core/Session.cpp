@@ -4051,30 +4051,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUpdate(IN ISipServerConnect
             return IMS_FAILURE;
         }
 
-        AString strWarning;
-
-        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
-        {
-            AString strUaString =
-                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
-
-            strUaString = strUaString.Replace(" ", "");
-
-            if (strUaString.GetLength() != 0)
-            {
-                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUaString.GetStr());
-            }
-            else
-            {
-                strWarning = "304 \"Media Type Not Available\"";
-            }
-        }
-        else
-        {
-            strWarning = "304 \"Media Type Not Available\"";
-        }
-
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)
@@ -5551,8 +5528,7 @@ IMS_RESULT Session::HandleRequestToInvite(IN ISipServerConnection* piSsc)
             return IMS_FAILURE;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
 
         if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
         {
@@ -5683,30 +5659,7 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
             return IMS_FAILURE;
         }
 
-        AString strWarning;
-
-        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
-        {
-            AString strUaString =
-                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
-
-            strUaString = strUaString.Replace(" ", "");
-
-            if (strUaString.GetLength() != 0)
-            {
-                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUaString.GetStr());
-            }
-            else
-            {
-                strWarning = "304 \"Media Type Not Available\"";
-            }
-        }
-        else
-        {
-            strWarning = "304 \"Media Type Not Available\"";
-        }
-
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)

@@ -1322,9 +1322,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
             return IMS_FAILURE;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
-
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)
@@ -1725,10 +1723,7 @@ void SessionEx::HandleRequestToPrack(IN ISipServerConnection* piSsc)
             return;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
-
-        // SIP_MESSAGE_MEDIATOR
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)
