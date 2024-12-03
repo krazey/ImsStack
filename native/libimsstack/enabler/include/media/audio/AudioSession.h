@@ -18,7 +18,6 @@
 #define AUDIO_SESSION_H_
 
 #include <AudioConfig.h>
-#include <MediaQualityThreshold.h>
 
 #include "ITimer.h"
 #include "BaseSession.h"
@@ -241,7 +240,6 @@ private:
     AudioConfiguration* GetConfiguration();
 
 protected:
-    MediaQualityThreshold m_objMediaQualityThreshold;
     ImsList<IMS_UINTP> m_listNegoId;
     IMS_SINT32 m_nNetworkToneTimer;
     IMS_SINT32 m_nRtpInactivityTimer;

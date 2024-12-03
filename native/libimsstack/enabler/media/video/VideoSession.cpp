@@ -37,7 +37,6 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoSession::VideoSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
-        m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_nCameraId(CAMERA_ID_NONE),
         m_nCameraZoom(-1),
         m_bPreviewSurfaceSet(IMS_FALSE),
@@ -97,16 +96,13 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         return IMS_FALSE;
     }
 
+    BaseSession::UpdateRtpConfig(pLocalProfile, pPeerProfile);
+
     VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
-    // Setting the network properties
-    UpdateLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->GetRtpMap().GetPayloadNumber());
     pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
-    // remote network parameters
-    pVideoConfig->setRemoteAddress(
-            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
-    pVideoConfig->setRemotePort(pPeerProfile->GetDataPort());
+
     if (GetConfiguration() != IMS_NULL)
     {
         pVideoConfig->setDscp(GetConfiguration()->GetVideoDscp());

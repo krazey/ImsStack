@@ -36,8 +36,7 @@ using namespace android::telephony::imsmedia;
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextSession::TextSession(IN IMS_SINT32 nSlotId) :
-        BaseSession(nSlotId),
-        m_objMediaQualityThreshold(MediaQualityThreshold())
+        BaseSession(nSlotId)
 {
     IMS_TRACE_I("+TextSession()", 0, 0, 0);
 
@@ -69,14 +68,10 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
         return IMS_FALSE;
     }
 
+    BaseSession::UpdateRtpConfig(pLocalProfile, pPeerProfile);
+
     TextConfig* pTextConfig = REINTERPRET_CAST(TextConfig*, m_pRtpConfig);
 
-    // Setting the network properties
-    UpdateLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
-    // remote network parameters
-    pTextConfig->setRemoteAddress(
-            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
-    pTextConfig->setRemotePort(pPeerProfile->GetDataPort());
     pTextConfig->setDscp(0); /** TODO: add interface to get text dscp value */
 
     IMS_SINT32 nTextDirection;
