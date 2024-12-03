@@ -95,7 +95,8 @@ private:
     inline IMS_BOOL IsSignaled() const { return m_bSignalFlag; }
 
     IMS_SINT32 RemoveMessages(IN_OUT ImsVector<ImsMessage>& objMsgQueue,
-            IN ImsMessage::IMessageCallback* piCallback, OUT ImsList<ImsMessage>* pImsMsgs);
+            IN IMS_SINT32 nStartingIndex, IN ImsMessage::IMessageCallback* piCallback,
+            OUT ImsList<ImsMessage>* pImsMsgs);
 
 private:
     // Name of this thread
@@ -115,6 +116,10 @@ private:
     // A message list that is currently processing
     ImsVector<ImsMessage> m_objProcessingMsgs;
     OsMutex m_objProcessingMsgsMutex;
+    // Track the index of the message being processed.
+    // Used as the starting position for m_objProcessingMsgs when requesting a removal operation
+    // for the messages that have already been posted but have not been processed.
+    IMS_SINT32 m_nProcessingMsgIndex;
 
     IRunnable* m_piListener;
 };
