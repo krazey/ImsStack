@@ -25,7 +25,6 @@ public:
     static const IMS_CHAR STR_199[];
     static const IMS_CHAR STR_ALERT_URN_CALL_WAITING[];
     static const IMS_CHAR STR_ANONYMOUS[];
-    static const IMS_CHAR STR_UNAVAILABLE[];
     static const IMS_CHAR STR_CONTENT_DISPOSITION_RECIPIENT_LIST[];
     static const IMS_CHAR STR_CONTENT_ID[];
     static const IMS_CHAR STR_CONTENT_TYPE_3GPP_IMS_XML[];

@@ -37,17 +37,17 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-static const IMS_CHAR SESSION_ID[] = "f81d4fae7dec11d0a76500a0c91e6bf6";
+LOCAL const IMS_CHAR SESSION_ID[] = "f81d4fae7dec11d0a76500a0c91e6bf6";
 
-static const AString CNV_HEADER_PASSED =
+LOCAL const AString CNV_HEADER_PASSED =
         "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
-static const AString CNV_HEADER_FAILED =
+LOCAL const AString CNV_HEADER_FAILED =
         "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Failed>";
-static const AString CNV_HEADER_PASSED_POTENTIAL_SPAM =
+LOCAL const AString CNV_HEADER_PASSED_POTENTIAL_SPAM =
         "potential spam <sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
-static const AString CNV_HEADER_NO_TN_VALIDATION =
+LOCAL const AString CNV_HEADER_NO_TN_VALIDATION =
         "<sip:01030993879@fakeims.google.com;verstat=No-TN-Validation>";
-static const AString CNV_HEADER_NONE = "<sip:01030993879@fakeims.google.com>";
+LOCAL const AString CNV_HEADER_NONE = "<sip:01030993879@fakeims.google.com>";
 
 namespace android
 {
@@ -320,6 +320,44 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallerIdUsingPaidByFallback)
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
             static_cast<IMS_SINT32>(OipType::RESTRICTED));
 
+    pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
+            static_cast<IMS_SINT32>(OipType::UNAVAILABLE));
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallerIdWithDisplayName)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT))
+            .WillByDefault(Return(static_cast<IMS_SINT32>(OipType::UNAVAILABLE)));
+
+    ImsList<AString> objFromHeaders;
+    objFromHeaders.Append(AString("\"Coin line/payphone\" <sip:anonymous@anonymous.invalid>"));
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objFromHeaders));
+    pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
+            static_cast<IMS_SINT32>(OipType::PAYPHONE));
+
+    objFromHeaders.Clear();
+    objFromHeaders.Append(
+            AString("\"Interaction with other service\" <sip:anonymous@anonymous.invalid>"));
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objFromHeaders));
+    pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
+            static_cast<IMS_SINT32>(OipType::UNAVAILABLE));
+
+    objFromHeaders.Clear();
+    objFromHeaders.Append(AString("\"Unavailable\" <sip:anonymous@anonymous.invalid>"));
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objFromHeaders));
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
             static_cast<IMS_SINT32>(OipType::UNAVAILABLE));
