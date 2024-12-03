@@ -418,13 +418,37 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupported)
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 }
 
-TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptable)
+TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithInvalidDescriptor)
 {
-    const AString strWarning("305 IMS-client Incompatible media format");
+    const AString strWarning("305 IMS-client \"Incompatible media format\"");
     IMS_SINT32 eStatusCode;
     AString strPhrase;
 
     CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_INVALID_DESCRIPTOR);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithIpMismatch)
+{
+    const AString strWarning("301 IMS-client \"Incompatible network address formats\"");
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_IP_MISMATCH);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithNoCodecMatched)
+{
+    const AString strWarning("304 IMS-client \"Media type not available\"");
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_NO_CODEC_MATCHED);
     EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
 
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);

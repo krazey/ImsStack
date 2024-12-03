@@ -711,13 +711,13 @@ void MessageFormatter::SetHeadersForReject(IN const CallReasonInfo& objReason)
             switch (objReason.nExtraCode)
             {
                 case MediaNego::ERROR_INVALID_DESCRIPTOR:
-                    strWarning = "305 IMS-client Incompatible media format";
+                    strWarning = "305 IMS-client \"Incompatible media format\"";
                     break;
                 case MediaNego::ERROR_IP_MISMATCH:
-                    strWarning = "301 IMS-client Incompatible network address formats";
+                    strWarning = "301 IMS-client \"Incompatible network address formats\"";
                     break;
                 default:
-                    strWarning = "304 IMS-client Media type not available";
+                    strWarning = "304 IMS-client \"Media type not available\"";
                     break;
             }
             m_objContext.GetMessageUtils().SetHeader(
