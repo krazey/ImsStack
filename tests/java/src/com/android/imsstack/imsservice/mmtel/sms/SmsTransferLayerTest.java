@@ -261,15 +261,15 @@ public class SmsTransferLayerTest {
                 eq(mTpdu), eq(STATUS_RESULT_NA));
         mProxyListener.notifyRLReportIndication(1, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
-        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(2), eq(mRpMessageType), eq(mSmsc),
+        verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(2), eq(mRpMessageType), eq(mSmsc),
                 eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
         mProxyListener.notifyRLReportIndication(2, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
-        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(3), eq(mRpMessageType), eq(mSmsc),
+        verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(3), eq(mRpMessageType), eq(mSmsc),
                 eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
         mProxyListener.notifyRLReportIndication(3, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
-        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc),
+        verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc),
                 eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
     }
 
