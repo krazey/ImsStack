@@ -17,4 +17,8 @@
 <carrier_config>
     <!-- Aos -->
     <int name="ims.reg_retry_305_policy_int" value="2"/>
+    <int-array name="ims.permanent_pdn_failure_int_array" num="2">
+        <item value="28"/>
+        <item value="33"/>
+    </int-array>
 </carrier_config>

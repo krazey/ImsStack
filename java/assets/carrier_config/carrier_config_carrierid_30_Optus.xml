@@ -23,6 +23,10 @@
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
+    <int-array name="ims.permanent_pdn_failure_int_array" num="2">
+        <item value="28"/>
+        <item value="33"/>
+    </int-array>
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
