@@ -309,7 +309,8 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
     {
         OaModel* pLatestOaModel = GetNegotiatedOaModel();
 
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
+        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE ||
+                pLatestOaModel->pNegotiatedProfile->GetDataPort() == 0)
         {
             return IMS_NULL;
         }

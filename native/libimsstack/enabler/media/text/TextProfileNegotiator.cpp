@@ -102,7 +102,6 @@ IMS_BOOL TextProfileNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferre
                 (pPeerProfile->GetPayloadList().GetSize() > 0) ? *pPeerProfile : *pLocalProfile;
 
         (*pNegotiatedProfile)->SetIpAddress(pLocalProfile->GetIpAddress());
-        (*pNegotiatedProfile)->SetDataPort(0);
     }
     else
     {
@@ -114,10 +113,10 @@ IMS_BOOL TextProfileNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferre
             **pNegotiatedProfile = *pLocalProfile;
             bRet = IMS_TRUE;
         }
-
-        (*pNegotiatedProfile)->SetDataPort(0);
-        (*pNegotiatedProfile)->SetDirection(MEDIA_DIRECTION_INVALID);
     }
+
+    (*pNegotiatedProfile)->SetDataPort(0);
+    (*pNegotiatedProfile)->SetDirection(MEDIA_DIRECTION_INVALID);
 
     return bRet;
 }
