@@ -72,17 +72,16 @@ public:
     MockIMtcService objService;
     MockISession objSession;
     MockISubscriberConfig objSubscriberConfig;
-    MockMtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
     MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationProxy = new MockMtcConfigurationProxy();
-        pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
+        pSupplementaryService = new MtcSupplementaryService(objContext, objConfigurationProxy);
 
-        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
@@ -104,7 +103,6 @@ protected:
     virtual void TearDown() override
     {
         delete pFormatter;
-        delete pConfigurationProxy;
         delete pSupplementaryService;
     }
 
@@ -145,11 +143,11 @@ TEST_F(MessageFormatterTest, FormStartMessageFailureCase)
 
 TEST_F(MessageFormatterTest, FormStartMessageWithoutGeolocation)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
                     static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE)))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
                     static_cast<IMS_SINT32>(
                             ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR)))
@@ -162,11 +160,11 @@ TEST_F(MessageFormatterTest, FormStartMessageWithoutGeolocation)
 
 TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
                     static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE)))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
                     static_cast<IMS_SINT32>(
                             ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR)))
@@ -264,7 +262,7 @@ TEST_F(MessageFormatterTest, FormProvisionalResponseMessageNormalCase)
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
                     static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::PROVISIONAL_RESPONSE)))
             .WillByDefault(Return(IMS_TRUE));
@@ -353,7 +351,7 @@ TEST_F(MessageFormatterTest, FormAcceptMessageNormalCase)
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
                     static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_SUCCESS_RESPONSE)))
             .WillByDefault(Return(IMS_TRUE));
@@ -382,7 +380,7 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithCodeUserDecline)
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
                     static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_FAILURE_RESPONSE)))
             .WillByDefault(Return(IMS_TRUE));
@@ -557,7 +555,7 @@ TEST_F(MessageFormatterTest, FormTerminateMessageFailureCase)
 TEST_F(MessageFormatterTest, FormTerminateMessageAddCarrierSpecificHeaderByConfig)
 {
     const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                     MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));
@@ -669,10 +667,10 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
     pFormatter->FormStartMessage(CallType::VOIP);
 
     pSupplementaryService->Add(SuppType::CALLER_ID, CALLERID_RESTRICTED);
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
             .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_HEADER));
     pFormatter->FormStartMessage(CallType::VOIP);
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
             .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_NONE));
     pFormatter->FormStartMessage(CallType::VOIP);
 
@@ -703,7 +701,7 @@ TEST_F(MessageFormatterTest, SetReasonHeader)
     pFormatter->FormTerminateMessage(objReasonInfo);
 
     const AString strReason = "TEST_REASON";
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING))
             .WillByDefault(Return(strReason));
 
@@ -712,11 +710,11 @@ TEST_F(MessageFormatterTest, SetReasonHeader)
 
 TEST_F(MessageFormatterTest, SetCarrierSpecificHeaders)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                     MessageUtil::STR_P_TTA_VOLTE_INFO))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                     MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));
@@ -762,7 +760,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
 
     EXPECT_EQ(GetRejectStatusCode(CODE_NONE), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_UNSPECIFIED), SipStatusCode::SC_480);
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             GetInt(ConfigVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT))
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_DECLINE), nTestStatusCode);
@@ -789,7 +787,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_488);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_606),
             SipStatusCode::SC_606);
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             GetInt(ConfigVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT))
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
@@ -801,7 +799,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_580);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_INIT_FAILED), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_NOT_ACCEPTABLE), SipStatusCode::SC_488);
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             GetInt(ConfigVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT))
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_TIMEOUT_NO_ANSWER), nTestStatusCode);
@@ -825,7 +823,7 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING,
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING};
 
-    ON_CALL(*pConfigurationProxy, GetString(AnyOfArray(expectedKeys)))
+    ON_CALL(objConfigurationProxy, GetString(AnyOfArray(expectedKeys)))
             .WillByDefault(Return(AString(pszTestPhrase)));
 
     EXPECT_TRUE(GetRejectPhrase(CODE_NONE).GetLength() < 1);
@@ -839,7 +837,7 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
     EXPECT_STREQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE).GetStr(), pszTestPhrase);
 }
 
-TEST_F(MessageFormatterTest, GetRejectPhraseForBusySpecialCase)
+TEST_F(MessageFormatterTest, GetRejectPhraseForBusyRttOn)
 {
     CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_RTT_ON);
 
@@ -848,6 +846,20 @@ TEST_F(MessageFormatterTest, GetRejectPhraseForBusySpecialCase)
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 
     EXPECT_STREQ("RTT on", strPhrase.GetStr());
+}
+
+TEST_F(MessageFormatterTest, GetRejectPhraseForBusyVowifiOff)
+{
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING))
+            .WillByDefault(Return(AString("VoWiFi OFF")));
+    CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF);
+
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+
+    EXPECT_STREQ("VoWiFi OFF", strPhrase.GetStr());
 }
 
 TEST_F(MessageFormatterTest, SetUpdateReason)
@@ -916,7 +928,7 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersB
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwConfiguration)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                     MessageUtil::STR_REASON_USER_SESSIONEXPIRED))
             .WillByDefault(Return(IMS_TRUE));
@@ -947,7 +959,7 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwCo
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrConfiguration)
 {
     const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                     MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));
@@ -986,7 +998,7 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrCon
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetPrivateHeaderSetsPrivateHeaderByKrConfiguration)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                     MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));

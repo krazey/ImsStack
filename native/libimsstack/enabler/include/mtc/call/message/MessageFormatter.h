@@ -109,6 +109,7 @@ private:
     void GetTerminateReason(IN const CallReasonInfo& objReason, OUT AString& strReason);
     AString GetTerminateReason(IN TerminateType eType);
     AString GetRejectPhrase(IN RejectType eType);
+    AString GetRejectPhraseForLocalCallBusy(IN IMS_SINT32 nExtraCode);
 
     IMS_RESULT InitVariables(IN FormType eFormType);
     IMS_RESULT SetNextMessage();
