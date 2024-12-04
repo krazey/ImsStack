@@ -252,7 +252,7 @@
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="2"/>
 
     <!-- MTC emergency call -->
-    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
+    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="false"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="25000"/>
