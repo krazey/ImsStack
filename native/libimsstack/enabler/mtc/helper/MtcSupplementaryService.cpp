@@ -41,6 +41,9 @@ LOCAL const IMS_CHAR STR_VERSTAT[] = "verstat";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_PASSED[] = "TN-Validation-Passed";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_FAILED[] = "TN-Validation-Failed";
 LOCAL const IMS_CHAR STR_VERSTAT_POTENTIAL_SPAM[] = "Potential Spam";
+LOCAL const IMS_CHAR STR_COIN_LINE_OR_PAYPHONE[] = "Coin line/payphone";
+LOCAL const IMS_CHAR STR_INTERACTION_WITH_OTHER_SERVICE[] = "Interaction with other service";
+LOCAL const IMS_CHAR STR_UNAVAILABLE[] = "Unavailable";
 
 PUBLIC
 MtcSupplementaryService::MtcSupplementaryService(IN IMtcCallContext& objContext,
@@ -630,15 +633,22 @@ OipType MtcSupplementaryService::GetOipTypeByHeader(
     {
         // only PAID can be multiple.
         SipAddress objAddr(objHeaders.GetAt(i));
-        if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE) ||
-                objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE))
+        const AString& strDisplayName = objAddr.GetDisplayName();
+        if (strDisplayName.EqualsIgnoreCase(STR_COIN_LINE_OR_PAYPHONE))
+        {
+            eOipType = OipType::PAYPHONE;
+            break;
+        }
+
+        if (strDisplayName.EqualsIgnoreCase(STR_INTERACTION_WITH_OTHER_SERVICE) ||
+                strDisplayName.EqualsIgnoreCase(STR_UNAVAILABLE))
         {
             eOipType = static_cast<OipType>(
                     m_objConfigurationProxy.GetInt(ConfigVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT));
             break;
         }
 
-        if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
+        if (strDisplayName.EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
                 objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS))
         {
             eOipType = OipType::RESTRICTED;

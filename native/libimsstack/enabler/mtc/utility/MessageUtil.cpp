@@ -20,7 +20,6 @@
 const IMS_CHAR MessageUtil::STR_199[] = "199";
 const IMS_CHAR MessageUtil::STR_ALERT_URN_CALL_WAITING[] = "<urn:alert:service:call-waiting>";
 const IMS_CHAR MessageUtil::STR_ANONYMOUS[] = "Anonymous";
-const IMS_CHAR MessageUtil::STR_UNAVAILABLE[] = "unavailable";
 const IMS_CHAR MessageUtil::STR_CONTENT_DISPOSITION_RECIPIENT_LIST[] = "recipient-list";
 const IMS_CHAR MessageUtil::STR_CONTENT_ID[] = "Content-ID";
 const IMS_CHAR MessageUtil::STR_CONTENT_TYPE_3GPP_IMS_XML[] = "3gpp-ims+xml";

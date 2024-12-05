@@ -78,6 +78,8 @@
     <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
     <int name="imsvoice.session_refresh_method_int" value="1"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
+    <int name="imsvoice.oip_type_for_unavailable_int" value="5"/>
+    <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
     <int name="imsvoice.mo_call_request_timeout_millis_int" value="-1"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="false"/>
     <boolean name="imsemergency.emergency_callback_mode_supported_bool" value="true"/>
