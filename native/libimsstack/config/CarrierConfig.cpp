@@ -1126,6 +1126,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE
         KEY_IMS_EMERGENCY_PREFIX "reject_code_require_temp_failure_int_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "reject_code_require_perm_failure_int_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "policy_for_emergency_urn_int_array";
 
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

@@ -289,6 +289,7 @@ public:
         static const IMS_CHAR KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[];
         static const IMS_CHAR KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY[];
         static const IMS_CHAR KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY[];
+        static const IMS_CHAR KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[];
 
         // Preferred Emergency Registration Type
         enum
