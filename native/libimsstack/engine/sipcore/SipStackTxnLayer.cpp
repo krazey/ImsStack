@@ -22,7 +22,6 @@
 #include "SipStackState.h"
 #include "SipStackTxnLayer.h"
 #include "SipTransactionTimer.h"
-#include "SipTxnContextData.h"
 
 // Implements the function prototypes for SIP stack transaction layer
 LOCAL SIP_BOOL SIPStackTxnLayer_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
@@ -100,13 +99,8 @@ LOCAL SIP_BOOL SIPStackTxnLayer_ReleaseTransaction(IN SIP_VOID* pvInTxnKey, IN S
 LOCAL SIP_VOID* SIPStackTxnLayer_CreateAckRequest(
         IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData)
 {
-    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
-            : IMS_NULL;
-    SipClientTransactionState* pCtState = (pTxnContextData != IMS_NULL)
-            ? reinterpret_cast<SipClientTransactionState*>(pTxnContextData->GetTxnState())
-            : IMS_NULL;
+    SipClientTransactionState* pCtState = IMS_NULL;
+    SipStack::GetTransactionState(*pUserData, pCtState);
 
     if (pCtState == IMS_NULL)
     {
@@ -120,12 +114,8 @@ LOCAL SIP_VOID* SIPStackTxnLayer_CreateAckRequest(
 LOCAL SIP_VOID SIPStackTxnLayer_PreProcessMessageSentByStack(
         IN SIP_VOID* pvSipMsg, IN ISipUserData* pUserData)
 {
-    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
-            : IMS_NULL;
-    SipTransactionState* pTState =
-            (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL;
+    SipTransactionState* pTState = IMS_NULL;
+    SipStack::GetTransactionState(*pUserData, pTState);
 
     if (pTState == IMS_NULL)
     {
@@ -138,12 +128,8 @@ LOCAL SIP_VOID SIPStackTxnLayer_PreProcessMessageSentByStack(
 LOCAL SIP_VOID SIPStackTxnLayer_PostProcessMessageSentByStack(IN SIP_VOID* pvSipMsg,
         IN SIP_CHAR* pcBuffer, IN SIP_UINT32 uiBufferLen, IN ISipUserData* pUserData)
 {
-    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
-            : IMS_NULL;
-    SipTransactionState* pTState =
-            (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL;
+    SipTransactionState* pTState = IMS_NULL;
+    SipStack::GetTransactionState(*pUserData, pTState);
 
     if (pTState == IMS_NULL)
     {
@@ -163,36 +149,34 @@ LOCAL SIP_VOID SIPStackTxnLayer_DisplayTxnKey(IN SIP_VOID* pvTxnKey)
 LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 nTimerType)
 {
     SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTransactionState* pTState = IMS_NULL;
+    SipStack::GetTransactionState(*pUserData, pTState);
 
     // Clear user data to avoid double memory free by aborting the transaction
     // when SIP transaction timer is expired.
     pUserData->SetUserData(IMS_NULL);
 
     if ((nTimerType == SipTxn::TIMER_D) || (nTimerType == SipTxn::TIMER_I) ||
-            (nTimerType == SipTxn::TIMER_J) || (nTimerType == SipTxn::TIMER_K))
+            (nTimerType == SipTxn::TIMER_J) || (nTimerType == SipTxn::TIMER_K) ||
+            (nTimerType == SipTxn::TIMER_M))
     {
-        // CSM moving from "Completed" to "Terminated".
+        // CSM moving from "Completed"/"Accepted" to "Terminated".
         // This is a normal case and ignore these cases.
+
+        if (nTimerType == SipTxn::TIMER_M && pTState != IMS_NULL)
+        {
+            SipClientTransactionState* pCtState = static_cast<SipClientTransactionState*>(pTState);
+            pCtState->ClearAllForkedTransactions();
+        }
         SipStack::DestroyTxnContext(pTxnContext);
         return;
     }
 
     SipTransactionTimer::TimerExpired(nTimerType);
 
-    if (pTxnContext != IMS_NULL)
+    if (pTState != IMS_NULL)
     {
-        SipTxnContextData* pTxnContextData =
-                static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData);
-
-        if (pTxnContextData != IMS_NULL)
-        {
-            SipTransactionState* pTState = pTxnContextData->GetTxnState();
-
-            if (pTState != IMS_NULL)
-            {
-                pTState->NotifyTimerExpired();
-            }
-        }
+        pTState->NotifyTimerExpired();
     }
 
     // Free the event context

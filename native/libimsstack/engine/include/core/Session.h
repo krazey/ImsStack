@@ -34,7 +34,6 @@ class IOnSessionListener;
 class IReasonHeaderSetter;
 class IRefreshListener;
 class ISessionParameter;
-class ISipAckPackage;
 class Media;
 class Publication;
 class Reference;
@@ -282,8 +281,6 @@ private:
         m_bSessionUpdateNotificationInProgress = bInProgress;
     }
 
-    // ACK_RETRANSMISSION_TO_2XX
-    void RemoveStrayAcks();
     SipMethod SelectUpdateMethod() const;
 
     // For UAC behavior
@@ -509,8 +506,6 @@ private:
     // For call transfer/hold/ ...
     IReferredMessageListener* m_piReferredMessageListener;
     RetryTaskHelper* m_pRetransmissionTask;
-    // ACK_RETRANSMISSION_TO_2XX
-    ISipAckPackage* m_piAckPackage;
     // Remote session id for 3rd-party call control
     AString m_strSessionIdForCallControl;
     // For internal BYE transaction

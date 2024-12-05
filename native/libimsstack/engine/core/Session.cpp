@@ -26,7 +26,6 @@
 #include "Capabilities.h"
 #include "IOnSessionListener.h"
 #include "IReasonHeaderSetter.h"
-#include "ISipAckPackage.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -88,7 +87,6 @@ Session::Session(IN Service* pService) :
         m_pRefreshHelper(IMS_NULL),
         m_piReferredMessageListener(IMS_NULL),
         m_pRetransmissionTask(IMS_NULL),
-        m_piAckPackage(IMS_NULL),
         m_strSessionIdForCallControl(AString::ConstNull()),
         m_piSccBye(IMS_NULL),
         m_objPreviousCallerPreference(ImsList<AString>()),
@@ -112,12 +110,6 @@ PUBLIC VIRTUAL Session::~Session()
     {
         delete m_pRetransmissionTask;
         m_pRetransmissionTask = IMS_NULL;
-    }
-
-    if (m_piAckPackage != IMS_NULL)
-    {
-        m_piAckPackage->Destroy();
-        m_piAckPackage = IMS_NULL;
     }
 
     if (m_pRemoteMediaCapabilities != IMS_NULL)
@@ -1963,9 +1955,6 @@ IMS_RESULT Session::Update()
         return IMS_FAILURE;
     }
 
-    // ACK_RETRANSMISSION_TO_2XX
-    RemoveStrayAcks();
-
     SipMethod objMethod = SelectUpdateMethod();
 
     if (objMethod.Equals(SipMethod::INVITE))
@@ -3436,9 +3425,6 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
     switch (objMethod.ToInt())
     {
         case SipMethod::INVITE:
-            // ACK_RETRANSMISSION_TO_2XX
-            RemoveStrayAcks();
-
             if (HandleRequestToInviteWithinDialog(piSsc) != IMS_SUCCESS)
             {
                 return IMS_FALSE;
@@ -3485,9 +3471,6 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
             }
             break;
         case SipMethod::UPDATE:
-            // ACK_RETRANSMISSION_TO_2XX
-            RemoveStrayAcks();
-
             if (HandleRequestToUpdate(piSsc) != IMS_SUCCESS)
             {
                 return IMS_FALSE;
@@ -6283,16 +6266,6 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
     return IMS_SUCCESS;
 }
 
-// ACK_RETRANSMISSION_TO_2XX
-PRIVATE
-void Session::RemoveStrayAcks()
-{
-    if (m_piAckPackage != IMS_NULL)
-    {
-        m_piAckPackage->RemoveStrayAcks();
-    }
-}
-
 PRIVATE
 SipMethod Session::SelectUpdateMethod() const
 {
@@ -6415,9 +6388,6 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /*= SipMethod::I
         // UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
     }
 
-    // ACK_RETRANSMISSION_TO_2XX
-    RemoveStrayAcks();
-
     return IMS_SUCCESS;
 }
 
@@ -6528,24 +6498,6 @@ IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT
     else
     {
         RestoreOfferAnswerState();
-    }
-
-    // ACK_RETRANSMISSION_TO_2XX
-    if (SipStatusCode::IsFinalSuccess(nStatusCode))
-    {
-        if (m_piAckPackage == IMS_NULL)
-        {
-            m_piAckPackage = piScc->GrabAck();
-        }
-        else
-        {
-            ISipAckPackage* piTempPackage = piScc->GrabAck();
-
-            if ((piTempPackage != IMS_NULL) && (piTempPackage != m_piAckPackage))
-            {
-                IMS_TRACE_D("Session :: ACK package is different (fatal error)", 0, 0, 0);
-            }
-        }
     }
 
     return IMS_SUCCESS;

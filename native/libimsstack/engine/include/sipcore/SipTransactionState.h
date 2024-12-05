@@ -55,6 +55,7 @@ public:
     virtual IMS_RESULT RetransmitMessage();
     virtual IMS_BOOL UpdateTransportDetails();
 
+    inline IMS_SINT32 GetType() const { return m_nType; }
     inline SipDialogEx* GetDialog() const { return m_pDialogEx.Get(); }
     inline ::SipMessage* GetMessage() const { return m_pSipMsg; }
     inline ::SipMessage* GetLastMessage() const { return m_pLastSipMsg; }
