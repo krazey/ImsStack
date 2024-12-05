@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@
 #include "PlatformContext.h"
 #include "TestThreadService.h"
 #include "helper/OperationAsyncRunner.h"
+#include "helper/OperationAsyncRunnerManager.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::Mock;
 
 namespace android
 {
@@ -40,15 +42,16 @@ public:
     inline ~TestBaseThread() {}
 };
 
-class OperationAsyncRunnerTest : public ::testing::Test
+class OperationAsyncRunnerManagerTest : public ::testing::Test
 {
 public:
-    inline OperationAsyncRunnerTest() :
-            pThreadService(new TestThreadService())
+    inline OperationAsyncRunnerManagerTest() :
+            pThreadService(new TestThreadService()),
+            objManager(SLOT_ID)
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
     }
-    inline ~OperationAsyncRunnerTest()
+    inline ~OperationAsyncRunnerManagerTest()
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
@@ -56,6 +59,7 @@ public:
 
 protected:
     TestThreadService* pThreadService;
+    OperationAsyncRunnerManager objManager;
 
     virtual void SetUp() override
     {
@@ -74,43 +78,65 @@ protected:
     }
 };
 
-TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
+TEST_F(OperationAsyncRunnerManagerTest, RunDoesNothingIfOwnerIsNull)
 {
-    EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_));
-
-    IMS_BOOL bUpdated = IMS_FALSE;
-    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
-    pRunner->SetOperation(
-            [&]()
+    EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_)).Times(0);
+    objManager.Run(IMS_NULL,
+            []()
             {
-                bUpdated = IMS_TRUE;
-            },
-            [&]()
-            {
-                delete pRunner;
             });
-
-    EXPECT_FALSE(bUpdated);
-
-    ImsMessage objMessage(0, 0, 0);
-    pRunner->MessageCallback_OnMessage(objMessage);
-    EXPECT_TRUE(bUpdated);
 }
 
-TEST_F(OperationAsyncRunnerTest, DestructorRemovesMessage)
+TEST_F(OperationAsyncRunnerManagerTest, RunDoesNothingIfOperationIsNull)
 {
-    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
-    pRunner->SetOperation(
+    EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_)).Times(0);
+    objManager.Run(this, IMS_NULL);
+}
+
+TEST_F(OperationAsyncRunnerManagerTest, RunCreatesOperationAsyncRunner)
+{
+    EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_));
+    objManager.Run(this,
             []()
             {
-            },
+            });
+}
+
+TEST_F(OperationAsyncRunnerManagerTest, ReleaseCancelsOperation)
+{
+    OperationAsyncRunnerManager* pManager = new OperationAsyncRunnerManager(SLOT_ID);
+    pManager->Run(this,
+            []()
+            {
+            });
+    pManager->Run(this,
             []()
             {
             });
 
-    EXPECT_CALL(pThreadService->GetMockThread(), RemoveMessages(pRunner, _));
+    EXPECT_CALL(pThreadService->GetMockThread(), RemoveMessages(_, _)).Times(2);
 
-    delete pRunner;
+    pManager->Release(this);
+
+    Mock::VerifyAndClearExpectations(pThreadService);
+    delete pManager;
+}
+
+TEST_F(OperationAsyncRunnerManagerTest, DestructorCancelsOperations)
+{
+    OperationAsyncRunnerManager* pManager = new OperationAsyncRunnerManager(SLOT_ID);
+    pManager->Run(reinterpret_cast<void*>(0x01),
+            []()
+            {
+            });
+    pManager->Run(reinterpret_cast<void*>(0x02),
+            []()
+            {
+            });
+
+    EXPECT_CALL(pThreadService->GetMockThread(), RemoveMessages(_, _)).Times(2);
+
+    delete pManager;
 }
 
 }  // namespace android

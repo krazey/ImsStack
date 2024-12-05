@@ -1234,15 +1234,15 @@ TEST_F(MtcCallTest, GetEmergencyServiceManagerCallsMtcContext)
     objCall.GetEmergencyServiceManager();
 }
 
-TEST_F(MtcCallTest, GetAsyncRunnerCallsMtcContext)
+TEST_F(MtcCallTest, RunAsyncOperationCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
     std::function<void()> objAnyOperation;
 
-    EXPECT_CALL(objContext, GetAsyncRunner(_)).Times(1);
+    EXPECT_CALL(objContext, RunAsyncOperation(this, _)).Times(1);
 
-    objCall.GetAsyncRunner(objAnyOperation);
+    objCall.RunAsyncOperation(this, objAnyOperation);
 }
 
 TEST_F(MtcCallTest, GetMessageUtilsCallsMtcContext)

@@ -49,6 +49,7 @@ EmergencyServiceController::EmergencyServiceController(
 PUBLIC VIRTUAL EmergencyServiceController::~EmergencyServiceController()
 {
     IMS_TRACE_I("~EmergencyServiceController", 0, 0, 0);
+    m_objContext.ReleaseAsyncOperation(this);
     RemoveListeners();
 }
 
@@ -243,7 +244,7 @@ PRIVATE void EmergencyServiceController::Finish()
 {
     Stop18xWaitingTimer();
 
-    m_objContext.GetAsyncRunner(
+    m_objContext.RunAsyncOperation(this,
             [&]()
             {
                 m_objServiceManager.StopOpen(IMS_FALSE);
@@ -252,7 +253,7 @@ PRIVATE void EmergencyServiceController::Finish()
 
 PRIVATE void EmergencyServiceController::FinishAndRetryOverImsPdn()
 {
-    m_objContext.GetAsyncRunner(
+    m_objContext.RunAsyncOperation(this,
             [&]()
             {
                 m_objServiceManager.StartOpen(ServiceType::NORMAL);

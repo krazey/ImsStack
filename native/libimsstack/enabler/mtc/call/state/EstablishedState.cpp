@@ -56,7 +56,10 @@ EstablishedState::EstablishedState(IN IMtcCallContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL EstablishedState::~EstablishedState() {}
+PUBLIC VIRTUAL EstablishedState::~EstablishedState()
+{
+    m_objContext.ReleaseAsyncOperation(this);
+}
 
 PUBLIC VIRTUAL void EstablishedState::OnEnter()
 {
@@ -70,7 +73,7 @@ PUBLIC VIRTUAL void EstablishedState::OnEnter()
 
     if (ShouldPendOperation())
     {
-        m_objContext.GetAsyncRunner(
+        m_objContext.RunAsyncOperation(this,
                 [&]()
                 {
                     m_objContext.RunPendingOperationIfPossible();
@@ -350,7 +353,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Refresh_NotifyCompleted(
         IN ISipClientConnection* /*piScc*/)
 {
     IMS_TRACE_D("Refresh_NotifyCompleted", 0, 0, 0);
-    m_objContext.GetAsyncRunner(
+    m_objContext.RunAsyncOperation(this,
             [&]()
             {
                 m_objContext.RunPendingOperationIfPossible();
@@ -483,7 +486,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnTimerExpired(IN IMS_SINT32 nTyp
     switch (nType)
     {
         case TIMER_DELAY_UPDATE_AFTER_CONNECTED:
-            m_objContext.GetAsyncRunner(
+            m_objContext.RunAsyncOperation(this,
                     [&]()
                     {
                         m_objContext.RunPendingOperationIfPossible();

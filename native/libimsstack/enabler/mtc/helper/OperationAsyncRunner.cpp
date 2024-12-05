@@ -25,12 +25,40 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-OperationAsyncRunner::OperationAsyncRunner(
-        IN IMS_SINT32 nSlotId, IN std::function<void()> objOperation) :
+OperationAsyncRunner::OperationAsyncRunner(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_objOperation(std::move(objOperation))
+        m_objOperation(IMS_NULL),
+        m_objRemoveCallback(IMS_NULL)
 {
     IMS_TRACE_D("+OperationAsyncRunner", 0, 0, 0);
+}
+
+PUBLIC
+OperationAsyncRunner::~OperationAsyncRunner()
+{
+    IMS_TRACE_D("~OperationAsyncRunner", 0, 0, 0);
+
+    BaseThread* pThread =
+            ImsProcess::GetInstance()->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId));
+    if (pThread != IMS_NULL)
+    {
+        IThread* piThread = pThread->GetThread();
+        if (piThread != IMS_NULL)
+        {
+            piThread->RemoveMessages(this);
+        }
+    }
+    m_objOperation = {};
+}
+
+PUBLIC
+void OperationAsyncRunner::SetOperation(
+        IN std::function<void()> objOperation, std::function<void()> objRemoveCallback)
+{
+    IMS_ASSERT(objOperation);
+    IMS_ASSERT(objRemoveCallback);
+    m_objOperation = std::move(objOperation);
+    m_objRemoveCallback = std::move(objRemoveCallback);
 
     ImsMessage objMsg(0, 0, 0, this);
     BaseThread* pThread =
@@ -46,23 +74,12 @@ OperationAsyncRunner::OperationAsyncRunner(
     }
 
     IMS_TRACE_E(0, "Thread is null", 0, 0, 0);
-    delete this;
-}
-
-PRIVATE
-OperationAsyncRunner::~OperationAsyncRunner()
-{
-    IMS_TRACE_D("~OperationAsyncRunner", 0, 0, 0);
-
-    m_objOperation = {};
+    m_objRemoveCallback();
 }
 
 PUBLIC VIRTUAL void OperationAsyncRunner::MessageCallback_OnMessage(IN ImsMessage& /*objMsg*/)
 {
-    if (m_objOperation)
-    {
-        m_objOperation();
-    }
-
-    delete this;
+    IMS_TRACE_D("MessageCallback_OnMessage", 0, 0, 0);
+    m_objOperation();
+    m_objRemoveCallback();
 }

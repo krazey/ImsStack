@@ -223,9 +223,13 @@ public:
     {
         return m_objContext.GetEmergencyServiceManager();
     }
-    inline OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override
+    inline void RunAsyncOperation(IN void* pOwner, IN std::function<void()> objOperation) override
     {
-        return m_objContext.GetAsyncRunner(objOperation);
+        m_objContext.RunAsyncOperation(pOwner, objOperation);
+    }
+    inline void ReleaseAsyncOperation(IN void* pOwner) override
+    {
+        m_objContext.ReleaseAsyncOperation(pOwner);
     }
     inline IMessageUtils& GetMessageUtils() override { return m_objContext.GetMessageUtils(); }
     inline std::unique_ptr<MtcTimerWrapper> CreateTimer() override

@@ -34,6 +34,7 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialogevent/MultiEndpointManager.h"
 #include "helper/CallStateProxy.h"
+#include "helper/OperationAsyncRunnerManager.h"
 #include "helper/PassiveTimerHolder.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "utility/MessageUtils.h"
@@ -97,7 +98,11 @@ public:
     inline IConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
     IEctManager& GetEctManager() override;
     IMtcEmergencyServiceManager& GetEmergencyServiceManager() override;
-    OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
+    void RunAsyncOperation(IN void* pOwner, IN std::function<void()> objOperation) override;
+    inline void ReleaseAsyncOperation(IN void* pOwner) override
+    {
+        m_objOperationAsyncRunnerManager.Release(pOwner);
+    }
     std::unique_ptr<MtcTimerWrapper> CreateTimer() override;
     inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; }
     inline IPassiveTimerHolder& GetPassiveTimerHolder() override { return m_objPassiveTimerHolder; }
@@ -120,6 +125,7 @@ protected:
 protected:
     IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy m_objConfigurationProxy;
+    OperationAsyncRunnerManager m_objOperationAsyncRunnerManager;
     ImsList<IMtcService*> m_lstServices;
     MtcDialingPlan m_objDialingPlan;
     MtcCallManager m_objCallManager;

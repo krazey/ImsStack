@@ -37,6 +37,7 @@ NormalServiceController::NormalServiceController(
 PUBLIC VIRTUAL NormalServiceController::~NormalServiceController()
 {
     IMS_TRACE_I("~NormalServiceController", 0, 0, 0);
+    m_objContext.ReleaseAsyncOperation(this);
     RemoveListeners();
 }
 
@@ -99,7 +100,7 @@ void NormalServiceController::Notify(IN EmergencyServiceState eState, IN IMS_SIN
 
 PRIVATE void NormalServiceController::Finish()
 {
-    m_objContext.GetAsyncRunner(
+    m_objContext.RunAsyncOperation(this,
             [&]()
             {
                 m_objServiceManager.StopOpen(IMS_FALSE);

@@ -252,18 +252,20 @@ TEST_F(MtcAppTest, GetConferenceManagerAfterConstructor)
     ASSERT_NE(piConferenceManager, nullptr);
 }
 
-TEST_F(MtcAppTest, GetAsyncRunnerAfterConstructor)
+TEST_F(MtcAppTest, RunAsyncOperationAfterConstructor)
 {
     // null case
-    ASSERT_EQ(nullptr, pMtcApp->GetAsyncRunner(nullptr));
+    pMtcApp->RunAsyncOperation(IMS_NULL, nullptr);
+    pMtcApp->RunAsyncOperation(IMS_NULL,
+            []()
+            {
+            });
 
     // non-null case
-    OperationAsyncRunner* pRunner = pMtcApp->GetAsyncRunner(
-            [&]()
+    pMtcApp->RunAsyncOperation(this,
+            []()
             {
-                // do nothing
             });
-    ASSERT_NE(pRunner, nullptr);
 
     // Here, BaseThread is null so OperationAsyncRunner is deleted immediately
     // so pRunner is Dangling pointer.

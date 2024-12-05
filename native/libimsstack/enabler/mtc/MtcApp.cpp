@@ -40,7 +40,7 @@
 #include "helper/CallStateProxy.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "helper/MtcTimerWrapper.h"
-#include "helper/OperationAsyncRunner.h"
+#include "helper/OperationAsyncRunnerManager.h"
 #include "helper/PassiveTimerHolder.h"
 #include "utility/MessageUtils.h"
 #include <functional>
@@ -55,6 +55,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTC_APP_NAME),
         m_nSlotId(nSlotId),
         m_objConfigurationProxy(MtcConfigurationProxy()),
+        m_objOperationAsyncRunnerManager(nSlotId),
         m_lstServices(ImsList<IMtcService*>()),
         m_objDialingPlan(MtcDialingPlan(
                 *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId))),
@@ -166,14 +167,10 @@ PUBLIC VIRTUAL IMtcEmergencyServiceManager& MtcApp::GetEmergencyServiceManager()
     return *m_pEmergencyServiceManager.get();
 }
 
-PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<void()> objOperation)
+PUBLIC VIRTUAL void MtcApp::RunAsyncOperation(
+        IN void* pOwner, IN std::function<void()> objOperation)
 {
-    if (objOperation == nullptr)
-    {
-        return IMS_NULL;
-    }
-    // object is deleted by itself
-    return new OperationAsyncRunner(m_nSlotId, objOperation);
+    m_objOperationAsyncRunnerManager.Run(pOwner, objOperation);
 }
 
 PUBLIC VIRTUAL std::unique_ptr<MtcTimerWrapper> MtcApp::CreateTimer()

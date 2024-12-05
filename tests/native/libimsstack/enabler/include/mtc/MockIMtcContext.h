@@ -64,7 +64,8 @@ public:
     MOCK_METHOD(IConferenceManager&, GetConferenceManager, (), (override));
     MOCK_METHOD(IEctManager&, GetEctManager, (), (override));
     MOCK_METHOD(IMtcEmergencyServiceManager&, GetEmergencyServiceManager, (), (override));
-    MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
+    MOCK_METHOD(void, RunAsyncOperation, (IN void*, IN std::function<void()>), (override));
+    MOCK_METHOD(void, ReleaseAsyncOperation, (IN void*), (override));
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
     MOCK_METHOD(std::unique_ptr<MtcTimerWrapper>, CreateTimer, (), (override));
     MOCK_METHOD(IPassiveTimerHolder&, GetPassiveTimerHolder, (), (override));

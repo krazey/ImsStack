@@ -142,15 +142,12 @@ TEST_F(MtcCallControllerTest, AttachAttachesTargetCall)
 TEST_F(MtcCallControllerTest, DetachInvokesRemoveCallUsingAsyncRunner)
 {
     CallKey nCallKey = 1;
-
-    EXPECT_CALL(objContext, GetAsyncRunner(_))
+    EXPECT_CALL(objContext, RunAsyncOperation(_, _))
             .WillOnce(Invoke(
-                    [](std::function<void()> objOperation)
+                    []([[maybe_unused]] void* pOwner, std::function<void()> objOperation)
                     {
                         objOperation();
-                        return new OperationAsyncRunner(SLOT_ID, objOperation);
                     }));
-
     EXPECT_CALL(objCallManager, RemoveCall(nCallKey)).Times(1);
 
     pCallController->Detach(nCallKey);
@@ -298,12 +295,11 @@ TEST_F(MtcCallControllerTest, TerminateInvokesTerminateUsingAsyncRunner)
     MockIMtcCall objCall;
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    EXPECT_CALL(objContext, GetAsyncRunner(_))
+    EXPECT_CALL(objContext, RunAsyncOperation(_, _))
             .WillOnce(Invoke(
-                    [](std::function<void()> objOperation)
+                    []([[maybe_unused]] void* pOwner, std::function<void()> objOperation)
                     {
                         objOperation();
-                        return new OperationAsyncRunner(SLOT_ID, objOperation);
                     }));
 
     EXPECT_CALL(objCall, Terminate(objReason)).Times(1);

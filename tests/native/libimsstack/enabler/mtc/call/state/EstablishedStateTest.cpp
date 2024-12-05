@@ -211,7 +211,7 @@ TEST_F(EstablishedStateTest,
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockCallContext, GetAsyncRunner(_)).Times(2);
+    EXPECT_CALL(objMockCallContext, RunAsyncOperation(pEstablishedState, _)).Times(2);
     pEstablishedState->OnEnter();
     pEstablishedState->OnEnter();
 }
@@ -266,7 +266,7 @@ TEST_F(EstablishedStateTest, SessionTerminatedInvokesSendTerminatedWithConf)
 
 TEST_F(EstablishedStateTest, RefreshNotifyCompletedRunsPendingOperationAsynchronously)
 {
-    EXPECT_CALL(objMockCallContext, GetAsyncRunner(_));
+    EXPECT_CALL(objMockCallContext, RunAsyncOperation(pEstablishedState, _));
 
     ISipClientConnection* piFakeConnection = reinterpret_cast<ISipClientConnection*>(0x1);
     pEstablishedState->Refresh_NotifyCompleted(piFakeConnection);
@@ -429,7 +429,7 @@ TEST_F(EstablishedStateTest, OnIpcanChangedPushesPendingOperation)
 
 TEST_F(EstablishedStateTest, OnTimerExpiredBringsAsyncRunner)
 {
-    EXPECT_CALL(objMockCallContext, GetAsyncRunner(_));
+    EXPECT_CALL(objMockCallContext, RunAsyncOperation(pEstablishedState, _));
 
     pEstablishedState->OnTimerExpired(MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED);
 }
