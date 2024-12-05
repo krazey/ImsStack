@@ -68,7 +68,7 @@ IMS_BOOL VideoController::CreateSession(
     if (m_pSession == IMS_NULL)
     {
         IMS_TRACE_D("CreateSession()", 0, 0, 0);
-        m_pSession = new VideoMediaSession();
+        m_pSession = new VideoSession();
         m_pSession->SetMediaSessionListener(pListener);
         m_pSession->SetConfig(pConfig);
         return IMS_TRUE;
@@ -84,7 +84,7 @@ IMS_BOOL VideoController::OpenSession()
     {
         IMS_TRACE_D("OpenSession() - state[%d]", m_pSession->GetState(), 0, 0);
 
-        if (m_pSession->GetState() == VideoMediaSession::STATE_IDLE)
+        if (m_pSession->GetState() == VideoSession::STATE_IDLE)
         {
             m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
 
@@ -130,7 +130,7 @@ IMS_BOOL VideoController::CloseSession()
 
     if (m_pSession != IMS_NULL)
     {
-        if (m_pSession->GetState() != VideoMediaSession::STATE_IDLE)
+        if (m_pSession->GetState() != VideoSession::STATE_IDLE)
         {
             m_pSession->Close();
             delete m_pSession;

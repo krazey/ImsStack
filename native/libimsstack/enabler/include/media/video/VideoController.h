@@ -20,7 +20,7 @@
 #include "MediaDef.h"
 #include "IMediaSessionListener.h"
 #include "config/VideoConfiguration.h"
-#include "video/VideoMediaSession.h"
+#include "video/VideoSession.h"
 #include "video/VideoNego.h"
 
 class VideoController
@@ -45,7 +45,7 @@ public:
     IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
     /**
-     * @brief Create a VideoMediaSession instance with given parameters
+     * @brief Create a VideoSession instance with given parameters
      *
      * @param pListener A listener to IMediaSession
      * @param pConfig The configuration instance
@@ -55,7 +55,7 @@ public:
     IMS_BOOL CreateSession(IMediaSessionListener* pListener, VideoConfiguration* pConfig);
 
     /**
-     * @brief Send openSession message from the given id of the VideoMediaSession instance
+     * @brief Send openSession message from the given id of the VideoSession instance
      *
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
@@ -125,7 +125,7 @@ public:
     IMS_BOOL IsSessionOpened();
 
 private:
-    VideoMediaSession* m_pSession;
+    VideoSession* m_pSession;
     IMS_UINT32 m_eCallState;
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;

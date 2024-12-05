@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AUDIO_MEDIA_SESSION_H_
-#define AUDIO_MEDIA_SESSION_H_
+#ifndef AUDIO_SESSION_H_
+#define AUDIO_SESSION_H_
 
 #include <AudioConfig.h>
 #include <MediaQualityThreshold.h>
@@ -29,7 +29,7 @@
 
 using namespace android::telephony::imsmedia;
 
-class AudioMediaSession : public BaseSession, ITimerListener
+class AudioSession : public BaseSession, ITimerListener
 {
 public:
     enum
@@ -68,8 +68,8 @@ public:
         CODEC_PCMU = 1 << 4,
     };
 
-    explicit AudioMediaSession(IN IMS_SINT32 nSlotId = 0);
-    virtual ~AudioMediaSession();
+    explicit AudioSession(IN IMS_SINT32 nSlotId = 0);
+    virtual ~AudioSession();
 
     /**
      * implements ITimerListener interfaces.
@@ -94,7 +94,7 @@ public:
     /**
      * @brief Set the negotiation id
      *
-     * @param nNegoId The unique identification of the AudioMediaSession instance
+     * @param nNegoId The unique identification of the AudioSession instance
      */
     void SetNegoId(IMS_UINTP nNegoId);
 

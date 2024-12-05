@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef TEXT_MEDIA_SESSION_H_
-#define TEXT_MEDIA_SESSION_H_
+#ifndef TEXT_SESSION_H_
+#define TEXT_SESSION_H_
 
 #include <MediaQualityThreshold.h>
 #include "BaseSession.h"
@@ -23,7 +23,7 @@
 #include "text/TextProfile.h"
 #include "config/TextConfiguration.h"
 
-class TextMediaSession : public BaseSession
+class TextSession : public BaseSession
 {
 public:
     enum
@@ -38,8 +38,8 @@ public:
         STATE_PAUSED,
     };
 
-    explicit TextMediaSession(IN IMS_SINT32 nSlotId = 0);
-    virtual ~TextMediaSession();
+    explicit TextSession(IN IMS_SINT32 nSlotId = 0);
+    virtual ~TextSession();
 
     /**
      * @brief Set the text configuration

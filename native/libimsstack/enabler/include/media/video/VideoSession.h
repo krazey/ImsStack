@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef VIDEO_MEDIA_SESSION_H_
-#define VIDEO_MEDIA_SESSION_H_
+#ifndef VIDEO_SESSION_H_
+#define VIDEO_SESSION_H_
 
 #include <MediaQualityThreshold.h>
 #include "BaseSession.h"
@@ -23,7 +23,7 @@
 #include "video/VideoProfile.h"
 #include "config/VideoConfiguration.h"
 
-class VideoMediaSession : public BaseSession
+class VideoSession : public BaseSession
 {
 public:
     enum
@@ -50,8 +50,8 @@ public:
 
     static const IMS_SINT32 CAMERA_ID_NONE = -1;
 
-    explicit VideoMediaSession(IN IMS_SINT32 nSlotId = 0);
-    virtual ~VideoMediaSession();
+    explicit VideoSession(IN IMS_SINT32 nSlotId = 0);
+    virtual ~VideoSession();
     void SetConfig(IN VideoConfiguration* pConfig);
 
     /**

@@ -48,7 +48,7 @@ IMS_BOOL TextController::CreateSession(IMediaSessionListener* pListener, TextCon
     if (m_pSession == IMS_NULL)
     {
         IMS_TRACE_D("CreateSession()", 0, 0, 0);
-        m_pSession = new TextMediaSession();
+        m_pSession = new TextSession();
         m_pSession->SetMediaSessionListener(pListener);
         m_pSession->SetConfig(pConfig);
         return IMS_TRUE;
@@ -64,7 +64,7 @@ IMS_BOOL TextController::OpenSession()
     {
         IMS_TRACE_D("OpenSession() - state[%d]", m_pSession->GetState(), 0, 0);
 
-        if (m_pSession->GetState() == TextMediaSession::STATE_NONE)
+        if (m_pSession->GetState() == TextSession::STATE_NONE)
         {
             m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
 
@@ -110,7 +110,7 @@ IMS_BOOL TextController::CloseSession()
 
     if (m_pSession != IMS_NULL)
     {
-        if (m_pSession->GetState() != TextMediaSession::STATE_NONE)
+        if (m_pSession->GetState() != TextSession::STATE_NONE)
         {
             m_pSession->Close();
         }

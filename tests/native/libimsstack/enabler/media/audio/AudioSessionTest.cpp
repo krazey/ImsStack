@@ -16,20 +16,20 @@
 
 #include <gtest/gtest.h>
 #include <IJniMedia.h>
-#include <audio/AudioMediaSession.h>
+#include <audio/AudioSession.h>
 
-class AudioMediaSessionTest : public ::testing::Test
+class AudioSessionTest : public ::testing::Test
 {
 public:
-    AudioMediaSession* m_pAudioMediaSession;
+    AudioSession* m_pAudioMediaSession;
 
 protected:
-    virtual void SetUp() override { m_pAudioMediaSession = new AudioMediaSession(); }
+    virtual void SetUp() override { m_pAudioMediaSession = new AudioSession(); }
 
     virtual void TearDown() override { delete m_pAudioMediaSession; }
 };
 
-TEST_F(AudioMediaSessionTest, testSetGetInactivityTimer)
+TEST_F(AudioSessionTest, testSetGetInactivityTimer)
 {
     IMS_UINT32 INACTIVITY_TIME = 12000;
 
@@ -38,7 +38,7 @@ TEST_F(AudioMediaSessionTest, testSetGetInactivityTimer)
     m_pAudioMediaSession->SetNetworkToneTimer(0);
 }
 
-TEST_F(AudioMediaSessionTest, testSetServiceType)
+TEST_F(AudioSessionTest, testSetServiceType)
 {
     m_pAudioMediaSession->SetServiceType(MEDIA_SERVICE_DEFAULT);
     EXPECT_EQ(m_pAudioMediaSession->GetServiceType(), MEDIA_SERVICE_DEFAULT);

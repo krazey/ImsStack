@@ -20,7 +20,7 @@
 #include "MediaDef.h"
 #include "IMediaSessionListener.h"
 #include "config/TextConfiguration.h"
-#include "text/TextMediaSession.h"
+#include "text/TextSession.h"
 #include "text/TextNego.h"
 
 class TextController
@@ -30,7 +30,7 @@ public:
     ~TextController();
 
     /**
-     * @brief Create a TextMediaSession instance with given parameters
+     * @brief Create a TextSession instance with given parameters
      *
      * @param pListener A listener to IMediaSession
      * @param pConfig The configuration instance
@@ -40,7 +40,7 @@ public:
     IMS_BOOL CreateSession(IMediaSessionListener* pListener, TextConfiguration* pConfig);
 
     /**
-     * @brief Send openSession message from the given id of the TextMediaSession instance
+     * @brief Send openSession message from the given id of the TextSession instance
      *
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
@@ -99,7 +99,7 @@ public:
     IMS_BOOL UpdateQualityThreshold(IN TextNego* pNego);
 
 private:
-    TextMediaSession* m_pSession;
+    TextSession* m_pSession;
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
 };

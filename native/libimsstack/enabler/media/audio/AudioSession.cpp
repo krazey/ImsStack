@@ -27,7 +27,7 @@
 #include "IJniMedia.h"
 #include "IMediaSessionListener.h"
 #include "MediaManager.h"
-#include "audio/AudioMediaSession.h"
+#include "audio/AudioSession.h"
 #include "audio/AudioProfileUtil.h"
 
 #include <AudioConfig.h>
@@ -38,7 +38,7 @@ static const IMS_UINT32 IMS_MEDIA_TIMER_MARGIN = 500;
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
-AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
+AudioSession::AudioSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_pConfig(IMS_NULL),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
@@ -50,15 +50,15 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_bAnbrEnabled(IMS_FALSE),
         m_piNetworkToneWaitTimer(IMS_NULL)
 {
-    IMS_TRACE_I("+AudioMediaSession() - state[%d]", m_nState, 0, 0);
+    IMS_TRACE_I("+AudioSession() - state[%d]", m_nState, 0, 0);
 
     m_pRtpConfig = new AudioConfig();
 }
 
 PUBLIC
-VIRTUAL AudioMediaSession::~AudioMediaSession()
+VIRTUAL AudioSession::~AudioSession()
 {
-    IMS_TRACE_I("~AudioMediaSession() - state[%d]", m_nState, 0, 0);
+    IMS_TRACE_I("~AudioSession() - state[%d]", m_nState, 0, 0);
 
     StopTimer();
     if (m_pRtpConfig)
@@ -67,7 +67,7 @@ VIRTUAL AudioMediaSession::~AudioMediaSession()
     }
 }
 
-PUBLIC VIRTUAL void AudioMediaSession::Timer_TimerExpired(IN ITimer* piTimer)
+PUBLIC VIRTUAL void AudioSession::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if ((m_piNetworkToneWaitTimer != IMS_NULL) && (m_piNetworkToneWaitTimer == piTimer))
     {
@@ -77,7 +77,7 @@ PUBLIC VIRTUAL void AudioMediaSession::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
+PRIVATE void AudioSession::NetworkToneTimerExpired()
 {
     IMS_TRACE_D("NetworkToneTimerExpired() - networktone time[%d]", m_nNetworkToneTimer, 0, 0);
 
@@ -94,7 +94,7 @@ PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
 }
 
 PRIVATE
-IMS_RESULT AudioMediaSession::StartTimer(IN IMS_SINT32 nDuration)
+IMS_RESULT AudioSession::StartTimer(IN IMS_SINT32 nDuration)
 {
     IMS_TRACE_D("StartTimer() - duration[%d]", nDuration, 0, 0);
 
@@ -114,7 +114,7 @@ IMS_RESULT AudioMediaSession::StartTimer(IN IMS_SINT32 nDuration)
 }
 
 PRIVATE
-void AudioMediaSession::StopTimer()
+void AudioSession::StopTimer()
 {
     if (m_piNetworkToneWaitTimer == IMS_NULL)
     {
@@ -129,7 +129,7 @@ void AudioMediaSession::StopTimer()
 }
 
 PUBLIC
-void AudioMediaSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
+void AudioSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 {
     IMS_TRACE_D("SetServiceType() - ServiceType[%d]", eServiceType, 0, 0);
     m_eServiceType = eServiceType;
@@ -137,7 +137,7 @@ void AudioMediaSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 
 /* testing purpose*/
 PUBLIC
-MEDIA_SERVICE_TYPE AudioMediaSession::GetServiceType()
+MEDIA_SERVICE_TYPE AudioSession::GetServiceType()
 {
     IMS_TRACE_D("GetServiceType() - ServiceType[%d]", m_eServiceType, 0, 0);
 
@@ -145,13 +145,13 @@ MEDIA_SERVICE_TYPE AudioMediaSession::GetServiceType()
 }
 
 PUBLIC
-void AudioMediaSession::SetNegoId(IMS_UINTP nNegoId)
+void AudioSession::SetNegoId(IMS_UINTP nNegoId)
 {
     m_listNegoId.Append(nNegoId);
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::IsSameNegoId(IMS_UINTP nNegoId)
+IMS_BOOL AudioSession::IsSameNegoId(IMS_UINTP nNegoId)
 {
     IMS_BOOL bRet = IMS_FALSE;
 
@@ -168,13 +168,13 @@ IMS_BOOL AudioMediaSession::IsSameNegoId(IMS_UINTP nNegoId)
 }
 
 PUBLIC
-void AudioMediaSession::SetConfig(IN AudioConfiguration* pConfig)
+void AudioSession::SetConfig(IN AudioConfiguration* pConfig)
 {
     m_pConfig = pConfig;
 }
 
 PUBLIC
-AudioConfig* AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
+AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
         IN AudioProfile* pNegoProfile)
 {
@@ -495,7 +495,7 @@ AudioConfig* AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwo
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
+IMS_BOOL AudioSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
 {
     if (m_pRtpConfig->getAccessNetwork() != nAccessNetwork)
     {
@@ -509,7 +509,7 @@ IMS_BOOL AudioMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
+IMS_BOOL AudioSession::UpdateMediaQualityThreshold(
         IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp)
 {
     if (bConfirmedSession)
@@ -542,7 +542,7 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void AudioMediaSession::SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
+void AudioSession::SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     m_objLocalAddress = objLocalAddr;
     m_nLocalPort = nPort;
@@ -552,13 +552,13 @@ void AudioMediaSession::SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IM
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::GetEnabledRtcp()
+IMS_BOOL AudioSession::GetEnabledRtcp()
 {
     return (m_pRtpConfig->getRtcpConfig().getIntervalSec() > 0);
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::Open()
+IMS_BOOL AudioSession::Open()
 {
     IMS_TRACE_I("Open() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -582,7 +582,7 @@ IMS_BOOL AudioMediaSession::Open()
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::Modify()
+IMS_BOOL AudioSession::Modify()
 {
     IMS_TRACE_I("Modify() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -612,7 +612,7 @@ IMS_BOOL AudioMediaSession::Modify()
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::Add()
+IMS_BOOL AudioSession::Add()
 {
     IMS_TRACE_I("Add() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -634,7 +634,7 @@ IMS_BOOL AudioMediaSession::Add()
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::Delete()
+IMS_BOOL AudioSession::Delete()
 {
     IMS_TRACE_I("Delete() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -656,7 +656,7 @@ IMS_BOOL AudioMediaSession::Delete()
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::Confirm()
+IMS_BOOL AudioSession::Confirm()
 {
     IMS_TRACE_I("Confirm() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -678,7 +678,7 @@ IMS_BOOL AudioMediaSession::Confirm()
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::Close()
+IMS_BOOL AudioSession::Close()
 {
     IMS_TRACE_I("Close() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -699,7 +699,7 @@ IMS_BOOL AudioMediaSession::Close()
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::SendDtmf(IN IMS_CHAR cDtmfCode)
+IMS_BOOL AudioSession::SendDtmf(IN IMS_CHAR cDtmfCode)
 {
     if (m_pConfig == IMS_NULL)
     {
@@ -723,7 +723,7 @@ IMS_BOOL AudioMediaSession::SendDtmf(IN IMS_CHAR cDtmfCode)
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::UpdateAnbrEnabledConfig(IN IMS_BOOL anbrEnabled)
+IMS_BOOL AudioSession::UpdateAnbrEnabledConfig(IN IMS_BOOL anbrEnabled)
 {
     IMS_TRACE_I(
             "UpdateAnbrEnabledConfig() - state[%d], anbr enabled[%d]", m_nState, anbrEnabled, 0);
@@ -744,7 +744,7 @@ IMS_BOOL AudioMediaSession::UpdateAnbrEnabledConfig(IN IMS_BOOL anbrEnabled)
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::NotifyAnbrReceived(
+IMS_BOOL AudioSession::NotifyAnbrReceived(
         IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate)
 {
     IMS_TRACE_I("NotifyAnbrReceived() - state[%d], anbr media type[%d], direction[%d]", m_nState,
@@ -799,7 +799,7 @@ IMS_BOOL AudioMediaSession::NotifyAnbrReceived(
 }
 
 PRIVATE
-IMS_SINT32 AudioMediaSession::ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_UINT32 codecType)
+IMS_SINT32 AudioSession::ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_UINT32 codecType)
 {
     IMS_SINT32 convertedCodecMode = -1;
 
@@ -862,7 +862,7 @@ IMS_SINT32 AudioMediaSession::ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::SetMediaQuality(IN IMS_BOOL bConfirmedSession)
+IMS_BOOL AudioSession::SetMediaQuality(IN IMS_BOOL bConfirmedSession)
 {
     IMS_TRACE_I("SetMediaQuality() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -887,7 +887,7 @@ IMS_BOOL AudioMediaSession::SetMediaQuality(IN IMS_BOOL bConfirmedSession)
 }
 
 PUBLIC
-void AudioMediaSession::SetNetworkToneTimer(IN IMS_UINT32 nTimer)
+void AudioSession::SetNetworkToneTimer(IN IMS_UINT32 nTimer)
 {
     m_nNetworkToneTimer = nTimer;
 
@@ -898,7 +898,7 @@ void AudioMediaSession::SetNetworkToneTimer(IN IMS_UINT32 nTimer)
 }
 
 PUBLIC
-IMS_SINT32 AudioMediaSession::GetInactivityTimer(IN InactivitytimerType eType)
+IMS_SINT32 AudioSession::GetInactivityTimer(IN InactivitytimerType eType)
 {
     switch (eType)
     {
@@ -914,7 +914,7 @@ IMS_SINT32 AudioMediaSession::GetInactivityTimer(IN InactivitytimerType eType)
 }
 
 PRIVATE
-IMS_SINT32 AudioMediaSession::GetRtpInactivityTimer(IN IMS_BOOL bActiveSession)
+IMS_SINT32 AudioSession::GetRtpInactivityTimer(IN IMS_BOOL bActiveSession)
 {
     IMS_TRACE_D("GetRtpInactivityTimer() - ActiveSession[%d] ServiceType[%d]", bActiveSession,
             m_eServiceType, 0);
@@ -938,7 +938,7 @@ IMS_SINT32 AudioMediaSession::GetRtpInactivityTimer(IN IMS_BOOL bActiveSession)
 }
 
 PRIVATE
-IMS_SINT32 AudioMediaSession::GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession)
+IMS_SINT32 AudioSession::GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession)
 {
     IMS_TRACE_D("GetRtcpInactivityTimer() - ActiveSession[%d] ServiceType[%d]", bActiveSession,
             m_eServiceType, 0);
@@ -961,7 +961,7 @@ IMS_SINT32 AudioMediaSession::GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession)
 }
 
 PRIVATE
-IMS_BOOL AudioMediaSession::IsRtpInactivityForQnsNeeded(IN IMS_BOOL bConfirmedSession)
+IMS_BOOL AudioSession::IsRtpInactivityForQnsNeeded(IN IMS_BOOL bConfirmedSession)
 {
     IMS_TRACE_D("IsRtpInactivityForQnsNeeded() - confirmed session[%d], direction[%d]",
             bConfirmedSession, GetDirection(), 0);

@@ -27,7 +27,7 @@
 #include "IJniMedia.h"
 #include "MediaManager.h"
 #include "MediaResourceManager.h"
-#include "video/VideoMediaSession.h"
+#include "video/VideoSession.h"
 #include "video/VideoProfileUtil.h"
 
 #include <VideoConfig.h>
@@ -35,7 +35,7 @@ using namespace android::telephony::imsmedia;
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
+PUBLIC VideoSession::VideoSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_pConfig(IMS_NULL),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
@@ -46,14 +46,14 @@ PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         m_bPreviewSurfaceSet(IMS_FALSE),
         m_bDisplaySurfaceSet(IMS_FALSE)
 {
-    IMS_TRACE_I("+VideoMediaSession() - state[%d]", m_nState, 0, 0);
+    IMS_TRACE_I("+VideoSession() - state[%d]", m_nState, 0, 0);
 
     m_pRtpConfig = new VideoConfig();
 }
 
-PUBLIC VIRTUAL VideoMediaSession::~VideoMediaSession()
+PUBLIC VIRTUAL VideoSession::~VideoSession()
 {
-    IMS_TRACE_I("~VideoMediaSession() - state[%d]", GetState(), 0, 0);
+    IMS_TRACE_I("~VideoSession() - state[%d]", GetState(), 0, 0);
 
     if (m_pRtpConfig)
     {
@@ -61,12 +61,12 @@ PUBLIC VIRTUAL VideoMediaSession::~VideoMediaSession()
     }
 }
 
-PUBLIC void VideoMediaSession::SetConfig(VideoConfiguration* pConfig)
+PUBLIC void VideoSession::SetConfig(VideoConfiguration* pConfig)
 {
     m_pConfig = pConfig;
 }
 
-PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
+PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, IN VideoProfile* pNegoProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
@@ -298,7 +298,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 }
 
 PUBLIC
-void VideoMediaSession::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
+void VideoSession::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 {
     if (m_pRtpConfig != NULL)
     {
@@ -309,7 +309,7 @@ void VideoMediaSession::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
-void VideoMediaSession::SetMtu(IN IMS_SINT32 nMtu)
+void VideoSession::SetMtu(IN IMS_SINT32 nMtu)
 {
     if (m_pRtpConfig != NULL)
     {
@@ -320,7 +320,7 @@ void VideoMediaSession::SetMtu(IN IMS_SINT32 nMtu)
 }
 
 PUBLIC
-IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
+IMS_BOOL VideoSession::UpdateMediaQualityThreshold(
         IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp)
 {
     /** TODO_MEDIA need to get real value when it's ready. */
@@ -357,7 +357,7 @@ IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void VideoMediaSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
+void VideoSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     if (!objLocalAddr.ToString().IsNULL())
     {
@@ -371,7 +371,7 @@ void VideoMediaSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN
 }
 
 PUBLIC
-IMS_BOOL VideoMediaSession::OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
+IMS_BOOL VideoSession::OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 {
     IMS_TRACE_I("OnMessages() - Msg[%d, %s]", nMsg, IJniMedia::PrintMsg(nMsg), 0);
 
@@ -401,7 +401,7 @@ IMS_BOOL VideoMediaSession::OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 }
 
 PUBLIC
-IMS_BOOL VideoMediaSession::Open()
+IMS_BOOL VideoSession::Open()
 {
     IMS_TRACE_I("Open() - state[%d], cameraId[%d]", m_nState, m_nCameraId, 0);
 
@@ -424,7 +424,7 @@ IMS_BOOL VideoMediaSession::Open()
 }
 
 PUBLIC
-IMS_BOOL VideoMediaSession::Modify()
+IMS_BOOL VideoSession::Modify()
 {
     if (m_pRtpConfig == NULL)
     {
@@ -488,7 +488,7 @@ IMS_BOOL VideoMediaSession::Modify()
 }
 
 PUBLIC
-IMS_BOOL VideoMediaSession::Close()
+IMS_BOOL VideoSession::Close()
 {
     IMS_TRACE_I("Close() - state[%d]", m_nState, 0, 0);
 
@@ -505,7 +505,7 @@ IMS_BOOL VideoMediaSession::Close()
 }
 
 PUBLIC
-IMS_BOOL VideoMediaSession::SetMediaQuality()
+IMS_BOOL VideoSession::SetMediaQuality()
 {
     IMS_TRACE_I("SetMediaQuality() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
@@ -523,25 +523,25 @@ IMS_BOOL VideoMediaSession::SetMediaQuality()
 }
 
 PUBLIC
-IMS_SINT32 VideoMediaSession::GetLocalPort()
+IMS_SINT32 VideoSession::GetLocalPort()
 {
     return m_nLocalPort;
 }
 
 PUBLIC
-IMS_SINT32 VideoMediaSession::GetRemotePort()
+IMS_SINT32 VideoSession::GetRemotePort()
 {
     return m_pRtpConfig->getRemotePort();
 }
 
 PUBLIC
-IMS_SINT32 VideoMediaSession::GetCameraId()
+IMS_SINT32 VideoSession::GetCameraId()
 {
     return m_nCameraId;
 }
 
 PRIVATE
-IMS_BOOL VideoMediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
+IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
@@ -592,7 +592,7 @@ IMS_BOOL VideoMediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
+IMS_BOOL VideoSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
@@ -646,7 +646,7 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_BOOL VideoMediaSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
+IMS_BOOL VideoSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
@@ -662,14 +662,14 @@ IMS_BOOL VideoMediaSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_BOOL VideoMediaSession::OnSetPauseImageCmd(IN IMS_UINTP pParam)
+IMS_BOOL VideoSession::OnSetPauseImageCmd(IN IMS_UINTP pParam)
 {
     (void)pParam;
     return IMS_TRUE;
 }
 
 PRIVATE
-IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
+IMS_BOOL VideoSession::OnChangeOrientation(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
@@ -691,7 +691,7 @@ IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertAvcProfile(IN IMS_UINT32 nProfile)
+IMS_UINT32 VideoSession::convertAvcProfile(IN IMS_UINT32 nProfile)
 {
     switch (nProfile)
     {
@@ -711,7 +711,7 @@ IMS_UINT32 VideoMediaSession::convertAvcProfile(IN IMS_UINT32 nProfile)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertHevcProfile(IN IMS_UINT32 nProfile)
+IMS_UINT32 VideoSession::convertHevcProfile(IN IMS_UINT32 nProfile)
 {
     switch (nProfile)
     {
@@ -726,7 +726,7 @@ IMS_UINT32 VideoMediaSession::convertHevcProfile(IN IMS_UINT32 nProfile)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertAvcLevel(IN IMS_UINT32 nLevel)
+IMS_UINT32 VideoSession::convertAvcLevel(IN IMS_UINT32 nLevel)
 {
     switch (nLevel)
     {
@@ -753,7 +753,7 @@ IMS_UINT32 VideoMediaSession::convertAvcLevel(IN IMS_UINT32 nLevel)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertHevcLevel(IN IMS_UINT32 nLevel)
+IMS_UINT32 VideoSession::convertHevcLevel(IN IMS_UINT32 nLevel)
 {
     switch (nLevel)
     {

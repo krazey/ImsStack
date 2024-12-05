@@ -27,7 +27,7 @@
 #include "IMediaSessionListener.h"
 #include "IJniMedia.h"
 #include "MediaManager.h"
-#include "text/TextMediaSession.h"
+#include "text/TextSession.h"
 #include "text/TextProfileUtil.h"
 
 #include <TextConfig.h>
@@ -35,21 +35,21 @@ using namespace android::telephony::imsmedia;
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC TextMediaSession::TextMediaSession(IN IMS_SINT32 nSlotId) :
+PUBLIC TextSession::TextSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_pConfig(IMS_NULL),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0)
 {
-    IMS_TRACE_I("+TextMediaSession()", 0, 0, 0);
+    IMS_TRACE_I("+TextSession()", 0, 0, 0);
 
     m_pRtpConfig = new TextConfig();
 }
 
-PUBLIC VIRTUAL TextMediaSession::~TextMediaSession()
+PUBLIC VIRTUAL TextSession::~TextSession()
 {
-    IMS_TRACE_I("~TextMediaSession() - state[%d]", GetState(), 0, 0);
+    IMS_TRACE_I("~TextSession() - state[%d]", GetState(), 0, 0);
 
     if (m_pRtpConfig)
     {
@@ -57,12 +57,12 @@ PUBLIC VIRTUAL TextMediaSession::~TextMediaSession()
     }
 }
 
-PUBLIC void TextMediaSession::SetConfig(TextConfiguration* pConfig)
+PUBLIC void TextSession::SetConfig(TextConfiguration* pConfig)
 {
     m_pConfig = pConfig;
 }
 
-PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
+PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
         IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile, IN TextProfile* pNegoProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
@@ -184,7 +184,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
 }
 
 PUBLIC
-void TextMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
+void TextSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
 {
     if (m_pRtpConfig != NULL)
     {
@@ -195,7 +195,7 @@ void TextMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
-IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(
+IMS_BOOL TextSession::UpdateMediaQualityThreshold(
         IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp)
 {
     /** TODO_MEDIA need to get real value when it's ready. */
@@ -226,7 +226,7 @@ IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void TextMediaSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
+void TextSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     if (!objLocalAddr.ToString().IsNULL())
     {
@@ -240,7 +240,7 @@ void TextMediaSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN 
 }
 
 PUBLIC
-IMS_BOOL TextMediaSession::Open()
+IMS_BOOL TextSession::Open()
 {
     IMS_TRACE_I("Open() - state[%d]", m_nState, 0, 0);
 
@@ -263,7 +263,7 @@ IMS_BOOL TextMediaSession::Open()
 }
 
 PUBLIC
-IMS_BOOL TextMediaSession::Modify()
+IMS_BOOL TextSession::Modify()
 {
     IMS_TRACE_I("Modify() - state[%d]", m_nState, 0, 0);
 
@@ -284,7 +284,7 @@ IMS_BOOL TextMediaSession::Modify()
 }
 
 PUBLIC
-IMS_BOOL TextMediaSession::Close()
+IMS_BOOL TextSession::Close()
 {
     IMS_TRACE_I("Close() - state[%d]", m_nState, 0, 0);
 
@@ -303,7 +303,7 @@ IMS_BOOL TextMediaSession::Close()
 }
 
 PUBLIC
-IMS_BOOL TextMediaSession::SetMediaQuality()
+IMS_BOOL TextSession::SetMediaQuality()
 {
     IMS_TRACE_I("SetMediaQuality() - state[%d]", m_nState, 0, 0);
 
@@ -321,13 +321,13 @@ IMS_BOOL TextMediaSession::SetMediaQuality()
 }
 
 PUBLIC
-IMS_SINT32 TextMediaSession::GetLocalPort()
+IMS_SINT32 TextSession::GetLocalPort()
 {
     return m_nLocalPort;
 }
 
 PUBLIC
-IMS_SINT32 TextMediaSession::GetRemotePort()
+IMS_SINT32 TextSession::GetRemotePort()
 {
     return m_pRtpConfig->getRemotePort();
 }
