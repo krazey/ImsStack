@@ -122,6 +122,8 @@
     </int-array>
     <int-array name="imsemergency.reject_code_require_perm_failure_int_array" num="0">
     </int-array>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="0">
+    </int-array>
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">RELEASE_CAUSE;cause=1;text=&quot;User ends call&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_rtp_timeout_string">RELEASE_CAUSE;cause=2;text=&quot;RTP/RTCP time-out&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string"></string>

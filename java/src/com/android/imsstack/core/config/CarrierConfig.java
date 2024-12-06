@@ -434,6 +434,13 @@ public class CarrierConfig {
                 KEY_PREFIX + "reject_code_require_temp_failure_int_array";
         public static final String KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY =
                 KEY_PREFIX + "reject_code_require_perm_failure_int_array";
+        public static final String KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY =
+                KEY_PREFIX + "policy_for_emergency_urn_int_array";
+
+        // Emergency URN policy
+        public static final int NOT_USE_SERVICE_CATEGORY = 1;
+        public static final int USE_POLICE_FOR_UNSPECIFIED = 2;
+        public static final int USE_GENERIC_FOR_MULTIPLE_CATEGORIES = 3;
 
         private ImsEmergency() {}
     }

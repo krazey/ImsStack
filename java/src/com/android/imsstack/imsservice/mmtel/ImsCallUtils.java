@@ -27,6 +27,9 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
@@ -40,6 +43,7 @@ import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.internal.telephony.imsphone.ImsExternalCallTracker;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -358,7 +362,13 @@ public class ImsCallUtils {
             String urn = null;
 
             if (urns.isEmpty()) {
-                urn = getSosUrnFromECallServiceCategory(profile.getEmergencyServiceCategories());
+                ConfigInterface config = AgentFactory.getInstance().getAgent(
+                        ConfigInterface.class, context.getSlotId());
+                CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
+                int[] policies = cc != null ? cc.getIntArray(
+                    CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
+                urn = getSosUrnFromECallServiceCategory(
+                        profile.getEmergencyServiceCategories(), policies);
             } else {
                 // The first item has priority ??
                 urn = urns.get(0);
@@ -417,7 +427,20 @@ public class ImsCallUtils {
     }
 
     public static String getSosUrnFromECallServiceCategory(
-            @EmergencyServiceCategories int category) {
+            @EmergencyServiceCategories int category, int[] policies) {
+        if (containsPolicy(policies, CarrierConfig.ImsEmergency.NOT_USE_SERVICE_CATEGORY)) {
+            return SOS_SERVICE_URN_GENERIC;
+        }
+        if ((category == EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED)
+                && containsPolicy(
+                policies, CarrierConfig.ImsEmergency.USE_POLICE_FOR_UNSPECIFIED)) {
+            return SOS_SERVICE_URN_POLICE;
+        }
+        if (isMultipleCategories(category) && containsPolicy(policies,
+                CarrierConfig.ImsEmergency.USE_GENERIC_FOR_MULTIPLE_CATEGORIES)) {
+            return SOS_SERVICE_URN_GENERIC;
+        }
+
         if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE) != 0) {
             return SOS_SERVICE_URN_POLICE;
         } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE) != 0) {
@@ -988,6 +1011,18 @@ public class ImsCallUtils {
             default:
                 return (-1);
         }
+    }
+
+    private static boolean containsPolicy(int[] policies, int policy) {
+        if (policies == null) {
+            return false;
+        }
+
+        return Arrays.stream(policies).anyMatch(value -> value == policy);
+    }
+
+    private static boolean isMultipleCategories(int categories) {
+        return Integer.bitCount(categories) > 1;
     }
 
     static {
