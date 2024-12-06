@@ -359,6 +359,7 @@ public:
         static const IMS_CHAR KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL[];
         static const IMS_CHAR KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[];
+        static const IMS_CHAR KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL[];
 
         // SMS formats
         enum

@@ -1247,6 +1247,8 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_MESSAGE_RESPONSE_WAIT_TIMER_MILLIS
         KEY_IMS_SMS_PREFIX "sms_message_response_wait_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
         KEY_IMS_SMS_PREFIX "sms_retry_policy_for_expiry_timer_f_int";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL[] =
+        KEY_IMS_SMS_PREFIX "sms_in_reply_to_validation_bool";
 
 PUBLIC GLOBAL IMS_BOOL CarrierConfig::IsVoLteEnabled(IN IMS_SINT32 nSlotId)
 {
