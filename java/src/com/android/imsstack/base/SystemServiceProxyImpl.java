@@ -246,11 +246,11 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         }
 
         @Override
-        public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
-                @NonNull Handler handler) {
+        public void registerSystemDefaultNetworkCallback(
+                @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
             ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             if (cm != null) {
-                cm.registerDefaultNetworkCallback(networkCallback, handler);
+                cm.registerSystemDefaultNetworkCallback(networkCallback, handler);
             } else {
                 throw new IllegalStateException("ConnectivityManager unavailable.");
             }

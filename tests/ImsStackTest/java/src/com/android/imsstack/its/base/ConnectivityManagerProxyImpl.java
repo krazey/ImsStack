@@ -141,8 +141,8 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
     }
 
     @Override
-    public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
-            @NonNull Handler handler) {
+    public void registerSystemDefaultNetworkCallback(
+            @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         NetworkCallbackRecord ncr = new NetworkCallbackRecord(null, networkCallback, handler);
         mNetworkCallbackRecords.add(ncr);
 

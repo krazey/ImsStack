@@ -57,14 +57,14 @@ public final class ApnIms extends Apn {
                 new HandleDefaultNetworkStatusChanged());
 
         registerConfigListener();
-        registerDefaultNetworkCallback();
+        registerSystemDefaultNetworkCallback();
     }
 
     // Interface implementation methods --------------------------
     @Override
     public void cleanup() {
         ImsLog.d(mSlotId, "clean up");
-        unregisterDefaultNetworkCallback();
+        unregisterSystemDefaultNetworkCallback();
 
         super.cleanup();
     }
@@ -140,8 +140,8 @@ public final class ApnIms extends Apn {
         if (mSlotId != phoneId) {
             return;
         }
-        unregisterDefaultNetworkCallback();
-        registerDefaultNetworkCallback();
+        unregisterSystemDefaultNetworkCallback();
+        registerSystemDefaultNetworkCallback();
     }
 
     /**
@@ -164,7 +164,7 @@ public final class ApnIms extends Apn {
     }
 
     @VisibleForTesting
-    void registerDefaultNetworkCallback() {
+    void registerSystemDefaultNetworkCallback() {
         if (!DeviceConfig.isMultiSimEnabled()) {
             ImsLog.i(mSlotId, "MultiSim is not enabled");
             return;
@@ -178,31 +178,31 @@ public final class ApnIms extends Apn {
             return;
         }
 
-        ImsLog.i(mSlotId, "registerDefaultNetworkCallback");
+        ImsLog.i(mSlotId, "registerSystemDefaultNetworkCallback");
         ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
 
         mDefaultNetworkCallback = new DefaultNetworkCallback(mSlotId, this);
         try {
-            cmp.registerDefaultNetworkCallback(mDefaultNetworkCallback, this);
+            cmp.registerSystemDefaultNetworkCallback(mDefaultNetworkCallback, this);
         } catch (RuntimeException e) {
-            ImsLog.e(mSlotId, "registerDefaultNetworkCallback: " + e.getMessage());
+            ImsLog.e(mSlotId, "registerSystemDefaultNetworkCallback: " + e.getMessage());
             mDefaultNetworkCallback = null;
         }
     }
 
     @VisibleForTesting
-    void unregisterDefaultNetworkCallback() {
+    void unregisterSystemDefaultNetworkCallback() {
         if (mDefaultNetworkCallback == null) {
             ImsLog.i(mSlotId, "Default network callback has been not registered");
             return;
         }
 
-        ImsLog.i(mSlotId, "unregisterDefaultNetworkCallback");
+        ImsLog.i(mSlotId, "unregisterSystemDefaultNetworkCallback");
         ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
         try {
             cmp.unregisterNetworkCallback(mDefaultNetworkCallback);
         } catch (RuntimeException e) {
-            ImsLog.e(mSlotId, "unregisterDefaultNetworkCallback: " + e.getMessage());
+            ImsLog.e(mSlotId, "unregisterSystemDefaultNetworkCallback: " + e.getMessage());
         }
         mDefaultNetworkCallback = null;
     }
