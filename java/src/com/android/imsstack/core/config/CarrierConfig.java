@@ -1002,8 +1002,8 @@ public class CarrierConfig {
                 "set_sdp_direction_attribute_for_removed_media_bool";
         public static final String KEY_SUPPORT_SDP_PRECONDITION_BOOL =
                 "support_sdp_precondition_bool";
-        public static final String KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_BOOL =
-                "hide_mac_address_in_pani_header_bool";
+        public static final String KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT =
+                "hide_mac_address_in_pani_header_int";
         public static final String KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL =
                 "support_country_param_in_pani_header_bool";
         public static final String KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL =

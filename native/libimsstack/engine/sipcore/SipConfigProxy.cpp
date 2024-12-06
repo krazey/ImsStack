@@ -709,13 +709,14 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMacAddressHiddenInPaniHeader(
     {
         if (pProfile->IsSipFeatureProvisioned())
         {
-            return pProfile->IsMacAddressHiddenInPaniHeader();
+            return (pProfile->GetHideMacInPaniHeaderPolicy() != SipConfig::SHOW_MAC_IN_PANI);
         }
     }
 
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 
-    return pSipConfig->IsMacAddressHiddenInPaniHeader();
+    // TODO - add implementation to handle HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL
+    return (pSipConfig->GetHideMacInPaniHeaderPolicy() != SipConfig::SHOW_MAC_IN_PANI);
 }
 
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(
