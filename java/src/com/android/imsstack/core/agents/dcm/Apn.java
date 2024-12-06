@@ -39,7 +39,6 @@ import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.AgentUtils;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.DcConstants;
@@ -391,16 +390,16 @@ public abstract class Apn extends Handler implements IApn {
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
 
         if (DeviceConfig.isMultiSimEnabled()) {
-            boolean setSubId = true;
+            boolean needToSetSubId = true;
             int subId = MSimUtils.getSubId(mSlotId);
 
-            if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
-                if (AgentUtils.isAllSimAbsentOrLocked() && !MSimUtils.isValidSubId(subId)) {
-                    setSubId = false;
-                }
+            // This condition is aligned with A-TEL.
+            if (mType.getType() == DcConstants.TYPE_EMERGENCY
+                    && !MSimUtils.isValidSubId(subId)) {
+                needToSetSubId = false;
             }
 
-            if (setSubId) {
+            if (needToSetSubId) {
                 nrb.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
                         .setSubscriptionId(subId).build());
             }

@@ -41,6 +41,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.TelephonyNetworkSpecifier;
 import android.os.Message;
 import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
@@ -49,8 +50,13 @@ import android.telephony.data.ApnSetting;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -444,6 +450,45 @@ public class ApnTest {
         mApn.requestNetwork();
         verify(mConnectivityManagerProxy)
                 .requestNetwork(eq(nrInternet), eq(mMockNetworkCallback), eq(mApn));
+    }
+
+    @Test
+    @SmallTest
+    public void testRequestNetworkWhenMultiSimEnabled() throws Exception {
+        DeviceConfig.setSimCount(2, 2);
+        try {
+            replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+
+            mApn.mType = EApnType.EMERGENCY;
+            NetworkRequest networkRequest = new NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS)
+                    .setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+                            .setSubscriptionId(SUB_ID_1).build())
+                    .build();
+
+            mApn.requestNetwork();
+
+            // Expect: SUB_ID_1 is set as TelephonyNetworkSpecifier.
+            verify(mConnectivityManagerProxy)
+                    .requestNetwork(eq(networkRequest), eq(mMockNetworkCallback), eq(mApn));
+
+            SubscriptionManagerProxy smp =
+                    mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
+            when(smp.getSubscriptionId(eq(SLOT0))).thenReturn(MSimUtils.INVALID_SUB_ID);
+            networkRequest = new NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS)
+                    .build();
+
+            mApn.requestNetwork();
+
+            // Expect: No TelephonyNetworkSpecifier.
+            verify(mConnectivityManagerProxy)
+                    .requestNetwork(eq(networkRequest), eq(mMockNetworkCallback), eq(mApn));
+        } finally {
+            DeviceConfig.setSimCount(1, 1);
+        }
     }
 
     @Test
