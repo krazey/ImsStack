@@ -22,6 +22,7 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ImsVector.h"
 #include "IuMtcService.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
@@ -96,11 +97,12 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
         m_objContext.GetCallInfo().eInitialCallType = eCallType;
         m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
     }
-    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
+
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
 
     if (m_objContext.IsUssi())
     {
+        m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
         m_objOperationAfterBlockCheck = [&]()
         {
             return ContinueStartUssi();
@@ -108,6 +110,8 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     }
     else
     {
+        m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(
+                RemoveCallerIdServiceCodeAndUpdateSuppService(strTarget));
         m_objOperationAfterBlockCheck = [&]()
         {
             return ContinueStart();
@@ -617,4 +621,42 @@ void IdleState::CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*>
     {
         m_pConfUsers.Append(std::make_shared<ConfUser>(*objUsers.GetAt(i)));
     }
+}
+
+PRIVATE
+AString IdleState::RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget)
+{
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+    {
+        return strTarget;
+    }
+
+    // TODO: b/382332088 - will have configuration for the carrier defined prefix.
+    ImsVector<AString> objCodeRestricted;
+    objCodeRestricted.Push("*67");
+
+    for (IMS_UINT32 i = 0; i < objCodeRestricted.GetSize(); i++)
+    {
+        if (strTarget.StartsWith(objCodeRestricted.GetAt(i)))
+        {
+            IMS_TRACE_D("dialed number includes caller id for restriction : ", 0, 0, 0);
+            m_objContext.GetSupplementaryService().Add(SuppType::CALLER_ID, CALLERID_RESTRICTED);
+            return AString(strTarget.GetSubStr(objCodeRestricted.GetAt(i).GetLength()));
+        }
+    }
+
+    ImsVector<AString> objCodeIdentity;
+    objCodeIdentity.Push("*82");
+    for (IMS_UINT32 i = 0; i < objCodeIdentity.GetSize(); i++)
+    {
+        if (strTarget.StartsWith(objCodeIdentity.GetAt(i)))
+        {
+            IMS_TRACE_D("dialed number includes caller id for identity : ", 0, 0, 0);
+            m_objContext.GetSupplementaryService().Add(SuppType::CALLER_ID, CALLERID_IDENTITY);
+            return AString(strTarget.GetSubStr(objCodeIdentity.GetAt(i).GetLength()));
+        }
+    }
+
+    return strTarget;
 }
