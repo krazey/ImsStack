@@ -1469,7 +1469,7 @@ public class LocationAgent implements LocationInterface {
             int updateType = CarrierConfig.Assets.LOCATION_UPDATE_POLICY_NONE;
             CarrierConfig cc = config.getCarrierConfig();
             if (cc != null) {
-                updateType = cc.getInt(CarrierConfig.Assets.KEY_LOCATION_POLICY_UPDATE_TYPE_INT);
+                updateType = cc.getInt(CarrierConfig.Ims.KEY_LOCATION_POLICY_UPDATE_TYPE_INT);
             }
 
             if ((CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED == updateType
@@ -1477,8 +1477,8 @@ public class LocationAgent implements LocationInterface {
                     || CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ALWAYS == updateType) {
                 lp = getLocationPolicy();
 
-                policy |= cc.getInt(CarrierConfig.Assets.KEY_LOCATION_ACQUISITION_POLICY_INT);
-                if (cc.getBoolean(CarrierConfig.Assets
+                policy |= cc.getInt(CarrierConfig.Ims.KEY_LOCATION_ACQUISITION_POLICY_INT);
+                if (cc.getBoolean(CarrierConfig.Ims
                         .KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL)) {
                     SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
                             SubsInfoInterface.class, mSlotId);
@@ -1490,18 +1490,18 @@ public class LocationAgent implements LocationInterface {
                 }
 
                 lp.setDefaultAddressResolutionTime(cc.getInt(
-                        CarrierConfig.Assets.KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT));
+                        CarrierConfig.Ims.KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT));
                 int validityMinutes = cc.getInt(
-                        CarrierConfig.Assets.KEY_LOCATION_VALIDITY_PERIOD_MIN_INT);
+                        CarrierConfig.Ims.KEY_LOCATION_VALIDITY_PERIOD_MIN_INT);
                 lp.setValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
                 validityMinutes = cc.getInt(
-                        CarrierConfig.Assets.KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT);
+                        CarrierConfig.Ims.KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT);
                 lp.setAddressValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
                 lp.setAddressTolerableDistance(cc.getInt(
-                        CarrierConfig.Assets.KEY_LOCATION_TOLERABLE_DISTANCE_INT));
+                        CarrierConfig.Ims.KEY_LOCATION_TOLERABLE_DISTANCE_INT));
                 lp.setSearchDurationForGps(cc.getInt(
-                        CarrierConfig.Assets.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT));
-                int shape = cc.getInt(CarrierConfig.Assets.KEY_LOCATION_GEODETIC_SHAPE_INT);
+                        CarrierConfig.Ims.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT));
+                int shape = cc.getInt(CarrierConfig.Ims.KEY_LOCATION_GEODETIC_SHAPE_INT);
                 lp.setShape(CarrierConfig.Assets.GEODETIC_SHAPE_ELLIPSOID == shape
                         ? LocationPolicy.SHAPE_ELLIPSOID : LocationPolicy.SHAPE_CIRCLE);
             }

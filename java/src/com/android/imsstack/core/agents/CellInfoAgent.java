@@ -585,7 +585,7 @@ public class CellInfoAgent implements CellInfoInterface {
         if (config != null) {
             CarrierConfig cc = config.getCarrierConfig();
             return cc.getBoolean(
-                    CarrierConfig.Assets.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL);
+                    CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL);
         }
         return false;
     }

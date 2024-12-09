@@ -16,5 +16,5 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="cellular_network_info_utc_offset_enabled_bool" value="true"/>
+    <boolean name="ims.cellular_network_info_utc_offset_enabled_bool" value="true"/>
 </carrier_config>
