@@ -69,6 +69,8 @@ private:
     static AString GetContentDispositionHeader();
     static AString GetEntityUri(IN const ISubscriberConfig& objSubscriberConfig);
 
+    static IMS_BOOL IsGeolocationBlocked(IN IMtcCallContext& objContext);
+
     IMtcCallContext& m_objContext;
 };
 

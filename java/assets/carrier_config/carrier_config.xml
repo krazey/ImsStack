@@ -603,6 +603,8 @@
     </int-array>
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="0">
     </int-array>
+    <int-array name="imsvoice.geolocation_block_condition_int_array" num="0">
+    </int-array>
     <boolean name="imsvoice.incoming_resume_event_support_bool" value="false"/>
     <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="200"/>
     <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="false"/>

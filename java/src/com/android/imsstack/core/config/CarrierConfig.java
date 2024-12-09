@@ -833,6 +833,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "stop_ringback_timer_by_183_with_sdp_body_bool";
         public static final String KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY =
                 KEY_PREFIX + "message_type_support_geolocation_pidf_int_array";
+        public static final String KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY =
+                KEY_PREFIX + "geolocation_block_condition_int_array";
         public static final String KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL =
                 KEY_PREFIX + "incoming_resume_event_support_bool";
         public static final String KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT =

@@ -1087,6 +1087,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT
         KEY_IMS_PREFIX "information_level_of_geolocation_pidf_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "message_type_support_geolocation_pidf_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "geolocation_block_condition_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[] =
         KEY_IMS_VOICE_PREFIX "incoming_resume_event_support_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[] =
