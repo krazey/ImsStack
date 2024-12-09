@@ -281,12 +281,12 @@ public interface SystemServiceProxy {
          * or {@link #unregisterNetworkCallback(NetworkCallback)} is called.
          *
          * @param networkCallback The {@link NetworkCallback} that the system will call as the
-         *                        application's default network changes.
+         *     application's default network changes.
          * @param handler {@link Handler} to specify the thread upon which the callback will be
-         *                invoked.
+         *     invoked.
          */
-        void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
-                @NonNull Handler handler);
+        void registerSystemDefaultNetworkCallback(
+                @NonNull NetworkCallback networkCallback, @NonNull Handler handler);
     }
 
     /**

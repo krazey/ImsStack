@@ -219,8 +219,9 @@ public class SscServiceStateTest {
         verify(mMockTelephonyManagerProxy).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
                 mSscServiceState.mMobileDataStateListener);
-        verify(mMockConnectivityManagerProxy).registerDefaultNetworkCallback(
-                mSscServiceState.mCrossSimDataStateListener, mSscServiceState.mHandler);
+        verify(mMockConnectivityManagerProxy)
+                .registerSystemDefaultNetworkCallback(
+                        mSscServiceState.mCrossSimDataStateListener, mSscServiceState.mHandler);
         assertTrue(((Handler) mSscServiceState.mHandler)
                 .hasMessages(SscServiceState.EVENT_UT_CAPABILITY_CHANGED));
 
@@ -259,8 +260,9 @@ public class SscServiceStateTest {
         verify(mMockTelephonyManagerProxy, never()).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
                 mSscServiceState.mMobileDataStateListener);
-        verify(mMockConnectivityManagerProxy, never()).registerDefaultNetworkCallback(
-                mSscServiceState.mCrossSimDataStateListener, mSscServiceState.mHandler);
+        verify(mMockConnectivityManagerProxy, never())
+                .registerSystemDefaultNetworkCallback(
+                        mSscServiceState.mCrossSimDataStateListener, mSscServiceState.mHandler);
     }
 
     @Test
@@ -940,8 +942,9 @@ public class SscServiceStateTest {
         verify(mMockAosService, times(1)).addListener(any(SscRegiStateListener.class));
         verify(mMockTelephonyManagerProxy, times(1)).registerTelephonyCallback(any(Executor.class),
                 any(SscMobileDataStateListener.class));
-        verify(mMockConnectivityManagerProxy, times(1)).registerDefaultNetworkCallback(
-                any(SscCrossSimDataStateListener.class), any(Handler.class));
+        verify(mMockConnectivityManagerProxy, times(1))
+                .registerSystemDefaultNetworkCallback(
+                        any(SscCrossSimDataStateListener.class), any(Handler.class));
 
         verify(mMockWifiInterface).removeListener(any(WifiInterface.Listener.class));
         verify(mMockAosService).removeListener(any(SscRegiStateListener.class));
