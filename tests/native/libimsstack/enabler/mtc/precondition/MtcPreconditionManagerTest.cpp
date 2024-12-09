@@ -1327,7 +1327,7 @@ TEST_F(MtcPreconditionManagerTest, OnQosStatusChangedIfStatusIsChangedToLostFrom
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER))
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AFTER_LOST, 1000)).Times(1);
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AFTER_LOST, 5000)).Times(1);
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -1354,7 +1354,7 @@ TEST_F(MtcPreconditionManagerTest,
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER))
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AFTER_LOST, 1000)).Times(0);
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AFTER_LOST, 5000)).Times(0);
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST)).Times(0);
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 1000)).Times(0);
     EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_FALSE)).Times(1);
