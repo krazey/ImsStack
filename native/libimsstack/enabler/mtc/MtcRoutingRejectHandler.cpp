@@ -72,13 +72,10 @@ PRIVATE
 SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
         IN const SipStatusCode& objDefaultStatusCode) const
 {
-    // Covers VZ_REQ_RCSVOLTE_37606 and VZ_REQ_VOWIFI_6230932.
-
     /*
-    TODO: if (IMS_OMADM_VLT off)
-    {
+    TODO: b/381989518 - need IMS platform support
+    if subscriber is not provisioned:
         return SipStatusCode(SipStatusCode::SC_488, "Subscriber not provisioned for VoLTE");
-    }
     */
 
     NETRADIO_ENTYPE eRat = m_objNetworkWatcher.GetNetRadioTechType();
@@ -101,12 +98,6 @@ SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
             break;
 
         case NW_REPORT_RADIO_LTE:
-            /*
-            TODO: if (SSAC)
-            {
-                return SipStatusCode(SipStatusCode::SC_488, "SSAC ON");
-            }
-            */
             if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_VOLTE_SETTING) ==
                     IMS_VOLTE_SETTING_OFF)
             {

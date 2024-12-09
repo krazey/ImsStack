@@ -126,6 +126,9 @@ public:
             case RejectType::USER_REJECT:
                 return objProxy.GetString(
                         ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING);
+            case RejectType::ACCESS_CLASS_BLOCKED:
+                return objProxy.GetString(
+                        ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING);
             default:
                 return AString::ConstNull();
         }

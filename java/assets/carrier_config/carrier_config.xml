@@ -145,6 +145,7 @@
     <string name="imsvoice.call_reject_reason_phrase_no_answer_by_user_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
+    <string name="imsvoice.call_reject_reason_phrase_access_class_blocked_string"></string>
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
     <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
     </string-array>

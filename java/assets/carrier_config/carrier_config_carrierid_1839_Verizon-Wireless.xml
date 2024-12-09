@@ -280,6 +280,7 @@
     <string name="imsvoice.call_reject_reason_phrase_on_converting_string">Video Upgrade Request In Progress</string>
     <string name="imsvoice.call_reject_reason_phrase_negotiation_failure_string">Codec not supported</string>
     <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string">VoWiFi OFF</string>
+    <string name="imsvoice.call_reject_reason_phrase_access_class_blocked_string">SSAC ON</string>
 
     <!-- MTC conference call -->
     <string name="imsvoice.conference_factory_uri_string">sip:confserver@vzims.com</string>

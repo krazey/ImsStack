@@ -822,6 +822,9 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
         case CODE_USER_REJECTED_SESSION_MODIFICATION:
             eStatusCode = SipStatusCode::SC_603;
             break;
+        case CODE_ACCESS_CLASS_BLOCKED:
+            eStatusCode = SipStatusCode::SC_488;
+            break;
 
         default:
             eStatusCode = SipStatusCode::SC_480;
@@ -859,6 +862,9 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
             break;
         case CODE_MEDIA_NOT_ACCEPTABLE:
             strPhrase = GetRejectPhrase(RejectType::NEGOTIATION_FAILURE);
+            break;
+        case CODE_ACCESS_CLASS_BLOCKED:
+            strPhrase = GetRejectPhrase(RejectType::ACCESS_CLASS_BLOCKED);
             break;
         default:
             strPhrase = AString::ConstNull();
