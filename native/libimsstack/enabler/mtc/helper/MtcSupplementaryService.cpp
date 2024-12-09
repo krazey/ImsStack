@@ -476,6 +476,22 @@ void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
     }
 }
 
+GLOBAL PUBLIC void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
+        IN MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber)
+{
+    AString strSet =
+            objConfigurationProxy.GetString(ConfigVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING);
+    if (strSet.GetLength() == 0 || strNumber.GetLength() == 0)
+    {
+        return;
+    }
+
+    AString strInternaltionalNumberPrefix;
+    AString strLocalNumberPrefix;
+    strSet.SplitF(TextParser::CHAR_COLON, strInternaltionalNumberPrefix, strLocalNumberPrefix);
+    strNumber.Replace(strInternaltionalNumberPrefix, strLocalNumberPrefix);
+}
+
 PRIVATE
 ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN IMessage* piMessage)
 {
@@ -674,6 +690,7 @@ void MtcSupplementaryService::GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOO
     IMS_SINT32 nDeterminationPolicyHeader =
             bFromHeader ? ISipHeader::FROM : ISipHeader::P_ASSERTED_IDENTITY;
     strCnap = m_objContext.GetMessageUtils().GetDisplayName(piMessage, nDeterminationPolicyHeader);
+    ConvertGlobalNumberToLocalNumber(m_objConfigurationProxy, strCnap);
 
     if (strCnap.GetLength() <= 0 && bDoFallBack)
     {

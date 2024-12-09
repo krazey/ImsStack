@@ -82,6 +82,7 @@
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="1"/>
     <int-array name="imsvoice.short_call_code_int_array" num="0">
     </int-array>
+    <string name="imsvoice.local_number_presentation_set_string"></string>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
     <string-array name="imsvoice.reject_code_and_reason_code_set_string_array" num="0">
     </string-array>
@@ -148,7 +149,6 @@
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
     <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
     </string-array>
-    <!-- Emergency -->
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_provisional_to_final_response_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>

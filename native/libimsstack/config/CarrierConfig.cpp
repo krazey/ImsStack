@@ -544,6 +544,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL
         KEY_IMS_VOICE_PREFIX "call_type_after_audio_and_video_call_merged_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "short_call_code_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING[] =
+        KEY_IMS_VOICE_PREFIX "local_number_presentation_set_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL[] =
         KEY_IMS_VOICE_PREFIX "allow_multiple_call_including_video_call_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[] =
