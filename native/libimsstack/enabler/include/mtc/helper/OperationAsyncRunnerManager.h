@@ -44,9 +44,9 @@ public:
 
         auto pRunner = std::make_unique<OperationAsyncRunner>(m_nSlotId);
         pRunner->SetOperation(objOperation,
-                [this, pOwner, &pRunner]()
+                [this, pOwner, pRawRunner = pRunner.get()]()
                 {
-                    this->RemoveRunner(pOwner, pRunner.get());
+                    this->RemoveRunner(pOwner, pRawRunner);
                 });
 
         m_objRunners.insert({pOwner, std::move(pRunner)});
