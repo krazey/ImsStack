@@ -109,6 +109,10 @@ protected:
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
         pSupplementaryService = new MtcSupplementaryService(objCallContext, *pConfigurationProxy);
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+                .WillByDefault(Return(IMS_TRUE));
+
         ON_CALL(objCallContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 
@@ -225,6 +229,93 @@ TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
 
     EXPECT_NE(nullptr, pSupplementaryService->Get(eSuppType));
+}
+
+TEST_F(IdleStateTest, StartUpdatesRemoteNumberIfCallerIdRestrictionIsIncluded)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    CallType eCallType = CallType::VOIP;
+    AString strTargetWithCallerId("*67some_target");
+    AString strTargetWithoutCallerId("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTargetWithoutCallerId));
+
+    pIdleState->Start(eCallType, strTargetWithCallerId, objInputMediaInfo, objInputSuppServices);
+
+    EXPECT_EQ(strTargetWithoutCallerId, pParticipantInfo->GetRemoteDisplayName());
+    EXPECT_EQ(CALLERID_RESTRICTED, pSupplementaryService->Get(SuppType::CALLER_ID)->nValue);
+}
+
+TEST_F(IdleStateTest, StartUpdatesRemoteNumberIfCallerIdIdentityIsIncluded)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    CallType eCallType = CallType::VOIP;
+    AString strTargetWithCallerId("*82some_target");
+    AString strTargetWithoutCallerId("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTargetWithoutCallerId));
+
+    pIdleState->Start(eCallType, strTargetWithCallerId, objInputMediaInfo, objInputSuppServices);
+
+    EXPECT_EQ(strTargetWithoutCallerId, pParticipantInfo->GetRemoteDisplayName());
+    EXPECT_EQ(CALLERID_IDENTITY, pSupplementaryService->Get(SuppType::CALLER_ID)->nValue);
+}
+
+TEST_F(IdleStateTest, StartDoesNotUpdateRemoteNumberIfCallerIdRestrictionIsIncludedButConfigIsOn)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    CallType eCallType = CallType::VOIP;
+    AString strTargetWithCallerId("*67some_target");
+    AString strTargetWithoutCallerId("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTargetWithoutCallerId));
+
+    pIdleState->Start(eCallType, strTargetWithCallerId, objInputMediaInfo, objInputSuppServices);
+
+    EXPECT_EQ(strTargetWithCallerId, pParticipantInfo->GetRemoteDisplayName());
+    EXPECT_EQ(nullptr, pSupplementaryService->Get(SuppType::CALLER_ID));
+}
+
+TEST_F(IdleStateTest, StartDoesNotUpdateRemoteNumberIfCallerIdRestrictionIsNotIncluded)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    CallType eCallType = CallType::VOIP;
+    AString strTargetWithoutCallerId("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTargetWithoutCallerId));
+
+    pIdleState->Start(eCallType, strTargetWithoutCallerId, objInputMediaInfo, objInputSuppServices);
+
+    EXPECT_EQ(strTargetWithoutCallerId, pParticipantInfo->GetRemoteDisplayName());
+    EXPECT_EQ(nullptr, pSupplementaryService->Get(SuppType::CALLER_ID));
 }
 
 TEST_F(IdleStateTest, StartSetsUpMediaManager)

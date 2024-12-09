@@ -77,6 +77,7 @@ private:
     IMS_BOOL IsCallPull() const;
     IMS_RESULT HandleCallPull();
     void CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*> objUsers);
+    AString RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget);
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;
