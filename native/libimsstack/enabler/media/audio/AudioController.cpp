@@ -39,6 +39,11 @@ AudioController::~AudioController()
 {
     IMS_TRACE_I("~AudioController() - state[%d]", m_eMediaState, 0, 0);
 
+    if (m_pAudioConfig != IMS_NULL)
+    {
+        delete m_pAudioConfig;
+    }
+
     if (m_eMediaState != AudioSession::STATE_NONE)
     {
         CloseSession();
@@ -611,10 +616,17 @@ IMS_BOOL AudioController::IsAudioConfigChanged(IN AudioConfig* pAudioConfig)
         return IMS_FALSE;
     }
 
-    if (m_pAudioConfig == IMS_NULL || *m_pAudioConfig != *pAudioConfig)
+    if (m_pAudioConfig == IMS_NULL)
+    {
+        IMS_TRACE_D("IsAudioConfigChanged() - RtpConfig changed (first RtpConfig)", 0, 0, 0);
+        m_pAudioConfig = new AudioConfig(*pAudioConfig);
+        return IMS_TRUE;
+    }
+
+    if (*m_pAudioConfig != *pAudioConfig)
     {
         IMS_TRACE_D("IsAudioConfigChanged() - RtpConfig changed", 0, 0, 0);
-        m_pAudioConfig = pAudioConfig;
+        *m_pAudioConfig = *pAudioConfig;
         return IMS_TRUE;
     }
 

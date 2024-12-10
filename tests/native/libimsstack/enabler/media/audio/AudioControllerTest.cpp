@@ -248,6 +248,9 @@ TEST_F(AudioControllerTest, testIsAudioConfigChanged)
     EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig2), IMS_FALSE);
     EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig1), IMS_TRUE);
 
+    pAudioConfig1->setAccessNetwork(5);
+    EXPECT_EQ(m_pController->IsAudioConfigChanged(pAudioConfig1), IMS_TRUE);
+
     delete pAudioConfig1;
     delete pAudioConfig2;
 }
