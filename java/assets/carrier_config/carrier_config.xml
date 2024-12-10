@@ -78,6 +78,12 @@
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="30000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="1"/>
+    <string-array name="imsvoice.caller_id_service_codes_for_restriction_string_array" num="1">
+        <item value="*67"/>
+    </string-array>
+    <string-array name="imsvoice.caller_id_service_codes_for_identity_string_array" num="1">
+        <item value="*82"/>
+    </string-array>
     <int-array name="imsvoice.short_call_code_int_array" num="0">
     </int-array>
     <string name="imsvoice.local_number_presentation_set_string"></string>

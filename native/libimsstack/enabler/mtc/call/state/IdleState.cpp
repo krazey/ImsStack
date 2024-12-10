@@ -626,16 +626,21 @@ void IdleState::CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*>
 PRIVATE
 AString IdleState::RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget)
 {
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        // TODO: b/382332088
+        // imsemergency.caller_id_service_codes_for_restriction_string_array for JP carriers.
+        return strTarget;
+    }
+
     if (m_objContext.GetConfigurationProxy().GetBoolean(
                 ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
     {
         return strTarget;
     }
 
-    // TODO: b/382332088 - will have configuration for the carrier defined prefix.
-    ImsVector<AString> objCodeRestricted;
-    objCodeRestricted.Push("*67");
-
+    ImsVector<AString> objCodeRestricted = m_objContext.GetConfigurationProxy().GetStringArray(
+            ConfigVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY);
     for (IMS_UINT32 i = 0; i < objCodeRestricted.GetSize(); i++)
     {
         if (strTarget.StartsWith(objCodeRestricted.GetAt(i)))
@@ -646,8 +651,8 @@ AString IdleState::RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AStrin
         }
     }
 
-    ImsVector<AString> objCodeIdentity;
-    objCodeIdentity.Push("*82");
+    ImsVector<AString> objCodeIdentity = m_objContext.GetConfigurationProxy().GetStringArray(
+            ConfigVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY);
     for (IMS_UINT32 i = 0; i < objCodeIdentity.GetSize(); i++)
     {
         if (strTarget.StartsWith(objCodeIdentity.GetAt(i)))

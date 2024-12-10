@@ -169,6 +169,14 @@
         <item value="0"/> <!-- NORMAL_WIFI -->
     </int-array>
     <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="false"/>
+    <string-array name="imsvoice.caller_id_service_codes_for_restriction_string_array" num="2">
+        <item value="#31#"/>
+        <item value="*67"/>
+    </string-array>
+    <string-array name="imsvoice.caller_id_service_codes_for_identity_string_array" num="2">
+        <item value="*31#"/>
+        <item value="*82"/>
+    </string-array>
     <int-array name="imsvoice.srvcc_type_int_array" num="3">
         <item value="0"/>
         <item value="1"/>
@@ -244,7 +252,6 @@
     <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="false"/>
-
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>
