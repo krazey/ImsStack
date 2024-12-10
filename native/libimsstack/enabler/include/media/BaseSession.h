@@ -17,13 +17,17 @@
 #ifndef BASE_SESSION_H_
 #define BASE_SESSION_H_
 
+#include <RtpConfig.h>
+#include <MediaQualityThreshold.h>
+
 #include "ImsList.h"
 #include "MediaDef.h"
 #include "config/MediaConfiguration.h"
-#include <RtpConfig.h>
+
 using namespace android::telephony::imsmedia;
 
 class IMediaSessionListener;
+class MediaBaseProfile;
 class MediaEnvironment;
 
 class BaseSession
@@ -31,6 +35,15 @@ class BaseSession
 public:
     explicit BaseSession(IN IMS_SINT32 nSlotId = 0);
     virtual ~BaseSession();
+
+    /**
+     * @brief Set RtpConfig for libpixelimsmedia from local/peer/negotiated profile
+     * @param pLocalProfile : local profile of the SDP negotiation
+     * @param pPeerProfile : peer profile of the SDP negotiation
+     * @param pRtpConfig : The target rtpConfig to be set ip address and port number
+     */
+    void UpdateRtpConfig(IN MediaBaseProfile* pLocalProfile, IN MediaBaseProfile* pPeerProfile,
+            OUT RtpConfig* pRtpConfig = IMS_NULL);
 
     /**
      * @brief Set the text configuration
@@ -110,8 +123,19 @@ public:
     void UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
 
 protected:
+    /**
+     * @brief Update the remote ip address and port number
+     *
+     * @param objRemoteAddr The remote ip address
+     * @param nPort The remote port number
+     * @param pRtpConfig The target rtpConfig to be set ip address and port number
+     */
+    void UpdateRemoteEndPoint(IN const IpAddress& objRemoteAddr, IN IMS_UINT32 nPort,
+            OUT RtpConfig* pRtpConfig = IMS_NULL);
+
     IMS_SINT32 m_nSlotId;
     MediaConfiguration* m_pConfiguration;
+    MediaQualityThreshold m_objMediaQualityThreshold;
     IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     IMediaSessionListener* m_piMediaSessionListener;

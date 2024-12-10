@@ -17,7 +17,6 @@
 #ifndef VIDEO_SESSION_H_
 #define VIDEO_SESSION_H_
 
-#include <MediaQualityThreshold.h>
 #include "BaseSession.h"
 #include "video/VideoDef.h"
 #include "video/VideoProfile.h"
@@ -133,7 +132,6 @@ private:
     IMS_UINT32 convertHevcLevel(IN IMS_UINT32 nLevel);
     VideoConfiguration* GetConfiguration();
 
-    MediaQualityThreshold m_objMediaQualityThreshold;
     IMS_SINT32 m_nCameraId;
     IMS_SINT32 m_nCameraZoom;
     IMS_BOOL m_bPreviewSurfaceSet;

@@ -16,6 +16,7 @@
 
 #include "ServiceTrace.h"
 #include "BaseSession.h"
+#include "MediaBaseProfile.h"
 #include "MediaEnvironment.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -24,6 +25,7 @@ PUBLIC
 BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_pConfiguration(IMS_NULL),
+        m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0),
         m_piMediaSessionListener(IMS_NULL),
@@ -35,6 +37,18 @@ BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
 }
 
 PUBLIC VIRTUAL BaseSession::~BaseSession() {}
+
+PUBLIC void BaseSession::UpdateRtpConfig(IN MediaBaseProfile* pLocalProfile,
+        IN MediaBaseProfile* pPeerProfile, OUT RtpConfig* pRtpConfig)
+{
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    UpdateLocalEndPoint(pLocalProfile->GetIpAddress(), pLocalProfile->GetDataPort());
+    UpdateRemoteEndPoint(pPeerProfile->GetIpAddress(), pPeerProfile->GetDataPort(), pRtpConfig);
+}
 
 PUBLIC
 void BaseSession::SetConfiguration(IN MediaConfiguration* pConfiguration)
@@ -147,4 +161,24 @@ void BaseSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_U
 
     IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
             m_objLocalAddress.ToString().GetStr(), m_nLocalPort, 0);
+}
+
+PROTECTED
+void BaseSession::UpdateRemoteEndPoint(
+        IN const IpAddress& objRemoteAddr, IN IMS_UINT32 nPort, OUT RtpConfig* pRtpConfig)
+{
+    if (pRtpConfig == IMS_NULL)
+    {
+        pRtpConfig = m_pRtpConfig;
+    }
+
+    if (!objRemoteAddr.ToString().IsNULL())
+    {
+        pRtpConfig->setRemoteAddress(android::String8(objRemoteAddr.ToString().GetStr()));
+    }
+
+    pRtpConfig->setRemotePort(nPort);
+
+    IMS_TRACE_D("UpdateRemoteEndPoint() - RemoteIP[%s], RemotePort[%d]",
+            objRemoteAddr.ToString().GetStr(), nPort, 0);
 }

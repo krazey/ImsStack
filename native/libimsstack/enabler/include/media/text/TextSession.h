@@ -17,7 +17,6 @@
 #ifndef TEXT_SESSION_H_
 #define TEXT_SESSION_H_
 
-#include <MediaQualityThreshold.h>
 #include "BaseSession.h"
 #include "text/TextDef.h"
 #include "text/TextProfile.h"
@@ -115,8 +114,6 @@ public:
 
 private:
     TextConfiguration* GetConfiguration();
-
-    MediaQualityThreshold m_objMediaQualityThreshold;
 };
 
 #endif

@@ -40,7 +40,6 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC
 AudioSession::AudioSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
-        m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_nNetworkToneTimer(0),
         m_nRtpInactivityTimer(0),
         m_nRtcpInactivityTimer(0),
@@ -208,15 +207,12 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     AudioConfig objAudioConfig;
 
+    BaseSession::UpdateRtpConfig(pLocalProfile, pPeerProfile, &objAudioConfig);
+
     // Setting the network properties
-    UpdateLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     objAudioConfig.setAccessNetwork(nAccessNetwork);
     objAudioConfig.setTxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
 
-    // remote network parameters
-    objAudioConfig.setRemoteAddress(
-            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
-    objAudioConfig.setRemotePort(pPeerProfile->GetDataPort());
     if (GetConfiguration() != IMS_NULL)
     {
         objAudioConfig.setDscp(GetConfiguration()->GetRtpDscp());
