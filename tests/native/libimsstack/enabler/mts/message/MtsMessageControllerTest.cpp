@@ -121,6 +121,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     AString strTargetAddress = "tel:+12345678901";
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
+    const AString strCallId(SipHeaderName::CALL_ID);
 
     ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     pContent->Append((IMS_BYTE)0x03);                     // message reference
@@ -138,6 +141,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, GetHeaders(strCallId)).WillByDefault(Return(objCallIdHeaders));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
@@ -158,6 +162,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     AString strTargetAddress = "tel:+12345678901";
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
+    const AString strCallId(SipHeaderName::CALL_ID);
 
     ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     pContent->Append((IMS_BYTE)0x03);                     // message reference
@@ -178,6 +185,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, GetHeaders(strCallId)).WillByDefault(Return(objCallIdHeaders));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
@@ -421,6 +429,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndPageMessageDeliveryFailed)
     AString strTargetAddress = "tel:+12345678901";
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
+    const AString strCallId(SipHeaderName::CALL_ID);
 
     ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     pContent->Append((IMS_BYTE)0x03);                     // message reference
@@ -438,6 +449,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndPageMessageDeliveryFailed)
     ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, GetHeaders(strCallId)).WillByDefault(Return(objCallIdHeaders));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
@@ -459,10 +471,12 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
-    AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
-    ImsList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
+    const AString strCallId(SipHeaderName::CALL_ID);
     ImsList<IMessageBodyPart*> objMessageBodies = ImsList<IMessageBodyPart*>();
     objMessageBodies.Append(&objMockMessageBodyPart);
+    AString strInReplyTo = "0057f183b-245fdcb9@192.168.45.139";
 
     ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     pContent->Append((IMS_BYTE)0x02);                     // message reference
@@ -475,6 +489,9 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
     ON_CALL(objMockMtsService, GetIMtsServiceState())
@@ -492,10 +509,12 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
             .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
-    ON_CALL(objMockMessage, GetHeaders(_)).WillByDefault(Return(objHeaders));
+    ON_CALL(objMockMessage, GetHeaders(_)).WillByDefault(Return(objCallIdHeaders));
     ON_CALL(objMockMessage, GetBodyParts()).WillByDefault(Return(objMessageBodies));
+    ON_CALL(objMockMessage, GetMessage()).WillByDefault(Return(&objMockSipMessage));
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpAck));
+    ON_CALL(objMockSipMessage, GetHeader(_, _, _)).WillByDefault(Return(strInReplyTo));
 
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
@@ -505,6 +524,70 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+}
+
+TEST_F(MtsMessageControllerTest, NormalMoSmsAndInReplyToMismatched)
+{
+    IMS_BOOL bEmergency = IMS_FALSE;
+    AString strContentType = "application/vnd.3gpp.sms";
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SipAddress objSipAddress;
+    objSipAddress.Create(strTargetAddress);
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
+    const AString strCallId(SipHeaderName::CALL_ID);
+    ImsList<IMessageBodyPart*> objMessageBodies = ImsList<IMessageBodyPart*>();
+    objMessageBodies.Append(&objMockMessageBodyPart);
+    AString strInReplyTo = "0057f183b-245fdcb9@192.168.45.1";
+
+    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    pContent->Append((IMS_BYTE)0x02);                     // message reference
+    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
+
+    ByteArray objRpAck((IMS_BYTE)0x03);  // message type indicator(RP-ACK)
+    objRpAck.Append((IMS_BYTE)0x02);     // message reference
+    objRpAck.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsService, GetICoreService(bEmergency))
+            .WillByDefault(Return(&objMockCoreService));
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
+    ON_CALL(objMockPageMessage, GetPreviousRequest(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
+    ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, GetHeaders(_)).WillByDefault(Return(objCallIdHeaders));
+    ON_CALL(objMockMessage, GetBodyParts()).WillByDefault(Return(objMessageBodies));
+    ON_CALL(objMockMessage, GetMessage()).WillByDefault(Return(&objMockSipMessage));
+    ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
+    ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpAck));
+    ON_CALL(objMockSipMessage, GetHeader(_, _, _)).WillByDefault(Return(strInReplyTo));
+
+    EXPECT_CALL(
+            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+            .Times(1);
+    pMtsMessageController->NotifyMoSms(
+            SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
+    pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
+
+    EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_488, _)).Times(1);
+    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
     pMtsMessageController->NotifyMtSms(&objMockPageMessage);
 }
 
@@ -532,6 +615,9 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAckWithout202Accepted)
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));

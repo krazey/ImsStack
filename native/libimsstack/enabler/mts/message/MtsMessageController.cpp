@@ -54,6 +54,7 @@ MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService
         m_bProcessingMsg(IMS_FALSE),
         m_nSlotId(nSlotId),
         m_strLastRcvIpsmgwAddr(AString::ConstNull()),
+        m_strPreviousCallId(AString::ConstNull()),
         m_piMtsService(piMtsService),
         m_piMtsErrorHandler(IMS_NULL),
         m_pMtsDynamicLoader(pMtsDynamicLoader),
@@ -447,7 +448,8 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         return;
     }
 
-    if ((piMtsMessage->GetSmsFormat() == SmsFormatType::SMSFORMAT_3GPP) &&
+    SmsFormatType eSmsFormat = piMtsMessage->GetSmsFormat();
+    if ((eSmsFormat == SmsFormatType::SMSFORMAT_3GPP) &&
             (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_N))
     {
         if (m_bProcessingMsg)
@@ -460,10 +462,11 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         m_bProcessingMsg = IMS_TRUE;
     }
 
-    ReportMtSms(piMtsMessage->GetSmsFormat(), objContent.GetLength(), objContent.GetData());
-    RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_TRUE);
-
-    IMS_TRACE_I("ReceiveMessage : SMS is received successfully", 0, 0, 0);
+    if (RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_TRUE) == IMS_SUCCESS)
+    {
+        IMS_TRACE_I("ReceiveMessage : SMS is received successfully", 0, 0, 0);
+        ReportMtSms(eSmsFormat, objContent.GetLength(), objContent.GetData());
+    }
 }
 
 PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
@@ -589,6 +592,15 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     SetMessageInfo(piPageMessage, *pContent, eSmsFormat, strDestination,
             MtsTransactionType::MESSAGE_TYPE_SEND, piMtsMessage);
     piMtsMessage->PrintInfo();
+
+    if (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_MS)
+    {
+        ImsList<AString> objCallIds = piMessage->GetHeaders("Call-ID");
+        if (!objCallIds.IsEmpty())
+        {
+            m_strPreviousCallId = objCallIds.GetAt(0);
+        }
+    }
 
     return IMS_SUCCESS;
 }
@@ -839,22 +851,36 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
 }
 
 PRIVATE
-void MtsMessageController::RespondReceivedMessage(
+IMS_RESULT MtsMessageController::RespondReceivedMessage(
         IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, IN IMS_BOOL bAdded)
 {
-    piPageMessage->Accept();
-    if (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_N)
+    IMS_SINT32 nMti = piMtsMessage->GetMti();
+    if (nMti == SMS_3GPP_MTI_RP_DATA_FROM_N)
     {
         IMS_TRACE_I("RespondReceivedMessage : bAdded[%s]", _TRACE_B_(bAdded), 0, 0);
         if (bAdded)
         {
             Add(piMtsMessage);
         }
+        piPageMessage->Accept();
+        return IMS_SUCCESS;
     }
-    else
+    else if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_N || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_N)
     {
-        delete piMtsMessage;
+        if (ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
+                    CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL) &&
+                ValidateInReplyToHeader(*piPageMessage) == IMS_FALSE)
+        {
+            IMS_TRACE_I("RespondReceivedMessage : In-Reply-To header is mismatched", 0, 0, 0);
+            piPageMessage->Reject(SipStatusCode::SC_488, 0);
+            delete piMtsMessage;
+            return IMS_FAILURE;
+        }
     }
+
+    piPageMessage->Accept();
+    delete piMtsMessage;
+    return IMS_SUCCESS;
 }
 
 PRIVATE
@@ -869,8 +895,10 @@ void MtsMessageController::Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessag
     IPageMessage* piPageMessage = piMtsMessage->GetPageMessage();
     SmsFormatType eSmsFormat = piMtsMessage->GetSmsFormat();
     const ByteArray& objContent = ProcessReceivedMessage(piPageMessage, piMtsMessage);
-    ReportMtSms(eSmsFormat, objContent.GetLength(), objContent.GetData());
-    RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_FALSE);
+    if (RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_FALSE) == IMS_SUCCESS)
+    {
+        ReportMtSms(eSmsFormat, objContent.GetLength(), objContent.GetData());
+    }
 }
 
 PRIVATE
@@ -1288,4 +1316,19 @@ void MtsMessageController::StopRetryAfterTimer()
         TimerService::GetTimerService()->DestroyTimer(m_piRetryAfterTimer);
         m_piRetryAfterTimer = IMS_NULL;
     }
+}
+
+PRIVATE
+IMS_RESULT MtsMessageController::ValidateInReplyToHeader(
+        IN const IPageMessage& objPageMessage) const
+{
+    IMS_TRACE_I("ValidateInReplyToHeader", 0, 0, 0);
+
+    IMessage* piMessage = objPageMessage.GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
+    ISipMessage* piSipMessage = piMessage != IMS_NULL ? piMessage->GetMessage() : IMS_NULL;
+    AString strInReplyTo = piSipMessage != IMS_NULL
+            ? piSipMessage->GetHeader(ISipHeader::IN_REPLY_TO)
+            : AString::ConstEmpty();
+
+    return (strInReplyTo.GetLength() > 0 && strInReplyTo.Equals(m_strPreviousCallId));
 }
