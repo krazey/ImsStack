@@ -721,5 +721,6 @@
     <boolean name="imssms.sms_report_generic_error_when_retry_after_not_possible_bool" value="false"/>
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="0"/>
     <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="3"/>
+    <boolean name="imssms.sms_in_reply_to_validation_bool" value="true"/>
 
 </carrier_config>
