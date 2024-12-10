@@ -785,4 +785,43 @@ TEST_F(MtcSupplementaryServiceTest, UpdateSessionId)
     EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::SESSION_ID));
 }
 
+TEST_F(MtcSupplementaryServiceTest, ConvertGlobalNumberToLocalNumberDoesNothingIfNoPrefixExists)
+{
+    AString strRemoteNumberWithoutPrefix("number");
+    const AString strSameRemoteNumberWithoutPrefix("number");
+    const AString strTestSet("globalPrefix:localPrefix");
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING))
+            .WillByDefault(Return(strTestSet));
+
+    pMtcSupplementaryService->ConvertGlobalNumberToLocalNumber(
+            *pConfigurationProxy, strRemoteNumberWithoutPrefix);
+    EXPECT_EQ(strSameRemoteNumberWithoutPrefix, strRemoteNumberWithoutPrefix);
+}
+
+TEST_F(MtcSupplementaryServiceTest, ConvertGlobalNumberToLocalNumberDoesNothingIfNotConfigured)
+{
+    AString strRemoteNumberAsGlobal("globalPrefixAndNumber");
+    const AString strSameRemoteNumberAsGlobal("globalPrefixAndNumber");
+    const AString strEmptySet;
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING))
+            .WillByDefault(Return(strEmptySet));
+
+    pMtcSupplementaryService->ConvertGlobalNumberToLocalNumber(
+            *pConfigurationProxy, strRemoteNumberAsGlobal);
+    EXPECT_EQ(strSameRemoteNumberAsGlobal, strRemoteNumberAsGlobal);
+}
+
+TEST_F(MtcSupplementaryServiceTest, ConvertGlobalNumberToLocalNumerUpdateTheNumber)
+{
+    AString strRemoteNumberAsGlobal("globalPrefixAndNumber");
+    const AString strRemoteNumberAsLocal("localPrefixAndNumber");
+    const AString strTestSet("globalPrefix:localPrefix");
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING))
+            .WillByDefault(Return(strTestSet));
+
+    pMtcSupplementaryService->ConvertGlobalNumberToLocalNumber(
+            *pConfigurationProxy, strRemoteNumberAsGlobal);
+    EXPECT_EQ(strRemoteNumberAsLocal, strRemoteNumberAsGlobal);
+}
+
 }  // namespace android

@@ -152,6 +152,8 @@ PUBLIC void ParticipantInfo::HandleRequest(IN RequestType eType, IN const IMessa
     m_strRemoteUri = m_objContext.GetMessageUtils().GetRemoteUri(
             &m_objContext.GetSession()->GetISession(), PeerType::MT);
     m_strRemoteNumber = GetRemoteNumberFromMessage(objRequest);
+    MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
+            m_objContext.GetConfigurationProxy(), m_strRemoteNumber);
 
     IMS_TRACE_D("HandleRequest : Remote URI[%s] Number[%s]", m_strRemoteUri.GetStr(),
             m_strRemoteNumber.GetStr(), 0);

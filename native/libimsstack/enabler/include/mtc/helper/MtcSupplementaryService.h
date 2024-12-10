@@ -65,6 +65,9 @@ public:
     void Add(IN SuppType eSuppType, IN IMS_SINT32 nValue);
     void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);
 
+    static void ConvertGlobalNumberToLocalNumber(
+            IN MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber);
+
 private:
     ISipHeader* GetHistoryInfoHeader(IN IMessage* piMessage);
     static IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
