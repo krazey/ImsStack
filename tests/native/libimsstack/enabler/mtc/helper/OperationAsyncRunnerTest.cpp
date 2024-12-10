@@ -85,9 +85,8 @@ TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
             {
                 bUpdated = IMS_TRUE;
             },
-            [&]()
+            []()
             {
-                delete pRunner;
             });
 
     EXPECT_FALSE(bUpdated);
@@ -95,6 +94,31 @@ TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
     ImsMessage objMessage(0, 0, 0);
     pRunner->MessageCallback_OnMessage(objMessage);
     EXPECT_TRUE(bUpdated);
+
+    delete pRunner;
+}
+
+TEST_F(OperationAsyncRunnerTest, DeletedByRemoveCallback)
+{
+    EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_));
+
+    IMS_BOOL bDeleted = IMS_FALSE;
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
+            []()
+            {
+            },
+            [&]()
+            {
+                bDeleted = IMS_TRUE;
+                delete pRunner;
+            });
+
+    EXPECT_FALSE(bDeleted);
+
+    ImsMessage objMessage(0, 0, 0);
+    pRunner->MessageCallback_OnMessage(objMessage);
+    EXPECT_TRUE(bDeleted);
 }
 
 TEST_F(OperationAsyncRunnerTest, DestructorRemovesMessage)
@@ -109,6 +133,37 @@ TEST_F(OperationAsyncRunnerTest, DestructorRemovesMessage)
             });
 
     EXPECT_CALL(pThreadService->GetMockThread(), RemoveMessages(pRunner, _));
+
+    delete pRunner;
+}
+
+TEST_F(OperationAsyncRunnerTest, IsOperationStartedReturnsFalse)
+{
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
+            []()
+            {
+            },
+            []()
+            {
+            });
+    EXPECT_FALSE(pRunner->IsOperationStarted());
+
+    delete pRunner;
+}
+
+TEST_F(OperationAsyncRunnerTest, IsWaitingMessageReturnsFalseAfterOperationIsStarted)
+{
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
+            []()
+            {
+            },
+            []()
+            {
+            });
+    ImsMessage objMessage(0, 0, 0);
+    pRunner->MessageCallback_OnMessage(objMessage);
 
     delete pRunner;
 }

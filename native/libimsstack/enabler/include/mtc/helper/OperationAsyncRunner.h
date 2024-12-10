@@ -31,10 +31,12 @@ public:
 
     void SetOperation(
             IN std::function<void()> objOperation, std::function<void()> objRemoveCallback);
+    inline IMS_BOOL IsOperationStarted() { return m_bOperationStarted; }
     void MessageCallback_OnMessage(IN ImsMessage& objMsg) override;
 
 private:
     IMS_SINT32 m_nSlotId;
+    IMS_BOOL m_bOperationStarted;
     std::function<void()> m_objOperation;
     std::function<void()> m_objRemoveCallback;
 };

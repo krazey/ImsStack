@@ -27,6 +27,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 OperationAsyncRunner::OperationAsyncRunner(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
+        m_bOperationStarted(IMS_FALSE),
         m_objOperation(IMS_NULL),
         m_objRemoveCallback(IMS_NULL)
 {
@@ -36,8 +37,6 @@ OperationAsyncRunner::OperationAsyncRunner(IN IMS_SINT32 nSlotId) :
 PUBLIC
 OperationAsyncRunner::~OperationAsyncRunner()
 {
-    IMS_TRACE_D("~OperationAsyncRunner", 0, 0, 0);
-
     BaseThread* pThread =
             ImsProcess::GetInstance()->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId));
     if (pThread != IMS_NULL)
@@ -45,7 +44,8 @@ OperationAsyncRunner::~OperationAsyncRunner()
         IThread* piThread = pThread->GetThread();
         if (piThread != IMS_NULL)
         {
-            piThread->RemoveMessages(this);
+            IMS_SINT32 nRemovedSize = piThread->RemoveMessages(this);
+            IMS_TRACE_D("~OperationAsyncRunner removed message size[%d]", nRemovedSize, 0, 0);
         }
     }
     m_objOperation = {};
@@ -80,6 +80,7 @@ void OperationAsyncRunner::SetOperation(
 PUBLIC VIRTUAL void OperationAsyncRunner::MessageCallback_OnMessage(IN ImsMessage& /*objMsg*/)
 {
     IMS_TRACE_D("MessageCallback_OnMessage", 0, 0, 0);
+    m_bOperationStarted = IMS_TRUE;
     m_objOperation();
     m_objRemoveCallback();
 }

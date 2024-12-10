@@ -52,10 +52,24 @@ public:
         m_objRunners.insert({pOwner, std::move(pRunner)});
     }
 
-    inline void Release(IN void* pOwner) { m_objRunners.erase(pOwner); }
+    inline void Release(IN void* pOwner)
+    {
+        std::erase_if(m_objRunners,
+                [pOwner](const auto& record)
+                {
+                    return record.first == pOwner && !record.second->IsOperationStarted();
+                });
+    }
 
 private:
-    inline void RemoveAllRunners() { m_objRunners.clear(); }
+    inline void RemoveAllRunners()
+    {
+        std::erase_if(m_objRunners,
+                [](const auto& record)
+                {
+                    return !record.second->IsOperationStarted();
+                });
+    }
 
     inline void RemoveRunner(IN void* pOwner, OperationAsyncRunner* pRunner)
     {

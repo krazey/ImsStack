@@ -122,6 +122,11 @@ TEST_F(OperationAsyncRunnerManagerTest, ReleaseCancelsOperation)
     delete pManager;
 }
 
+TEST_F(OperationAsyncRunnerManagerTest, ReleaseDoesNotCancelOperationIfNotWaitingMessage)
+{
+    // Not applicable.
+}
+
 TEST_F(OperationAsyncRunnerManagerTest, DestructorCancelsOperations)
 {
     OperationAsyncRunnerManager* pManager = new OperationAsyncRunnerManager(SLOT_ID);
