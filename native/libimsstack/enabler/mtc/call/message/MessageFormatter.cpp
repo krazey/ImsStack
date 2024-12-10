@@ -488,6 +488,11 @@ void MessageFormatter::SetSrvccContactParameter()
 PRIVATE
 void MessageFormatter::SetCallerIdHeader()
 {
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        return;
+    }
+
     const SuppService* pSuppService =
             m_objContext.GetSupplementaryService().Get(SuppType::CALLER_ID);
 
