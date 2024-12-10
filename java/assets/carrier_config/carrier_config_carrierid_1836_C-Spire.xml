@@ -16,4 +16,7 @@
 -->
 <carrier_config>
     <string name="imsemergency.p_emergency_info_header_in_invite_string">i-wlan-node-id=#MAC#</string>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
+    </int-array>
 </carrier_config>

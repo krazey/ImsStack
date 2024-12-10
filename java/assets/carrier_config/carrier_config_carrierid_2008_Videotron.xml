@@ -42,6 +42,9 @@
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
+    </int-array>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>

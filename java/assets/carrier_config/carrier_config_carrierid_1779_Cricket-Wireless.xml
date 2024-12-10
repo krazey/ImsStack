@@ -282,6 +282,9 @@
     <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
     <boolean name="imsvoice.suppinfo_cdiv_cause_required_bool" value="true"/>
     <string name="imsemergency.p_emergency_info_header_in_invite_string">IEEE-802.11b; I-wlan-node-id=#AID#</string>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
+    </int-array>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
