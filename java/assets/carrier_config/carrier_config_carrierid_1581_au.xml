@@ -86,6 +86,7 @@
     <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="90"/>
 
+    <int name="imsvoice.session_privacy_type_int" value="2"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
     <int name="imsvoice.ringing_timer_millis_int" value="80000"/>
