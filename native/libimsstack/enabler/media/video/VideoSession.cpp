@@ -218,8 +218,8 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         pVideoConfig->setCodecType(VideoConfig::CODEC_HEVC);
         pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->GetProfile())));
 
-        /** TODO: check the case for setting HIGHTIER */
-        pVideoConfig->setCodecLevel(convertHevcLevel(pFmtp->GetLevel()));
+        /** The levelId received from sdp profile should be converted to a value divided by 3. */
+        pVideoConfig->setCodecLevel(convertHevcLevel(pFmtp->GetLevel() / 3));
 
         pVideoConfig->setFramerate(pFmtp->GetFramerate());
         pVideoConfig->setBitrate(pFmtp->GetBitrate());
