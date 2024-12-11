@@ -236,6 +236,12 @@ TEST_F(IdleStateTest, StartUpdatesRemoteNumberIfCallerIdRestrictionIsIncluded)
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+    ImsVector<AString> objCodeRestricted;
+    objCodeRestricted.Push("*123");
+    objCodeRestricted.Push("*67");
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(ConfigVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY))
+            .WillByDefault(Return(objCodeRestricted));
 
     CallType eCallType = CallType::VOIP;
     AString strTargetWithCallerId("*67some_target");
@@ -258,6 +264,12 @@ TEST_F(IdleStateTest, StartUpdatesRemoteNumberIfCallerIdIdentityIsIncluded)
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+    ImsVector<AString> objCodeIdentity;
+    objCodeIdentity.Push("*123");
+    objCodeIdentity.Push("*82");
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(ConfigVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY))
+            .WillByDefault(Return(objCodeIdentity));
 
     CallType eCallType = CallType::VOIP;
     AString strTargetWithCallerId("*82some_target");
@@ -280,6 +292,12 @@ TEST_F(IdleStateTest, StartDoesNotUpdateRemoteNumberIfCallerIdRestrictionIsInclu
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ImsVector<AString> objCodeRestricted;
+    objCodeRestricted.Push("*123");
+    objCodeRestricted.Push("*67");
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(ConfigVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY))
+            .WillByDefault(Return(objCodeRestricted));
 
     CallType eCallType = CallType::VOIP;
     AString strTargetWithCallerId("*67some_target");
@@ -302,7 +320,60 @@ TEST_F(IdleStateTest, StartDoesNotUpdateRemoteNumberIfCallerIdRestrictionIsNotIn
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+    ImsVector<AString> objCodeRestricted;
+    objCodeRestricted.Push("*123");
+    objCodeRestricted.Push("*67");
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(ConfigVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY))
+            .WillByDefault(Return(objCodeRestricted));
 
+    CallType eCallType = CallType::VOIP;
+    AString strTargetWithoutCallerId("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTargetWithoutCallerId));
+
+    pIdleState->Start(eCallType, strTargetWithoutCallerId, objInputMediaInfo, objInputSuppServices);
+
+    EXPECT_EQ(strTargetWithoutCallerId, pParticipantInfo->GetRemoteDisplayName());
+    EXPECT_EQ(nullptr, pSupplementaryService->Get(SuppType::CALLER_ID));
+}
+
+TEST_F(IdleStateTest, StartDoesNotUpdateRemoteNumberIfCallerIdServiceCodesIsEmpty)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ImsVector<AString> objCodeRestricted;
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(ConfigVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY))
+            .WillByDefault(Return(objCodeRestricted));
+
+    CallType eCallType = CallType::VOIP;
+    AString strTargetWithCallerId("*67some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTargetWithCallerId));
+
+    pIdleState->Start(eCallType, strTargetWithCallerId, objInputMediaInfo, objInputSuppServices);
+
+    EXPECT_EQ(strTargetWithCallerId, pParticipantInfo->GetRemoteDisplayName());
+    EXPECT_EQ(nullptr, pSupplementaryService->Get(SuppType::CALLER_ID));
+}
+
+TEST_F(IdleStateTest, StartDoesNotUpdateRemoteNumberIfEmergencyCall)
+{
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL))
+            .Times(0);
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     CallType eCallType = CallType::VOIP;
     AString strTargetWithoutCallerId("some_target");
 

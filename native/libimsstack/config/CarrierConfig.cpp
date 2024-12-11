@@ -542,6 +542,10 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT[] 
         KEY_IMS_VOICE_PREFIX "silent_redial_interval_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT[] =
         KEY_IMS_VOICE_PREFIX "call_type_after_audio_and_video_call_merged_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "caller_id_service_codes_for_restriction_string_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "caller_id_service_codes_for_identity_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "short_call_code_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING[] =
