@@ -250,6 +250,8 @@ PROTECTED VIRTUAL void AosERegistration::DestroyRegistration()
 
 PROTECTED VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
 {
+    StopTimer(TIMER_TRANSACTION);
+
     ProcessDefaultFlowRecovery_Start();
 }
 
@@ -409,6 +411,8 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SI
 {
     A_IMS_TRACE_I(REGID, "ProcessStartFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
+    StopTimer(TIMER_TRANSACTION);
+
     switch (nStatusCode)
     {
             // 423
@@ -430,7 +434,12 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_TxnTimeout()
 
 PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
 {
-    (void)nReason;
+    if (m_piTransactionTimer != IMS_NULL)
+    {
+        A_IMS_TRACE_I(REGID, "ProcessStartFailed_Others :: Reason(%d), Wait transaction timeout",
+                nReason, 0, 0);
+        return;
+    }
 
     ProcessDefaultFlowRecovery_Start();
 }
@@ -613,7 +622,6 @@ PROTECTED VIRTUAL void AosERegistration::Registration_Updated()
 
 PROTECTED VIRTUAL void AosERegistration::Registration_StartFailed(IN IMS_SINT32 nReason)
 {
-    StopTimer(TIMER_TRANSACTION);
     AosRegistration::Registration_StartFailed(nReason);
 }
 

@@ -182,6 +182,7 @@ public:
     FRIEND_TEST(AosERegistrationTest, RegistrationStarted_ChangeStateToRegistered);
     FRIEND_TEST(AosERegistrationTest, RegistrationUpdated_ChangeStateToRegistered);
     FRIEND_TEST(AosERegistrationTest, RegistrationStartFailed_ChangeStateToRegstop);
+    FRIEND_TEST(AosERegistrationTest, RegistrationStartFailed_failedWithOthers);
     FRIEND_TEST(AosERegistrationTest, RegistrationTerminatedDuringCall_PendingTerminated);
     FRIEND_TEST(AosERegistrationTest, RegistrationTerminated_ChangeStateToOffline);
     FRIEND_TEST(AosERegistrationTest, CallTrackerStateChangedForNonEmergencyType_Ignored);
@@ -716,6 +717,7 @@ TEST_F(AosERegistrationTest, AuthenticationFailedWhenEModeInfoIsNotECall)
 {
     m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_TRANSACTION, 10000);
     m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
 
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
@@ -727,6 +729,7 @@ TEST_F(AosERegistrationTest, AuthenticationFailedWhenEModeInfoIsNotECall)
     m_pAosERegistration->ProcessAuthenticationFailed();
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
 }
 
 TEST_F(AosERegistrationTest, StartFailedWithTxnTimeoutWhenReinitiationIsRequested)
@@ -916,6 +919,7 @@ TEST_F(AosERegistrationTest, SetRegstopStateWhenStartFailedWith423AndRequiredNot
 
 TEST_F(AosERegistrationTest, StartFailedWithOtherStatusCode)
 {
+    m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_TRANSACTION, 10000);
     EXPECT_CALL(m_objMockIAosTransaction, StopEmergencyTraffic()).Times(1);
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
@@ -925,6 +929,7 @@ TEST_F(AosERegistrationTest, StartFailedWithOtherStatusCode)
     m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_500);
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
 }
 
 TEST_F(AosERegistrationTest, UpdateFailedWithStatusCode423)
@@ -1139,7 +1144,6 @@ TEST_F(AosERegistrationTest, RegistrationStartFailed_ChangeStateToRegstop)
 {
     m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_TRANSACTION, 10000);
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
@@ -1148,8 +1152,24 @@ TEST_F(AosERegistrationTest, RegistrationStartFailed_ChangeStateToRegstop)
 
     m_pAosERegistration->Registration_StartFailed(IRegistration::REASON_SERVER_SOCKET_ERROR);
 
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
+
+TEST_F(AosERegistrationTest, RegistrationStartFailed_failedWithOthers)
+{
+    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_TRANSACTION, 10000);
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
+            .Times(0);
+
+    m_pAosERegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
+
+    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+    EXPECT_NE(m_pAosERegistration->m_piTransactionTimer, nullptr);
 }
 
 TEST_F(AosERegistrationTest, RegistrationTerminatedDuringCall_PendingTerminated)
