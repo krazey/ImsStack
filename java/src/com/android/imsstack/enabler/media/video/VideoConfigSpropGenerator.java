@@ -231,6 +231,13 @@ public class VideoConfigSpropGenerator {
                         continue;
                     }
 
+                    int[] bitrates = hevcPayloadDesc.getIntArray(
+                            CarrierConfig.ImsVt.KEY_VIDEO_CODEC_BITRATE_INT_ARRAY);
+                    int hevcBitrate = 512; // Default HEVC bitrate
+                    if (bitrates != null) {
+                        hevcBitrate = bitrates[0];
+                    }
+
                     VideoConfig videoConfig = new VideoConfig.Builder()
                             .setTxPayloadTypeNumber((byte) payloadType)
                             .setCodecType(VideoConfig.VIDEO_CODEC_HEVC)
@@ -242,6 +249,7 @@ public class VideoConfigSpropGenerator {
                             .setResolutionHeight(resolution[1])
                             .setFramerate(hevcPayloadDesc.getInt(
                                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT))
+                            .setBitrate(hevcBitrate)
                             .build();
 
                     videoConfigs.add(videoConfig);
@@ -260,11 +268,11 @@ public class VideoConfigSpropGenerator {
                         && (payloadTypeIdx <= MAX_VIDEO_PAYLOAD_TYPES); payloadTypeIdx++) {
 
                     int payloadType = h264PayloadTypes[payloadTypeIdx];
-                    PersistableBundle h264PayloadDesc = h264PayloadDescriptions
+                    PersistableBundle avcPayloadDesc = h264PayloadDescriptions
                             .getPersistableBundle("" + payloadType);
 
                     // Check if SPROP already exists.
-                    String sprop = h264PayloadDesc.getString(
+                    String sprop = avcPayloadDesc.getString(
                             CarrierConfig.ImsVt.KEY_AVC_SPROP_PARAMETER_SETS_STRING,
                             null);
                     if (sprop != null && !sprop.isEmpty()) {
@@ -272,14 +280,21 @@ public class VideoConfigSpropGenerator {
                         continue;
                     }
 
-                    int[] resolution = h264PayloadDesc.getIntArray(
+                    int[] resolution = avcPayloadDesc.getIntArray(
                             ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
                     if (resolution == null || resolution.length != 2) {
                         continue;
                     }
 
-                    String profileLevelStr = h264PayloadDesc.getString(
-                            ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING);
+                    int[] bitrates = avcPayloadDesc.getIntArray(
+                            CarrierConfig.ImsVt.KEY_VIDEO_CODEC_BITRATE_INT_ARRAY);
+                    int avcBitrate = 384; // Default AVC bitrate
+                    if (bitrates != null) {
+                        avcBitrate = bitrates[0];
+                    }
+
+                    String profileLevelStr = avcPayloadDesc.getString(CarrierConfig.ImsVt
+                            .KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING);
                     if (profileLevelStr != null && !profileLevelStr.isEmpty()) {
                         VideoConfig videoConfig = new VideoConfig.Builder()
                                 .setTxPayloadTypeNumber((byte) payloadType)
@@ -287,8 +302,9 @@ public class VideoConfigSpropGenerator {
                                 .setCodecProfileLevelString(profileLevelStr)
                                 .setResolutionWidth(resolution[0])
                                 .setResolutionHeight(resolution[1])
-                                .setFramerate(h264PayloadDesc.getInt(
+                                .setFramerate(avcPayloadDesc.getInt(
                                         ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT))
+                                .setBitrate(avcBitrate)
                                 .build();
                         videoConfigs.add(videoConfig);
                     } else {
