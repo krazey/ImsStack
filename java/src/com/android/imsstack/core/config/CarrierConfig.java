@@ -779,6 +779,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_reject_reason_phrase_vowifi_off_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING =
                 KEY_PREFIX + "call_reject_reason_phrase_user_reject_string";
+        public static final String KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING =
+                KEY_PREFIX + "call_reject_reason_phrase_access_class_blocked_string";
         public static final String KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL =
                 KEY_PREFIX + "check_conference_event_package_version_bool";
         public static final String KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL =

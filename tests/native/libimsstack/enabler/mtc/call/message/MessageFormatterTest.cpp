@@ -861,6 +861,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
     EXPECT_EQ(GetRejectStatusCode(CODE_NETWORK_RESP_TIMEOUT), SipStatusCode::SC_500);
     EXPECT_EQ(GetRejectStatusCode(CODE_BLACKLISTED_CALL_ID), SipStatusCode::SC_603);
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_REJECTED_SESSION_MODIFICATION), SipStatusCode::SC_603);
+    EXPECT_EQ(GetRejectStatusCode(CODE_ACCESS_CLASS_BLOCKED), SipStatusCode::SC_488);
 }
 
 TEST_F(MessageFormatterTest, GetRejectPhrase)
@@ -875,7 +876,8 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_NEGOTIATION_FAILURE_STRING,
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_NO_ANSWER_BY_USER_STRING,
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING,
-            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING};
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING};
 
     ON_CALL(objConfigurationProxy, GetString(AnyOfArray(expectedKeys)))
             .WillByDefault(Return(AString(pszTestPhrase)));
@@ -889,6 +891,7 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
     EXPECT_STREQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_ACCESS_CLASS_BLOCKED).GetStr(), pszTestPhrase);
 }
 
 TEST_F(MessageFormatterTest, GetRejectPhraseForBusyRttOn)

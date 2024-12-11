@@ -44,6 +44,7 @@ enum class RejectType
     NO_ANSWER_BY_USER = 6,
     VOWIFI_OFF = 7,
     USER_REJECT = 8,
+    ACCESS_CLASS_BLOCKED = 9,
 };
 
 enum class MessageTypeForGeolocationPidf
