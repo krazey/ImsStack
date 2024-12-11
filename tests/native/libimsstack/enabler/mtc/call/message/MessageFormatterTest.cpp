@@ -116,9 +116,9 @@ protected:
         return eStatusCode;
     }
 
-    AString GetRejectPhrase(IMS_SINT32 nCode)
+    AString GetRejectPhrase(IMS_SINT32 nCode, IMS_SINT32 nExtraCode = -1)
     {
-        CallReasonInfo objReasonInfo(nCode);
+        CallReasonInfo objReasonInfo(nCode, nExtraCode);
         IMS_SINT32 eStatusCode;
         AString strPhrase;
         pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
@@ -841,6 +841,8 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_488);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_606),
             SipStatusCode::SC_606);
+    EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_VOPS),
+            SipStatusCode::SC_488);
     ON_CALL(objConfigurationProxy,
             GetInt(ConfigVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT))
             .WillByDefault(Return(nTestStatusCode));
@@ -877,12 +879,16 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_NO_ANSWER_BY_USER_STRING,
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING,
             ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING,
-            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING};
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOPS_OFF_STRING};
 
     ON_CALL(objConfigurationProxy, GetString(AnyOfArray(expectedKeys)))
             .WillByDefault(Return(AString(pszTestPhrase)));
 
     EXPECT_TRUE(GetRejectPhrase(CODE_NONE).GetLength() < 1);
+    EXPECT_STREQ(
+            GetRejectPhrase(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_VOPS).GetStr(),
+            pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_USER_DECLINE).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CS_CALL).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_LOCAL_CALL_BUSY).GetStr(), pszTestPhrase);

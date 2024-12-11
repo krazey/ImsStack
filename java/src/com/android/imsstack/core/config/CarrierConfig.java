@@ -755,8 +755,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_terminate_reason_header_call_setup_timeout_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_terminating_earlydialog_string";
-        public static final String KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING =
-                KEY_PREFIX + "call_terminate_reason_header_vops_off_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_session_refresh_failure_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING =
@@ -781,6 +779,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_reject_reason_phrase_user_reject_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING =
                 KEY_PREFIX + "call_reject_reason_phrase_access_class_blocked_string";
+        public static final String KEY_CALL_REJECT_REASON_PHRASE_VOPS_OFF_STRING =
+                KEY_PREFIX + "call_reject_reason_phrase_vops_off_string";
         public static final String KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL =
                 KEY_PREFIX + "check_conference_event_package_version_bool";
         public static final String KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL =

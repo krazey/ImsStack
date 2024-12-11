@@ -589,8 +589,6 @@ const IMS_CHAR
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING[] =
                 KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_terminating_earlydialog_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_vops_off_string";
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING[] =
                 KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_session_refresh_failure_string";
@@ -619,6 +617,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJEC
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING[] =
                 KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_access_class_blocked_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOPS_OFF_STRING[] =
+        KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_vops_off_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "registration_to_18x_timer_millis_int_array";
 // Media

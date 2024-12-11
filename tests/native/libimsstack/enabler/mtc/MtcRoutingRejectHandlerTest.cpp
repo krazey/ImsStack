@@ -181,31 +181,6 @@ TEST_F(MtcRoutingRejectHandlerTest, NotifyRequestSets488ForInviteInLteVolteOff)
     EXPECT_STREQ("VoLTE setting OFF", objStatusCode.GetReasonPhrase().GetStr());
 }
 
-TEST_F(MtcRoutingRejectHandlerTest, NotifyRequestSets488ForInviteInLteVopsOff)
-{
-    const SipMethod eMethod = SipMethod::INVITE;
-    MockISipMessage objMessage;
-    MockISipServerConnection objSipServerConnection;
-    SipStatusCode objStatusCode;
-    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(eMethod));
-    ON_CALL(objSipServerConnection, GetMethod).WillByDefault(ReturnRef(eMethod));
-
-    ON_CALL(objNetworkWatcher, GetNetRadioTechType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_VOLTE_SETTING))
-            .WillByDefault(Return(IMS_VOLTE_SETTING_ON));
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
-            .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));
-
-    EXPECT_TRUE(pRoutingRejectHandler->RoutingReject_NotifyRequest(&objMessage, objStatusCode));
-    EXPECT_EQ(SipStatusCode::SC_488, objStatusCode.ToInt());
-    EXPECT_STREQ("VOPS OFF", objStatusCode.GetReasonPhrase().GetStr());
-
-    EXPECT_TRUE(pRoutingRejectHandler->RoutingReject_NotifyRequest(
-            &objSipServerConnection, objStatusCode));
-    EXPECT_EQ(SipStatusCode::SC_488, objStatusCode.ToInt());
-    EXPECT_STREQ("VOPS OFF", objStatusCode.GetReasonPhrase().GetStr());
-}
-
 TEST_F(MtcRoutingRejectHandlerTest, NotifyRequestSetsDefaultCodeForInviteInLte)
 {
     const SipMethod eMethod = SipMethod::INVITE;

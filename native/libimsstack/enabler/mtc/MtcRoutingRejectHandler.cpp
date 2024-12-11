@@ -29,7 +29,6 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const IMS_CHAR REASON_PHRASE_VZW_ON_EHRPD[] = "On eHRPD";
 LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOLTE_OFF[] = "VoLTE setting OFF";
-LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOPS_OFF[] = "VOPS OFF";
 
 PUBLIC MtcRoutingRejectHandler::MtcRoutingRejectHandler(
         IN IMtcContext& objContext, IN INetworkWatcher& objNetworkWatcher) :
@@ -102,11 +101,6 @@ SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
                     IMS_VOLTE_SETTING_OFF)
             {
                 return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_VOLTE_OFF);
-            }
-            if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE) !=
-                    IMS_VOICE_OVER_PS_SUPPORTED)
-            {
-                return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_VOPS_OFF);
             }
             break;
 

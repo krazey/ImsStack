@@ -28,9 +28,8 @@ enum class TerminateType
     USER_ENDS_AND_SIP_RESPONSE_TIMEOUT = 6,
     CALL_SETUP_TIMEOUT = 7,
     TERMINATING_EARLY_DIALOG = 8,
-    VOPS_OFF = 9,
-    SESSION_REFRESH_FAILURE = 10,
-    CONFERENCE_CALL_JOINED = 11,
+    SESSION_REFRESH_FAILURE = 9,
+    CONFERENCE_CALL_JOINED = 10,
 };
 
 enum class RejectType
@@ -45,6 +44,7 @@ enum class RejectType
     VOWIFI_OFF = 7,
     USER_REJECT = 8,
     ACCESS_CLASS_BLOCKED = 9,
+    VOPS_OFF = 10,
 };
 
 enum class MessageTypeForGeolocationPidf

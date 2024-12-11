@@ -80,9 +80,6 @@ public:
             case TerminateType::TERMINATING_EARLY_DIALOG:
                 return objProxy.GetString(ConfigVoice::
                                 KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING);
-            case TerminateType::VOPS_OFF:
-                return objProxy.GetString(
-                        ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING);
             case TerminateType::SESSION_REFRESH_FAILURE:
                 return objProxy.GetString(ConfigVoice::
                                 KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING);
@@ -129,6 +126,9 @@ public:
             case RejectType::ACCESS_CLASS_BLOCKED:
                 return objProxy.GetString(
                         ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING);
+            case RejectType::VOPS_OFF:
+                return objProxy.GetString(
+                        ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOPS_OFF_STRING);
             default:
                 return AString::ConstNull();
         }

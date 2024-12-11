@@ -132,7 +132,6 @@
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string"></string>
     <string name="imsvoice.call_terminate_reason_header_call_setup_timeout_string">RELEASE_CAUSE;cause=6;text=&quot;Call-setup time-out&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_terminating_earlydialog_string"></string>
-    <string name="imsvoice.call_terminate_reason_header_vops_off_string"></string>
     <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string"></string>
     <string name="imsvoice.call_terminate_reason_header_conference_call_joined_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_on_cscall_string"></string>
@@ -145,6 +144,7 @@
     <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_access_class_blocked_string"></string>
+    <string name="imsvoice.call_reject_reason_phrase_vops_off_string"></string>
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
     <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
     </string-array>
