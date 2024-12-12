@@ -40,7 +40,8 @@ public:
     IMS_RESULT FormUpdateMessage(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo) override;
 
 protected:
-    virtual void SetAcceptHeader();
+    void SetAcceptHeader() override;
+    void SetCallerIdHeader() override;
 
 private:
     void SetPPreferredIdentityHeader();

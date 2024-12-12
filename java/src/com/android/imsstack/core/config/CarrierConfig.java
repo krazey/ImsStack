@@ -639,6 +639,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_invite_18x_timer_millis_int";
         public static final String KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_provisional_to_final_response_timer_millis_int";
+        public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
+                KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
         // Aos
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL =
                 KEY_PREFIX + "release_emergency_pdn_with_emergency_call_end_bool";
@@ -723,6 +725,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_emergency_urn_int_array";
         public static final String KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL =
                 KEY_PREFIX + "silent_redial_with_voip_by_rtt_rejection_bool";
+        public static final String KEY_NUMBER_NEED_OIR_STRING_ARRAY =
+                KEY_PREFIX + "number_need_oir_string_array";
 
         // Emergency URN policy
         public static final int NOT_USE_SERVICE_CATEGORY = 1;

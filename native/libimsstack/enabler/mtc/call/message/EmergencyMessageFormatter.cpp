@@ -29,6 +29,7 @@
 #include "SipParameter.h"
 #include "TextParser.h"
 #include "call/IMtcCallContext.h"
+#include "call/ParticipantInfo.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
@@ -92,8 +93,7 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormUpdateMessage(
     return IMS_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-void EmergencyMessageFormatter::SetAcceptHeader()
+PROTECTED VIRTUAL void EmergencyMessageFormatter::SetAcceptHeader()
 {
     MessageFormatter::SetAcceptHeader();
 
@@ -106,6 +106,21 @@ void EmergencyMessageFormatter::SetAcceptHeader()
     m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
             MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_CURRENT_LOCATION_DISCOVERY_XML,
             ISipHeader::ACCEPT);
+}
+
+PROTECTED VIRTUAL void EmergencyMessageFormatter::SetCallerIdHeader()
+{
+    const ImsVector<AString> objConfigNumbers = m_objContext.GetConfigurationProxy().GetStringArray(
+            ConfigEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY);
+    for (IMS_UINT32 i = 0; i < objConfigNumbers.GetSize(); i++)
+    {
+        if (m_objContext.GetParticipantInfo().GetRemoteNumber().Contains(objConfigNumbers.GetAt(i)))
+        {
+            IMS_TRACE_I("SetCallerIdHeader - OIR is required for emergency call", 0, 0, 0);
+            SetOirHeaders();
+            break;
+        }
+    }
 }
 
 PRIVATE

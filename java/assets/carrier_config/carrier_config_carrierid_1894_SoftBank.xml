@@ -129,4 +129,8 @@
         <item value="503:352"/> <!-- 503:CODE_SIP_SERVICE_UNAVAILABLE -->
         <item value="603:361"/> <!-- 603:CODE_SIP_USER_REJECTED -->
     </string-array>
+    <string-array name="imsemergency.number_need_oir_string_array" num="2">
+        <item value="184"/>
+        <item value="186"/>
+    </string-array>
 </carrier_config>

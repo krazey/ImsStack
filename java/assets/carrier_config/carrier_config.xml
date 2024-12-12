@@ -157,6 +157,8 @@
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_provisional_to_final_response_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
+    <string-array name="imsemergency.number_need_oir_string_array" num="0">
+    </string-array>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">

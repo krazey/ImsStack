@@ -84,6 +84,8 @@ public:
 protected:
     virtual void SetAcceptHeader();
     virtual void SetLocation();
+    virtual void SetCallerIdHeader();
+    void SetOirHeaders();
 
     ICoreService* GetICoreService();
     IFeatureCaps* GetIFeatureCaps();
@@ -93,7 +95,6 @@ private:
     void SetAcceptContactHeader(IN CallType eCallType);
     void AddSrvccFeature();
     void SetSrvccContactParameter();
-    void SetCallerIdHeader();
     void SetTipHeader();
     void SetPEarlyMediaHeader();
     void SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo);

@@ -29,12 +29,15 @@
 #include "SipParameter.h"
 #include "TestNetworkService.h"
 #include "TestPhoneInfoService.h"
+#include "call/ParticipantInfo.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "dialingplan/MockIMtcDialingPlan.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
+#include "utility/MessageUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -53,9 +56,15 @@ namespace android
 class EmergencyMessageFormatterTest : public ::testing::Test
 {
 public:
+    EmergencyMessageFormatterTest() :
+            objParticipantInfo(objContext)
+    {
+    }
+
     EmergencyMessageFormatter* pFormatter;
 
     CallInfo objCallInfo;
+    ParticipantInfo objParticipantInfo;
     MockIMessage objMessage;
     MockISipMessage objSipMessage;
     MockIMtcCallContext objContext;
@@ -81,6 +90,7 @@ protected:
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetAosConnector).WillByDefault(Return(&objAosConnector));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
@@ -115,6 +125,63 @@ protected:
 
 TEST_F(EmergencyMessageFormatterTest, FormStartMessageNormalCase)
 {
+    const ImsVector<AString> objEmptyNumbers;
+    ON_CALL(*pConfigurationProxy, GetStringArray(ConfigEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY))
+            .WillByDefault(Return(objEmptyNumbers));
+
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
+
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, FormStartMessageSetsOirIfConfigured)
+{
+    // Set ParticipantInfo
+    MockIMtcDialingPlan objDialingPlan;
+    ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(AString::ConstEmpty()));
+    objParticipantInfo.UpdateFromRemoteNumber("184110");
+
+    ImsVector<AString> objConfigNumbers;
+    objConfigNumbers.Push("184");
+    ON_CALL(*pConfigurationProxy, GetStringArray(ConfigEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY))
+            .WillByDefault(Return(objConfigNumbers));
+
+    // To skip other 'SetHeader' invocations.
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, AString::ConstNull())).Times(2);
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_ID));
+
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, AString(MessageUtil::STR_ID), ISipHeader::PRIVACY,
+                    AString::ConstNull()))
+            .Times(1);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, ISipHeader::FROM, AString::ConstNull()))
+            .Times(1);
+
+    pFormatter->FormStartMessage(CallType::VOIP);
+}
+
+TEST_F(EmergencyMessageFormatterTest, FormStartMessageDoesNotSetOirIfConfiguredButNotContains)
+{
+    ImsVector<AString> objConfigNumbers;
+    AString strNotContainedNumber("1111");
+    objConfigNumbers.Push(strNotContainedNumber);
+    ON_CALL(*pConfigurationProxy, GetStringArray(ConfigEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY))
+            .WillByDefault(Return(objConfigNumbers));
+
+    // To skip other 'SetHeader' invocations.
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, AString::ConstNull())).Times(2);
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_ID));
+
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, AString(MessageUtil::STR_ID), ISipHeader::PRIVACY,
+                    AString::ConstNull()))
+            .Times(0);
+
     IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);

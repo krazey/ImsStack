@@ -138,6 +138,10 @@
     <int-array name="imsemergency.reject_code_require_temp_failure_int_array" num="1">
         <item value="403"/>
     </int-array>
+    <string-array name="imsemergency.number_need_oir_string_array" num="2">
+        <item value="184"/>
+        <item value="186"/>
+    </string-array>
 
     <!-- Mts -->
     <int-array name="imssms.sms_generic_error_codes_int_array" num="1">

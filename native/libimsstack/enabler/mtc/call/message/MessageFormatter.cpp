@@ -361,6 +361,49 @@ PROTECTED VIRTUAL void MessageFormatter::SetLocation()
     MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage, IMS_TRUE);
 }
 
+PROTECTED VIRTUAL void MessageFormatter::SetCallerIdHeader()
+{
+    const SuppService* pSuppService =
+            m_objContext.GetSupplementaryService().Get(SuppType::CALLER_ID);
+
+    if (pSuppService == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pSuppService->nValue == CALLERID_RESTRICTED)
+    {
+        SetOirHeaders();
+    }
+    else if (pSuppService->nValue == CALLERID_IDENTITY)
+    {
+        m_objContext.GetMessageUtils().SetHeader(
+                m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
+    }
+}
+
+PROTECTED
+void MessageFormatter::SetOirHeaders()
+{
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    if (objConfig.GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT) ==
+            ConfigVoice::SESSION_PRIVACY_TYPE_HEADER)
+    {
+        m_objContext.GetMessageUtils().SetHeader(
+                m_piNextMessage, MessageUtil::STR_HEADER, ISipHeader::PRIVACY);
+    }
+    else
+    {
+        m_objContext.GetMessageUtils().SetHeader(
+                m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
+    }
+
+    SipAddress objSIPAddress(ImsIdentity::GetAnonymousUserId());
+    objSIPAddress.SetDisplayName(MessageUtil::STR_ANONYMOUS);
+    m_objContext.GetMessageUtils().SetHeader(
+            m_piNextMessage, objSIPAddress.ToString(), ISipHeader::FROM);
+}
+
 PROTECTED
 ICoreService* MessageFormatter::GetICoreService()
 {
@@ -481,49 +524,6 @@ void MessageFormatter::SetSrvccContactParameter()
                 piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_M, 0);
-    }
-}
-
-PRIVATE
-void MessageFormatter::SetCallerIdHeader()
-{
-    if (m_objContext.GetCallInfo().IsEmergency())
-    {
-        return;
-    }
-
-    const SuppService* pSuppService =
-            m_objContext.GetSupplementaryService().Get(SuppType::CALLER_ID);
-
-    if (pSuppService == IMS_NULL)
-    {
-        return;
-    }
-
-    if (pSuppService->nValue == CALLERID_RESTRICTED)
-    {
-        const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
-        if (objConfig.GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT) ==
-                ConfigVoice::SESSION_PRIVACY_TYPE_HEADER)
-        {
-            m_objContext.GetMessageUtils().SetHeader(
-                    m_piNextMessage, MessageUtil::STR_HEADER, ISipHeader::PRIVACY);
-        }
-        else
-        {
-            m_objContext.GetMessageUtils().SetHeader(
-                    m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
-        }
-
-        SipAddress objSIPAddress(ImsIdentity::GetAnonymousUserId());
-        objSIPAddress.SetDisplayName(MessageUtil::STR_ANONYMOUS);
-        m_objContext.GetMessageUtils().SetHeader(
-                m_piNextMessage, objSIPAddress.ToString(), ISipHeader::FROM);
-    }
-    else if (pSuppService->nValue == CALLERID_IDENTITY)
-    {
-        m_objContext.GetMessageUtils().SetHeader(
-                m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
     }
 }
 

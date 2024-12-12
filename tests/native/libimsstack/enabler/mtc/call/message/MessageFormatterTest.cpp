@@ -684,7 +684,7 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
     pFormatter->FormStartMessage(CallType::VOIP);
 
     ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
-            .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_NONE));
+            .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_ID));
     EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, AString::ConstNull()))
             .Times(nCountOfAnotherSetHeader);
     EXPECT_CALL(objMessageUtils,
@@ -693,24 +693,6 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
             .Times(1);
     EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, ISipHeader::FROM, AString::ConstNull()))
             .Times(1);
-    pFormatter->FormStartMessage(CallType::VOIP);
-}
-
-TEST_F(MessageFormatterTest, SetCallerIdHeaderIgnoreRestrictingIfEmergency)
-{
-    IMS_SINT32 nCountOfAnotherSetHeader = 2;
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    pSupplementaryService->Add(SuppType::CALLER_ID, CALLERID_RESTRICTED);
-    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
-            .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_NONE));
-    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, AString::ConstNull()))
-            .Times(nCountOfAnotherSetHeader);
-    EXPECT_CALL(objMessageUtils,
-            SetHeader(&objMessage, AString(MessageUtil::STR_ID), ISipHeader::PRIVACY,
-                    AString::ConstNull()))
-            .Times(0);
-    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, ISipHeader::FROM, AString::ConstNull()))
-            .Times(0);
     pFormatter->FormStartMessage(CallType::VOIP);
 }
 
