@@ -277,6 +277,7 @@ TEST_F(SipInviteServerTxnTest, CompletedState)
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_COMPLETED_ST][SipTxn::INV_SER_RECV_INV_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_RETRANSMISSION);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_COMPLETED_ST][SipTxn::INV_SER_TRANSP_ERROR_EVT](
@@ -291,6 +292,7 @@ TEST_F(SipInviteServerTxnTest, CompletedState)
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_COMPLETED_ST][SipTxn::INV_SER_RECV_ACK_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
 
     delete pSipTranspParam;
     delete pTxnFsmData;
@@ -313,6 +315,7 @@ TEST_F(SipInviteServerTxnTest, CompletedState)
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_COMPLETED_ST][SipTxn::INV_SER_RECV_ACK_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_COMPLETED_ST]
