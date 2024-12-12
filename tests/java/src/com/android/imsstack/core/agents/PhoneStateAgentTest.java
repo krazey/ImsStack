@@ -470,6 +470,37 @@ public class PhoneStateAgentTest {
         }
     }
 
+    @Test
+    @SmallTest
+    public void testCsCallStateChangedWhenImsCallDelayed() {
+        int events = mPsAgent.getPhoneStateEvents().getEvents();
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, times(getEventCount(events)))
+                .registerTelephonyCallback(any(Executor.class), captor.capture());
+
+        TelephonyCallback.CallStateListener csListener = null;
+        for (TelephonyCallback callback : captor.getAllValues()) {
+            if (callback instanceof TelephonyCallback.CallStateListener) {
+                csListener = (TelephonyCallback.CallStateListener) callback;
+                break;
+            }
+        }
+
+        assertNotNull(csListener);
+
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getImsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getCsCallState());
+
+        mPsAgent.setImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getImsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        verify(mSystem, times(2))
+                .notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE), anyInt(), anyInt());
+    }
+
     private void invokeTelephonyCallback(TelephonyCallback callback) {
         if (callback instanceof TelephonyCallback.ServiceStateListener) {
             TelephonyCallback.ServiceStateListener listener =

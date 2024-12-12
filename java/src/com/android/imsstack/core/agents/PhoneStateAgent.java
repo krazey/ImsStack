@@ -172,6 +172,17 @@ public class PhoneStateAgent implements PhoneStateInterface,
                     + TelephonyInterface.callStateToString(mImsCallState.get()) + " -> "
                     + TelephonyInterface.callStateToString(state));
             mImsCallState.set(state);
+
+            // If the telephony call state is set incorrectly for CS,
+            // it should be corrected by the IMS call state.
+            //
+            // For example, when a call is initiated in ECBM, Telephony framework will exit
+            // emergency mode and initiate the call.
+            // At this time, even if the call state change is delivered via TelephonyCallback,
+            // the dial request will be delayed until the emergency mode is successfully exited.
+            if (state != TelephonyManager.CALL_STATE_IDLE) {
+                updateCsCallState(TelephonyManager.CALL_STATE_IDLE);
+            }
         }
     }
 
