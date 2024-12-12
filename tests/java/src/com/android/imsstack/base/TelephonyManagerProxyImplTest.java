@@ -15,6 +15,10 @@
  */
 package com.android.imsstack.base;
 
+import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,15 +27,19 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.OutcomeReceiver;
 import android.telephony.CellInfo;
+import android.telephony.NetworkRegistrationInfo;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.BootstrapAuthenticationCallback;
@@ -202,14 +210,8 @@ public class TelephonyManagerProxyImplTest {
         mTelephonyManagerProxy.isDataRoamingEnabled();
         verify(mTelephonyManager).isDataRoamingEnabled();
 
-        mTelephonyManagerProxy.getServiceState();
-        verify(mTelephonyManager).getServiceState();
-
-        mTelephonyManagerProxy.getDataNetworkType();
-        verify(mTelephonyManager).getDataNetworkType();
-
-        mTelephonyManagerProxy.getVoiceNetworkType();
-        verify(mTelephonyManager).getVoiceNetworkType();
+        mTelephonyManagerProxy.getServiceState(SLOT0);
+        verify(mTelephonyManager).getServiceStateForSlot(eq(SLOT0));
 
         mTelephonyManagerProxy.getNetworkOperator();
         verify(mTelephonyManager).getNetworkOperator();
@@ -268,16 +270,56 @@ public class TelephonyManagerProxyImplTest {
                 TelephonyManager.APPTYPE_ISIM, TelephonyManager.AUTHTYPE_EAP_AKA, data));
         assertFalse(mTelephonyManagerProxy.isDataEnabled());
         assertFalse(mTelephonyManagerProxy.isDataRoamingEnabled());
-        assertNull(mTelephonyManagerProxy.getServiceState());
+        assertNull(mTelephonyManagerProxy.getServiceState(SLOT0));
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                mTelephonyManagerProxy.getDataNetworkType());
+                mTelephonyManagerProxy.getDataNetworkType(SLOT0));
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                mTelephonyManagerProxy.getVoiceNetworkType());
+                mTelephonyManagerProxy.getVoiceNetworkType(SLOT0));
         assertEquals("", mTelephonyManagerProxy.getNetworkOperator());
         assertEquals("", mTelephonyManagerProxy.getNetworkCountryIso());
         assertNull(mTelephonyManagerProxy.getAllCellInfo());
         assertEquals(TelephonyManager.HAL_VERSION_UNKNOWN,
                 mTelephonyManagerProxy.getHalVersion(TelephonyManager.HAL_SERVICE_IMS));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetDataNetworkType() {
+        // ServiceState is null.
+        when(mTelephonyManager.getServiceStateForSlot(eq(SLOT0))).thenReturn(null);
+
+        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                mTelephonyManagerProxy.getDataNetworkType(SLOT0));
+
+        ServiceState ss = mock(ServiceState.class);
+        when(mTelephonyManager.getServiceStateForSlot(eq(SLOT0))).thenReturn(ss);
+
+        mTelephonyManagerProxy.getDataNetworkType(SLOT0);
+        verify(ss).getDataNetworkType();
+    }
+
+    @Test
+    @SmallTest
+    public void testGetVoiceNetworkType() {
+        // ServiceState is null.
+        when(mTelephonyManager.getServiceStateForSlot(eq(SLOT0))).thenReturn(null);
+
+        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                mTelephonyManagerProxy.getVoiceNetworkType(SLOT0));
+
+        // No NetworkRegistrationInfo.
+        ServiceState ss = mock(ServiceState.class);
+        when(mTelephonyManager.getServiceStateForSlot(eq(SLOT0))).thenReturn(ss);
+
+        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                mTelephonyManagerProxy.getVoiceNetworkType(SLOT0));
+
+        NetworkRegistrationInfo wwanNri = mock(NetworkRegistrationInfo.class);
+        when(ss.getNetworkRegistrationInfo(anyInt(), eq(TRANSPORT_TYPE_WWAN))).thenReturn(wwanNri);
+        when(wwanNri.getAccessNetworkTechnology()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE,
+                mTelephonyManagerProxy.getVoiceNetworkType(SLOT0));
     }
 
     @Test

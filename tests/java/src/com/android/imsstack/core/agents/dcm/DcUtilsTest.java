@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +39,6 @@ import android.telephony.TelephonyManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
@@ -72,7 +70,7 @@ public class DcUtilsTest {
         mTestAppContext.setUp();
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
-        when(mTelephonyManagerProxy.getServiceState()).thenReturn(mServiceState);
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(mServiceState);
 
         mDcUtils = new DcUtils(TestAppContext.SLOT0);
         mDcUtils.init(mTestAppContext.getContext());
@@ -95,7 +93,7 @@ public class DcUtilsTest {
     @Test
     @SmallTest
     public void getAccessNetworkInfo_serviceStateNull() {
-        when(mTelephonyManagerProxy.getServiceState()).thenReturn(null);
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(null);
 
         IDcUtils.AccessNetworkInfo ani =
                 mDcUtils.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
@@ -249,26 +247,10 @@ public class DcUtilsTest {
 
     @Test
     @SmallTest
-    public void getServiceState_singleSim() {
+    public void testGetServiceState() {
         ServiceState ss = mDcUtils.getServiceState();
 
-        verify(mTelephonyManagerProxy, never()).createForSubscriptionId(anyInt());
         assertEquals(mServiceState, ss);
-    }
-
-    @Test
-    @SmallTest
-    public void getServiceState_multiSim() {
-        DeviceConfig.setSimCount(2, 2);
-
-        try {
-            ServiceState ss = mDcUtils.getServiceState();
-
-            verify(mTelephonyManagerProxy).createForSubscriptionId(anyInt());
-            assertEquals(mServiceState, ss);
-        } finally {
-            DeviceConfig.setSimCount(1, 1);
-        }
     }
 
     @Test

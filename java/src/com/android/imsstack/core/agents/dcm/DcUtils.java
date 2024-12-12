@@ -30,7 +30,6 @@ import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.TelephonyManagerProxy;
@@ -160,13 +159,9 @@ public class DcUtils implements IDcUtils {
 
     @VisibleForTesting
     protected ServiceState getServiceState() {
-        final TelephonyManagerProxy tmp;
-        if (DeviceConfig.isMultiSimEnabled()) {
-            tmp = AppContext.getTelephonyManagerProxy(MSimUtils.getSubId(mSlotId));
-        } else {
-            tmp = AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
-        }
-        return tmp.getServiceState();
+        final TelephonyManagerProxy tmp =
+                AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        return tmp.getServiceState(mSlotId);
     }
 
     @VisibleForTesting

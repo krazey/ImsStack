@@ -88,7 +88,7 @@ public class TelephonyAgent implements TelephonyInterface {
     @Override
     public @NetworkType int getNetworkType() {
         TelephonyManagerProxy tmp = getTelephonyManagerProxy();
-        int networkType = tmp.getDataNetworkType();
+        int networkType = tmp.getDataNetworkType(mSlotId);
 
         if (networkType == TelephonyManager.NETWORK_TYPE_IWLAN) {
             networkType = getCellularDataNetworkType();
@@ -108,7 +108,7 @@ public class TelephonyAgent implements TelephonyInterface {
     @Override
     public @NetworkType int getVoiceNetworkType() {
         TelephonyManagerProxy tmp = getTelephonyManagerProxy();
-        int voiceNetworkType = tmp.getVoiceNetworkType();
+        int voiceNetworkType = tmp.getVoiceNetworkType(mSlotId);
 
         IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         if (dnw != null) {

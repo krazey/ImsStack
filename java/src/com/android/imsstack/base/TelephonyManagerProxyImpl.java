@@ -19,10 +19,12 @@ import android.annotation.CallbackExecutor;
 import android.content.Context;
 import android.net.Uri;
 import android.os.OutcomeReceiver;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.UiccAppType;
 import android.telephony.Annotation.UiccAppTypeExt;
 import android.telephony.CellInfo;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -290,21 +292,24 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
-    public @Nullable ServiceState getServiceState() {
+    public @Nullable ServiceState getServiceState(int slotIndex) {
         TelephonyManager tm = getTelephonyManager();
-        return tm != null ? tm.getServiceState() : null;
+        // NOTE: For IMS emergency call when there is no SIM, a hidden API is used at this time.
+        return tm != null ? tm.getServiceStateForSlot(slotIndex) : null;
     }
 
     @Override
-    public @NetworkType int getDataNetworkType() {
-        TelephonyManager tm = getTelephonyManager();
-        return tm != null ? tm.getDataNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    public @NetworkType int getDataNetworkType(int slotIndex) {
+        ServiceState ss = getServiceState(slotIndex);
+        // NOTE: Even though ServiceState#getDataNetworkType() is a hidden API, it is used for now
+        // because there is no replacement.
+        return ss != null ? ss.getDataNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     @Override
-    public @NetworkType int getVoiceNetworkType() {
-        TelephonyManager tm = getTelephonyManager();
-        return tm != null ? tm.getVoiceNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    public @NetworkType int getVoiceNetworkType(int slotIndex) {
+        ServiceState ss = getServiceState(slotIndex);
+        return ss != null ? getVoiceNetworkType(ss) : TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     @Override
@@ -365,5 +370,20 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         return mTelephonyManager != null
                 ? mTelephonyManager
                 : mContext.getSystemService(TelephonyManager.class);
+    }
+
+    /**
+     * Returns the voice network type from the given {@link ServiceState} object.
+     *
+     * @param ss The {@link ServiceState} object.
+     * @return The voice network type.
+     */
+    private static int getVoiceNetworkType(ServiceState ss) {
+        final NetworkRegistrationInfo regState = ss.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        if (regState != null) {
+            return regState.getAccessNetworkTechnology();
+        }
+        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 }

@@ -610,7 +610,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
 
         private void updateCellularDataNetworkType(ServiceState serviceState) {
             TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSubId());
-            int dataNetworkType = tmp.getDataNetworkType();
+            int dataNetworkType = tmp.getDataNetworkType(mSlotId);
 
             if (dataNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN) {
                 NetworkRegistrationInfo nri = serviceState.getNetworkRegistrationInfo(

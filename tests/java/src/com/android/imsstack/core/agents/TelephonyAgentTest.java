@@ -124,14 +124,14 @@ public class TelephonyAgentTest {
     @SmallTest
     public void testGetNetworkType() {
         // LTE
-        when(mTelephonyManagerProxy.getDataNetworkType())
+        when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
 
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getNetworkType());
         verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
         // IWLAN & cellular network type: NR
-        when(mTelephonyManagerProxy.getDataNetworkType())
+        when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
         when(mPhoneStateInterface.getCellularDataNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
@@ -147,7 +147,7 @@ public class TelephonyAgentTest {
         verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_UNKNOWN));
 
         // NR & 5G not support
-        when(mTelephonyManagerProxy.getDataNetworkType())
+        when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
         when(mDcNetWatcher.is5GRequired()).thenReturn(false);
 
@@ -160,7 +160,7 @@ public class TelephonyAgentTest {
     @SmallTest
     public void testGetVoiceNetworkType() {
         // LTE
-        when(mTelephonyManagerProxy.getVoiceNetworkType())
+        when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
 
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getVoiceNetworkType());
@@ -168,7 +168,7 @@ public class TelephonyAgentTest {
                 .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
         // NR
-        when(mTelephonyManagerProxy.getVoiceNetworkType())
+        when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
         when(mDcNetWatcher.is5GRequired()).thenReturn(true);
 
@@ -177,7 +177,7 @@ public class TelephonyAgentTest {
                 .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_NR));
 
         // NR & 5G not support
-        when(mTelephonyManagerProxy.getVoiceNetworkType())
+        when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
         when(mDcNetWatcher.is5GRequired()).thenReturn(false);
 

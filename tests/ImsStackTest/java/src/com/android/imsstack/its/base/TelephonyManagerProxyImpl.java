@@ -272,17 +272,17 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
-    public @Nullable ServiceState getServiceState() {
+    public @Nullable ServiceState getServiceState(int slotIndex) {
         return mNetworkInfoRecord.getServiceState();
     }
 
     @Override
-    public @NetworkType int getDataNetworkType() {
+    public @NetworkType int getDataNetworkType(int slotIndex) {
         return mNetworkInfoRecord.getDataNetworkType();
     }
 
     @Override
-    public @NetworkType int getVoiceNetworkType() {
+    public @NetworkType int getVoiceNetworkType(int slotIndex) {
         return mNetworkInfoRecord.getVoiceNetworkType();
     }
 

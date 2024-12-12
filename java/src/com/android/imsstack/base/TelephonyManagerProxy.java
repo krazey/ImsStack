@@ -344,23 +344,27 @@ public interface TelephonyManagerProxy {
 
     /**
      * Returns the current {@link ServiceState} information.
+     *
+     * @param slotIndex The slot index of which the {@link ServiceState} is returned.
      */
-    @Nullable ServiceState getServiceState();
+    @Nullable ServiceState getServiceState(int slotIndex);
 
     /**
      * Returns a constant indicating the radio technology (network type)
      * currently in use on the device for data transmission.
      *
+     * @param slotIndex The slot index of which the data network type is returned.
      * @return The network type.
      */
-    @NetworkType int getDataNetworkType();
+    @NetworkType int getDataNetworkType(int slotIndex);
 
     /**
      * Returns the NETWORK_TYPE_xxxx for voice.
      *
+     * @param slotIndex The slot index of which the voice network type is returned.
      * @return The network type.
      */
-    @NetworkType int getVoiceNetworkType();
+    @NetworkType int getVoiceNetworkType(int slotIndex);
 
     /**
      * Returns the numeric name (MCC+MNC) of current registered operator.
