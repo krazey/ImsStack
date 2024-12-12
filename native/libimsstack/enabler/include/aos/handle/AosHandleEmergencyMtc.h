@@ -27,8 +27,5 @@ public:
 
 protected:
     void InitializeServiceFeature() override;
-
-private:
-    friend class AosHandleEmergencyMtcTest;
 };
 #endif  // AOS_HANDLE_EMERGENCY_MTC_H_
