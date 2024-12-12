@@ -2614,7 +2614,23 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetNextPcscf(
         }
     }
 
-    return UpdatePreloadedRoute();
+    if (UpdatePreloadedRoute())
+    {
+        if (GET_N_CONFIG(m_piContext->GetSlotId())
+                        ->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+        {
+            IMS_UINT32 nType = (m_eRegType == AosRegistrationType::NORMAL)
+                    ? AosRetryRepository::TYPE_NORMAL
+                    : AosRetryRepository::TYPE_EMERGENCY;
+
+            AosProvider::GetInstance()
+                    ->GetRetryRepository(m_piContext->GetSlotId())
+                    ->ResetRetryCount(nType);
+        }
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::TryNextPcscf()

@@ -1963,6 +1963,17 @@ TEST_F(AosRegistrationTest, UseCurrentPcscfIfRetryOnSamePcscfIsRequiredWhenSetNe
     EXPECT_TRUE(bResult);
 }
 
+TEST_F(AosRegistrationTest, ResetRetryCountWhenSetNextPcscfCalledAndSharedCntIsSupported)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRetryRepository, ResetRetryCount(0));
+
+    EXPECT_TRUE(m_pAosRegistration->SetNextPcscf());
+}
+
 TEST_F(AosRegistrationTest, RetryOnSamePcscfIsRequiredIfTriedCountIsBelowConfiguredLimitPerPcscf)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillOnce(Return(3));
