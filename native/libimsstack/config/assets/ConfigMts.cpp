@@ -65,7 +65,7 @@ PUBLIC GLOBAL const IMS_CHAR ConfigMts::APP_CONFIG[] = {
         "header_0=Supported: path\n"
         "\n"
         "[Write]\n"
-        "header_names=Request-Disposition In-Reply-To Geolocation\n"
+        "header_names=Request-Disposition In-Reply-To Geolocation Geolocation-Routing\n"
         "\n"
         "[Read]\n"
         "header_names=Content-Type From Request-Disposition Retry-After To Call-ID\n"

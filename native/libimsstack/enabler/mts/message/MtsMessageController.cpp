@@ -47,6 +47,9 @@
 
 __IMS_TRACE_TAG_COM_MTS__;
 
+LOCAL const IMS_CHAR CONTENT_TYPE_PIDF_XML[] = "application/pidf+xml";
+LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
+
 PUBLIC
 MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
         IN MtsDynamicLoader* pMtsDynamicLoader) :
@@ -1044,7 +1047,7 @@ PRIVATE void MtsMessageController::SetLocationToMessage(IN IMessage* piMessage)
     piBodyPart->SetContent(objContent);
 
     // Set a Location Content-Type
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, "application/pidf+xml");
+    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, CONTENT_TYPE_PIDF_XML);
 
     AString strNewContentId = GeolocationHelper::CreateContentId(m_nSlotId);
 
@@ -1063,6 +1066,9 @@ PRIVATE void MtsMessageController::SetLocationToMessage(IN IMessage* piMessage)
     AString strGeolocation;
     strGeolocation.Sprintf("<cid:%s>", strNewContentId.GetStr());
     piMessage->AddHeader(SipHeaderName::GEOLOCATION, strGeolocation.GetStr());
+
+    // Set Geolocation-Routing header
+    piMessage->AddHeader(SipHeaderName::GEOLOCATION_ROUTING, GEOLOCATION_ROUTING_YES);
 }
 
 PRIVATE

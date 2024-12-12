@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "GeolocationHelper.h"
 #include "IPageMessage.h"
 #include "ImsTypeDef.h"
 #include "IuMtsService.h"
@@ -25,10 +26,12 @@
 #include "MockIMtsServiceState.h"
 #include "MockIPageMessage.h"
 #include "MockISipMessage.h"
+#include "MockISipMessageBodyPart.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
 #include "SipHeaderName.h"
 #include "TestConfigService.h"
+#include "TestPhoneInfoService.h"
 #include "TestTimerService.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
@@ -70,6 +73,11 @@ public:
             pMtsMessageController(IMS_NULL),
             objTimer(pTimerService->GetMockTimer())
     {
+        objPhoneInfoService.SetLocationInfo(&objMockILocationInfo);
+        SetUpTestLocationProperties();
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
+        GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, pTimerService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
@@ -77,11 +85,15 @@ public:
     inline virtual ~MtsMessageControllerTest()
     {
         delete pTimerService;
+        GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 
     MockICoreService objMockCoreService;
+    MockILocationInfo objMockILocationInfo;
+    MockILocationProperties objMockILocationProperties;
     MockIMessage objMockMessage;
     MockIMessageBodyPart objMockMessageBodyPart;
     MockISipMessage objMockSipMessage;
@@ -90,9 +102,12 @@ public:
     MockIPageMessage objMockPageMessage;
     MtsDynamicLoader* pMtsDynamicLoader;
     TestConfigService objConfigService;
+    TestPhoneInfoService objPhoneInfoService;
     TestTimerService* pTimerService;
     TestMtsMessageController* pMtsMessageController;
     MockITimer& objTimer;
+
+    AString strLocationProperties = AString("LocationProperties");
 
 protected:
     virtual void SetUp() override
@@ -107,6 +122,38 @@ protected:
     {
         delete pMtsDynamicLoader;
         delete pMtsMessageController;
+    }
+
+    void SetUpTestLocationProperties()
+    {
+        ON_CALL(objMockILocationInfo, GetLocationProperties(_))
+                .WillByDefault(Return(&objMockILocationProperties));
+        ON_CALL(objMockILocationProperties, GetLatitude())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetLongitude())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetRadius())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetShape())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetConfidence())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetCurrentTime())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetMethod())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetCountry())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetState())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetCity())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetPostal())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetAltitude())
+                .WillByDefault(ReturnRef(strLocationProperties));
+        ON_CALL(objMockILocationProperties, GetVerticalAccuracy())
+                .WillByDefault(ReturnRef(strLocationProperties));
     }
 };
 
@@ -168,7 +215,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
-            .WillByDefault(Return(IMS_TRUE));
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
     ON_CALL(objMockMtsService, GetIMtsServiceState())
@@ -608,6 +655,52 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithSMMAAndFailToFormDestination)
     pMtsMessageController->NotifyMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
+}
+
+TEST_F(MtsMessageControllerTest, SendMoSmsWithGeoLocationInformation)
+{
+    IMS_BOOL bEmergency = IMS_TRUE;
+    AString strContentType = "application/vnd.3gpp.sms";
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SipAddress objSipAddress;
+    objSipAddress.Create(strTargetAddress);
+    MockISipMessageBodyPart objMockISipMessageBodyPart;
+
+    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    pContent->Append((IMS_BYTE)0x02);                     // message reference
+    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsService, GetICoreService(bEmergency))
+            .WillByDefault(Return(&objMockCoreService));
+    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetMessage()).WillByDefault(Return(&objMockSipMessage));
+    ON_CALL(objMockSipMessage, CreateBodyPart()).WillByDefault(Return(&objMockISipMessageBodyPart));
+
+    EXPECT_CALL(objMockISipMessageBodyPart, SetContent(_)).Times(1);
+    EXPECT_CALL(objMockISipMessageBodyPart, SetHeader(_, _, _)).Times(3);
+    EXPECT_CALL(objMockMessage, AddHeader(AString(SipHeaderName::REQUEST_DISPOSITION), _))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMockMessage, AddHeader(AString(SipHeaderName::GEOLOCATION), _))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMockMessage, AddHeader(AString(SipHeaderName::GEOLOCATION_ROUTING), _))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    pMtsMessageController->NotifyMoSms(
+            SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
 TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
