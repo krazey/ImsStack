@@ -34,7 +34,7 @@ class Subscription :
 {
 public:
     Subscription(IN Service* pService, IN const AString& strEvent,
-            IN IMS_BOOL bImplicitRoutingRequired = IMS_FALSE);
+            IN IMS_BOOL bImplicitRoutingRequired = IMS_TRUE);
     virtual ~Subscription();
 
     Subscription(IN const Subscription&) = delete;

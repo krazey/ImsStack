@@ -222,12 +222,14 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
     IMS_BOOL bImplicitRouteRequired = IMS_FALSE;
     IMS_BOOL bCheckImplicitRouteUsage = IMS_FALSE;
     IMS_BOOL bIgnoreLr = IMS_FALSE;
+    const IMS_CHAR* pImplicitRoutingReason = "";
 
     if (m_pImplicitRoute != IMS_NULL)
     {
         if (m_nRoutingType == TARGET_NO_ROUTE)
         {
             bCheckImplicitRouteUsage = IMS_TRUE;
+            pImplicitRoutingReason = "No-Route";
         }
         else if (!m_pSipProfile.IsNull() &&
                 m_pSipProfile->IsConfigurationSet(
@@ -235,6 +237,13 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
         {
             bCheckImplicitRouteUsage = IMS_TRUE;
             bIgnoreLr = IMS_TRUE;
+            pImplicitRoutingReason = "Config";
+        }
+        else if (IsIpSecRequired())
+        {
+            bCheckImplicitRouteUsage = IMS_TRUE;
+            bIgnoreLr = IMS_TRUE;
+            pImplicitRoutingReason = "IPSec";
         }
     }
 
@@ -263,7 +272,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
         if (bImplicitRouteRequired && bIgnoreLr)
         {
             bRoutingLr = IMS_FALSE;
-            IMS_TRACE_I("ImplicitRoute :: Ignore route-set", 0, 0, 0);
+            IMS_TRACE_I("ImplicitRoute: Ignore route-set (%s)", pImplicitRoutingReason, 0, 0);
         }
     }
 

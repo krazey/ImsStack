@@ -31,7 +31,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 Publication::Publication(IN Service* pService, IN const AString& strEvent,
-        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_FALSE*/) :
+        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_TRUE*/) :
         ServiceMethod(pService),
         m_nState(STATE_INACTIVE),
         m_strEvent(strEvent),
