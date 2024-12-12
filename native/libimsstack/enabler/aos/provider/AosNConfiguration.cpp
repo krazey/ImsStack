@@ -247,6 +247,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() cons
     return m_objAsset.bRemoveOldSaOnEstablishingSa;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsB2cCallComposerFeatureTagInRegContact() const
+{
+    return m_objAsset.bB2cCallComposerFeatureTagInRegContact;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsBlockPcscfOnRegFailure() const
 {
     return m_objAsset.bBlockPcscfOnRegFailure;
@@ -1334,6 +1339,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 PROTECTED
 void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
+    m_objAsset.bB2cCallComposerFeatureTagInRegContact = piCc->GetBoolean(
+            CarrierConfig::Ims::KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONTACT_BOOL);
     m_objAsset.bBlockPcscfOnRegFailure =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL);
     m_objAsset.bCallEndAndPdnReactivationByRegTerminated = piCc->GetBoolean(

@@ -226,6 +226,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARR
         KEY_IMS_PREFIX "registration_permanent_error_code_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY[] =
         KEY_IMS_PREFIX "update_registration_with_rat_change_int_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONTACT_BOOL[] =
+        KEY_IMS_PREFIX "b2c_call_composer_feature_tag_in_reg_contact_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[] =
         KEY_IMS_PREFIX "block_pcscf_on_reg_failure_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL[] =

@@ -242,6 +242,14 @@ public:
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const = 0;
 
     /**
+     * @brief Returns flag indicating whether +g.gsma.callcomposer feature tag is included
+     *        in contact header of REGISTER messages when call composer is for B2C only.
+     *
+     * @return IMS_BOOL Return whether to be included or not
+     */
+    virtual IMS_BOOL IsB2cCallComposerFeatureTagInRegContact() const = 0;
+
+    /**
      * @brief Returns flag indicating whether PCSCFs that UE fails to register will be blocked.
      *
      * @return IMS_BOOL Return whether to be blocked or not
