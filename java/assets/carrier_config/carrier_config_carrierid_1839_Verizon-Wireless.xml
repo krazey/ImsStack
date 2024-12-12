@@ -35,6 +35,7 @@
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">True</string>
 
     <!-- Aos -->
+    <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="false"/>
     <boolean name="ims.reg_contact_validation_bool" value="true"/>
     <boolean name="ims.request_ims_pdn_without_mmtel_bool" value="true"/>
     <boolean name="ims.required_cdmaless_feature_tag_bool" value="true"/>
