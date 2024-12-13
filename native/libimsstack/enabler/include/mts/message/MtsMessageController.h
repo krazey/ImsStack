@@ -85,7 +85,7 @@ private:
             IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage);
     void ReportTransmissionResult(
             IN IMS_SINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
-    void RespondReceivedMessage(
+    IMS_RESULT RespondReceivedMessage(
             IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, IN IMS_BOOL bAdded);
     void Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessage);
 
@@ -113,6 +113,7 @@ private:
 
     void StartRetryAfterTimer(IN IMS_SINT32 nRetryAfterValue);
     void StopRetryAfterTimer();
+    IMS_RESULT ValidateInReplyToHeader(IN const IPageMessage& objPageMessage) const;
 
 protected:
     ImsList<IMtsMessage*> m_objMsgList;
@@ -121,6 +122,7 @@ private:
     IMS_BOOL m_bProcessingMsg;
     IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
+    AString m_strPreviousCallId;
     IMtsService* m_piMtsService;
     IMtsErrorHandler* m_piMtsErrorHandler;
     MtsDynamicLoader* m_pMtsDynamicLoader;
