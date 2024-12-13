@@ -539,7 +539,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                         .getAgent(ConfigInterface.class, mSlotId);
                 CarrierConfig cc = (ci == null) ? null : ci.getCarrierConfig();
                 boolean isCdmalessFeatureTagRequired = cc != null && cc.getBoolean(
-                        CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
+                        CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
                 if (isCdmalessFeatureTagRequired) {
                     controlRegistration(RequestType.START_IMS_EST_TIMER,
                             Pcscf.CURRENT, Cause.DATA_CONNECTING);
@@ -906,7 +906,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private String getErrorMessage(ReasonCode reason) {
         String key = convertReasonToKey(reason);
         return (key == null) ? null :
-                getStringFromBundle(CarrierConfig.Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, key);
+                getStringFromBundle(CarrierConfig.ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE, key);
     }
 
     private static NetworkType getRegistrationNetworkType(int telephonyNetworkType) {
@@ -927,17 +927,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private static String convertReasonToKey(ReasonCode reason) {
         return switch (reason) {
             case WFC_REG_RESP_403 ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;
+                    CarrierConfig.ImsWfc.KEY_WFC_ERR_REG_403_STRING;
             case WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
+                    CarrierConfig.ImsWfc.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
             case WFC_REG_RESP_500 ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
+                    CarrierConfig.ImsWfc.KEY_WFC_ERR_REG_500_STRING;
             case WFC_REG_RESP_OTHER_FAILURES ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING;
+                    CarrierConfig.ImsWfc.KEY_WFC_ERR_OTHER_FAILURES_STRING;
             case WFC_SUB_RESP_403 ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
+                    CarrierConfig.ImsWfc.KEY_WFC_ERR_SUB_403_STRING;
             case WFC_SUB_NOTIFY_TERMINATED ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
+                    CarrierConfig.ImsWfc.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
             default -> null;
         };
     }

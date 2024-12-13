@@ -86,7 +86,7 @@ public class LocationAgentTest {
         when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
         when(mSubsInfoInterface.isTestModeEnabled()).thenReturn(true);
         when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_POLICY_UPDATE_TYPE_INT)))
-                .thenReturn(CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ALWAYS);
+                .thenReturn(CarrierConfig.Ims.LOCATION_UPDATE_POLICY_ALWAYS);
         int configuredPolicy = LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING
                 | LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
         when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_ACQUISITION_POLICY_INT)))
@@ -113,7 +113,7 @@ public class LocationAgentTest {
                 eq(CarrierConfig.Ims.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT)))
                 .thenReturn(gpsSearchingDuration);
         when(mCarrierConfig.getInt(eq(CarrierConfig.Ims.KEY_LOCATION_GEODETIC_SHAPE_INT)))
-                .thenReturn(CarrierConfig.Assets.GEODETIC_SHAPE_ELLIPSOID);
+                .thenReturn(CarrierConfig.Ims.GEODETIC_SHAPE_ELLIPSOID);
 
         ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
                 ArgumentCaptor.forClass(ConfigInterface.Listener.class);

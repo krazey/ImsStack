@@ -63,7 +63,7 @@ public class DcSettings implements IDcSettings {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         return config == null || config.getBoolean(
-                CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, true);
+                CarrierConfig.ImsVoice.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, true);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class DcSettings implements IDcSettings {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         return config != null && config.getBoolean(
-                CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
+                CarrierConfig.Ims.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
     }
 
     @Override
@@ -108,11 +108,11 @@ public class DcSettings implements IDcSettings {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         if (config != null) {
-            return config.getInt(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT,
-                    CarrierConfig.Assets.IPV6_PREFERRED);
+            return config.getInt(CarrierConfig.Ims.KEY_IMS_PREFERRED_IPTYPE_INT,
+                    CarrierConfig.Ims.IPV6_PREFERRED);
         }
 
-        return CarrierConfig.Assets.IPV6_PREFERRED;
+        return CarrierConfig.Ims.IPV6_PREFERRED;
     }
 
     @Override
@@ -120,10 +120,10 @@ public class DcSettings implements IDcSettings {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         if (config != null) {
-            return config.getInt(CarrierConfig.Assets.KEY_EPDN_PREFERRED_IPTYPE_INT,
-                    CarrierConfig.Assets.IPV6_PREFERRED);
+            return config.getInt(CarrierConfig.ImsEmergency.KEY_EPDN_PREFERRED_IPTYPE_INT,
+                    CarrierConfig.Ims.IPV6_PREFERRED);
         }
-        return CarrierConfig.Assets.IPV6_PREFERRED;
+        return CarrierConfig.Ims.IPV6_PREFERRED;
     }
 
     @Override
@@ -135,7 +135,7 @@ public class DcSettings implements IDcSettings {
 
             if (apnType == EApnType.IMS) {
                 permanentFailure = config.getIntArray(
-                        CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
+                        CarrierConfig.Ims.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
             } else {
                 return false;
             }

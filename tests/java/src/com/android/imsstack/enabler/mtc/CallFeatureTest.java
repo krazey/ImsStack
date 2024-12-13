@@ -67,7 +67,7 @@ public class CallFeatureTest {
         assertFalse(CallFeature.isVideoHevcSupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
+                CarrierConfig.ImsVoice.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isCallHoldUsingInactive(SLOT_ID));
@@ -102,14 +102,14 @@ public class CallFeatureTest {
         assertFalse(CallFeature.isRttSupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
+                CarrierConfig.ImsVt.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isVideoDirectionInactiveOnVideoCallHold(SLOT_ID));
         assertFalse(CallFeature.isVideoDirectionInactiveOnVideoCallHold(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
+                CarrierConfig.ImsRtt.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isTextDirectionInactiveOnRttCallHold(SLOT_ID));

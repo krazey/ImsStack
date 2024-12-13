@@ -458,7 +458,7 @@ public class ImsRegistrationTracker {
         ConfigInterface config = getConfigInterface(mContext.getSlotId());
         CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
         return cc != null && cc.getBoolean(
-                CarrierConfig.Assets
+                CarrierConfig.ImsSms
                 .KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL);
     }
 
@@ -466,7 +466,7 @@ public class ImsRegistrationTracker {
         ConfigInterface config = getConfigInterface(mContext.getSlotId());
         CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
         return cc != null && cc.getBoolean(
-                CarrierConfig.Assets
+                CarrierConfig.ImsWfc
                 .KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL);
     }
 

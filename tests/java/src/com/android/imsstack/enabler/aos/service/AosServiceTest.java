@@ -812,7 +812,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.DATA_CONNECTING.getValue());
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
+                CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
 
         mAosService.onPreciseDataConnectionStateChanged(
                 EApnType.EMERGENCY.getType(), TelephonyManager.DATA_CONNECTING);
@@ -827,7 +827,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.DATA_CONNECTING.getValue());
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
+                CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
 
         mAosService.onPreciseDataConnectionStateChanged(
                 EApnType.IMS.getType(), TelephonyManager.DATA_CONNECTING);

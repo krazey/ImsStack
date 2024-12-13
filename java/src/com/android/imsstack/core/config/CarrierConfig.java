@@ -304,6 +304,7 @@ public class CarrierConfig {
     /** Configuration items for generic IMS. */
     public static class Ims {
         public static final String KEY_PREFIX = "ims.";
+        // Ims General
         public static final String KEY_SIP_COMPACT_FORM_ENABLED_BOOL =
                 KEY_PREFIX + "sip_compact_form_enabled_bool";
         public static final String KEY_ALLOW_SIP_UDP_FALLBACK_ON_TCP_CONNECTION_SETUP_FAILED_BOOL =
@@ -383,11 +384,225 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_preferred_accesstype_feature_tag_int";
         public static final String KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "registration_permanent_error_code_int_array";
+        public static final String KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL =
+                KEY_PREFIX + "block_pcscf_on_reg_failure_bool";
+        public static final String KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL =
+                KEY_PREFIX + "call_end_and_pdn_reactivation_by_reg_terminated_bool";
+        public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
+                KEY_PREFIX + "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
+        public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
+                KEY_PREFIX + "hold_reg_with_ipcan_changed_during_ims_call_bool";
+        public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
+                KEY_PREFIX + "ims_dereg_on_3g_network_bool";
+        public static final String KEY_IMSI_BASED_URI_PRIORITIZED_BOOL =
+                KEY_PREFIX + "imsi_based_uri_prioritized_bool";
+        public static final String KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
+                KEY_PREFIX + "init_ipsec_setting_with_new_pcscf_bool";
+        public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
+                KEY_PREFIX + "no_init_reg_on_pcscf_change_bool";
+        public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
+                KEY_PREFIX + "reg_contact_validation_bool";
+        public static final String KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL =
+                KEY_PREFIX + "reg_plmn_block_with_timeout_on_failure_with_all_pcscfs_bool";
+        public static final String KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL =
+                KEY_PREFIX + "reg_retry_with_ip_ver_fallback_bool";
+        public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
+                KEY_PREFIX + "remove_old_sa_on_establishing_sa_bool";
+        public static final String KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL =
+                KEY_PREFIX + "request_ims_pdn_without_mmtel_bool";
+        public static final String KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL =
+                KEY_PREFIX + "required_cdmaless_feature_tag_bool";
+        public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
+                KEY_PREFIX + "required_init_reg_after_ims_call_end_on_reg_held_bool";
+        public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
+                KEY_PREFIX + "sip_over_ipsec_enabled_in_roaming_bool";
+        public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
+                KEY_PREFIX + "support_contact_user_info_bool";
+        public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
+                KEY_PREFIX + "support_reg_with_feature_tag_unavailable_bool";
+        public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
+                KEY_PREFIX + "support_verstat_for_reg_bool";
+        public static final String
+                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
+                KEY_PREFIX
+                        + "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
+        public static final String KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL =
+                KEY_PREFIX + "use_security_server_port_in_init_reg_bool";
+        public static final String KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL =
+                KEY_PREFIX + "use_security_server_port_in_reg_contact_of_init_reg_bool";
+        public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
+                KEY_PREFIX + "contact_user_info_policy_for_non_reg_message_int";
+        public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
+                KEY_PREFIX + "geolocation_pidf_forming_policy_int";
+        public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
+                KEY_PREFIX + "ims_establishment_time_sec_int";
+        public static final String KEY_IMS_PREFERRED_IPTYPE_INT =
+                KEY_PREFIX + "ims_preferred_iptype_int";
+        public static final String KEY_IMS_SIGNALLING_DSCP_INT =
+                KEY_PREFIX + "ims_signalling_dscp_int";
+        public static final String KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT =
+                KEY_PREFIX + "reg_actual_wait_time_policy_int";
+        public static final String KEY_REG_DEFAULT_WAIT_TIME_INT =
+                KEY_PREFIX + "reg_default_wait_time_int";
+        public static final String KEY_REG_OUT_OF_SERVICE_POLICY_INT =
+                KEY_PREFIX + "reg_out_of_service_policy_int";
+        public static final String KEY_REG_PCSCF_UPDATE_POLICY_INT =
+                KEY_PREFIX + "reg_pcscf_update_policy_int";
+        public static final String KEY_REG_RETRY_305_POLICY_INT =
+                KEY_PREFIX + "reg_retry_305_policy_int";
+        public static final String KEY_REG_RETRY_503_POLICY_INT =
+                KEY_PREFIX + "reg_retry_503_policy_int";
+        public static final String KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT =
+                KEY_PREFIX + "reg_retry_cnt_on_single_pcscf_int";
+        public static final String KEY_REG_RETRY_CNT_PER_PCSCF_INT =
+                KEY_PREFIX + "reg_retry_cnt_per_pcscf_int";
+        public static final String KEY_REG_RETRY_CNT_RESET_POLICY_INT =
+                KEY_PREFIX + "reg_retry_cnt_reset_policy_int";
+        public static final String KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT =
+                KEY_PREFIX + "reg_retry_cnt_with_ipsec_on_auth_failure_int";
+        public static final String KEY_REG_RETRY_DEFAULT_POLICY_INT =
+                KEY_PREFIX + "reg_retry_default_policy_int";
+        public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
+                KEY_PREFIX + "reg_retry_timer_f_policy_int";
+        public static final String KEY_REREG_RETRY_305_POLICY_INT =
+                KEY_PREFIX + "rereg_retry_305_policy_int";
+        public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
+                KEY_PREFIX + "sip_message_threshold_for_transport_change_int";
+        public static final String KEY_SUB_RETRY_503_POLICY_INT =
+                KEY_PREFIX + "sub_retry_503_policy_int";
+        public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
+                KEY_PREFIX + "usat_reg_event_download_policy_int";
+        public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
+                KEY_PREFIX + "permanent_pdn_failure_int_array";
+        public static final String KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY =
+                KEY_PREFIX + "reg_err_code_for_pcscf_discovery_int_array";
+        public static final String KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY =
+                KEY_PREFIX + "reg_permanent_err_max_cnt_int_array";
+        public static final String KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY =
+                KEY_PREFIX + "reg_retry_err_code_without_ipsec_int_array";
+        public static final String KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY =
+                KEY_PREFIX + "rereg_err_code_for_call_end_int_array";
+        public static final String KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY =
+                KEY_PREFIX + "rereg_err_code_for_ims_pdn_reactivation_int_array";
+        public static final String
+                KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
+                KEY_PREFIX
+                        + "rereg_err_code_for_init_reg_with_available_pcscf_int_array";
+        public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
+                KEY_PREFIX + "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY =
+                KEY_PREFIX + "sub_err_code_for_init_reg_with_next_pcscf_int_array";
+        public static final String KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY =
+                KEY_PREFIX + "sub_err_code_for_stopping_by_expiration_time_int_array";
+        public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
+                KEY_PREFIX + "supported_roaming_rats_int_array";
+        public static final String KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY =
+                KEY_PREFIX + "unavailable_features_in_limited_reg_int_array";
+        // Bundle {
+        public static final String KEY_EXTRA_REG_ERR_BUNDLE =
+                KEY_PREFIX + "extra_reg_err_bundle";
+        public static final String KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL =
+                KEY_PREFIX + "extra_reg_err_code_as_failure_in_roaming_for_update_bool";
+        public static final String KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL =
+                KEY_PREFIX + "extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool";
+        public static final String KEY_EXTRA_REG_ERR_FINAL_TYPE_INT =
+                KEY_PREFIX + "extra_reg_err_final_type_int";
+        public static final String KEY_EXTRA_REG_ERR_MAX_CNT_INT =
+                KEY_PREFIX + "extra_reg_err_max_cnt_int";
+        public static final String
+                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT =
+                KEY_PREFIX
+                        + "extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int";
+        public static final String
+                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT =
+                KEY_PREFIX
+                        + "extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int";
+        public static final String KEY_EXTRA_REG_ERR_POLICY_INT =
+                KEY_PREFIX + "extra_reg_err_policy_int";
+        public static final String KEY_EXTRA_REG_ERR_CODE_INT_ARRAY =
+                KEY_PREFIX + "extra_reg_err_code_int_array";
+        public static final String KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY =
+                KEY_PREFIX + "extra_reg_err_code_for_update_int_array";
+        public static final String KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY =
+                KEY_PREFIX + "extra_reg_err_wait_time_sec_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE =
+                KEY_PREFIX + "notify_terminated_for_init_reg_bundle";
+        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT =
+                KEY_PREFIX + "notify_terminated_for_init_reg_with_wait_time_int";
+        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY =
+                KEY_PREFIX + "notify_terminated_for_init_reg_used_event_int_array";
+        public static final String
+                KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY =
+                KEY_PREFIX + "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE =
+                KEY_PREFIX + "pcscf_recovery_conditions_bundle";
+        public static final String KEY_PCSCF_RECOVERY_MAX_CNT_INT =
+                KEY_PREFIX + "pcscf_recovery_max_cnt_int";
+        public static final String KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT =
+                KEY_PREFIX + "pcscf_recovery_wait_time_sec_int";
+        public static final String KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT =
+                KEY_PREFIX + "pcscf_recovery_base_time_sec_int";
+        public static final String KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT =
+                KEY_PREFIX + "pcscf_recovery_max_time_sec_int";
+        // }
+        // Bundle {
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE =
+                KEY_PREFIX + "reg_err_code_with_ra_time_bundle";
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL =
+                KEY_PREFIX + "reg_err_code_with_ra_time_only_defined_bool";
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY =
+                KEY_PREFIX + "reg_err_code_with_ra_time_int_array";
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY =
+                KEY_PREFIX + "reg_err_code_with_ra_time_for_update_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_REG_RETRY_INTERVAL_BUNDLE =
+                KEY_PREFIX + "reg_retry_interval_bundle";
+        public static final String KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL =
+                KEY_PREFIX + "reg_retry_interval_used_for_sub_bool";
+        public static final String KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY =
+                KEY_PREFIX + "reg_retry_interval_random_upper_value_sec_int_array";
+        public static final String KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY =
+                KEY_PREFIX + "reg_retry_interval_sec_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE =
+                KEY_PREFIX + "sub_err_code_for_init_reg_bundle";
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT =
+                KEY_PREFIX + "sub_err_code_for_init_reg_with_retry_max_cnt_int";
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
+                KEY_PREFIX + "sub_err_code_for_init_reg_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE =
+                KEY_PREFIX + "sub_err_code_for_terminated_bundle";
+        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT =
+                KEY_PREFIX + "sub_err_code_for_terminated_with_retry_max_cnt_int";
+        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY =
+                KEY_PREFIX + "sub_err_code_for_terminated_int_array";
+        // }
         // Mtc
         public static final String KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY =
                 KEY_PREFIX + "information_level_of_geolocation_pidf_int_array";
         public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT =
                 KEY_PREFIX + "geolocation_policy_for_location_based_call_int";
+
+        // Indicates preferred IP version
+        public static final int IPV4_PREFERRED = 0;
+        public static final int IPV6_PREFERRED = 1;
+
+        // Indicates whether location information policy need to be updated using carrier config.
+        public static final int LOCATION_UPDATE_POLICY_NONE = 0;
+        public static final int LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED = 1;
+        public static final int LOCATION_UPDATE_POLICY_ALWAYS = 2;
+
+        // Indicates the type of PIDF-LO geodetic shape.
+        public static final int GEODETIC_SHAPE_CIRCLE = 0;
+        public static final int GEODETIC_SHAPE_ELLIPSOID = 1;
 
         private Ims() {}
     }
@@ -424,8 +639,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_invite_18x_timer_millis_int";
         public static final String KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_provisional_to_final_response_timer_millis_int";
-        public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
-                KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
         // Aos
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL =
                 KEY_PREFIX + "release_emergency_pdn_with_emergency_call_end_bool";
@@ -433,6 +646,32 @@ public class CarrierConfig {
                 KEY_PREFIX + "wait_time_sec_for_release_epdn_after_ecall_end_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
                 KEY_PREFIX + "preferred_emergency_registration_int";
+        public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
+                KEY_PREFIX + "ecall_based_on_p_associated_uri_of_normal_reg_bool";
+        public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
+                KEY_PREFIX + "ereg_on_random_pcscf_bool";
+        public static final String KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL =
+                KEY_PREFIX + "ereg_set_tcp_only_in_roaming_bool";
+        public static final String KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL =
+                KEY_PREFIX + "ereg_using_first_impu_in_isim_bool";
+        public static final String KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL =
+                KEY_PREFIX + "keep_ereg_retry_on_wlan_bool";
+        public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
+                KEY_PREFIX + "support_erereg_on_ipcan_change_bool";
+        public static final String KEY_SUPPORT_VIDEO_FOR_EREG_BOOL =
+                KEY_PREFIX + "support_video_for_ereg_bool";
+        public static final String KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL =
+                KEY_PREFIX + "use_reg_retry_rule_for_ereg_bool";
+        public static final String KEY_EPDN_PREFERRED_IPTYPE_INT =
+                KEY_PREFIX + "epdn_preferred_iptype_int";
+        public static final String KEY_EREG_RETRY_MAX_CNT_INT =
+                KEY_PREFIX + "ereg_retry_max_cnt_int";
+        public static final String KEY_EREG_RETRY_TIMER_MILLIS_INT =
+                KEY_PREFIX + "ereg_retry_timer_millis_int";
+        public static final String KEY_REG_TIMER_FOR_ECALL_MILLIS_INT =
+                KEY_PREFIX + "reg_timer_for_ecall_millis_int";
+        public static final String KEY_ROAMING_PREFERRED_EREG_INT =
+                KEY_PREFIX + "roaming_preferred_ereg_int";
         // Mtc
         public static final String KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL =
                 KEY_PREFIX + "emergency_call_over_emergency_pdn_on_cellular_bool";
@@ -511,6 +750,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "text_rtcp_inactivity_timer_millis_int";
         public static final String KEY_TEXT_RTCP_INTERVAL_INT_ARRAY =
                 KEY_PREFIX + "text_rtcp_interval_int_array";
+        public static final String KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
+                KEY_PREFIX + "text_hold_with_direction_inactive_bool";
 
         private ImsRtt() {}
     }
@@ -518,6 +759,12 @@ public class CarrierConfig {
     /** Configuration items for SMS over IP. */
     public static class ImsSms {
         public static final String KEY_PREFIX = "imssms.";
+        // Aos
+        public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL =
+                KEY_PREFIX + "sms_over_ims_available_without_voice_capa_bool";
+        public static final String KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL =
+                KEY_PREFIX + "support_sms_capability_in_wifi_roaming_bool";
+        // Mts
         public static final String KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL =
                 KEY_PREFIX + "support_limited_admin_sms_mode_bool";
         public static final String KEY_SMS_REQUEST_URI_TYPE_INT =
@@ -674,6 +921,16 @@ public class CarrierConfig {
     /** Configuration items for voice calling. */
     public static class ImsVoice {
         public static final String KEY_PREFIX = "imsvoice.";
+        // Aos
+        public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
+                KEY_PREFIX + "ignore_vops_for_volte_enable_bool";
+        public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =
+                KEY_PREFIX + "plmn_block_with_timeout_on_voice_call_unavailable_bool";
+        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL =
+                KEY_PREFIX + "required_volte_block_by_ssac_bool";
+        public static final String KEY_VOLTE_HYS_TIME_SEC_INT =
+                KEY_PREFIX + "volte_hys_time_sec_int";
+        // Mtc
         public static final String KEY_SIP_18X_TIMER_MILLIS_INT =
                 KEY_PREFIX + "18x_timer_millis_int";
         public static final String KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL =
@@ -932,6 +1189,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "audio_rtcp_interval_int_array";
         public static final String KEY_EVS_AMRWB_IO_MODE_SET_INT =
                 KEY_PREFIX + "evs_amrwb_io_mode_set_int";
+        public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
+                KEY_PREFIX + "audio_hold_with_direction_inactive_bool";
 
         private ImsVoice() {}
     }
@@ -965,6 +1224,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "one_way_video_call_by_local_end_supported_bool";
         public static final String KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL =
                 KEY_PREFIX + "one_way_video_call_by_remote_end_supported_bool";
+        public static final String KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
+                KEY_PREFIX + "video_hold_with_direction_inactive_bool";
         // Media
         public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "video_rtp_port_range_int_array";
@@ -1023,8 +1284,39 @@ public class CarrierConfig {
     /** Configuration items for Wi-Fi calling. */
     public static class ImsWfc {
         public static final String KEY_PREFIX = "imswfc.";
+        // Aos
         public static final String KEY_REGISTRATION_PRIVATE_HEADER_INT =
                 KEY_PREFIX + "registration_private_header_int";
+        public static final String KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL =
+                KEY_PREFIX + "rereg_with_changed_country_on_wifi_bool";
+        public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
+                KEY_PREFIX + "required_wfc_block_by_airplane_mode_bool";
+        public static final String
+                KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
+                KEY_PREFIX
+                        + "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
+        public static final String KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL =
+                KEY_PREFIX + "use_wfc_country_code_availability_check_bool";
+        public static final String KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL =
+                KEY_PREFIX + "video_over_wifi_supported_without_voice_bool";
+        public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
+                KEY_PREFIX + "vowifi_sub_err_code_for_init_reg_int_array";
+        // Bundle {
+        public static final String KEY_WFC_ERR_MESSAGE_BUNDLE =
+                KEY_PREFIX + "wfc_err_message_bundle";
+        public static final String KEY_WFC_ERR_REG_403_STRING =
+                KEY_PREFIX + "wfc_err_reg_403_string";
+        public static final String KEY_WFC_ERR_REG_500_STRING =
+                KEY_PREFIX + "wfc_err_reg_500_string";
+        public static final String KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING =
+                KEY_PREFIX + "wfc_err_not_supported_country_string";
+        public static final String KEY_WFC_ERR_SUB_403_STRING =
+                KEY_PREFIX + "wfc_err_sub_403_string";
+        public static final String KEY_WFC_ERR_NOTIFY_TERMINATED_STRING =
+                KEY_PREFIX + "wfc_err_notify_terminated_string";
+        public static final String KEY_WFC_ERR_OTHER_FAILURES_STRING =
+                KEY_PREFIX + "wfc_err_other_failures_string";
+        // }
         // Mtc
         public static final String KEY_COUNTRY_CODE_INT =
                 KEY_PREFIX + "country_code_int";
@@ -1036,310 +1328,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
 
         private ImsWfc() {}
-    }
-
-    /** Configuration items for internal assets. */
-    public static class Assets {
-        public static final String KEY_IMS_PREFIX = "ims.";
-        public static final String KEY_IMS_EMERGENCY_PREFIX = "imsemergency.";
-        public static final String KEY_IMS_SMS_PREFIX = "imssms.";
-        public static final String KEY_IMS_VOICE_PREFIX = "imsvoice.";
-        public static final String KEY_IMS_WFC_PREFIX = "imswfc.";
-
-        // Aos
-        public static final String KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL =
-                KEY_IMS_PREFIX + "block_pcscf_on_reg_failure_bool";
-        public static final String KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL =
-                KEY_IMS_PREFIX + "call_end_and_pdn_reactivation_by_reg_terminated_bool";
-        public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
-                KEY_IMS_PREFIX + "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
-        public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
-                KEY_IMS_PREFIX + "hold_reg_with_ipcan_changed_during_ims_call_bool";
-        public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
-                KEY_IMS_PREFIX + "ims_dereg_on_3g_network_bool";
-        public static final String KEY_IMSI_BASED_URI_PRIORITIZED_BOOL =
-                KEY_IMS_PREFIX + "imsi_based_uri_prioritized_bool";
-        public static final String KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
-                KEY_IMS_PREFIX + "init_ipsec_setting_with_new_pcscf_bool";
-        public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
-                KEY_IMS_PREFIX + "no_init_reg_on_pcscf_change_bool";
-        public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
-                KEY_IMS_PREFIX + "reg_contact_validation_bool";
-        public static final String KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL =
-                KEY_IMS_PREFIX + "reg_plmn_block_with_timeout_on_failure_with_all_pcscfs_bool";
-        public static final String KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL =
-                KEY_IMS_PREFIX + "reg_retry_with_ip_ver_fallback_bool";
-        public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
-                KEY_IMS_PREFIX + "remove_old_sa_on_establishing_sa_bool";
-        public static final String KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL =
-                KEY_IMS_PREFIX + "request_ims_pdn_without_mmtel_bool";
-        public static final String KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL =
-                KEY_IMS_PREFIX + "required_cdmaless_feature_tag_bool";
-        public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
-                KEY_IMS_PREFIX + "required_init_reg_after_ims_call_end_on_reg_held_bool";
-        public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
-                KEY_IMS_PREFIX + "sip_over_ipsec_enabled_in_roaming_bool";
-        public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
-                KEY_IMS_PREFIX + "support_contact_user_info_bool";
-        public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
-                KEY_IMS_PREFIX + "support_reg_with_feature_tag_unavailable_bool";
-        public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
-                KEY_IMS_PREFIX + "support_verstat_for_reg_bool";
-        public static final String
-                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
-                        KEY_IMS_PREFIX
-                                + "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
-        public static final String KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL =
-                KEY_IMS_PREFIX + "use_security_server_port_in_init_reg_bool";
-        public static final String KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL =
-                KEY_IMS_PREFIX + "use_security_server_port_in_reg_contact_of_init_reg_bool";
-        public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
-                KEY_IMS_PREFIX + "contact_user_info_policy_for_non_reg_message_int";
-        public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
-                KEY_IMS_PREFIX + "geolocation_pidf_forming_policy_int";
-        public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
-                KEY_IMS_PREFIX + "ims_establishment_time_sec_int";
-        public static final String KEY_IMS_PREFERRED_IPTYPE_INT =
-                KEY_IMS_PREFIX + "ims_preferred_iptype_int";
-        public static final String KEY_IMS_SIGNALLING_DSCP_INT =
-                KEY_IMS_PREFIX + "ims_signalling_dscp_int";
-        public static final String KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_actual_wait_time_policy_int";
-        public static final String KEY_REG_DEFAULT_WAIT_TIME_INT =
-                KEY_IMS_PREFIX + "reg_default_wait_time_int";
-        public static final String KEY_REG_OUT_OF_SERVICE_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_out_of_service_policy_int";
-        public static final String KEY_REG_PCSCF_UPDATE_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_pcscf_update_policy_int";
-        public static final String KEY_REG_RETRY_305_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_retry_305_policy_int";
-        public static final String KEY_REG_RETRY_503_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_retry_503_policy_int";
-        public static final String KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT =
-                KEY_IMS_PREFIX + "reg_retry_cnt_on_single_pcscf_int";
-        public static final String KEY_REG_RETRY_CNT_PER_PCSCF_INT =
-                KEY_IMS_PREFIX + "reg_retry_cnt_per_pcscf_int";
-        public static final String KEY_REG_RETRY_CNT_RESET_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_retry_cnt_reset_policy_int";
-        public static final String KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT =
-                KEY_IMS_PREFIX + "reg_retry_cnt_with_ipsec_on_auth_failure_int";
-        public static final String KEY_REG_RETRY_DEFAULT_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_retry_default_policy_int";
-        public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
-                KEY_IMS_PREFIX + "reg_retry_timer_f_policy_int";
-        public static final String KEY_REREG_RETRY_305_POLICY_INT =
-                KEY_IMS_PREFIX + "rereg_retry_305_policy_int";
-        public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
-                KEY_IMS_PREFIX + "sip_message_threshold_for_transport_change_int";
-        public static final String KEY_SUB_RETRY_503_POLICY_INT =
-                KEY_IMS_PREFIX + "sub_retry_503_policy_int";
-        public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
-                KEY_IMS_PREFIX + "usat_reg_event_download_policy_int";
-        public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
-                KEY_IMS_PREFIX + "permanent_pdn_failure_int_array";
-        public static final String KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY =
-                KEY_IMS_PREFIX + "reg_err_code_for_pcscf_discovery_int_array";
-        public static final String KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY =
-                KEY_IMS_PREFIX + "reg_permanent_err_max_cnt_int_array";
-        public static final String KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY =
-                KEY_IMS_PREFIX + "reg_retry_err_code_without_ipsec_int_array";
-        public static final String KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY =
-                KEY_IMS_PREFIX + "rereg_err_code_for_call_end_int_array";
-        public static final String KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY =
-                KEY_IMS_PREFIX + "rereg_err_code_for_ims_pdn_reactivation_int_array";
-        public static final String
-                KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
-                        KEY_IMS_PREFIX
-                                + "rereg_err_code_for_init_reg_with_available_pcscf_int_array";
-        public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
-                KEY_IMS_PREFIX + "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
-        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY =
-                KEY_IMS_PREFIX + "sub_err_code_for_init_reg_with_next_pcscf_int_array";
-        public static final String KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY =
-                KEY_IMS_PREFIX + "sub_err_code_for_stopping_by_expiration_time_int_array";
-        public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
-                KEY_IMS_PREFIX + "supported_roaming_rats_int_array";
-        public static final String KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY =
-                KEY_IMS_PREFIX + "unavailable_features_in_limited_reg_int_array";
-        // Bundle {
-        public static final String KEY_EXTRA_REG_ERR_BUNDLE =
-                KEY_IMS_PREFIX + "extra_reg_err_bundle";
-        public static final String KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL =
-                KEY_IMS_PREFIX + "extra_reg_err_code_as_failure_in_roaming_for_update_bool";
-        public static final String KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL =
-                KEY_IMS_PREFIX + "extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool";
-        public static final String KEY_EXTRA_REG_ERR_FINAL_TYPE_INT =
-                KEY_IMS_PREFIX + "extra_reg_err_final_type_int";
-        public static final String KEY_EXTRA_REG_ERR_MAX_CNT_INT =
-                KEY_IMS_PREFIX + "extra_reg_err_max_cnt_int";
-        public static final String
-                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT =
-                        KEY_IMS_PREFIX
-                                + "extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int";
-        public static final String
-                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT =
-                        KEY_IMS_PREFIX
-                                + "extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int";
-        public static final String KEY_EXTRA_REG_ERR_POLICY_INT =
-                KEY_IMS_PREFIX + "extra_reg_err_policy_int";
-        public static final String KEY_EXTRA_REG_ERR_CODE_INT_ARRAY =
-                KEY_IMS_PREFIX + "extra_reg_err_code_int_array";
-        public static final String KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY =
-                KEY_IMS_PREFIX + "extra_reg_err_code_for_update_int_array";
-        public static final String KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY =
-                KEY_IMS_PREFIX + "extra_reg_err_wait_time_sec_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE =
-                KEY_IMS_PREFIX + "notify_terminated_for_init_reg_bundle";
-        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT =
-                KEY_IMS_PREFIX + "notify_terminated_for_init_reg_with_wait_time_int";
-        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY =
-                KEY_IMS_PREFIX + "notify_terminated_for_init_reg_used_event_int_array";
-        public static final String
-                KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY =
-                        KEY_IMS_PREFIX
-                                + "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE =
-                KEY_IMS_PREFIX + "pcscf_recovery_conditions_bundle";
-        public static final String KEY_PCSCF_RECOVERY_MAX_CNT_INT =
-                KEY_IMS_PREFIX + "pcscf_recovery_max_cnt_int";
-        public static final String KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT =
-                KEY_IMS_PREFIX + "pcscf_recovery_wait_time_sec_int";
-        public static final String KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT =
-                KEY_IMS_PREFIX + "pcscf_recovery_base_time_sec_int";
-        public static final String KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT =
-                KEY_IMS_PREFIX + "pcscf_recovery_max_time_sec_int";
-        // }
-        // Bundle {
-        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE =
-                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_bundle";
-        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL =
-                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_only_defined_bool";
-        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY =
-                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_int_array";
-        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY =
-                KEY_IMS_PREFIX + "reg_err_code_with_ra_time_for_update_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_REG_RETRY_INTERVAL_BUNDLE =
-                KEY_IMS_PREFIX + "reg_retry_interval_bundle";
-        public static final String KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL =
-                KEY_IMS_PREFIX + "reg_retry_interval_used_for_sub_bool";
-        public static final String KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY =
-                KEY_IMS_PREFIX + "reg_retry_interval_random_upper_value_sec_int_array";
-        public static final String KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY =
-                KEY_IMS_PREFIX + "reg_retry_interval_sec_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE =
-                KEY_IMS_PREFIX + "sub_err_code_for_init_reg_bundle";
-        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT =
-                KEY_IMS_PREFIX + "sub_err_code_for_init_reg_with_retry_max_cnt_int";
-        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
-                KEY_IMS_PREFIX + "sub_err_code_for_init_reg_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE =
-                KEY_IMS_PREFIX + "sub_err_code_for_terminated_bundle";
-        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT =
-                KEY_IMS_PREFIX + "sub_err_code_for_terminated_with_retry_max_cnt_int";
-        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY =
-                KEY_IMS_PREFIX + "sub_err_code_for_terminated_int_array";
-        // }
-        public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "ecall_based_on_p_associated_uri_of_normal_reg_bool";
-        public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "ereg_on_random_pcscf_bool";
-        public static final String KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "ereg_set_tcp_only_in_roaming_bool";
-        public static final String KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "ereg_using_first_impu_in_isim_bool";
-        public static final String KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "keep_ereg_retry_on_wlan_bool";
-        public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "support_erereg_on_ipcan_change_bool";
-        public static final String KEY_SUPPORT_VIDEO_FOR_EREG_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "support_video_for_ereg_bool";
-        public static final String KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL =
-                KEY_IMS_EMERGENCY_PREFIX + "use_reg_retry_rule_for_ereg_bool";
-        public static final String KEY_EPDN_PREFERRED_IPTYPE_INT =
-                KEY_IMS_EMERGENCY_PREFIX + "epdn_preferred_iptype_int";
-        public static final String KEY_EREG_RETRY_MAX_CNT_INT =
-                KEY_IMS_EMERGENCY_PREFIX + "ereg_retry_max_cnt_int";
-        public static final String KEY_EREG_RETRY_TIMER_MILLIS_INT =
-                KEY_IMS_EMERGENCY_PREFIX + "ereg_retry_timer_millis_int";
-        public static final String KEY_REG_TIMER_FOR_ECALL_MILLIS_INT =
-                KEY_IMS_EMERGENCY_PREFIX + "reg_timer_for_ecall_millis_int";
-        public static final String KEY_ROAMING_PREFERRED_EREG_INT =
-                KEY_IMS_EMERGENCY_PREFIX + "roaming_preferred_ereg_int";
-        public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL =
-                KEY_IMS_SMS_PREFIX + "sms_over_ims_available_without_voice_capa_bool";
-        public static final String KEY_SUPPORT_SMS_CAPABILITY_IN_WIFI_ROAMING_BOOL =
-                KEY_IMS_SMS_PREFIX + "support_sms_capability_in_wifi_roaming_bool";
-        public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
-                KEY_IMS_VOICE_PREFIX + "ignore_vops_for_volte_enable_bool";
-        public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =
-                KEY_IMS_VOICE_PREFIX + "plmn_block_with_timeout_on_voice_call_unavailable_bool";
-        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL =
-                KEY_IMS_VOICE_PREFIX + "required_volte_block_by_ssac_bool";
-        public static final String KEY_VOLTE_HYS_TIME_SEC_INT =
-                KEY_IMS_VOICE_PREFIX + "volte_hys_time_sec_int";
-        public static final String KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL =
-                KEY_IMS_WFC_PREFIX + "rereg_with_changed_country_on_wifi_bool";
-        public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
-                KEY_IMS_WFC_PREFIX + "required_wfc_block_by_airplane_mode_bool";
-        public static final String
-                KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
-                        KEY_IMS_WFC_PREFIX
-                                + "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
-        public static final String KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL =
-                KEY_IMS_WFC_PREFIX + "use_wfc_country_code_availability_check_bool";
-        public static final String KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL =
-                KEY_IMS_WFC_PREFIX + "video_over_wifi_supported_without_voice_bool";
-        public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
-                KEY_IMS_WFC_PREFIX + "vowifi_sub_err_code_for_init_reg_int_array";
-        // Bundle {
-        public static final String KEY_WFC_ERR_MESSAGE_BUNDLE =
-                KEY_IMS_WFC_PREFIX + "wfc_err_message_bundle";
-        public static final String KEY_WFC_ERR_REG_403_STRING =
-                KEY_IMS_WFC_PREFIX + "wfc_err_reg_403_string";
-        public static final String KEY_WFC_ERR_REG_500_STRING =
-                KEY_IMS_WFC_PREFIX + "wfc_err_reg_500_string";
-        public static final String KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING =
-                KEY_IMS_WFC_PREFIX + "wfc_err_not_supported_country_string";
-        public static final String KEY_WFC_ERR_SUB_403_STRING =
-                KEY_IMS_WFC_PREFIX + "wfc_err_sub_403_string";
-        public static final String KEY_WFC_ERR_NOTIFY_TERMINATED_STRING =
-                KEY_IMS_WFC_PREFIX + "wfc_err_notify_terminated_string";
-        public static final String KEY_WFC_ERR_OTHER_FAILURES_STRING =
-                KEY_IMS_WFC_PREFIX + "wfc_err_other_failures_string";
-        // }
-
-        // TODO Media additional for CallFeature
-        public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
-                "audio_hold_with_direction_inactive_bool";
-        public static final String KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
-                "video_hold_with_direction_inactive_bool";
-        public static final String KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
-                "text_hold_with_direction_inactive_bool";
-
-        // Indicates preferred IP version
-        public static final int IPV4_PREFERRED = 0;
-        public static final int IPV6_PREFERRED = 1;
-
-        // Indicates whether location information policy need to be updated using carrier config.
-        public static final int LOCATION_UPDATE_POLICY_NONE = 0;
-        public static final int LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED = 1;
-        public static final int LOCATION_UPDATE_POLICY_ALWAYS = 2;
-
-        // Indicates the type of PIDF-LO geodetic shape.
-        public static final int GEODETIC_SHAPE_CIRCLE = 0;
-        public static final int GEODETIC_SHAPE_ELLIPSOID = 1;
-
-        private Assets() {}
     }
 
     /**
@@ -1360,13 +1348,13 @@ public class CarrierConfig {
             CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
             CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
             CarrierConfigManager.ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-            Assets.KEY_EXTRA_REG_ERR_BUNDLE,
-            Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
-            Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
-            Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
-            Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
-            Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
-            Assets.KEY_WFC_ERR_MESSAGE_BUNDLE);
+            Ims.KEY_EXTRA_REG_ERR_BUNDLE,
+            Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+            Ims.KEY_REG_RETRY_INTERVAL_BUNDLE,
+            Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
+            Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
+            Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
+            ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE);
 
     private final PersistableBundle mConfig = new PersistableBundle();
 

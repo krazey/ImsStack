@@ -1466,15 +1466,15 @@ public class LocationAgent implements LocationInterface {
 
         ConfigInterface config = getConfigInterface();
         if (config != null) {
-            int updateType = CarrierConfig.Assets.LOCATION_UPDATE_POLICY_NONE;
+            int updateType = CarrierConfig.Ims.LOCATION_UPDATE_POLICY_NONE;
             CarrierConfig cc = config.getCarrierConfig();
             if (cc != null) {
                 updateType = cc.getInt(CarrierConfig.Ims.KEY_LOCATION_POLICY_UPDATE_TYPE_INT);
             }
 
-            if ((CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED == updateType
+            if ((CarrierConfig.Ims.LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED == updateType
                     && ServiceCaps.isWfcEnabledByPlatform(mSlotId))
-                    || CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ALWAYS == updateType) {
+                    || CarrierConfig.Ims.LOCATION_UPDATE_POLICY_ALWAYS == updateType) {
                 lp = getLocationPolicy();
 
                 policy |= cc.getInt(CarrierConfig.Ims.KEY_LOCATION_ACQUISITION_POLICY_INT);
@@ -1502,7 +1502,7 @@ public class LocationAgent implements LocationInterface {
                 lp.setSearchDurationForGps(cc.getInt(
                         CarrierConfig.Ims.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT));
                 int shape = cc.getInt(CarrierConfig.Ims.KEY_LOCATION_GEODETIC_SHAPE_INT);
-                lp.setShape(CarrierConfig.Assets.GEODETIC_SHAPE_ELLIPSOID == shape
+                lp.setShape(CarrierConfig.Ims.GEODETIC_SHAPE_ELLIPSOID == shape
                         ? LocationPolicy.SHAPE_ELLIPSOID : LocationPolicy.SHAPE_CIRCLE);
             }
         }

@@ -53,7 +53,7 @@ public final class CallFeature {
 
     public static boolean isCallHoldUsingInactive(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
     }
 
     public static boolean isIncomingResumeEventSupported(int slotId) {
@@ -84,12 +84,12 @@ public final class CallFeature {
 
     public static boolean isVideoDirectionInactiveOnVideoCallHold(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
+                .getBoolean(CarrierConfig.ImsVt.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
     }
 
     public static boolean isTextDirectionInactiveOnRttCallHold(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
+                .getBoolean(CarrierConfig.ImsRtt.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
     }
 
     public static boolean isDynamicVideoQualitySupported(int slotId) {

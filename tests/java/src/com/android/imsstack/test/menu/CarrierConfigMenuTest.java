@@ -91,7 +91,7 @@ public class CarrierConfigMenuTest {
     private static final String TEST_ASSETS_CONFIG_STRING =
             CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING;
     private static final String TEST_ASSETS_CONFIG_INT_ARRAY =
-            CarrierConfig.Assets.KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY;
+            CarrierConfig.Ims.KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY;
     private static final String TEST_ASSETS_CONFIG_STRING_ARRAY =
             CarrierConfig.ImsVoice.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY;
     private static final String TEST_CONFIG_PAYLOAD_TYPE = "100";

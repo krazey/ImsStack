@@ -41,7 +41,8 @@ import com.android.imsstack.base.SystemServiceProxy.ProvisioningManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.config.CarrierConfig.Assets;
+import com.android.imsstack.core.config.CarrierConfig.Ims;
+import com.android.imsstack.core.config.CarrierConfig.ImsWfc;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.Log;
@@ -132,14 +133,14 @@ public class CarrierConfigMenu extends AppCompatActivity {
             CONFIG_I_BUNDLE, KEY_CONFIG_BUNDLE_VALUE,
             ASSETS_CONFIG_I_BUNDLE, KEY_ASSETS_PREFIX + KEY_CONFIG_BUNDLE_VALUE);
     private static final List<String> ASSETS_BUNDLE_KEYS = Arrays.asList(
-            Assets.KEY_EXTRA_REG_ERR_BUNDLE,
-            Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
-            Assets.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE,
-            Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
-            Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
-            Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
-            Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
-            Assets.KEY_WFC_ERR_MESSAGE_BUNDLE);
+            Ims.KEY_EXTRA_REG_ERR_BUNDLE,
+            Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+            Ims.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE,
+            Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
+            Ims.KEY_REG_RETRY_INTERVAL_BUNDLE,
+            Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
+            Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
+            ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE);
     private static final Map<String, List<String>> BUNDLE_ITEMS_MAP = Map.ofEntries(
             Map.entry(ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
                     ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
@@ -189,47 +190,47 @@ public class CarrierConfigMenu extends AppCompatActivity {
                     CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
                     CarrierConfig.ImsVt.KEY_HEVC_PROFILE_INT,
                     CarrierConfig.ImsVt.KEY_HEVC_LEVEL_INT)),
-            Map.entry(Assets.KEY_EXTRA_REG_ERR_BUNDLE, Arrays.asList(
-                    Assets.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
-                    Assets.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
-                    Assets.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
-                    Assets.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
-                    Assets.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
-                    Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
-                    Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
-                    Assets.KEY_EXTRA_REG_ERR_POLICY_INT,
-                    Assets.KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
-                    Assets.KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY)),
-            Map.entry(Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE, Arrays.asList(
-                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
-                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
-                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT)),
-            Map.entry(Assets.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE, Arrays.asList(
-                    Assets.KEY_PCSCF_RECOVERY_MAX_CNT_INT,
-                    Assets.KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT,
-                    Assets.KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT,
-                    Assets.KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT)),
-            Map.entry(Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE, Arrays.asList(
-                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY,
-                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
-                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL)),
-            Map.entry(Assets.KEY_REG_RETRY_INTERVAL_BUNDLE, Arrays.asList(
-                    Assets.KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
-                    Assets.KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY,
-                    Assets.KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL)),
-            Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE, Arrays.asList(
-                    Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY,
-                    Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
-            Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
-                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
-                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT)),
-            Map.entry(Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, Arrays.asList(
-                    Assets.KEY_WFC_ERR_REG_403_STRING,
-                    Assets.KEY_WFC_ERR_REG_500_STRING,
-                    Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING,
-                    Assets.KEY_WFC_ERR_SUB_403_STRING,
-                    Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING,
-                    Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING)));
+            Map.entry(Ims.KEY_EXTRA_REG_ERR_BUNDLE, Arrays.asList(
+                    Ims.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
+                    Ims.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
+                    Ims.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
+                    Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
+                    Ims.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
+                    Ims.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
+                    Ims.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
+                    Ims.KEY_EXTRA_REG_ERR_POLICY_INT,
+                    Ims.KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
+                    Ims.KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY)),
+            Map.entry(Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE, Arrays.asList(
+                    Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                    Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
+                    Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT)),
+            Map.entry(Ims.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE, Arrays.asList(
+                    Ims.KEY_PCSCF_RECOVERY_MAX_CNT_INT,
+                    Ims.KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT,
+                    Ims.KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT,
+                    Ims.KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT)),
+            Map.entry(Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE, Arrays.asList(
+                    Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY,
+                    Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
+                    Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL)),
+            Map.entry(Ims.KEY_REG_RETRY_INTERVAL_BUNDLE, Arrays.asList(
+                    Ims.KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
+                    Ims.KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY,
+                    Ims.KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL)),
+            Map.entry(Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE, Arrays.asList(
+                    Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY,
+                    Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
+            Map.entry(Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
+                    Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
+                    Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT)),
+            Map.entry(ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE, Arrays.asList(
+                    ImsWfc.KEY_WFC_ERR_REG_403_STRING,
+                    ImsWfc.KEY_WFC_ERR_REG_500_STRING,
+                    ImsWfc.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING,
+                    ImsWfc.KEY_WFC_ERR_SUB_403_STRING,
+                    ImsWfc.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING,
+                    ImsWfc.KEY_WFC_ERR_OTHER_FAILURES_STRING)));
     private static final List<String> KEYS_OF_VALUE_USED_AS_BUNDLE_KEY = List.of(
             ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,

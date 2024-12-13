@@ -77,7 +77,7 @@ public class DcSettingsTest {
     @Test
     public void testIsVopsIgnored() throws Exception {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL), anyBoolean()))
+                eq(CarrierConfig.ImsVoice.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL), anyBoolean()))
                 .thenReturn(false)
                 .thenReturn(true);
 
@@ -91,7 +91,7 @@ public class DcSettingsTest {
     @Test
     public void testIsImsPdnRequestWithoutMmtelRequired() throws Exception {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
+                eq(CarrierConfig.Ims.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
                 .thenReturn(true)
                 .thenReturn(false);
 
@@ -129,25 +129,25 @@ public class DcSettingsTest {
     @Test
     public void testGetPreferredIpVersion() throws Exception {
         when(mMockCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT), anyInt()))
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
-                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+                eq(CarrierConfig.Ims.KEY_IMS_PREFERRED_IPTYPE_INT), anyInt()))
+                .thenReturn(CarrierConfig.Ims.IPV4_PREFERRED)
+                .thenReturn(CarrierConfig.Ims.IPV6_PREFERRED);
 
-        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV4_PREFERRED);
-        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV4_PREFERRED);
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV6_PREFERRED);
     }
 
     @Test
     public void testGetEmergencyPreferredIpVersion() throws Exception {
         when(mMockCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_EPDN_PREFERRED_IPTYPE_INT), anyInt()))
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
-                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+                eq(CarrierConfig.ImsEmergency.KEY_EPDN_PREFERRED_IPTYPE_INT), anyInt()))
+                .thenReturn(CarrierConfig.Ims.IPV4_PREFERRED)
+                .thenReturn(CarrierConfig.Ims.IPV6_PREFERRED);
 
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
-                CarrierConfig.Assets.IPV4_PREFERRED);
+                CarrierConfig.Ims.IPV4_PREFERRED);
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
-                CarrierConfig.Assets.IPV6_PREFERRED);
+                CarrierConfig.Ims.IPV6_PREFERRED);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class DcSettingsTest {
         int[] emptyList = {}, availableList = {permanentFailureCause};
 
         when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY)))
+                eq(CarrierConfig.Ims.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY)))
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
 
@@ -179,9 +179,9 @@ public class DcSettingsTest {
         int[] availableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(availableRats.length, 0);
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());
-        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV6_PREFERRED);
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
-                CarrierConfig.Assets.IPV6_PREFERRED);
+                CarrierConfig.Ims.IPV6_PREFERRED);
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
     }
 

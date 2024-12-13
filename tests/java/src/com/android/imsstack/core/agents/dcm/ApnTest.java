@@ -229,7 +229,7 @@ public class ApnTest {
     public void testGetIpVersion_imsApn() throws Exception {
         replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
         when(mMockIDcSettings.getPreferredIpVersion())
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED);
+                .thenReturn(CarrierConfig.Ims.IPV4_PREFERRED);
 
         mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
         mApn.mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
@@ -250,7 +250,7 @@ public class ApnTest {
         mApn.mType = EApnType.EMERGENCY;
         replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
         when(mMockIDcSettings.getEmergencyPreferredIpVersion())
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED);
+                .thenReturn(CarrierConfig.Ims.IPV4_PREFERRED);
 
         mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
         mApn.mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
