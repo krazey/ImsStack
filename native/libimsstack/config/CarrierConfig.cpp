@@ -174,6 +174,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_IN_UA_STRING_BO
 const IMS_CHAR
         CarrierConfig::Ims::KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[] =
                 KEY_IMS_PREFIX "allow_sip_p_access_network_info_header_in_initial_register_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL[] =
+        KEY_IMS_PREFIX "require_sip_expires_header_in_register_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[] =
         KEY_IMS_PREFIX "support_sip_session_id_header_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
