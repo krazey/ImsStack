@@ -56,6 +56,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                        \
+    using Base::SetState;                          \
+    using Base::GetState;                          \
     using Base::RemoveBlock;                       \
     using Base::SetSuspendedReason;                \
     using Base::SetHandleState;                    \
@@ -169,7 +171,7 @@ public:
     inline void SetAosInfo(IN IImsAosInfo* piAosInfo) { m_piInfo = piAosInfo; }
     inline void SetNetSrvIn(IN IMS_BOOL bNetSrvIn) { m_bNetSrvIn = bNetSrvIn; }
     inline IMS_BOOL GetNetSrvIn() { return m_bNetSrvIn; }
-    inline IImsAosInfo* GetAosInfo() { return m_piInfo; }
+    inline IImsAosInfo* GetAosInfo() override { return m_piInfo; }
     inline IMS_UINT32 GetReason() { return m_nReason; }
     inline void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_bEpdgEnabled = bEnabled; }
 
@@ -251,7 +253,7 @@ public:
         RestoreBlocks(m_objHoldingBlocksPolicyForWifi, m_nHoldingBlocksForWifi);
     }
 
-    inline IMS_BOOL IsBlocked() const { return m_bBlocked; }
+    inline IMS_BOOL IsBlocked() const override { return m_bBlocked; }
 
     IMS_BOOL HasFeatureTag(IN const AString& strName, IN const AString& strValue) const
     {
@@ -280,9 +282,11 @@ public:
 
     void AddBlock(IN IMS_UINT32 nBlock) { AddBlock(nBlock, m_nBlocks); }
 
-public:
-    void SetState(IN IMS_UINT32 nState) { AosHandle::SetState(nState); }
-    IMS_UINT32 GetState() { return AosHandle::GetState(); }
+    inline IMS_BOOL IsEmergencyInitiated() { return m_bEmergencyInitiated; }
+    inline void SetEmergencyInitiated(IN IMS_BOOL bInitiated)
+    {
+        m_bEmergencyInitiated = bInitiated;
+    }
 };
 
 class AosHandleTest : public ::testing::Test
@@ -296,6 +300,7 @@ public:
     MockIImsAosListener m_objMockIImsAosListener;
     MockIAosConnection m_objMockIAosConnection;
     MockIWifiWatcher m_objMockIWifiWatcher;
+    MockIAosRegistration m_objMockIAosRegistration;
 
     IAosNConfiguration* m_piAosNConfiguration;
     MockIAosNConfiguration m_objMockIAosNConfiguration;
@@ -321,6 +326,8 @@ protected:
                 .WillByDefault(Return(&m_objMockIAosNetTracker));
         ON_CALL(m_objMockIAosAppContext, GetConnection())
                 .WillByDefault(Return(&m_objMockIAosConnection));
+        ON_CALL(m_objMockIAosAppContext, GetRegistration())
+                .WillByDefault(Return(&m_objMockIAosRegistration));
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
@@ -795,10 +802,102 @@ TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTING)
     EXPECT_TRUE(m_pAosHandle->App_Notify());
 }
 
-TEST_F(AosHandleTest, Control_Test)
+TEST_F(AosHandleTest, ShouldNotNotifyECallDoneIfStateIsConnecting)
 {
-    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(_, _)).Times(1);
-    m_pAosHandle->Control(0);
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
+    m_pAosHandle->SetNotify(IMS_TRUE);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
+    m_pAosHandle->SetEmergencyInitiated(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_DONE, _))
+            .Times(0);
+
+    // WHEN
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsEmergencyInitiated());
+}
+
+TEST_F(AosHandleTest, ShouldNotifyECallDoneAfterCallbackListenersIfECallInitHasNotified)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
+    m_pAosHandle->SetNotify(IMS_TRUE);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
+    m_pAosHandle->SetEmergencyInitiated(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_DONE, _));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandle->IsEmergencyInitiated());
+}
+
+TEST_F(AosHandleTest, ShouldNotifyESmsDoneAfterCallbackListenersIfESmslInitHasNotified)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTS);
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
+    m_pAosHandle->SetNotify(IMS_TRUE);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
+    m_pAosHandle->SetEmergencyInitiated(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_DONE, _));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandle->IsEmergencyInitiated());
+}
+
+TEST_F(AosHandleTest, ControlCallsRequestCmdOfAosApplicationWithTheGivenValue)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::REGISTER_START_WITH_WLAN, _));
+
+    // WHEN
+    m_pAosHandle->Control(ImsAosControl::REGISTER_START_WITH_WLAN);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosHandleTest, ShouldNotifyECallInitiationWhenMtcRequestedEmergencyRegisterStart)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_INIT, _));
+
+    // WHEN
+    m_pAosHandle->Control(ImsAosControl::REGISTER_START);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsEmergencyInitiated());
+}
+
+TEST_F(AosHandleTest, ShouldNotifyESmsInitiationWhenMtsRequestedEmergencyRegisterStartWithWlan)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTS);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_INIT, _));
+
+    // WHEN
+    m_pAosHandle->Control(ImsAosControl::REGISTER_START_WITH_WLAN);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsEmergencyInitiated());
 }
 
 TEST_F(AosHandleTest, GetAosInfo_Test)
@@ -1295,26 +1394,14 @@ TEST_F(AosHandleTest, SetReason_Test)
     m_pAosHandle->SetReason(AosReason::NONE);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::NONE);
 
-    m_pAosHandle->SetReason(AosReason::SRV_OUT);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::SRV_OUT);
-
     m_pAosHandle->SetReason(AosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::POWER_OFF);
-
-    m_pAosHandle->SetReason(AosReason::BAD_BATTERY);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::BAD_BATTERY);
 
     m_pAosHandle->SetReason(AosReason::AIRPLANE_MODE);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::AIRPLANE_MODE);
 
-    m_pAosHandle->SetReason(AosReason::NO_LTE_COVERAGE);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::NO_LTE_COVERAGE);
-
     m_pAosHandle->SetReason(AosReason::SERVICE_POLICY);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::SERVICE_POLICY);
-
-    m_pAosHandle->SetReason(AosReason::SERVICE_BLOCKED);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::SERVICE_BLOCKED);
 
     m_pAosHandle->SetReason(AosReason::IMS_DISABLED);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::IMS_DISABLED);
@@ -1348,12 +1435,6 @@ TEST_F(AosHandleTest, SetReason_Test)
 
     m_pAosHandle->SetReason(AosReason::REG_TERMINATING);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::REG_TERMINATING);
-
-    m_pAosHandle->SetReason(AosReason::PCSCF_DISCOVERY_FAILED);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::PCSCF_DISCOVERY_FAILED);
-
-    m_pAosHandle->SetReason(AosReason::UNKNOWN);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::UNKNOWN);
 }
 
 TEST_F(AosHandleTest, ClearSuspendedReason_Test)
@@ -1383,19 +1464,13 @@ TEST_F(AosHandleTest, GetAppState_Test)
 TEST_F(AosHandleTest, GetImsAosReason_Test)
 {
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::BAD_BATTERY), ImsAosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::AIRPLANE_MODE),
             ImsAosReason::DATA_DISCONNECTED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_DISCONNECTED),
             ImsAosReason::DATA_DISCONNECTED);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NO_LTE_COVERAGE),
-            ImsAosReason::NO_RAT_COVERAGE);
     EXPECT_EQ(
             m_pAosHandle->GetImsAosReason(AosReason::SERVICE_POLICY), ImsAosReason::SERVICE_POLICY);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::SERVICE_BLOCKED),
-            ImsAosReason::SERVICE_BLOCKED);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::SRV_OUT), ImsAosReason::OUT_OF_SERVICE);
     EXPECT_EQ(
             m_pAosHandle->GetImsAosReason(AosReason::REG_TERMINATED), ImsAosReason::REG_TERMINATED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::INITIAL_REG_REQUESTED),
@@ -1650,6 +1725,11 @@ TEST_F(AosHandleTest, GetAosFeature_Test)
             ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
 
     EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_NONE), ImsAosFeature::NONE);
+}
+
+TEST_F(AosHandleTest, ShouldReturnTextFeatureIfTheBlockReasonForTextCapabilityIsGiven)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_TEXT_CAPABILITY), ImsAosFeature::TEXT);
 }
 
 TEST_F(AosHandleTest, BackupAllBlocks_Test1)
@@ -3272,13 +3352,8 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test1)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
 
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosRegistration));
-
     EXPECT_CALL(
-            objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
             .Times(1);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
 
@@ -3294,13 +3369,8 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test2)
     m_pAosHandle->SetListener(IMS_NULL);
     ASSERT_EQ(m_pAosHandle->GetListener(), nullptr);
 
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosRegistration));
-
     EXPECT_CALL(
-            objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
             .Times(1);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
 
@@ -3319,13 +3389,8 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test3)
     m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosRegistration));
-
     EXPECT_CALL(
-            objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
             .Times(1);
 
     EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())

@@ -39,6 +39,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 LOCAL const IMS_CHAR STR_VERSTAT[] = "verstat";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_PASSED[] = "TN-Validation-Passed";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_FAILED[] = "TN-Validation-Failed";
+LOCAL const IMS_CHAR STR_VERSTAT_POTENTIAL_SPAM[] = "Potential Spam";
 
 PUBLIC
 MtcSupplementaryService::MtcSupplementaryService(IN IMtcCallContext& objContext,
@@ -129,7 +130,7 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
     bUpdate |= UpdateAnswerHold(piMessage);
     bUpdate |= UpdateMcid(piMessage);
     bUpdate |= UpdateDualNumber(piMessage);
-    bUpdate |= UpdateCallingNumVerification(piMessage);
+    bUpdate |= UpdateCallingNumberVerification(piMessage);
     bUpdate |= UpdateCallComposerElements(piMessage);
     bUpdate |= UpdateSessionId(piMessage);
 
@@ -297,15 +298,21 @@ IMS_BOOL MtcSupplementaryService::UpdateDualNumber(IN IMessage* /*piMessage*/)
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCallingNumVerification(IN IMessage* piMessage)
+IMS_BOOL MtcSupplementaryService::UpdateCallingNumberVerification(IN IMessage* piMessage)
 {
-    AString strValue = GetCnvParameterValue(piMessage);
-    if (strValue.GetLength() <= 0)
+    AString strVerstatParameter = GetCnvParameterValue(piMessage);
+    if (strVerstatParameter.GetLength() <= 0)
     {
         return IMS_FALSE;
     }
 
-    Add(SuppType::CALLING_NUM_VERIFICATION, GetCallingNumVerificationResult(strValue));
+    AString strDisplayName = m_objContext.GetMessageUtils().GetDisplayName(
+            piMessage, ISipHeader::P_ASSERTED_IDENTITY);
+
+    IMS_SINT32 nResult = GetCallingNumberVerificationResult(strVerstatParameter, strDisplayName);
+    IMS_TRACE_D("UpdateCallingNumberVerification : result[%d]", nResult, 0, 0);
+
+    Add(SuppType::CALLING_NUM_VERIFICATION, nResult);
     return IMS_TRUE;
 }
 
@@ -570,24 +577,24 @@ IMS_SINT32 MtcSupplementaryService::ConvertCdivCause(IN IMS_SINT32 nCause)
 }
 
 PRIVATE
-IMS_SINT32 MtcSupplementaryService::GetCallingNumVerificationResult(IN const AString& strValue)
+IMS_SINT32 MtcSupplementaryService::GetCallingNumberVerificationResult(
+        IN const AString& strVerstatParameter, IN const AString& strDisplayName)
 {
-    IMS_SINT32 nVerstatResult = CALLING_NUM_VERSTAT_NONE;
-
-    if (strValue.GetLength() > 0)
+    if (strVerstatParameter.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_PASSED))
     {
-        if (strValue.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_PASSED))
+        if (strDisplayName.EqualsIgnoreCase(STR_VERSTAT_POTENTIAL_SPAM))
         {
-            nVerstatResult = CALLING_NUM_VERSTAT_VERIFIED;
+            return CALLING_NUM_VERSTAT_NOT_VERIFIED;
         }
-        else if (strValue.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_FAILED))
-        {
-            nVerstatResult = CALLING_NUM_VERSTAT_NOT_VERIFIED;
-        }
+        return CALLING_NUM_VERSTAT_VERIFIED;
     }
 
-    IMS_TRACE_D("GetCallingNumVerificationResult : result is [%d]", nVerstatResult, 0, 0);
-    return nVerstatResult;
+    if (strVerstatParameter.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_FAILED))
+    {
+        return CALLING_NUM_VERSTAT_NOT_VERIFIED;
+    }
+
+    return CALLING_NUM_VERSTAT_NONE;
 }
 
 PRIVATE

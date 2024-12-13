@@ -137,12 +137,12 @@ public:
         return m_pMsgBodyList;
     }
 
-    SIP_BOOL SetRequestline(SipRequestLine* pReqLine);
+    SIP_VOID SetRequestline(SipRequestLine* pReqLine);
     SIP_BOOL SetHeader(SipHeaderBase* pHdr);
     SIP_BOOL AppendHeader(SipHeaderBase* pHdr);
     SIP_BOOL InsertHeader(SipHeaderBase* pHdr, SIP_UINT32 nIndex);
     SIP_BOOL SetMessageBody(SipMsgBody* pMsgBody);
-    SIP_BOOL SetMessageType(SIP_INT32 eMsgType);
+    inline SIP_VOID SetMessageType(SIP_INT32 eMsgType) { m_eSipMsgType = eMsgType; }
     inline SipHeaders* GetMsgHdrs() { return (m_objHdrs); }
     inline SIP_INT32 GetMsgType() const { return m_eSipMsgType; }
     inline SipRequestLine* GetReqLine()
@@ -177,7 +177,7 @@ public:
     SIP_BOOL AppendMessageBody(SipMsgBody* pMsgBody);
     SipMsgBody* GetMsgBody(SIP_UINT32 nPos);
     SIP_BOOL RemoveHdr(SIP_INT32 eHdrType);
-    SIP_BOOL SetStatusLine(SipStatusLine* pStatusLine);
+    SIP_VOID SetStatusLine(SipStatusLine* pStatusLine);
     SIP_BOOL IsReqLineExists();
     SIP_BOOL IsStatusLineExists();
     SIP_BOOL HasMIMEMessageBody();

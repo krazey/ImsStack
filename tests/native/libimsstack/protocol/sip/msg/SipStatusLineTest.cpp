@@ -36,7 +36,7 @@ TEST_F(SipStatusLineTest, EncodeStatusLine)
     SipStatusLine* pStatusLine = new SipStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -46,16 +46,16 @@ TEST_F(SipStatusLineTest, EncodeStatusLine)
     EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
 
     /* Only status code present, fail */
-    EXPECT_EQ(SIP_TRUE, pStatusLine->SetStatusCode("183"));
+    pStatusLine->SetStatusCode("183");
 
     EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
 
     /* Status code, reason phrase present and sip version absent, fail */
-    EXPECT_EQ(SIP_TRUE, pStatusLine->SetRsnPhrase("Session Progress"));
+    pStatusLine->SetRsnPhrase("Session Progress");
 
     EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pStatusLine->SetSipVersion(SIP_SIPVER));
+    pStatusLine->SetSipVersion(SIP_SIPVER);
 
     /* sip version,status code and reason phrase present, success */
     EXPECT_EQ(SIP_TRUE, pStatusLine->EncodeStatusLine(&pBuff));

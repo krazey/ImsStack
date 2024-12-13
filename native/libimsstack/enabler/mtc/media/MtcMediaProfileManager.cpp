@@ -16,6 +16,7 @@
 
 #include "IMediaSession.h"
 #include "ISession.h"
+#include "MediaDef.h"
 #include "ServiceTrace.h"
 #include "media/MtcMediaProfileManager.h"
 
@@ -136,7 +137,7 @@ IMS_UINTP MtcMediaProfileManager::GetNegoId(IN const ISession* piSession) const
 
     if (!pProfile)
     {
-        return IMS_NULL;
+        return UNDEFINED_NEGO_ID;
     }
 
     return pProfile->nNegoId;

@@ -78,7 +78,7 @@ public class ImsConfigMenuTest {
 
         Preference menu;
         // SIM1
-        final int positionSim1 = 1;
+        final int positionSim1 = 2;
         mInstrumentation.runOnMainSync(() -> {
             listener.onItemClick(listView, listView, positionSim1, 1L);
         });
@@ -94,7 +94,7 @@ public class ImsConfigMenuTest {
         assertEquals(SLOT0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
 
         // SIM2
-        final int positionSim2 = 2;
+        final int positionSim2 = 3;
         mInstrumentation.runOnMainSync(() -> {
             listener.onItemClick(listView, listView, positionSim2, 1L);
         });

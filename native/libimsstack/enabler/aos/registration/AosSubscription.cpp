@@ -44,7 +44,7 @@
 #include "provider/AosUtil.h"
 #include "registration/AosSubscription.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 
@@ -458,6 +458,12 @@ void AosSubscription::PrintRegInfo(IN ImsList<IRegInfoContact*>& objRegInfo)
         strLog.Append("[expires/");
         strLog.Append(strNumber.SetNumber(piCurr->GetExpiresValue()));
         strLog.Append("]\n");
+    }
+
+    if (strLog.GetLength() > 0)
+    {
+        // Remove line-feed (LF)
+        strLog.Chop(1);
     }
 
     A_IMS_TRACE_D(AOSTAG, "PrintRegInfo :: %s", strLog.GetStr(), 0, 0);

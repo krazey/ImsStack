@@ -132,7 +132,8 @@ protected:
     {
         pMockIdManager = new MockCallConnectionIdManager(objMockContext);
 
-        pMockNotifier = new MockConferenceEventNotifier(objMockCallContext, *pMockIdManager);
+        pMockNotifier = new MockConferenceEventNotifier(
+                objMockCallManager, CONFERENCE_CALL_KEY, *pMockIdManager);
         ON_CALL(*pMockFactory, CreateEventNotifier(_, _)).WillByDefault(Return(pMockNotifier));
         ON_CALL(*piConferenceCall, GetCallContext()).WillByDefault(ReturnRef(objMockCallContext));
         ON_CALL(objMockCallContext, GetService()).WillByDefault(ReturnRef(objMtcService));

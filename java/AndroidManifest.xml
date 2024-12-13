@@ -107,7 +107,8 @@
             android:label="Debug Screen"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.DEBUG_SCREEN" />
                 <category android:name="android.intent.category.DEFAULT" />

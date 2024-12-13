@@ -49,7 +49,7 @@ public:
     MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedDirection, (), (override));
     MOCK_METHOD(VIDEO_RESOLUTION, GetNegotiatedResolution, (), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedRtpPort, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetMediaBandwidth, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetNegotiatedBandwidth, (), (override));
 };
 
 #endif

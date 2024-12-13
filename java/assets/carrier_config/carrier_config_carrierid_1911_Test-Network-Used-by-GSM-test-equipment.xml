@@ -16,12 +16,13 @@
 -->
 <carrier_config>
     <!-- Aos -->
+    <boolean name="sms_over_ims_available_without_voice_capa_bool" value="false"/>
     <boolean name="use_awt_when_init_reg_with_next_pcscf_bool" value="true"/>
 
     <!-- MEDIA -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="125"/>
+            <item value="127"/>
         </int-array>
         <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
             <item value="115"/>
@@ -39,17 +40,18 @@
         </int-array>
     </pbundle>
     <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="125">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
+        <pbundle name="127">
+            <int name="imsvoice.codec_attribute_cmr_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
             <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
                 <item value="0"/>
-                <item value="4"/>
+                <item value="6"/>
             </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="0"/>
             <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">
@@ -130,6 +132,16 @@
     <boolean name="sdp_reoffer_full_capability_bool" value="false"/>
     <boolean name="media_session_level_bandwidth_bool" value="true"/>
 
+    <!-- Ut/Xcap AOSP -->
+    <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
+    <int-array name="imsss.xcap_over_ut_supported_rats_int_array" num="5">
+        <item value="3"/>
+        <item value="6"/>
+        <item value="5"/>
+        <item value="1"/>
+        <item value="2"/>
+    </int-array>
+
     <!-- Ut/Xcap Config -->
     <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
 
@@ -150,7 +162,6 @@
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
     <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="8000"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="2"/>
-    <boolean name="imsvoice.default_eps_bearer_context_usage_restriction_on_cellular_bool" value="true"/>
     <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="true"/>
     <string name="imsvoice.conference_factory_uri_string">sip:mmtel@conf-factory.test.3gpp.com</string>
 </carrier_config>

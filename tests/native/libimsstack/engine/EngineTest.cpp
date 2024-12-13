@@ -16,11 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "Engine.h"
-#include "ServiceContext.h"
 
-#include "MockIServiceContext.h"
-
-using ::testing::Return;
+#include "TestEngine.h"
 
 namespace android
 {
@@ -30,17 +27,21 @@ class EngineTest : public ::testing::Test
 protected:
     void SetUp() override {}
     void TearDown() override {}
+
+protected:
+    TestEngine m_objEngine;
 };
 
 TEST_F(EngineTest, GetConfiguration)
 {
-    MockIServiceContext objServiceContext;
-    ServiceContext::GetInstance()->SetServiceContext(&objServiceContext);
-    EXPECT_CALL(objServiceContext, GetConfiguration()).Times(1).WillOnce(Return(nullptr));
+    MockIConfiguration& objConfiguration = m_objEngine.GetMockConfiguration();
+    EXPECT_EQ(Engine::GetConfiguration(), &objConfiguration);
+}
 
-    EXPECT_EQ(Engine::GetConfiguration(), nullptr);
-
-    ServiceContext::GetInstance()->SetServiceContext(IMS_NULL);
+TEST_F(EngineTest, GetRegistrationManager)
+{
+    MockIRegistrationManager& objRegistrationManager = m_objEngine.GetMockRegistrationManager();
+    EXPECT_EQ(Engine::GetRegistrationManager(), &objRegistrationManager);
 }
 
 }  // namespace android

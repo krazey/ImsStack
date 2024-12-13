@@ -123,7 +123,7 @@
     <int name="imsvt.convert_user_response_timer_millis_int" value="40000"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>
     <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
 
     <!-- Mts -->
@@ -161,8 +161,8 @@
                 <item value="0"/>
                 <item value="4"/>
             </int-array>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">

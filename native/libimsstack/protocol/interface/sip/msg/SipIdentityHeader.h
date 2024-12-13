@@ -35,8 +35,8 @@ public:
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    SIP_BOOL SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest);
-    SIP_BOOL SetInfo(const SIP_CHAR* pszInfo);
+    SIP_VOID SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest);
+    SIP_VOID SetInfo(const SIP_CHAR* pszInfo);
 
     inline const SIP_CHAR* GetSignedIdentityDigest() const { return m_pSignedIdentityDigest; }
     inline const SIP_CHAR* GetInfo() const { return m_pInfo; }

@@ -21,11 +21,13 @@
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/state/MtcCallState.h"
+#include <memory>
 
 class AString;
 class IMessage;
 class IMtcCalContext;
 class SuppService;
+class UdpKeepAliveSender;
 enum class QosLossPolicy;
 struct MediaInfo;
 
@@ -61,6 +63,9 @@ public:
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
+
+private:
+    std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
 };
 
 #endif

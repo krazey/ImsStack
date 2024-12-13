@@ -104,17 +104,17 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipRequestLine::SetMethod(const SIP_CHAR* pMethod)
+SIP_VOID SipRequestLine::SetMethod(const SIP_CHAR* pMethod)
 {
-    return SetCharVar(pMethod, m_pszMethod);
+    SetCharVar(pMethod, m_pszMethod);
 }
 
-SIP_BOOL SipRequestLine::SetSipVersion(const SIP_CHAR* pszVer)
+SIP_VOID SipRequestLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
-    return SetCharVar(pszVer, m_pszSipVersion);
+    SetCharVar(pszVer, m_pszSipVersion);
 }
 
-SIP_BOOL SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
+SIP_VOID SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
 {
     if (m_pReqUri != SIP_NULL)
     {
@@ -126,7 +126,6 @@ SIP_BOOL SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
         m_pReqUri = pAddrSpec;
         m_pReqUri->Increment();
     }
-    return SIP_TRUE;
 }
 
 SipAddrSpec* SipRequestLine::GetReqUri()

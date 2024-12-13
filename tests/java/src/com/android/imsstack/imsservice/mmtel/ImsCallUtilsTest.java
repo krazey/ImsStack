@@ -102,7 +102,7 @@ public class ImsCallUtilsTest {
         assertEquals(false, profile.getCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL));
 
         callInfo.isConf = true;
-        mediaInfo.AQuality = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB;
+        mediaInfo.AQuality = MediaInfo.AUDIO_QUALITY_EVS_SWB;
         profile = ImsCallUtils.createCallProfileFromCallInfo(mContext, callInfo, mediaInfo);
         assertEquals(ImsCallProfile.CALL_RESTRICT_CAUSE_NONE, profile.getRestrictCause());
         assertEquals(true, profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE));
@@ -117,6 +117,11 @@ public class ImsCallUtilsTest {
         profile = ImsCallUtils.createCallProfileFromCallInfo(mContext, callInfo, mediaInfo);
         assertEquals(ImsCallProfile.CALL_TYPE_VT, profile.mCallType);
         assertEquals(ImsCallProfile.SERVICE_TYPE_EMERGENCY, profile.mServiceType);
+
+        mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+        profile = ImsCallUtils.createCallProfileFromCallInfo(mContext, callInfo, mediaInfo);
+        assertEquals(ImsStreamMediaProfile.DIRECTION_INVALID,
+                profile.getMediaProfile().mVideoDirection);
     }
 
     @Test

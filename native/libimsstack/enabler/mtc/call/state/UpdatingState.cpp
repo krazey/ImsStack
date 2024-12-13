@@ -102,7 +102,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     IMtcSession* pSession = m_objContext.GetSession();
     ISession& objSession = pSession->GetISession();
     pSession->SetCallType(eCallType);
-    m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
@@ -145,7 +144,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
         if (nRejectCode == SipStatusCode::SC_200)
         {
             return AcceptUpdate(pMtcSession->GetPreviousCallType(),
-                    m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+                    m_objContext.GetUpdatingInfo().GetOriginalInfo());
         }
     }
 
@@ -289,7 +288,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
     CallReasonInfo objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
 
-    if (objReason.nCode == CODE_USER_TERMINATED_BY_REMOTE)
+    if (objReason.nCode == CODE_USER_TERMINATED_BY_REMOTE ||
+            objReason.nCode == CODE_SIP_SERVICE_UNAVAILABLE)
     {
         HandleTerminate(objReason);
         m_objContext.GetUiNotifier().SendTerminated(objReason);
@@ -503,7 +503,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::Refresh_NotifyTimerExpired(
     bDoImplicitRefresh = IMS_FALSE;
     // TODO: if session_timer_update_required_in_session_update_by_reinvite_bool is true,
     // no need to refresh. session timer is updated by re-INVITE.
-    m_objContext.GetUpdatingInfo().SetPendingUpdate(IMS_TRUE);
+    m_objContext.GetUpdatingInfo().SetPendingUpdate();
     return GetStateName();
 }
 
@@ -711,8 +711,8 @@ IMS_RESULT UpdatingState::SendRecoverUpdate()
     IMS_TRACE_D("SendUpdate", 0, 0, 0);
 
     m_objContext.GetUpdatingInfo().GetModifyingInfo() =
-            m_objContext.GetUpdatingInfo().GetNegotiatedInfo();
-    m_objContext.GetUpdatingInfo().GetNegotiatedInfo() =
+            m_objContext.GetUpdatingInfo().GetOriginalInfo();
+    m_objContext.GetUpdatingInfo().GetOriginalInfo() =
             m_objContext.GetUpdatingInfo().GetModifiedInfo();
     m_objContext.GetUpdatingInfo().GetAlertingInfo().eAudioDirection = DIRECTION_INVALID;
     m_objContext.GetUpdatingInfo().GetModifiedInfo().eAudioDirection = DIRECTION_INVALID;
@@ -737,8 +737,6 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 {
     IMS_TRACE_D("HandleModificationSucceeded", 0, 0, 0);
 
-    NotifyHoldResumeState();
-
     IMS_BOOL bModified = m_objContext.GetUpdatingInfo().IsModified();
     CallStateName eCallStateName;
 
@@ -750,6 +748,8 @@ CallStateName UpdatingState::HandleModificationSucceeded()
     {
         eCallStateName = HandleReceivedModificationSucceeded();
     }
+
+    NotifyHoldResumeState();
 
     if (eCallStateName == CallStateName::ESTABLISHED)
     {

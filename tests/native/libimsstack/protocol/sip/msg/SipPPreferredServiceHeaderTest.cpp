@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "msg/SipPPreferredServiceHeader.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -59,8 +60,8 @@ TEST_F(SipPPreferredServiceHeaderTest, DecodeHdr)
 
     /* Decode in complete value */
     const SIP_CHAR* pValue = "urn:urn-8";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
-    const int BUFFER_SIZE = 4096;
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -72,7 +73,7 @@ TEST_F(SipPPreferredServiceHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
     pValue = "urn:urn-7:gpp-serv##ice.";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -84,7 +85,7 @@ TEST_F(SipPPreferredServiceHeaderTest, DecodeHdr)
 
     /* Decode incomplete subservice value */
     pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel:.";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -95,7 +96,7 @@ TEST_F(SipPPreferredServiceHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
     pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));

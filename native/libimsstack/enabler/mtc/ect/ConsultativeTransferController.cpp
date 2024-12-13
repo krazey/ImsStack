@@ -64,11 +64,11 @@ PUBLIC VIRTUAL void ConsultativeTransferController::Transfer()
     StartTimer();
 }
 
-PROTECTED VIRTUAL void ConsultativeTransferController::OnCompleted()
+PROTECTED VIRTUAL void ConsultativeTransferController::OnSuccess()
 {
-    // just in case EctManager directly delete controller once OnCompleted().
+    // just in case EctManager directly delete controller once OnSuccess().
     TerminateTransferTargetCall();
-    EctController::OnCompleted();
+    EctController::OnSuccess();
 }
 
 PRIVATE

@@ -32,6 +32,7 @@ import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityStatus;
 import android.telephony.imsmedia.MediaQualityThreshold;
+import android.telephony.imsmedia.RtpReceptionStats;
 import android.util.Pair;
 
 import com.android.imsstack.core.agents.QosAgent;
@@ -360,7 +361,9 @@ public class AudioSessionHandler extends MediaState {
                     handleTriggerAnbrQuery((AudioConfig) msg.obj);
                 }
                     break;
-
+                case MediaConstants.NOTIFY_RTP_RECEPTION_STATS:
+                    handleNotifyRtpReceptionStats((RtpReceptionStats) msg.obj);
+                    break;
                 default:
                 {
                     ImsLog.e("Invalid RequestType");
@@ -467,6 +470,15 @@ public class AudioSessionHandler extends MediaState {
             Message.obtain(mAudioMessageHandler, MediaConstants.TRIGGER_ANBR_QUERY,
                     audioConfig).sendToTarget();
         }
+
+        @Override
+        public void notifyRtpReceptionStats(final RtpReceptionStats stats) {
+            ImsLog.v("notifyRtpReceptionStats: stats=" + stats);
+
+            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS,
+                    stats).sendToTarget();
+        }
+
     }
 
     /** Implements Interface to receive callbacks when the QoS is connected or disconnected. */
@@ -644,6 +656,18 @@ public class AudioSessionHandler extends MediaState {
             mAudioImsQosCallback = new AudioImsQosCallback();
         }
         mAudioQosAgent.setCallback(mAudioImsQosCallback);
+    }
+
+    /**
+     * Gets the sampling rate of the rtp timestamp
+     */
+    public int getSamplingRateKHz() {
+        switch (mCodecType) {
+            default:
+                return 16;
+            case CODEC_AMR:
+                return 8;
+        }
     }
 
     private void handleAudioOpenSession(String localIpAddress, int localPortNumber) {
@@ -869,6 +893,10 @@ public class AudioSessionHandler extends MediaState {
             MediaQualityThreshold mediaQualityThreshold = mMediaConfig.getMediaQualityThreshold();
             ImsLog.d("setMediaQualityThreshold: " + mediaQualityThreshold.toString());
             mAudioSession.setMediaQualityThreshold(mediaQualityThreshold);
+
+            final int reportingIntervalMillis = 3000;
+            ImsLog.d("requestRtpReceptionStats - intervalMs=" + reportingIntervalMillis);
+            mAudioSession.requestRtpReceptionStats(reportingIntervalMillis);
         }
     }
 
@@ -1042,6 +1070,12 @@ public class AudioSessionHandler extends MediaState {
 
         ImsLog.d("convertedBitrate: " + convertedBitrate);
         return convertedBitrate;
+    }
+
+    private void handleNotifyRtpReceptionStats(final RtpReceptionStats stats) {
+        if (mAudioSessionCallbackHandler != null) {
+            mAudioSessionCallbackHandler.onNotifyRtpReceptionStats(stats);
+        }
     }
 
     private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber)  {

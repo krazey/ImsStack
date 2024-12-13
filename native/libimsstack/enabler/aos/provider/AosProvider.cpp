@@ -32,7 +32,7 @@
 
 #include "provider/AosProvider.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosProvider::AosProvider() :

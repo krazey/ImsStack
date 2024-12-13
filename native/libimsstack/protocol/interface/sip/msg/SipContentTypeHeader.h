@@ -40,10 +40,8 @@ public:
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*set methods*/
-    SIP_BOOL SetMediaType(const SIP_CHAR* pszMtype);
-    /*set methods*/
-    SIP_BOOL SetSubMediaType(const SIP_CHAR* pszMSubtype);
+    SIP_VOID SetMediaType(const SIP_CHAR* pszMType);
+    SIP_VOID SetSubMediaType(const SIP_CHAR* pszMSubType);
 
     SIP_CHAR* GetBoundary();
 

@@ -17,6 +17,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="test_config_editor"
     android:title="TestConfig Editor">
+    <PreferenceScreen/> <!-- Empty row for notification bar. -->
     <PreferenceScreen/> <!-- Empty row for title bar. -->
     <CheckBoxPreference android:title="IMS Disabled"
         android:key="test_ims_disabled"

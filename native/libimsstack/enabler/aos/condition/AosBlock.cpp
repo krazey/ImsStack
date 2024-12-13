@@ -18,7 +18,7 @@
 #include "interface/IAosBlockListener.h"
 #include "condition/AosBlock.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPPROFILE m_strTag.GetStr()
 
@@ -367,6 +367,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
 
         case BLOCK_EPS_FALLBACK_STARTED:
             return "EPS_FALLBACK_STARTED";
+
+        case BLOCK_INVALID_CONNECTION:
+            return "INVALID_CONNECTION";
 
         case BLOCK_CELLULAR_AIRPLANE_MODE_ON:
             return "CELLULAR_AIRPLANE_MODE_ON";

@@ -19,7 +19,7 @@
 #include "IRegistration.h"
 #include "provider/AosLog.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosLog::AosLog()
@@ -461,9 +461,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
 
         case IMS_EVENT_CSCALL_STATE:
             return "IMS_EVENT_CSCALL_STATE";
-
-        case IMS_EVENT_LTE_STATE:
-            return "IMS_EVENT_LTE_STATE";
 
         case IMS_EVENT_LTE_INFO:
             return "IMS_EVENT_LTE_INFO";

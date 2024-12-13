@@ -2755,7 +2755,7 @@ AString& AString::Vsprintf(IN const IMS_CHAR* pszFormat, va_list ap)
 {
     if (pszFormat == IMS_NULL)
     {
-        (*this) = reinterpret_cast<const IMS_CHAR*>(IMS_NULL);
+        (*this) = AString::ConstNull();
         return (*this);
     }
 

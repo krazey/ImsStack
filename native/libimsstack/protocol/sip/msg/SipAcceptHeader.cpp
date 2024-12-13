@@ -92,14 +92,14 @@ SIP_BOOL SipAcceptHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Def
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipAcceptHeader::SetMediaType(const SIP_CHAR* pszMType)
+SIP_VOID SipAcceptHeader::SetMediaType(const SIP_CHAR* pszMType)
 {
-    return SetCharVar(pszMType, m_pszMType);
+    SetCharVar(pszMType, m_pszMType);
 }
 
-SIP_BOOL SipAcceptHeader::SetMediaSubType(const SIP_CHAR* pszMSubType)
+SIP_VOID SipAcceptHeader::SetMediaSubType(const SIP_CHAR* pszMSubType)
 {
-    return SetCharVar(pszMSubType, m_pszMSubType);
+    SetCharVar(pszMSubType, m_pszMSubType);
 }
 
 SIP_BOOL SipAcceptHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

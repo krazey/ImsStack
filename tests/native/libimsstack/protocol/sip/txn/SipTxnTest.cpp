@@ -19,6 +19,7 @@
 #include "SipUtil.h"
 #include "SipVector.h"
 #include "include/MockSipTransaction.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
@@ -26,7 +27,7 @@
 #include "txn/SipTxnFsmData.h"
 
 SipVector<MockSipTransaction*> objTxnList;
-static int* pnTimerId = SIP_NULL;
+static SIP_INT32* pnTimerId = SIP_NULL;
 
 SIP_BOOL MockTxn_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
@@ -36,7 +37,7 @@ SIP_BOOL MockTxn_FetchTransaction(
         return SIP_FALSE;
     }
     SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
-    if (nOption == TXN_OPT_CREATE)
+    if (nOption == SipTxn::OPT_CREATE)
     {
         if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
         {
@@ -70,7 +71,7 @@ SIP_BOOL MockTxn_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID** 
 {
     if (pnTimerId == SIP_NULL)
     {
-        pnTimerId = new int[16];
+        pnTimerId = new SIP_INT32[16];
     }
     *ppvHandle = pnTimerId;
     return SIP_TRUE;
@@ -131,7 +132,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
         static const SipStackCallbacks stTestCallbacks = {
                 &MockTxn_FetchTransaction,
@@ -168,8 +169,8 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
@@ -180,8 +181,8 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     SipTxn* pTxn =
             new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -220,8 +221,8 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     delete pTxnFsmData;
     pTxn->SipDelete();
 
-    pSipTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+    pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxn = new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
@@ -248,8 +249,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
@@ -261,8 +262,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     EXPECT_EQ(SipTxn::INV_CLI_CALLING_ST, pTxn->GetTxnState());
 
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
@@ -296,8 +297,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     delete pTxnFsmData;
     pTxn->SipDelete();
 
-    pSipTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+    pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
@@ -326,8 +327,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
@@ -352,8 +353,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     EXPECT_EQ(SipTxn::INV_SER_PROCEEDING_ST, pTxn->GetTxnState());
 
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
@@ -409,8 +410,8 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
@@ -449,7 +450,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
 
     /* Invoking Timeout with invalid timerID */
-    int nTimerId = 0;
+    SIP_INT32 nTimerId = 0;
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
     CbkTxnTimeout(pTimeoutData, &nTimerId);
@@ -496,7 +497,7 @@ P-Access-Network-Info: 3GPP-UTRAN;utran-cell-id-3gpp=B20E\r\n\
 User-Agent: pixel\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pInSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pInSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     SipTxn* pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, SIP_NULL, pInSipMsg, SIP_NULL, &nError);
 
     pMsg = "SIP/2.0 406 Not Acceptable\r\n\
@@ -507,7 +508,7 @@ Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     EXPECT_EQ(SIP_TRUE, pTxn->PrepareACK(pRespSipMsg, SIP_TRUE, &pOutMsg));
 
     pInSipMsg->SipDelete();
@@ -519,15 +520,13 @@ TEST_F(SipTxnTest, SetUserData)
 {
     SipTxn* pTxn = new SipTxn();
 
-    EXPECT_EQ(SIP_FALSE, pTxn->SetUserData(SIP_NULL));
-
-    EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(new ISipUserData()));
+    pTxn->SetUserData(new ISipUserData());
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     EXPECT_EQ(SipConfiguration::MSG_OPT_ENCODE_NONE, pSipUserData->GetMsgOptions());
     pSipUserData->SetMsgOptions(SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE);
     EXPECT_EQ(SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE, pSipUserData->GetMsgOptions());
     EXPECT_EQ(SIP_FALSE, pSipUserData->GetDeleteFlag());
-    EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(pSipUserData));
+    pTxn->SetUserData(pSipUserData);
 
     pTxn->SipDelete();
 }
@@ -594,8 +593,8 @@ TEST_F(SipTxnTest, AbortTxn)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
@@ -606,8 +605,8 @@ TEST_F(SipTxnTest, AbortTxn)
     SipTxn* pTxn =
             new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);

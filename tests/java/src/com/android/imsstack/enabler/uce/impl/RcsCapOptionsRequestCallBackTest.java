@@ -16,12 +16,13 @@
 
 package com.android.imsstack.enabler.uce.impl;
 
+import static org.mockito.Mockito.verify;
+
 import android.net.Uri;
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.RcsContactUceCapability.OptionsBuilder;
 
 import com.android.imsstack.enabler.uce.interf.RemoteOptionsCallback;
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,47 +30,50 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
+
 @RunWith(JUnit4.class)
 public class RcsCapOptionsRequestCallBackTest {
 
-    @Mock
-    RemoteOptionsCallback mRemoteOptionsCallback;
-    RcsCapOptionsRequestCallback mRcsCapOptionsRequestCallback;
-
-    @Mock
-    RcsContactUceCapability mRcsContactUceCapability;
-    @Mock
-    MessageExecutor mMessageExecutor;
-
-    static final String FEATURE_VIDEO = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video ";
+    private static final String FEATURE_VIDEO = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video";
+    @Mock RemoteOptionsCallback mRemoteOptionsCallback;
+    @Mock RcsContactUceCapability mRcsContactUceCapability;
+    private RcsCapOptionsRequestCallback mRcsCapOptionsRequestCallback;
 
     @Before
     public void setUp() {
-        mRemoteOptionsCallback = Mockito.mock(RemoteOptionsCallback.class);
-        mMessageExecutor = new MessageExecutor("requestExecutor");
-        mRcsCapOptionsRequestCallback = new RcsCapOptionsRequestCallback(mMessageExecutor);
+        MockitoAnnotations.initMocks(this);
+        mRcsCapOptionsRequestCallback = new RcsCapOptionsRequestCallback(mExecutor);
         mRcsCapOptionsRequestCallback.setCallBack(mRemoteOptionsCallback);
     }
 
+    @After
+    public void tearDown() {
+        mRcsCapOptionsRequestCallback = null;
+    }
+
+    private final Executor mExecutor = (r) -> r.run();
+
     @Test
-    public  void  onRespondToCapabilityRequest() {
+    public void onRespondToCapabilityRequest() {
         Set<String> ownCapabilities = new HashSet<>();
-        OptionsBuilder optionsBuilder = new OptionsBuilder(Uri.parse("+123456789"),
-                RcsContactUceCapability.SOURCE_TYPE_CACHED);
+        OptionsBuilder optionsBuilder =
+                new OptionsBuilder(
+                        Uri.parse("+123456789"), RcsContactUceCapability.SOURCE_TYPE_CACHED);
         final RcsContactUceCapability capability = optionsBuilder.build();
         mRcsCapOptionsRequestCallback.onRespondToCapabilityRequest(capability, false);
         ownCapabilities.add(FEATURE_VIDEO);
-        //verify
-        Mockito.verify(mRemoteOptionsCallback, Mockito.timeout(100).times(1))
+        // verify
+        verify(mRemoteOptionsCallback)
                 .onRespondToCapabilityRequest(capability.getFeatureTags(), false);
 
         mRcsCapOptionsRequestCallback.onRespondToCapabilityRequest(capability, true);
-        //verify
-        Mockito.verify(mRemoteOptionsCallback, Mockito.timeout(100).times(1))
+        // verify
+        verify(mRemoteOptionsCallback)
                 .onRespondToCapabilityRequest(capability.getFeatureTags(), false);
     }
 
@@ -78,18 +82,9 @@ public class RcsCapOptionsRequestCallBackTest {
         int code = 200;
         String reason = "ok";
         mRcsCapOptionsRequestCallback.onRespondToCapabilityRequestWithError(code, reason);
-        Mockito.verify(mRemoteOptionsCallback, Mockito.timeout(100).times(1))
-                .onRespondToCapabilityRequestWithError(code, reason);
+        verify(mRemoteOptionsCallback).onRespondToCapabilityRequestWithError(code, reason);
 
         mRcsCapOptionsRequestCallback.onRespondToCapabilityRequestWithError(code, null);
-        Mockito.verify(mRemoteOptionsCallback, Mockito.timeout(100).times(1))
-                .onRespondToCapabilityRequestWithError(code, null);
-    }
-
-    @After
-    public void cleanUp() {
-        mRcsCapOptionsRequestCallback = null;
-        mMessageExecutor = null;
-        mRcsContactUceCapability = null;
+        verify(mRemoteOptionsCallback).onRespondToCapabilityRequestWithError(code, null);
     }
 }

@@ -80,7 +80,6 @@ private:
     IMS_BOOL IsByMaxCallLimit(IN const IMessage& objMessage) const;
     IMS_BOOL IsRedialEmergencyWithNextPcscfRequired(IN const IMessage* piMessage) const;
     IMS_BOOL IsRoaming() const;
-    IMS_BOOL IsEpsOnlyAttach() const;
 
     void ControlAos(IN IMS_UINT32 nCommand) const;
     IMS_BOOL RegisterFor503(IN IMS_SINT32 nRetryAfter) const;

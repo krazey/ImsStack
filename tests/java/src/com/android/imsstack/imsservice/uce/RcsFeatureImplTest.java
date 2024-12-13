@@ -18,12 +18,12 @@ package com.android.imsstack.imsservice.uce;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.telephony.ims.ImsRcsManager;
@@ -33,8 +33,6 @@ import android.telephony.ims.feature.RcsFeature.RcsImsCapabilities;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
-
-import androidx.test.core.app.ApplicationProvider;
 
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.TestAppContext;
@@ -47,25 +45,25 @@ import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class RcsFeatureImplTest {
     private static final int STATE_READY = 2;
 
-    @Mock private Context mMockContext;
     @Mock private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
     @Mock private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
     @Mock private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
     @Mock private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
     @Mock private IUceApi mUceApi;
+    @Mock private Executor mMessageExecutor;
 
     private MessageExecutor mExecutor = null;
     private ImsContext mImsContext;
@@ -75,6 +73,7 @@ public class RcsFeatureImplTest {
     private static class CapabilityCallback extends IImsCapabilityCallback.Stub {
         boolean mIsOnCapabilitiesStatusChanged = false;
         boolean mIsOnChangeCapabilityConfigurationError = false;
+
         @Override
         public void onQueryCapabilityConfiguration(int capability, int radioTech, boolean enabled)
                 throws RemoteException {
@@ -99,14 +98,26 @@ public class RcsFeatureImplTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mExecutor = new MessageExecutor(RcsFeatureImplTest.class.getSimpleName());
-        mMockContext = Mockito.spy(ApplicationProvider.getApplicationContext());
-        mTestAppContext = new TestAppContext(mMockContext);
+        mTestAppContext = new TestAppContext();
         mTestAppContext.setUp();
 
-        mImsContext = new ImsContext(mMockContext, mExecutor, TestAppContext.SLOT0);
+        mImsContext = new ImsContext(mTestAppContext.getContext(), mExecutor, TestAppContext.SLOT0);
         mFeature = new TestRcsFeatureImpl(mImsContext);
-        mFeature.initialize(mMockContext, TestAppContext.SLOT0);
+        mFeature.initialize(mTestAppContext.getContext(), TestAppContext.SLOT0);
         mFeature.setFeatureState(STATE_READY);
+    }
+
+    @After
+    public void tearDown() {
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+        mFeature = null;
+        mCapabilityExchangeEventListener = null;
+
+        if (mExecutor != null) {
+            mExecutor.getLooper().quit();
+            mExecutor = null;
+        }
     }
 
     @Test
@@ -117,70 +128,60 @@ public class RcsFeatureImplTest {
 
     @Test
     public void createCapabilityExchangeImplTest() {
-        Assert.assertNotNull(
+        assertNotNull(
                 mFeature.createCapabilityExchangeImpl(mCapabilityExchangeEventListener));
     }
 
     @Test
-    public void  queryCapabilityConfiguration() {
-        boolean flag =  mFeature.queryCapabilityConfiguration(
-                ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
+    public void queryCapabilityConfiguration() {
+        boolean flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
 
         assertTrue(flag);
 
-        flag =  mFeature.queryCapabilityConfiguration(ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
+        flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_PRESENCE_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
         assertFalse(flag);
 
-        flag =  mFeature.queryCapabilityConfiguration(ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
+        flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_NONE);
         assertFalse(flag);
 
-        flag =  mFeature.queryCapabilityConfiguration(ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
-                ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
+        flag =
+                mFeature.queryCapabilityConfiguration(
+                        ImsRcsManager.CAPABILITY_TYPE_OPTIONS_UCE,
+                        ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         assertTrue(flag);
     }
 
     @Test
     public void changeEnabledCapabilities() throws RemoteException {
-        //Carrier Configuration stubbing
-        mCapabilityExchangeEventListener = Mockito.mock(CapabilityExchangeEventListener.class);
-
+        // Carrier Configuration stubbing
         PersistableBundle bundle = new PersistableBundle();
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
         when(ccmp.getConfigForSubId(anyInt(), any())).thenReturn(bundle);
 
         // CapabilityChangeRequest can not be mocked It is a final class.
-        CapabilityChangeRequest request =  new CapabilityChangeRequest();
-        request.addCapabilitiesToEnableForTech(RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE,
+        CapabilityChangeRequest request = new CapabilityChangeRequest();
+        request.addCapabilitiesToEnableForTech(
+                RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
-        request.addCapabilitiesToEnableForTech(RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE,
+        request.addCapabilitiesToEnableForTech(
+                RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         CapabilityCallback capabilityCallback = new CapabilityCallback();
         mFeature.addCapabilityCallback(capabilityCallback);
-        //verify API changeEnabledCapabilities call
+        // verify API changeEnabledCapabilities call
         mFeature.changeEnabledCapabilities(request, null);
-        Assert.assertTrue(capabilityCallback.mIsOnCapabilitiesStatusChanged);
-        Assert.assertFalse(capabilityCallback.mIsOnChangeCapabilityConfigurationError);
-    }
-
-    @After
-    public void tearDown() {
-        mTestAppContext.tearDown();
-        mTestAppContext = null;
-    }
-
-    @After
-    public void cleanUp() {
-        mFeature = null;
-        mCapabilityExchangeEventListener = null;
-
-        if (mExecutor != null) {
-            mExecutor.getLooper().quit();
-            mExecutor = null;
-        }
+        assertTrue(capabilityCallback.mIsOnCapabilitiesStatusChanged);
+        assertFalse(capabilityCallback.mIsOnChangeCapabilityConfigurationError);
     }
 
     class TestRcsFeatureImpl extends RcsFeatureImpl {
@@ -191,9 +192,16 @@ public class RcsFeatureImplTest {
         @Override
         public RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
                 CapabilityExchangeEventListener listener) {
-            return new RcsCapExchangeImpl(mCapabilityExchangeEventListener, TestAppContext.SLOT0,
-                    mMockContext, mUceApi, mRcsCapSubscribeResponseCallBack,
-                    mRcsCapOptionsResponseCallBack, mRcsCapPublishResponseCallBack);
+            return new RcsCapExchangeImpl(
+                    mCapabilityExchangeEventListener,
+                    TestAppContext.SLOT0,
+                    mTestAppContext.getContext(),
+                    mUceApi,
+                    mRcsCapSubscribeResponseCallBack,
+                    mRcsCapOptionsResponseCallBack,
+                    mRcsCapPublishResponseCallBack,
+                    mExecutor,
+                    mMessageExecutor);
         }
     }
 }

@@ -21,43 +21,40 @@ const AString SEMICOLON = ";";
 const AString COMMA = ",";
 
 const AString MODESETLIST = "mode-set=0,1,2";
-const AString OCTETALIGN = "octet-align=1";
+const AString OCTETALIGN0 = "octet-align=0";
+const AString OCTETALIGN1 = "octet-align=1";
 const AString MODECHANGECAPABILITY = "mode-change-capability=2";
 const AString MODECHANGEPERIOD = "mode-change-period=1";
 const AString MODECHANGENEIGHBOR = "mode-change-neighbor=1";
 const AString MAXRED = "max-red=220";
-const AString PTIME = "ptime=20";
-const AString MAXPTIME = "maxptime=240";
 
 class AudioNegoAmrTest : public ::testing::Test
 {
 public:
     AudioProfile::AmrFmtp* m_pAmrFmtpFull;
     AudioProfile::AmrFmtp* m_pAmrFmtpEmpty;
+    AudioProfile::AmrFmtp* m_pAmrFmtpNull;
 
 protected:
     virtual void SetUp() override
     {
         m_pAmrFmtpFull = new AudioProfile::AmrFmtp();
         m_pAmrFmtpEmpty = new AudioProfile::AmrFmtp();
+        m_pAmrFmtpNull = IMS_NULL;
 
-        m_pAmrFmtpFull->nModeSetList = 7;
-        m_pAmrFmtpFull->nOctetAlign = 1;
-        m_pAmrFmtpFull->nModeChangeCapability = 2;
-        m_pAmrFmtpFull->nModeChangePeriod = 1;
-        m_pAmrFmtpFull->nModeChangeNeighbor = 1;
-        m_pAmrFmtpFull->nMaxRed = 220;
-        m_pAmrFmtpFull->nPtime = 20;
-        m_pAmrFmtpFull->nMaxPtime = 240;
+        m_pAmrFmtpFull->SetModeSetList(7);
+        m_pAmrFmtpFull->SetOctetAlign(1);
+        m_pAmrFmtpFull->SetModeChangeCapability(2);
+        m_pAmrFmtpFull->SetModeChangePeriod(1);
+        m_pAmrFmtpFull->SetModeChangeNeighbor(1);
+        m_pAmrFmtpFull->SetMaxRed(220);
 
-        m_pAmrFmtpFull->bShowModeSet = IMS_TRUE;
-        m_pAmrFmtpFull->bShowOctetAlign = IMS_TRUE;
-        m_pAmrFmtpFull->bShowModeChangeCapability = IMS_TRUE;
-        m_pAmrFmtpFull->bShowModeChangePeriod = IMS_TRUE;
-        m_pAmrFmtpFull->bShowModeChangeNeighbor = IMS_TRUE;
-        m_pAmrFmtpFull->bShowMaxRed = IMS_TRUE;
-        m_pAmrFmtpFull->bShowPtime = IMS_TRUE;
-        m_pAmrFmtpFull->bShowMaxPtime = IMS_TRUE;
+        m_pAmrFmtpFull->SetShowModeSet(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowOctetAlign(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowModeChangeCapability(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowModeChangePeriod(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowModeChangeNeighbor(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowMaxRed(IMS_TRUE);
     }
 
     virtual void TearDown() override
@@ -71,23 +68,24 @@ TEST_F(AudioNegoAmrTest, TestSetSdpFmtpFromAmrFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
-    strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpEmpty);
+    strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpNull);
     EXPECT_EQ(strFmtp, AString::ConstNull());
+
+    strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpEmpty);
+    EXPECT_EQ(strFmtp, OCTETALIGN0);
 
     strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpFull);
 
     EXPECT_EQ(strFmtp.Contains(MODESETLIST), IMS_TRUE);
-    EXPECT_EQ(strFmtp.Contains(OCTETALIGN), IMS_TRUE);
+    EXPECT_EQ(strFmtp.Contains(OCTETALIGN1), IMS_TRUE);
     EXPECT_EQ(strFmtp.Contains(MODECHANGECAPABILITY), IMS_TRUE);
     EXPECT_EQ(strFmtp.Contains(MODECHANGEPERIOD), IMS_TRUE);
     EXPECT_EQ(strFmtp.Contains(MODECHANGENEIGHBOR), IMS_TRUE);
     EXPECT_EQ(strFmtp.Contains(MAXRED), IMS_TRUE);
-    EXPECT_EQ(strFmtp.Contains(PTIME), IMS_TRUE);
-    EXPECT_EQ(strFmtp.Contains(MAXPTIME), IMS_TRUE);
 
     AString strResult = MODESETLIST;
     AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
-    strResult.Append(OCTETALIGN);
+    strResult.Append(OCTETALIGN1);
     AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
     strResult.Append(MODECHANGECAPABILITY);
     AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
@@ -96,10 +94,6 @@ TEST_F(AudioNegoAmrTest, TestSetSdpFmtpFromAmrFmtp)
     strResult.Append(MODECHANGENEIGHBOR);
     AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
     strResult.Append(MAXRED);
-    AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
-    strResult.Append(PTIME);
-    AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
-    strResult.Append(MAXPTIME);
 
     EXPECT_EQ(strFmtp, strResult);
 }
@@ -127,6 +121,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeSetListToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddModeSetListToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddModeSetListToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -138,16 +135,22 @@ TEST_F(AudioNegoAmrTest, TestAddOctetAlignToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddOctetAlignToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddOctetAlignToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddOctetAlignToFmtp(m_pAmrFmtpFull, strFmtp);
-    EXPECT_EQ(strFmtp, OCTETALIGN);
+    EXPECT_EQ(strFmtp, OCTETALIGN1);
 }
 
 TEST_F(AudioNegoAmrTest, TestAddModeChangeCapabilityToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoAmr::AddModeChangeCapabilityToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddModeChangeCapabilityToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -160,6 +163,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeChangePeriodToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddModeChangePeriodToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddModeChangePeriodToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -170,6 +176,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeChangePeriodToFmtp)
 TEST_F(AudioNegoAmrTest, TestAddModeChangeNeighborToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoAmr::AddModeChangeNeighborToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddModeChangeNeighborToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -182,31 +191,12 @@ TEST_F(AudioNegoAmrTest, TestAddMaxRedToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddMaxRedToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddMaxRedToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddMaxRedToFmtp(m_pAmrFmtpFull, strFmtp);
     EXPECT_EQ(strFmtp, MAXRED);
-}
-
-TEST_F(AudioNegoAmrTest, TestAddPtimeToFmtp)
-{
-    AString strFmtp = AString::ConstNull();
-
-    AudioNegoAmr::AddPtimeToFmtp(m_pAmrFmtpEmpty, strFmtp);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
-
-    AudioNegoAmr::AddPtimeToFmtp(m_pAmrFmtpFull, strFmtp);
-    EXPECT_EQ(strFmtp, PTIME);
-}
-
-TEST_F(AudioNegoAmrTest, TestAddMaxPtimeToFmtp)
-{
-    AString strFmtp = AString::ConstNull();
-
-    AudioNegoAmr::AddMaxPtimeToFmtp(m_pAmrFmtpEmpty, strFmtp);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
-
-    AudioNegoAmr::AddMaxPtimeToFmtp(m_pAmrFmtpFull, strFmtp);
-    EXPECT_EQ(strFmtp, MAXPTIME);
 }

@@ -108,6 +108,13 @@ public:
     virtual IMS_BOOL IsRttSupported() const = 0;
 
     /**
+     * @brief Check if RTT is supported while UE is on roaming network.
+     *
+     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     */
+    virtual IMS_BOOL IsRttSupportedWhileRoaming() const = 0;
+
+    /**
      * @brief Check if limited admin sms mode is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
@@ -115,11 +122,11 @@ public:
     virtual IMS_BOOL IsSupportLimitedAdminSmsMode() const = 0;
 
     /**
-     * @brief Check if TTY is supported.
+     * @brief Check if TTY over VoLTE is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
      */
-    virtual IMS_BOOL IsTtySupported() const = 0;
+    virtual IMS_BOOL IsVolteTtySupported() const = 0;
 
     /**
      * @brief Check if VOPS is ignored for VoLTE enable.
@@ -270,6 +277,27 @@ public:
      * @return IMS_BOOL Return wherther UE tries emergency registration on random pcscf.
      */
     virtual IMS_BOOL IsEmcRegOnRandomPcscf() const = 0;
+
+    /**
+     * @brief Flag specifying if emergency registration is transmitted only over TCP
+     *        in roaming network.
+     *
+     *        If this is set as TRUE, it will be applied in all the SIP messages which are sent
+     *        via this emergency IMS registration.
+     *
+     * @return IMS_BOOL Return whether to be set or not to use only TCP transport.
+     */
+    virtual IMS_BOOL IsERegWithOnlyTcpInRoaming() const = 0;
+
+    /**
+     * @brief Flag specifying if emergency re-registration is required after handover.
+     *
+     *        If this is set as TRUE, emergency re-registration will be conducted
+     *        when ipcan is changed
+     *
+     * @return IMS_BOOL Return whether emergency re-registration is required after handover.
+     */
+    virtual IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const = 0;
 
     /**
      * @brief Flag specifying whether the re-registration is held when IPCAN is changed
@@ -1089,6 +1117,45 @@ public:
      * @return IMS_UINT32 Return value whether to perform initial registration with wait time
      */
     virtual IMS_UINT32 GetNotifyEventForInitialRegWithWaitTime() const = 0;
+
+    /**
+     * @brief Returns max count to retry with fixed wait time.
+     *        When the fail count does not reach this value yet, it waits during fixed time before
+     *        retrying PCSCF recovery.
+     *
+     * @return IMS_SINT32 Return max count to retry with fixed wait time.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryMaxRetryCnt() const = 0;
+
+    /**
+     * @brief Returns wait time in seconds before retrying PCSCF recovery.
+     *        This is used as waiting time for PCSCF recovery during fail count is unter max count.
+     *        If valid PCSCF acquisition fails during this time, IMS PDN reestablishment will be
+     *        requested for PCSCF recovery.
+     *
+     * @return IMS_SINT32 Return wait time before retrying PCSCF recovery.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryWaitTime() const = 0;
+
+    /**
+     * @brief Returns base time in seconds that is used to calculate upper-bound wait time
+     *        described in RFC5626. When the fail count reaches max count, waiting time for
+     *        PCSCF recovery is determined as a random value between the upper-bound wait time
+     *        and half of it.
+     *
+     * @return IMS_SINT32 Return base time value of upper-bound wait time.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryBaseTime() const = 0;
+
+    /**
+     * @brief Returns max time in seconds that is used to calculate upper-bound wait time
+     *        described in RFC5626. When the fail count reaches max count, waiting time for
+     *        PCSCF recovery is determined as a random value between the upper-bound wait time
+     *        and half of it.
+     *
+     * @return IMS_SINT32 Return max time value of upper-bound wait time.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryMaxTime() const = 0;
 
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to perform

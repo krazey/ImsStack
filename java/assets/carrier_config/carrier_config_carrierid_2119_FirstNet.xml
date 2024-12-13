@@ -153,7 +153,6 @@
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_int" value="0"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_in_roaming_int" value="0"/>
     <int name="imsvoice.policy_of_local_numbers_int" value="2"/>
-    <boolean name="imsvoice.default_eps_bearer_context_usage_restriction_on_cellular_bool" value="false"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="2"/>
     <int-array name="imsvoice.short_call_code_int_array" num="7">
@@ -265,7 +264,7 @@
     <boolean name="support_video_call_only_in_vops_off_status_bool" value="false"/>
     <boolean name="block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
     <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
     <int name="wifi_emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="support_canid_info_bool" value="false"/>
@@ -323,8 +322,8 @@
             </int-array>
             <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
             <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">

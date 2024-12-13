@@ -547,21 +547,14 @@ SIP_INT32 SipTxn::GetMsgSentProto()
     return eTranspMsgSentProtocol;
 }
 
-SIP_BOOL SipTxn::SetUserData(ISipUserData* pUserData)
+SIP_VOID SipTxn::SetUserData(ISipUserData* pUserData)
 {
-    if (pUserData == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
     if (m_pUserData != SIP_NULL)
     {
         delete m_pUserData;
     }
 
     m_pUserData = pUserData;
-
-    return SIP_TRUE;
 }
 
 SIP_BOOL SipTxn::IsTxnTerminated()
@@ -641,7 +634,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
     SipTxnKey* pTxnKey = pTimeoutData->GetTxnKey();
     SipTxn* pTxn = SIP_NULL;
     SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
+            SipTxn::OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bTxnExist == SIP_YES)
     {
@@ -875,7 +868,7 @@ SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey)
     SipTxn* pTempTxn = SIP_NULL;
     SipTxnKey* pTempTxnKey = SIP_NULL;
 
-    if (Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
+    if (Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), SipTxn::OPT_REMOVE,
                 reinterpret_cast<SIP_VOID**>(&pTempTxnKey),
                 reinterpret_cast<SIP_VOID**>(&pTempTxn)) == SIP_FALSE)
     {

@@ -34,7 +34,7 @@
 
 #define __IMS_DNS_QUERY_SIP__
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipClientTransport::SipClientTransport(IN IMS_SINT32 nSlotId) :

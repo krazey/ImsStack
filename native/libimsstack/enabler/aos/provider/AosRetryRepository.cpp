@@ -20,7 +20,7 @@
 #include "provider/AosProvider.h"
 #include "provider/AosRetryRepository.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 

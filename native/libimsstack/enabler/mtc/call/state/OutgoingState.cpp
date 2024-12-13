@@ -57,6 +57,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
+        m_pUdpKeepAliveSender(IMS_NULL),
         m_bTimer100WaitExpired(IMS_FALSE),
         m_bWaitingRedial(IMS_FALSE)
 {
@@ -67,9 +68,9 @@ PUBLIC VIRTUAL OutgoingState::~OutgoingState() {}
 PUBLIC VIRTUAL void OutgoingState::OnExit()
 {
     m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
-    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (m_pUdpKeepAliveSender != IMS_NULL)
     {
-        m_objContext.GetUdpKeepAliveSender().Stop();
+        m_pUdpKeepAliveSender->Stop();
     }
 }
 
@@ -182,7 +183,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     }
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_FALSE);
     OnStarted(piSession);
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
 
@@ -193,7 +194,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
 
-    if (IsNeedToIgnoreStartFailure())
+    if (IsNeedToIgnoreStartFailure() || m_bWaitingRedial)
     {
         return GetStateName();
     }
@@ -252,8 +253,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
         return CallStateName::TERMINATING;
     }
 
-    RunMedia(piSession, piMessage);
-
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
@@ -264,6 +264,17 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
+    if (objReason.nCode == CODE_INTERNAL_REDIAL)
+    {
+        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF)
+        {
+            m_bWaitingRedial = IMS_TRUE;
+            return GetStateName();
+        }
+
+        return HandleSilentRedial(piSession, objReason);
+    }
+
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
     {
         m_objContext.GetMediaManager().FinalizeSdp(piSession);
@@ -313,7 +324,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
         return CallStateName::TERMINATING;
     }
 
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
@@ -393,6 +404,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
         return GetStateName();
     }
 
+    // The case that a PRACK request is rejected with a 503 error rarely happens.
+    // So, do not consider that case.
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_PRACK);
     IMS_TRACE_D("SessionPrackDeliveryFailed statusCode[%d]", nStatusCode, 0, 0);
@@ -425,7 +438,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     // by receiving any first provisional response.
     if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()) && nIndex == 0)
     {
-        m_objContext.GetUdpKeepAliveSender().Start();
+        m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
+        m_pUdpKeepAliveSender->Start();
     }
 
     IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
@@ -467,7 +481,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
@@ -558,7 +572,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     }
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
@@ -572,9 +586,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::UssiStarted(IN ISession* piSession)
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataStarted(
         IN IMS_UINT32 /*eMediaType*/, IN IMS_UINT32 /*eProtocolType*/)
 {
-    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (m_pUdpKeepAliveSender != IMS_NULL)
     {
-        m_objContext.GetUdpKeepAliveSender().Stop();
+        m_pUdpKeepAliveSender->Stop();
     }
     return GetStateName();
 }

@@ -28,11 +28,11 @@
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ImsCore.h"
+#include "ImsCoreContext.h"
 #include "RemoteCapabilities.h"
 #include "SdpSessionDescription.h"
 #include "SdpMediaDescription.h"
 #include "Service.h"
-#include "ServiceContext.h"
 #include "ServiceManager.h"
 #include "ServiceProtocol.h"
 #include "Sip.h"
@@ -727,7 +727,7 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     if (bIncludeAllFeatures)
     {
         ImsList<Service*> objServices =
-                ServiceContext::GetInstance()->GetServiceManager()->GetServices(GetSlotId());
+                ImsCoreContext::GetInstance()->GetServiceManager()->GetServices(GetSlotId());
 
         // Collects the feature parameters for Contact header
         for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
@@ -821,7 +821,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
     SdpSessionDescription objSessionDesc;
 
     // Create a session-level mandatory descriptions
-    if (!objSessionDesc.CreateMandatoryLines(GetUserAor()->GetUri(), objLocalAddress))
+    if (!objSessionDesc.CreateMandatoryLines(SdpOrigin::DEFAULT_USERNAME, objLocalAddress))
     {
         IMS_TRACE_E(0, "Creating a session descriptor failed", 0, 0, 0);
         return IMS_FALSE;
@@ -838,7 +838,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
     SdpDescription objAudioSdpFields;
     SdpDescription objVideoSdpFields;
     ImsList<Service*> objServices =
-            ServiceContext::GetInstance()->GetServiceManager()->GetServices(GetSlotId());
+            ImsCoreContext::GetInstance()->GetServiceManager()->GetServices(GetSlotId());
 
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
     {

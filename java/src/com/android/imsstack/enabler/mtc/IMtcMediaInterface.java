@@ -21,6 +21,7 @@ import android.telephony.CallQuality;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.MediaQualityStatus;
+import android.telephony.imsmedia.RtpReceptionStats;
 
 import com.android.imsstack.enabler.media.IMediaListener;
 
@@ -72,6 +73,13 @@ public interface IMtcMediaInterface {
      * Notified when the video session opened
      */
     void videoSessionOpened();
+
+    /**
+     * Notified when the audio session got the notification of the rtp reception stats
+     * @param type The media session type
+     * @param stats The rtp reception stats for the av sync
+     */
+    void onNotifyRtpReceptionStats(int type, RtpReceptionStats stats);
 
     /**
      * Get the media threshold information for specific session type

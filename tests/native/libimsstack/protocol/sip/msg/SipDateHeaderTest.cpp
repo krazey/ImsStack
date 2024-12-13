@@ -35,7 +35,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
             SipDateHeader::GetNewObj(SipHeaderBase::DATE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 256;
+    const SIP_INT32 BUFFER_SIZE = 256;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -46,41 +46,43 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_FALSE, pHeader->SetDate(35));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetDate(25));
-
+    pHeader->SetDate(35);
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
+    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+
+    pHeader->SetDate(25);
+
+    objValue = AString::ConstNull();
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    pHeader->SetMonth(SipDateHeader::UNKNOWN_MONTH);
+    objValue = AString::ConstNull();
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
+
+    pHeader->SetMonth(SipDateHeader::JANUARY);
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
     objValue = AString::ConstNull();
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->SetMonth(SipDateHeader::UNKNOWN_MONTH));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMonth(SipDateHeader::JANUARY));
-
+    pHeader->SetYear(999);
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+
+    pHeader->SetYear(2050);
 
     objValue = AString::ConstNull();
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->SetYear(999));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetYear(2050));
-
+    pHeader->SetWkDay(SipDateHeader::UNKNOWN_DAY);
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    objValue = AString::ConstNull();
-    pBuff = &(aBuffer[0]);
-    memset(pBuff, 0, BUFFER_SIZE);
-
-    EXPECT_EQ(SIP_FALSE, pHeader->SetWkDay(SipDateHeader::UNKNOWN_DAY));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWkDay(SipDateHeader::MONDAY));
-
-    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
+    pHeader->SetWkDay(SipDateHeader::MONDAY);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
 
     EXPECT_STREQ("Mon, 25 Jan 2050 00:00:00 GMT", objValue.GetCharString());
     EXPECT_STREQ("Mon, 25 Jan 2050 00:00:00 GMT", &(aBuffer[0]));
@@ -89,19 +91,18 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->SetHour(24));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetHour(21));
-
-    EXPECT_EQ(SIP_FALSE, pHeader->SetMinute(60));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMinute(45));
-
-    EXPECT_EQ(SIP_FALSE, pHeader->SetSecond(60));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetSecond(30));
-
+    pHeader->SetHour(24);
+    pHeader->SetMinute(60);
+    pHeader->SetSecond(62);
+    objValue = AString::ConstNull();
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_STREQ("Mon, 25 Jan 2050 00:00:00 GMT", objValue.GetCharString());
 
-    EXPECT_STREQ("Mon, 25 Jan 2050 21:45:30 GMT", objValue.GetCharString());
+    pHeader->SetMinute(45);
+    pHeader->SetHour(21);
+    pHeader->SetSecond(30);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ("Mon, 25 Jan 2050 21:45:30 GMT", &(aBuffer[0]));
 
     pHeader->SipDelete();

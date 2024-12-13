@@ -32,6 +32,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsCoreContext.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "Service.h"
 #include "SipConfigProxy.h"
@@ -48,10 +49,9 @@
 #include "util/CallerPreferenceManager.h"
 #include "util/MethodManager.h"
 #include "util/PreferenceHeader.h"
-#include "util/SipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 Service::Service(IN const AString& strScheme, IN const AString& strAppId,
@@ -537,7 +537,8 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
                 piSipMsg->GetMethod().Equals(SipMethod::BYE)))
     {
         const ImsList<AString>& objAcceptContactsInDialog =
-                CallerPreferenceManager::GetInstance()->GetAcceptContacts(strDialogId);
+                ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->GetAcceptContacts(
+                        strDialogId);
 
         if (!objAcceptContactsInDialog.IsEmpty())
         {

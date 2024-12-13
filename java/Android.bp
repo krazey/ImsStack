@@ -52,6 +52,11 @@ android_library {
         "ims-common",
         "telephony-common",
     ],
+    errorprone: {
+        javacflags: [
+            "-Xep:UnnecessaryStringBuilder:OFF",
+        ],
+    },
 }
 
 android_app {

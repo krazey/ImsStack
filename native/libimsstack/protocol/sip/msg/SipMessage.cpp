@@ -131,7 +131,7 @@ SipMessage::~SipMessage()
 #endif
 }
 
-SIP_BOOL SipMessage::SetRequestline(SipRequestLine* pReqLine)
+SIP_VOID SipMessage::SetRequestline(SipRequestLine* pReqLine)
 {
     if (m_pReqLine != SIP_NULL)
     {
@@ -139,7 +139,6 @@ SIP_BOOL SipMessage::SetRequestline(SipRequestLine* pReqLine)
     }
 
     m_pReqLine = pReqLine;
-    return SIP_TRUE;
 }
 
 SIP_BOOL SipMessage::RemoveHdr(SIP_INT32 eHdrType)
@@ -190,13 +189,7 @@ SIP_BOOL SipMessage::SetMessageBody(SipMsgBody* pMsgBody)
     return m_pMsgBodyList->AddBody(pMsgBody);
 }
 
-SIP_BOOL SipMessage::SetMessageType(SIP_INT32 eMsgType)
-{
-    m_eSipMsgType = eMsgType;
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipMessage::SetStatusLine(SipStatusLine* pStatusLine)
+SIP_VOID SipMessage::SetStatusLine(SipStatusLine* pStatusLine)
 {
     if (m_pStatusLine != SIP_NULL)
     {
@@ -204,7 +197,6 @@ SIP_BOOL SipMessage::SetStatusLine(SipStatusLine* pStatusLine)
     }
 
     m_pStatusLine = pStatusLine;
-    return SIP_TRUE;
 }
 
 SIP_BOOL SipMessage::AppendHeader(SipHeaderBase* pHdr)

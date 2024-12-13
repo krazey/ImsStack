@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -63,8 +64,6 @@ import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.enabler.aos.IAosRegistration;
-import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.system.ISystem;
 
 import org.junit.After;
@@ -91,7 +90,6 @@ public class ApnTest {
     @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private ISystem mMockISystem;
     @Mock private ConfigInterface mMockConfigInterface;
-    @Mock private IAosRegistration mMockIAosReg;
     @Mock private Network mMockNetwork;
     @Mock private MsgProcInterface mMockMsgProc;
 
@@ -113,7 +111,6 @@ public class ApnTest {
 
         // create the instance to test
         mApn = new FakeApn(mContext, SLOT0);
-        mApn.mType = EApnType.IMS;
         mConnectivityManagerProxy =
                 mTestAppContext.getSystemServiceProxy(ConnectivityManagerProxy.class);
 
@@ -797,10 +794,8 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandlePreciseDataConnectionStateChanged_connecting() throws Exception {
-        replaceInstance(Apn.class, "mAosReg", mApn, mMockIAosReg);
-        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
-        when(mMockIDcSettings.isCdmalessFeatureTagRequired()).thenReturn(true);
+    public void testHandlePreciseDataConnectionStateChanged_notifyConnectionStateChange() {
+        mApn.addListener(mMockApnListener);
 
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
@@ -809,27 +804,24 @@ public class ApnTest {
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.START_IMS_EST_TIMER,
-                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA_CONNECTING.getValue());
-        assertEquals(TelephonyManager.DATA_CONNECTING, mApn.mPreciseDcState);
+        verify(mMockApnListener).onPreciseDataConnectionStateChanged(
+                EApnType.IMS.getType(), TelephonyManager.DATA_CONNECTING);
     }
 
     @Test
-    public void testHandlePreciseDataConnectionStateChanged_disconnecting() throws Exception {
-        replaceInstance(Apn.class, "mAosReg", mApn, mMockIAosReg);
-        when(mMockIAosReg.getRegisteredNetworkType())
-                .thenReturn(IAosRegistrationListener.NetworkType.LTE);
+    public void testHandlePreciseDataConnectionStateChanged_doNotNotifySameConnectionState() {
+        mApn.addListener(mMockApnListener);
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
 
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
-        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_DISCONNECTING,
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTING,
                 TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.STOP,
-                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA.getValue());
-        assertEquals(TelephonyManager.DATA_DISCONNECTING, mApn.mPreciseDcState);
+        verify(mMockApnListener, never()).onPreciseDataConnectionStateChanged(
+                EApnType.IMS.getType(), TelephonyManager.DATA_CONNECTING);
     }
 
     @Test
@@ -852,13 +844,12 @@ public class ApnTest {
 
     @Test
     public void testImsNetworkCallback_create() throws Exception {
-        Apn.ImsNetworkCallback callback1 = new Apn.ImsNetworkCallback(mContext,
-                mApn.mType.getType(), mApn);
+        Apn.ImsNetworkCallback callback1 = new Apn.ImsNetworkCallback(mApn.mType.getType(), mApn);
         assertNotNull(callback1);
         assertEquals(mApn.mType.getType(), callback1.getType());
         assertEquals(Apn.ImsNetworkCallback.EVENT_ALL, callback1.getEvents());
 
-        Apn.ImsNetworkCallback callback2 = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback2 = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
         assertNotNull(callback2);
         assertEquals(mApn.mType.getType(), callback2.getType());
@@ -874,12 +865,35 @@ public class ApnTest {
     }
 
     @Test
+    public void testImsNetworkCallback_onAvailable_withChangedNetwork() throws Exception {
+        mApn.registerHandler(Apn.EVENT_NETWORK_AVAILABLE, mMockMsgProc);
+        mApn.registerHandler(Apn.EVENT_NETWORK_LOST, mMockMsgProc);
+        LinkProperties linkProperties = new LinkProperties();
+        when(mConnectivityManagerProxy.getLinkProperties(any(Network.class)))
+                .thenReturn(linkProperties);
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
+                mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
+        callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
+
+        // first onAvailable is called and handle EVENT_NETWORK_AVAILABLE
+        callback.onAvailable(mMockNetwork);
+
+        // onAvailable is called with changed Network again
+        Network mockNewNetwork = mock(Network.class);
+        callback.onAvailable(mockNewNetwork);
+        mTestableLooper.processAllMessages();
+
+        // verify whether handle EVENT_NETWORK_LOST and EVENT_NETWORK_AVAILABLE
+        verify(mMockMsgProc, times(3)).procMsg(any(Message.class));
+    }
+
+    @Test
     public void testImsNetworkCallback_onAvailable_ignore() throws Exception {
         mApn.registerHandler(Apn.EVENT_NETWORK_AVAILABLE, mMockMsgProc);
         LinkProperties linkProperties = new LinkProperties();
         when(mConnectivityManagerProxy.getLinkProperties(any(Network.class)))
                 .thenReturn(linkProperties);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
 
         // ignore if EVENT_AVAILABLE is not set
@@ -902,7 +916,7 @@ public class ApnTest {
         LinkProperties linkProperties = null;
         when(mConnectivityManagerProxy.getLinkProperties(any(Network.class)))
                 .thenReturn(linkProperties);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_ALL, mApn);
 
         // do not sent EVENT_NETWORK_AVAILABLE when LinkProperties is not updated yet
@@ -917,7 +931,7 @@ public class ApnTest {
     public void testImsNetworkCallback_onLosing() throws Exception {
         int maxMsToLive = 500;
         mApn.registerHandler(Apn.EVENT_NETWORK_LOSING, mMockMsgProc);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
 
         // ignore if EVENT_LOSING is not set
@@ -934,7 +948,7 @@ public class ApnTest {
     @Test
     public void testImsNetworkCallback_onLost() throws Exception {
         mApn.registerHandler(Apn.EVENT_NETWORK_LOST, mMockMsgProc);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_AVAILABLE, mApn);
         callback.mCachedLinkProperties = new LinkProperties();
         callback.mNetwork = mMockNetwork;
@@ -957,7 +971,7 @@ public class ApnTest {
     @Test
     public void testImsNetworkCallback_onUnavailable() throws Exception {
         mApn.registerHandler(Apn.EVENT_NETWORK_UNAVAILABLE, mMockMsgProc);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
         callback.mCachedLinkProperties = new LinkProperties();
         assertNotNull(callback.mCachedLinkProperties);
@@ -978,7 +992,7 @@ public class ApnTest {
     public void testImsNetworkCallback_onCapabilitiesChanged() throws Exception {
         mApn.registerHandler(Apn.EVENT_NETWORK_CAPABILITIES_CHANGED, mMockMsgProc);
         NetworkCapabilities networkCapabilities = new NetworkCapabilities();
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
 
         // ignore if EVENT_CAPABILITIES_CHANGED is not set
@@ -1000,7 +1014,7 @@ public class ApnTest {
         LinkProperties linkProperties = new LinkProperties();
         when(mConnectivityManagerProxy.getLinkProperties(any(Network.class)))
                 .thenReturn(linkProperties);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
 
         // check whether send EVENT_NETWORK_AVAILABLE and EVENT_NETWORK_CAPABILITIES_CHANGED
@@ -1017,7 +1031,7 @@ public class ApnTest {
     @Test
     public void testImsNetworkCallback_onLinkPropertiesChangedWithFirstIp() throws Exception {
         mApn.registerHandler(Apn.EVENT_IP_CHANGED, mMockMsgProc);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOCAL_IP_CHANGED, mApn);
         callback.mCachedLinkProperties = new LinkProperties();
         LinkProperties newLinkProperties = new LinkProperties();
@@ -1036,7 +1050,7 @@ public class ApnTest {
     @Test
     public void testImsNetworkCallback_onLinkPropertiesChangedWithIpChange() throws Exception {
         mApn.registerHandler(Apn.EVENT_IP_CHANGED, mMockMsgProc);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOCAL_IP_CHANGED, mApn);
 
         callback.mCachedLinkProperties = new LinkProperties();
@@ -1057,7 +1071,7 @@ public class ApnTest {
     @Test
     public void testImsNetworkCallback_onLinkPropertiesChangedWithFirstPcscf() throws Exception {
         mApn.registerHandler(Apn.EVENT_PCSCF_CHANGED, mMockMsgProc);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_NET_PCSCF_CHANGED, mApn);
 
         callback.mCachedLinkProperties = new LinkProperties();
@@ -1076,7 +1090,7 @@ public class ApnTest {
     @Test
     public void testImsNetworkCallback_onLinkPropertiesChangedWithPcscfChange() throws Exception {
         mApn.registerHandler(Apn.EVENT_PCSCF_CHANGED, mMockMsgProc);
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_NET_PCSCF_CHANGED, mApn);
 
         callback.mCachedLinkProperties = new LinkProperties();
@@ -1099,7 +1113,7 @@ public class ApnTest {
         mApn.registerHandler(Apn.EVENT_IP_CHANGED, mMockMsgProc);
         mApn.registerHandler(Apn.EVENT_PCSCF_CHANGED, mMockMsgProc);
         LinkProperties linkProperties = new LinkProperties();
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
 
         // ignore if EVENT_LOCAL_IP_CHANGED and EVENT_NET_PCSCF_CHANGED is not set
@@ -1114,7 +1128,7 @@ public class ApnTest {
 
     @Test
     public void testImsNetworkCallbackIsIpChanged() throws Exception {
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOCAL_IP_CHANGED, mApn);
         callback.mCachedLinkProperties = new LinkProperties();
         LinkProperties newLinkProperties = new LinkProperties();
@@ -1142,7 +1156,7 @@ public class ApnTest {
 
     @Test
     public void testImsNetworkCallbackIsPcscfChanged() throws Exception {
-        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_NET_PCSCF_CHANGED, mApn);
         callback.mCachedLinkProperties = new LinkProperties();
         LinkProperties newLinkProperties = new LinkProperties();
@@ -1161,14 +1175,14 @@ public class ApnTest {
         assertTrue(callback.isPcscfChanged(newLinkProperties));
 
         // Apn Type is not IMS
-        Apn.ImsNetworkCallback callbackXcap = new Apn.ImsNetworkCallback(mContext,
+        Apn.ImsNetworkCallback callbackXcap = new Apn.ImsNetworkCallback(
                 EApnType.XCAP.getType(), Apn.ImsNetworkCallback.EVENT_NET_PCSCF_CHANGED, mApn);
         assertFalse(callbackXcap.isPcscfChanged(newLinkProperties));
     }
 
     private static class FakeApn extends Apn {
         FakeApn(Context context, int slotId) {
-            super(context, slotId);
+            super(context, slotId, EApnType.IMS);
         }
     }
 

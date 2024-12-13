@@ -29,7 +29,7 @@
 #include "network/OsWifiConnection.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsWifiConnection::OsWifiConnection() :

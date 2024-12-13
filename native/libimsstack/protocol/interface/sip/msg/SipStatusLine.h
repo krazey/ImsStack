@@ -47,12 +47,9 @@ public:
     /*Function for decoding*/
     SIP_BOOL DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-    /*Set Methods*/
-    SIP_BOOL SetStatusCode(const SIP_CHAR* pszStatusCode);
-
-    SIP_BOOL SetSipVersion(const SIP_CHAR* pszVer);
-
-    SIP_BOOL SetRsnPhrase(const SIP_CHAR* pszRsnPhrase);
+    SIP_VOID SetStatusCode(const SIP_CHAR* pszStatusCode);
+    SIP_VOID SetSipVersion(const SIP_CHAR* pszVer);
+    SIP_VOID SetRsnPhrase(const SIP_CHAR* pszRsnPhrase);
 
     /*Get methods*/
     inline const SIP_CHAR* GetStatusCode() const { return m_pszStatusCode; }

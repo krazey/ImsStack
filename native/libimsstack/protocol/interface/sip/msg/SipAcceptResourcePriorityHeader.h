@@ -39,10 +39,8 @@ public:
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
     SIP_BOOL IsValidHeader() const override;
-    /*set methods*/
-    SIP_BOOL SetNameSpace(const SIP_CHAR* pszNameSpace);
-
-    SIP_BOOL SetRPriority(const SIP_CHAR* pszRPriority);
+    SIP_VOID SetNameSpace(const SIP_CHAR* pszNameSpace);
+    SIP_VOID SetRPriority(const SIP_CHAR* pszRPriority);
 
     /*Get methods*/
     inline const SIP_CHAR* GetNameSpace() const { return m_pszNameSpace; }

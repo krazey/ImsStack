@@ -21,22 +21,32 @@
 class SipEventHeader : public SipHeaderBase
 {
 private:
-    /*This is a part of header value but kept as prm*/
-    SipParameterList* m_pEventTemplateList;
+    SipVector<SIP_CHAR*> m_objEventTemplates;
 
 public:
     /*constructor*/
-    SipEventHeader();
+    SipEventHeader(SIP_INT32 eHdrType);
     SipEventHeader(const SipEventHeader& objHeader);
+
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
-    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     /*Function for encoding of headers*/
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams = SIP_TRUE) const override;
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+
+    inline SIP_UINT32 GetTemplateCount() const { return m_objEventTemplates.GetSize(); }
+    SIP_BOOL IsTemplatePresent(const SIP_CHAR* pTemplateName) const;
+    SIP_INT32 GetTemplateIndex(const SIP_CHAR* pTemplateName) const;
+    SIP_VOID AddTemplate(const SIP_CHAR* pTemplateName);
+    SIP_VOID RemoveTemplate(const SIP_CHAR* pTemplateName);
+    inline const SIP_CHAR* GetTemplate(SIP_UINT32 nPos) const
+    {
+        return (nPos < m_objEventTemplates.GetSize()) ? m_objEventTemplates.GetAt(nPos) : SIP_NULL;
+    }
 
 private:
     ~SipEventHeader();

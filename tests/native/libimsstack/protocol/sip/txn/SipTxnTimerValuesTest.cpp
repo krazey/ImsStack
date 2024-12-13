@@ -51,7 +51,7 @@ TEST_F(SipTxnTimerValuesTest, SetGetAndUpdate)
 
     pTxnTimers->SetTimerValue(SipTxn::TIMER_TYPE_INVALID, 14);
 
-    unsigned int nTxnTimerOptions = 0;
+    SIP_UINT32 nTxnTimerOptions = 0;
 
     SipTxnTimerValues* pCopyTxnTimers = new SipTxnTimerValues();
     ASSERT_TRUE(pCopyTxnTimers != nullptr);

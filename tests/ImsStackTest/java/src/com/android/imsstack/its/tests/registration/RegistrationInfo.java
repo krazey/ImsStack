@@ -37,27 +37,61 @@ import java.util.function.BiConsumer;
  */
 public final class RegistrationInfo {
     private final int mSlotId;
-    private final int mSimApplicationState;
     private final PersistableBundle mConfig;
+    private final int mSimCarrierId;
+    private final SimSupportMode mSimSupportMode;
+    private final int mSimApplicationState;
+
     private final CapabilityChangeRequest mCapabilityRequest;
     private final int mNetworkCapability;
     private final ServiceState mServiceState;
 
     /**
+     * Defines the available modes for SIM card support.
+     * Each mode indicates the level of support for ISIM and USIM applications.
+     *     {@code BOTH_ISIM_USIM}: Both ISIM and USIM are fully supported.
+     *     {@code ONLY_USIM}: Only USIM is supported, ISIM is not.
+     *     {@code INCOMP_ISIM_USIM}: ISIM is incompletely supported, USIM is fully supported.
+     *     {@code NEITHER_ISIM_USIM}: Neither ISIM nor USIM is supported.
+     */
+    public enum SimSupportMode {
+        BOTH_ISIM_USIM,
+        INCOMP_ISIM_USIM,
+        ONLY_USIM,
+        NEITHER_ISIM_USIM;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case BOTH_ISIM_USIM -> "BOTH_ISIM_USIM";
+                case INCOMP_ISIM_USIM -> "INCOMP_ISIM_USIM";
+                case ONLY_USIM -> "ONLY_USIM";
+                case NEITHER_ISIM_USIM -> "NEITHER_ISIM_USIM";
+            };
+        }
+    }
+    /**
      * Constructs a new RegistrationInfo object with the specified parameters.
      *
      * @param slotId            The slot ID for the IMS registration.
      * @param config            The configuration for the IMS registration.
+     * @param simCarrierId      the SIM carrier-id from the IMS registration.
+     * @param simSupportMode    The mode indicating the level of support for SIM applications.
+     *                          {@link SimSupportMode}
+     * @param simApplicationState The SIM application state.
      * @param capabilityRequest The request to change capabilities. {@link CapabilityChangeRequest}
      * @param networkCapability The network capability for the IMS registration.
      * @param serviceState      The service state. {@link ServiceState}
      */
-    public RegistrationInfo(int slotId, int simApplicationState, PersistableBundle config,
+    public RegistrationInfo(int slotId, PersistableBundle config, int simCarrierId,
+            SimSupportMode simSupportMode, int simApplicationState,
             CapabilityChangeRequest capabilityRequest, int networkCapability,
             ServiceState serviceState) {
         mSlotId = slotId;
-        mSimApplicationState = simApplicationState;
         mConfig = config;
+        mSimCarrierId = simCarrierId;
+        mSimSupportMode = simSupportMode;
+        mSimApplicationState = simApplicationState;
         mCapabilityRequest = capabilityRequest;
         mNetworkCapability = networkCapability;
         mServiceState = serviceState;
@@ -73,15 +107,6 @@ public final class RegistrationInfo {
     }
 
     /**
-     * Returns the SIM application state from the registration information.
-     *
-     * @return The SIM application state.
-     */
-    public int getSimApplicationState() {
-        return mSimApplicationState;
-    }
-
-    /**
      * Returns the configuration from the registration information.
      *
      * @return The configuration, or {@code null} if no configuration is available.
@@ -89,6 +114,33 @@ public final class RegistrationInfo {
     @Nullable
     public PersistableBundle getConfig() {
         return mConfig;
+    }
+
+    /**
+     * Returns the SIM carrier-id from the registration information.
+     *
+     * @return The SIM carrier-id.
+     */
+    public int getSimCarrierId() {
+        return mSimCarrierId;
+    }
+
+    /**
+     * Returns the SIM support mode for the registration information.
+     *
+     * @return The {@link SimSupportMode} indicating the level of support for SIM applications.
+     */
+    public SimSupportMode getSimSupportMode() {
+        return mSimSupportMode;
+    }
+
+    /**
+     * Returns the SIM application state from the registration information.
+     *
+     * @return The SIM application state.
+     */
+    public int getSimApplicationState() {
+        return mSimApplicationState;
     }
 
     /**
@@ -150,10 +202,14 @@ public final class RegistrationInfo {
 
         sb.append("[ RegistrationInfo :: SlotId=");
         sb.append(mSlotId);
-        sb.append(", SimApplicationState=");
-        sb.append(mSimApplicationState);
         sb.append(", Config=");
         sb.append((mConfig != null) ? mConfig.toString() : "null");
+        sb.append(", SimCarrierId=");
+        sb.append(mSimCarrierId);
+        sb.append(", SimSupportMode=");
+        sb.append(mSimSupportMode.toString());
+        sb.append(", SimApplicationState=");
+        sb.append(mSimApplicationState);
         sb.append(", EnableCapabilityRequest=");
         sb.append((mCapabilityRequest != null) ? mCapabilityRequest.toString() : "null");
         sb.append(", NetworkCapability=");
@@ -170,8 +226,10 @@ public final class RegistrationInfo {
      */
     public static final class Builder {
         private int mSlotId = TestConstants.SLOT0;
-        private int mSimApplicationState = TelephonyManager.SIM_STATE_LOADED;
         private PersistableBundle mConfig;
+        private int mSimCarrierId = -1;
+        private SimSupportMode mSimSupportMode = SimSupportMode.BOTH_ISIM_USIM;
+        private int mSimApplicationState = TelephonyManager.SIM_STATE_LOADED;
         private int mNetworkCapability = NetworkCapabilities.NET_CAPABILITY_IMS;
         private ServiceState mServiceState;
 
@@ -192,18 +250,6 @@ public final class RegistrationInfo {
         @NonNull
         public Builder setSlotId(int slotId) {
             mSlotId = slotId;
-            return this;
-        }
-
-        /**
-         *
-         * Sets the SIM application state for the registration information.
-         * @param simApplicationState The SIM application state to set.
-         * @return This {@code Builder} object to allow for chaining of method calls.
-         */
-        @NonNull
-        public Builder setSimApplicationState(int simApplicationState) {
-            mSimApplicationState = simApplicationState;
             return this;
         }
 
@@ -237,6 +283,48 @@ public final class RegistrationInfo {
             Objects.requireNonNull(config, "config must not be null.");
 
             mConfig.putAll(config);
+            return this;
+        }
+
+        /**
+         * Sets the SIM carrier-id for the registration information.
+         *
+         * @param simCarrierId The SIM carrier-id to set.
+         * @return This {@code Builder} object to allow for chaining of method calls.
+         */
+        @NonNull
+        public Builder setSimCarrierId(int simCarrierId) {
+            mSimCarrierId = simCarrierId;
+            return this;
+        }
+
+        /**
+         * Sets the SIM support mode for the registration information.
+         *
+         * @param simSupportMode The SIM support mode to set.
+         * @return This {@code Builder} object to allow for chaining of method calls.
+         */
+        @NonNull
+        public Builder setSimSupportMode(SimSupportMode simSupportMode) {
+            mSimSupportMode = simSupportMode;
+            return this;
+        }
+
+        /**
+         * Sets the SIM application state for the registration information.
+         * @param simApplicationState The SIM application state to set. Possible values are:
+         *                            {@link TelephonyManager#SIM_STATE_UNKNOWN},
+         *                            {@link TelephonyManager#SIM_STATE_PIN_REQUIRED},
+         *                            {@link TelephonyManager#SIM_STATE_PUK_REQUIRED},
+         *                            {@link TelephonyManager#SIM_STATE_NETWORK_LOCKED},
+         *                            {@link TelephonyManager#SIM_STATE_NOT_READY},
+         *                            {@link TelephonyManager#SIM_STATE_PERM_DISABLED},
+         *                            {@link TelephonyManager#SIM_STATE_LOADED}
+         * @return This {@code Builder} object to allow for chaining of method calls.
+         */
+        @NonNull
+        public Builder setSimApplicationState(int simApplicationState) {
+            mSimApplicationState = simApplicationState;
             return this;
         }
 
@@ -331,9 +419,11 @@ public final class RegistrationInfo {
          * @return A new {@code RegistrationInfo} object with the specified configuration.
          */
         public RegistrationInfo build() {
-            return new RegistrationInfo(mSlotId, mSimApplicationState, mConfig,
-                    createCapabilityRequest(), mNetworkCapability, mServiceState);
+            return new RegistrationInfo(mSlotId, mConfig, mSimCarrierId, mSimSupportMode,
+                    mSimApplicationState, createCapabilityRequest(), mNetworkCapability,
+                    mServiceState);
         }
+
 
         private CapabilityChangeRequest createCapabilityRequest() {
             if (!mEnablePairs.getPairs().isEmpty() || !mDisablePairs.getPairs().isEmpty()) {

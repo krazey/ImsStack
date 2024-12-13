@@ -24,7 +24,7 @@
 #include "SipTransport.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipClientTransmissionProxy::SipClientTransmissionProxy() :

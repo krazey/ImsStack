@@ -68,12 +68,12 @@ protected:
         m_pLocalProfile = new TextProfile();
         TextProfile::Payload* pLocalT140Payload = new TextProfile::Payload();
         pLocalT140Payload->SetRtpMap(99, "t140", 1000);
-        m_pLocalProfile->lstPayload.Append(pLocalT140Payload);
+        m_pLocalProfile->GetPayloadList().Append(pLocalT140Payload);
 
         TextProfile::Payload* pLocalRedPayload = new TextProfile::Payload();
         pLocalRedPayload->SetRtpMap(100, "red", 1000);
-        pLocalRedPayload->pFmtp = new TextProfile::RedFmtp(3, 99);
-        m_pLocalProfile->lstPayload.Append(pLocalRedPayload);
+        pLocalRedPayload->SetFmtp(new TextProfile::RedFmtp(3, 99));
+        m_pLocalProfile->GetPayloadList().Append(pLocalRedPayload);
 
         m_pPeerProfile = new TextProfile(*m_pLocalProfile);
         m_pNegoProfile = new TextProfile(*m_pLocalProfile);

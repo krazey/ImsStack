@@ -29,6 +29,7 @@
 #include "ISipServerConnection.h"
 #include "ImplicitNotifierState.h"
 #include "ImplicitSubscriberState.h"
+#include "ImsCoreContext.h"
 #include "Reference.h"
 #include "Service.h"
 #include "Sip.h"
@@ -103,7 +104,8 @@ Reference::Reference(IN Service* pService, IN const AString& strReferToUri,
         m_pNotifierState(IMS_NULL)
 {
     const AString& strSessionId =
-            CallControlHelper::GetInstance()->GetSessionIdFromReplaces(&objReplaces);
+            ImsCoreContext::GetInstance()->GetCallControlHelper()->GetSessionIdFromReplaces(
+                    &objReplaces);
 
     if (!strSessionId.IsNULL())
     {
@@ -216,7 +218,8 @@ const AString& Reference::GetReplaces() const
     IMS_TRACE_D("___ Replaces: %s ___",
             SipDebug::GetStr1(m_pReplaces->ToString(IMS_FALSE), 8, '@').GetStr(), 0, 0);
 
-    return CallControlHelper::GetInstance()->GetSessionIdFromReplaces(m_pReplaces);
+    return ImsCoreContext::GetInstance()->GetCallControlHelper()->GetSessionIdFromReplaces(
+            m_pReplaces);
 }
 
 PUBLIC
@@ -383,7 +386,8 @@ IMS_RESULT Reference::SetReplaces(IN const AString& strSessionId)
     }
 
     Replaces* pTmpReplaces =
-            CallControlHelper::GetInstance()->GetReplacesFromSessionId(strSessionId);
+            ImsCoreContext::GetInstance()->GetCallControlHelper()->GetReplacesFromSessionId(
+                    strSessionId);
 
     if (pTmpReplaces == IMS_NULL)
     {

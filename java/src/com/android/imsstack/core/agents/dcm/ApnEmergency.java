@@ -30,14 +30,19 @@ import com.android.imsstack.util.ImsLog;
 /**
  * this is data connection class for emergency
  */
-public class ApnEmergency extends Apn {
-    protected IDcUtils mDcUtils;
+public final class ApnEmergency extends Apn {
+    private IDcUtils mDcUtils;
 
     // Public methods --------------------------------------------
     public ApnEmergency(Context context, int slotId) {
-        super(context, slotId);
+        super(context, slotId, EApnType.EMERGENCY);
 
-        initializeApn();
+        mDcUtils = DcFactory.getDcAgent(IDcUtils.class, slotId);
+
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
+        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
     }
 
     // Interface implementation methods --------------------------
@@ -91,18 +96,7 @@ public class ApnEmergency extends Apn {
         return super.getApn();
     }
 
-    // Private/Protected methods ---------------------------------
-    protected void initializeApn() {
-        mType = EApnType.EMERGENCY;
-        mDcUtils = DcFactory.getDcAgent(IDcUtils.class, getSlotId());
-
-        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
-        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
-        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
-        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
-    }
-
-    private class HandleNetworkAvailable implements MsgProcInterface {
+    private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
 
@@ -129,7 +123,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class HandleNetworkLost implements MsgProcInterface {
+    private final class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -148,7 +142,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class HandleIpChanged implements MsgProcInterface {
+    private final class HandleIpChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "ip is changed");
@@ -166,7 +160,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class HandleDataConnectionFailed implements MsgProcInterface {
+    private final class HandleDataConnectionFailed implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             if (msg == null || msg.obj == null) {

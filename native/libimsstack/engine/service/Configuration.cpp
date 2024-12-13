@@ -139,16 +139,20 @@ PUBLIC VIRTUAL const ISipConfig* Configuration::GetSipConfig(IN IMS_SINT32 nSlot
     return ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 }
 
-PUBLIC VIRTUAL const ISubscriberConfig* Configuration::GetSubscriberConfig(
+PUBLIC VIRTUAL ISubscriberConfig* Configuration::GetSubscriberConfig(
         IN IMS_SINT32 nSlotId, IN const AString& strId /*= AString::ConstNull()*/) const
 {
+    const ISubscriberConfig* piSubsConfig;
+
     if (strId.IsNULL())
     {
-        return ConfigurationManager::GetInstance()->GetSubscriberConfig(
+        piSubsConfig = ConfigurationManager::GetInstance()->GetSubscriberConfig(
                 SubscriberConfig::GetDefaultId(), nSlotId);
     }
 
-    return ConfigurationManager::GetInstance()->GetSubscriberConfig(strId, nSlotId);
+    piSubsConfig = ConfigurationManager::GetInstance()->GetSubscriberConfig(strId, nSlotId);
+
+    return const_cast<ISubscriberConfig*>(piSubsConfig);
 }
 
 PUBLIC VIRTUAL IMS_UINT32 Configuration::GetTraceModule(IN IMS_SINT32 nSlotId) const

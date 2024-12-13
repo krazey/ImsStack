@@ -38,7 +38,7 @@ SipTransportParameter::SipTransportParameter(SipTransportParameter* pTranspParam
 }
 
 SipTransportParameter::SipTransportParameter(
-        SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol) :
+        const SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol) :
         m_pHostAddress(SIP_NULL),
         m_nPort(nPort),
         m_nTranspProtocol(eTranspProtocol),
@@ -50,7 +50,7 @@ SipTransportParameter::SipTransportParameter(
     m_pHostAddress = SipPf_Strdup(pHostAddress);
 }
 
-SIP_BOOL SipTransportParameter::SetHostAddress(const SIP_CHAR* pHostAddress)
+SIP_VOID SipTransportParameter::SetHostAddress(const SIP_CHAR* pHostAddress)
 {
     if (m_pHostAddress != SIP_NULL)
     {
@@ -59,6 +59,4 @@ SIP_BOOL SipTransportParameter::SetHostAddress(const SIP_CHAR* pHostAddress)
     }
 
     m_pHostAddress = SipPf_Strdup(pHostAddress);
-
-    return SIP_TRUE;
 }

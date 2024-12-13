@@ -19,7 +19,7 @@
 #include "ServiceUtil.h"
 #include "device/OsSubscriberInfo.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsSubscriberInfo::OsSubscriberInfo(IN IMS_SINT32 nSlotId) :

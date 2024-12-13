@@ -226,6 +226,16 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInitialNotifyWithoutUsers)
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
 }
 
+TEST_F(ConferenceInfoUpdaterTest,
+        UpdateDoesNotFailByInitialNotifyWithoutUsersIfPreviousVersionIsValid)
+{
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 11);
+    objParticipantList.SetXmlVersion(10);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+}
+
 TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInitialNotifyWithOnlyHostUri)
 {
     AddUserToInfo(LOCAL_URI, STATUS_CONNECTED);

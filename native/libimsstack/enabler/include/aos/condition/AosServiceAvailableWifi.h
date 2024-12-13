@@ -29,7 +29,7 @@ class AosServiceAvailableWifi :
 {
 public:
     AosServiceAvailableWifi();
-    virtual ~AosServiceAvailableWifi();
+    ~AosServiceAvailableWifi() override;
 
     IMS_BOOL StartToCheckNetworkConnection() final;
     IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE) final;

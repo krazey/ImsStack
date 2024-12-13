@@ -19,7 +19,7 @@
 #include "interface/IAosHandle.h"
 #include "handle/AosHandleUce.h"
 
-//__IMS_TRACE_TAG_USER_DECL__("AOS");
+//__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosHandleUce::AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& strAppId,

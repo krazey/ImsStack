@@ -23,7 +23,7 @@
 #include "SipParsingHelper.h"
 #include "TriggerPoint.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 TriggerPoint::TriggerPoint(

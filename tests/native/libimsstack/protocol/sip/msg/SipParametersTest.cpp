@@ -18,6 +18,7 @@
 
 #include "msg/SipAddrSpec.h"
 #include "msg/SipParameters.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -118,7 +119,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     SipParameters* pParameters = new SipParameters();
     ASSERT_TRUE(pParameters != nullptr);
 
-    const int BUFFER_SIZE = 256;
+    const SIP_INT32 BUFFER_SIZE = 256;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -126,34 +127,29 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     AStringBuffer objValue(256);
 
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-
     /* Empty list - no encoding, success */
-    EXPECT_EQ(SIP_TRUE, objParameterList.Encode(objValue, ' '));
-    EXPECT_EQ(SIP_TRUE, objParameterList.Encode(&pBuff, ' '));
+    EXPECT_EQ(SIP_TRUE, pParameters->Encode(objValue, ' '));
+    EXPECT_EQ(SIP_TRUE, pParameters->Encode(&pBuff, ' '));
 
     /* Decode with empty data, fail */
     const SIP_CHAR* pData = "";
-    EXPECT_EQ(SIP_FALSE, objParameterList.Decode(pData, pData, ' '));
+    EXPECT_EQ(SIP_FALSE, pParameters->Decode(pData, pData, ' '));
 
     pData = "OnlyName;param-name=param-value,param-value1";
-    const SIP_CHAR* pDataEnd = pData + strlen(pData) - 1;
+    const SIP_CHAR* pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
     /* Decode with valid input, success */
-    EXPECT_EQ(SIP_TRUE, objParameterList.Decode(pData, pDataEnd, ';'));
+    EXPECT_EQ(SIP_TRUE, pParameters->Decode(pData, pDataEnd, ';'));
 
-    SipVector<SipNameValue*>& objParameters = objParameterList.GetList();
-    EXPECT_EQ(2, objParameters.GetSize());
+    EXPECT_EQ(2, pParameters->GetParamCount());
 
     SipParameters* pCopyParameters = new SipParameters(*pParameters);
     ASSERT_TRUE(pCopyParameters != nullptr);
 
     delete pParameters;
 
-    SipParameterList& objCopyParameterList = pCopyParameters->GetParameterList();
-
-    EXPECT_EQ(SIP_TRUE, objCopyParameterList.Encode(objValue, ';'));
-    EXPECT_EQ(SIP_TRUE, objCopyParameterList.Encode(&pBuff, ';'));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(objValue, ';'));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(&pBuff, ';'));
 
     EXPECT_STREQ(";OnlyName;param-name=param-value,param-value1", objValue.GetCharString());
     EXPECT_STREQ(";OnlyName;param-name=param-value,param-value1", &(aBuffer[0]));
@@ -168,28 +164,22 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     pParameters = new SipParameters();
     ASSERT_TRUE(pParameters != nullptr);
 
-    SipParameterList& objNormalParameterList = pParameters->GetParameterList();
-
     pData = "OnlyName;param-name=param%20value,param-value1";
-    pDataEnd = pData + strlen(pData) - 1;
+    pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
     SipUri* pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, objNormalParameterList.Decode(pData, pDataEnd, ';', pSipUri));
-
-    SipVector<SipNameValue*>& objNormalParameters = objNormalParameterList.GetList();
-    EXPECT_EQ(2, objNormalParameters.GetSize());
+    EXPECT_EQ(SIP_TRUE, pParameters->Decode(pData, pDataEnd, ';', pSipUri));
+    EXPECT_EQ(2, pParameters->GetParamCount());
 
     pCopyParameters = new SipParameters(*pParameters);
     ASSERT_TRUE(pCopyParameters != nullptr);
 
     delete pParameters;
 
-    SipParameterList& objNormalCopyParameterList = pCopyParameters->GetParameterList();
-
-    EXPECT_EQ(SIP_TRUE, objNormalCopyParameterList.Encode(objValue, ';', pSipUri));
-    EXPECT_EQ(SIP_TRUE, objNormalCopyParameterList.Encode(&pBuff, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(objValue, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(&pBuff, ';', pSipUri));
 
     EXPECT_STREQ(";OnlyName;param-name=param%20value,param-value1", objValue.GetCharString());
     EXPECT_STREQ(";OnlyName;param-name=param%20value,param-value1", &(aBuffer[0]));
@@ -204,19 +194,16 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     pParameters = new SipParameters();
     ASSERT_TRUE(pParameters != nullptr);
 
-    SipParameterList& objHeaderParameterList = pParameters->GetParameterList();
-
     pSipUri->SetComponentType(IParameterComponent::HEADER);
 
     pData = "OnlyName;param-name=param%20value";
-    pDataEnd = pData + strlen(pData) - 1;
+    pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
-    EXPECT_EQ(SIP_TRUE, objHeaderParameterList.Decode(pData, pDataEnd, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pParameters->Decode(pData, pDataEnd, ';', pSipUri));
 
-    SipVector<SipNameValue*>& objHeaderParameters = objHeaderParameterList.GetList();
-    EXPECT_EQ(2, objHeaderParameters.GetSize());
+    EXPECT_EQ(2, pParameters->GetParamCount());
 
-    SipNameValue* pNameVal = objHeaderParameters.GetAt(1);
+    SipNameValue* pNameVal = pParameters->GetParam(1);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("param value", pNameVal->m_valueList.GetAt(0));
@@ -226,10 +213,8 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     delete pParameters;
 
-    SipParameterList& objHeaderCopyParameterList = pCopyParameters->GetParameterList();
-
-    EXPECT_EQ(SIP_TRUE, objHeaderCopyParameterList.Encode(objValue, ';', pSipUri));
-    EXPECT_EQ(SIP_TRUE, objHeaderCopyParameterList.Encode(&pBuff, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(objValue, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(&pBuff, ';', pSipUri));
 
     EXPECT_STREQ(";OnlyName;param-name=param%20value", objValue.GetCharString());
     EXPECT_STREQ(";OnlyName;param-name=param%20value", &(aBuffer[0]));
@@ -244,19 +229,16 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     pParameters = new SipParameters();
     ASSERT_TRUE(pParameters != nullptr);
 
-    SipParameterList& objUriParameterList = pParameters->GetParameterList();
-
     pData = "OnlyName;transport=%24!%26";
-    pDataEnd = pData + strlen(pData) - 1;
+    pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
     pSipUri->SetComponentType(IParameterComponent::URI);
 
-    EXPECT_EQ(SIP_TRUE, objUriParameterList.Decode(pData, pDataEnd, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pParameters->Decode(pData, pDataEnd, ';', pSipUri));
 
-    SipVector<SipNameValue*>& objUriParameters = objUriParameterList.GetList();
-    EXPECT_EQ(2, objUriParameters.GetSize());
+    EXPECT_EQ(2, pParameters->GetParamCount());
 
-    pNameVal = objUriParameters.GetAt(1);
+    pNameVal = pParameters->GetParam(1);
     EXPECT_STREQ("transport", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("$!&", pNameVal->m_valueList.GetAt(0));
@@ -266,10 +248,8 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     delete pParameters;
 
-    SipParameterList& objUriCopyParameterList = pCopyParameters->GetParameterList();
-
-    EXPECT_EQ(SIP_TRUE, objUriCopyParameterList.Encode(objValue, ';', pSipUri));
-    EXPECT_EQ(SIP_TRUE, objUriCopyParameterList.Encode(&pBuff, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(objValue, ';', pSipUri));
+    EXPECT_EQ(SIP_TRUE, pCopyParameters->Encode(&pBuff, ';', pSipUri));
 
     EXPECT_STREQ(";OnlyName;transport=%24!%26", objValue.GetCharString());
     EXPECT_STREQ(";OnlyName;transport=%24!%26", &(aBuffer[0]));

@@ -72,7 +72,7 @@ class AosApplication :
 
 public:
     AosApplication(IN IAosAppContext* piAppContext, IN AString& strAppId);
-    virtual ~AosApplication();
+    ~AosApplication() override;
 
     // IAosApplication
     void Reconfig() override;

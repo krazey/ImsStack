@@ -23,13 +23,15 @@
 
 #include "SipDatatypes.h"
 
-#define SIP_TIME_MAX_SIZE 100
-#define SIP_NUM_SEC_HOURS 100000000
-#define SIP_NUM_SEC_MIN   60
-#define SIP_NUM_1000      1000
+inline SIP_CHAR SIP_TOLOWER(SIP_CHAR c)
+{
+    return ((c >= 'A') && (c <= 'Z')) ? (c - 'A' + 'a') : (c);
+}
 
-#define SIP_TOLOWER(c)    ((((c) >= 'A') && ((c) <= 'Z')) ? ((c) - 'A' + 'a') : (c))
-#define SIP_TOUPPER(c)    ((((c) >= 'a') && ((c) <= 'z')) ? ((c) - 'a' + 'A') : (c))
+inline SIP_CHAR SIP_TOUPPER(SIP_CHAR c)
+{
+    return ((c >= 'a') && (c <= 'z')) ? (c - 'a' + 'A') : (c);
+}
 
 void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* pszFormat, ...);
 void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...);

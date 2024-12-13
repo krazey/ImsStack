@@ -15,13 +15,11 @@
  */
 
 #include "CarrierConfig.h"
-#include "Engine.h"
 #include "IConfiguration.h"
 #include "IIpcan.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
-#include "ImsServiceConfig.h"
-#include "ImsServiceConfigTypeDef.h"
+#include "ImsEventDef.h"
 #include "ImsVector.h"
 #include "JniEnablerConnector.h"
 #include "MockICarrierConfig.h"
@@ -30,9 +28,11 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
+#include "MockIMtcImsEventReceiver.h"
 #include "MtcService.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include "TestConnector.h"
 #include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
@@ -119,6 +119,8 @@ public:
     JniEnablerConnector* pConnector;
     TestConfigService objConfigService;
     TestPhoneInfoService objPhoneInfoService;
+    MockIMtcImsEventReceiver objEventReceiver;
+    TestConnector objConnector;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -149,16 +151,12 @@ protected:
         ON_CALL(*pMockConfigurationManager,
                 IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration)
                 .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMockContext, GetImsEventReceiver).WillByDefault(ReturnRef(objEventReceiver));
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
-
-        // to make Connector::Open() return valid IConnector even though MtcApp is not created
-        // during the test.
-        Engine::GetConfiguration()->SetAppConfig(
-                ImsServiceConfig::GetAppName(ImsAppId::MTC), SLOT_ID);
 
         pNormalMtcService = CreateNormalService();
         pEmergencyMtcService = CreateEmergencyService();
@@ -343,7 +341,7 @@ TEST_F(MtcServiceTest, IsNrChecksWifiFirst)
     EXPECT_FALSE(pNormalMtcService->IsNr());
 }
 
-TEST_F(MtcServiceTest, IsNrChecksRadioInfo)
+TEST_F(MtcServiceTest, IsNrChecksRatType)
 {
     ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
 
@@ -354,6 +352,57 @@ TEST_F(MtcServiceTest, IsNrChecksRadioInfo)
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_NR));
     EXPECT_TRUE(pNormalMtcService->IsNr());
+}
+
+TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksWifiFirst)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+
+    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
+}
+
+TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksRatType)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsCombinedAttach());
+}
+
+TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksLteInfo)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_UNKNOWN));
+    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsCombinedAttach());
 }
 
 TEST_F(MtcServiceTest, ImsAosConnectedNormalServiceInvokesSetReady)

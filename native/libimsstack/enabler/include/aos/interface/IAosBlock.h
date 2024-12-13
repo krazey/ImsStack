@@ -55,8 +55,10 @@ typedef enum
     BLOCK_IMS_SERVICE_DISABLED,
     /// EPS fallback is started. registration is holding until LTE is attached.
     BLOCK_EPS_FALLBACK_STARTED,
+    /// Can not obtain valid P-CSCF address.
+    BLOCK_INVALID_CONNECTION,
     /// End common Block reason
-    BLOCK_END = BLOCK_EPS_FALLBACK_STARTED,
+    BLOCK_END = BLOCK_INVALID_CONNECTION,
 
     /// Start cellular Block reason
     BLOCK_CELLULAR_START,

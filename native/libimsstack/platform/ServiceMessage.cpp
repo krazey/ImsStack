@@ -18,7 +18,7 @@
 #include "ServiceMessage.h"
 #include "ServiceThread.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_BASE__;
 
 PRIVATE GLOBAL AString MessageService::GetThreadName(IN const AString& strTargetName)
 {

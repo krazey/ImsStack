@@ -86,7 +86,7 @@ public class CellInfoAgent implements CellInfoInterface {
 
     private static final String DELIMETER = ",";
 
-    /** Mapping from the radio access network type to the telephony's network type. */
+    // Mapping from the radio access network type to the telephony's network type.
     private static final Map<Integer, List<Integer>>
             ACCESS_NETWORK_TYPE_TO_TELEPHONY_NETWORK_TYPE = Map.ofEntries(
             Map.entry(AccessNetworkType.EUTRAN, List.of(TelephonyManager.NETWORK_TYPE_LTE)),
@@ -332,10 +332,8 @@ public class CellInfoAgent implements CellInfoInterface {
                     }
                 });
 
-        /**
-         * If NR is not supported, then remove the updated access network type
-         * because NR cell information will not be used by the ImsStack.
-         */
+        // If NR is not supported, then remove the updated access network type
+        // because NR cell information will not be used by the ImsStack.
         if (!CapabilityConfigs.isVoNrEnabled(mSlotId)) {
             updatedAccessNetworkTypes.remove(Integer.valueOf(AccessNetworkType.NGRAN));
         }

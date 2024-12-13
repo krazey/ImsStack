@@ -18,15 +18,13 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-#define NUM_OF_MANDATORY_HEADERS 5
-
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
-        SipHeaderBase::GetNewObj,                        //    Allow
-        SipAllowEventsHeader::GetNewObj,                 //    AllowEvent
-        SipAuthBase::GetNewObj,                          //    Authorization
-        SipHeaderBase::GetNewObj,                        //    CallId
+        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::ALLOW
+        SipEventHeader::GetNewObj,                       //    SipHeaderBase::ALLOW_EVENTS
+        SipAuthBase::GetNewObj,                          //    SipHeaderBase::AUTHORIZATION
+        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CALL_ID
         SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT
         SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_WILD
         SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_ANY
@@ -142,9 +140,9 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SIP_NULL                                     //    SipHeaderBase::TYPE_END //120
 };
 
-SipHeaders::SipHeaders()
+SipHeaders::SipHeaders() :
+        m_objHeaders(SipMap<SIP_INT32, SipHeaderBase*>())
 {
-    memset(m_HeaderArray, SIP_NULL, (SipHeaderBase::TYPE_END + SIP_ONE) * sizeof(SipHeaderBase*));
 }
 
 SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
@@ -244,6 +242,30 @@ SipHeaderBase* SipHeaders::GetHdrObj(SIP_INT32 eHdrType)
         return pHeader;
     }
     return SIP_NULL;
+}
+
+SipHeaderBase* SipHeaders::GetHeader(SIP_INT32 eHdrType)
+{
+    SIP_SLONG nIndex = m_objHeaders.GetIndexOfKey(eHdrType);
+
+    return (nIndex != -1) ? m_objHeaders.GetValueAt(nIndex) : SIP_NULL;
+}
+
+SIP_VOID SipHeaders::SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader)
+{
+    SIP_SLONG nIndex = m_objHeaders.GetIndexOfKey(eHdrType);
+
+    if (nIndex != -1)
+    {
+        SipHeaderBase* pHdr = m_objHeaders.GetValueAt(nIndex);
+        if (pHdr != SIP_NULL)
+        {
+            pHdr->SipDelete();
+        }
+        m_objHeaders.RemoveAt(nIndex);
+    }
+
+    m_objHeaders.Add(eHdrType, pHeader);
 }
 
 SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHeader /* = SIP_NULL */)
@@ -348,6 +370,8 @@ SIP_BOOL SipHeaders::InsertHdr(SipHeaderBase* pHdr, SIP_UINT32 nIndex)
 
 SIP_BOOL SipHeaders::EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 {
+    const SIP_UINT16 NUM_OF_MANDATORY_HEADERS = 5;
+
     SIP_INT32 arMandatoryHeaders[NUM_OF_MANDATORY_HEADERS] = {SipHeaderBase::VIA,
             SipHeaderBase::FROM, SipHeaderBase::TO, SipHeaderBase::CALL_ID, SipHeaderBase::CSEQ};
 
@@ -540,13 +564,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
             return SIP_FALSE;
         }
 
-        if (pUnknown->SetHeaderName(*ppHdrName) == SIP_FALSE)
-        {
-            pUnknown->SipDelete();
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Set header name fail", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-
+        pUnknown->SetHeaderName(*ppHdrName);
         *ppHdrBody = SipCreateString(pTempNext, pEndPt);
         if (*ppHdrBody == SIP_NULL)
         {
@@ -561,13 +579,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
             return SIP_FALSE;
         }
 
-        if (pUnknown->SetHeaderValue(*ppHdrBody) == SIP_FALSE)
-        {
-            pUnknown->SipDelete();
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Set header value fail", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-
+        pUnknown->SetHeaderValue(*ppHdrBody);
         /*Add the header into the unknown list*/
         if ((static_cast<SipHeaderList*>(pHeader))->AddHeader(pUnknown) == SIP_FALSE)
         {

@@ -15,6 +15,7 @@
  */
 
 #include "IMediaManager.h"
+#include "MediaDef.h"
 #include "MockIMtcService.h"
 #include "../../include/media/MockIMediaManager.h"
 #include "../../include/media/MockIMediaSession.h"
@@ -983,7 +984,7 @@ TEST_F(MtcMediaManagerTest, GetRtpPortInvokesMediaSessionGetRemotePort)
 TEST_F(MtcMediaManagerTest, SetConferenceCallInvokesMediaSessionSetOptions)
 {
     EXPECT_CALL(objMediaSession,
-            SetOptions(IMS_NULL, IMediaSession::OptionType::SET_CONFERENCE_ENABLE, 0, 0))
+            SetOptions(UNDEFINED_NEGO_ID, IMediaSession::OptionType::SET_CONFERENCE_ENABLE, 0, 0))
             .Times(2);
     pMediaManager->SetConferenceCall(IMS_TRUE);
     pMediaManager->SetConferenceCall(IMS_FALSE);

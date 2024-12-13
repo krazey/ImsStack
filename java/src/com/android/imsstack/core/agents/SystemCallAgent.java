@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** A class for providing the implementation of system call. */
-public class SystemCallAgent implements SystemCallInterface {
+public final class SystemCallAgent implements SystemCallInterface {
     private final int mSlotId;
 
     public SystemCallAgent(int slotId) {

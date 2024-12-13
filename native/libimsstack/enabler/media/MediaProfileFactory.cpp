@@ -80,7 +80,7 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
     {
         case MEDIA_TYPE_AUDIO:
             pProfile = CreateAudioProfile();
-            pProfile = SetAudioProfile(pProfile, pConfig);
+            pProfile = SetAudioProfile(pProfile, pConfig, pEnvironment, nSlotId);
             break;
         case MEDIA_TYPE_TEXT:
             pProfile = CreateTextProfile();
@@ -105,25 +105,62 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
         }
 
         // Setting IP address
-        pProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
-        pProfile->nDataPort = pResourceMngr->AcquireRtpPort(pConfig);
-        pProfile->nControlPort = pProfile->nDataPort + 1;
+        pProfile->SetIpAddress(pEnvironment->pIService->GetIpAddress());
+        pProfile->SetDataPort(pResourceMngr->AcquireRtpPort(pConfig));
+        pProfile->SetControlPort(pProfile->GetDataPort() + 1);
 
         IMS_TRACE_I("CreateProfile() - IpAddress[%s], rtp port[%d], rtcp port[%d]",
-                pProfile->objIpAddress.ToCharString(), pProfile->nDataPort, pProfile->nControlPort);
+                pProfile->GetIpAddress().ToCharString(), pProfile->GetDataPort(),
+                pProfile->GetControlPort());
 
         // Setting direction
-        pProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
-        pProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
-        pProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
-        pProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
-        pProfile->nRtcpInterval = pConfig->GetRtcpInterval();
+        pProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+        pProfile->SetBandwidthAs(pConfig->GetAsBandwidthKbps());
+        pProfile->SetBandwidthRr(pConfig->GetRrBandwidthBps());
+        pProfile->SetBandwidthRs(pConfig->GetRsBandwidthBps());
+        pProfile->SetRtcpInterval(pConfig->GetRtcpInterval());
 
-        IMS_TRACE_I("CreateProfile() - direction[%d], rtcp Interval[%d]", pProfile->eDirection,
-                pProfile->nRtcpInterval, 0);
+        IMS_TRACE_I("CreateProfile() - direction[%d], rtcp Interval[%d]", pProfile->GetDirection(),
+                pProfile->GetRtcpInterval(), 0);
     }
 
     return pProfile;
+}
+
+PUBLIC
+MediaBaseProfile* MediaProfileFactory::CreateProfile(
+        IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile)
+{
+    MediaBaseProfile* pNewProfile = IMS_NULL;
+
+    switch (eType)
+    {
+        case MEDIA_TYPE_AUDIO:
+            pNewProfile = CreateAudioProfile();
+            if (pProfile != IMS_NULL)
+            {
+                *static_cast<AudioProfile*>(pNewProfile) = *static_cast<AudioProfile*>(pProfile);
+            }
+            break;
+        case MEDIA_TYPE_TEXT:
+            pNewProfile = CreateTextProfile();
+            if (pProfile != IMS_NULL)
+            {
+                *static_cast<TextProfile*>(pNewProfile) = *static_cast<TextProfile*>(pProfile);
+            }
+            break;
+        case MEDIA_TYPE_VIDEO:
+            pNewProfile = CreateVideoProfile();
+            if (pProfile != IMS_NULL)
+            {
+                *static_cast<VideoProfile*>(pNewProfile) = *static_cast<VideoProfile*>(pProfile);
+            }
+            break;
+        default:
+            break;
+    }
+
+    return pNewProfile;
 }
 
 PRIVATE MediaBaseProfile* MediaProfileFactory::CreateCodecPayloads(
@@ -175,7 +212,7 @@ PRIVATE MediaBaseProfile* MediaProfileFactory::CreateCodecPayloads(
 
             if (pTempPayload != IMS_NULL)
             {
-                static_cast<AudioProfile*>(pProfile)->lstPayload.Append(pTempPayload);
+                static_cast<AudioProfile*>(pProfile)->GetPayloadList().Append(pTempPayload);
             }
         }
         else if (nCodec > ImsCodec::VIDEO_NONE && nCodec < ImsCodec::VIDEO_MAX)
@@ -193,7 +230,7 @@ PRIVATE MediaBaseProfile* MediaProfileFactory::CreateCodecPayloads(
 
             if (pTempPayload != IMS_NULL)
             {
-                static_cast<VideoProfile*>(pProfile)->lstPayload.Append(pTempPayload);
+                static_cast<VideoProfile*>(pProfile)->GetPayloadList().Append(pTempPayload);
             }
         }
         else if (nCodec > ImsCodec::TEXT_NONE && nCodec < ImsCodec::TEXT_MAX)
@@ -207,7 +244,7 @@ PRIVATE MediaBaseProfile* MediaProfileFactory::CreateCodecPayloads(
 
             if (pTempPayload != IMS_NULL)
             {
-                static_cast<TextProfile*>(pProfile)->lstPayload.Append(pTempPayload);
+                static_cast<TextProfile*>(pProfile)->GetPayloadList().Append(pTempPayload);
             }
         }
         else
@@ -248,7 +285,7 @@ PUBLIC
 MediaBaseProfile::BasePayload* MediaProfileFactory::CreatePayload(
         IN MediaBaseProfile::BasePayload* payload)
 {
-    switch (MediaProfileUtil::GetMediaType(payload->objRtpMap.strPayloadType))
+    switch (MediaProfileUtil::GetMediaType(payload->GetRtpMap().GetPayloadType()))
     {
         case MEDIA_TYPE_AUDIO:
             return CreateAudioPayload(static_cast<AudioProfile::Payload*>(payload));
@@ -324,8 +361,8 @@ PRIVATE VideoProfile* MediaProfileFactory::CreateVideoProfile()
     return new VideoProfile();
 }
 
-PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
-        IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
+PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(IN MediaBaseProfile* pProfile,
+        IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL)
     {
@@ -335,28 +372,29 @@ PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
     AudioProfile* pAudioProfile = static_cast<AudioProfile*>(pProfile);
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
 
-    pAudioProfile->strTransportType = "RTP/AVP";
-    pAudioProfile->objCandidateAttr = pAudioConfig->GetAudioCandidateAttribute();
-    pAudioProfile->nPtime = pAudioConfig->GetPtime();
-    pAudioProfile->nMaxPtime = pAudioConfig->GetMaxPtime();
+    pAudioProfile->SetTransportType("RTP/AVP");
+    pAudioProfile->SetCandidateAttr(pAudioConfig->GetAudioCandidateAttribute());
+    pAudioProfile->SetPtime(pAudioConfig->GetPtime());
+    pAudioProfile->SetMaxPtime(pAudioConfig->GetMaxPtime());
 
     MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pAudioConfig);
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
+    AudioProfileUtil::SetAnbr(pAudioProfile, pEnvironment, nSlotId);
 
-    while (pAudioProfile->lstPayload.GetSize() > 0)
+    while (pAudioProfile->GetPayloadList().GetSize() > 0)
     {
         AudioProfile::Payload* pPayload = pAudioProfile->GetPayloadAt(0);
         if (pPayload != IMS_NULL)
         {
             delete pPayload;
         }
-        pAudioProfile->lstPayload.RemoveAt(0);
+        pAudioProfile->GetPayloadList().RemoveAt(0);
     }
 
-    IMS_TRACE_D("SetAudioProfile() - nPtime[%d], nMaxPtime[%d]", pAudioProfile->nPtime,
-            pAudioProfile->nMaxPtime, 0);
-    IMS_TRACE_D("SetAudioProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->nBandwidthAs,
-            pAudioProfile->nBandwidthRr, pAudioProfile->nBandwidthRs);
+    IMS_TRACE_D("SetAudioProfile() - Ptime[%d], MaxPtime[%d]", pAudioProfile->GetPtime(),
+            pAudioProfile->GetMaxPtime(), 0);
+    IMS_TRACE_D("SetAudioProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->GetBandwidthAs(),
+            pAudioProfile->GetBandwidthRr(), pAudioProfile->GetBandwidthRs());
 
     return pAudioProfile;
 }
@@ -378,22 +416,22 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAmrPayload(
 
     SetAudioCodecFmtp(pAmrConfig, pAudioConfig, pAmrFmtp);
 
-    pAmrFmtp->nModeSetList = pAmrConfig->GetAmrModeSetList();
-    pAmrFmtp->nDefaultRtpModeSet = pAmrConfig->GetDefaultAmrModeSetList();
-    pAmrFmtp->bShowModeSet = pAmrConfig->GetShowAmrModeSet();
+    pAmrFmtp->SetModeSetList(pAmrConfig->GetAmrModeSetList());
+    pAmrFmtp->SetDefaultRtpModeSet(pAmrConfig->GetDefaultAmrModeSetList());
+    pAmrFmtp->SetShowModeSet(pAmrConfig->GetShowAmrModeSet());
 
-    pAmrFmtp->bShowOctetAlign = IMS_FALSE;
+    pAmrFmtp->SetShowOctetAlign(IMS_FALSE);
     if (pAmrConfig->GetOctetAlign() != -1)
     {
-        pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
-        if (pAmrFmtp->nOctetAlign == 1 || pAmrFmtp->nModeSetList == 0)
+        pAmrFmtp->SetOctetAlign(pAmrConfig->GetOctetAlign());
+        if (pAmrFmtp->GetOctetAlign() == 1)
         {
-            pAmrFmtp->bShowOctetAlign = IMS_TRUE;
+            pAmrFmtp->SetShowOctetAlign(IMS_TRUE);
         }
     }
     else
     {
-        pAmrFmtp->nOctetAlign = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
+        pAmrFmtp->SetOctetAlign(CodecAmrConfig::DEFAULT_OCTET_ALIGN);
     }
 
     strCodecName.Sprintf("%s", (pAmrConfig->GetSamplingRate() == 8000) ? "AMR" : "AMR-WB");
@@ -401,7 +439,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAmrPayload(
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(pAmrConfig->GetPayloadType(), strCodecName,
             pAmrConfig->GetSamplingRate(), pAmrConfig->GetChannel());
-    pAmrPayload->pFmtp = pAmrFmtp;
+    pAmrPayload->SetFmtp(pAmrFmtp);
 
     IMS_TRACE_D("CreateAmrPayload() codec(%s), SamplingRate(%d)",
             ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetSamplingRate(), 0);
@@ -429,79 +467,79 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateEvsPayload(
     SetAudioCodecFmtp(pEvsConfig, pAudioConfig, pEvsFmtp);
 
     // Mode set list
-    pEvsFmtp->nModeSetList = pEvsConfig->GetAmrModeSetList();
-    pEvsFmtp->nDefaultRtpModeSet = pEvsConfig->GetDefaultAmrModeSetList();
-    pEvsFmtp->bShowModeSet = pEvsConfig->GetShowAmrModeSet();
-    pEvsFmtp->nBrList = pEvsConfig->GetBrList();
-    pEvsFmtp->nBwList = pEvsConfig->GetBwList();
+    pEvsFmtp->SetModeSetList(pEvsConfig->GetAmrModeSetList());
+    pEvsFmtp->SetDefaultRtpModeSet(pEvsConfig->GetDefaultAmrModeSetList());
+    pEvsFmtp->SetShowModeSet(pEvsConfig->GetShowAmrModeSet());
+    pEvsFmtp->SetBrList(pEvsConfig->GetBrList());
+    pEvsFmtp->SetBwList(pEvsConfig->GetBwList());
 
     // Bit-rate
-    if (pEvsFmtp->nBrList == 0)
+    if (pEvsFmtp->GetBrList() == 0)
     {
-        pEvsFmtp->nBrList = CodecEvsConfig::DEFAULT_BR_LIST;
-        pEvsFmtp->bShowBrList = IMS_FALSE;
+        pEvsFmtp->SetBrList(CodecEvsConfig::DEFAULT_BR_LIST);
+        pEvsFmtp->SetShowBrList(IMS_FALSE);
     }
     else
     {
-        pEvsFmtp->bShowBrList = IMS_TRUE;
+        pEvsFmtp->SetShowBrList(IMS_TRUE);
     }
 
     // Bandwidth
-    if (pEvsFmtp->nBwList == -1)
+    if (pEvsFmtp->GetBwList() == -1)
     {
-        pEvsFmtp->nBwList = CodecEvsConfig::DEFAULT_BW_LIST;
-        pEvsFmtp->bShowBrList = IMS_FALSE;
+        pEvsFmtp->SetBwList(CodecEvsConfig::DEFAULT_BW_LIST);
+        pEvsFmtp->SetShowBwList(IMS_FALSE);
     }
     else
     {
-        pEvsFmtp->bShowBwList = IMS_TRUE;
+        pEvsFmtp->SetShowBwList(IMS_TRUE);
     }
 
-    pEvsFmtp->bShowDtx = pEvsConfig->GetShowDtx();
+    pEvsFmtp->SetShowDtx(pEvsConfig->GetShowDtx());
 
     if (pEvsConfig->GetHfOnly() == -1)  // Not Present
     {
-        pEvsFmtp->nHfOnly = CodecEvsConfig::DEFAULT_HF_ONLY;
+        pEvsFmtp->SetHfOnly(CodecEvsConfig::DEFAULT_HF_ONLY);
     }
     else
     {
-        pEvsFmtp->nHfOnly = pEvsConfig->GetHfOnly();
-        pEvsFmtp->bShowHfOnly = IMS_TRUE;
+        pEvsFmtp->SetHfOnly(pEvsConfig->GetHfOnly());
+        pEvsFmtp->SetShowHfOnly(IMS_TRUE);
     }
 
     if (pEvsConfig->GetEvsModeSwitch() != -1)
     {
-        pEvsFmtp->nEvsModeSwitch = pEvsConfig->GetEvsModeSwitch();
-        pEvsFmtp->bShowEvsModeSwitch = IMS_TRUE;
+        pEvsFmtp->SetEvsModeSwitch(pEvsConfig->GetEvsModeSwitch());
+        pEvsFmtp->SetShowEvsModeSwitch(IMS_TRUE);
     }
     else
     {
-        pEvsFmtp->nEvsModeSwitch = CodecEvsConfig::DEFAULT_EVS_MODESWITCH;
-        pEvsFmtp->bShowEvsModeSwitch = IMS_FALSE;
+        pEvsFmtp->SetEvsModeSwitch(CodecEvsConfig::DEFAULT_EVS_MODESWITCH);
+        pEvsFmtp->SetShowEvsModeSwitch(IMS_FALSE);
     }
 
     if (pEvsConfig->GetCmr() == CodecEvsConfig::CMR_NOT_PRESENT)
     {
-        pEvsFmtp->nCmr = CodecEvsConfig::DEFAULT_CMR;
+        pEvsFmtp->SetCmr(CodecEvsConfig::DEFAULT_CMR);
     }
     else
     {
-        pEvsFmtp->nCmr = pEvsConfig->GetCmr();
-        pEvsFmtp->bShowCmr = IMS_TRUE;
+        pEvsFmtp->SetCmr(pEvsConfig->GetCmr());
+        pEvsFmtp->SetShowCmr(IMS_TRUE);
     }
     if (pEvsConfig->GetChAwareRecv() != -1)
     {
-        pEvsFmtp->nChAwRecv = pEvsConfig->GetChAwareRecv();
-        pEvsFmtp->bShowChannelAwMode = IMS_TRUE;
+        pEvsFmtp->SetChAwRecv(pEvsConfig->GetChAwareRecv());
+        pEvsFmtp->SetShowChannelAwMode(IMS_TRUE);
 
         if (pEvsConfig->GetChAwareRecv() == 99)
         {
-            pEvsFmtp->nChAwRecv = -1;
+            pEvsFmtp->SetChAwRecv(-1);
         }
     }
     else
     {
-        pEvsFmtp->nChAwRecv = -1;
+        pEvsFmtp->SetChAwRecv(-1);
     }
 
     IMS_TRACE_D("EVS - GetShowDtx: %d GetShowAmrModeSet: %d", pEvsConfig->GetShowDtx(),
@@ -511,7 +549,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateEvsPayload(
     AudioProfile::Payload* pEvsPayload = new AudioProfile::Payload();
     pEvsPayload->SetRtpMap(
             pEvsConfig->GetPayloadType(), strCodecName, 16000, pEvsConfig->GetChannel());
-    pEvsPayload->pFmtp = pEvsFmtp;
+    pEvsPayload->SetFmtp(pEvsFmtp);
 
     return pEvsPayload;
 }
@@ -537,7 +575,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateTelephoneEventPayload(
     AudioProfile::Payload* pTelephoneEventPayload = new AudioProfile::Payload();
     pTelephoneEventPayload->SetRtpMap(
             pDtmfConfig->GetPayloadType(), strCodecName, pDtmfConfig->GetSamplingRate(), 0);
-    pTelephoneEventPayload->pFmtp = pTelephoneEventFmtp;
+    pTelephoneEventPayload->SetFmtp(pTelephoneEventFmtp);
 
     IMS_TRACE_D("CreateTelephoneEventPayload() codec(%s), SamplingRate(%d)",
             ImsCodec::CodecToString(pDtmfConfig->GetCodec()), pDtmfConfig->GetSamplingRate(), 0);
@@ -588,71 +626,49 @@ PRIVATE void MediaProfileFactory::SetAudioCodecFmtp(IN CodecAudioConfig* pCodecC
 
     if (pCodecConfig->GetModeChangeCapability() != NOT_PRESENT)
     {
-        pFmtp->nModeChangeCapability = pCodecConfig->GetModeChangeCapability();
-        pFmtp->bShowModeChangeCapability = IMS_TRUE;
+        pFmtp->SetModeChangeCapability(pCodecConfig->GetModeChangeCapability());
+        pFmtp->SetShowModeChangeCapability(IMS_TRUE);
     }
     else
     {
-        pFmtp->nModeChangeCapability = CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY;
-        pFmtp->bShowModeChangeCapability = IMS_FALSE;
+        pFmtp->SetModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
+        pFmtp->SetShowModeChangeCapability(IMS_FALSE);
     }
 
     if (pCodecConfig->GetModeChangePeriod() != NOT_PRESENT)
     {
-        pFmtp->nModeChangePeriod = pCodecConfig->GetModeChangePeriod();
-        pFmtp->bShowModeChangePeriod = IMS_TRUE;
+        pFmtp->SetModeChangePeriod(pCodecConfig->GetModeChangePeriod());
+        pFmtp->SetShowModeChangePeriod(IMS_TRUE);
     }
     else
     {
-        pFmtp->nModeChangePeriod = CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD;
-        pFmtp->bShowModeChangePeriod = IMS_FALSE;
+        pFmtp->SetModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
+        pFmtp->SetShowModeChangePeriod(IMS_FALSE);
     }
 
     if (pCodecConfig->GetModeChangeNeighbor() != NOT_PRESENT)
     {
-        pFmtp->nModeChangeNeighbor = pCodecConfig->GetModeChangeNeighbor();
-        pFmtp->bShowModeChangeNeighbor = IMS_TRUE;
+        pFmtp->SetModeChangeNeighbor(pCodecConfig->GetModeChangeNeighbor());
+        pFmtp->SetShowModeChangeNeighbor(IMS_TRUE);
     }
     else
     {
-        pFmtp->nModeChangeNeighbor = CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR;
-        pFmtp->bShowModeChangeNeighbor = IMS_FALSE;
-    }
-
-    if (pAudioConfig->GetPtime() != NOT_PRESENT)
-    {
-        pFmtp->nPtime = pAudioConfig->GetPtime();
-        pFmtp->bShowPtime = IMS_TRUE;
-    }
-    else
-    {
-        pFmtp->nPtime = AudioConfiguration::DEFAULT_PTIME;
-        pFmtp->bShowPtime = IMS_FALSE;
-    }
-
-    if (pAudioConfig->GetMaxPtime() != NOT_PRESENT)
-    {
-        pFmtp->nMaxPtime = pAudioConfig->GetMaxPtime();
-        pFmtp->bShowMaxPtime = IMS_TRUE;
-    }
-    else
-    {
-        pFmtp->nMaxPtime = AudioConfiguration::DEFAULT_MAX_PTIME;
-        pFmtp->bShowMaxPtime = IMS_FALSE;
+        pFmtp->SetModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
+        pFmtp->SetShowModeChangeNeighbor(IMS_FALSE);
     }
 
     if (pAudioConfig->GetMaxRed() != NOT_PRESENT)
     {
-        pFmtp->nMaxRed = pAudioConfig->GetMaxRed();
-        pFmtp->bShowMaxRed = IMS_TRUE;
+        pFmtp->SetMaxRed(pAudioConfig->GetMaxRed());
+        pFmtp->SetShowMaxRed(IMS_TRUE);
     }
     else
     {
-        pFmtp->nMaxRed = AudioConfiguration::DEFAULT_MAX_RED;
-        pFmtp->bShowMaxRed = IMS_FALSE;
+        pFmtp->SetMaxRed(AudioConfiguration::DEFAULT_MAX_RED);
+        pFmtp->SetShowMaxRed(IMS_FALSE);
     }
 
-    pFmtp->bDtx = pCodecConfig->GetDtx();
+    pFmtp->SetDtx(pCodecConfig->GetDtx());
 }
 
 PRIVATE TextProfile* MediaProfileFactory::SetTextProfile(
@@ -666,11 +682,11 @@ PRIVATE TextProfile* MediaProfileFactory::SetTextProfile(
     TextProfile* pTextProfile = static_cast<TextProfile*>(pProfile);
     TextConfiguration* pTextConfig = static_cast<TextConfiguration*>(pConfig);
 
-    pTextProfile->strTransportType = "RTP/AVP";
-    pTextProfile->bKeepRedLevel = pTextConfig->IsTextCodecEmptyRedundantEnabled();
+    pTextProfile->SetTransportType("RTP/AVP");
+    pTextProfile->SetKeepRedundantLevel(pTextConfig->IsTextCodecEmptyRedundantEnabled());
 
     IMS_TRACE_I("SetTextProfile() - transport type[%s], keep red level[%d]",
-            pTextProfile->strTransportType.GetStr(), pTextProfile->bKeepRedLevel, 0);
+            pTextProfile->GetTransportType().GetStr(), pTextProfile->GetKeepRedundantLevel(), 0);
 
     return pTextProfile;
 }
@@ -695,9 +711,9 @@ PRIVATE TextProfile::Payload* MediaProfileFactory::CreateT140Payload(
                 static_cast<TextConfiguration*>(pConfig)->GetT140PayloadType());
 
         IMS_TRACE_I("CreateT140Payload() add fmtp - red level(%d), red payload(%d)",
-                pRedFmtp->nRedLevel, pRedFmtp->nRedPayload, 0);
+                pRedFmtp->GetRedLevel(), pRedFmtp->GetRedPayload(), 0);
 
-        pTextPayload->pFmtp = pRedFmtp;
+        pTextPayload->SetFmtp(pRedFmtp);
     }
     else
     {
@@ -721,17 +737,17 @@ PRIVATE VideoProfile* MediaProfileFactory::SetVideoProfile(
     VideoProfile* pVideoProfile = static_cast<VideoProfile*>(pProfile);
     VideoConfiguration* pVideoConfig = static_cast<VideoConfiguration*>(pConfig);
 
-    pVideoProfile->strTransportType = (pVideoConfig->IsVideoAvpfEnabled() &&
-                                              !pVideoConfig->IsAvpfCapabilityNegotiationEnabled())
-            ? "RTP/AVPF"
-            : "RTP/AVP";
+    pVideoProfile->SetTransportType((pVideoConfig->IsVideoAvpfEnabled() &&
+                                            !pVideoConfig->IsAvpfCapabilityNegotiationEnabled())
+                    ? "RTP/AVPF"
+                    : "RTP/AVP");
 
-    pVideoProfile->nCvoId = pVideoConfig->GetCvoId();
+    pVideoProfile->SetCvoId(pVideoConfig->GetCvoId());
     MediaProfileUtil::SetRtcpRsRr(pVideoProfile, pVideoConfig);
 
     if (pVideoConfig->IsVideoAvpfEnabled() == IMS_TRUE)
     {
-        pVideoProfile->bSupportAvpf = IMS_TRUE;
+        pVideoProfile->SetSupportAvpf(IMS_TRUE);
 
         IMS_SINT32 nTcap, nAcap = 0;
 
@@ -742,7 +758,7 @@ PRIVATE VideoProfile* MediaProfileFactory::SetVideoProfile(
     }
 
     IMS_TRACE_D("SetVideoProfile - SupportAvpf[%d], SupportCapaNegoForAvpf[%d]",
-            pVideoProfile->bSupportAvpf, pVideoProfile->bSupportCapaNegoForAvpf, 0);
+            pVideoProfile->IsAvpfSupported(), pVideoProfile->IsCapaNegoForAvpfSupported(), 0);
 
     return pVideoProfile;
 }
@@ -771,37 +787,37 @@ PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateAvcPayload(
 
     SetVideoCodecFmtp(pAvcConfig, pVideoConfig, pAvcFmtp);
 
-    pAvcFmtp->nProfile =
-            VideoProfileUtil::GetAvcProfileFromProfileLevelId(pAvcConfig->GetProfileLevelId());
-    pAvcFmtp->nLevel =
-            VideoProfileUtil::GetAvcLevelFromProfileLevelId(pAvcConfig->GetProfileLevelId());
-    IMS_TRACE_I(
-            "CreateAvcPayload - nProfile[%d], nLevel[%d]", pAvcFmtp->nProfile, pAvcFmtp->nLevel, 0);
+    pAvcFmtp->SetProfile(
+            VideoProfileUtil::GetAvcProfileFromProfileLevelId(pAvcConfig->GetProfileLevelId()));
+    pAvcFmtp->SetLevel(
+            VideoProfileUtil::GetAvcLevelFromProfileLevelId(pAvcConfig->GetProfileLevelId()));
+    IMS_TRACE_I("CreateAvcPayload - Profile[%d], Level[%d]", pAvcFmtp->GetProfile(),
+            pAvcFmtp->GetLevel(), 0);
 
     const IMS_CHAR* pbAvc4SpropParameterSets;
     pbAvc4SpropParameterSets = pAvcConfig->GetSpropParameterSets().GetStr();
 
     /** TODO: later sprop need to find a way to get SpropPramaterSets
     pbAvc4SpropParameterSets = GetAvcSpropParameterSets(
-            pAvcFmtp->eResolution, pAvcFmtp->nProfile, pAvcFmtp->nLevel);
+            pAvcFmtp->GetResolution(), pAvcFmtp->GetProfile(), pAvcFmtp->GetLevel());
     */
 
     IMS_TRACE_I("CreateAvcPayload - pbAvc4SpropParameterSets[%s]", pbAvc4SpropParameterSets, 0, 0);
 
     if (pAvcConfig->GetProfileLevelId().GetLength() != 0)
     {
-        pAvcFmtp->strProfileLevelId = pAvcConfig->GetProfileLevelId();
-        pAvcFmtp->bShow_ProfileLevelId = IMS_TRUE;
+        pAvcFmtp->SetProfileLevelId(pAvcConfig->GetProfileLevelId());
+        pAvcFmtp->SetShowProfileLevelId(IMS_TRUE);
     }
 
     if (pAvcConfig->GetIncludeSpropParameterSets())
     {
-        pAvcFmtp->strSpropParam = pbAvc4SpropParameterSets;
-        pAvcFmtp->bShow_SpropParam = IMS_TRUE;
+        pAvcFmtp->SetSpropParam(pbAvc4SpropParameterSets);
+        pAvcFmtp->SetShowSpropParam(IMS_TRUE);
     }
 
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
-    pAvcPayload->pFmtp = pAvcFmtp;
+    pAvcPayload->SetFmtp(pAvcFmtp);
 
     SetVideoCodecPayload(pAvcConfig, pVideoConfig, pAvcPayload);
 
@@ -826,24 +842,24 @@ PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateHevcPayload(
 
     if (pHevcConfig->GetHevcProfile() != -1)
     {
-        pHevcFmtp->nProfile = static_cast<VIDEO_PROFILE_HEVC>(pHevcConfig->GetHevcProfile());
-        pHevcFmtp->bShow_Profile = IMS_TRUE;
+        pHevcFmtp->SetProfile(static_cast<VIDEO_PROFILE_HEVC>(pHevcConfig->GetHevcProfile()));
+        pHevcFmtp->SetShowProfile(IMS_TRUE);
     }
 
     if (pHevcConfig->GetHevcLevel() != -1)
     {
-        pHevcFmtp->nLevel = pHevcConfig->GetHevcLevel();
-        pHevcFmtp->bShow_Level = IMS_TRUE;
+        pHevcFmtp->SetLevel(pHevcConfig->GetHevcLevel());
+        pHevcFmtp->SetShowLevel(IMS_TRUE);
     }
 
     if (pHevcConfig->GetSpropParameterSets().GetLength() != 0)
     {
-        pHevcFmtp->strSpropParam = pHevcConfig->GetSpropParameterSets();
-        pHevcFmtp->bShow_SpropParam = IMS_TRUE;
+        pHevcFmtp->SetSpropParam(pHevcConfig->GetSpropParameterSets());
+        pHevcFmtp->SetShowSpropParam(IMS_TRUE);
     }
 
     VideoProfile::Payload* pHevcPayload = new VideoProfile::Payload();
-    pHevcPayload->pFmtp = pHevcFmtp;
+    pHevcPayload->SetFmtp(pHevcFmtp);
 
     SetVideoCodecPayload(pHevcConfig, pVideoConfig, pHevcPayload);
 
@@ -858,22 +874,22 @@ PRIVATE void MediaProfileFactory::SetVideoCodecFmtp(IN CodecVideoConfig* pCodecC
         return;
     }
 
-    pFmtp->nFrameRate = pCodecConfig->GetFramerate();
-    pFmtp->eResolution = VideoProfileUtil::GetResolutionFromWidthHeight(
-            pCodecConfig->GetResolutionWidth(), pCodecConfig->GetResolutionHeight());
-    pFmtp->nBitrate = pCodecConfig->GetBitrate();
-    pFmtp->nAs = pVideoConfig->GetAsBandwidthKbps();
+    pFmtp->SetFramerate(pCodecConfig->GetFramerate());
+    pFmtp->SetResolution(VideoProfileUtil::GetResolutionFromWidthHeight(
+            pCodecConfig->GetResolutionWidth(), pCodecConfig->GetResolutionHeight()));
+    pFmtp->SetBitrate(pCodecConfig->GetBitrate());
+    pFmtp->SetAs(pVideoConfig->GetAsBandwidthKbps());
 
     if (pCodecConfig->GetPacketizationMode() != -1)
     {
-        pFmtp->nPacketizationMode = pCodecConfig->GetPacketizationMode();
-        pFmtp->bShow_PacketizationMode = IMS_TRUE;
+        pFmtp->SetPacketizationMode(pCodecConfig->GetPacketizationMode());
+        pFmtp->SetShowPacketizationMode(IMS_TRUE);
     }
 
-    IMS_TRACE_D("SetVideoCodecFmtp - FrameRate[%d], Resolution[%d], Bitrate[%d]", pFmtp->nFrameRate,
-            pFmtp->eResolution, pFmtp->nBitrate);
-    IMS_TRACE_D("SetVideoCodecFmtp - AS[%d], PacketizationMode[%d]", pFmtp->nAs,
-            pFmtp->nPacketizationMode, 0);
+    IMS_TRACE_D("SetVideoCodecFmtp - FrameRate[%d], Resolution[%d], Bitrate[%d]",
+            pFmtp->GetFramerate(), pFmtp->GetResolution(), pFmtp->GetBitrate());
+    IMS_TRACE_D("SetVideoCodecFmtp - AS[%d], PacketizationMode[%d]", pFmtp->GetAs(),
+            pFmtp->GetPacketizationMode(), 0);
 }
 
 PRIVATE void MediaProfileFactory::SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,
@@ -890,48 +906,50 @@ PRIVATE void MediaProfileFactory::SetVideoCodecPayload(IN CodecVideoConfig* pCod
 
     if (pCodecConfig->GetImageAttr().GetLength() != 0)
     {
-        pPayload->bIncludeImageAttr = IMS_TRUE;
-        pPayload->strImageAttr = pCodecConfig->GetImageAttr();
+        pPayload->SetIncludeImageAttr(IMS_TRUE);
+        pPayload->SetImageAttr(pCodecConfig->GetImageAttr());
     }
     else if (pCodecConfig->GetFrameSize().GetLength() != 0)
     {
-        pPayload->bIncludeFrameSize = IMS_TRUE;
+        pPayload->SetIncludeFrameSize(IMS_TRUE);
     }
 
     if (pVideoConfig->IsVideoAvpfEnabled() == IMS_TRUE)
     {
         if (pVideoConfig->IsVideoAvpfTrrEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bTrrSupported = IMS_TRUE;
-            pPayload->objRtcpFbAttr.nTrrInt = pVideoConfig->GetRtcpInterval() * 1000;
+            pPayload->GetRtcpFbAttr().SetTrrSupported(IMS_TRUE);
+            pPayload->GetRtcpFbAttr().SetTrrInt(pVideoConfig->GetRtcpInterval() * 1000);
         }
 
         if (pVideoConfig->IsVideoAvpfNackEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bNackSupported = IMS_TRUE;
+            pPayload->GetRtcpFbAttr().SetNackSupported(IMS_TRUE);
         }
 
         if (pVideoConfig->IsVideoAvpfTmmbrEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
-            pPayload->objRtcpFbAttr.nTmmbrSmaxPr = 40;
+            pPayload->GetRtcpFbAttr().SetTmmbrSupported(IMS_TRUE);
+            pPayload->GetRtcpFbAttr().SetTmmbrSmaxPr(40);
         }
 
         if (pVideoConfig->IsVideoAvpfPliEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bPliSupported = IMS_TRUE;
+            pPayload->GetRtcpFbAttr().SetPliSupported(IMS_TRUE);
         }
 
         if (pVideoConfig->IsVideoAvpfFirEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bFirSupported = IMS_TRUE;
+            pPayload->GetRtcpFbAttr().SetFirSupported(IMS_TRUE);
         }
 
         IMS_TRACE_I("SetVideoCodecPayload() AVPF. TRR[%d], NACK[%d], TMMBR[%d]",
-                pPayload->objRtcpFbAttr.bTrrSupported, pPayload->objRtcpFbAttr.bNackSupported,
-                pPayload->objRtcpFbAttr.bTmmbrSupported);
+                pPayload->GetRtcpFbAttr().IsTrrSupported(),
+                pPayload->GetRtcpFbAttr().IsNackSupported(),
+                pPayload->GetRtcpFbAttr().IsTmmbrSupported());
         IMS_TRACE_I("SetVideoCodecPayload() AVPF. PLI[%d], FIR[%d]",
-                pPayload->objRtcpFbAttr.bPliSupported, pPayload->objRtcpFbAttr.bFirSupported, 0);
+                pPayload->GetRtcpFbAttr().IsPliSupported(),
+                pPayload->GetRtcpFbAttr().IsFirSupported(), 0);
     }
 }
 
@@ -942,10 +960,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetTransportCapa(OUT VideoProfile* pVide
     if (pVideoProfile != IMS_NULL)
     {
         AString strTemp("RTP/AVPF");
-        pVideoProfile->objCapaNego.mapTransportCapa.SetValue(++nTcap, strTemp);
+        pVideoProfile->GetCapaNego().GetMapTcap().SetValue(++nTcap, strTemp);
 
         IMS_TRACE_I("SetTransportCapa() - Tcap[%d][%s]", nTcap,
-                pVideoProfile->objCapaNego.mapTransportCapa.GetValue(nTcap).GetStr(), 0);
+                pVideoProfile->GetCapaNego().GetMapTcap().GetValue(nTcap).GetStr(), 0);
     }
 
     return nTcap;
@@ -979,10 +997,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfTrr(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp.Sprintf("%s %d", "rtcp-fb:* trr-int", pVideoConfig->GetRtcpInterval() * 1000);
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->GetCapaNego().GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfTrr() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->GetCapaNego().GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -998,10 +1016,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfNack(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* nack";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->GetCapaNego().GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfNack() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->GetCapaNego().GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1017,10 +1035,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfPli(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* nack pli";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->GetCapaNego().GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfPli() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->GetCapaNego().GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1036,10 +1054,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfFir(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* ccm fir";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->GetCapaNego().GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfFir() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->GetCapaNego().GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1055,10 +1073,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfTmmbr(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* ccm tmmbr";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->GetCapaNego().GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfTmmbr() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->GetCapaNego().GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1075,17 +1093,18 @@ PRIVATE void MediaProfileFactory::SetCapaNegoForAvpf(OUT VideoProfile* pVideoPro
 
     IMS_TRACE_I("SetCapaNegoForAvpf() - Acap[%d], Tcap[%d]", nTcap, nAcap, 0);
 
-    pVideoProfile->bSupportCapaNegoForAvpf =
-            (nCapaNegoForAvpfOption > MediaConfiguration::CAPNEG_OFFER_NONE) ? IMS_TRUE : IMS_FALSE;
+    pVideoProfile->SetSupportCapaNegoForAvpf(
+            (nCapaNegoForAvpfOption > MediaConfiguration::CAPNEG_OFFER_NONE) ? IMS_TRUE
+                                                                             : IMS_FALSE);
 
-    if (pVideoProfile->bSupportCapaNegoForAvpf == IMS_TRUE)
+    if (pVideoProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE)
     {
         AString strPcfg = AString::ConstNull();
         strPcfg.Sprintf("t=%d", nTcap);
 
         if (nCapaNegoForAvpfOption == MediaConfiguration::CAPNEG_OFFER_WITHOUT_ACAP)
         {
-            pVideoProfile->objCapaNego.bIsAttCapaInPcfg = IMS_FALSE;
+            pVideoProfile->GetCapaNego().SetAttCapaInPcfg(IMS_FALSE);
         }
         else if (nCapaNegoForAvpfOption == MediaConfiguration::CAPNEG_OFFER_WITH_ACAP)
         {
@@ -1102,9 +1121,9 @@ PRIVATE void MediaProfileFactory::SetCapaNegoForAvpf(OUT VideoProfile* pVideoPro
                 strTmp.Append(strTmp2);
             }
             strPcfg.Append(strTmp);
-            pVideoProfile->objCapaNego.bIsAttCapaInPcfg = IMS_TRUE;
+            pVideoProfile->GetCapaNego().SetAttCapaInPcfg(IMS_TRUE);
         }
-        pVideoProfile->objCapaNego.lstPotentialConfig.Append(strPcfg);
+        pVideoProfile->GetCapaNego().GetListPcfg().Append(strPcfg);
     }
 }
 
@@ -1117,16 +1136,17 @@ PRIVATE void MediaProfileFactory::SetMaxProfileFrameRate(OUT VideoProfile* pVide
 
     IMS_SINT32 nMaxFrameRate = -1;
 
-    for (IMS_UINT32 i = 0; i < pVideoProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pVideoProfile->GetPayloadList().GetSize(); i++)
     {
         VideoProfile::Payload* pPayload = pVideoProfile->GetPayloadAt(i);
 
-        if (pPayload == IMS_NULL || pPayload->pFmtp == IMS_NULL)
+        if (pPayload == IMS_NULL || pPayload->GetFmtp() == IMS_NULL)
         {
             continue;
         }
 
-        IMS_SINT32 nFrameRate = static_cast<VideoProfile::VideoFmtp*>(pPayload->pFmtp)->nFrameRate;
+        IMS_SINT32 nFrameRate =
+                static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp())->GetFramerate();
 
         if (nFrameRate > nMaxFrameRate)
         {
@@ -1137,5 +1157,5 @@ PRIVATE void MediaProfileFactory::SetMaxProfileFrameRate(OUT VideoProfile* pVide
                 nMaxFrameRate, nFrameRate, 0);
     }
 
-    pVideoProfile->nFrameRate = nMaxFrameRate;
+    pVideoProfile->SetFrameRate(nMaxFrameRate);
 }

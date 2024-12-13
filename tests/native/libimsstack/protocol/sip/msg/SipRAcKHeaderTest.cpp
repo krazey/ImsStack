@@ -37,7 +37,7 @@ TEST_F(SipRAcKHeaderTest, IsValidHeader)
 
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMethod("REGISTER"));
+    pHeader->SetMethod("REGISTER");
 
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
@@ -50,7 +50,7 @@ TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

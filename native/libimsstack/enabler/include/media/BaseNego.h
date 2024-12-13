@@ -19,10 +19,14 @@
 
 #include "ImsSlot.h"
 #include "ISession.h"
+#include "media/IMedia.h"
 
 #include "MediaBaseProfile.h"
 #include "MediaEnvironment.h"
 #include "config/MediaConfiguration.h"
+
+class SdpGenerator;
+class SdpNegotiator;
 
 class BaseNego : public ImsSlot
 {
@@ -73,8 +77,39 @@ public:
         };
     };
 
-    explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0);
+    explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0,
+            IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
     virtual ~BaseNego();
+
+    /**
+     * @brief Form the SDP with the current profile based on the state
+     *
+     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
+     * list
+     * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
+     * @param pDescriptor The SDP descriptor instance to form the media level SDP
+     * @param eDir The media direction of the SDP
+     * @param bDisable if it is IMS_TRUE, set the port number to zero
+     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
+     * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
+     * it is failed to form
+     */
+    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode);
+
+    /**
+     * @brief Negotiate the SDP and make the negotiate profile based on the nego state
+     *
+     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
+     * list
+     * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
+     * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
+     * @param eDir The media direction of the SDP
+     */
+    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
+            OUT IMS_SINT32& eDir);
 
     /**
      * @brief Get the local ip address
@@ -83,7 +118,7 @@ public:
      */
     virtual const IpAddress& GetLocalAddress()
     {
-        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->objIpAddress : IpAddress::NONE;
+        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->GetIpAddress() : IpAddress::NONE;
     }
 
     /**
@@ -93,7 +128,7 @@ public:
      */
     virtual IMS_UINT32 GetLocalPort()
     {
-        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->nDataPort : 0;
+        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->GetDataPort() : 0;
     };
 
     /**
@@ -123,18 +158,82 @@ public:
      */
     void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
+    /**
+     * @brief Get the negotiated remote ip address
+     *
+     * @return const IpAddress& The ip address
+     */
+    virtual const IpAddress& GetNegotiatedRemoteAddress();
+
+    /**
+     * @brief Get the negotiated remote port number
+     *
+     * @return IMS_UINT32 The port number
+     */
+    virtual IMS_SINT32 GetRemotePort();
+
+    /**
+     * @brief Get the negotiated local profile object
+     */
+    virtual MediaBaseProfile* GetNegotiatedLocalProfile();
+
+    /**
+     * @brief Get the negotiated negotiated profile object
+     */
+    virtual MediaBaseProfile* GetNegotiatedNegoProfile();
+
+    /**
+     * @brief Get the negotiated peer profile object
+     */
+    virtual MediaBaseProfile* GetNegotiatedPeerProfile();
+
+    /**
+     * @brief Get the negotiated media direction
+     */
+    virtual MEDIA_DIRECTION GetNegotiatedDirection();
+
+    /**
+     * @brief Get the negotiated rtp port number
+     */
+    virtual IMS_SINT32 GetNegotiatedRtpPort();
+
+    /**
+     * @brief Get the negotiated bandwidth
+     */
+    virtual IMS_SINT32 GetNegotiatedBandwidth();
+
+    /**
+     * @brief Get the negotiated payload
+     */
+    virtual MediaBaseProfile::BasePayload* GetNegotiatedPayload();
+
 protected:
     virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
-
+    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
     void DestroyListOaModel();
+    void Copy(IN const BaseNego* pNego);
+    virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+    virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable) = 0;
+    virtual IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode) = 0;
+    virtual MEDIA_DIRECTION NegotiateOffer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) = 0;
+    virtual MEDIA_DIRECTION NegotiateAnswer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) = 0;
 
 protected:
+    MEDIA_CONTENT_TYPE m_eType;
     MediaBaseProfile* m_pBaseProfile;
     ImsList<OaModel*> m_listOaModel;
     MediaConfiguration* m_pConfig;
     MediaEnvironment* m_pEnvironment;
+    std::shared_ptr<SdpGenerator> m_pSdpGenerator;
+    std::shared_ptr<SdpNegotiator> m_pSdpNegotiator;
 };
 
 #endif

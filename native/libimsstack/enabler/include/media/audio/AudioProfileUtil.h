@@ -45,6 +45,15 @@ public:
             IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
     static IMS_SINT32 GetModesetList(
             IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
+    /**
+     * @brief Set Anbr on/off from the media session config
+     *
+     * @param pProfile target profile that anbr to be set
+     * @param pEnvironment The media environment for network connection parameter
+     * @param nSlotId The UICC slot id
+     */
+    static void SetAnbr(
+            OUT AudioProfile* pProfile, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId);
 
     static const IMS_UINT32 EVS_BR_CNT = 12;
     static const IMS_UINT32 EVS_BW_CNT = 4;

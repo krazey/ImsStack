@@ -15,10 +15,13 @@
  */
 
 #include "AString.h"
+#include "ByteArray.h"
 #include "GeolocationPidfWriter.h"
 #include "IXmlStreamWriter.h"
 #include "ImsTypeDef.h"
+#include "ServiceMemory.h"
 #include "TextParser.h"
+#include "XmlFactory.h"
 #include <initializer_list>
 #include <vector>
 
@@ -49,6 +52,29 @@ PUBLIC VIRTUAL void PidfLoXml::Write(IN_OUT IXmlStreamWriter& objWriter) const
     Element::Write(objWriter);
 
     objWriter.WriteEndDocument();
+}
+
+PUBLIC ByteArray PidfLoXml::Write() const
+{
+    ByteArray objContent;
+
+    XmlFactory* pXmlFactory = XmlFactory::GetInstance();
+    IXmlStreamWriter* pWriter = pXmlFactory->CreateStreamWriter();
+
+    Write(*pWriter);
+
+    IMS_CHAR* pszXml = pWriter->Flush();
+    if (pszXml != IMS_NULL)
+    {
+        objContent.Attach(reinterpret_cast<IMS_BYTE*>(pszXml), pWriter->GetContentLength());
+        objContent.Detach();
+        IMS_MEM_Free(pszXml);
+    }
+
+    pWriter->Close();
+    pXmlFactory->DestroyStreamWriter(pWriter);
+
+    return objContent;
 }
 
 PUBLIC VIRTUAL void Presence::Write(IN_OUT IXmlStreamWriter& objWriter) const

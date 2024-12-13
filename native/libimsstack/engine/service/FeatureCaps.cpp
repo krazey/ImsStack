@@ -23,7 +23,7 @@
 #include "SipMethod.h"
 #include "util/CallerCapability.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 FeatureCaps::FeatureCaps() :

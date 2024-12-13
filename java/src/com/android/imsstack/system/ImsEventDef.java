@@ -103,22 +103,8 @@ public interface ImsEventDef {
     // Indicates that the network is attached with SMS only option.
     int IMS_LTE_INFO_EXTRA_SMS_ONLY = 0x2;
 
-    // NR network information.
-    int IMS_EVENT_NR_INFO = 0x00000040;
-    /**
-     * Parameter (param1) of {@link #IMS_EVENT_NR_INFO}.
-     */
-    // Indicates that the NR network state is unknown.
-    int IMS_NR_INFO_UNKNOWN = 0;
-    // Indicates that the device has registered to the NR network.
-    int IMS_NR_INFO_REGISTRATION = 1;
-    // Indicates that the device has deregistered from the NR network.
-    int IMS_NR_INFO_DEREGISTRATION = 2;
-    // Indicates that the device has registered to the NR network for emergency only.
-    int IMS_NR_INFO_EMERGENCY_REGISTRATION = 3;
-
     // Voice over PS indicator.
-    int IMS_EVENT_IMS_VOICE_OVER_PS_STATE = 0x00000080;
+    int IMS_EVENT_IMS_VOICE_OVER_PS_STATE = 0x00000040;
     /**
      * Parameter (param1) of {@link #IMS_EVENT_IMS_VOICE_OVER_PS_STATE}.
      */
@@ -127,32 +113,8 @@ public interface ImsEventDef {
     // Indicates that the voice over PS indication is enabled.
     int IMS_VOICE_OVER_PS_SUPPORTED = 1;
 
-    // LTE connection establishment state.
-    int IMS_EVENT_LTE_STATE = 0x00000100;
-    /**
-     * Parameter (param1) of {@link #IMS_EVENT_LTE_STATE}.
-     */
-    // Indicates that the LTE connection establishment is failed with RACH reject.
-    // With this reason, the param2 contains the wait time as milli-seconds.
-    int IMS_LTE_RACH_REJECT_WITH_WAITTIME = 11;
-    // Indicates that the LTE connection establishment is failed that RACH should be ignored
-    // during T300 timer.
-    int IMS_LTE_RACH_IGNORE_DURING_T300_3TIMES = 12;
-    // Indicates that the LTE connection establishment is failed with SR reject with EMM9/EMM10.
-    int IMS_LTE_SR_REJECT_WITH_EMM9_EMM10 = 13;
-    // Indicates that the LTE connection establishment is failed with SR reject with EMM17
-    // for 3 times.
-    int IMS_LTE_SR_REJECT_WITH_EMM17_3TIMES = 14;
-    // Indicates that the LTE connection establishment is failed that SR should be ignored
-    // during 5 seconds.
-    int IMS_LTE_SR_IGNORE_DURING_5SEC = 15;
-    // Indicates that the LTE connection establishment is failed with MO DATA barring.
-    int IMS_LTE_BARRING_MO_DATA = 16;
-    // Indicates that the LTE connection establishment is failed with SR reject with EMM.
-    int IMS_LTE_SR_REJECT_WITH_EMM = 17;
-
     // Wi-Fi calling settings.
-    int IMS_EVENT_WFC_SETTING_CHANGED = 0x00000200;
+    int IMS_EVENT_WFC_SETTING_CHANGED = 0x00000080;
     /**
      * Parameter (param1) of {@link #IMS_EVENT_WFC_SETTING_CHANGED}.
      * Wi-Fi calling setting enabled/disabled.
@@ -175,7 +137,7 @@ public interface ImsEventDef {
     int MODE_IMS_PREFERRED = 10;
 
     // VoLTE settings.
-    int IMS_EVENT_VOLTE_SETTING = 0x00000400;
+    int IMS_EVENT_VOLTE_SETTING = 0x00000100;
     /**
      * Parameter (param1) of {@link #IMS_EVENT_VOLTE_SETTING}.
      */
@@ -184,11 +146,8 @@ public interface ImsEventDef {
     // Indicates that the VoLTE setting is enabled.
     int IMS_VOLTE_SETTING_ON = 0x00000001;
 
-    // AC barring state.
-    int IMS_EVENT_AC_BARRING_STATE = 0x00000800;
-
     // IMS registration control event.
-    int IMS_EVENT_REG_CONTROL = 0x00001000;
+    int IMS_EVENT_REG_CONTROL = 0x00000200;
     /**
      * Parameter (param1) of {@link #IMS_EVENT_REG_CONTROL}.
      */
@@ -226,7 +185,7 @@ public interface ImsEventDef {
     int IMS_REG_CONTROL_PCSCF_SAME_CHANGED = 71;
 
     // RTT settings.
-    int IMS_EVENT_RTT_SETTING = 0x00002000;
+    int IMS_EVENT_RTT_SETTING = 0x00000400;
     /**
      * Parameter (param2) of {@link #IMS_EVENT_RTT_SETTING}.
      */

@@ -13,38 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
+#include "ImsMap.h"
 
-#include "ImsCoreProtocol.h"
 #include "ProtocolPermission.h"
-#include "SipProtocol.h"
 
-struct ProtocolBinder
+static ImsMap<AString, Protocol*>* s_pProtocolPermissions = IMS_NULL;
+
+PUBLIC GLOBAL Protocol* ProtocolPermission::Lookup(IN const AString& strName)
 {
-    const IMS_CHAR* pszName;
-    Protocol* pProtocol;
-};
-
-static const ProtocolBinder PROTOCOL_BINDER[] = {
-        {ImsCore::CONNECTION_SCHEME, ImsCoreProtocol::GetInstance()},
-        {Sip::CONNECTION_SCHEME_SIP, SipProtocol::GetInstance()    }
-  //    { Sip::CONNECTION_SCHEME_SIPS, SipProtocol::GetInstance() }
-};
-
-PUBLIC
-Protocol* ProtocolPermission::Lookup(IN const AString& strName)
-{
-    IMS_SINT32 nNumOfBinder = sizeof(PROTOCOL_BINDER) / sizeof(PROTOCOL_BINDER[0]);
-
-    for (IMS_SINT32 i = 0; i < nNumOfBinder; ++i)
+    if (s_pProtocolPermissions != IMS_NULL)
     {
-        const ProtocolBinder* pBinder = &(PROTOCOL_BINDER[i]);
+        IMS_SLONG nIndex = s_pProtocolPermissions->GetIndexOfKey(strName);
 
-        if (strName.EqualsIgnoreCase(pBinder->pszName))
+        if (nIndex >= 0)
         {
-            return pBinder->pProtocol;
+            return s_pProtocolPermissions->GetValueAt(nIndex);
         }
     }
 
     return IMS_NULL;
+}
+
+PUBLIC GLOBAL void ProtocolPermission::RegisterProtocol(
+        IN const AString& strName, IN Protocol* pProtocol)
+{
+    if (s_pProtocolPermissions == IMS_NULL)
+    {
+        s_pProtocolPermissions = new ImsMap<AString, Protocol*>();
+    }
+
+    s_pProtocolPermissions->SetValue(strName, pProtocol);
+}
+
+PUBLIC GLOBAL void ProtocolPermission::UnregisterAllProtocols()
+{
+    if (s_pProtocolPermissions != IMS_NULL)
+    {
+        delete s_pProtocolPermissions;
+        s_pProtocolPermissions = IMS_NULL;
+    }
 }

@@ -100,17 +100,5 @@ public final class FeatureConfig {
         ImsLog.i(slotId, "FeatureConfig=" + sb.toString());
     }
 
-    private static void initUnavailable(int slotId) {
-        ArrayMap<String, Integer> features = new ArrayMap<>();
-
-        features.put(VOLTE, 0);
-        features.put(VT, 0);
-        features.put(VOWIFI, 0);
-        features.put(SMS, 0);
-        features.put(UCE, 0);
-
-        sFeatures.put(slotId, features);
-    }
-
     private FeatureConfig() {}
 }

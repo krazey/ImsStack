@@ -27,7 +27,7 @@
 #include "provider/AosProvider.h"
 #include "connection/AosConnection.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define CNXID m_strTag.GetStr()
 

@@ -28,7 +28,7 @@ class AosKeepAlive : public ISipKeepAliveHelperListener, public ITimerListener
 {
 public:
     explicit AosKeepAlive(IN IMS_SINT32 nSlotId);
-    virtual ~AosKeepAlive();
+    ~AosKeepAlive() override;
 
     virtual void SetListener(IN IAosKeepAliveListener* piListener);
 

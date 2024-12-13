@@ -503,7 +503,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             mSimInfoRecord.setSerialNumber(TestConstants.SIM_SERIAL_NUMBER_2);
             mSimInfoRecord.setImsi(TestConstants.MCC_MNC + TestConstants.PHONE_NUMBER_2);
         }
-        mSimInfoRecord.setOperator(TestConstants.MCC);
+        mSimInfoRecord.setOperator(TestConstants.MCC_MNC);
         mSimInfoRecord.setCountryIso("");
         mSimInfoRecord.setGroupIdLevel1(null);
         mSimInfoRecord.setOperatorName(TestConstants.OPERATOR_ALPHA_LONG);
@@ -563,6 +563,15 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void clearIsimApplication() {
         mSimInfoRecord.setIsimAppType(TelephonyManager.APPTYPE_UNKNOWN);
+        clearIsimRecords();
+    }
+
+    /**
+     * Clears the ISIM records. This includes resetting the ISIM Domain,
+     * ISIM Private User Identity (IMPI), ISIM Public User Identities (IMPU),
+     * and the service table for ISIM to its default value.
+     */
+    public void clearIsimRecords() {
         mSimInfoRecord.setIsimDomain(null);
         mSimInfoRecord.setIsimPrivateUserIdentity(null);
         mSimInfoRecord.setIsimPublicUserIdentities(null);

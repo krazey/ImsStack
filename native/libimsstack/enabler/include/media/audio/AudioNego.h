@@ -17,12 +17,13 @@
 #ifndef AUDIO_NEGO_H_
 #define AUDIO_NEGO_H_
 
-#include "media/IMedia.h"
 #include "BaseNego.h"
-#include "ISession.h"
 #include "MediaDef.h"
 #include "audio/AudioDef.h"
+#include "audio/AudioProfileExtractor.h"
 #include "audio/AudioProfileUtil.h"
+#include "audio/AudioSdpGenerator.h"
+#include "audio/AudioSdpNegotiator.h"
 #include "config/AudioConfiguration.h"
 
 /**
@@ -38,22 +39,6 @@ public:
     virtual ~AudioNego();
 
     /**
-     * @brief Form the SDP with the current profile based on the state
-     *
-     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
-     * list
-     * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
-     * @param pDescriptor The SDP descriptor instance to form the media level SDP
-     * @param eDir The media direction of the SDP
-     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
-     * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
-     * it is failed to form
-     */
-    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-            IN IMS_BOOL bEnforceReofferMode);
-
-    /**
      * @brief Check if audio codec from SDP is supported
      *
      * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
@@ -63,53 +48,6 @@ public:
      */
     virtual IMS_BOOL IsMediaCodecFromSdpSupported(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-
-    /**
-     * @brief Negotiate the SDP and make the negotiate profile based on the nego state
-     *
-     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
-     * list
-     * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
-     * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
-     * @param eDir The media direction of the SDP
-     */
-    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-            OUT IMS_SINT32& eDir);
-
-    /**
-     * @brief Get the negotiated remote ip address
-     *
-     * @return const IpAddress& The ip address
-     */
-    virtual const IpAddress& GetNegotiatedRemoteAddress();
-
-    /**
-     * @brief Get the negotiated remote port number
-     *
-     * @return IMS_UINT32 The port number
-     */
-    virtual IMS_SINT32 GetRemotePort();
-
-    /**
-     * @brief Get the negotiated local profile object
-     */
-    virtual AudioProfile* GetNegotiatedLocalProfile();
-
-    /**
-     * @brief Get the negotiated negotiated profile object
-     */
-    virtual AudioProfile* GetNegotiatedNegoProfile();
-
-    /**
-     * @brief Get the negotiated peer profile object
-     */
-    virtual AudioProfile* GetNegotiatedPeerProfile();
-
-    /**
-     * @brief Get the negotiated audio direction
-     */
-    virtual MEDIA_DIRECTION GetNegotiatedDirection(void);
 
     /**
      * @brief Get the negotiated audio codec
@@ -127,80 +65,37 @@ public:
     virtual IMS_BOOL HasNegotiatedDtmf(void);
 
     /**
-     * @brief Get the port number from the negotiated profile
+     * @brief static cast from MediaConfiguration to AudioConfiguration
      */
-    virtual IMS_SINT32 GetNegotiatedRtpPort(void);
+    AudioConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
 
     /**
-     * @brief Get the negotiated audio bandwidth
+     * @brief static cast from MediaBaseProfile to AudioProfile
      */
-    virtual IMS_SINT32 GetMediaBandwidth(void);
+    AudioProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
+
+    /**
+     * @brief static cast from MediaBaseProfile::BasePayload to AudioProfile::Payload
+     */
+    AudioProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
 
 protected:
-    AudioConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
-    AudioProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
     AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+            IN IMS_BOOL bDisable) override;
+    IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode) override;
+    MEDIA_DIRECTION NegotiateOffer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
+    MEDIA_DIRECTION NegotiateAnswer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    void Copy(IN const AudioNego* pAudioNego);
-    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-            IN MEDIA_DIRECTION eDir);
-    IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
-    IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-            IN IMS_BOOL bEnforceReofferMode);
-    MEDIA_DIRECTION NegotiateOffer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    MEDIA_DIRECTION NegotiateAnswer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
-    IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
-            IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
-    IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::EvsFmtp* pFmtp);
-    IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
-            OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::AmrFmtp* pFmtp);
-    IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
-            OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
-    IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, IN IMS_BOOL bReturnMode,
-            OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
-    IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
-    IMS_SINT32 CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
-            IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            IN IMS_BOOL bReturnMode, OUT IMS_UINT32* nNegoModeSet,
-            OUT IMS_UINT32* nNegoDefaultRtpModeSet);
-    IMS_BOOL CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList,
-            OUT IMS_UINT32* nNegoModeList);
-    IMS_BOOL CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
-            OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
-    IMS_SINT32 FindPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL isOfferReceivedCase);
-    IMS_SINT32 FindMatchedPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL isOfferReceivedCase, IN IMS_BOOL bReturnMode);
-    MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
-            IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
-    IMS_BOOL MakeCapaNegoProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
-    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
-
-    void SetSdpSessionIpAddress(
-            OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);
-    void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
-    void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
+    std::unique_ptr<AudioProfileExtractor> m_pProfileExtractor;
 };
 
 #endif

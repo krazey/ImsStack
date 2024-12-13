@@ -22,6 +22,7 @@
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "SipStatusCode.h"
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -181,14 +182,12 @@ protected:
 
     void InitMediaSession();
     IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
-    void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
 
     IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
 
     void SendIncomingUpdateToUi(IN CallType eCallType);
 
-    IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     static IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage);
@@ -212,10 +211,16 @@ protected:
     static IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason);
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;
+    IMS_BOOL IsRprRequired() const;
 
     IMtcCallContext& m_objContext;
 
 private:
+    inline IMS_BOOL Is18x(IN IMS_SINT32 eStatusCode) const
+    {
+        return SipStatusCode::SC_180 <= eStatusCode && eStatusCode <= SipStatusCode::SC_183;
+    }
+
     const CallStateName m_eStateName;
 };
 

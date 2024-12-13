@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IMessage.h"
+#include "ISipConfig.h"
+#include "ISipConfigV.h"
+#include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
+#include "call/MtcCallManager.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/UpdateErrorHandler.h"
+#include "helper/IMtcAosConnector.h"
+#include "helper/IPassiveTimerHolder.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -50,6 +59,11 @@ CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage)
                 UpdateErrorHandler::GetGlareTimeMillisecond(m_objContext.GetCallInfo().ePeerType));
     }
 
+    if (nStatusCode == SipStatusCode::SC_503)
+    {
+        return Handle503Response(*piMessage);
+    }
+
     return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, nStatusCode);
 }
 
@@ -62,4 +76,71 @@ IMS_BOOL EarlyUpdateErrorHandler::IsTransactionTimeout(IN const IMessage* piMess
     }
 
     return piMessage->GetStatusCode() == SipStatusCode::SC_INVALID;
+}
+
+PRIVATE
+CallReasonInfo EarlyUpdateErrorHandler::Handle503Response(IN const IMessage& objMessage) const
+{
+    if (!m_objContext.GetCallManager().GetCallsByState(IMtcCall::State::ESTABLISHED).IsEmpty())
+    {
+        return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, objMessage.GetStatusCode());
+    }
+
+    IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            &objMessage, ISipHeader::RETRY_AFTER_ANY);
+    IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
+    if (IsRegisterWithNextPcscfAndRedialRequiredFor503(nRetryAfter))
+    {
+        if (RegisterFor503(nRetryAfter))
+        {
+            return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
+        }
+
+        return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR);
+    }
+
+    if (m_objContext.GetService().IsEpsCombinedAttach())
+    {
+        SetTimerForImsCallBlocking(nRetryAfterInMillis);
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+    }
+
+    AString strRetryAfter;
+    strRetryAfter.SetNumber(nRetryAfterInMillis);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfter);
+}
+
+PRIVATE
+IMS_BOOL EarlyUpdateErrorHandler::RegisterFor503(IN IMS_SINT32 nRetryAfter) const
+{
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (pAosConnector)
+    {
+        pAosConnector->RegisterWithNextPcscf(nRetryAfter > 0 ? nRetryAfter : 0);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL EarlyUpdateErrorHandler::IsRegisterWithNextPcscfAndRedialRequiredFor503(
+        IN IMS_SINT32 nRetryAfter) const
+{
+    return nRetryAfter <= 0 ||
+            nRetryAfter * 1000 > Engine::GetConfiguration()
+                                         ->GetSipConfig(m_objContext.GetSlotId())
+                                         ->GetSipConfigV()
+                                         ->GetTimerValue(ISipConfigV::TIMER_F);
+}
+
+PRIVATE
+void EarlyUpdateErrorHandler::SetTimerForImsCallBlocking(IN IMS_SINT32 nRetryAfterInMillis) const
+{
+    if (nRetryAfterInMillis > 0)
+    {
+        m_objContext.GetPassiveTimerHolder().AddTimer(
+                IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nRetryAfterInMillis);
+    }
 }

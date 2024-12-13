@@ -25,10 +25,6 @@
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
 
-#define TXN_OPT_FETCH  0
-#define TXN_OPT_CREATE 1
-#define TXN_OPT_REMOVE 2
-
 extern SIP_BOOL Sip_Cbk_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
         OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
 extern SIP_BOOL Sip_Cbk_ReleaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
@@ -204,6 +200,10 @@ public:
         NON_INV_SER_INVALID_ST
     };
 
+    static constexpr SIP_INT32 OPT_FETCH = 0;
+    static constexpr SIP_INT32 OPT_CREATE = 1;
+    static constexpr SIP_INT32 OPT_REMOVE = 2;
+
 private:
     /* Txn Type */
     SIP_INT32 m_eTxnType;
@@ -285,7 +285,7 @@ public:
         m_nCurrentDuration = nCurDuration;
     }
     inline SIP_VOID SetTimerId(SIP_VOID* pvTimerId) { m_pvTimerId = pvTimerId; }
-    SIP_BOOL SetUserData(ISipUserData* pUserData);
+    SIP_VOID SetUserData(ISipUserData* pUserData);
     /* Increment Txn Count by one*/
     inline SIP_VOID IncrTxnCount() { m_nReTxCount = m_nReTxCount + SIP_ONE; }
 

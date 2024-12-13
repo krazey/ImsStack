@@ -162,14 +162,15 @@ protected:
         delete pEpsFbTrigger;
     }
 
-    MtcExtensionSet* GetTestExtensionSet(IN const AString& strOptionTag)
+    MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag)
     {
         ImsList<IMtcExtension*> objExtensions;
         MockIMtcExtension* pExtension = new MockIMtcExtension();
         ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
         ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
         objExtensions.Append(pExtension);
-        return new MtcExtensionSet(objCallContext, objExtensions);
+        MtcExtensionSet objMtcExtensionSet(objCallContext, objExtensions);
+        return objMtcExtensionSet;
     }
 
     void SetEpsFallbackRequiredByConfig(IN IMS_BOOL bRequired)
@@ -662,9 +663,8 @@ TEST_F(IdleStateTest, HandleIncomingRejectsIfUnsupportedExtensionIsRequired)
     lstRequiredExtensions.Append(strUnsupportedExtension);
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
@@ -687,9 +687,8 @@ TEST_F(IdleStateTest, HandleIncomingRejectsIfOfferlessInviteIsNotSupported)
     lstRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
@@ -715,9 +714,8 @@ TEST_F(IdleStateTest, HandleIncomingReturnsIdleStateIfBlockCheckResultIsPending)
     lstRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
@@ -742,9 +740,8 @@ TEST_F(IdleStateTest, HandleIncomingRejectsIfBlockCheckResultIsBlocked)
     lstRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
@@ -771,9 +768,8 @@ TEST_F(IdleStateTest, HandleIncomingInvokesSendPreIncomingCallReceived)
     lstRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
@@ -800,9 +796,8 @@ TEST_F(IdleStateTest, HandleIncomingInvokesOnCallReceivedForLastComeFirstServedH
     objRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(objRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     ON_CALL(*pConfigurationManager, IsRejectOfferlessInvite).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, GetPreAlertingTimer).WillByDefault(Return(7000));
@@ -830,9 +825,8 @@ TEST_F(IdleStateTest, HandleIncomingDoesNothingForLastComeFirstServedHelperIfNot
     objRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(objRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     ON_CALL(*pConfigurationManager, IsRejectOfferlessInvite).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, GetPreAlertingTimer).WillByDefault(Return(0));
@@ -886,10 +880,10 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSendProvisionalResponseFailed)
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
 
-    const AString strRprTag(MtcExtensionSet::OPTION_TAG_RPR);
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strRprTag)));
-    ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE)).WillByDefault(Return(IMS_FAILURE));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE, IMS_TRUE))
+            .WillByDefault(Return(IMS_FAILURE));
 
     const CallReasonInfo objReasonInfo(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
@@ -910,10 +904,10 @@ TEST_F(IdleStateTest, OnAttachedTransitsIncomingState)
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
 
-    const AString strRprTag(MtcExtensionSet::OPTION_TAG_RPR);
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strRprTag)));
-    ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE, IMS_TRUE))
+            .WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_180));
 
     EXPECT_EQ(CallStateName::INCOMING, pIdleState->OnAttached());
@@ -930,9 +924,8 @@ TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRprNotSupported
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
 
-    const AString strNoRprTag("no100rel");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strNoRprTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("no100rel")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
 
@@ -1027,9 +1020,8 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfUnsupportedExtensionIsRequired)
     lstRequiredExtensions.Append(strUnsupportedExtension);
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
@@ -1053,9 +1045,8 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfSdpOaFailed)
     lstRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     ON_CALL(objMessageUtils, HasSdp(pMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
@@ -1084,9 +1075,8 @@ TEST_F(IdleStateTest, OnUssiAttachedTransitsAlertingState)
     lstRequiredExtensions.Append(AString("supportedExtension"));
     ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
-    const AString strSupportedOptionTag("supportedExtension");
-    ON_CALL(objMtcSession, GetExtensionSet)
-            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
     ON_CALL(objMessageUtils, HasSdp(pMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -386,7 +387,7 @@ public class ProvisioningData {
         int count = parser.getAttributeCount();
         if (count > 0) {
             for (int i = 0; i < count; i++) {
-                String name = parser.getAttributeName(i).trim().toLowerCase();
+                String name = parser.getAttributeName(i).trim().toLowerCase(Locale.US);
                 if (ATTR_VERSION.equals(name)) {
                     String value = parser.getAttributeValue(i);
                     root.updateTypeValue(value);
@@ -418,7 +419,7 @@ public class ProvisioningData {
 
         if (count > 0) {
             for (int i = 0; i < count; i++) {
-                String name = parser.getAttributeName(i).trim().toLowerCase();
+                String name = parser.getAttributeName(i).trim().toLowerCase(Locale.US);
                 if (ATTR_TYPE.equals(name)) {
                     String typeValue = parser.getAttributeValue(i);
                     current = new Characteristic(parent, typeValue);
@@ -430,14 +431,14 @@ public class ProvisioningData {
         while (!(endTag == XmlPullParser.END_TAG
                 && TAG_CHARACTERISTIC.equals(endName))) {
             if (parser.getEventType() == XmlPullParser.START_TAG) {
-                String tag = parser.getName().trim().toLowerCase();
+                String tag = parser.getName().trim().toLowerCase(Locale.US);
                 if (ELEM_PARM.equals(tag)) {
                     count = parser.getAttributeCount();
                     String key = null;
                     String value = null;
                     if (count > 1) {
                         for (int i = 0; i < count; i++) {
-                            String name = parser.getAttributeName(i).trim().toLowerCase();
+                            String name = parser.getAttributeName(i).trim().toLowerCase(Locale.US);
                             if (ATTR_NAME.equals(name)) {
                                 key = parser.getAttributeValue(i);
                             } else if (ATTR_VALUE.equals(name)) {
@@ -454,7 +455,7 @@ public class ProvisioningData {
             }
 
             endTag = parser.next();
-            endName = parser.getName().trim().toLowerCase();
+            endName = parser.getName().trim().toLowerCase(Locale.US);
         }
         parser.require(XmlPullParser.END_TAG, null, "characteristic");
 

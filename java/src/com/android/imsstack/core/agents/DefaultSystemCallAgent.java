@@ -23,7 +23,7 @@ import com.android.imsstack.system.SystemInterface;
 /**
  * An agent class to handle the default system calls.
  */
-public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
+public final class DefaultSystemCallAgent implements DefaultSystemCallInterface {
 
     public DefaultSystemCallAgent() {
         SystemInterface.getInstance().setSystemCallInterface(this);

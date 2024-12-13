@@ -34,18 +34,11 @@ public:
         /// Indicate that there is no reason.
         NONE = 0,
 
-        /// Indicate that service is out-of-service.
-        OUT_OF_SERVICE = 10000,  // SRV_OUT
-                                 /// Indicate that power is down.
-        POWER_OFF,
-        /// Indicate that the current RAT is not supported in IMS services. e.g.) not LTE/NR/WLAN
-        NO_RAT_COVERAGE,  // NO_LTE_COVERAGE
-                          /// Indicate that IMS services are not available based on network feature
-                          /// or something
+        /// Indicate that power is down.
+        POWER_OFF = 10000,
+        /// Indicate that IMS services are not available based on network feature
+        /// or something
         SERVICE_POLICY,
-        /// Indicate that service is blocked temporarily. After IMS call is terminated,
-        /// the initial registration is tried.
-        SERVICE_BLOCKED,
         /// Indicate that data connection is disconnected.
         DATA_DISCONNECTED,
         /// Indicate that registration is terminated with the specific causes.

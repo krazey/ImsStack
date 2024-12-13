@@ -69,7 +69,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
 
     pHeader->SipDelete();
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

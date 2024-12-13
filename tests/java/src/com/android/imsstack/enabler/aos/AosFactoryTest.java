@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.aos;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
@@ -78,13 +77,13 @@ public class AosFactoryTest {
     public void init_creatingServices() {
         assertNull(mAosFactory.getAosRegistration(SLOT0));
         assertNull(mAosFactory.getAosInfo(SLOT0));
-        assertEquals(0, mAosFactory.mAosSettingServices.size());
+        assertNull(mAosFactory.getAosSettingService(SLOT0));
 
         mAosFactory.init(SLOT0);
 
         assertNotNull(mAosFactory.getAosRegistration(SLOT0));
         assertNotNull(mAosFactory.getAosInfo(SLOT0));
-        assertEquals(1, mAosFactory.mAosSettingServices.size());
+        assertNotNull(mAosFactory.getAosSettingService(SLOT0));
     }
 
     @Test
@@ -115,9 +114,9 @@ public class AosFactoryTest {
 
     @Test
     public void cleanup_removingServices() {
-        mAosFactory.mAosServices.put(SLOT0, mMockAosService);
-        mAosFactory.mAosSettingServices.put(SLOT0, mMockAosSettingService);
-        mAosFactory.mAosDebugs.put(SLOT0, mMockAosDebug);
+        AosFactory.getInstance().replaceService(SLOT0, mMockAosService);
+        AosFactory.getInstance().replaceSettingService(SLOT0, mMockAosSettingService);
+        AosFactory.getInstance().replaceDebug(SLOT0, mMockAosDebug);
 
         mAosFactory.cleanup(SLOT0);
 
@@ -125,14 +124,13 @@ public class AosFactoryTest {
         verify(mMockAosSettingService).cleanup();
         assertNull(mAosFactory.getAosRegistration(SLOT0));
         assertNull(mAosFactory.getAosInfo(SLOT0));
-        assertEquals(0, mAosFactory.mAosSettingServices.size());
+        assertNull(mAosFactory.getAosSettingService(SLOT0));
         assertNull(mAosFactory.getAosDebug(SLOT0));
     }
 
     @Test
     public void start_startService() {
-        mAosFactory.mAosServices.put(SLOT0, mMockAosService);
-
+        mAosFactory.replaceService(SLOT0, mMockAosService);
         mAosFactory.start(SLOT0);
 
         verify(mMockAosService).start();
@@ -140,8 +138,7 @@ public class AosFactoryTest {
 
     @Test
     public void stop_stopService() {
-        mAosFactory.mAosServices.put(SLOT0, mMockAosService);
-
+        mAosFactory.replaceService(SLOT0, mMockAosService);
         mAosFactory.stop(SLOT0);
 
         verify(mMockAosService).stop();

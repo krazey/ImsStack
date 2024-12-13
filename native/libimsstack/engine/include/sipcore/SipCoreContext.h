@@ -13,52 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SERVICE_CONTEXT_H_
-#define SERVICE_CONTEXT_H_
+#ifndef SIP_CORE_CONTEXT_H_
+#define SIP_CORE_CONTEXT_H_
 
-#include "IServiceContext.h"
+#include "ImsTypeDef.h"
 
-class ServiceContextPrivate;
+#include "ISipCoreContext.h"
+
+class SipProtocol;
 
 /**
- * A context class for providing the singleton instances for service layer.
+ * A context class for providing the singleton instances for sipcore layer.
  */
-class ServiceContext : public IServiceContext
+class SipCoreContext : public ISipCoreContext
 {
 private:
-    ServiceContext();
-    virtual ~ServiceContext();
+    SipCoreContext();
+    virtual ~SipCoreContext();
 
 public:
-    ServiceContext(IN const ServiceContext&) = delete;
-    ServiceContext& operator=(IN const ServiceContext&) = delete;
+    SipCoreContext(IN const SipCoreContext&) = delete;
+    SipCoreContext& operator=(IN const SipCoreContext&) = delete;
 
 public:
-    IConfiguration* GetConfiguration() const override;
-    IServiceManager* GetServiceManager() const override;
+    Protocol* GetSipProtocol() const override;
 
     /**
-     * @brief Sets the specific service context to return their own instances.
+     * @brief Sets the specific SIP core context to return their own instances.
      */
-    inline void SetServiceContext(IN IServiceContext* piServiceContext)
+    inline void SetSipCoreContext(IN ISipCoreContext* piSipCoreContext)
     {
-        m_piServiceContext = piServiceContext;
+        m_piSipCoreContext = piSipCoreContext;
     }
 
     /**
      * @brief Returns a singleton instance of this class.
      */
-    static ServiceContext* GetInstance();
+    static SipCoreContext* GetInstance();
     /**
      * @brief Destroys a singleton instance of this class.
      */
     static void DestroyInstance();
 
 private:
-    ServiceContextPrivate* m_pPrivate;
-    IServiceContext* m_piServiceContext;
+    SipProtocol* m_pSipProtocol;
+    ISipCoreContext* m_piSipCoreContext;
 
-    static ServiceContext* s_pContext;
+    static SipCoreContext* s_pContext;
 };
 
 #endif

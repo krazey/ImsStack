@@ -21,6 +21,8 @@
 #include <list>
 #include <algorithm>
 
+inline constexpr IMS_UINTP UNDEFINED_NEGO_ID = 0;
+
 /** Service Type */
 typedef enum
 {

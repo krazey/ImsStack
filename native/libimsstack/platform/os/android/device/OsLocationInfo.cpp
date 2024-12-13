@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "device/OsLocationInfo.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC GLOBAL const IMS_CHAR OsLocationInfo::COUNTRY_ISO_UNKNOWN[] = "ZZ";
 

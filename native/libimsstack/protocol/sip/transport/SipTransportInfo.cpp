@@ -60,12 +60,6 @@ SipTransportParameter* SipTransportInfo::GetMsgSentTranspParam()
     return m_pActualDestParam;
 }
 
-SIP_BOOL SipTransportInfo::SetMsgSentTranspParam(SipTransportParameter* pTranspParam)
-{
-    m_pActualDestParam = pTranspParam;
-    return SIP_TRUE;
-}
-
 SipTransportBuffer* SipTransportInfo::GetTranspSipBuffer()
 {
     return m_pSentBuffer;

@@ -36,8 +36,6 @@ public:
     void OnPassiveTimerExpired(IN IPassiveTimerHolder::Type eType) override;
 
 private:
-    IMS_BOOL IsEpsOnlyAttach() const;
-
     IMtcCallContext& m_objContext;
     IMtcBlockRuleCheckListener* m_piMtcBlockRuleCheckListener;
 };

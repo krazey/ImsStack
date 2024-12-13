@@ -28,7 +28,7 @@
 #include "network/OsSocketMsg.h"
 #include "network/OsSocketService.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 #define IMS_FD_SET ImsFdSet::TYPE_SELECT
 

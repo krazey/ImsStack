@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "msg/SipPVisitedNetworkIdHeader.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -68,7 +69,7 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipPVisitedNetworkIdHeader*>(
             SipPVisitedNetworkIdHeader::GetNewObj(SipHeaderBase::P_VISITED_NETWORK_ID, nullptr));
     const SIP_CHAR* pValue = "other.net";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     EXPECT_STREQ(pValue, pHeader->GetValue());
     EXPECT_EQ(0, pHeader->GetParamCount());
     pHeader->SipDelete();
@@ -78,7 +79,7 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
 
     /* Decode valid value */
     pValue = "Visited network number 1;level=7";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     EXPECT_STREQ("Visited network number 1", pHeader->GetValue());
     EXPECT_EQ(1, pHeader->GetParamCount());
     SipNameValue* pNameVal = pHeader->GetParam(0);
@@ -92,7 +93,7 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
 
     /* Decode valid value within quotes */
     pValue = "\"Visited network number 1\"";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     EXPECT_STREQ("Visited network number 1", pHeader->GetValue());
     EXPECT_EQ(0, pHeader->GetParamCount());
     pHeader->SipDelete();

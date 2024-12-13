@@ -24,7 +24,7 @@
 #include "SipDebug.h"
 #include "base/SubscriberTracker.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PRIVATE
 SubscriberTracker::SubscriberTracker() :

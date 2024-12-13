@@ -80,8 +80,8 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
         return SIP_FALSE;
     }
 
-    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
-                reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
+    if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), SipTxn::OPT_CREATE,
+                SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
     {
         pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
@@ -130,7 +130,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
 
         if (pINVTxnKey != SIP_NULL)
         {
-            if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pINVTxnKey), TXN_OPT_FETCH,
+            if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pINVTxnKey), SipTxn::OPT_FETCH,
                         SIP_NULL, reinterpret_cast<SIP_VOID**>(&pInvSerTxn)) == SIP_TRUE)
             {
                 if (pInvSerTxn != SIP_NULL)

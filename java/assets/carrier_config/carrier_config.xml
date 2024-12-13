@@ -73,7 +73,6 @@
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_int" value="0"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_in_roaming_int" value="0"/>
     <int name="imsvoice.policy_of_local_numbers_int" value="2"/>
-    <boolean name="imsvoice.default_eps_bearer_context_usage_restriction_on_cellular_bool" value="true"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="1"/>
     <int-array name="imsvoice.short_call_code_int_array" num="0">
@@ -318,6 +317,7 @@
     <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
     <boolean name="ecall_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
     <boolean name="ereg_on_random_pcscf_bool" value="false"/>
+    <boolean name="ereg_set_tcp_only_in_roaming_bool" value="false"/>
     <boolean name="hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
     <boolean name="ims_dereg_on_3g_network_bool" value="false"/>
@@ -335,6 +335,7 @@
     <boolean name="sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
     <boolean name="sms_over_ims_available_without_voice_capa_bool" value="true"/>
     <boolean name="support_contact_user_info_bool" value="true"/>
+    <boolean name="support_erereg_on_ipcan_change_bool" value="false"/>
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="support_verstat_for_reg_bool" value="false"/>
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
@@ -423,6 +424,13 @@
         <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="0">
         </int-array>
     </pbundle>
+    <!-- KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE -->
+    <pbundle name="pcscf_recovery_conditions_bundle">
+        <int name="pcscf_recovery_max_cnt_int" value="3"/>
+        <int name="pcscf_recovery_wait_time_sec_int" value="20"/>
+        <int name="pcscf_recovery_base_time_sec_int" value="20"/>
+        <int name="pcscf_recovery_max_time_sec_int" value="1800"/>
+    </pbundle>
     <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
     <pbundle name="reg_err_code_with_ra_time_bundle">
         <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="false"/>
@@ -466,6 +474,7 @@
     <boolean name="conference_refer_to_uri_source_paid_bool" value="true"/>
     <int name="conference_drop_refer_to_uri_source_type_int" value="0"/>
     <boolean name="enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
+    <int name="media_type_for_offerless_invite_int" value="0"/>
     <int name="media_type_for_offerless_reinvite_int" value="0"/>
     <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
     <int name="oip_type_for_unavailable_int" value="1"/>
@@ -506,7 +515,7 @@
     <boolean name="support_video_call_only_in_vops_off_status_bool" value="false"/>
     <boolean name="block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
     <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
     <int name="wifi_emergency_18x_timer_millis_int" value="0"/>
     <boolean name="support_canid_info_bool" value="false"/>
@@ -544,7 +553,6 @@
     </int-array>
     <boolean name="call_mergeable_on_conference_on_hold_bool" value="false"/>
     <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="false"/>
-    <int name="policy_for_alert_not_using_precondition_mechanism_int" value="0"/>
     <boolean name="emergency_call_current_location_discovery_supported_bool" value="true"/>
     <boolean name="check_ui_condition_for_incoming_resume_bool" value="false"/>
 
@@ -639,12 +647,12 @@
     <boolean name="sms_report_generic_error_when_retry_after_not_possible_bool" value="false"/>
 
     <!-- Ut/Xcap -->
-    <int-array name="imsss.ut_sm_cause_temporary_block_int_array" num="0">
+    <int-array name="ut_sm_cause_temporary_block_int_array" num="0">
     </int-array>
-    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="0">
+    <int-array name="ut_http_temporary_error_code_int_array" num="0">
     </int-array>
-    <int name="imsss.ut_max_retry_count_int" value="0"/>
-    <int name="imsss.ut_temporary_block_timer_min_int" value="1"/>
+    <int name="ut_max_retry_count_int" value="0"/>
+    <int name="ut_temporary_block_timer_min_int" value="1"/>
     <boolean name="ut_support_cf_action_erasure_bool" value="true"/>
     <boolean name="ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
     <int name="ut_oir_network_default_operation_int" value="0"/>
@@ -659,7 +667,7 @@
     <boolean name="ut_omit_namespace_ss_bool" value="false"/>
     <boolean name="ut_omit_namespace_cp_bool" value="false"/>
     <boolean name="ut_insert_new_rule_bool" value="false"/>
-    <int name="ut_uri_type_for_cf_target_number" value="0"/>
+    <int name="ut_uri_type_for_cf_target_number_int" value="0"/>
 
     <!-- Uce -->
     <boolean name="add_video_tag_contact_header_in_publish_bool" value="false"/>

@@ -15,60 +15,51 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
-#include "ServiceThread.h"
 
 #include "FakeRegistration.h"
-#include "RegInfoManager.h"
-#include "RegKey.h"
 #include "Registration.h"
 #include "RegistrationManager.h"
 #include "SipConfigProxy.h"
 
-class RegistrationManagerPrivate
-{
-public:
-    RegistrationManagerPrivate();
-    ~RegistrationManagerPrivate();
-
-    RegistrationManagerPrivate(IN const RegistrationManagerPrivate&) = delete;
-    RegistrationManagerPrivate& operator=(IN const RegistrationManagerPrivate&) = delete;
-
-public:
-    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
-            IN IMS_BOOL bFake, IN const AString& strSubsId, IN SipProfile* pProfile);
-    void DestroyRegistration(IN IRegistration* piReg, IN IMS_BOOL bByForce = IMS_FALSE);
-    IRegistration* GetRegistration(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId) const;
-
-private:
-    void ClearRegistrations();
-
-private:
-    IMutex* m_piLock;
-    // List of registration (bindings): < AOR (IMPU) + Contacts >
-    ImsMap<RegKey, IRegistration*> m_objRegistrations;
-};
-
 PUBLIC
-RegistrationManagerPrivate::RegistrationManagerPrivate()
+RegistrationManager::RegistrationManager() :
+        m_piLock(IMS_NULL),
+        m_objRegistrations(ImsMap<RegKey, IRegistration*>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
-    RegInfoManager::GetInstance()->Initialize();
 }
 
 PUBLIC
-RegistrationManagerPrivate::~RegistrationManagerPrivate()
+RegistrationManager::~RegistrationManager()
 {
     ClearRegistrations();
-
     MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
-PUBLIC
-IMS_BOOL RegistrationManagerPrivate::CreateRegistration(IN IMS_UINT32 nFlowId,
-        IN const SipAddress& objAor, IN IMS_BOOL bFake, IN const AString& strSubsId,
-        IN SipProfile* pProfile)
+PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nSlotId,
+        IN IMS_UINT32 nFlowId, IN const AString& strAor, IN IMS_BOOL bFake /*= IMS_FALSE*/,
+        IN const AString& strSubsId /*= AString::ConstNull()*/,
+        IN SipProfile* pProfile /*= IMS_NULL*/)
 {
-    // Fine a proper registration flow, but in this time, it uses a default registration flow.
+    SipAddress objAor;
+
+    if (!objAor.Create(strAor))
+    {
+        return IMS_FALSE;
+    }
+
+    return CreateRegistration(nSlotId, nFlowId, objAor, bFake, strSubsId, pProfile);
+}
+
+PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nSlotId,
+        IN IMS_UINT32 nFlowId, IN const SipAddress& objAor, IN IMS_BOOL bFake /*= IMS_FALSE*/,
+        IN const AString& strSubsId /*= AString::ConstNull()*/,
+        IN SipProfile* pProfile /*= IMS_NULL*/)
+{
+    if (GetRegistration(nSlotId, nFlowId) != IMS_NULL)
+    {
+        return IMS_TRUE;
+    }
 
     if (bFake)
     {
@@ -79,8 +70,6 @@ IMS_BOOL RegistrationManagerPrivate::CreateRegistration(IN IMS_UINT32 nFlowId,
             return IMS_FALSE;
         }
 
-        // MULTI_SUBS
-        // MULTI_REG_SIP_PROFILE
         if (!pFakeReg->Create(nFlowId, objAor, strSubsId, pProfile))
         {
             delete pFakeReg;
@@ -104,8 +93,6 @@ IMS_BOOL RegistrationManagerPrivate::CreateRegistration(IN IMS_UINT32 nFlowId,
             return IMS_FALSE;
         }
 
-        // MULTI_SUBS
-        // MULTI_REG_SIP_PROFILE
         if (!pReg->Create(nFlowId, objAor, strSubsId, pProfile))
         {
             delete pReg;
@@ -124,8 +111,7 @@ IMS_BOOL RegistrationManagerPrivate::CreateRegistration(IN IMS_UINT32 nFlowId,
     return IMS_TRUE;
 }
 
-PUBLIC
-void RegistrationManagerPrivate::DestroyRegistration(
+PUBLIC VIRTUAL void RegistrationManager::DestroyRegistration(
         IN IRegistration* piReg, IN IMS_BOOL bByForce /*= IMS_FALSE*/)
 {
     if (piReg == IMS_NULL)
@@ -153,7 +139,7 @@ void RegistrationManagerPrivate::DestroyRegistration(
         {
             if (piReg->IsNetworkInterworkingRequired())
             {
-                Registration* pReg = DYNAMIC_CAST(Registration*, piReg);
+                Registration* pReg = static_cast<Registration*>(piReg);
 
                 if (bByForce || pReg->GetAllContactsEx().IsEmpty())
                 {
@@ -167,7 +153,7 @@ void RegistrationManagerPrivate::DestroyRegistration(
             }
             else
             {
-                FakeRegistration* pFakeReg = DYNAMIC_CAST(FakeRegistration*, piReg);
+                FakeRegistration* pFakeReg = static_cast<FakeRegistration*>(piReg);
 
                 if (bByForce || pFakeReg->GetAllContactsEx().IsEmpty())
                 {
@@ -183,8 +169,13 @@ void RegistrationManagerPrivate::DestroyRegistration(
     }
 }
 
-PUBLIC
-IRegistration* RegistrationManagerPrivate::GetRegistration(
+PUBLIC VIRTUAL IMS_BOOL RegistrationManager::IsRegSubscriptionSupported(
+        IN IMS_SINT32 nSlotId, IN SipProfile* pProfile /*= IMS_NULL*/) const
+{
+    return SipConfigProxy::IsRegSubscriptionConfigured(nSlotId, pProfile);
+}
+
+PUBLIC VIRTUAL IRegistration* RegistrationManager::GetRegistration(
         IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId) const
 {
     LockGuard objLock(m_piLock);
@@ -205,7 +196,7 @@ IRegistration* RegistrationManagerPrivate::GetRegistration(
 }
 
 PRIVATE
-void RegistrationManagerPrivate::ClearRegistrations()
+void RegistrationManager::ClearRegistrations()
 {
     LockGuard objLock(m_piLock);
 
@@ -222,7 +213,7 @@ void RegistrationManagerPrivate::ClearRegistrations()
         {
             if (piReg->IsNetworkInterworkingRequired())
             {
-                Registration* pReg = DYNAMIC_CAST(Registration*, piReg);
+                Registration* pReg = static_cast<Registration*>(piReg);
 
                 if (pReg != IMS_NULL)
                 {
@@ -231,7 +222,7 @@ void RegistrationManagerPrivate::ClearRegistrations()
             }
             else
             {
-                FakeRegistration* pFakeReg = DYNAMIC_CAST(FakeRegistration*, piReg);
+                FakeRegistration* pFakeReg = static_cast<FakeRegistration*>(piReg);
 
                 if (pFakeReg != IMS_NULL)
                 {
@@ -242,82 +233,4 @@ void RegistrationManagerPrivate::ClearRegistrations()
     }
 
     m_objRegistrations.Clear();
-}
-
-PRIVATE
-RegistrationManager::RegistrationManager() :
-        m_pRegMngrPrivate(new RegistrationManagerPrivate())
-{
-}
-
-PUBLIC
-RegistrationManager::~RegistrationManager()
-{
-    if (m_pRegMngrPrivate != IMS_NULL)
-    {
-        delete m_pRegMngrPrivate;
-    }
-}
-
-PUBLIC
-IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_UINT32 nFlowId, IN const AString& strAor,
-        IN IMS_BOOL bFake /*= IMS_FALSE*/, IN const AString& strSubsId /*= AString::ConstNull()*/,
-        IN SipProfile* pProfile /*= IMS_NULL*/)
-{
-    SipAddress objAor;
-
-    if (!objAor.Create(strAor))
-    {
-        return IMS_FALSE;
-    }
-
-    return CreateRegistration(nFlowId, objAor, bFake, strSubsId, pProfile);
-}
-
-PUBLIC
-IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
-        IN IMS_BOOL bFake /*= IMS_FALSE*/, IN const AString& strSubsId /*= AString::ConstNull()*/,
-        IN SipProfile* pProfile /*= IMS_NULL*/)
-{
-    IMS_SINT32 nSlotId = ThreadService::GetCurrentSlotId();
-
-    if (m_pRegMngrPrivate->GetRegistration(nSlotId, nFlowId) != IMS_NULL)
-    {
-        return IMS_TRUE;
-    }
-
-    return m_pRegMngrPrivate->CreateRegistration(nFlowId, objAor, bFake, strSubsId, pProfile);
-}
-
-PUBLIC
-void RegistrationManager::DestroyRegistration(
-        IN IRegistration* piReg, IN IMS_BOOL bByForce /*= IMS_FALSE*/)
-{
-    m_pRegMngrPrivate->DestroyRegistration(piReg, bByForce);
-}
-
-PUBLIC
-IMS_BOOL RegistrationManager::IsRegSubscriptionSupported(
-        IN IMS_SINT32 nSlotId, IN SipProfile* pProfile /*= IMS_NULL*/) const
-{
-    return SipConfigProxy::IsRegSubscriptionConfigured(nSlotId, pProfile);
-}
-
-PUBLIC
-IRegistration* RegistrationManager::GetRegistration(
-        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId) const
-{
-    return m_pRegMngrPrivate->GetRegistration(nSlotId, nFlowId);
-}
-
-PUBLIC GLOBAL RegistrationManager* RegistrationManager::GetInstance()
-{
-    static RegistrationManager* s_pRegMngr = IMS_NULL;
-
-    if (s_pRegMngr == IMS_NULL)
-    {
-        s_pRegMngr = new RegistrationManager();
-    }
-
-    return s_pRegMngr;
 }

@@ -47,16 +47,22 @@ private:
     virtual ~SipNameValue();
 };
 
-class SipParameterList : public SipRefBase
+class SipParameters
 {
-private:
+public:
+    /* Enumeration for parameter type */
+    enum
+    {
+        GENERIC,
+        FEATURE,
+        INVALID = SIP_INVALID
+    };
+
     SipVector<SipNameValue*> m_objPrmList;
 
-public:
-    SipParameterList();
-    explicit SipParameterList(SIP_INT32 eHdrType);
-    SipParameterList(const SipParameterList& objPrmList);
-    ~SipParameterList();
+    SipParameters();
+    SipParameters(const SipParameters& objParameters);
+    ~SipParameters();
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
             IParameterComponent* pParameterComponent = SIP_NULL) const;
@@ -67,7 +73,7 @@ public:
     SIP_BOOL Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR cDelimiter,
             IParameterComponent* pParameterComponent = SIP_NULL);
 
-    SIP_BOOL Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue = SIP_NULL);
+    SIP_BOOL AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue = SIP_NULL);
 
     SIP_VOID RemoveParam(const SIP_CHAR* pszName);
 
@@ -80,58 +86,13 @@ public:
     SIP_BOOL SetParam(
             const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos = SIP_ZERO);
 
-    inline SipVector<SipNameValue*>& GetList() { return m_objPrmList; }
+    inline SIP_UINT32 GetParamCount() const { return m_objPrmList.GetSize(); }
 
-    inline SIP_UINT32 GetCount() const { return m_objPrmList.GetSize(); }
+    SIP_CHAR* GetParamValue(const SIP_CHAR* pszName, SIP_UINT32 nPos = SIP_ZERO) const;
 
     inline SipNameValue* GetParam(SIP_UINT32 nPos) const
     {
         return (nPos < m_objPrmList.GetSize()) ? m_objPrmList.GetAt(nPos) : SIP_NULL;
-    }
-
-    SIP_CHAR* GetParamValue(const SIP_CHAR* pszName, SIP_UINT32 nPos = SIP_ZERO) const;
-};
-
-class SipParameters
-{
-public:
-    /*Enumeration for Prm Type*/
-    enum
-    {
-        GENERIC,
-        FEATURE,
-        INVALID = SIP_INVALID
-    };
-
-    SipParameterList m_objParameterList;
-
-    SipParameters();
-    SipParameters(const SipParameters& objParameters);
-    ~SipParameters();
-
-    SIP_BOOL AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue = SIP_NULL);
-
-    SIP_VOID RemoveParam(const SIP_CHAR* pszName);
-
-    SIP_BOOL IsParamPresent(const SIP_CHAR* pszName) const;
-
-    inline SIP_INT32 GetParamIndex(const SIP_CHAR* pszName) const
-    {
-        return m_objParameterList.GetParamIndex(pszName);
-    }
-
-    SIP_BOOL SetParam(
-            const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos = SIP_ZERO);
-
-    inline SIP_UINT32 GetParamCount() const { return m_objParameterList.GetCount(); }
-
-    SipParameterList& GetParameterList();
-
-    SIP_CHAR* GetParamValue(const SIP_CHAR* pszName, SIP_UINT32 nPos = SIP_ZERO) const;
-
-    inline SipNameValue* GetParam(SIP_UINT32 nPos) const
-    {
-        return m_objParameterList.GetParam(nPos);
     }
 };
 

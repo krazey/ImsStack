@@ -343,7 +343,6 @@ TEST(AosLogTest, EventToString)
             "IMS_EVENT_IMS_VOICE_OVER_PS_STATE");
     EXPECT_STREQ(
             AosProvider::GetLog()->EventToString(IMS_EVENT_CSCALL_STATE), "IMS_EVENT_CSCALL_STATE");
-    EXPECT_STREQ(AosProvider::GetLog()->EventToString(IMS_EVENT_LTE_STATE), "IMS_EVENT_LTE_STATE");
     EXPECT_STREQ(AosProvider::GetLog()->EventToString(IMS_EVENT_WFC_SETTING_CHANGED),
             "IMS_EVENT_WFC_SETTING_CHANGED");
     EXPECT_STREQ(AosProvider::GetLog()->EventToString(IMS_EVENT_VOLTE_SETTING),

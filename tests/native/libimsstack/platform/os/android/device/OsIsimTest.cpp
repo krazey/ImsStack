@@ -177,10 +177,10 @@ TEST_F(OsIsimTest, DispatchServiceMessage_IsimAuth)
     m_pIsim->DispatchServiceMessage(wParam, lParam);
 
     EXPECT_CALL(m_objMockDigestAkaListener, DigestAka_OnResponse(_, _, _)).Times(0);
-    m_pIsim->DispatchServiceMessage(0, IMS_NULL);
+    m_pIsim->DispatchServiceMessage(0, 0);
 
     EXPECT_CALL(m_objMockThread, PostMessageI(_, _, _)).Times(0);
-    m_piSystemListener->System_NotifyEvent(7843, 0, IMS_NULL);
+    m_piSystemListener->System_NotifyEvent(7843, 0, 0);
 }
 
 TEST_F(OsIsimTest, DispatchServiceMessage_IsimAuthFailure)

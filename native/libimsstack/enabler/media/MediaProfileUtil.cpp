@@ -63,10 +63,10 @@ PUBLIC GLOBAL void MediaProfileUtil::SetRtcpRsRr(
 {
     if (pProfile != IMS_NULL && pConfig != IMS_NULL)
     {
-        pProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
-        pProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
+        pProfile->SetBandwidthRr(pConfig->GetRrBandwidthBps());
+        pProfile->SetBandwidthRs(pConfig->GetRsBandwidthBps());
 
-        IMS_TRACE_D(
-                "SetRtcpRsRr(), RS[%d], RR[%d]", pProfile->nBandwidthRs, pProfile->nBandwidthRr, 0);
+        IMS_TRACE_D("SetRtcpRsRr(), RS[%d], RR[%d]", pProfile->GetBandwidthRs(),
+                pProfile->GetBandwidthRr(), 0);
     }
 }

@@ -247,7 +247,7 @@ public class SscAuthAgent implements ISscAuthAgent {
             String unqRealm = realm.replace("\"", "");
             String varA1 = unqUsername + ":" + unqRealm + ":" + passwd;
 
-            if ("MD5-sees".equals(algorithm)) {
+            if ("MD5-sess".equalsIgnoreCase(algorithm)) {
                 varA1 = ImsUtils.calculateMessageDigest("MD5", varA1);
                 String unqNonce = nonce.replace("\"", "");
                 String unqCnonce = cnonce.replace("\"", "");
@@ -275,7 +275,7 @@ public class SscAuthAgent implements ISscAuthAgent {
 
             String varA2 = method + ":" + digestUri;
 
-            if ("auth-int".equals(qop)) {
+            if ("auth-int".equalsIgnoreCase(qop)) {
                 if (entity == null) {
                     ImsLog.w("entity is null ");
                     entity = "";

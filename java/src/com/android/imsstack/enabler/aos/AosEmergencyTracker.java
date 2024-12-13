@@ -15,6 +15,9 @@
  */
 package com.android.imsstack.enabler.aos;
 
+import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeState;
+import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeType;
+
 /**
  * This class provides information for emergency.
  */
@@ -29,11 +32,12 @@ public class AosEmergencyTracker {
     /**
      * Updating callback mode information for emergency.
      *
-     * @param type {@code type} is callback mode entry {@link EmcCallbackType}
-     * @param state {@code state} is type of {@link EmcCallbackMode}.
+     * @param type {@code type} is callback mode entry {@link EmcCallbackModeType}
+     * @param state {@code state} is type of {@link EmcCallbackModeState}.
      * @param duration is the number of seconds remaining in the emergency callback mode.
      */
-    public void updateEmcCallbackMode(int type, int state, long duration) {
+    public void updateEmcCallbackMode(EmcCallbackModeType type, EmcCallbackModeState state,
+            long duration) {
         IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
         if (aosInfo != null) {
             aosInfo.notifyEmcCallbackModeChanged(type, state, duration);

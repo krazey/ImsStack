@@ -96,14 +96,14 @@ SIP_BOOL SipUnknownHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUnknownHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
+SIP_VOID SipUnknownHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
 {
-    return SetCharVar(pszHdrName, m_pszHdrName);
+    SetCharVar(pszHdrName, m_pszHdrName);
 }
 
-SIP_BOOL SipUnknownHeader::SetHeaderValue(const SIP_CHAR* pszHdrValue)
+SIP_VOID SipUnknownHeader::SetHeaderValue(const SIP_CHAR* pszHdrValue)
 {
-    return SetCharVar(pszHdrValue, m_pszHdrValue);
+    SetCharVar(pszHdrValue, m_pszHdrValue);
 }
 
 SipHeaderBase* SipUnknownHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)

@@ -18,7 +18,7 @@
 #include "NativeCommands.h"
 #include "NativeCommandsHandler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Main")
+__IMS_TRACE_TAG_BASE__;
 
 PUBLIC
 void NativeCommandsHandler::OnCommand(

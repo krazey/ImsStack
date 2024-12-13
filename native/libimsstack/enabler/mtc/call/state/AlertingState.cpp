@@ -43,7 +43,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 AlertingState::AlertingState(IN IMtcCallContext& objContext) :
-        MtcCallState(CallStateName::ALERTING, objContext)
+        MtcCallState(CallStateName::ALERTING, objContext),
+        m_pUdpKeepAliveSender(IMS_NULL)
 {
 }
 
@@ -53,23 +54,25 @@ PUBLIC VIRTUAL void AlertingState::OnEnter()
 {
     if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
     {
-        m_objContext.GetUdpKeepAliveSender().Start();
+        m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
+        m_pUdpKeepAliveSender->Start();
     }
 }
 
 PUBLIC VIRTUAL void AlertingState::OnExit()
 {
     m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
-    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (m_pUdpKeepAliveSender != IMS_NULL)
     {
-        m_objContext.GetUdpKeepAliveSender().Stop();
+        m_pUdpKeepAliveSender->Stop();
     }
 }
 
 PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
     IMS_TRACE_D("HandleUserAlert", 0, 0, 0);
-    if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE) == IMS_FAILURE)
+    if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE, IsRprRequired()) ==
+            IMS_FAILURE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
@@ -90,7 +93,14 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
-    if (bCallTypeChanged)
+    if (m_pUdpKeepAliveSender != IMS_NULL)
+    {
+        m_pUdpKeepAliveSender->Stop();
+    }
+
+    if (bCallTypeChanged &&
+            m_objContext.GetMediaManager().GetNegotiationState(&pSession->GetISession()) ==
+                    NegotiationState::STATE_NEGOTIATED)
     {
         if (SendEarlyUpdate(UpdateType::NORMAL, pSession) == IMS_FAILURE)
         {
@@ -104,7 +114,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
-    RunMedia(GetISession(), IMS_NULL);
+    m_objContext.GetMediaManager().Run(GetISession(), IMS_NULL, IMS_FALSE);
 
     return GetStateName();
 }
@@ -187,7 +197,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
         return CallStateName::TERMINATING;
     }
 
-    RunMedia(piSession, piMessage);
+    m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_FALSE);
     m_objContext.GetUiNotifier().SendStarted();
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
 

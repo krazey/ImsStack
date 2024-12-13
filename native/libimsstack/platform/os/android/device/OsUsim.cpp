@@ -26,7 +26,7 @@
 #include "device/OsUsim.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 // USIM system interface parameters for event notification
 class OsUsimParam

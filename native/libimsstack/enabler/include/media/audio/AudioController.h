@@ -238,7 +238,7 @@ public:
             IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
 
 private:
-    AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);
+    AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = UNDEFINED_NEGO_ID);
     void ClearSession();
 
     ImsList<AudioMediaSession*> m_listAudioSession;

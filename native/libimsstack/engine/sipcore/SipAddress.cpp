@@ -29,7 +29,7 @@
 #include "SipStack.h"
 #include "SipUtils.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_MADDR[] = "maddr";
 PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_METHOD[] = "method";

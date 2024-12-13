@@ -32,7 +32,7 @@
 #include "provider/AosLog.h"
 #include "app/AosEApplication.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPID m_strTag.GetStr()
 
@@ -137,6 +137,13 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
 
         case MSG_RETRY_COUNT_INCREASE:
             ProcessRegRetryCount(objMsg);
+            break;
+
+        case MSG_IPCAN_CHANGED:
+            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
+            {
+                ProcessIpcanChanged(objMsg);
+            }
             break;
 
         default:
@@ -296,6 +303,13 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
     {
         case AosConnector::REASON_IP_CHANGED:
             ProcessCleanAll(AosReason::IP_CHANGED);
+            break;
+
+        case AosConnector::REASON_IPCAN_CAT_CHANGED:
+            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
+            {
+                PostMessage(MSG_IPCAN_CHANGED, 0, 0);
+            }
             break;
 
         default:

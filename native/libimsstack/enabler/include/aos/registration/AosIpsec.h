@@ -83,7 +83,7 @@ class AosIpsec : public IIpSecPolicyListener
 {
 public:
     AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId);
-    virtual ~AosIpsec();
+    ~AosIpsec() override;
 
 private:
     AosIpsec(IN const AosIpsec& objRhs);

@@ -38,10 +38,9 @@
 
 class IRegContact;
 class IRegistration;
+class IRegistrationManager;
 class IRegParameter;
 class IRegSubscription;
-
-class RegistrationManager;
 
 class IAosAppContext;
 class IAosHandle;
@@ -68,7 +67,7 @@ class AosRegistration :
 {
 public:
     AosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
-    virtual ~AosRegistration();
+    ~AosRegistration() override;
 
     /// IAosRegistration
     void Start() override;
@@ -88,6 +87,7 @@ public:
             IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) override;
     IMS_UINT32 GetState() override;
     AosRegistrationType GetRegType() override;
+    IMS_SINT32 GetImsRegType() override;
 
     IMS_BOOL IsRegistered() override;
     IMS_BOOL IsRefreshing() override;
@@ -130,6 +130,7 @@ protected:
     IMS_BOOL IsCallStateRequired() const;
     IMS_BOOL IsRadioWaiting() const;
     IMS_BOOL IsTrafficPriorityBlocked() const;
+    IMS_BOOL IsReregFailureReportOnIpcanChangeRequired() const;
 
     IMS_SINT32 GetRegExpires();
 
@@ -141,6 +142,9 @@ protected:
     AosReasonCode GetReasonCode() const;
     IMS_SINT32 GetRegIpcanCategory() const;
     IMS_UINT32 GetRegFeatures();
+
+    void NotifyFailureWithImsReason(IN IMS_SINT32 nReason, IN IMS_SINT32 nStatusCode);
+    void NotifyDeregistered();
 
     /// Set Detail State
     void UpdateDetailState(IN IMS_UINT32 nState);
@@ -207,6 +211,7 @@ protected:
     virtual void SetStaticIpQos();
     virtual void SetDynamicIpQos();
     virtual void SetActiveBindingsRestorationUsage();
+    virtual void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired);
 
     virtual void UpdateTransactionStarted();
     virtual void UpdateIpsecSupported(IN IMS_BOOL bSupported, IN IMS_UINT32 nReason = 0);
@@ -389,7 +394,7 @@ private:
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
     void UpdateCallingNumberVerification();
-    void NotifyDeregistered();
+    void NotifyTechnologyChangeFailed();
 
     IMS_BOOL IsErrorCodeExisted(
             IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
@@ -477,7 +482,7 @@ protected:
     IMS_SINT32 m_nSlotId;
 
     /// engine member
-    RegistrationManager* m_pRegManager;
+    IRegistrationManager* m_piRegManager;
     IRegistration* m_piRegistration;
     IRegContact* m_piRegContact;
     IRegParameter* m_piRegParameter;
@@ -506,6 +511,9 @@ protected:
     IMS_BOOL m_bIsAppReady;
     IMS_BOOL m_bIsRadioWaiting;
     IMS_BOOL m_bIsTrafficPriorityBlocked;
+
+    // reg update failure after handover
+    IMS_BOOL m_bIsReregFailureReportOnIpcanChangeRequired;
 
     /// reg info
     AString m_strRegId;              /// aos_reg_0

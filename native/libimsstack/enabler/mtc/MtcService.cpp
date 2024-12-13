@@ -29,12 +29,14 @@
 #include "IJniMtcServiceThread.h"
 #include "IMtcCallController.h"
 #include "IMtcContext.h"
+#include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipRoutingRejectNotifier.h"
 #include "ImsAos.h"
 #include "ImsAosParameter.h"
 #include "ImsCore.h"
+#include "ImsEventDef.h"
 #include "ImsServiceConfig.h"
 #include "JniEnablerConnector.h"
 #include "MtcRoutingRejectHandler.h"
@@ -147,6 +149,20 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsNr() const
     return PhoneInfoService::GetPhoneInfoService()
                    ->GetNetworkWatcher(m_objContext.GetSlotId())
                    ->GetNetRadioTechType() == NW_REPORT_RADIO_NR;
+}
+
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsEpsCombinedAttach() const
+{
+    if (IsWlanIpCanType())
+    {
+        return IMS_FALSE;
+    }
+
+    return PhoneInfoService::GetPhoneInfoService()
+                    ->GetNetworkWatcher(m_objContext.GetSlotId())
+                    ->GetNetRadioTechType() == NW_REPORT_RADIO_LTE &&
+            m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_LTE_INFO) ==
+            IMS_LTE_INFO_COMBINED_ATTACHED;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const

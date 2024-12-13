@@ -48,7 +48,7 @@ class AosCondition :
 public:
     explicit AosCondition(IN IAosAppContext* piAppContext);
     inline explicit AosCondition(){};
-    virtual ~AosCondition();
+    ~AosCondition() override;
 
     virtual void Start();
     virtual void Stop();
@@ -73,7 +73,8 @@ public:
         REQUEST_STOP,
         REQUEST_DESTROY,
         REQUEST_RECOVER,
-        REQUEST_PDN_DISCONNECT
+        REQUEST_PDN_DISCONNECT,
+        REQUEST_RESET_CONNECTION_RECOVERY
     };
     // eReason : AosReason
 
@@ -154,7 +155,7 @@ protected:
 
     void AddHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
     void RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
-    IMS_BOOL IsHolded(IN IMS_UINT32 nEvent) const;
+    IMS_BOOL IsHeld(IN IMS_UINT32 nEvent) const;
     IMS_BOOL IsRefreshStarted() const;
 
     void SetInitialBlockReason();
@@ -172,9 +173,9 @@ protected:
     void ProcessTtyEvent(IN IMS_BOOL bIsOn);
     void ProcessImsVopsEvent(IN IMS_UINT32 nState);
     void ProcessLocationInfo(IN LocationInfo eState);
-    void ProcessLteInfoEvent(IN IMS_UINT32 nState);
+    void ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
 
-    void ResetImsDisableReason();
+    void ClearRegistrationAndDataFailureBlocks();
 
     SERVICE_TYPE GetServiceType();
     void SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx = -1,
@@ -184,6 +185,9 @@ protected:
 
     void UpdateRegistrationMode() const;
     IMS_BOOL IsServiceBlockedByMenu() const;
+    IMS_BOOL IsRttSupported() const;
+    IMS_BOOL IsCombinedAttached() const;
+    IMS_BOOL IsDeregRequiredForTty() const;
 
 protected:
     IAosAppContext* m_piAppContext;

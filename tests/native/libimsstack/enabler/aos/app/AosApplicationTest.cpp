@@ -141,7 +141,8 @@ enum
     REQUEST_STOP,
     REQUEST_DESTROY,
     REQUEST_RECOVER,
-    REQUEST_PDN_DISCONNECT
+    REQUEST_PDN_DISCONNECT,
+    REQUEST_RESET_CONNECTION_RECOVERY
 };
 
 enum
@@ -276,7 +277,8 @@ enum
     using Base::Timer_TimerExpired;                      \
     using Base::RegistrationControl_ControlRegistration; \
     using Base::ServicePhone_LocationInfoChanged;        \
-    using Base::ProcessRegTerminating;
+    using Base::ProcessRegTerminating;                   \
+    using Base::ProcessScscfRestoration;
 
 class TestAosApplication : public AosApplication
 {
@@ -1574,7 +1576,8 @@ TEST_F(AosApplicationTest, ProcessMessage)
     m_pAosApplication->SetNetTrackerListener();
     objMessage.nMSG = MSG_PLMN_BLOCK_WITH_TIMEOUT;
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
             .Times(2);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
     m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
@@ -1590,7 +1593,7 @@ TEST_F(AosApplicationTest, ProcessMessage)
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrMaxCount())
             .WillOnce(Return(0))
             .WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _));
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
     m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
@@ -1636,7 +1639,8 @@ TEST_F(AosApplicationTest, RegRetryCount)
             .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED));
 
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
             .Times(1);
 
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
@@ -2117,6 +2121,36 @@ TEST_F(AosApplicationTest, SetBlockPermanentDataFailedWhenStateConnectingConnect
     // THEN: The GIVEN condition should be met.
 }
 
+TEST_F(AosApplicationTest, SetBlockInvalidPcscfWhenStateReadyConnection)
+{
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_INVALID_CONNECTION, IMS_TRUE));
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    ImsMessage objMessage(
+            MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_PCSCF_DISCOVERY_FAILED);
+    m_pAosApplication->StateReady_Connection(objMessage);
+}
+
+TEST_F(AosApplicationTest, ResetBlockInvalidPcscfWhenNetStatusChanged)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_INVALID);
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_CELLULAR_RAT_BLOCK))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_INVALID_CONNECTION))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_INVALID_CONNECTION, _));
+
+    m_pAosApplication->NetTracker_StatusChanged();
+}
+
 TEST_F(AosApplicationTest, Process)
 {
     // TEST_F : ProcessDisconnectingState
@@ -2308,7 +2342,8 @@ TEST_F(AosApplicationTest, Process)
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
             .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::NR, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::NR,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
             .Times(AnyNumber());
     EXPECT_CALL(m_objMockIAosConnection, GetState())
             .WillOnce(Return(IAosConnection::STATE_IDLE))
@@ -2339,7 +2374,8 @@ TEST_F(AosApplicationTest, Process)
     // TEST_F : ProcessPlmnBlock
     // IsPlmnBlockWithTimeoutOnVoiceCallUnavailable false
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
             .Times(0);
     EXPECT_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
             .WillOnce(Return(IMS_FALSE))
@@ -2364,7 +2400,8 @@ TEST_F(AosApplicationTest, Process)
     m_pAosApplication->ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
     // est timer running
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::NR, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::NR,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
             .Times(1);
     m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
     m_pAosApplication->ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
@@ -2382,13 +2419,6 @@ TEST_F(AosApplicationTest, Process)
     // pending feature on, not held - recover reason PCSCF_CHANGE
     m_pAosApplication->SetImsCall(IMS_FALSE);
     m_pAosApplication->SetRecoverReason(AoSRegRecoveryType::PCSCF_CHANGE);
-    EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
-    EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
-    EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
-    // pending feature on, not held - recover reason SCSCF_RESTORATION_REQUIRED
-    m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
-    m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
-    m_pAosApplication->SetRecoverReason(AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED);
     EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
@@ -2514,7 +2544,7 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenTypeR
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK));
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, AosReasonCode::RAT_BLOCK)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, AosReasonCode::RAT_BLOCK)).Times(1);
 
     // WHEN
     m_pAosApplication->ProcessPdnDisconnect();
@@ -2534,7 +2564,8 @@ TEST_F(AosApplicationTest,
                     Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
 
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
             .Times(1);
 
     // WHEN
@@ -2573,7 +2604,8 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenLteIn
                     Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
 
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
 
     // WHEN
     m_pAosApplication->ProcessPdnDisconnect();
@@ -2589,7 +2621,7 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNo
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED));
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
 
     // WHEN
     m_pAosApplication->ProcessPdnDisconnect();
@@ -2915,8 +2947,42 @@ TEST_F(AosApplicationTest, Callback)
     m_pAosApplication->ServicePhone_LocationInfoChanged(LocationInfo::AVAILABLE);
 }
 
+TEST_F(AosApplicationTest, InvokeResetReadyRecoveryWhenReceiveResetPcscfRecoveryRequest)
+{
+    EXPECT_CALL(m_objMockAosConnector, ResetReadyRecovery());
+
+    m_pAosApplication->Condition_RequestCommand(REQUEST_RESET_CONNECTION_RECOVERY, AosReason::NONE);
+}
+
 TEST_F(AosApplicationTest, UpdateConnectedServices)
 {
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillOnce(Return(IMS_TRUE));
     m_pAosApplication->UpdateConnectedServices(IMS_FALSE);
+}
+
+TEST_F(AosApplicationTest, ShouldSetOffReasonWithInitialRegRequestedInScscfRestoration)
+{
+    // GIVEN
+    m_pAosApplication->SetOffReason(AosReason::NONE);
+    ImsMessage objMessage(MSG_SCSCF_RESTORATION, 0, 30);
+
+    // WHEN
+    m_pAosApplication->ProcessScscfRestoration(objMessage);
+
+    // THEN
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::INITIAL_REG_REQUESTED);
+}
+
+TEST_F(AosApplicationTest, ShouldRequestScscfRestorationToRegistration)
+{
+    // GIVEN
+    m_pAosApplication->SetOffReason(AosReason::NONE);
+    ImsMessage objMessage(MSG_SCSCF_RESTORATION, 0, 30);
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION, 30));
+
+    // WHEN
+    m_pAosApplication->ProcessScscfRestoration(objMessage);
+
+    // THEN: The GIVEN condition should be met.
 }

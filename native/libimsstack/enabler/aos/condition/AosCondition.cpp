@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "IImsPrivateProperty.h"
+#include "INetworkWatcher.h"
 #include "ServiceEvent.h"
 #include "ServiceUtil.h"
 #include "ServiceTrace.h"
@@ -36,7 +37,7 @@
 #include "condition/AosServiceAvailableWifi.h"
 #include "condition/AosCondition.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPPROFILE m_strTag.GetStr()
 
@@ -348,7 +349,7 @@ PROTECTED VIRTUAL void AosCondition::Event_NotifyEvent(
             break;
 
         case IMS_EVENT_LTE_INFO:
-            ProcessLteInfoEvent(nWParam);
+            ProcessLteInfoEvent(nWParam, nLParam);
             break;
 
         default:
@@ -382,6 +383,12 @@ PROTECTED VIRTUAL void AosCondition::CallTracker_StateChanged(
 PROTECTED VIRTUAL void AosCondition::NetTracker_StatusChanged()
 {
     A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged()", 0, 0, 0);
+
+    if (m_bIsTtyOn)
+    {
+        ProcessTtyEvent(IMS_TRUE);
+    }
+
     SendConditionEvent(AosServiceAvailable::EVENT_NETWORK, 0, SERVICE_CELLULAR);
 }
 
@@ -396,8 +403,6 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
         UpdateRegistrationMode();
     }
 
-    const IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
-
     switch (nState)
     {
         case IAosSubscriber::REFRESH_STARTED:
@@ -406,33 +411,19 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
             m_bIsRefreshStarted = IMS_TRUE;
             break;
 
-        case IAosSubscriber::REFRESH_COMPLETED:
+        case IAosSubscriber::REFRESH_COMPLETED:  // FALL-THROUGH
+        case IAosSubscriber::READY:
             ProcessBlockReason(IMS_FALSE, BLOCK_SUBSCRIBER_INCOMPLETED);
-            ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
-
             if (IsRefreshStarted())
             {
                 m_bIsRefreshStarted = IMS_FALSE;
-                ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+                ClearRegistrationAndDataFailureBlocks();
             }
             break;
-
-        case IAosSubscriber::REFRESH_FAILED:
-            ProcessBlockReason(IMS_TRUE, BLOCK_SUBSCRIBER_INCOMPLETED);
-            break;
-
+        case IAosSubscriber::REFRESH_FAILED:  // FALL-THROUGH
+        case IAosSubscriber::NOT_READY:       // FALL-THROUGH
         default:
-            if (piSubscriber != IMS_NULL)
-            {
-                ProcessBlockReason((piSubscriber->IsReady()) ? IMS_FALSE : IMS_TRUE,
-                        BLOCK_SUBSCRIBER_INCOMPLETED);
-
-                if (IsRefreshStarted() && piSubscriber->IsReady())
-                {
-                    m_bIsRefreshStarted = IMS_FALSE;
-                    ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
-                }
-            }
+            ProcessBlockReason(IMS_TRUE, BLOCK_SUBSCRIBER_INCOMPLETED);
             break;
     }
 }
@@ -548,11 +539,6 @@ PROTECTED VIRTUAL void AosCondition::ServiceSetting_ServiceChanged(
 
 PROTECTED VIRTUAL void AosCondition::ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn)
 {
-    if (!GET_N_CONFIG(m_nSlotId)->IsTtySupported())
-    {
-        return;
-    }
-
     ProcessTtyEvent(bIsOn);
 }
 
@@ -649,7 +635,7 @@ void AosCondition::RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset /*
 }
 
 PROTECTED
-IMS_BOOL AosCondition::IsHolded(IN IMS_UINT32 nEvent) const
+IMS_BOOL AosCondition::IsHeld(IN IMS_UINT32 nEvent) const
 {
     return (m_nHoldEvents & nEvent);
 }
@@ -721,8 +707,7 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
     {
         RequestCommand(REQUEST_STOP, AosReason::AIRPLANE_MODE);
 
-        ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
-        ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+        ClearRegistrationAndDataFailureBlocks();
     }
 }
 
@@ -737,14 +722,15 @@ PROTECTED
 void AosCondition::ProcessRoamingEvent(IN IMS_UINT32 nPsState, IN IMS_UINT32 nCsState)
 {
     IMS_UINT32 nState = (nPsState == IMS_ROAMING_STATE_OFF) ? nCsState : IMS_ROAMING_STATE_ON;
-    if (IsHolded(HOLD_EVENT_ROAMING))
+    if (IsHeld(HOLD_EVENT_ROAMING))
     {
         return;
     }
 
     SendConditionEvent(AosServiceAvailable::EVENT_ROAMING, nState, SERVICE_CELLULAR);
 
-    ResetImsDisableReason();
+    ClearRegistrationAndDataFailureBlocks();
+    ProcessBlockReason(IMS_FALSE, BLOCK_IMS_DISABLED);
 }
 
 PROTECTED
@@ -763,19 +749,23 @@ void AosCondition::ProcessPhoneNumberAvailableEvent(
     }
 
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_INVALID_CONNECTION);
+
+    RequestCommand(REQUEST_RESET_CONNECTION_RECOVERY);
 }
 
 PROTECTED
 void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 /*nServiceBits*/)
 {
-    if (IsHolded(HOLD_EVENT_IMS_SERVICE))
+    if (IsHeld(HOLD_EVENT_IMS_SERVICE))
     {
         return;
     }
 
     if (eState == ServiceSetting::ON)
     {
-        ResetImsDisableReason();
+        ProcessBlockReason(IMS_FALSE, BLOCK_IMS_DISABLED);
+        ClearRegistrationAndDataFailureBlocks();
     }
     else if (eState == ServiceSetting::OFF)
     {
@@ -790,16 +780,12 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     A_IMS_TRACE_I(APPPROFILE, "ProcessTtyEvent(), bIsOn(%s)", _TRACE_B_(bIsOn), 0, 0);
     m_bIsTtyOn = bIsOn;
 
-    if (!GET_N_CONFIG(m_nSlotId)->IsRttSupported() || m_bIsCombinedAttached)
+    if (m_bIsTtyOn && IsDeregRequiredForTty())
     {
-        if (m_bIsTtyOn)
-        {
-            RequestCommand(REQUEST_STOP, AosReason::TTYMODEON);
-            ProcessBlockReason(IMS_TRUE, BLOCK_TTY_MODE_ON);
-        }
+        RequestCommand(REQUEST_STOP, AosReason::TTYMODEON);
+        ProcessBlockReason(IMS_TRUE, BLOCK_TTY_MODE_ON);
     }
-
-    if (!m_bIsTtyOn)
+    else
     {
         ProcessBlockReason(IMS_FALSE, BLOCK_TTY_MODE_ON);
     }
@@ -826,20 +812,25 @@ void AosCondition::ProcessLocationInfo(IN LocationInfo eState)
 }
 
 PROTECTED
-void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState)
+void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx)
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessLteInfoEvent(), nState(%d)", nState, 0, 0);
+    A_IMS_TRACE_I(
+            APPPROFILE, "ProcessLteInfoEvent(), nState(%d), nStateEx(%d)", nState, nStateEx, 0);
 
-    m_bIsCombinedAttached = (nState == IMS_LTE_INFO_COMBINED_ATTACHED);
+    m_bIsCombinedAttached =
+            (nState == IMS_LTE_INFO_COMBINED_ATTACHED && nStateEx == IMS_LTE_INFO_EXTRA_NONE);
 }
 
 PROTECTED
-void AosCondition::ResetImsDisableReason()
+void AosCondition::ClearRegistrationAndDataFailureBlocks()
 {
-    A_IMS_TRACE_D(APPPROFILE, "ResetImsDisableReason", 0, 0, 0);
-    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
-    ProcessBlockReason(IMS_FALSE, BLOCK_IMS_DISABLED);
+    A_IMS_TRACE_D(APPPROFILE, "ClearRegistrationAndDataFailureBlocks", 0, 0, 0);
     ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_INVALID_CONNECTION);
+
+    RequestCommand(REQUEST_RESET_CONNECTION_RECOVERY);
 }
 
 PROTECTED
@@ -935,4 +926,39 @@ IMS_BOOL AosCondition::IsServiceBlockedByMenu() const
 
     A_IMS_TRACE_D(APPPROFILE, "IsServiceBlockedByMenu : %s", strTestImsDeregister.GetStr(), 0, 0);
     return strTestImsDeregister.Equals("YES");
+}
+
+PROTECTED
+IMS_BOOL AosCondition::IsRttSupported() const
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsRttSupported())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_pAvailableCellular != IMS_NULL && m_pAvailableCellular->IsRoaming())
+    {
+        return GET_N_CONFIG(m_nSlotId)->IsRttSupportedWhileRoaming();
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL AosCondition::IsCombinedAttached() const
+{
+    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
+    if (piNetTracker != IMS_NULL && piNetTracker->GetNetworkType() != NW_REPORT_RADIO_LTE)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_bIsCombinedAttached;
+}
+
+PROTECTED
+IMS_BOOL AosCondition::IsDeregRequiredForTty() const
+{
+    return !IsRttSupported() && !GET_N_CONFIG(m_nSlotId)->IsVolteTtySupported() &&
+            IsCombinedAttached();
 }

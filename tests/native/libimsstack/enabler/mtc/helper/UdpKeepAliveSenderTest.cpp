@@ -22,15 +22,19 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/UdpKeepAliveSender.h"
+#include "sipcore/MockISipKeepAliveHelper.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-LOCAL AString LOCAL_IP_ADDRESS = "192.168.0.1";
-LOCAL IMS_UINT32 LOCAL_PORT_NUMBER = 12345;
-LOCAL AString PCSCF_IP_ADDRESS = "192.168.0.10";
-LOCAL IMS_UINT32 PCSCF_PORT_NUMBER = 5060;
+LOCAL const IMS_SINT32 ANY_KEEP_ALIVE_INTERVAL = 2000;
+
+LOCAL const AString LOCAL_IP_ADDRESS = "192.168.0.1";
+LOCAL const IMS_UINT32 LOCAL_PORT_NUMBER = 12345;
+LOCAL const AString PCSCF_IP_ADDRESS = "192.168.0.10";
+LOCAL const IMS_UINT32 PCSCF_PORT_NUMBER = 5060;
 
 class UdpKeepAliveSenderTest : public ::testing::Test
 {
@@ -51,6 +55,7 @@ public:
     TestTimerService objTimerService;
     MockITimer& objTimer;
     MockIMtcAosConnector objAosConnector;
+    MockISipKeepAliveHelper objKeepAliveHelper;
 
     UdpKeepAliveSender* pSender;
 
@@ -64,16 +69,21 @@ protected:
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
+                .WillByDefault(Return(ANY_KEEP_ALIVE_INTERVAL));
 
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
         ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(LOCAL_IP_ADDRESS));
         ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(LOCAL_PORT_NUMBER));
         ON_CALL(objAosConnector, GetPcscfAddress).WillByDefault(Return(PCSCF_IP_ADDRESS));
         ON_CALL(objAosConnector, GetPcscfPort).WillByDefault(Return(PCSCF_PORT_NUMBER));
+
+        pSender = new UdpKeepAliveSender(&objKeepAliveHelper, objContext);
     }
 
     virtual void TearDown() override
     {
+        delete pSender;
         delete pConfigurationProxy;
 
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
@@ -83,70 +93,59 @@ protected:
 TEST_F(UdpKeepAliveSenderTest, IsRequiredChecksConfiguration)
 {
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(-1));
-    EXPECT_FALSE(pSender->IsRequired(*pConfigurationProxy));
+    EXPECT_FALSE(UdpKeepAliveSender::IsRequired(*pConfigurationProxy));
 
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(0));
-    EXPECT_FALSE(pSender->IsRequired(*pConfigurationProxy));
+    EXPECT_FALSE(UdpKeepAliveSender::IsRequired(*pConfigurationProxy));
 
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
-    EXPECT_TRUE(pSender->IsRequired(*pConfigurationProxy));
+    EXPECT_TRUE(UdpKeepAliveSender::IsRequired(*pConfigurationProxy));
 }
 
-TEST_F(UdpKeepAliveSenderTest, ConstructorStartsAndDestructorStopsKeepAlive)
+TEST_F(UdpKeepAliveSenderTest, StartStartsKeepAlive)
 {
-    // TODO: add MockISipKeepAliveHelper expectation.
-    IMS_SINT32 nAnyKeepAliveTime = 2000;
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
-            .WillByDefault(Return(nAnyKeepAliveTime));
+    EXPECT_CALL(objKeepAliveHelper, SendPacket(_));
+    EXPECT_CALL(objTimer, SetTimer(ANY_KEEP_ALIVE_INTERVAL, pSender));
 
-    pSender = new UdpKeepAliveSender(objContext);
-    EXPECT_CALL(objTimer, SetTimer(nAnyKeepAliveTime, pSender));
+    pSender->Start();
+}
+
+TEST_F(UdpKeepAliveSenderTest, DestructorStopsKeepAlive)
+{
     pSender->Start();
 
     EXPECT_CALL(objTimer, KillTimer);
+
     delete pSender;
+    pSender = IMS_NULL;
 }
 
 TEST_F(UdpKeepAliveSenderTest, StopStopsKeepAlive)
 {
-    IMS_SINT32 nAnyKeepAliveTime = 2000;
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
-            .WillByDefault(Return(nAnyKeepAliveTime));
-
-    pSender = new UdpKeepAliveSender(objContext);
     pSender->Start();
 
     EXPECT_CALL(objTimer, KillTimer);
-    pSender->Stop();
 
-    delete pSender;
+    pSender->Stop();
 }
 
-TEST_F(UdpKeepAliveSenderTest, TimerExpiredInvokesReStart)
+TEST_F(UdpKeepAliveSenderTest, TimerExpiredRestartsKeepAlive)
 {
-    // TODO: add MockISipKeepAliveHelper expectation.
-
-    pSender = new UdpKeepAliveSender(objContext);
     pSender->Start();
 
-    // 1st is by timerexpired, 2nd is by the destructor.
-    EXPECT_CALL(objTimer, KillTimer).Times(2);
+    EXPECT_CALL(objKeepAliveHelper, SendPacket(_));
 
     pSender->Timer_TimerExpired(&objTimer);
-
-    delete pSender;
 }
 
 TEST_F(UdpKeepAliveSenderTest, InvalidTimerExpiredInvokesNothing)
 {
-    pSender = new UdpKeepAliveSender(objContext);
     pSender->Start();
 
-    EXPECT_CALL(objTimer, KillTimer).Times(0);
-    pSender->Timer_TimerExpired(IMS_NULL);
-    MockITimer* pDiffTimer = new MockITimer();
-    pSender->Timer_TimerExpired(pDiffTimer);
+    EXPECT_CALL(objTimer, KillTimer).Times(1);  // Once by destructor
+    EXPECT_CALL(objKeepAliveHelper, SendPacket(_)).Times(0);
 
-    EXPECT_CALL(objTimer, KillTimer).Times(1);
-    delete pSender;
+    pSender->Timer_TimerExpired(IMS_NULL);
+    MockITimer* pNotRelatedTimer = new MockITimer();
+    pSender->Timer_TimerExpired(pNotRelatedTimer);
 }

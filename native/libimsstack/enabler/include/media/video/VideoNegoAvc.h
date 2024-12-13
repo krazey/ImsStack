@@ -26,9 +26,9 @@ class VideoNegoAvc
 public:
     static AString SetSdpFmtpFromAvcFmtp(IN VideoProfile::AvcFmtp* avcFmtp);
     static void AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator);
-    static void AddProfileLevelIdToFmtp(IN VideoProfile::AvcFmtp* profile, OUT AString& strFmtp);
-    static void AddPacketizationModeToFmtp(IN VideoProfile::AvcFmtp* profile, OUT AString& strFmtp);
+    static void AddProfileLevelIdToFmtp(IN VideoProfile::AvcFmtp* avcFmtp, OUT AString& strFmtp);
+    static void AddPacketizationModeToFmtp(IN VideoProfile::AvcFmtp* avcFmtp, OUT AString& strFmtp);
     static void AddSpropParameterSetsToFmtp(
-            IN VideoProfile::AvcFmtp* profile, OUT AString& strFmtp);
+            IN VideoProfile::AvcFmtp* avcFmtp, OUT AString& strFmtp);
 };
 #endif

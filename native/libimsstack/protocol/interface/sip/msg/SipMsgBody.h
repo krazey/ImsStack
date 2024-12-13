@@ -82,12 +82,12 @@ public:
     inline SIP_UINT32 GetMsgBodyCount() const { return m_objBodyList.GetSize(); }
 
     SIP_BOOL GetEncodedMessageBody(
-            SIP_CHAR** ppMsgBufer, SIP_UINT32& nMsgLen, SIP_CHAR* pszBoundary = SIP_NULL);
+            SIP_CHAR** ppMsgBufer, SIP_UINT32& nMsgLen, const SIP_CHAR* pszBoundary = SIP_NULL);
 
-    SIP_BOOL EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBoundary);
+    SIP_BOOL EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR* pszBoundary);
 
     SIP_BOOL DecodeMIMEBody(
-            const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary);
+            const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR* pszBoundary);
     /*Function for decoding of headers*/
     SIP_BOOL DecodeSingleBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 

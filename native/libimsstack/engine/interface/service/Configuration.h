@@ -41,7 +41,7 @@ public:
             IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId) override;
     const IMediaConfig* GetMediaConfig(IN IMS_SINT32 nSlotId) const override;
     const ISipConfig* GetSipConfig(IN IMS_SINT32 nSlotId) const override;
-    const ISubscriberConfig* GetSubscriberConfig(
+    ISubscriberConfig* GetSubscriberConfig(
             IN IMS_SINT32 nSlotId, IN const AString& strId = AString::ConstNull()) const override;
     IMS_UINT32 GetTraceModule(IN IMS_SINT32 nSlotId) const override;
     IMS_UINT32 GetTraceOption(IN IMS_SINT32 nSlotId) const override;

@@ -240,7 +240,8 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
                 ? serviceRecord.getRegistrationTracker() : null;
 
         if ((regTracker != null) && (regTracker.isCallRegistered())) {
-            int regNetworkType = regTracker.getRegisteredNetworkType();
+            IAosRegistrationListener.NetworkType regNetworkType =
+                    regTracker.getRegisteredNetworkType();
 
             if (regNetworkType == IAosRegistrationListener.NetworkType.IWLAN) {
                 isNetworkTypeWifi = true;

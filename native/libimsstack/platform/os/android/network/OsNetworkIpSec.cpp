@@ -21,7 +21,7 @@
 #include "network/OsIpSecSp.h"
 #include "network/OsNetworkIpSec.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsNetworkIpSec::OsNetworkIpSec(IN IMS_SINT32 nSlotId) :

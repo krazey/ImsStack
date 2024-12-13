@@ -30,6 +30,7 @@
 #include "IConfiguration.h"
 #include "IRegContact.h"
 #include "IRegistration.h"
+#include "IRegistrationManager.h"
 #include "IRegParameter.h"
 #include "IRegSubscription.h"
 #include "ISipHeader.h"
@@ -37,7 +38,6 @@
 #include "ISipTransportHelper.h"
 #include "Credential.h"
 #include "Engine.h"
-#include "RegistrationManager.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipFactory.h"
@@ -74,7 +74,7 @@
 #include "registration/AosIpsecHelper.h"
 #include "registration/AosSubscription.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define REGID m_strTag.GetStr()
 
@@ -84,7 +84,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_piContext(piAppContext),
         m_piListener(IMS_NULL),
         m_nSlotId(piAppContext->GetSlotId()),
-        m_pRegManager(IMS_NULL),
+        m_piRegManager(IMS_NULL),
         m_piRegistration(IMS_NULL),
         m_piRegContact(IMS_NULL),
         m_piRegParameter(IMS_NULL),
@@ -101,6 +101,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_bIsAppReady(IMS_FALSE),
         m_bIsRadioWaiting(IMS_FALSE),
         m_bIsTrafficPriorityBlocked(IMS_FALSE),
+        m_bIsReregFailureReportOnIpcanChangeRequired(IMS_FALSE),
         m_strRegId(strRegId),
         m_eRegType(AosRegistrationType::NORMAL),
         m_nFlowId(0),
@@ -136,7 +137,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
 {
     // Init Object
     m_pUtil = AosUtil::GetInstance();
-    m_pRegManager = RegistrationManager::GetInstance();
+    m_piRegManager = Engine::GetRegistrationManager();
 
     // registration type
     m_eRegType = piAppContext->GetStaticProfile()->GetRegistrationType();
@@ -550,6 +551,26 @@ PUBLIC VIRTUAL AosRegistrationType AosRegistration::GetRegType()
     return m_eRegType;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosRegistration::GetImsRegType()
+{
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        return IMS_REG_TYPE_NORMAL;
+    }
+
+    if (m_eRegType == AosRegistrationType::EMERGENCY)
+    {
+        return (IsFakeRegistration() ? IMS_REG_TYPE_FAKE : IMS_REG_TYPE_EMERGENCY);
+    }
+
+    if (m_eRegType == AosRegistrationType::FAKE)
+    {
+        return IMS_REG_TYPE_FAKE;
+    }
+
+    return IMS_REG_TYPE_INVALID;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosRegistration::IsRegistered()
 {
     return (IsRefreshing() || m_nState == STATE_REGISTERED);
@@ -594,9 +615,13 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
 
     m_nState = nState;
 
-    if (m_eRegType == AosRegistrationType::NORMAL)
+    if (m_eRegType != AosRegistrationType::RCS)
     {
         UpdateDetailState(m_nState);
+    }
+
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
         if (!IsRegTrying())
         {
             SetTraffic(IMS_FALSE);
@@ -734,6 +759,12 @@ void AosRegistration::SetTrafficListener(IN IMS_BOOL bSet)
 }
 
 PROTECTED
+void AosRegistration::UpdateRegIpcanCategory()
+{
+    m_nRegIpcanCategory = m_piContext->GetConnection()->GetIpcanCategory();
+}
+
+PROTECTED
 void AosRegistration::ClearPending()
 {
     m_nTxnPending = PENDING_NONE;
@@ -864,6 +895,12 @@ IMS_BOOL AosRegistration::IsTrafficPriorityBlocked() const
 }
 
 PROTECTED
+IMS_BOOL AosRegistration::IsReregFailureReportOnIpcanChangeRequired() const
+{
+    return m_bIsReregFailureReportOnIpcanChangeRequired;
+}
+
+PROTECTED
 IMS_SINT32 AosRegistration::GetRegExpires()
 {
     return (m_piRegContact != IMS_NULL) ? m_piRegContact->GetExpires() : -1;
@@ -983,6 +1020,46 @@ IMS_UINT32 AosRegistration::GetRegFeatures()
 }
 
 PROTECTED
+void AosRegistration::NotifyFailureWithImsReason(IN IMS_SINT32 nReason, IN IMS_SINT32 nStatusCode)
+{
+    if (GetImsRegType() != IMS_REG_TYPE_NORMAL)
+    {
+        return;
+    }
+
+    switch (nReason)
+    {
+        case IRegistration::REASON_TRANSACTION_TIMEOUT:  // FALL-THROUGH
+        case IRegistration::REASON_CLIENT_SOCKET_ERROR:  // FALL-THROUGH
+        case IRegistration::REASON_SERVER_SOCKET_ERROR:
+            m_eImsReasonCode = AosReasonCode::REG_RESP_NETWORK_TIMEOUT;
+            break;
+        case IRegistration::REASON_STATUS_CODE:
+            if (nStatusCode == SipStatusCode::SC_403)
+            {
+                m_eImsReasonCode = AosReasonCode::REG_RESP_403;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+PROTECTED
+void AosRegistration::NotifyDeregistered()
+{
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    IMS_SINT32 nImsRegType = GetImsRegType();
+    if (piService != IMS_NULL && nImsRegType != IAosRegistration::IMS_REG_TYPE_INVALID)
+    {
+        A_IMS_TRACE_D(REGID, "NotifyDeregistered :: RegType(%d), ImsReasonCode(%d)", nImsRegType,
+                m_eImsReasonCode, 0);
+        piService->NotifyDeregistered(
+                nImsRegType, GetNetworkTypeForImsRegState(), m_eImsReasonCode);
+    }
+}
+
+PROTECTED
 void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
 {
     IMS_SINT32 nImsRegState = IMS_REG_STATE_DEREGISTERED;
@@ -995,7 +1072,8 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
         case STATE_REGISTERED:
             nImsRegState = IMS_REG_STATE_REGISTERED;
             break;
-        case STATE_OFFLINE:
+        case STATE_OFFLINE:  // FALL-THROUGH
+        case STATE_REGSTOP:
             nImsRegState = IMS_REG_STATE_DEREGISTERED;
             break;
 
@@ -1031,22 +1109,25 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
     m_eImsRegNetwork = eImsRegNetwork;
 
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piService != IMS_NULL)
+    IMS_SINT32 nImsRegType = GetImsRegType();
+    if (piService != IMS_NULL && nImsRegType != IAosRegistration::IMS_REG_TYPE_INVALID)
     {
         if (m_nImsRegState == IMS_REG_STATE_DEREGISTERED)
         {
-            piService->NotifyDeregistered(m_eImsRegNetwork, eReason);
+            piService->NotifyDeregistered(nImsRegType, m_eImsRegNetwork, eReason);
             m_eImsReasonCode = AosReasonCode::UNSPECIFIED;
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERING)
         {
             ImsList<AString> objFeatureTags = ImsList<AString>();
-            piService->NotifyRegistering(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
+            piService->NotifyRegistering(
+                    nImsRegType, m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERED)
         {
             ImsList<AString> objFeatureTags = ImsList<AString>();
-            piService->NotifyRegistered(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
+            piService->NotifyRegistered(
+                    nImsRegType, m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
     }
 }
@@ -1306,7 +1387,7 @@ void AosRegistration::PrepareRegistration()
     A_IMS_TRACE_I(REGID, "PrepareRegistration", 0, 0, 0);
 
     if (m_piRegistration != IMS_NULL &&
-            m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId) != IMS_NULL)
+            m_piRegManager->GetRegistration(m_nSlotId, m_nFlowId) != IMS_NULL)
     {
         A_IMS_TRACE_I(REGID, "PrepareRegistration :: destroy registration for creating", 0, 0, 0);
 
@@ -1317,7 +1398,7 @@ void AosRegistration::PrepareRegistration()
             m_piRegistration->DestroyContact(objContactList.GetAt(nAt));
         }
 
-        m_pRegManager->DestroyRegistration(m_piRegistration);
+        m_piRegManager->DestroyRegistration(m_piRegistration);
         m_piRegistration = IMS_NULL;
 
         DestroySubscription();
@@ -1372,9 +1453,9 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
 
     StartRegBinding();
 
-    AddSpecificOperation();
-
     m_piRegParameter = m_piRegistration->GetParameter();
+
+    AddSpecificOperation();
 
     if (UpdatePreloadedRoute() == IMS_FALSE)
     {
@@ -1404,7 +1485,12 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
     ClearNetworkBindingFeatures();
 
     SetRadioWaiting(IMS_FALSE);
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        UpdateTransactionStarted();
+    }
     SetTraffic(IMS_FALSE);
+    SetReregFailureReportOnIpcanChangeRequired(IMS_FALSE);
 
     DestroyIpsecHelper();
 
@@ -1421,7 +1507,7 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
 
     m_piRegistration->DestroyContact(m_piRegContact);
     m_piRegistration->SetListener(IMS_NULL);
-    m_pRegManager->DestroyRegistration(m_piRegistration);
+    m_piRegManager->DestroyRegistration(m_piRegistration);
 
     m_piRegistration = IMS_NULL;
     m_piRegContact = IMS_NULL;
@@ -1433,13 +1519,13 @@ PROTECTED VIRTUAL IRegistration* AosRegistration::GetRegistration()
     A_IMS_TRACE_D(REGID, "GetRegistration :: m_nFlowId (%d), strAoR (%s)", m_nFlowId,
             m_strPuid.GetStr(), 0);
 
-    if (!m_pRegManager->CreateRegistration(m_nFlowId, m_strPuid, IsFakeRegistration()))
+    if (!m_piRegManager->CreateRegistration(m_nSlotId, m_nFlowId, m_strPuid, IsFakeRegistration()))
     {
         A_IMS_TRACE_I(REGID, "create reg is failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    return m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId);
+    return m_piRegManager->GetRegistration(m_nSlotId, m_nFlowId);
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartRegBinding()
@@ -1847,6 +1933,12 @@ PROTECTED VIRTUAL void AosRegistration::AddSpecificOperation()
     if (m_eRegType == AosRegistrationType::EMERGENCY)
     {
         m_piRegContact->AddUriParameter("sos");
+
+        if (GET_N_CONFIG(m_nSlotId)->IsERegWithOnlyTcpInRoaming() && m_piRegParameter != IMS_NULL &&
+                m_piContext->GetNetTracker()->IsRoaming())
+        {
+            m_piRegParameter->SetTransportExt(Sip::TRANSPORT_EXT_TCP);
+        }
     }
 
     if (!GET_N_CONFIG(m_nSlotId)->IsSipOverIpsecInRoamingEnabled())
@@ -2123,9 +2215,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
         else
         {
             A_IMS_TRACE_D(REGID, "SetAor :: GetAssociatedUris from normal registration", 0, 0, 0);
-            const IRegistration* piRegistration =
-                    RegistrationManager::GetInstance()->GetRegistration(
-                            m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
+            const IRegistration* piRegistration = m_piRegManager->GetRegistration(
+                    m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
             objImpu = (piRegistration == IMS_NULL) ? pSubscriber->GetFakeImpus()
                                                    : piRegistration->GetAssociatedUris();
         }
@@ -2370,23 +2461,21 @@ PROTECTED VIRTUAL void AosRegistration::SetActiveBindingsRestorationUsage()
     }
 }
 
+PROTECTED VIRTUAL void AosRegistration::SetReregFailureReportOnIpcanChangeRequired(
+        IN IMS_BOOL bRequired)
+{
+    m_bIsReregFailureReportOnIpcanChangeRequired = bRequired;
+}
+
 PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
 {
-    if (m_eRegType == AosRegistrationType::EMERGENCY)
+    if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() && GetState() == STATE_REFRESHSTOP)
     {
-        m_bIsTransactionStarted = IsImsCall();
+        SetHeldByCall(IMS_FALSE);
     }
-    else
-    {
-        if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() &&
-                GetState() == STATE_REFRESHSTOP)
-        {
-            SetHeldByCall(IMS_FALSE);
-        }
 
-        m_bIsTransactionStarted =
-                !(IsBlocked() || IsHeldByCall() || IsRadioWaiting() || IsTrafficPriorityBlocked());
-    }
+    m_bIsTransactionStarted =
+            !(IsBlocked() || IsHeldByCall() || IsRadioWaiting() || IsTrafficPriorityBlocked());
 
     A_IMS_TRACE_I(REGID, "UpdateTransactionStarted :: (%s)",
             (m_bIsTransactionStarted) ? "READY" : "NOT READY", 0, 0);
@@ -2805,28 +2894,36 @@ PROTECTED VIRTUAL void AosRegistration::ProcessIpcanChanged()
 {
     A_IMS_TRACE_I(REGID, "ProcessIpcanChanged()", 0, 0, 0);
 
-    if (GET_N_CONFIG(m_nSlotId)->IsRegWithIpcanChangedDuringImsCallHeld() && IsImsCall())
+    if (!IsRegTypeEqual(AosRegistrationType::EMERGENCY))
     {
-        // if required not to update while calling,
-        // then add feature PENDING_UPDATE.
-        // when calls end, it'll do an actual update.
-        m_pUtil->AddFeature(PENDING_UPDATE_HELD_BY_CALL, m_nTxnPending);
-
-        UpdateRegIpcanCategory();
-
-        if (GetState() == STATE_REGISTERED)
+        if (GET_N_CONFIG(m_nSlotId)->IsRegWithIpcanChangedDuringImsCallHeld() && IsImsCall())
         {
-            SetState(STATE_REFRESHING);
-            ReportTryingState();
+            // if required not to update while calling,
+            // then add feature PENDING_UPDATE.
+            // when calls end, it'll do an actual update.
+            m_pUtil->AddFeature(PENDING_UPDATE_HELD_BY_CALL, m_nTxnPending);
 
-            SetState(STATE_REGISTERED);
-            ReportStateChanged(RESULT_SUCCESS);
+            UpdateRegIpcanCategory();
+
+            if (GetState() == STATE_REGISTERED)
+            {
+                SetState(STATE_REFRESHING);
+                ReportTryingState();
+
+                SetState(STATE_REGISTERED);
+                ReportStateChanged(RESULT_SUCCESS);
+            }
+
+            return;
         }
     }
-    else
+
+    if (GetState() == STATE_REGISTERED)
     {
-        Update();
+        SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
     }
+
+    Update();
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessUpdateIpcan()
@@ -3158,7 +3255,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
 {
     if (IsUsimAuthFailureHandlingNeeded())
     {
-        m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES;
+        m_eImsReasonCode = AosReasonCode::USIM_AUTHENTICATION_FAILURES;
     }
     else if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
@@ -3472,6 +3569,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessIpsecFallback(IN IMS_BOOL bIsSupp
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage(IN IMS_SINT32 nStatusCode)
 {
+    if (!IsRegTypeEqual(AosRegistrationType::NORMAL))
+    {
+        return;
+    }
+
     if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
     {
         return;
@@ -4003,13 +4105,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_403()
         return;
     }
 
-    AosReasonCode eReason = AosReasonCode::REGISTRATION_ERROR_WFC_REG_403;
+    AosReasonCode eReason = AosReasonCode::WFC_REG_RESP_403;
     if (m_pUtil->IsDifferentCountry(
                 UtilService::GetUtilService()->GetPrivateProperty()->GetPersistent(
                         ImsPrivateProperties::Persistent::KEY_SIM_COUNTRY, m_nSlotId),
                 m_nSlotId))
     {
-        eReason = AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY;
+        eReason = AosReasonCode::WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY;
     }
 
     if (m_eImsReasonCode == eReason)
@@ -4018,12 +4120,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_403()
     }
 
     m_eImsReasonCode = eReason;
-    NotifyDeregistered();
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_500()
 {
-    if (m_eImsReasonCode == AosReasonCode::REGISTRATION_ERROR_WFC_REG_500)
+    if (m_eImsReasonCode == AosReasonCode::WFC_REG_RESP_500)
     {
         return;
     }
@@ -4034,13 +4135,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_500()
         return;
     }
 
-    m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_REG_500;
-    NotifyDeregistered();
+    m_eImsReasonCode = AosReasonCode::WFC_REG_RESP_500;
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_Others()
 {
-    if (m_eImsReasonCode == AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES)
+    if (m_eImsReasonCode == AosReasonCode::WFC_REG_RESP_OTHER_FAILURES)
     {
         return;
     }
@@ -4051,8 +4151,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_Others()
         return;
     }
 
-    m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES;
-    NotifyDeregistered();
+    m_eImsReasonCode = AosReasonCode::WFC_REG_RESP_OTHER_FAILURES;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUpdateFailed_305()
@@ -4562,6 +4661,11 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessIpVersionChange()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRegEventChange(IN IMS_UINT32 nStatusCode)
 {
+    if (!IsRegTypeEqual(AosRegistrationType::NORMAL))
+    {
+        return;
+    }
+
     IMS_SINT32 nPolicy = GET_N_CONFIG(m_piContext->GetSlotId())->GetUsatRegEventDownloadPolicy();
     if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD)
     {
@@ -4905,6 +5009,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     ClearAuthIpsecCount();
 
     IMS_SINT32 nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
+    NotifyFailureWithImsReason(nReason, nStatusCode);
     ProcessRequiredWfcErrMessage(nStatusCode);
     ProcessRegEventChange(nStatusCode);
 
@@ -4939,6 +5044,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
     ClearRetryValues(IMS_TRUE);
     ClearAuthChallengedCount();
     ClearAuthIpsecCount();
+    SetReregFailureReportOnIpcanChangeRequired(IMS_FALSE);
 
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
             CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
@@ -5014,6 +5120,11 @@ PROTECTED VIRTUAL void AosRegistration::Registration_UpdateFailed(IN IMS_SINT32 
     }
 
     CheckPending();
+
+    if (IsReregFailureReportOnIpcanChangeRequired())
+    {
+        NotifyTechnologyChangeFailed();
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::Registration_Removed()
@@ -5600,7 +5711,7 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
             break;
         case AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG:
         {
-            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_SUB_403;
+            m_eImsReasonCode = AosReasonCode::WFC_SUB_RESP_403;
             IMS_SINT32 nTime = nRetryAfter;
             if (bAwt)
             {
@@ -5612,7 +5723,7 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
         }
         case AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG:
         {
-            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED;
+            m_eImsReasonCode = AosReasonCode::WFC_SUB_NOTIFY_TERMINATED;
             IMS_SINT32 nTime = nRetryAfter;
             if (bAwt)
             {
@@ -6102,21 +6213,18 @@ void AosRegistration::UpdateCallingNumberVerification()
     */
 }
 
-PROTECTED
-void AosRegistration::NotifyDeregistered()
+PRIVATE
+void AosRegistration::NotifyTechnologyChangeFailed()
 {
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piService != IMS_NULL)
+    IMS_SINT32 nImsRegType = GetImsRegType();
+    if (piService != IMS_NULL && nImsRegType != IAosRegistration::IMS_REG_TYPE_INVALID)
     {
-        A_IMS_TRACE_D(REGID, "NotifyDeregistered :: ImsReasonCode(%d)", m_eImsReasonCode, 0, 0);
-        piService->NotifyDeregistered(GetNetworkTypeForImsRegState(), m_eImsReasonCode);
+        A_IMS_TRACE_D(REGID, "NotifyTechnologyChangeFailed :: RegType(%d), ImsReasonCode(%d)",
+                nImsRegType, m_eImsReasonCode, 0);
+        piService->NotifyTechnologyChangeFailed(
+                nImsRegType, GetNetworkTypeForImsRegState(), m_eImsReasonCode);
     }
-}
-
-PROTECTED
-void AosRegistration::UpdateRegIpcanCategory()
-{
-    m_nRegIpcanCategory = m_piContext->GetConnection()->GetIpcanCategory();
 }
 
 PRIVATE

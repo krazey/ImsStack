@@ -177,11 +177,6 @@ public class SystemServiceProxyImplTest {
 
         assertNotNull(ccmp.getDefaultConfig());
 
-        // Expected that the CarrierConfigManager API is invoked.
-        PersistableBundle config = ccmp.getConfigForSubId(TestAppContext.SUB_ID_1);
-        assertNotNull(config);
-        verify(carrierConfigManager).getConfigForSubId(eq(TestAppContext.SUB_ID_1));
-
         final String[] keys = {
             CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
             CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL,
@@ -193,14 +188,11 @@ public class SystemServiceProxyImplTest {
         // Expected that the CarrierConfigManager API throws an exception.
         doThrow(new IllegalStateException("getConfigForSubId exception."))
                 .when(carrierConfigManager).getConfigForSubId(anyInt(), any());
-        config = ccmp.getConfigForSubId(TestAppContext.SUB_ID_1, keys);
+        PersistableBundle config = ccmp.getConfigForSubId(TestAppContext.SUB_ID_1, keys);
         assertTrue(config.isEmpty());
 
         // Expected that the CarrierConfigManager is null.
         mContextFixture.setSystemService(Context.CARRIER_CONFIG_SERVICE, null);
-
-        config = ccmp.getConfigForSubId(TestAppContext.SUB_ID_1);
-        assertNotNull(config);
 
         config = ccmp.getConfigForSubId(TestAppContext.SUB_ID_1, keys);
         assertNotNull(config);

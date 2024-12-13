@@ -28,7 +28,7 @@
 #include "EnablerThread.h"
 #include "GeolocationHelper.h"
 
-__IMS_TRACE_TAG_USER_DECL__("EnablerThread");
+__IMS_TRACE_TAG_BASE__;
 
 PUBLIC
 EnablerThread::EnablerThread(IN EnablerFactory* pEnablerFactory, IN IMS_SINT32 nSlotId) :
@@ -106,7 +106,7 @@ void EnablerThread::UninitializeGlobals()
 PROTECTED
 void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
 {
-    IMS_TRACE_D("ControlEnablersInternal :: ctrlFlags=%08X", nCtrlFlags, 0, 0);
+    IMS_TRACE_D("ControlEnablersInternal: ctrlFlags=%08X", nCtrlFlags, 0, 0);
 
     if (IsControlSet(nCtrlFlags, CONTROL_STOP))
     {
@@ -114,6 +114,10 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
         {
             StopEnablers();
             SetState(STATE_INACTIVE);
+        }
+        else
+        {
+            IMS_TRACE_D("ControlEnablersInternal: Enablers are already stopped.", 0, 0, 0);
         }
     }
 
@@ -125,13 +129,9 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
         EngineLoader::Uninitialize(GetSlotId());
     }
 
-    if (IsControlSet(nCtrlFlags, CONTROL_CREATE) || IsControlSet(nCtrlFlags, CONTROL_START))
+    if (IsControlSet(nCtrlFlags, CONTROL_CREATE) && !m_pEnablerFactory->HasEnablers(GetSlotId()))
     {
         EventService::GetEventService()->SetUnregisteredEvents(GetSlotId());
-    }
-
-    if (IsControlSet(nCtrlFlags, CONTROL_CREATE))
-    {
         ConfigService::GetConfigService()->LoadCarrierConfig(GetSlotId());
         Engine::GetConfiguration()->RefreshConfigs(GetSlotId());
         EngineLoader::Initialize(GetSlotId());
@@ -142,10 +142,19 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
 
     if (IsControlSet(nCtrlFlags, CONTROL_START))
     {
-        if (StartEnablers())
+        if (GetState() == STATE_INACTIVE)
         {
-            SetState(STATE_ACTIVE);
-            NotifyEnablerStartCompleted();
+            EventService::GetEventService()->SetUnregisteredEvents(GetSlotId());
+
+            if (StartEnablers())
+            {
+                SetState(STATE_ACTIVE);
+                NotifyEnablerStartCompleted();
+            }
+        }
+        else
+        {
+            IMS_TRACE_D("ControlEnablersInternal: Enablers are already started.", 0, 0, 0);
         }
     }
 }

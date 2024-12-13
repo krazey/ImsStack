@@ -22,7 +22,7 @@
 #include "SipServerTransport.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipServerTransport::SipServerTransport(IN IMS_SINT32 nSlotId,

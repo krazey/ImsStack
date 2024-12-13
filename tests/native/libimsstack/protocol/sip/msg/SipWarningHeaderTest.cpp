@@ -35,7 +35,7 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 256;
+    const SIP_INT32 BUFFER_SIZE = 256;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -61,12 +61,12 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnAgent("Warn-Agent"));
+    pHeader->SetWarnAgent("Warn-Agent");
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnText("Warn-Text"));
+    pHeader->SetWarnText("Warn-Text");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -81,8 +81,8 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     pHeader->SetWarnCode(300);
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnAgent("Warn-Agent"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnText("Warn Text"));
+    pHeader->SetWarnAgent("Warn-Agent");
+    pHeader->SetWarnText("Warn Text");
 
     objValue = AString::ConstNull();
     pBuff = &(aBuffer[0]);

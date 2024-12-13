@@ -32,9 +32,6 @@ protected:
     virtual ~TraceService();
 
 public:
-    const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName) const;
-    const IMS_CHAR* GetFileName(
-            IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) const;
     const ImsTraceTag& GetTraceTag(IN IMS_SINT32 nTag) const;
     IMS_UINT32 GetOption() const;
     void SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule);
@@ -74,170 +71,98 @@ private:
 #define IMS_TRACE_OPT_TEXT   0x0008
 #define IMS_TRACE_OPT_MEM    0x0010
 
-// Additional options
-#define IMS_TRACE_OPT_TIME   0x0100
-#define IMS_TRACE_OPT_FILE   0x0200
-
 //// Macro for unknown tag trace statement
 #define IMS_TRACE(VA_FORMAT) TraceService::GetTraceService()->GetTrace()->Out VA_FORMAT
 
-#define IMS_TRACE_D(FORMAT, A1, A2, A3)                                                      \
-    do                                                                                       \
-    {                                                                                        \
-        TraceService* pTs = TraceService::GetTraceService();                                 \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, __IMS_TRACE_MODULE__))            \
-        {                                                                                    \
-            char acFileNameForTrace__[128] = {                                               \
-                    0,                                                                       \
-            };                                                                               \
-            pTs->GetTrace()->Out(ITrace::CAT_D, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__,    \
-                    "[%s:%d] " FORMAT, pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), \
-                    __IMS_LINE__, A1, A2, A3);                                               \
-        }                                                                                    \
+#define IMS_TRACE_D(FORMAT, A1, A2, A3)                                                   \
+    do                                                                                    \
+    {                                                                                     \
+        TraceService* pTs = TraceService::GetTraceService();                              \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, __IMS_TRACE_MODULE__))         \
+        {                                                                                 \
+            pTs->GetTrace()->Out(ITrace::CAT_D, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, \
+                    __IMS_FILE__, __IMS_LINE__, FORMAT, A1, A2, A3);                      \
+        }                                                                                 \
     } while (0)
 
-#define A_IMS_TRACE_D(ID, FORMAT, A1, A2, A3)                                                     \
-    do                                                                                            \
-    {                                                                                             \
-        TraceService* pTs = TraceService::GetTraceService();                                      \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, __IMS_TRACE_MODULE__))                 \
-        {                                                                                         \
-            char acFileNameForTrace__[128] = {                                                    \
-                    0,                                                                            \
-            };                                                                                    \
-            pTs->GetTrace()->Out(ITrace::CAT_D, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__,         \
-                    "[%s:%d] [%s] " FORMAT, pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), \
-                    __IMS_LINE__, ID, A1, A2, A3);                                                \
-        }                                                                                         \
-    } while (0)
-
-#define U_IMS_TRACE_D(ID, FORMAT, A1, A2, A3)                                                     \
-    do                                                                                            \
-    {                                                                                             \
-        TraceService* pTs = TraceService::GetTraceService();                                      \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, __IMS_TRACE_MODULE__))                 \
-        {                                                                                         \
-            char acFileNameForTrace__[128] = {                                                    \
-                    0,                                                                            \
-            };                                                                                    \
-            pTs->GetTrace()->Out(ITrace::CAT_D, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__,         \
-                    "[%s:%d] [%s] " FORMAT, pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), \
-                    __IMS_LINE__, ID, A1, A2, A3);                                                \
-        }                                                                                         \
+#define IMS_TRACE4_D(ID, FORMAT, A1, A2, A3)                                              \
+    do                                                                                    \
+    {                                                                                     \
+        TraceService* pTs = TraceService::GetTraceService();                              \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, __IMS_TRACE_MODULE__))         \
+        {                                                                                 \
+            pTs->GetTrace()->Out(ITrace::CAT_D, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, \
+                    __IMS_FILE__, __IMS_LINE__, "[%s] " FORMAT, ID, A1, A2, A3);          \
+        }                                                                                 \
     } while (0)
 
 #define IMS_TRACE_DV(VA_FORMAT) TraceService::GetTraceService()->GetTrace()->Out VA_FORMAT
 
-#define IMS_TRACE_I(FORMAT, A1, A2, A3)                                                      \
-    do                                                                                       \
-    {                                                                                        \
-        TraceService* pTs = TraceService::GetTraceService();                                 \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_I, __IMS_TRACE_MODULE__))            \
-        {                                                                                    \
-            char acFileNameForTrace__[128] = {                                               \
-                    0,                                                                       \
-            };                                                                               \
-            pTs->GetTrace()->Out(ITrace::CAT_I, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__,    \
-                    "[%s:%d] " FORMAT, pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), \
-                    __IMS_LINE__, A1, A2, A3);                                               \
-        }                                                                                    \
+#define IMS_TRACE_I(FORMAT, A1, A2, A3)                                                   \
+    do                                                                                    \
+    {                                                                                     \
+        TraceService* pTs = TraceService::GetTraceService();                              \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_I, __IMS_TRACE_MODULE__))         \
+        {                                                                                 \
+            pTs->GetTrace()->Out(ITrace::CAT_I, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, \
+                    __IMS_FILE__, __IMS_LINE__, FORMAT, A1, A2, A3);                      \
+        }                                                                                 \
     } while (0)
 
-#define A_IMS_TRACE_I(ID, FORMAT, A1, A2, A3)                                                     \
-    do                                                                                            \
-    {                                                                                             \
-        TraceService* pTs = TraceService::GetTraceService();                                      \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_I, __IMS_TRACE_MODULE__))                 \
-        {                                                                                         \
-            char acFileNameForTrace__[128] = {                                                    \
-                    0,                                                                            \
-            };                                                                                    \
-            pTs->GetTrace()->Out(ITrace::CAT_I, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__,         \
-                    "[%s:%d] [%s] " FORMAT, pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), \
-                    __IMS_LINE__, ID, A1, A2, A3);                                                \
-        }                                                                                         \
-    } while (0)
-
-#define U_IMS_TRACE_I(ID, FORMAT, A1, A2, A3)                                                     \
-    do                                                                                            \
-    {                                                                                             \
-        TraceService* pTs = TraceService::GetTraceService();                                      \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_I, __IMS_TRACE_MODULE__))                 \
-        {                                                                                         \
-            char acFileNameForTrace__[128] = {                                                    \
-                    0,                                                                            \
-            };                                                                                    \
-            pTs->GetTrace()->Out(ITrace::CAT_I, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__,         \
-                    "[%s:%d] [%s] " FORMAT, pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), \
-                    __IMS_LINE__, ID, A1, A2, A3);                                                \
-        }                                                                                         \
+#define IMS_TRACE4_I(ID, FORMAT, A1, A2, A3)                                              \
+    do                                                                                    \
+    {                                                                                     \
+        TraceService* pTs = TraceService::GetTraceService();                              \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_I, __IMS_TRACE_MODULE__))         \
+        {                                                                                 \
+            pTs->GetTrace()->Out(ITrace::CAT_I, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, \
+                    __IMS_FILE__, __IMS_LINE__, "[%s] " FORMAT, ID, A1, A2, A3);          \
+        }                                                                                 \
     } while (0)
 
 #define IMS_TRACE_IV(VA_FORMAT) TraceService::GetTraceService()->GetTrace()->Out VA_FORMAT
 
-#define IMS_TRACE_E(ECODE, FORMAT, A1, A2, A3)                                                  \
-    do                                                                                          \
-    {                                                                                           \
-        TraceService* pTs = TraceService::GetTraceService();                                    \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_E, __IMS_TRACE_MODULE__))               \
-        {                                                                                       \
-            char acFileNameForTrace__[128] = {                                                  \
-                    0,                                                                          \
-            };                                                                                  \
-            pTs->GetTrace()->OutE(ECODE, __IMS_FUNC__, __IMS_LINE__, __IMS_TRACE_NAME__,        \
-                    __IMS_TRACE_MODULE__, "[%s:%d] " FORMAT,                                    \
-                    pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), __IMS_LINE__, A1, A2, \
-                    A3);                                                                        \
-        }                                                                                       \
+#define IMS_TRACE_E(ECODE, FORMAT, A1, A2, A3)                                                   \
+    do                                                                                           \
+    {                                                                                            \
+        TraceService* pTs = TraceService::GetTraceService();                                     \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_E, __IMS_TRACE_MODULE__))                \
+        {                                                                                        \
+            pTs->GetTrace()->OutE(ECODE, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, __IMS_FILE__, \
+                    __IMS_FUNC__, __IMS_LINE__, FORMAT, A1, A2, A3);                             \
+        }                                                                                        \
     } while (0)
 
-#define A_IMS_TRACE_E(ECODE, ID, FORMAT, A1, A2, A3)                                            \
-    do                                                                                          \
-    {                                                                                           \
-        TraceService* pTs = TraceService::GetTraceService();                                    \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_E, __IMS_TRACE_MODULE__))               \
-        {                                                                                       \
-            char acFileNameForTrace__[128] = {                                                  \
-                    0,                                                                          \
-            };                                                                                  \
-            pTs->GetTrace()->OutE(ECODE, __IMS_FUNC__, __IMS_LINE__, __IMS_TRACE_NAME__,        \
-                    __IMS_TRACE_MODULE__, "[%s:%4d] [%s] " FORMAT,                              \
-                    pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), __IMS_LINE__, ID, A1, \
-                    A2, A3);                                                                    \
-        }                                                                                       \
+#define IMS_TRACE4_E(ECODE, ID, FORMAT, A1, A2, A3)                                              \
+    do                                                                                           \
+    {                                                                                            \
+        TraceService* pTs = TraceService::GetTraceService();                                     \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_E, __IMS_TRACE_MODULE__))                \
+        {                                                                                        \
+            pTs->GetTrace()->OutE(ECODE, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, __IMS_FILE__, \
+                    __IMS_FUNC__, __IMS_LINE__, "[%s] " FORMAT, ID, A1, A2, A3);                 \
+        }                                                                                        \
     } while (0)
 
-#define U_IMS_TRACE_E(ECODE, ID, FORMAT, A1, A2, A3)                                            \
-    do                                                                                          \
-    {                                                                                           \
-        TraceService* pTs = TraceService::GetTraceService();                                    \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_E, __IMS_TRACE_MODULE__))               \
-        {                                                                                       \
-            char acFileNameForTrace__[128] = {                                                  \
-                    0,                                                                          \
-            };                                                                                  \
-            pTs->GetTrace()->OutE(ECODE, __IMS_FUNC__, __IMS_LINE__, __IMS_TRACE_NAME__,        \
-                    __IMS_TRACE_MODULE__, "[%s:%4d] [%s] " FORMAT,                              \
-                    pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), __IMS_LINE__, ID, A1, \
-                    A2, A3);                                                                    \
-        }                                                                                       \
-    } while (0)
+#define A_IMS_TRACE_D IMS_TRACE4_D
+#define A_IMS_TRACE_I IMS_TRACE4_I
+#define A_IMS_TRACE_E IMS_TRACE4_E
+
+#define U_IMS_TRACE_D IMS_TRACE4_D
+#define U_IMS_TRACE_I IMS_TRACE4_I
+#define U_IMS_TRACE_E IMS_TRACE4_E
 
 #if ((__IMS_TRACE_MEM__ & IMS_TRACE_OPT_MEM) == IMS_TRACE_OPT_MEM)
 
-#define IMS_TRACE_MEM(TAG, FORMAT, A1, A2, A3)                                                  \
-    do                                                                                          \
-    {                                                                                           \
-        TraceService* pTs = TraceService::GetTraceService();                                    \
-        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, IMS_TRACE_MODULE_IMS))               \
-        {                                                                                       \
-            char acFileNameForTrace__[128] = {                                                  \
-                    0,                                                                          \
-            };                                                                                  \
-            pTs->GetTrace()->Out(ITrace::CAT_D, TAG, IMS_TRACE_MODULE_IMS, "[%s:%d] " FORMAT,   \
-                    pTs->GetFileName(acFileNameForTrace__, __IMS_FILE__), __IMS_LINE__, A1, A2, \
-                    A3);                                                                        \
-        }                                                                                       \
+#define IMS_TRACE_MEM(TAG, FORMAT, A1, A2, A3)                                            \
+    do                                                                                    \
+    {                                                                                     \
+        TraceService* pTs = TraceService::GetTraceService();                              \
+        if (pTs->GetTrace()->IsTraceEnabled(ITrace::CAT_D, IMS_TRACE_MODULE_BASE))        \
+        {                                                                                 \
+            pTs->GetTrace()->Out(ITrace::CAT_D, TAG, IMS_TRACE_MODULE_BASE, __IMS_FILE__, \
+                    __IMS_LINE__, FORMAT, A1, A2, A3);                                    \
+        }                                                                                 \
     } while (0)
 
 #else
@@ -248,9 +173,9 @@ private:
 
 #define IMS_TRACE_EV(VA_FORMAT) TraceService::GetTraceService()->GetTrace()->OutE VA_FORMAT
 
-#define IMS_TRACE_SIP(DESC, TEXT, SIZE, BODY)                                                    \
+#define IMS_TRACE_SIP(DESC, TEXT, SIZE)                                                          \
     TraceService::GetTraceService()->GetTrace()->OutText(IMS_TRACE_MODULE_SIP, ITrace::TEXT_SIP, \
-            DESC, reinterpret_cast<const IMS_CHAR*>(TEXT), SIZE, BODY)
+            DESC, reinterpret_cast<const IMS_CHAR*>(TEXT), SIZE)
 
 #define IMS_TRACE_SDP(DESC, TEXT, SIZE)                                                          \
     TraceService::GetTraceService()->GetTrace()->OutText(IMS_TRACE_MODULE_SDP, ITrace::TEXT_SDP, \

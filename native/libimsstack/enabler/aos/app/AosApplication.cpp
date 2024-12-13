@@ -45,7 +45,7 @@
 #include "provider/AosStaticProfile.h"
 #include "app/AosApplication.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPID m_strTag.GetStr()
 
@@ -213,8 +213,7 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             break;
 
         case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
-            PostMessage(
-                    MSG_SCSCF_RESTORATION, AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED, nReason);
+            PostMessage(MSG_SCSCF_RESTORATION, 0, nReason);
             break;
 
         case ImsAosControl::IPSEC_DISABLED:
@@ -419,13 +418,18 @@ void AosApplication::ResetBlock(IN BLOCK_REASON nReason)
 PROTECTED
 void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
 {
+    if (!IsRegTypeNormal())
+    {
+        return;
+    }
+
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (piService != IMS_NULL)
     {
         A_IMS_TRACE_D(APPID, "NotifyDeregistered :: Reason(%d)", eReason, 0, 0);
-        piService->NotifyDeregistered((eReason == AosReasonCode::CLEAR_RAT_BLOCKS)
-                        ? AosNetworkType::NONE
-                        : GetNetworkTypeForImsRegState(),
+        piService->NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL,
+                (eReason == AosReasonCode::CLEAR_RAT_BLOCKS) ? AosNetworkType::NONE
+                                                             : GetNetworkTypeForImsRegState(),
                 eReason);
     }
 }
@@ -1116,7 +1120,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegRecovery(IN IMSMSG& objMsg)
 
     if (IsRegRecoveryHeld())
     {
-        A_IMS_TRACE_I(APPID, "ProcessRegRecovery :: recover is holded", 0, 0, 0);
+        A_IMS_TRACE_I(APPID, "ProcessRegRecovery :: recover is held", 0, 0, 0);
         m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
         m_nRecoverReason = nReason;
         return;
@@ -1151,7 +1155,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessIpcanChanged(IN IMSMSG& /* objMsg 
     {
         if (IsTimerRunning(TIMER_RECONFIG_GUARD))
         {
-            A_IMS_TRACE_I(APPID, "ProcessIpcanChanged :: ipcan is holded", 0, 0, 0);
+            A_IMS_TRACE_I(APPID, "ProcessIpcanChanged :: ipcan is held", 0, 0, 0);
             m_pUtil->RemoveFeature(PENDING_REG_UPDATE_HELD, m_nRegPending);
             m_pUtil->AddFeature(PENDING_IPCAN_HELD, m_nRegPending);
         }
@@ -1201,7 +1205,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentControl(IN IMSMSG&
                 m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
         {
             return;
         }
@@ -1262,7 +1267,9 @@ PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg
 {
     /* Abnormal network connection error between P-CSCF and S-CSCF has been detected.
      * The case is explained in 3GPP 24.229 5.1.2A.1.6.
-     * It is sure that current P-CSCF is no longer available for any IMS services. */
+     * It is sure that current P-CSCF is no longer available for any IMS services.
+     * It will conduct a new registration regardless of RegRecoverHold scheme.
+     */
 
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
     IMS_UINT32 nUnavailableTimeForCurrentPcscf = LONG_TO_INT(objMsg.nLparam);
@@ -1270,13 +1277,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg
             "ProcessScscfRestoration :: reason (%d), nUnavailableTimeForCurrentPcscf (%d)", nReason,
             nUnavailableTimeForCurrentPcscf, 0);
 
-    if (IsRegRecoveryHeld())
-    {
-        A_IMS_TRACE_I(APPID, "ProcessScscfRestoration :: recover is holded", 0, 0, 0);
-        m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
-        m_nRecoverReason = nReason;
-        return;
-    }
+    SetOffReason(AosReason::INITIAL_REG_REQUESTED);
 
     m_piRegistration->RequestCmd(
             IAosRegistration::CMD_SCSCF_RESTORATION, nUnavailableTimeForCurrentPcscf);
@@ -1453,6 +1454,11 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateReady_Connection(IN IMSMSG& objM
 
                     m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
                     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+                }
+                else if (nReason == AosConnector::REASON_PCSCF_DISCOVERY_FAILED)
+                {
+                    m_pCondition->SetBlock(BLOCK_INVALID_CONNECTION);
+                    m_pConnector->Stop();
                 }
                 else
                 {
@@ -2015,16 +2021,19 @@ PROTECTED VIRTUAL void AosApplication::ProcessNetworkEvent(
 
     if (nType == IMS_EVENT_LTE_INFO)
     {
-        if (m_nLteAttachState != nState)
+        if (m_nLteAttachState != nState || m_nLteExtraInfo != nStateEx)
         {
             m_nLteAttachState = nState;
+            m_nLteExtraInfo = nStateEx;
             m_piRegistration->RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY,
-                    (m_nLteAttachState != IMS_LTE_INFO_COMBINED_ATTACHED)
+                    (m_nLteAttachState == IMS_LTE_INFO_EPS_ONLY_ATTACHED ||
+                            (m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED &&
+                                    m_nLteExtraInfo != IMS_LTE_INFO_EXTRA_NONE))
                             ? IAosRegistration::REASON_SET_ENABLE
                             : IAosRegistration::REASON_SET_DISABLE);
         }
 
-        m_nLteExtraInfo = nStateEx;
+        return;
     }
 
     if (nType == IMS_EVENT_VOICE_SERVICE_STATE)
@@ -2447,7 +2456,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
                 m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
         {
             StopTimer(TIMER_IMS_ESTABLISHMENT);
             return;
@@ -2566,10 +2576,6 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::UpdateRegRecoveryHeld()
                 if (m_nRecoverReason == AoSRegRecoveryType::PCSCF_CHANGE)
                 {
                     PostMessage(MSG_PCSCF_RECOVER, m_nRecoverReason, 0);
-                }
-                else if (m_nRecoverReason == AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED)
-                {
-                    PostMessage(MSG_SCSCF_RESTORATION, m_nRecoverReason, 0);
                 }
                 else
                 {
@@ -2806,6 +2812,12 @@ PROTECTED VIRTUAL IMS_UINT32 AosApplication::UpdateConnectedServices(
         }
     }
 
+    if (strLog.GetLength() > 0)
+    {
+        // Remove line-feed (LF)
+        strLog.Chop(1);
+    }
+
     A_IMS_TRACE_I(APPID, "connected :: %s", strLog.GetStr(), 0, 0);
 
     for (nAt = 0; nAt < objHandles.GetSize(); ++nAt)
@@ -3007,20 +3019,12 @@ PROTECTED VIRTUAL void AosApplication::Condition_RequestCommand(
         case AosCondition::REQUEST_STOP:  // FALL-THROUGH
         case AosCondition::REQUEST_DESTROY:
             ProcessDisconnectingState(nReason);
+            PostMessage(nCommand == AosCondition::REQUEST_STOP ? MSG_REG_STOP : MSG_DESTROY,
+                    nReason, 0);
             break;
 
-        default:
-            break;
-    }
-
-    switch (nCommand)
-    {
-        case AosCondition::REQUEST_STOP:
-            PostMessage(MSG_REG_STOP, nReason, 0);
-            break;
-
-        case AosCondition::REQUEST_DESTROY:
-            PostMessage(MSG_DESTROY, nReason, 0);
+        case AosCondition::REQUEST_RESET_CONNECTION_RECOVERY:
+            m_pConnector->ResetReadyRecovery();
             break;
 
         case AosCondition::REQUEST_RECOVER:
@@ -3156,6 +3160,16 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
                 PostMessage(MSG_REG_UPDATE, 0, 0);
             }
         }
+    }
+
+    if (!m_pConnector->IsReady())
+    {
+        m_pConnector->ResetReadyRecovery();
+    }
+
+    if (m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
+    {
+        m_pCondition->ResetBlock(BLOCK_INVALID_CONNECTION);
     }
 
     if (IsBlockRat(nNewRat))

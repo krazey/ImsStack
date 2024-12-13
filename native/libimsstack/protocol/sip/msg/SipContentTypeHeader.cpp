@@ -80,14 +80,14 @@ SIP_BOOL SipContentTypeHeader::EncodeHdr(
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipContentTypeHeader::SetMediaType(const SIP_CHAR* pszMtype)
+SIP_VOID SipContentTypeHeader::SetMediaType(const SIP_CHAR* pszMType)
 {
-    return SetCharVar(pszMtype, m_pszMType);
+    SetCharVar(pszMType, m_pszMType);
 }
 
-SIP_BOOL SipContentTypeHeader::SetSubMediaType(const SIP_CHAR* pszMSubtype)
+SIP_VOID SipContentTypeHeader::SetSubMediaType(const SIP_CHAR* pszMSubType)
 {
-    return SetCharVar(pszMSubtype, m_pszMSubType);
+    SetCharVar(pszMSubType, m_pszMSubType);
 }
 
 SIP_CHAR* SipContentTypeHeader::GetBoundary()

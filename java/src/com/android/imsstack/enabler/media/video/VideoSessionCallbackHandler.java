@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.RtpReceptionStats;
 import android.telephony.imsmedia.VideoConfig;
 
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
@@ -164,5 +165,15 @@ public class VideoSessionCallbackHandler {
         parcel.writeBoolean(result);
 
         getMtcMediaInterface().sendRequest(parcel);
+    }
+
+    /**
+     * Handles the notification of the rtp reception stats
+     * @param stats The object of the RtpReceptionStats
+     */
+    public void onNotifyRtpReceptionStats(final RtpReceptionStats stats) {
+        ImsLog.v("onNotifyRtpReceptionStats: stats= " + stats);
+
+        getMtcMediaInterface().onNotifyRtpReceptionStats(ImsMediaSession.SESSION_TYPE_VIDEO, stats);
     }
 }

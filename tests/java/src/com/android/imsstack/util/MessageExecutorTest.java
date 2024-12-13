@@ -18,11 +18,12 @@ package com.android.imsstack.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
 import android.os.Message;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -30,31 +31,33 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class MessageExecutorTest {
-    private static final int CALLBACK_WAIT_TIME = 100;
-
     @Mock private Runnable mCallback;
     @Mock private Runnable mExceptionCallback;
+
+    private TestableLooper mTestableLooper;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mTestableLooper = TestableLooper.get(this);
     }
 
     @After
     public void tearDown() throws Exception {
+        mTestableLooper = null;
     }
 
     @Test
     @SmallTest
     public void testInit() {
         MessageExecutor executor = new MessageExecutor(MessageExecutorTest.class.getSimpleName());
-
         assertNotEquals(Looper.getMainLooper(), executor.getLooper());
         assertEquals(MessageExecutorTest.class.getSimpleName(),
                 executor.getLooper().getThread().getName());
@@ -63,16 +66,16 @@ public class MessageExecutorTest {
     @Test
     @SmallTest
     public void testExecute() throws Exception {
-        MessageExecutor executor =
-                new MessageExecutor(MessageExecutorTest.class.getSimpleName() + ":execute");
+        MessageExecutor executor = new MessageExecutor(mTestableLooper.getLooper());
         executor.execute(mCallback);
+        processAllMessages();
 
-        verify(mCallback, timeout(CALLBACK_WAIT_TIME)).run();
+        verify(mCallback).run();
 
         doThrow(new RuntimeException("MessageExecutorTest failed.")).when(mExceptionCallback).run();
         executor.execute(mExceptionCallback);
-
-        verify(mExceptionCallback, timeout(CALLBACK_WAIT_TIME)).run();
+        processAllMessages();
+        verify(mExceptionCallback).run();
 
         // Expected: Any exception should not be thrown when calling execute(...).
     }
@@ -80,10 +83,15 @@ public class MessageExecutorTest {
     @Test
     @SmallTest
     public void testHandleMessageWithNonRunnable() {
-        MessageExecutor executor =
-                new MessageExecutor(MessageExecutorTest.class.getSimpleName() + ":handleMessage");
+        MessageExecutor executor = new MessageExecutor(mTestableLooper.getLooper());
         executor.handleMessage(Message.obtain());
 
         // Expected: Message should be ignored.
+    }
+
+    private void processAllMessages() {
+        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
+            mTestableLooper.processAllMessages();
+        }
     }
 }

@@ -30,7 +30,7 @@
 #include "SipStack.h"
 #include "SipUnknownHeaders.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE GLOBAL const AString SipClientConnection::ANONYMOUS_URI(
         "\"Anonymous\" <sip:thisis@anonymous.invalid>");

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "../../../../config/interface/common/MockISubscriberConfig.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "FeatureCaps.h"
@@ -26,6 +27,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
+#include "core/MockIMessageBodyPart.h"
 #include "core/MockISession.h"
 #include "dialogevent/MockIMultiEndpointManager.h"
 #include "helper/MtcSupplementaryService.h"
@@ -33,18 +35,20 @@
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipHeaderName.h"
 #include "utility/MessageUtil.h"
-#include "utility/MessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 #include <vector>
 
-LOCAL IMS_SINT32 SLOT_ID = 0;
-
 using ::testing::_;
+using ::testing::AnyNumber;
 using ::testing::AnyOf;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+LOCAL const IMS_SINT32 SLOT_ID = 0;
+LOCAL const AString HOME_DOMAIN = "homedomain";
+LOCAL const AString PRIVATE_USER_ID = "prid";
 
 namespace android
 {
@@ -60,14 +64,16 @@ public:
 
     CallInfo objCallInfo;
     MockIMessage objMessage;
+    MockIMessageBodyPart objBodyPart;
     MockISipMessage objSipMessage;
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockISession objSession;
+    MockISubscriberConfig objSubscriberConfig;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
-    MessageUtils objMessageUtils;
+    MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
@@ -83,9 +89,14 @@ protected:
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+        ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
+
+        ON_CALL(objSubscriberConfig, GetHomeDomainName).WillByDefault(ReturnRef(HOME_DOMAIN));
+        ON_CALL(objSubscriberConfig, GetPrivateUserId).WillByDefault(ReturnRef(PRIVATE_USER_ID));
 
         pFormatter = new MessageFormatter(objContext, objSession);
     }
@@ -199,10 +210,36 @@ TEST_F(MessageFormatterTest, FormStartMessageWithIncompleteCallComposerLocation)
 
 TEST_F(MessageFormatterTest, FormStartMessageWithCallComposerLocation)
 {
+    const ByteArray objContent =
+            ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                      "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                      "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                      "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                      "xmlns:gml=\"http://www.opengis.net/gml\" "
+                      "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" entity=\"pres:prid\">\n"
+                      "<dm:person id=\"\">\n"
+                      "<gp:geopriv>\n"
+                      "<gp:location-info>\n"
+                      "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">\n"
+                      "<gml:pos>1 2</gml:pos>\n"
+                      "</gs:Circle>\n"
+                      "</gp:location-info>\n"
+                      "<gp:usage-rules/>\n"
+                      "</gp:geopriv>\n"
+                      "</dm:person>\n"
+                      "</presence>\n");
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("500")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), _));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
+
     pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LAT, AString("1"));
     pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LONG, AString("2"));
-    // TODO: Location is hard to test now
-    // EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormProvisionalResponseMessageNormalCase)
@@ -453,9 +490,7 @@ TEST_F(MessageFormatterTest, FormTerminateMessageAddCarrierSpecificHeaderByConfi
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strByeCauseNormal("normal");
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
-    EXPECT_CALL(objMockMessageUtils,
+    EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(
                     &objMessage, strByeCauseNormal, ISipHeader::UNKNOWN, strCarrierSpecificHeader));
 
@@ -498,10 +533,6 @@ TEST_F(MessageFormatterTest, AddSrvccFeatureByStartMessage)
 
 TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
 {
-    // TODO: change all Tests in this file to use MockIMessageUtils.
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
-
     MockICoreService objCoreService;
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
     MockIFeatureCaps objFeatureCaps;
@@ -514,7 +545,7 @@ TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
 
     // No FeatureCaps in INVITE case
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
-    ON_CALL(objMockMessageUtils,
+    ON_CALL(objMessageUtils,
             ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
                     ISipHeader::FEATURE_CAPS, AString::ConstNull()))
             .WillByDefault(Return(IMS_FALSE));
@@ -524,14 +555,12 @@ TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
 
 TEST_F(MessageFormatterTest, AddSrvccFeatureByPrAnswerMessage)
 {
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
     MockICoreService objCoreService;
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
     MockIFeatureCaps objFeatureCaps;
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
-    ON_CALL(objMockMessageUtils,
+    ON_CALL(objMessageUtils,
             ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
                     ISipHeader::FEATURE_CAPS, AString::ConstNull()))
             .WillByDefault(Return(IMS_TRUE));
@@ -617,15 +646,13 @@ TEST_F(MessageFormatterTest, SetCarrierSpecificHeaders)
 
 TEST_F(MessageFormatterTest, SetCarrierSpecificHeadersSetsTranscodingHeaderIfCallPull)
 {
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
     ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader).WillByDefault(Return(IMS_FALSE));
     pSupplementaryService->Add(SuppType::CALL_PULL, IMS_FALSE);
     const AString strTranscodingHeader(MessageUtil::STR_P_COM_ENABLETRANSCODING);
 
-    // TODO: make this be checked isolated.
-    // EXPECT_CALL(objMockMessageUtils, AddValueIfNotExists(
-    //        &objMessage, _, ISipHeader::UNKNOWN, strTranscodingHeader));
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, _, ISipHeader::UNKNOWN, strTranscodingHeader));
     pFormatter->FormStartMessage(CallType::VOIP);
 }
 
@@ -640,14 +667,11 @@ TEST_F(MessageFormatterTest, FormStartMessageSetsReplaceHeaderIfCallPull)
     ON_CALL(objMepManager, GetDialogInfo(_)).WillByDefault(Return(objDialogInfo));
     AString strReplaces("anyCallId;from-tag=anyLocalTag;to-tag=anyRemoteTag");
 
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
-
     pSupplementaryService->Add(SuppType::CALL_PULL, IMS_FALSE);
 
-    // TODO: make this be checked isolated.
-    // EXPECT_CALL(objMockMessageUtils, AddValueIfNotExists(
-    //        &objMessage, strReplaces, ISipHeader::REPLACES, _));
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, strReplaces, ISipHeader::REPLACES, _));
     pFormatter->FormStartMessage(CallType::VOIP);
 }
 
@@ -704,18 +728,30 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
 
 TEST_F(MessageFormatterTest, GetRejectPhrase)
 {
-    const AString strTestPhrase = "TEST_PHRASE";
-    ON_CALL(*pConfigurationManager, GetCallRejectReasonPhrase).WillByDefault(Return(strTestPhrase));
+    const IMS_CHAR pszTestPhrase[] = "TEST_PHRASE";
+    ON_CALL(*pConfigurationManager, GetCallRejectReasonPhrase)
+            .WillByDefault(Return(AString(pszTestPhrase)));
 
     EXPECT_TRUE(GetRejectPhrase(CODE_NONE).GetLength() < 1);
-    EXPECT_EQ(GetRejectPhrase(CODE_USER_DECLINE), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CS_CALL), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_LOCAL_CALL_BUSY), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_SETUP), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_MAX_CALL_LIMIT_REACHED), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE), strTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_USER_DECLINE).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CS_CALL).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_LOCAL_CALL_BUSY).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_SETUP).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_MAX_CALL_LIMIT_REACHED).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE).GetStr(), pszTestPhrase);
+}
+
+TEST_F(MessageFormatterTest, GetRejectPhraseForBusySpecialCase)
+{
+    CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_RTT_ON);
+
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+
+    EXPECT_STREQ("RTT on", strPhrase.GetStr());
 }
 
 TEST_F(MessageFormatterTest, SetUpdateReason)

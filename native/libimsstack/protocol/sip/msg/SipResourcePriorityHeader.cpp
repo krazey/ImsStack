@@ -77,14 +77,14 @@ SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*b
     return SIP_TRUE;
 }
 
-SIP_BOOL SipResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
+SIP_VOID SipResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
 {
-    return SetCharVar(pszNameSpace, m_pszNameSpace);
+    SetCharVar(pszNameSpace, m_pszNameSpace);
 }
 
-SIP_BOOL SipResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
+SIP_VOID SipResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
 {
-    return SetCharVar(pszRPriority, m_pszRPriority);
+    SetCharVar(pszRPriority, m_pszRPriority);
 }
 
 SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

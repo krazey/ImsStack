@@ -38,9 +38,9 @@ SipBadHeader::~SipBadHeader()
     }
 }
 
-SIP_BOOL SipBadHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
+SIP_VOID SipBadHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
 {
-    return SetCharVar(pszHdrName, m_pszHdrName);
+    SetCharVar(pszHdrName, m_pszHdrName);
 }
 
 SIP_BOOL SipBadHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)

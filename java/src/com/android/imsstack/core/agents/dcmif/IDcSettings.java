@@ -56,9 +56,4 @@ public interface IDcSettings extends IDc {
      * Returns whether the casueCode should be handled as permanent failure
      */
     boolean isPermanentFailure(EApnType apnType, int causeCode);
-
-    /**
-     * Returns whether cdmaless feature tag is required
-     */
-    boolean isCdmalessFeatureTagRequired();
 }

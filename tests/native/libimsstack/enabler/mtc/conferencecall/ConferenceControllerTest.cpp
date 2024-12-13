@@ -156,7 +156,8 @@ protected:
     {
         pMockIdManager = new MockCallConnectionIdManager(objMockContext);
 
-        pMockNotifier = new MockConferenceEventNotifier(objMockCallContext, *pMockIdManager);
+        pMockNotifier = new MockConferenceEventNotifier(
+                objMockCallManager, CONFERENCE_CALL_KEY, *pMockIdManager);
         ON_CALL(*pMockFactory, CreateEventNotifier(_, _)).WillByDefault(Return(pMockNotifier));
         ON_CALL(*piConferenceCall, GetCallContext()).WillByDefault(ReturnRef(objMockCallContext));
         ON_CALL(objMockCallContext, GetService()).WillByDefault(ReturnRef(objMtcService));
@@ -1082,8 +1083,7 @@ TEST_F(ConferenceControllerTest, OnOperationReadyWithNotifyResultNotifiesJoinedI
             new ConferenceOperationQueue::ConferenceOperation(
                     CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
-    EXPECT_CALL(
-            *pMockNotifier, NotifyJoined(CallReasonInfo(CODE_NONE), Ref(*pMockParticipantList)));
+    EXPECT_CALL(*pMockNotifier, NotifyJoined(Ref(*pMockParticipantList)));
     EXPECT_CALL(
             *pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_NULL))
             .WillOnce(Return(IMS_FALSE));
@@ -1099,8 +1099,7 @@ TEST_F(ConferenceControllerTest, OnOperationReadyWithNotifyResultNotifiesDropped
             new ConferenceOperationQueue::ConferenceOperation(
                     CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
-    EXPECT_CALL(
-            *pMockNotifier, NotifyDropped(CallReasonInfo(CODE_NONE), Ref(*pMockParticipantList)));
+    EXPECT_CALL(*pMockNotifier, NotifyDropped(Ref(*pMockParticipantList)));
     EXPECT_CALL(
             *pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_NULL))
             .WillOnce(Return(IMS_FALSE));

@@ -36,8 +36,8 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, CopyConstructor)
                     SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetNameSpace("namespace"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetRPriority("r-priority"));
+    pHeader->SetNameSpace("namespace");
+    pHeader->SetRPriority("r-priority");
 
     SipAcceptResourcePriorityHeader* pCopyHeader =
             reinterpret_cast<SipAcceptResourcePriorityHeader*>(
@@ -55,7 +55,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, CopyConstructor)
 
 TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeAndEncodeHdr)
 {
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -74,7 +74,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     /* Only namespace present, fail */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetNameSpace("namespace"));
+    pHeader->SetNameSpace("namespace");
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
@@ -86,7 +86,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeAndEncodeHdr)
                     SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* Only r-priority present, fail */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetRPriority("r-priority"));
+    pHeader->SetRPriority("r-priority");
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
@@ -98,8 +98,8 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeAndEncodeHdr)
                     SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* namespace and r-priority present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->SetNameSpace("namespace"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetRPriority("r-priority"));
+    pHeader->SetNameSpace("namespace");
+    pHeader->SetRPriority("r-priority");
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));

@@ -28,7 +28,7 @@ class AosMngrAdaptor : public ImsAosManager
 {
 public:
     AosMngrAdaptor(IN const AString& strAppName, IN IMS_SINT32 nSlotId);
-    virtual ~AosMngrAdaptor();
+    ~AosMngrAdaptor() override;
 
 private:
     AosMngrAdaptor(IN const AosMngrAdaptor& objRhs);

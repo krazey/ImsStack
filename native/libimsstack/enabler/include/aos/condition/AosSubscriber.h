@@ -26,7 +26,7 @@ class AosSubscriber : public IAosSubscriber, public IAosSubscriberManagerListene
 {
 public:
     explicit AosSubscriber(IN IAosAppContext* piAppContext);
-    virtual ~AosSubscriber();
+    ~AosSubscriber() override;
 
     // IAosSubscriber
     IMS_BOOL IsReady() const override;

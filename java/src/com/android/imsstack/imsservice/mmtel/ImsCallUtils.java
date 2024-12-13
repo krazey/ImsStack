@@ -200,6 +200,14 @@ public class ImsCallUtils {
             profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, ci.rttCapable);
         }
 
+        if (profile.getMediaProfile().getVideoDirection()
+                == ImsStreamMediaProfile.DIRECTION_INACTIVE) {
+            profile.updateMediaProfile(new ImsCallProfile(serviceType, callType, new Bundle(),
+                    new ImsStreamMediaProfile(mediaProfile.getAudioQuality(),
+                    mediaProfile.getAudioDirection(), mediaProfile.getVideoQuality(),
+                    ImsStreamMediaProfile.DIRECTION_INVALID, mediaProfile.getRttMode())));
+        }
+
         return profile;
     }
 

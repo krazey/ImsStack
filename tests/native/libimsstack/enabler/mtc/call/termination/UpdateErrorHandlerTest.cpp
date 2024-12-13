@@ -20,10 +20,13 @@
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
 #include "PlatformContext.h"
+#include "SipMethod.h"
 #include "TestConfigService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
 #include "core/MockIMessage.h"
+#include "helper/IPassiveTimerHolder.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipStatusCode.h"
@@ -47,6 +50,7 @@ public:
     MockIMessageUtils objMessageUtils;
     MockIMtcService objMtcService;
     TestConfigService* m_pConfigService;
+    MockIPassiveTimerHolder objPassiveTimerHolder;
 
 protected:
     virtual void SetUp() override
@@ -61,6 +65,7 @@ protected:
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMtcService));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimerHolder));
         ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         pHandler = new UpdateErrorHandler(objContext);
@@ -167,21 +172,48 @@ TEST_F(UpdateErrorHandlerTest, Handle500MessageReturnsServerError)
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithoutRetryAfterReturnsServerErrorWithCallingAos)
+TEST_F(UpdateErrorHandlerTest,
+        Handle503ResponseWithoutRetryAfterReturnsServiceUnavailableWithCallingAos)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SipMethod objMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(-1));
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
-    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, nStatusCode),
+            pHandler->Handle(&objMessage));
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerErrorWithCallingAos)
+TEST_F(UpdateErrorHandlerTest,
+        Handle503ResponseWithRetryAfterToInviteRequestReturnsServiceUnavailableWithCallingAos)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SipMethod objMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(1);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, nStatusCode),
+            pHandler->Handle(&objMessage));
+}
+
+TEST_F(UpdateErrorHandlerTest,
+        Handle503ResponseWithRetryAfterToUpdateRequestReturnsServiceUnavailableWithCallingAos)
+{
+    IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     IMS_SINT32 nAnyRetryAfter = 10;
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
@@ -191,13 +223,17 @@ TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerError
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(1);
-    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, nStatusCode),
+            pHandler->Handle(&objMessage));
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerErrorWithOutCallingAos)
+TEST_F(UpdateErrorHandlerTest,
+        Handle503ResponseWithRetryAfterReturnsServiceUnavailableWithOutCallingAos)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     IMS_SINT32 nAnyRetryAfter = 10;
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
@@ -207,6 +243,10 @@ TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerError
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
+    EXPECT_CALL(objPassiveTimerHolder,
+            AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
+                    IMS_FALSE))
+            .Times(1);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }
 

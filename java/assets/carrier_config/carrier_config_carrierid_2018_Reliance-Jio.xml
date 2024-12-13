@@ -74,8 +74,8 @@
             <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="-1"/>
             <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
             <int name="imsvoice.evs_codec_attribute_hf_only_int" value="0"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">

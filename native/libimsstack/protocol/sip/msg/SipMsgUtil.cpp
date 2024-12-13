@@ -19,8 +19,6 @@
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
-#define NAME_CONTENT_TRANSFER_ENCODING "Content-Transfer-Encoding"
-
 // clang-format off
 SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] = {
         "Allow",  // 0
@@ -202,7 +200,7 @@ SIP_INT32 SipGetMsgType(const SIP_CHAR* pszStartPoint)
                                                                      : SipMessage::REQ_TYPE;
 }
 
-SIP_INT32 SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+SipUri::UriType SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
     if (SipPf_Memcmp(pStartPt, SIP_SIP, nSize) == 0)
@@ -242,7 +240,7 @@ SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType)
 }
 
 #ifdef SIP_STRICT_PARSING
-SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL IsValidAddress(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     SIP_CHAR* pTempLoc = SIP_NULL;
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
@@ -264,8 +262,8 @@ SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 }
 #endif
 
-const SIP_CHAR* SipFindBodyEnd(
-        const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
+const SIP_CHAR* SipFindBodyEnd(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+        const SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
 {
     if (pStartPt == SIP_NULL)
     {
@@ -302,12 +300,14 @@ const SIP_CHAR* SipFindBodyEnd(
     return SIP_NULL;
 }
 
-SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName)
+SIP_INT32 SipGetMimeHdrType(const SIP_CHAR* pszHdrName)
 {
     if (pszHdrName == SIP_NULL)
     {
         return SipHeaderBase::UNKNOWN;
     }
+
+    const SIP_CHAR NAME_CONTENT_TRANSFER_ENCODING[] = "Content-Transfer-Encoding";
 
     switch (pszHdrName[0])
     {

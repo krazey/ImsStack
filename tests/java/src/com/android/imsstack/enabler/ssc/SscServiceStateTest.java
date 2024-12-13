@@ -68,6 +68,8 @@ import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.CarrierConfig.Assets;
 import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.enabler.ssc.SscServiceState.SscCrossSimDataStateListener;
@@ -156,7 +158,7 @@ public class SscServiceStateTest {
         AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT0);
-        AosFactory.getInstance().mAosServices.put(SLOT0, mMockAosService);
+        AosFactory.getInstance().replaceService(SLOT0, mMockAosService);
 
         DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT0);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT0, mMockUtInterface);
@@ -179,7 +181,7 @@ public class SscServiceStateTest {
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
-        AosFactory.getInstance().mAosServices.remove(SLOT0);
+        AosFactory.getInstance().replaceService(SLOT0, null);
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT0);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT0, null);
 
@@ -960,7 +962,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
-        mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistered(0, NetworkType.LTE, 0, null);
         processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -976,7 +978,7 @@ public class SscServiceStateTest {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
 
-        mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistered(0, NetworkType.LTE, 0, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -992,7 +994,7 @@ public class SscServiceStateTest {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
 
-        mSscServiceState.mRegiStateListener.notifyRegistering(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistering(0, NetworkType.LTE, 0, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1008,7 +1010,8 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
-        mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyDeregistered(
+                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1025,7 +1028,8 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = true;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = true;
 
-        mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyDeregistered(
+                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null);
         processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -1040,7 +1044,8 @@ public class SscServiceStateTest {
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
 
         createAndInitSscServiceState();
-        mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(
+                0, NetworkType.LTE, ReasonCode.UNSPECIFIED, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1066,7 +1071,7 @@ public class SscServiceStateTest {
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
         createAndInitSscServiceState();
 
-        mSscServiceState.mRegiStateListener.notifyCapabilitiesUpdateFailed(0, 0, 0);
+        mSscServiceState.mRegiStateListener.notifyCapabilitiesUpdateFailed(0, NetworkType.LTE, 0);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);

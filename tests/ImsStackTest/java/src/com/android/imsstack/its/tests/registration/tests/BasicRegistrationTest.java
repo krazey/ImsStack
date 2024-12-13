@@ -60,7 +60,6 @@ public class BasicRegistrationTest extends RegistrationTestBase {
 
     @After
     public void tearDown() throws Exception {
-        disableAllMmTelCapabilities();
         tearDownBase(SLOT0);
     }
 

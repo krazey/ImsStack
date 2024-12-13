@@ -31,6 +31,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsCoreContext.h"
 #include "Publication.h"
 #include "Reference.h"
 #include "Replaces.h"
@@ -420,7 +421,7 @@ IMS_RESULT Session::Accept()
 
             if (piDialog != IMS_NULL)
             {
-                CallerPreferenceManager::GetInstance()->UpdateDialogId(
+                ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->UpdateDialogId(
                         GetName(), piDialog->GetDialogId());
             }
         }
@@ -756,7 +757,8 @@ const Replaces* Session::GetReplaces() const
         return IMS_NULL;
     }
 
-    return CallControlHelper::GetInstance()->GetReplacesFromSessionId(GetSessionId());
+    return ImsCoreContext::GetInstance()->GetCallControlHelper()->GetReplacesFromSessionId(
+            GetSessionId());
 }
 
 PUBLIC
@@ -1586,7 +1588,8 @@ IMS_RESULT Session::SetCallerPreference(IN const ImsList<AString>& objCallerPref
     m_objPreviousCallerPreference.Clear();
     m_objPreviousCallerPreference = objCallerPreference;
 
-    CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(GetName(), objCallerPreference);
+    ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->UpdateAcceptContacts(
+            GetName(), objCallerPreference);
 
     return IMS_SUCCESS;
 }
@@ -2431,7 +2434,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::InitInstance()
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
 
     // CALLER_PREFERENCE_MANAGER
-    CallerPreferenceManager::GetInstance()->CreatePreferenceWrapper(
+    ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->CreatePreferenceWrapper(
             GetName(), AString::ConstNull());
 
     GetService()->RegisterMethod(this);
@@ -4265,13 +4268,7 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
         }
 
         // Create a media capabilities for this service & session
-        const SipAddress* pUserAor = GetUserAor();
-        const SipAddress::UserInfoPart* pUserInfo = pUserAor->GetUserInfoPart();
-        const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
-                : pUserAor->IsSchemeTel()                  ? pUserAor->GetHost()
-                                                           : pUserAor->GetUser();
-
-        if (!m_pOaState->CreateCapabilities(GetService(), strUserId))
+        if (!m_pOaState->CreateCapabilities(GetService()))
         {
             IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
             return IMS_FALSE;
@@ -4316,13 +4313,7 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
         }
 
         // Create a media capabilities for this service & session
-        const SipAddress* pUserAor = GetUserAor();
-        const SipAddress::UserInfoPart* pUserInfo = pUserAor->GetUserInfoPart();
-        const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
-                : pUserAor->IsSchemeTel()                  ? pUserAor->GetHost()
-                                                           : pUserAor->GetUser();
-
-        if (!m_pOaState->CreateCapabilities(GetService(), strUserId))
+        if (!m_pOaState->CreateCapabilities(GetService()))
         {
             IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
             return IMS_FALSE;
@@ -4981,6 +4972,8 @@ void Session::UpdateCallerPreference(
         return;
     }
 
+    CallerPreferenceManager* pCallerPreferenceManager =
+            ImsCoreContext::GetInstance()->GetCallerPreferenceManager();
     const SipMethod& objMethod = piPrevSipMsg->GetMethod();
 
     if (objMethod.Equals(SipMethod::INVITE))
@@ -4995,9 +4988,8 @@ void Session::UpdateCallerPreference(
                     ((piDialog->GetState() == ISipDialog::STATE_EARLY) ||
                             (piDialog->GetState() == ISipDialog::STATE_CONFIRMED)))
             {
-                CallerPreferenceManager::GetInstance()->UpdateDialogId(
-                        GetName(), piDialog->GetDialogId());
-                CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
+                pCallerPreferenceManager->UpdateDialogId(GetName(), piDialog->GetDialogId());
+                pCallerPreferenceManager->UpdateAcceptContacts(
                         GetName(), piPrevSipMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
             }
         }
@@ -5006,14 +4998,14 @@ void Session::UpdateCallerPreference(
             if (SipStatusCode::IsProvisional(nStatusCode) ||
                     SipStatusCode::IsFinalSuccess(nStatusCode))
             {
-                CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
+                pCallerPreferenceManager->UpdateAcceptContacts(
                         GetName(), piPrevSipMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
             }
             else
             {
                 // If the re-INVITE has been failed, restore the caller preference
                 // to the previous one
-                CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
+                pCallerPreferenceManager->UpdateAcceptContacts(
                         GetName(), m_objPreviousCallerPreference);
             }
         }
@@ -5022,7 +5014,7 @@ void Session::UpdateCallerPreference(
     {
         if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
+            pCallerPreferenceManager->UpdateAcceptContacts(
                     GetName(), piPrevSipMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
         }
     }
@@ -5115,15 +5107,16 @@ void Session::AddSessionToCallControlHelper()
         RemoveSessionFromCallControlHelper();
     }
 
-    m_strSessionIdForCallControl = CallControlHelper::CreateSessionId();
+    CallControlHelper* pCallControlHelper = ImsCoreContext::GetInstance()->GetCallControlHelper();
+
+    m_strSessionIdForCallControl = pCallControlHelper->CreateSessionId();
 
     // Create a Replaces header info...
-    Replaces* pReplaces = CallControlHelper::CreateReplaces(IsMobileOriginated(), GetDialog());
+    Replaces* pReplaces = CallControlHelper::CreateReplaces(GetDialog(), IsMobileOriginated());
 
-    CallControlHelper::GetInstance()->AddSession(m_strSessionIdForCallControl, pReplaces);
+    pCallControlHelper->AddSession(m_strSessionIdForCallControl, pReplaces);
 
-    IMS_TRACE_D(
-            "CallControlHelper :: AddSession (%s)", m_strSessionIdForCallControl.GetStr(), 0, 0);
+    IMS_TRACE_D("CallControlHelper: AddSession (%s)", m_strSessionIdForCallControl.GetStr(), 0, 0);
 }
 
 PRIVATE
@@ -5135,11 +5128,11 @@ void Session::RemoveSessionFromCallControlHelper()
         return;
     }
 
-    CallControlHelper::GetInstance()->RemoveSession(m_strSessionIdForCallControl);
+    CallControlHelper* pCallControlHelper = ImsCoreContext::GetInstance()->GetCallControlHelper();
+    pCallControlHelper->RemoveSession(m_strSessionIdForCallControl);
 
-    IMS_TRACE_D("CallControlHelper :: RemoveSession (%s), Count (%d)",
-            m_strSessionIdForCallControl.GetStr(),
-            CallControlHelper::GetInstance()->GetSessionCount(), 0);
+    IMS_TRACE_D("CallControlHelper: RemoveSession (%s), Count (%d)",
+            m_strSessionIdForCallControl.GetStr(), pCallControlHelper->GetSessionCount(), 0);
 
     m_strSessionIdForCallControl = AString::ConstNull();
 }
@@ -5180,7 +5173,8 @@ void Session::CleanupOnDestroy()
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // CALLER_PREFERENCE_MANAGER
-    CallerPreferenceManager::GetInstance()->DestroyPreferenceWrapper(GetName());
+    ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->DestroyPreferenceWrapper(
+            GetName());
 
     // Stop 2xx retransmission if it is running...
     Stop2xxRetransmission();
@@ -6808,8 +6802,9 @@ IMS_RESULT Session::SendRequestToInvite(IN IMS_BOOL bSessionRefresh /*= IMS_FALS
     // CALLER_PREFERENCE_MANAGER
     if (GetState() != STATE_INITIATED)
     {
-        m_objPreviousCallerPreference =
-                CallerPreferenceManager::GetInstance()->GetAcceptContactsByName(GetName());
+        m_objPreviousCallerPreference = ImsCoreContext::GetInstance()
+                                                ->GetCallerPreferenceManager()
+                                                ->GetAcceptContactsByName(GetName());
     }
 
     // Try to send an INVITE request to the network
@@ -6985,8 +6980,9 @@ IMS_RESULT Session::SendRequestToInviteOn422Received()
     // CALLER_PREFERENCE_MANAGER
     if (nState != STATE_INITIATED)
     {
-        m_objPreviousCallerPreference =
-                CallerPreferenceManager::GetInstance()->GetAcceptContactsByName(GetName());
+        m_objPreviousCallerPreference = ImsCoreContext::GetInstance()
+                                                ->GetCallerPreferenceManager()
+                                                ->GetAcceptContactsByName(GetName());
     }
 
     // Try to send an INVITE request to the network

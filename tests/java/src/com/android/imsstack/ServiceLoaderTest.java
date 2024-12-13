@@ -33,10 +33,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.XmlResourceParser;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
@@ -69,6 +71,7 @@ public class ServiceLoaderTest {
     @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
 
+    private XmlResourceParser mCarrierConfigOverrideParser;
     private ContextFixture mContextFixture;
     private TestAppContext mTestAppContext;
     private ServiceLoader mServiceLoader;
@@ -84,6 +87,11 @@ public class ServiceLoaderTest {
         mContextFixture = new ContextFixture();
         mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
         mTestAppContext.setUp();
+
+        mCarrierConfigOverrideParser = InstrumentationRegistry.getInstrumentation().getContext()
+                .getResources().getXml(R.xml.carrier_config_override);
+        when(mTestAppContext.getContext().getResources().getXml(eq(R.xml.carrier_config_override)))
+                .thenReturn(mCarrierConfigOverrideParser);
 
         when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
                 .thenReturn(mSettingsProxy);
@@ -108,6 +116,7 @@ public class ServiceLoaderTest {
 
     @After
     public void tearDown() throws Exception {
+        mCarrierConfigOverrideParser = null;
         mSp = null;
         mServiceLoader = null;
         ImsStackRegistry.setImsServiceState(SLOT0, false);

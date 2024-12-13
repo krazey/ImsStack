@@ -37,8 +37,9 @@ public:
     MOCK_METHOD(IMS_BOOL, IsWfcImsAvailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsSingleRegistrationRequired, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRttSupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsRttSupportedWhileRoaming, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportLimitedAdminSmsMode, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsTtySupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsVolteTtySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVopsIgnoredForVolteEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsAvailableWithoutVoiceCapability, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySsac, (), (const, override));
@@ -60,6 +61,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmcRegOnRandomPcscf, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsERegWithOnlyTcpInRoaming, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyReregSupportedOnIpcanChange, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithIpcanChangedDuringImsCallHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsDeregOn3gNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIpsecInitializedWithNewPcscf, (), (const, override));
@@ -137,6 +140,10 @@ public:
     MOCK_METHOD(IMS_UINT32, GetNotifyEventForInitialRegistration, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetNotifyWaitTime, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetNotifyEventForInitialRegWithWaitTime, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryMaxRetryCnt, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryWaitTime, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryBaseTime, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryMaxTime, (), (const, override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorRegRequired, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRetryCountSubErrorRegRequired, (), (const, override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorRegRequiredWithNextPcscf, (), (override));

@@ -45,14 +45,14 @@ SipIdentityHeader::~SipIdentityHeader()
     }
 }
 
-SIP_BOOL SipIdentityHeader::SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest)
+SIP_VOID SipIdentityHeader::SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest)
 {
-    return SetCharVar(pszSignedIdentiDigest, m_pSignedIdentityDigest);
+    SetCharVar(pszSignedIdentiDigest, m_pSignedIdentityDigest);
 }
 
-SIP_BOOL SipIdentityHeader::SetInfo(const SIP_CHAR* pszInfo)
+SIP_VOID SipIdentityHeader::SetInfo(const SIP_CHAR* pszInfo)
 {
-    return SetCharVar(pszInfo, m_pInfo);
+    SetCharVar(pszInfo, m_pInfo);
 }
 
 SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const

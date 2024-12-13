@@ -21,7 +21,7 @@
 #include "network/OsIpcan.h"
 #include "network/OsNetworkConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsIpcan::OsIpcan() {}

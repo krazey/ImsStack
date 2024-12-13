@@ -101,7 +101,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
                 return true;
             }
 
-            if (hasHighPriorityInOtherSlot(slotId, getPriorityType(trafficType))) {
+            if (hasHighPriorityInOtherSlot(getPriorityType(trafficType), slotId)) {
                 ImsLog.d(slotId, "priority is low");
                 return false;
             }
@@ -276,7 +276,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
     /**
      * This class provides the top priority type of the IMS traffic for a specified slot.
      */
-    private final class Traffic {
+    private static final class Traffic {
         private int mPriorityType = TRAFFIC_PRIORITY_NONE;
         private boolean mWlan = false;
         private boolean mIsSimultaneousCallingSupported = false;

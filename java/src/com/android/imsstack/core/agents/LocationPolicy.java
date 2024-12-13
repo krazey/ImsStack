@@ -18,7 +18,7 @@ package com.android.imsstack.core.agents;
 /**
  * This class defines the rules to obtain the location information.
  */
-public class LocationPolicy {
+public final class LocationPolicy {
     public static final int POLICY_NONE = 0;
     /**
      * Indicates if the cached location can be provided for location information.

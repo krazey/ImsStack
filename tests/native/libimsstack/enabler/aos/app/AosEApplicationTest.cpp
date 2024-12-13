@@ -22,7 +22,10 @@
 #include "ImsEventDef.h"
 #include "ImsMap.h"
 #include "INetworkWatcher.h"
+#include "PlatformContext.h"
 #include "ServiceNetworkPolicy.h"
+#include "TestThreadService.h"
+#include "MockIThread.h"
 
 #include "../../../config/interface/CarrierConfig.h"
 #include "../../../config/interface/ImsServiceConfig.h"
@@ -60,6 +63,11 @@ using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+#define DECLARE_USING(Base)               \
+    using Base::SetAppState;              \
+    using Base::ProcessConnectionUpdated; \
+    using Base::ProcessMessage;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -148,6 +156,9 @@ private:
 
 class TestAosEApplication : public AosEApplication
 {
+public:
+    DECLARE_USING(AosEApplication)
+
     inline TestAosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
             AosEApplication(piAppContext, strAppId)
     {
@@ -186,7 +197,6 @@ class TestAosEApplication : public AosEApplication
     FRIEND_TEST(AosEApplicationTest, Condition_RequestCommand);
     FRIEND_TEST(AosEApplicationTest, CallTracker_StateChanged);
 
-public:
     inline void SetAosCondition(IN AosCondition* pCondition) { m_pCondition = pCondition; }
 
     inline void SetAosConnector(IN AosConnector* pConnector) { m_pConnector = pConnector; }
@@ -204,11 +214,17 @@ public:
 private:
 };
 
+MATCHER_P(IsSameMsg, message, "")
+{
+    return arg.nMSG == message;
+}
+
 class AosEApplicationTest : public ::testing::Test
 {
 public:
     TestAosEApplication* m_pTestAosEApplication;
     TestAosCondition* m_pTestAosCondition;
+    TestThreadService m_objThreadService;
     AosStaticProfile* m_pAosStaticProfile;
     IAosNConfiguration* m_piAosNConfiguration;
 
@@ -223,6 +239,7 @@ public:
     MockIAosPcscf m_objMockIAosPcscf;
     MockIAosRegistration m_objMockIAosRegistration;
     MockIImsAosMonitor m_objMockIImsAosMonitor;
+    MockIThread m_objMockThread;
 
     AString m_strAppId = AString("ims.app.test");
     AString m_strServiceId = AString("ims.service.test");
@@ -323,6 +340,10 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(IMS_TRUE));
 
+        m_objThreadService.SetThread(&m_objMockThread);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_THREAD, &m_objThreadService);
+
         m_pTestAosEApplication =
                 new TestAosEApplication(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                         m_pAosStaticProfile->GetId());
@@ -346,6 +367,7 @@ protected:
     virtual void TearDown() override
     {
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
 
         if (m_pTestAosCondition)
         {
@@ -785,4 +807,69 @@ TEST_F(AosEApplicationTest, CallTracker_StateChanged)
     m_pTestAosEApplication->CallTracker_StateChanged(
             IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE);
     EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
+}
+
+TEST_F(AosEApplicationTest, ShouldNotifyRegistrationIfIpcanIsChangedWhileTheConfigIsTrue)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_IPCAN_CHANGED, _));
+
+    // WHEN
+    ImsMessage objMessage(MSG_IPCAN_CHANGED, 0, 0);
+    m_pTestAosEApplication->ProcessMessage(objMessage);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEApplicationTest, ShouldNotNotifyRegistrationIfIpcanIsChangedWhileTheConfigIsFalse)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_IPCAN_CHANGED, _))
+            .Times(0);
+
+    // WHEN
+    ImsMessage objMessage(MSG_IPCAN_CHANGED, 0, 0);
+    m_pTestAosEApplication->ProcessMessage(objMessage);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEApplicationTest,
+        ShouldPostMessageForIpcanChangeIfConnectionNotifiesIpcanChangedWhildTheConfigIsTrue)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(MSG_IPCAN_CHANGED)));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessConnectionUpdated(AosConnector::REASON_IPCAN_CAT_CHANGED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEApplicationTest,
+        ShouldNotPostMessageForIpcanChangeIfConnectionNotifiesIpcanChangedWhildTheConfigIsFalse)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyReregSupportedOnIpcanChange())
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(MSG_IPCAN_CHANGED))).Times(0);
+
+    // WHEN
+    m_pTestAosEApplication->ProcessConnectionUpdated(AosConnector::REASON_IPCAN_CAT_CHANGED);
+
+    // THEN: The GIVEN condition should be met.
 }

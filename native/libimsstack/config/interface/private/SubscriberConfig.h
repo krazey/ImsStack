@@ -86,6 +86,21 @@ public:
     {
         return IsSubscriptionAttributeEnabled(SUBSCRIPTION_ATTRIBUTE_TESTMODE);
     }
+    inline IMS_SINT32 GetSubscriptionAttributes() const override
+    {
+        return m_nSubscriptionAttributes;
+    }
+    inline IConfigurable* GetConfigurable() const override { return m_pConfigurable; }
+    void RemoveListener(IN ISubscriberConfigListener* piListener) override;
+    void SetListener(IN ISubscriberConfigListener* piListener,
+            IN IMS_SINT32 nEvents = LISTEN_EVENT_DEFAULT) override;
+    void EnableIsim() override;
+    void UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+            IN const AString& strPrivateUserId, IN const AString& strPublicUserId,
+            IN IMS_BOOL bIsimEnabled = IMS_FALSE) override;
+    void UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+            IN const AString& strPrivateUserId, IN const AStringArray& objPublicUserIds,
+            IN IMS_BOOL bIsimEnabled = IMS_FALSE) override;
 
     //// APIs for the values of a default ImsSubscriberInfo
     const Credential& GetCredential() const override;
@@ -118,15 +133,6 @@ protected:
     // IAsyncConfig class
     void HandleMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2) override;
 
-    // ISubscriberConfig class
-    inline IMS_SINT32 GetSubscriptionAttributes() const override
-    {
-        return m_nSubscriptionAttributes;
-    }
-    inline IConfigurable* GetConfigurable() const override { return m_pConfigurable; }
-    void RemoveListener(IN ISubscriberConfigListener* piListener) const override;
-    void SetListener(IN ISubscriberConfigListener* piListener) const override;
-
     // ConfigBase class
     IMS_BOOL ReadFrom() override;
     IMS_BOOL Update(IN IMS_SINT32 nCpi, IN const AString& strValue = AString::ConstNull()) override;
@@ -151,31 +157,36 @@ private:
     void SetOrClearSubscriptionAttributes(IN IMS_BOOL bEnabled, IN IMS_SINT32 nAttributes);
 
     void CallSubscriberInfoListener(IN IMS_SINT32 nSubsInfo);
-    void ClearPcscfAddressAndSubscriberInfo();
+    void ClearPcscfAddresses();
+    void ClearSubscriberInfos();
     const AString& GetLog(IN const AString& strValue, IN IMS_SINT32 nCount) const;
     inline IMS_SINT32 GetState() const { return m_nState; }
+    ImsSubscriberInfo* CreateSubscriberInfo();
     void InitIsim();
     void SetPrimaryImpu(IN ImsSubscriberInfo* pSubsInfo);
     void SetState(IN IMS_SINT32 nState);
-    void CompleteProvisioning();
     void RefreshIsimRecords();
     void UpdateIsimRecords();
-    void UpdateHomeDomainName();
-    void UpdatePrivateUserIdentity();
-    void UpdatePublicUserIdentities();
-    void NotifyInitCompleted();
-    void NotifyRefreshCompleted();
-    void NotifyRefreshStarted();
-    void NotifyError(
-            IN IMS_SINT32 nErrorCode, IN ISubscriberConfigListener* piTargetListener = IMS_NULL);
+    void UpdateHomeDomainName(IN ImsSubscriberInfo* pSubsInfo, IN const AString& strHomeDomainName);
+    void UpdatePrivateUserId(IN ImsSubscriberInfo* pSubsInfo, IN const AString& strPrivateUserId);
+    void UpdatePublicUserIds(
+            IN ImsSubscriberInfo* pSubsInfo, IN const AStringArray& objPublicUserIds);
+    void UpdatePcscfAddresses();
+    void NotifyInitCompleted(IN IMS_SINT32 nEvent);
+    void NotifyRefreshCompleted(IN IMS_SINT32 nEvent);
+    void NotifyRefreshStarted(IN IMS_SINT32 nEvent);
+    void NotifyError(IN IMS_SINT32 nEvent, IN IMS_SINT32 nErrorCode,
+            IN ISubscriberConfigListener* piTargetListener = IMS_NULL);
 
     void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2);
     void UpdateAllConfigs();
-    void WriteProvisioning();
+    void StorePrimaryPublicUserId();
+    void StoreSubscriberInfo();
     void ToDebugString();
 
     IMS_SINT32 ReadSubscriptionAttributes(IN ICarrierConfig* piCc);
     static ImsVector<IMS_SINT32> ReadPcscfDiscoveryMethods(IN ICarrierConfig* piCc);
+    static ImsList<IMS_SINT32> GetListenEvents(IN IMS_SINT32 nEvents);
 
     static const IMS_CHAR* IsimStateToString(IN IMS_SINT32 nState);
     static const IMS_CHAR* PcscfDiscoveryMethodToString(IN IMS_SINT32 nMethod);
@@ -204,6 +215,7 @@ private:
         ACMSG_INIT_COMPLETED,
         ACMSG_REFRESH_COMPLETED,
         ACMSG_REFRESH_STARTED,
+        ACMSG_REFRESH_STARTED_N_COMPLETED,
         ACMSG_NOTIFY_ERROR,
         ACMSG_UPDATE_ALL_CONFIGS
     };
@@ -238,7 +250,8 @@ private:
     IMS_SINT32 m_nState;
     ImsList<ImsSubscriberInfo*> m_objSubscriberInfos;
 
-    mutable ImsList<ISubscriberConfigListener*> m_objListeners;
+    // <Event, List of ISubscriberConfigListener>
+    ImsMap<IMS_SINT32, ImsList<ISubscriberConfigListener*>> m_objListeners;
     ISubscriberInfoListener* m_piSubsInfoListener;
 
     // Configurable class

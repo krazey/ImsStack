@@ -155,14 +155,48 @@ public:
      *
      * @param piListener The listener to monitor the subscription change.
      */
-    virtual void RemoveListener(IN ISubscriberConfigListener* piListener) const = 0;
+    virtual void RemoveListener(IN ISubscriberConfigListener* piListener) = 0;
 
     /**
      * @brief Sets the listener to be notified the status of IMS subscriber information.
      *
      * @param piListener The listener to monitor the subscription change.
+     * @param nEvents The events of interest to listen.
      */
-    virtual void SetListener(IN ISubscriberConfigListener* piListener) const = 0;
+    virtual void SetListener(IN ISubscriberConfigListener* piListener,
+            IN IMS_SINT32 nEvents = LISTEN_EVENT_DEFAULT) = 0;
+
+    /**
+     * @brief Enables ISIM attribute. The IMS-AKA also performs using the ISIM instead of USIM.
+     *
+     * NOTE: If ISIM attribute is being enabled, the IMS identities will be loaded from
+     *       the ISIM application. Otherwise, there is no action.
+     */
+    virtual void EnableIsim() = 0;
+
+    /**
+     * @brief Updates IMS identities that are created based on USIM information.
+     *
+     * @param strHomeDomainName The home domain name.
+     * @param strPrivateUserId The private user identity.
+     * @param strPublicUserId The public user identity.
+     * @param bIsimEnabled The flag specifying whether ISIM should be enabled for IMS AKA.
+     */
+    virtual void UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+            IN const AString& strPrivateUserId, IN const AString& strPublicUserId,
+            IN IMS_BOOL bIsimEnabled = IMS_FALSE) = 0;
+
+    /**
+     * @brief Updates IMS identities that are created based on USIM information.
+     *
+     * @param strHomeDomainName The home domain name.
+     * @param strPrivateUserId The private user identity.
+     * @param objPublicUserIds The list of public user identity.
+     * @param bIsimEnabled The flag specifying whether ISIM should be enabled for IMS AKA.
+     */
+    virtual void UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+            IN const AString& strPrivateUserId, IN const AStringArray& objPublicUserIds,
+            IN IMS_BOOL bIsimEnabled = IMS_FALSE) = 0;
 
     //// APIs for the values of a default IImsSubscriberInfo
 
@@ -253,6 +287,17 @@ public:
     {
         PCSCF_DISCOVERY_METHOD_PCO = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_PCO,
         PCSCF_DISCOVERY_METHOD_CONFIG = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_CONFIG
+    };
+
+    /// Listening events for ISubscriberConfigListener
+    enum
+    {
+        /// Calls the listener when anything related to ISIM provisioning changes.
+        LISTEN_EVENT_ISIM_PROVISIONING = 1 << 0,
+        /// Calls the listener when anything related to manual provisioning changes.
+        LISTEN_EVENT_MANUAL_PROVISIONING = 1 << 1,
+        /// Calls the listener when any information changes.
+        LISTEN_EVENT_DEFAULT = LISTEN_EVENT_ISIM_PROVISIONING | LISTEN_EVENT_MANUAL_PROVISIONING
     };
 };
 

@@ -74,7 +74,7 @@ class AosERegistration : public AosRegistration, public IAosEmergencyListener
 {
 public:
     AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
-    virtual ~AosERegistration();
+    ~AosERegistration() override;
 
     void Start() final;
     void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
@@ -105,6 +105,7 @@ protected:
     void ProcessTransactionTimerExpired() final;
 
     void SetRefreshPolicy() final;
+    void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired) final;
 
     void UpdateTransactionStarted() final;
 

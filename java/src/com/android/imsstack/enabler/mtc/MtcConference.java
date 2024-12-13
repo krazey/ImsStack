@@ -170,7 +170,10 @@ public class MtcConference {
 
     public void extendToConference(UsersInfo usersInfo) {
         if (!isConferenceValid()) {
-            // FIXME: do exception handling
+            if (mListener != null) {
+                mListener.onCallConferenceExtendFailed(this,
+                        new CallReasonInfo(CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR, 0, ""));
+            }
             return;
         }
 
@@ -397,7 +400,6 @@ public class MtcConference {
                     listener.onCallInviteParticipantsRequestDelivered(this);
                 } else {
                     CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
-                    // FIXME: it needs to add an SIP status code for some scenarios
                     mCT.updateConferenceState(this,
                             ConferenceTracker.EVENT_INVITE_PARTICIPANTS_REQUEST_FAILED,
                             ImsArgs.obtain(callReasonInfo, null, null));

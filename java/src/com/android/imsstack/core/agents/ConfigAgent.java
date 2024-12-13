@@ -16,14 +16,17 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
+import android.annotation.XmlRes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.XmlResourceParser;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.text.TextUtils;
 
+import com.android.imsstack.R;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
@@ -80,7 +83,7 @@ public class ConfigAgent implements ConfigInterface {
 
     @Override
     public void init(Context context) {
-        mDefaultImsConfig = loadCarrierConfigFromXml(
+        mDefaultImsConfig = readCarrierConfigFromAsset(
                 CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, null);
         mIntentReceiver.register();
     }
@@ -188,11 +191,33 @@ public class ConfigAgent implements ConfigInterface {
         // Sets a default configuration from assets.
         config.putAll(mDefaultImsConfig);
 
-        // Loads IMS specific carrier configuration from asset.
-        PersistableBundle configFromAsset = loadCarrierConfig(subId, id);
+        // Loads IMS internal carrier configuration from asset.
+        // 1) Precedence: specific-carrier-id > carrier-id > carrier-id-from-sim-mcc-mnc.
+        // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
+        PersistableBundle internalConfig;
 
-        CarrierConfig.overrideNestedBundles(config, configFromAsset);
-        config.putAll(configFromAsset);
+        // Reads the parent carrier configuration first if present.
+        if (id.getSpecificCarrierId() != SimCarrierId.UNKNOWN_ID
+                && id.getCarrierId() != id.getSpecificCarrierId()) {
+            SimCarrierId parentId = new SimCarrierId.Builder()
+                    .setCarrierId(id.getCarrierId())
+                    .build();
+            internalConfig = readCarrierConfig(subId, parentId);
+            CarrierConfig.overrideNestedBundles(config, internalConfig);
+            config.putAll(internalConfig);
+        }
+
+        internalConfig = readCarrierConfig(subId, id);
+        CarrierConfig.overrideNestedBundles(config, internalConfig);
+        config.putAll(internalConfig);
+
+        // Overrides the specific carrier configuration values if present.
+        internalConfig = readCarrierConfigFromRes(R.xml.carrier_config_override, id);
+        CarrierConfig.overrideNestedBundles(config, internalConfig);
+        config.putAll(internalConfig);
+
+        // Loads override configs in the hidden key of CarrierConfigManager
+        overrideHiddenConfigs(subId, config);
 
         ImsLog.d(mSlotId, "updateCarrierConfig: " + config.toString());
 
@@ -211,6 +236,24 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         notifyCarrierConfigChanged(subId);
+    }
+
+    @VisibleForTesting
+    protected void overrideHiddenConfigs(int subId, PersistableBundle config) {
+        // Load the settings from the AP IMS hidden key of CarrierConfigManager if it exists
+        if (!config.containsKey(CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE)) {
+            return;
+        }
+        PersistableBundle configsInHiddenKey = config.getPersistableBundle(
+                CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE);
+        config.remove(CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE);
+        if (configsInHiddenKey.isEmpty()) {
+            return;
+        }
+
+        ImsLog.i(mSlotId, "Override internal settings for the hidden key");
+        CarrierConfig.overrideNestedBundles(config, configsInHiddenKey);
+        config.putAll(configsInHiddenKey);
     }
 
     private void overrideTestConfigs(PersistableBundle config) {
@@ -250,7 +293,8 @@ public class ConfigAgent implements ConfigInterface {
                 CarrierConfig.IMS_PREFIX_KEYS, CarrierConfig.IMS_VOICE_PREFIX_KEYS,
                 CarrierConfig.IMS_SMS_PREFIX_KEYS, CarrierConfig.IMS_RTT_PREFIX_KEYS,
                 CarrierConfig.IMS_EMERGENCY_PREFIX_KEYS, CarrierConfig.IMS_VT_PREFIX_KEYS,
-                CarrierConfig.IMS_WFC_PREFIX_KEYS, CarrierConfig.IMS_SS_PREFIX_KEYS)
+                CarrierConfig.IMS_WFC_PREFIX_KEYS, CarrierConfig.IMS_SS_PREFIX_KEYS,
+                new String[] {CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE})
                     .flatMap(Stream::of)
                     .toArray(String[]::new);
 
@@ -261,20 +305,21 @@ public class ConfigAgent implements ConfigInterface {
         return ccmp.getConfigForSubId(subId, imsConfigKeys);
     }
 
-    private PersistableBundle loadCarrierConfig(int subId, SimCarrierId id) {
+    @VisibleForTesting
+    protected PersistableBundle readCarrierConfig(int subId, SimCarrierId id) {
         String fileName = getCarrierConfigFile(subId, id);
 
         if (TextUtils.isEmpty(fileName)) {
-            ImsLog.d(mSlotId, "loadCarrierConfig: No matched carrier configuration.");
+            ImsLog.d(mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
             return new PersistableBundle();
         }
 
-        ImsLog.d(mSlotId, "loadCarrierConfigFromXml: " + fileName);
+        ImsLog.d(mSlotId, "readCarrierConfig: " + fileName);
 
-        return loadCarrierConfigFromXml(fileName, id);
+        return readCarrierConfigFromAsset(fileName, id);
     }
 
-    private PersistableBundle loadCarrierConfigFromXml(String fileName, SimCarrierId id) {
+    private PersistableBundle readCarrierConfigFromAsset(String fileName, SimCarrierId id) {
         try (InputStream is = AppContext.getInstance().getAssets().open(fileName)) {
             synchronized (this) {
                 if (mFactory == null) {
@@ -286,8 +331,17 @@ public class ConfigAgent implements ConfigInterface {
             parser.setInput(is, "utf-8");
 
             return readConfigFromXml(parser, id);
+        } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
+            ImsLog.e(mSlotId, "readCarrierConfigFromAsset: " + e.toString());
+            return new PersistableBundle();
+        }
+    }
+
+    private PersistableBundle readCarrierConfigFromRes(@XmlRes int resId, SimCarrierId id) {
+        try (XmlResourceParser parser = AppContext.getInstance().getResources().getXml(resId)) {
+            return readConfigFromXml(parser, id);
         } catch (IOException | XmlPullParserException e) {
-            ImsLog.e(mSlotId, "loadCarrierConfigFromXml: " + e.toString());
+            ImsLog.e(mSlotId, "readCarrierConfigFromRes: " + e.toString());
             return new PersistableBundle();
         }
     }
@@ -313,21 +367,21 @@ public class ConfigAgent implements ConfigInterface {
             }
 
             TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
-            int mccMncCarrierId = tmp.getCarrierIdFromSimMccMnc();
-            int testCarrierId = ImsPrivateProperties.Persistent.getInt(
-                    ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
-            int specificCarrierId = (testCarrierId > 0) ? testCarrierId : id.getSpecificCarrierId();
+            String prefixForSpecificCarrierId = CARRIER_ID_PREFIX + id.getSpecificCarrierId() + "_";
+            String prefixForCarrierId = CARRIER_ID_PREFIX + id.getCarrierId() + "_";
+            String prefixForMccMncCarrierId =
+                    CARRIER_ID_PREFIX + tmp.getCarrierIdFromSimMccMnc() + "_";
             String fileNameForSpecificCarrierId = null;
             String fileNameForCarrierId = null;
             String fileNameForMccMncCarrierId = null;
 
             for (String file : files) {
-                if (file.startsWith(CARRIER_ID_PREFIX + specificCarrierId + "_")) {
+                if (file.startsWith(prefixForSpecificCarrierId)) {
                     fileNameForSpecificCarrierId = file;
                     break;
-                } else if (file.startsWith(CARRIER_ID_PREFIX + id.getCarrierId() + "_")) {
+                } else if (file.startsWith(prefixForCarrierId)) {
                     fileNameForCarrierId = file;
-                } else if (file.startsWith(CARRIER_ID_PREFIX + mccMncCarrierId + "_")) {
+                } else if (file.startsWith(prefixForMccMncCarrierId)) {
                     fileNameForMccMncCarrierId = file;
                 }
             }

@@ -58,6 +58,15 @@ public:
             IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId, IN MEDIA_CONTENT_TYPE eType);
 
     /**
+     * @brief Create each media(audio/text/video) profile
+     *
+     * @param eType The media profile type to be created
+     * @param pProfile if not null, this profile will be copied to the media profile just created
+     * @return MediaBaseProfile* The media profile created
+     */
+    MediaBaseProfile* CreateProfile(
+            IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile = IMS_NULL);
+    /**
      * @brief Delete the profile
      *
      * @param pProfile The media profile to be deleted
@@ -112,7 +121,8 @@ private:
     TextProfile::Payload* CreateTextPayload(IN TextProfile::Payload* payload = IMS_NULL);
     VideoProfile::Payload* CreateVideoPayload(IN VideoProfile::Payload* payload = IMS_NULL);
 
-    AudioProfile* SetAudioProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
+    AudioProfile* SetAudioProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
+            IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId);
     VideoProfile* SetVideoProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     TextProfile* SetTextProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
 

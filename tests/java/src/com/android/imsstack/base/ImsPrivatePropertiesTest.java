@@ -33,9 +33,7 @@ import androidx.test.filters.SmallTest;
 import com.android.imsstack.ContextFixture;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -64,22 +62,20 @@ public class ImsPrivatePropertiesTest {
     private static final int DEFAULT_VALUE_INT = -1;
     private static final String DEFAULT_VALUE_STRING = null;
 
-    static ContextFixture sContext;
-
     @Mock SharedPreferences mSp;
     @Mock SharedPreferences.Editor mSpEditor;
 
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
+    TestAppContext mTestAppContext;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        doReturn(mSp).when(sContext.getTestDouble()).getSharedPreferences(anyString(), anyInt());
+        mTestAppContext = new TestAppContext(new ContextFixture().getTestDouble());
+        mTestAppContext.setUp();
+
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
         when(mSp.edit()).thenReturn(mSpEditor);
         when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_SIM_OPERATOR), anyString()))
                 .thenReturn(TEST_OPERATOR);
@@ -100,17 +96,13 @@ public class ImsPrivatePropertiesTest {
 
     @After
     public void tearDown() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        AppContext.deinit();
-        sContext = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
     @SmallTest
-    public void getSimCountry() throws Exception {
+    public void testGetSimCountry() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> defaultValueCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -125,7 +117,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void getSimOperator() throws Exception {
+    public void testGetSimOperator() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> defaultValueCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -140,7 +132,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void getSimOperatorSub() throws Exception {
+    public void testGetSimOperatorSub() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> defaultValueCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -155,7 +147,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void ephemeralGetOperations() throws Exception {
+    public void testEphemeralGetOperations() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> defaultValueCaptor = ArgumentCaptor.forClass(String.class);
         int callCount = 3;
@@ -182,7 +174,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void ephemeralGetOperations_defaultValue() throws Exception {
+    public void testEphemeralGetOperations_defaultValue() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> defaultValueCaptor = ArgumentCaptor.forClass(String.class);
         int callCount = 3;
@@ -212,7 +204,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void ephemeralSetOperations() throws Exception {
+    public void testEphemeralSetOperations() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
         int callCount = 3;
@@ -236,7 +228,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void ephemeralRemove() throws Exception {
+    public void testEphemeralRemove() {
         ImsPrivateProperties.Ephemeral.remove(KEY_TEST_STRING, SLOT0);
 
         verify(mSpEditor).remove(eq(KEY_TEST_STRING));
@@ -245,7 +237,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void ephemeralRemoveAll() throws Exception {
+    public void testEphemeralRemoveAll() {
         ImsPrivateProperties.Ephemeral.removeAll(SLOT0);
 
         verify(mSpEditor).clear();
@@ -254,7 +246,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void persistentGetOperations() throws Exception {
+    public void testPersistentGetOperations() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> defaultValueCaptor = ArgumentCaptor.forClass(String.class);
         int callCount = 3;
@@ -281,7 +273,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void persistentGetOperations_defaultValue() throws Exception {
+    public void testPersistentGetOperations_defaultValue() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> defaultValueCaptor = ArgumentCaptor.forClass(String.class);
         int callCount = 3;
@@ -311,7 +303,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void persistentSetOperations() throws Exception {
+    public void testPersistentSetOperations() {
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
         int callCount = 3;
@@ -335,7 +327,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void persistentRemoveTestProperties() throws Exception {
+    public void testPersistentRemoveTestProperties() {
         int callCount = ImsPrivateProperties.Persistent.TEST_PROPERTIES.length;
 
         ImsPrivateProperties.Persistent.removeTestProperties(SLOT0);
@@ -346,7 +338,7 @@ public class ImsPrivatePropertiesTest {
 
     @Test
     @SmallTest
-    public void persistentIsConfigProperty() throws Exception {
+    public void testPersistentIsConfigProperty() {
         assertTrue(ImsPrivateProperties.Persistent.isConfigProperty(
                 ImsPrivateProperties.Persistent.KEY_CONFIG_PCSCF_ADDRESS_LIST));
         assertTrue(ImsPrivateProperties.Persistent.isConfigProperty(
@@ -359,5 +351,25 @@ public class ImsPrivatePropertiesTest {
         assertFalse(ImsPrivateProperties.Persistent.isConfigProperty(KEY_TEST_STRING));
         assertFalse(ImsPrivateProperties.Persistent.isConfigProperty(KEY_TEST_BOOL));
         assertFalse(ImsPrivateProperties.Persistent.isConfigProperty(KEY_TEST_INT));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetInt_returnEmptyOrNullString_defaultValue() {
+        when(mSp.getString(eq(KEY_TEST_INT), anyString())).thenReturn("");
+
+        final int defaultIntValue = DEFAULT_VALUE_TEST_INT + 1;
+
+        assertEquals(defaultIntValue,
+                ImsPrivateProperties.Persistent.getInt(KEY_TEST_INT, defaultIntValue, SLOT0));
+        assertEquals(defaultIntValue,
+                ImsPrivateProperties.Ephemeral.getInt(KEY_TEST_INT, defaultIntValue, SLOT0));
+
+        when(mSp.getString(eq(KEY_TEST_INT), anyString())).thenReturn(null);
+
+        assertEquals(defaultIntValue,
+                ImsPrivateProperties.Persistent.getInt(KEY_TEST_INT, defaultIntValue, SLOT0));
+        assertEquals(defaultIntValue,
+                ImsPrivateProperties.Ephemeral.getInt(KEY_TEST_INT, defaultIntValue, SLOT0));
     }
 }

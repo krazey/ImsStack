@@ -29,7 +29,7 @@ class AosService : public IAosService, public ITimerListener
 {
 public:
     explicit AosService(IN IMS_SINT32 nSlotId);
-    virtual ~AosService();
+    ~AosService() override;
 
     void AddListener(IN IAosRegistrationControlListener* piListener) override;
     void RemoveListener(IN IAosRegistrationControlListener* piListener) override;
@@ -79,13 +79,14 @@ public:
     void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
 
     // Native -> Java
-    IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
-    IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
-    IMS_BOOL NotifyDeregistered(IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
+    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyRegistering(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN AosReasonCode eReason) override;
     IMS_BOOL NotifyTechnologyChangeFailed(
-            IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) override;
+            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, AosReasonCode eReason) override;
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
     IMS_BOOL NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;

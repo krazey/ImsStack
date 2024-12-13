@@ -69,7 +69,7 @@ PUBLIC VIRTUAL void EctController::OnReferenceUpdated(IN IMS_SINT32 nSipFragCode
     IMS_TRACE_D("OnReferenceUpdated", 0, 0, 0);
     if (SipStatusCode::IsFinalSuccess(nSipFragCode))
     {
-        OnCompleted();
+        OnSuccess();
     }
     else if (SipStatusCode::IsFinalFailure(nSipFragCode))
     {
@@ -95,7 +95,7 @@ IMtcCall* EctController::GetTransferee() const
     return piTransferee;
 }
 
-PROTECTED VIRTUAL void EctController::OnCompleted()
+PROTECTED VIRTUAL void EctController::OnSuccess()
 {
     NotifyResult(IMS_SUCCESS, CODE_USER_TERMINATED);
     TerminateTransfereeCall();

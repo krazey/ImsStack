@@ -25,6 +25,7 @@ import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityStatus;
+import android.telephony.imsmedia.RtpReceptionStats;
 
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
@@ -267,5 +268,15 @@ public class AudioSessionCallbackHandler {
         parcel.writeInt(bitsPerSecond);
 
         getMtcMediaInterface().sendRequest(parcel);
+    }
+
+    /**
+     * Handles the notification of the rtp reception stats
+     * @param stats The object of the RtpReceptionStats
+     */
+    public void onNotifyRtpReceptionStats(final RtpReceptionStats stats) {
+        ImsLog.v("onNotifyRtpReceptionStats: stats= " + stats);
+
+        getMtcMediaInterface().onNotifyRtpReceptionStats(ImsMediaSession.SESSION_TYPE_AUDIO, stats);
     }
 }

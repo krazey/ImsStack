@@ -144,17 +144,6 @@ public class DcSettings implements IDcSettings {
         return false;
     }
 
-    @Override
-    public boolean isCdmalessFeatureTagRequired() {
-        CarrierConfig config = getCarrierConfig(mSlotId);
-
-        if (config != null) {
-            return config.getBoolean(CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL,
-                    false);
-        }
-        return false;
-    }
-
     @VisibleForTesting
     protected IDcNetWatcher getDcNetWatcher(int slotId) {
         return DcFactory.getDcAgent(IDcNetWatcher.class, slotId);

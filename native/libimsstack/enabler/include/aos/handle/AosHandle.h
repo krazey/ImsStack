@@ -61,7 +61,7 @@ class AosHandle :
 public:
     AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_UINT32 nServiceType);
-    virtual ~AosHandle();
+    ~AosHandle() override;
 
     // IAosHandle
     AString& GetAppId() override;
@@ -160,12 +160,13 @@ public:
         BLOCK_VIWIFI_CAPABILITY = 0x8,
         BLOCK_CALL_COMPOSER_CAPABILITY = 0x10,
         BLOCK_SMS_CAPABILITY = 0x20,
+        BLOCK_TEXT_CAPABILITY = 0x40,
 
         // Network
-        BLOCK_VOPS = 0x40,
-        BLOCK_SSAC = 0x80,
-        BLOCK_NETWORK = 0x100,
-        BLOCK_3G = 0x200
+        BLOCK_VOPS = 0x80,
+        BLOCK_SSAC = 0x100,
+        BLOCK_NETWORK = 0x200,
+        BLOCK_3G = 0x400
     };
 
 protected:
@@ -214,6 +215,9 @@ protected:
     IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ReevaluateBlocks();
     IMS_BOOL UpdateIpcan();
+
+    void NotifyEmergencyInitiated();
+    void NotifyEmergencyInitiationDone();
 
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nType) const;
     IMS_BOOL IsHandleBlocked(IN const IMS_UINT32& nBlocks, IN IMS_UINT32 nType) const;
@@ -332,6 +336,8 @@ protected:
 
     IMS_BOOL m_bNetSrvIn;
     IMS_UINT32 m_nNetworkType;
+
+    IMS_BOOL m_bEmergencyInitiated;
 
     IMS_UINT32 m_nAppState;
 

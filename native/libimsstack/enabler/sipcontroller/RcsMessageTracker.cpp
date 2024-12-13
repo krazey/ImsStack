@@ -230,9 +230,10 @@ PRIVATE
 IMS_RESULT RcsMessageTracker::SendRequest(IN IUSncSendMessageParam* pParam)
 {
     (void)pParam;
+    SipMethod objMethod;
 
     m_piscc = m_piscf->CreateClientConnection(
-            /*IN const SipMethod& objMethod*/ IMS_NULL,
+            /*IN const SipMethod& objMethod*/ objMethod,
             /*IN const SipAddress* pFrom*/ IMS_NULL,
             /*IN const SipAddress* pTo*/ IMS_NULL);
 

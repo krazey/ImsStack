@@ -84,7 +84,6 @@ public:
         m_piListener = piListener;
     }
 
-    // TODO: need to optimize.
     // IConferenceController interfaces implementation
     void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,

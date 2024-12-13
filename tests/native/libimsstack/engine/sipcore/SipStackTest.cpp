@@ -44,7 +44,7 @@ TEST_F(SipStackTest, DisplayBadHeaders)
                               "\r\n"};
 
     ::SipMessage* pSipMsg = new ::SipMessage();
-    SIP_BOOL bResult = pSipMsg->DecCompleteMsg(const_cast<SIP_CHAR*>(acMsg), IMS_StrLen(acMsg));
+    SIP_BOOL bResult = pSipMsg->DecCompleteMsg(acMsg, IMS_StrLen(acMsg));
 
     EXPECT_EQ(SIP_TRUE, bResult);
     EXPECT_EQ(1, pSipMsg->GetBadHeaderCount());  // Date is a bad header.

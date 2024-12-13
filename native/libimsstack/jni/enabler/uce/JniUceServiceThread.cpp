@@ -22,7 +22,7 @@
 
 using namespace android;
 
-__IMS_TRACE_TAG_USER_DECL__("IMS_UCE");
+__IMS_TRACE_TAG_USER_DECL__("JNI.UCE");
 
 PUBLIC
 JniUceServiceThread::JniUceServiceThread() :

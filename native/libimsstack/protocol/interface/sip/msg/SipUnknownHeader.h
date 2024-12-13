@@ -40,9 +40,9 @@ public:
     SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*set methods*/
-    SIP_BOOL SetHeaderName(const SIP_CHAR* pszHdrName);
+    SIP_VOID SetHeaderName(const SIP_CHAR* pszHdrName);
 
-    SIP_BOOL SetHeaderValue(const SIP_CHAR* pszHdrValue);
+    SIP_VOID SetHeaderValue(const SIP_CHAR* pszHdrValue);
 
     /*Get methods*/
     inline const SIP_CHAR* GetHeaderName() const { return m_pszHdrName; }

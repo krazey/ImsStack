@@ -24,18 +24,20 @@
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ImsConstDef.h"
-#include "ImsStrLib.h"
 #include "ImsTraceNode.h"
 #include "OsTrace.h"
 
 class OsTraceNode : public ImsTraceNode
 {
 public:
-    OsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag);
-    virtual ~OsTraceNode();
+    explicit OsTraceNode(IN const IMS_CHAR* pszTag) :
+            ImsTraceNode(pszTag)
+    {
+    }
+    virtual ~OsTraceNode() = default;
 
 public:
-    IMS_BOOL IsWritable() const;
+    inline IMS_BOOL IsWritable() const { return (GetLength() <= MAX_TRACE_SIZE); }
 
 protected:
     inline virtual IMS_SINT32 Vsnprintf(OUT IMS_CHAR* pszBuffer, IN IMS_UINT32 nBuffSize,
@@ -46,25 +48,8 @@ protected:
 
 public:
     // 250 in android
-    enum
-    {
-        MAX_TRACE_SIZE = 1024
-    };
+    static constexpr IMS_SINT32 MAX_TRACE_SIZE = 1024;
 };
-
-PUBLIC
-OsTraceNode::OsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag) :
-        ImsTraceNode(nCategory, pszTag)
-{
-}
-
-PUBLIC VIRTUAL OsTraceNode::~OsTraceNode() {}
-
-PUBLIC
-IMS_BOOL OsTraceNode::IsWritable() const
-{
-    return (GetLength() <= MAX_TRACE_SIZE);
-}
 
 PUBLIC
 OsTrace::OsTrace() :
@@ -85,7 +70,8 @@ PUBLIC VIRTUAL OsTrace::~OsTrace()
 }
 
 PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
-        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, IN va_list args)
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine,
+        IN const IMS_CHAR* pszFormat, IN va_list args)
 {
     (void)nModule;
 
@@ -104,19 +90,27 @@ PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* ps
 
     if (nTraceNodeCount > 200)
     {
-        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.TRACE.I>> TOO MANY NODE\n");
+        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "[IPL] TOO MANY NODE\n");
         return;
     }
 
-    OsTraceNode* pNode = new OsTraceNode(nCategory, pszTag);
+    OsTraceNode* pNode = new OsTraceNode(pszTag);
 
     if (pNode == IMS_NULL)
     {
-        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.TRACE.I>> ALLOCATING NODE FAILED\n");
+        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "[IPL] ALLOCATING NODE FAILED\n");
         return;
     }
 
-    pNode->Format(pszFormat, args);
+    AString strComponentName = ImsTraceNode::GetComponentName(pszFile);
+    AString strSuffix;
+
+    if (strComponentName.GetLength() > 0)
+    {
+        strSuffix.Sprintf(" [@%s:%d", strComponentName.GetStr(), nLine);
+    }
+
+    pNode->Format(pszFormat, args, strSuffix);
 
     // When the node is processing...
     if (IsLogging())
@@ -167,42 +161,6 @@ PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* ps
     }
 
     SetLogging(IMS_FALSE);
-}
-
-PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetFileName(IN const IMS_CHAR* pszFileName)
-{
-    if (pszFileName == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    IMS_CHAR* pszFn = IMS_StrRChr(pszFileName, '/');
-
-    return (pszFn != IMS_NULL) ? (pszFn + 1) : pszFileName;
-}
-
-PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetFileName(
-        IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName)
-{
-    if (pszFileName == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    AString strFileName(pszFileName);
-
-    IMS_CHAR* pszName = strrchr(strFileName.GetStr(), '/');
-
-    if (pszName == IMS_NULL)
-    {
-        sprintf(pszOutFileName, "%s", strFileName.GetStr());
-    }
-    else
-    {
-        sprintf(pszOutFileName, "%s", pszName + 1);
-    }
-
-    return pszOutFileName;
 }
 
 PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetDirName() const

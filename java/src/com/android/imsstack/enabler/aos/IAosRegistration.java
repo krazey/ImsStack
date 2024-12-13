@@ -20,11 +20,14 @@ import android.annotation.Nullable;
 
 import androidx.annotation.NonNull;
 
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This class provides the interworking interface between Java and native layer
@@ -94,79 +97,98 @@ public interface IAosRegistration {
      * @param pcscfOrder Type of int {@link Pcscf}.
      * @param cause Type of int {@link Cause}.
      */
-    void controlRegistration(int requestType, int pcscfOrder, int cause);
+    void controlRegistration(RequestType requestType, Pcscf pcscfOrder, Cause cause);
 
     /**
      * This method is returns the network type in which the IMS registered.
      *
-     * @return int returns NetworkType {@link IAosRegistrationListener.NetworkType}
+     * @return NetworkType {@link IAosRegistrationListener.NetworkType}
      *    {@code IAosRegistrationListener.NetworkType.NONE} if IMS is not registered,
      *    The NetworkType is returns, if IMS is registered.
      */
-    int getRegisteredNetworkType();
+    NetworkType getRegisteredNetworkType();
 
     /**
-     * This method provides the IMS registration state
+     * Retrieves the current IMS registration state.
      *
-     * @return int returns RegistrationState {@link IAosRegistrationListener.RegistrationState}
+     * @return The registration state as a {@link RegistrationState} enum value.
      */
-    int getRegistrationState();
+    RegistrationState getRegistrationState();
 
     /**
-     * Request Type
+     * Represents the types of requests that can be made.
+     * Each request type is associated with a corresponding integer value.
      */
-    class RequestType {
-        public static final int START = 0;
-        public static final int REFRESH = 1;
-        public static final int STOP = 2;
-        public static final int START_IMS_EST_TIMER = 3;
+    enum RequestType {
+        START(0),
+        REFRESH(1),
+        STOP(2),
+        START_IMS_EST_TIMER(3);
+
+        private final int mValue;
+
+        RequestType(int value) {
+            mValue = value;
+        }
+
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * PCSCF
+     * Represents the order of P-CSCF addresses.
+     * Each P-CSCF order is associated with a corresponding integer value.
      */
-    class Pcscf {
-        public static final int FIRST = 0;
-        public static final int CURRENT = 1;
-        public static final int NEXT = 2;
+    enum Pcscf {
+        FIRST(0),
+        CURRENT(1),
+        NEXT(2);
+
+        private final int mValue;
+
+        Pcscf(int value) {
+            mValue = value;
+        }
+
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
      * Defines possible causes for a specific event or failure.
      */
     enum Cause {
-        UNKNOWN(0, "UNKNOWN"),
-        DATA(1, "DATA"),
-        RADIO(2, "RADIO"),
-        IMS_SERVICE(3, "IMS_SERVICE"),
-        IMS_SUBSCRIBER(4, "IMS_SUBSCRIBER"),
-        DATA_CONNECTING(5, "DATA_CONNECTING"),
+        UNKNOWN(0),
+        DATA(1),
+        RADIO(2),
+        IMS_SERVICE(3),
+        IMS_SUBSCRIBER(4),
+        DATA_CONNECTING(5),
 
         // From modem
-        RADIO_SIM_REMOVED(11, "RADIO_SIM_REMOVED"),
-        RADIO_SIM_REFRESH(12, "RADIO_SIM_REFRESH"),
-        RADIO_ALLOWED_NETWORK_TYPES_CHANGED(13, "RADIO_ALLOWED_NETWORK_TYPES_CHANGED"),
+        RADIO_SIM_REMOVED(11),
+        RADIO_SIM_REFRESH(12),
+        RADIO_ALLOWED_NETWORK_TYPES_CHANGED(13),
 
         // From framework
-        RADIO_POWER_OFF(21, "RADIO_POWER_OFF"),
-        NON_IMS_CAPABLE_NETWORK(22, "NON_IMS_CAPABLE_NETWORK"),
-        DATA_STALL(23, "DATA_STALL"),
-        HANDOVER_FAILED(24, "HANDOVER_FAILED"),
-        VOPS_NOT_SUPPORTED(25, "VOPS_NOT_SUPPORTED"),
-        WIFI_OFF(26, "WIFI_OFF");
+        RADIO_POWER_OFF(21),
+        NON_IMS_CAPABLE_NETWORK(22),
+        DATA_STALL(23),
+        HANDOVER_FAILED(24),
+        VOPS_NOT_SUPPORTED(25),
+        WIFI_OFF(26);
 
         private final int mValue;
-        private final String mLabel;
 
         /**
-         * Constructs a Cause with the given value and label.
+         * Constructs a Cause with the given value.
          *
          * @param value The integer value of the cause.
-         * @param label The label of the cause.
          */
-        Cause(int value, String label) {
+        Cause(int value) {
             mValue = value;
-            mLabel = label;
         }
 
         /**
@@ -178,58 +200,82 @@ public interface IAosRegistration {
             return mValue;
         }
 
-        /**
-         * Returns the label of the cause.
-         *
-         * @return The label of the cause.
-         */
-        public String getLabel() {
-            return mLabel;
+        @Override
+        public String toString() {
+            return name();
         }
 
         /**
          * Returns the Cause enum constant corresponding to the given integer value.
          *
          * @param value The integer value to look up.
-         * @return An Optional containing the Cause enum constant with the given value,
-         *         or an empty Optional if no such constant exists.
+         * @return The Cause enum constant with the given value, or
+         *         {@link #UNKNOWN} if no such constant exists.
          */
-        public static Optional<Cause> fromValue(int value) {
+        public static Cause of(int value) {
             return Arrays.stream(values())
-                    .filter(cause -> cause.mValue == value)
-                    .findFirst();
+                .filter(cause -> cause.mValue == value)
+                .findFirst()
+                .orElse(UNKNOWN);
         }
     }
 
     /**
-     * CapabilityPairs
+     * Represents a set of capability pairs associated with different network types.
      */
     final class CapabilityPairs {
 
         /**
-         * The key of {@code Map<Integer, Integer>} is networkType.
+         * The key of {@code Map<NetworkType, Integer>} is networkType.
          * {@link IAosRegistrationListener.NetworkType}
          *
-         * The value of {@code Map<Integer, Integer>} is Capability.
+         * The value of {@code Map<NetworkType, Integer>} is Capability.
          * {@link IAosRegistrationListener.Capability}
          */
-        private final Map<Integer, Integer> mCapabilities;
+        private final Map<NetworkType, Integer> mCapabilities;
 
+        /**
+         * Constructs an empty CapabilityPairs object.
+         */
         public CapabilityPairs() {
-            mCapabilities = new LinkedHashMap<Integer, Integer>();
+            this(null, null);
         }
 
-        public CapabilityPairs(Integer networkType, Integer capability) {
-            mCapabilities = new LinkedHashMap<Integer, Integer>();
-            addCapability(networkType, capability);
+        /**
+         * Constructs a CapabilityPairs object with an initial capability for the given network
+         * type.
+         *
+         * @param networkType The network type.
+         * @param capability The capability to be added.
+         */
+        public CapabilityPairs(NetworkType networkType, Integer capability) {
+            mCapabilities = new LinkedHashMap<>();
+            if (networkType != null && capability != null) {
+                addCapability(networkType, capability);
+            }
         }
 
-        public void addCapability(Integer networkType, Integer capability) {
+        /**
+         * Adds a capability to the specified network type.
+         * If the network type already exists, the capability is bitwise ORed with the existing
+         * value.
+         *
+         * @param networkType The network type.
+         * @param capability The capability to be added.
+         */
+        public void addCapability(NetworkType networkType, Integer capability) {
             mCapabilities.put(networkType,
                     mCapabilities.getOrDefault(networkType, 0) | capability);
         }
 
-        public boolean hasCapability(Integer networkType, Integer capability) {
+        /**
+         * Checks if the specified capability is present for the given network type.
+         *
+         * @param networkType The network type.
+         * @param capability The capability to be checked.
+         * @return {@code true} if the capability is present, {@code false} otherwise.
+         */
+        public boolean hasCapability(NetworkType networkType, Integer capability) {
             return (mCapabilities.getOrDefault(networkType, 0) & capability) > 0;
         }
 
@@ -238,7 +284,7 @@ public interface IAosRegistration {
          *
          * @return mCapabilities is type of {@code Map<Integer, Integer>}.
          */
-        public Map<Integer, Integer> getCapabilities() {
+        public Map<NetworkType, Integer> getCapabilities() {
             return mCapabilities;
         }
 
@@ -248,11 +294,9 @@ public interface IAosRegistration {
                 return true;
             }
 
-            if (!(o instanceof CapabilityPairs)) {
+            if (!(o instanceof CapabilityPairs that) || that.getCapabilities() == null) {
                 return false;
             }
-
-            CapabilityPairs that = (CapabilityPairs)o;
 
             if (this.getCapabilities().size() != that.getCapabilities().size()) {
                 return false;
@@ -264,25 +308,17 @@ public interface IAosRegistration {
 
         @Override
         public int hashCode() {
-            int code = 0;
-            for (Map.Entry<Integer, Integer> entry : this.getCapabilities().entrySet()) {
-                code += Objects.hash(entry.getKey(), entry.getValue());
-            }
-
-            return code;
+            return getCapabilities().entrySet().stream()
+                .mapToInt(entry -> Objects.hash(entry.getKey(), entry.getValue()))
+                .sum();
         }
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("{ Size=").append(getCapabilities().size()).append(", ");
-            for (Map.Entry<Integer, Integer> entry : getCapabilities().entrySet()) {
-                sb.append("( Network=").append(entry.getKey()).append(", Capabilities=")
-                        .append(entry.getValue()).append(" )");
-            }
-            sb.append(" }");
-
-            return sb.toString();
+            return getCapabilities().entrySet().stream().map(
+                entry -> "(Network=" + entry.getKey() + ", Capabilities=" + entry.getValue() + ")")
+                .collect(Collectors.joining(
+                        ", ", "{ Size=" + getCapabilities().size() + ", ", " }"));
         }
     }
 }

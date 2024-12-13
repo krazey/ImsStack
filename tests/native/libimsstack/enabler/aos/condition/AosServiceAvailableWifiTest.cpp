@@ -43,6 +43,7 @@ using ::testing::ReturnRef;
 using ::testing::StrEq;
 
 #define DECLARE_USING(Base)                     \
+    using Base::SetBlock;                       \
     using Base::WifiWatcher_NotifyStateChanged; \
     using Base::NetworkPing_NotifyResult;       \
     using Base::HandleCallStateChanged;         \
@@ -67,8 +68,6 @@ public:
 
     inline TestAosServiceAvailableWifi(IN const TestAosServiceAvailableWifi&) = delete;
     inline TestAosServiceAvailableWifi& operator=(IN const TestAosServiceAvailableWifi&) = delete;
-
-    inline void SetBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 
     inline void SetCallTracker(IN IAosCallTracker* pIAosCallTracker)
     {

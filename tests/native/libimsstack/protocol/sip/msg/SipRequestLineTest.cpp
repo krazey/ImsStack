@@ -73,7 +73,7 @@ TEST_F(SipRequestLineTest, CopyConstructor)
 
 TEST_F(SipRequestLineTest, EncodeRequestLine)
 {
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -103,7 +103,7 @@ TEST_F(SipRequestLineTest, EncodeRequestLine)
 
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
 
-    pRequestLine = new SipRequestLine(const_cast<SIP_CHAR*>("INVITE"), pSipAddrSpec, SIP_SIPVER);
+    pRequestLine = new SipRequestLine("INVITE", pSipAddrSpec, SIP_SIPVER);
     ASSERT_TRUE(pRequestLine != nullptr);
 
     /* method, addrspec and sip version present, success */

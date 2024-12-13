@@ -18,8 +18,6 @@
 #include "msg/SipWarningHeader.h"
 #include "platform/SipString.h"
 
-#define MAX_WARN_LEN 12
-
 SipWarningHeader::SipWarningHeader() :
         SipHeaderBase(SipHeaderBase::WARNING),
         m_nWarnCode(SIP_ZERO),
@@ -87,6 +85,7 @@ SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
         return SIP_FALSE;
     }
 
+    const SIP_UINT16 MAX_WARN_LEN = 11;
     SIP_CHAR szLen[MAX_WARN_LEN];
     SipPf_Sprintf(szLen, "%u", m_nWarnCode);
 
@@ -118,14 +117,14 @@ SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipWarningHeader::SetWarnAgent(const SIP_CHAR* pszWarnAgent)
+SIP_VOID SipWarningHeader::SetWarnAgent(const SIP_CHAR* pszWarnAgent)
 {
-    return SetCharVar(pszWarnAgent, m_pszWarnAgent);
+    SetCharVar(pszWarnAgent, m_pszWarnAgent);
 }
 
-SIP_BOOL SipWarningHeader::SetWarnText(const SIP_CHAR* pszWarnText)
+SIP_VOID SipWarningHeader::SetWarnText(const SIP_CHAR* pszWarnText)
 {
-    return SetCharVar(pszWarnText, m_pszWarnText);
+    SetCharVar(pszWarnText, m_pszWarnText);
 }
 
 SIP_BOOL SipWarningHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)

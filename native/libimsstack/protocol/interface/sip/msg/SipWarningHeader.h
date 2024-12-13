@@ -51,14 +51,11 @@ public:
     /*Gets the visited nw name*/
     inline SIP_UINT32 GetWarnCode() const { return m_nWarnCode; }
 
-    /*Sets the visited nw name*/
-    SIP_BOOL SetWarnAgent(const SIP_CHAR* pszWarnAgent);
+    SIP_VOID SetWarnAgent(const SIP_CHAR* pszWarnAgent);
+    SIP_VOID SetWarnText(const SIP_CHAR* pszWarnText);
 
     /*Gets the visited nw name*/
     inline SIP_CHAR* GetWarnAgent() const { return m_pszWarnAgent; }
-
-    /*Sets the visited nw name*/
-    SIP_BOOL SetWarnText(const SIP_CHAR* pszWarnText);
 
     /*Gets the visited nw name*/
     inline const SIP_CHAR* GetWarnText() const { return m_pszWarnText; }

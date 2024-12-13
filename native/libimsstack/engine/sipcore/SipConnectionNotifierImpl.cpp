@@ -21,7 +21,7 @@
 #include "SipConnectionNotifierImpl.h"
 #include "SipPrivate.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipConnectionNotifierImpl::SipConnectionNotifierImpl(IN SipConnectionNotifier* pScn) :

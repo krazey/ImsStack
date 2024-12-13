@@ -26,9 +26,9 @@ import java.util.List;
  */
 public final class FeatureTable {
     public static class Feature {
-        /** Feature string value for IMS configuration */
+        // Feature string value for IMS configuration
         private String mFeature;
-        /** Feature mask value for FeatureConfig */
+        // Feature mask value for FeatureConfig
         private int mFeatureMask;
 
         /* package */ Feature(String feature, int featureMask) {
@@ -54,7 +54,7 @@ public final class FeatureTable {
     private FeatureTable() {}
 
     static {
-        /** Service feature list */
+        // Service feature list
         sServiceFeatureList = new ArrayList<Feature>();
 
         sServiceFeatureList.add(new Feature(

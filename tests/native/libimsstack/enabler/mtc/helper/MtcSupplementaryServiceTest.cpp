@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#include "ByteArray.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ImsList.h"
 #include "ImsMap.h"
+#include "MockIMessageBodyPart.h"
 #include "MtcDef.h"
 #include "SipHeaderName.h"
 #include "call/MockIMtcCallContext.h"
@@ -35,6 +37,16 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 static const IMS_CHAR SESSION_ID[] = "f81d4fae7dec11d0a76500a0c91e6bf6";
+
+static const AString CNV_HEADER_PASSED =
+        "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
+static const AString CNV_HEADER_FAILED =
+        "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Failed>";
+static const AString CNV_HEADER_PASSED_POTENTIAL_SPAM =
+        "potential spam <sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
+static const AString CNV_HEADER_NO_TN_VALIDATION =
+        "<sip:01030993879@fakeims.google.com;verstat=No-TN-Validation>";
+static const AString CNV_HEADER_NONE = "<sip:01030993879@fakeims.google.com>";
 
 namespace android
 {
@@ -455,85 +467,167 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCw)
     EXPECT_FALSE(pMtcSupplementaryService->Get(SuppType::CW)->bValue);
 }
 
-TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
+TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumberVerificationWhenPaidHeaderContainsPassed)
 {
-    ImsList<AString> objNoHeaders;
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_PASSED);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
 
-    ImsList<AString> objHeadersPass;
-    AString strCnvPass = "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
-    objHeadersPass.Append(AString(strCnvPass));
-
-    ImsList<AString> objHeadersFail;
-    AString strCnvFail = "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Failed>";
-    objHeadersFail.Append(strCnvFail);
-
-    ImsList<AString> objHeadersNone;
-    objHeadersNone.Append(AString("<sip:01030993879@fakeims.google.com>"));
-
-    ImsList<AString> objHeadersNoValidation;
-    objHeadersNoValidation.Append(
-            AString("<sip:01030993879@fakeims.google.com;verstat=No-TN-Validation>"));
-
-    EXPECT_CALL(
-            objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
-            .Times(6)
-            .WillOnce(Return(objHeadersPass))
-            .WillOnce(Return(objNoHeaders))
-            .WillOnce(Return(objNoHeaders))
-            .WillOnce(Return(objHeadersNoValidation))
-            .WillOnce(Return(objHeadersNone))
-            .WillOnce(Return(objNoHeaders));
-
-    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
-            .Times(4)
-            .WillOnce(Return(objHeadersFail))
-            .WillOnce(Return(objHeadersNone))
-            .WillOnce(Return(objHeadersFail))
-            .WillOnce(Return(objHeadersPass));
-
-    pMtcSupplementaryService->UpdateCallingNumVerification(
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
             static_cast<IMessage*>(&objMockIMessage));
-    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
-            CALLING_NUM_VERSTAT_VERIFIED);
-    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
 
-    pMtcSupplementaryService->UpdateCallingNumVerification(
-            static_cast<IMessage*>(&objMockIMessage));
-    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
-            CALLING_NUM_VERSTAT_NOT_VERIFIED);
-    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
-
-    pMtcSupplementaryService->UpdateCallingNumVerification(
-            static_cast<IMessage*>(&objMockIMessage));
-    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION),
-            static_cast<SuppService*>(IMS_NULL));
-    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
-
-    pMtcSupplementaryService->UpdateCallingNumVerification(&objMockIMessage);
-    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
-            CALLING_NUM_VERSTAT_NONE);
-    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
-
-    pMtcSupplementaryService->UpdateCallingNumVerification(&objMockIMessage);
-    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
-            CALLING_NUM_VERSTAT_NOT_VERIFIED);
-    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
-
-    pMtcSupplementaryService->UpdateCallingNumVerification(&objMockIMessage);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
             CALLING_NUM_VERSTAT_VERIFIED);
 }
 
-TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
+TEST_F(MtcSupplementaryServiceTest,
+        UpdateCallingNumberVerificationWhenPaidHeaderContainsPassedAndPotentialSpam)
+{
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_PASSED_POTENTIAL_SPAM);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_NOT_VERIFIED);
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumberVerificationWhenPaidHeaderContainsFailed)
+{
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_FAILED);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_NOT_VERIFIED);
+}
+
+TEST_F(MtcSupplementaryServiceTest,
+        UpdateCallingNumberVerificationWhenPaidHeaderContainsNoValidation)
+{
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_NO_TN_VALIDATION);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_NONE);
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumberVerificationWhenPaidHeaderNotContainsVerstat)
+{
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_NONE);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    ImsList<AString> objEmptyHeaders;
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objEmptyHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION), IMS_NULL);
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumberVerificationWhenFromHeaderContainsPassed)
+{
+    ImsList<AString> objEmptyHeaders;
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objEmptyHeaders));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_PASSED);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_VERIFIED);
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumberVerificationWhenFromHeaderContainsFailed)
+{
+    ImsList<AString> objEmptyHeaders;
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objEmptyHeaders));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_FAILED);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_NOT_VERIFIED);
+}
+
+TEST_F(MtcSupplementaryServiceTest,
+        UpdateCallingNumberVerificationWhenFromHeaderContainsNoValidation)
+{
+    ImsList<AString> objEmptyHeaders;
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objEmptyHeaders));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_NO_TN_VALIDATION);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_NONE);
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumberVerificationWhenFromHeaderNotContainsVerstat)
+{
+    ImsList<AString> objEmptyHeaders;
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
+            .WillByDefault(Return(objEmptyHeaders));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(CNV_HEADER_NONE);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objHeaders));
+
+    pMtcSupplementaryService->UpdateCallingNumberVerification(
+            static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION), IMS_NULL);
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElementsFromEmptyMessage)
 {
     pMtcSupplementaryService->UpdateCallComposerElements(&objMockIMessage);
+
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LAT), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LONG), nullptr);
-    EXPECT_FALSE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS), nullptr);
+}
 
+TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElementsFromMessageWithCallComposerInfo)
+{
     ImsList<AString> lstPriorityHeaders;
     lstPriorityHeaders.Append("none");
     ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::PRIORITY)))
@@ -554,12 +648,49 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
     ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::ORGANIZATION)))
             .WillByDefault(Return(lstOrganizationHeaders));
 
+    MockIMessageBodyPart objLocationBody;
+    ByteArray objLocationContent(  // From RCC.20
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "entity=\"tel:+491711234567\">"
+            "<dm:person id=\"sh2204\">"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">"
+            "<gml:pos>47.577866 -122.164080</gml:pos>"
+            "<gs:radius uom=\"urn:ogc:def:uom:EPSG::9001\">30</gs:radius>"
+            "</gs:Circle>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "</gp:geopriv>"
+            "</dm:person>"
+            "</presence>");
+    ON_CALL(objLocationBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("application/pidf+xml")));
+    ON_CALL(objLocationBody, GetContent).WillByDefault(ReturnRef(objLocationContent));
+    ImsList<IMessageBodyPart*> lstMessageBodies;
+    lstMessageBodies.Append(&objLocationBody);
+    ON_CALL(objMockIMessage, GetBodyParts).WillByDefault(Return(lstMessageBodies));
+
     pMtcSupplementaryService->UpdateCallComposerElements(&objMockIMessage);
-    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY), nullptr);
-    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT), nullptr);
-    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
-    // TODO: Location is hard to test now
-    EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY)->nValue,
+            CALL_COMPOSER_PRIORITY_NONE);
+    EXPECT_STREQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT)->strValue.GetStr(),
+            "subject");
+    EXPECT_STREQ(
+            pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL)->strValue.GetStr(),
+            "https://it-is-a/picture.jpg");
+    EXPECT_STREQ(
+            pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LAT)->strValue.GetStr(),
+            "47.577866");
+    EXPECT_STREQ(
+            pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LONG)->strValue.GetStr(),
+            "-122.164080");
+    EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS)->bValue);
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateSessionId)

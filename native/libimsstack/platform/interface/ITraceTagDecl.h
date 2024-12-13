@@ -17,35 +17,36 @@
 #define INTERFACE_TRACE_TAG_DECL_H_
 
 ////
-// TRACE MODULE DEFINITIONS FOR FRAMEWORK & ENABLERS
+// TRACE MODULE DEFINITIONS
 ////
 
-//// IMS ("ims" package)
-//// engine -> connection/service, etc...
-#define __IMS_TRACE_TAG_IMS__          __IMS_TRACE_TAG__(IMS)
+//// IPL (ImsStack Porting Layer)
+//// platform -> os
+#define __IMS_TRACE_TAG_IPL__          __IMS_TRACE_TAG__(IPL)
 
-//// IMS ("ims" package)
-//// engine -> registration
-#define __IMS_TRACE_TAG_REG__          __IMS_TRACE_TAG__(REG)
-
-//// CORE, CORE.MEDIA ("ims.core", "ims.core.media" package)
-//// engine -> core, core/media
-#define __IMS_TRACE_TAG_IMS_CORE__     __IMS_TRACE_TAG__(CORE)
-
-//// PLATFORM
+//// BASE
+//// All the base components
 //// platform -> base
 #define __IMS_TRACE_TAG_BASE__         __IMS_TRACE_TAG__(BASE)
-
-//// ADAPT
-//// platform -> os
-#define __IMS_TRACE_TAG_ADAPT__        __IMS_TRACE_TAG__(ADAPT)
 
 //// CONF
 //// config
 #define __IMS_TRACE_TAG_CONF__         __IMS_TRACE_TAG__(CONF)
 
+//// REG ("ims" package)
+//// engine -> registration
+#define __IMS_TRACE_TAG_REG__          __IMS_TRACE_TAG__(REG)
+
+//// IMS.CORE ("ims", "ims.core", "ims.core.media" package)
+//// engine -> service, core, core/media
+#define __IMS_TRACE_TAG_IMS_CORE__     __IMS_TRACE_TAG__(IMS_CORE)
+
+//// SIP.CORE
+//// engine -> sipcore
+#define __IMS_TRACE_TAG_SIP_CORE__     __IMS_TRACE_TAG__(SIP_CORE)
+
 //// SIP
-//// engine -> sipcore, protocol/sip -> sip
+//// protocol/sip -> sip
 #define __IMS_TRACE_TAG_SIP__          __IMS_TRACE_TAG__(SIP)
 
 //// XML
@@ -55,10 +56,6 @@
 //// SDP
 //// protocol/sdp -> sdp
 #define __IMS_TRACE_TAG_SDP__          __IMS_TRACE_TAG__(SDP)
-
-//// FWK
-//// platform -> base
-#define __IMS_TRACE_TAG_FWK__          __IMS_TRACE_TAG__(FWK)
 
 //// AOS
 //// enabler -> aos
@@ -78,12 +75,12 @@
 //// enabler -> uce
 #define __IMS_TRACE_TAG_UCE__          __IMS_TRACE_TAG__(UCE)
 
-//// SIP_DELEGATE
-//// enabler -> sipdelegate
-#define __IMS_TRACE_TAG_SIP_DELEGATE__ __IMS_TRACE_TAG__(SIP_DELEGATE)
-
 //// MEDIA
 //// enabler -> media
 #define __IMS_TRACE_TAG_MEDIA__        __IMS_TRACE_TAG__(MEDIA)
+
+//// SIP_DELEGATE
+//// enabler -> sipdelegate
+#define __IMS_TRACE_TAG_SIP_DELEGATE__ __IMS_TRACE_TAG__(SIP_DELEGATE)
 
 #endif
