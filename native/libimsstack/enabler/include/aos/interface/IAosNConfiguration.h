@@ -619,7 +619,7 @@ public:
      *        the UE use preferred IP address type of each operator's requirement.
      *
      * @return IMS_SINT32
-     * @see CarrierConfig::Assets::IP_VERSION_4
+     * @see CarrierConfig::Ims::IP_VERSION_4
      */
     virtual IMS_SINT32 GetPreferredIpType() const = 0;
 
@@ -630,7 +630,7 @@ public:
      *        the UE use preferred IP address type of each operator's requirement.
      *
      * @return IMS_SINT32
-     * @see CarrierConfig::Assets::IP_VERSION_4
+     * @see CarrierConfig::Ims::IP_VERSION_4
      */
     virtual IMS_SINT32 GetEmergencyPreferredIpType() const = 0;
 
@@ -639,13 +639,13 @@ public:
      *
      *       Specify the number of emergency registration retry attempt to P-CSCFs. UE will try
      *       emergency registration with specified number of P-CSCFs when
-     *       CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer has expired. If the
+     *       CarrierConfig::Ims::KEY_EREG_RETRY_TIMER_MILLIS_INT timer has expired. If the
      *       number is zero, UE will try registration on every P-CSCFs once. If the number of
      *       P-CSCF is less than a given number and UE's default retry policy is a
-     *       CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF, UE will try
+     *       CarrierConfig::Ims::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF, UE will try
      *       registration from the first P-CSCF again after attempting on all P-CSCFs.
      *       If UE doesn't support emerg-reg-retry defined in 3GPP 24.229, which is configured by
-     *       CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT, this configuration is
+     *       CarrierConfig::Ims::KEY_EREG_RETRY_TIMER_MILLIS_INT, this configuration is
      *       discarded.
      *
      * @return IMS_SINT32 Return the retry attempt count
@@ -661,7 +661,7 @@ public:
      *        been stopped or expired. Upon this timer expiry, the UE considers that the emergency
      *        registration attempt for this P-CSCF has failed. The UE may retry registration on
      *        a different P-CSCF if available and restart the
-     *        CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer. If the UE has no
+     *        CarrierConfig::ImsEmergency::KEY_EREG_RETRY_TIMER_MILLIS_INT timer. If the UE has no
      *        more available P-CSCFs, the UE shall stop the
      *        CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer by
      *        considering the emergency registration has failed. If the value is zero, it considers
@@ -743,7 +743,8 @@ public:
      *        be established until completion of the emergency registration procedure.
      *        Upon timer expiry, the UE considers the emergency REGISTER request or
      *        the emergency call attempt as failed, and stop the
-     *        CarrierConfig::Assets::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer, if running.
+     *        CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer,
+     *        if running.
      *
      * @return IMS_SINT32 Return the milli-second time
      */
@@ -777,17 +778,17 @@ public:
      * @brief Indicate the actual wait time policy
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::AWT_POLICY_RFC_RULE
+     *        CarrierConfig::Ims::AWT_POLICY_RFC_RULE
      *            Follow RFC 5626 section 4.5.
-     *        CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF
+     *        CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF
      *            Indicate whether it shall calculate a wait time based on RFC 5626 4.5
      *            if the registration to every known PCSCF is attempted and handled
      *            as temporary failure without Retry-After header.
-     *        CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EACH_PCSCF
+     *        CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF
      *            Indicate whether it shall calculate a wait time based on RFC 5626 4.5
      *            if the registration to each known PCSCF is attempted and handled
      *            as temporary failure without Retry-After header.
-     *        CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL
+     *        CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL
      *            @see KEY_REG_RETRY_INTERVAL_BUNDLE
      *
      * @return IMS_SINT32 Return the actual wait time policy
@@ -805,11 +806,11 @@ public:
     /**
      * @brief Get the out of service policy object
      *
-     *        CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT
+     *        CarrierConfig::Ims::REG_OOS_POLICY_DEFAULT
      *            Indicate that reregistration is not tried during OOS and
      *            reregistratioin is attempted after network service state is changed to in service
      *            and registration is not expired.
-     *        CarrierConfig::Assets::REG_OOS_POLICY_DESTROY
+     *        CarrierConfig::Ims::REG_OOS_POLICY_DESTROY
      *            Indicate that registration is terminated if registration is refreshed during OOS.
      *            When network service state is changed to in service,
      *            the initial registration is tried.
@@ -852,9 +853,9 @@ public:
      * @brief Indicate the SIP 503 response policy for subscription (reg event package)
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT
+     *        CarrierConfig::Ims::SIP_503_CODE_POLICY_DEFAULT
      *         - Follow default retry operation. (Retry SUBSCRIBE message after retry-after or AWT)
-     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP
+     *        CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP
      *         - Follow 3GPP 24.229.
      *
      * @return IMS_SINT32 Return the SIP 503 response policy
@@ -870,9 +871,9 @@ public:
      *        This asset indicates whether USAT IMS registration event download is supported,
      *        and if so, whether to check the precondition before notifying.
      *        Possible values are,
-     *        CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD
-     *        CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD
-     *        CarrierConfig::Assets::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD
+     *        CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD
+     *        CarrierConfig::Ims::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD
+     *        CarrierConfig::Ims::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD
      *
      * @return IMS_SINT32 Returns registration event download policy for USAT.
      */
@@ -889,14 +890,14 @@ public:
      * @brief Indicate the SIP 305 response policy for registration
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT
      *            Follow KEY_DEFAULT_RETRY_POLICY_INT operation if 305 code is not configured
      *            from other configurations of this bundle.
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP
      *            Follow 3GPP 24.229.
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF
      *            Follow 3GPP 24.229 starting from the top of the existing PCSCF list.
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_USE_CONTACT_VALUE
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_USE_CONTACT_VALUE
      *            Flag indicating whether a new IMS registration is tried
      *            using the contact header field value as specified in RFC3261
      *            after a 305 response for registration is received.
@@ -909,14 +910,14 @@ public:
      * @brief Indicate the SIP 305 response policy for reregistration
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT
      *            Follow KEY_DEFAULT_RETRY_POLICY_INT operation if 305 code is not configured
      *            from other configurations of this bundle.
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP
      *            Follow 3GPP 24.229.
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF
      *            Follow 3GPP 24.229 starting from the top of the existing PCSCF list.
-     *        CarrierConfig::Assets::SIP_305_CODE_POLICY_USE_CONTACT_VALUE
+     *        CarrierConfig::Ims::SIP_305_CODE_POLICY_USE_CONTACT_VALUE
      *            Flag indicating whether a new IMS registration is tried
      *            using the contact header field value as specified in RFC3261
      *            after a 305 response for registration is received.
@@ -929,10 +930,10 @@ public:
      * @brief Indicate the SIP 503 response policy for registration
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT
+     *        CarrierConfig::Ims::SIP_503_CODE_POLICY_DEFAULT
      *            Follow KEY_DEFAULT_RETRY_POLICY_INT operation if 305 code is not configured
      *            from other configurations of this bundle.
-     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP
+     *        CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP
      *            Follow 3GPP 24.229.
      *
      * @return IMS_SINT32 Return the SIP 503 response policy
@@ -963,9 +964,9 @@ public:
      * @brief Indicate the policy for clearing the registration retry count
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION
-     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION
-     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_NOTIFY
+     *        CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION
+     *        CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION
+     *        CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_NOTIFY
      *
      * @return IMS_SINT32 Return the policy of clearing the retry count for registration
      */
@@ -984,9 +985,9 @@ public:
      *
      *        Specify the default retry policy about how to use the PCSCF address selection.
      *        Possible values are,
-     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC
-     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF
-     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_NEXT_PCSCF
+     *        CarrierConfig::Ims::DEFAULT_RETRY_POLICY_SPEC
+     *        CarrierConfig::Ims::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF
+     *        CarrierConfig::Ims::DEFAULT_RETRY_POLICY_NEXT_PCSCF
      *
      * @return IMS_SINT32 Return the default policy for the registration retry
      */
@@ -1018,15 +1019,15 @@ public:
      * @brief Indicate the extra error type for registration
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED
-     *        CarrierConfig::Assets::ERROR_TYPE_REPEATED
+     *        CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED
+     *        CarrierConfig::Ims::ERROR_TYPE_REPEATED
      *            Indicate that it results in blocking PLMN with the specific protocol timer.
      *            like T3402.
-     *        CarrierConfig::Assets::ERROR_TYPE_CRITICAL
+     *        CarrierConfig::Ims::ERROR_TYPE_CRITICAL
      *            Indicate that it results in blocking PLMN.
-     *        CarrierConfig::Assets::ERROR_TYPE_ROAMING
+     *        CarrierConfig::Ims::ERROR_TYPE_ROAMING
      *            Indicate that it results in blocking PLMN basd on the attached network type.
-     *        CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK
+     *        CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK
      *            Indicate that it results in blocking PLMN with the specific protocol timer
      *            like T3402.
      *
@@ -1038,10 +1039,10 @@ public:
      * @brief Indicate the extra error policy for registration
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED
-     *        CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED
-     *        CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED
-     *        CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED
+     *        CarrierConfig::Ims::ERROR_POLICY_NOT_SPECIFIED
+     *        CarrierConfig::Ims::ERROR_POLICY_PCSCF_FAILED
+     *        CarrierConfig::Ims::ERROR_POLICY_SUBSCRIBER_FAILED
+     *        CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED
      *
      * @return IMS_SINT32 Return the extra error policy
      */
@@ -1050,11 +1051,11 @@ public:
     /**
      * @brief Indicate max of retry count the extra error for registration
      *
-     *      CarrierConfig::Assets::ERROR_TYPE_REPEATED
+     *      CarrierConfig::Ims::ERROR_TYPE_REPEATED
      *          Indicate the maximum retry count with the same PCSCF.
      *          If the retry count reaches the maximum count, initial registration is tried
      *          with other PCSCF.
-     *      CarrierConfig::Assets::ERROR_TYPE_CRITICAL
+     *      CarrierConfig::Ims::ERROR_TYPE_CRITICAL
      *          Indicate the number of error response that is included in KEY_ERROR_CODE_INT_ARRAY.
      *          If this number reaches, it is handled as a critical error.
      *
@@ -1067,11 +1068,11 @@ public:
      *        with address and order.
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_DEFAULT
+     *        CarrierConfig::Ims::REG_PCSCF_UPDATE_POLICY_DEFAULT
      *            Indicate that registration is tried with new PCSCF address
      *            only when the current PCSCF address that is used for registration
      *            is not contained in the new PCSCF list.
-     *        CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME
+     *        CarrierConfig::Ims::REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME
      *            Indicate that registration or reregistration is always tried
      *            when the PCSCF addresses are changed regardless of the existence
      *            of the current PCSCF address in the new PCSCF list.
@@ -1086,9 +1087,9 @@ public:
      *        except for register request.
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT
-     *        CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_NONE
-     *        CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_NO_IMSI
+     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_DEFAULT
+     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NONE
+     *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NO_IMSI
      *
      * @return IMS_SINT32 Return the policy of setting the user info
      */
@@ -1098,10 +1099,10 @@ public:
      * @brief Indicate which policy is applied for creating geolocation pidf.
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION
-     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION
-     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY
-     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_CIVIC
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_POSITION
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITH_POSITION
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY
+     *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_CIVIC
      *
      * @return IMS_SINT32 Return the policy of setting the user info
      */
@@ -1397,7 +1398,7 @@ public:
      *        Indicate the error causes that result in new PCSCF discovery
      *        when the calculated retry number reaches.
      *        - Possible wildcard values except for error codes are,
-     *        CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F, etc
+     *        CarrierConfig::Ims::REG_ERROR_CODE_TIMER_F, etc
      *
      * @return vector error code list
      */
@@ -1507,10 +1508,10 @@ public:
     /**
      * @brief List of features that unavailable in limited registration.
      *        Possible values are,
-     *        CarrierConfig::Assets::REG_FEATURE_MMTEL
-     *        CarrierConfig::Assets::REG_FEATURE_VIDEO
-     *        CarrierConfig::Assets::REG_FEATURE_TEXT
-     *        CarrierConfig::Assets::REG_FEATURE_SMS
+     *        CarrierConfig::Ims::REG_FEATURE_MMTEL
+     *        CarrierConfig::Ims::REG_FEATURE_VIDEO
+     *        CarrierConfig::Ims::REG_FEATURE_TEXT
+     *        CarrierConfig::Ims::REG_FEATURE_SMS
      *
      * @return vector features list
      */

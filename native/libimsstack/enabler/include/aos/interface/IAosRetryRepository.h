@@ -25,7 +25,7 @@ public:
      * @brief increase retry count
      *
      * Retry count can be increased by max count
-     * (max count: CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT)
+     * (max count: CarrierConfig::Ims::KEY_EXTRA_REG_ERR_MAX_CNT_INT)
      * If retry count reaches out max count, return IMS_FALSE and reset the retry count.
      *
      * @return IMS_BOOL Return whether increasing retry count or not

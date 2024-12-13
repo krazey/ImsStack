@@ -453,7 +453,7 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
 {
     IMS_TRACE_I("HandleRedialByNetworkContext", 0, 0, 0);
     if (m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigAssets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL) &&
+                ConfigIms::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL) &&
             !m_objContext.GetService().IsRoaming())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);

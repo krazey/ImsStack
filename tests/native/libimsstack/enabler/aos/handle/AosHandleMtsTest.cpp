@@ -571,7 +571,7 @@ TEST_F(AosHandleMtsTest,
 {
     // GIVEN
     ImsVector<IMS_SINT32> objUnavailableFeatures;
-    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_SMS);
+    objUnavailableFeatures.Add(CarrierConfig::Ims::REG_FEATURE_SMS);
     ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
             .WillByDefault(ReturnRef(objUnavailableFeatures));
 
@@ -587,7 +587,7 @@ TEST_F(AosHandleMtsTest,
 {
     // GIVEN
     ImsVector<IMS_SINT32> objUnavailableFeatures;
-    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_SMS);
+    objUnavailableFeatures.Add(CarrierConfig::Ims::REG_FEATURE_SMS);
     ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
             .WillByDefault(ReturnRef(objUnavailableFeatures));
     AddBlock(AosHandle::BLOCK_LIMITED_SMS);

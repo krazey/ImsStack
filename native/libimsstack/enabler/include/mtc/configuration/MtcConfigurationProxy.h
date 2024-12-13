@@ -30,7 +30,6 @@
 class ConfigCache;
 class ICarrierConfig;
 
-using ConfigAssets = CarrierConfig::Assets;
 using ConfigEmergency = CarrierConfig::ImsEmergency;
 using ConfigIms = CarrierConfig::Ims;
 using ConfigRtt = CarrierConfig::ImsRtt;

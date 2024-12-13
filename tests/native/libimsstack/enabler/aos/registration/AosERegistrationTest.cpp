@@ -342,8 +342,7 @@ protected:
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
-                .WillByDefault(
-                        Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
+                .WillByDefault(Return(CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
         ON_CALL(m_objMockIAosNConfiguration, GetRoamingPreferredEmcReg())
                 .WillByDefault(Return(
                         CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED));
@@ -740,7 +739,7 @@ TEST_F(AosERegistrationTest, StartWithSpecifiedIntervalPolicytWhenRetryRuleForER
     ON_CALL(m_objMockIAosNConfiguration, IsRegRetryRuleForERegUsed())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
+            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL));
     ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillByDefault(Return(IMS_TRUE));
 
@@ -853,7 +852,7 @@ TEST_F(AosERegistrationTest, ReportFailureIfNotPossibleToIncreaseCountAndNoPcscf
 TEST_F(AosERegistrationTest, ReturnTrueWhenFollowingNoramlRulesWith305Policy3GPP)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP));
+            .WillByDefault(Return(CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP));
 
     EXPECT_TRUE(m_pAosERegistration->ProcessNormalDefaultFlowRecovery_Start(305));
 }
@@ -861,9 +860,9 @@ TEST_F(AosERegistrationTest, ReturnTrueWhenFollowingNoramlRulesWith305Policy3GPP
 TEST_F(AosERegistrationTest, ReturnFalseWhenFollowingNoramlRulesWith305PolicyDefault)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
+            .WillByDefault(Return(CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT));
     ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_RFC_RULE));
 
     EXPECT_FALSE(m_pAosERegistration->ProcessNormalDefaultFlowRecovery_Start(305));
 }
@@ -871,7 +870,7 @@ TEST_F(AosERegistrationTest, ReturnFalseWhenFollowingNoramlRulesWith305PolicyDef
 TEST_F(AosERegistrationTest, ReturnFalseWhenFollowingNoramlRuleAndSharedCntNotUsed)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
+            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL));
     ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillByDefault(Return(IMS_FALSE));
 

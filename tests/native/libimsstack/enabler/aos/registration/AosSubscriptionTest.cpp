@@ -293,7 +293,7 @@ protected:
         ON_CALL(m_objMockIAosConfig, GetRegRandomRetryIntervals())
                 .WillByDefault(ReturnRef(m_objRetryRandomIntervals));
         ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
-                .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT));
+                .WillByDefault(Return(CarrierConfig::Ims::SIP_503_CODE_POLICY_DEFAULT));
         // m_objErrRegRequiredWithNextPcscf.GetSize() = 0
         ON_CALL(m_objMockIAosConfig, GetSubErrorRegRequiredWithNextPcscf())
                 .WillByDefault(ReturnRef(m_objErrRegRequiredWithNextPcscf));
@@ -447,7 +447,7 @@ TEST_F(AosSubscriptionTest,
     // IsWfcErrorMessageSupportedWithStateChecked - IMS_TRUE;
     ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED))
+            IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
@@ -750,7 +750,7 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenErrRegRequiredInWifiIsMatchedBySingleD
     ON_CALL(m_objMockIAosConfig, GetVowifiSubErrorRegRequired())
             .WillByDefault(ReturnRef(objErrRegRequiredInWifi));
     ON_CALL(m_objMockIAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
+            IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosConfig, GetRegRetryCountResetPolicy()).WillByDefault(Return(2));
 
@@ -775,7 +775,7 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupported)
             .WillByDefault(ReturnRef(objErrRegRequiredInWifi));
 
     ON_CALL(m_objMockIAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
+            IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
             .WillByDefault(Return(IMS_TRUE));
 
     // RequestCommand
@@ -810,7 +810,7 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsNotSupportedInRefresh
 
     // Condition: The Error isn't supported for showing wfc error message
     ON_CALL(m_objMockIAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
+            IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
             .WillByDefault(Return(IMS_FALSE));
 
     // Expected result: The UE will have to call Subscription_StateChanged with OFFLINE state and
@@ -886,7 +886,7 @@ TEST_F(AosSubscriptionTest, ReturnFalseWhenEpdgEnabledIsFalseWhileCheckingWfcErr
     // Condition: IsEpdgEnabled() is false. It was defined in the SetUp() function.
 
     EXPECT_FALSE(m_pAosSubscription->IsWfcErrorMessageSupportedWithStateChecked(
-            CarrierConfig::Assets::WFC_ERROR_SUB_403));
+            CarrierConfig::ImsWfc::WFC_ERROR_SUB_403));
 }
 
 TEST_F(AosSubscriptionTest, ReturnFalseWhenStateIsNotAppropriateWhileCheckingWfcErrMessage)
@@ -894,18 +894,18 @@ TEST_F(AosSubscriptionTest, ReturnFalseWhenStateIsNotAppropriateWhileCheckingWfc
     ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(m_objMockIAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
+            IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
             .WillByDefault(Return(IMS_TRUE));
 
     // state is STATE_OFFLINE
     m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
     EXPECT_FALSE(m_pAosSubscription->IsWfcErrorMessageSupportedWithStateChecked(
-            CarrierConfig::Assets::WFC_ERROR_SUB_403));
+            CarrierConfig::ImsWfc::WFC_ERROR_SUB_403));
 
     // state is STATE_UNSUBSCRIBING
     m_pAosSubscription->SetState(AosSubscription::STATE_UNSUBSCRIBING);
     EXPECT_FALSE(m_pAosSubscription->IsWfcErrorMessageSupportedWithStateChecked(
-            CarrierConfig::Assets::WFC_ERROR_SUB_403));
+            CarrierConfig::ImsWfc::WFC_ERROR_SUB_403));
 }
 
 TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupported403)
@@ -913,12 +913,12 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupported403)
     ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(m_objMockIAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
+            IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
     EXPECT_TRUE(m_pAosSubscription->IsWfcErrorMessageSupportedWithStateChecked(
-            CarrierConfig::Assets::WFC_ERROR_SUB_403));
+            CarrierConfig::ImsWfc::WFC_ERROR_SUB_403));
 }
 
 TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupportedNotifyWithTerminated)
@@ -926,12 +926,12 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupportedNotifyWithTe
     ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(m_objMockIAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED))
+            IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED))
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
     EXPECT_TRUE(m_pAosSubscription->IsWfcErrorMessageSupportedWithStateChecked(
-            CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED));
+            CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED));
 }
 
 // ProcessFailed_StatusCode - IsRetryActionDueToRetryCounter()
@@ -1151,7 +1151,7 @@ TEST_F(AosSubscriptionTest, ShouldRequestScscfRestorationWithoutRetryAfterIfNoRe
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
     ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
+            .WillByDefault(Return(CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP));
     // 503 error response without retry after
     ON_CALL(m_objMockISipMsg, GetStatusCode()).WillByDefault(Return(503));
     AString strRetryAfter = AString::ConstNull();
@@ -1176,7 +1176,7 @@ TEST_F(AosSubscriptionTest,
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
     ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
+            .WillByDefault(Return(CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP));
     // 503 error response with retry after which value is 600 seconds
     ON_CALL(m_objMockISipMsg, GetStatusCode()).WillByDefault(Return(503));
     AString strRetryAfter("600");
@@ -1201,7 +1201,7 @@ TEST_F(AosSubscriptionTest,
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
     ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
+            .WillByDefault(Return(CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP));
     // 503 error response with retry after which value is 60 seconds
     ON_CALL(m_objMockISipMsg, GetStatusCode()).WillByDefault(Return(503));
     AString strRetryAfter("60");
@@ -1439,7 +1439,7 @@ TEST_F(AosSubscriptionTest, ResetRetryCountWhenRetryCountIsSharedInActiveState)
 TEST_F(AosSubscriptionTest, NotifyRegEventWithImpuWhenRegEventChangedWithUnconditionalDownload)
 {
     ON_CALL(m_objMockIAosConfig, GetUsatRegEventDownloadPolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
+            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
 
     const SipAddress objSipAddress = SipAddress("");
     ON_CALL(m_objMockIRegInfoRegistration, GetAor()).WillByDefault(ReturnRef(objSipAddress));
