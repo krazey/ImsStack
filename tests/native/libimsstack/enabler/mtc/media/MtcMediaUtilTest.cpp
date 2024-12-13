@@ -360,4 +360,86 @@ TEST_F(MtcMediaUtilTest, StringToMediaTypesReturnsMediaTypesFromString)
     EXPECT_EQ(MtcMediaUtil::StringToMediaTypes(strMediaTypes), eMediaTypes);
 }
 
+TEST_F(MtcMediaUtilTest, RefineMediaInfoByCallTypeReturnsMediaInfoWithOnlyAudioIfCallTypeIsVoip)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::VOIP, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest, RefineMediaInfoByCallTypeReturnsMediaInfoWithAudioAndVideoIfCallTypeIsVt)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::VT, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest, RefineMediaInfoByCallTypeReturnsMediaInfoWithAudioAndTextIfCallTypeIsRtt)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::RTT, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest,
+        RefineMediaInfoByCallTypeReturnsMediaInfoWithAudioVideoAndTextIfCallTypeIsVideoRtt)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::VIDEO_RTT, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest,
+        RefineMediaInfoByCallTypeReturnsMediaInfoWithoutValidMediaIfCallTypeIsUnknown)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::UNKNOWN, objMediaInfo);
+
+    EXPECT_EQ(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
 }  // namespace android

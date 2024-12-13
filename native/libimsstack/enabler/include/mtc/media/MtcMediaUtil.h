@@ -45,6 +45,8 @@ public:
 
     static AString MediaTypesToString(IN IMS_UINT32 eMediaTypes);
     static IMS_UINT32 StringToMediaTypes(IN const AString& strMediaTypes);
+
+    static void RefineMediaInfoByCallType(IN CallType eCallType, IN_OUT MediaInfo& objMediaInfo);
 };
 
 #endif

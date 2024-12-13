@@ -149,6 +149,7 @@ void SilentRedialHelper::ReStart()
 
     // MediaInfo
     MediaInfo objMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
+    MtcMediaUtil::RefineMediaInfoByCallType(eType, objMediaInfo);
 
     // SuppService list
     ImsMap<SuppType, SuppService*> objSuppServices;
