@@ -278,7 +278,8 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
     {
         IMS_TRACE_I("NegotiateSdp() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
                 *nVideoDirection, *nTextDirection);
-
+        /* TODO : After determining whether AddConfig is to be used,
+                  must decide whether to clear the logic or re-enable it.
         // set Access Network
         MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
@@ -290,9 +291,9 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
         }
 
         // audio
-        /*
         if (pMediaNego->GetAudioNego() != IMS_NULL)
         {
+            // TODO : If we decide to use AddConfig, this one has to be changed to `AddConfig`
             m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
         }
         */
