@@ -702,17 +702,17 @@ PROTECTED VIRTUAL void AosHandleMtc::Request(IN IMS_UINT32 nType, IN IMS_UINT32 
     {
         const IMS_BOOL bAdd = (nState == IAosHandle::STATE_ADD);
 
-        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Assets::REG_FEATURE_MMTEL))
+        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Ims::REG_FEATURE_MMTEL))
         {
             ProcessBlock(BLOCK_LIMITED_MMTEL, bAdd);
         }
 
-        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Assets::REG_FEATURE_VIDEO))
+        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Ims::REG_FEATURE_VIDEO))
         {
             ProcessBlock(BLOCK_LIMITED_VIDEO, bAdd);
         }
 
-        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Assets::REG_FEATURE_TEXT))
+        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Ims::REG_FEATURE_TEXT))
         {
             ProcessBlock(BLOCK_LIMITED_TEXT, bAdd);
         }

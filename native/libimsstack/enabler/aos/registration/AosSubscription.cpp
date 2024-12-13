@@ -310,7 +310,7 @@ void AosSubscription::ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRet
     }
 
     if (IsWfcErrorMessageSupportedWithStateChecked(
-                CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED))
+                CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED))
     {
         m_piListener->Subscription_Request(CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG);
     }
@@ -509,7 +509,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_423(IN IMS_BO
 PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_503(IN IMS_BOOL bIsRefreshed)
 {
     if (GET_N_CONFIG(m_piContext->GetSlotId())->GetSubRetrySip503CodePolicy() !=
-            CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP)
+            CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP)
     {
         return IMS_FALSE;
     }
@@ -697,7 +697,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
                 A_IMS_TRACE_I(AOSTAG, "Request initial registration", 0, 0, 0);
 
                 if (IsWfcErrorMessageSupportedWithStateChecked(
-                            CarrierConfig::Assets::WFC_ERROR_SUB_403))
+                            CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
                 {
                     SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_SUB_403_MSG);
                 }
@@ -844,7 +844,7 @@ PROTECTED VIRTUAL void AosSubscription::RequestCommand(
     ReportState(nReason, nCommand,
             bIsRegRequired &&
                     GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy() !=
-                            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION,
+                            CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION,
             nRetryAfter);
 }
 
@@ -1074,7 +1074,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_InvalidBody()
 PROTECTED VIRTUAL void AosSubscription::ProcessRegEventChange(IN IMS_UINT32 nStatusCode)
 {
     IMS_SINT32 nPolicy = GET_N_CONFIG(m_piContext->GetSlotId())->GetUsatRegEventDownloadPolicy();
-    if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD)
+    if (nPolicy == CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD)
     {
         return;
     }
@@ -1098,7 +1098,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessRegEventChange(IN IMS_UINT32 nSta
         }
     }
 
-    if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD)
+    if (nPolicy == CarrierConfig::Ims::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD)
     {
         piService->NotifyRegEventState(nStatusCode, objImpus);
     }

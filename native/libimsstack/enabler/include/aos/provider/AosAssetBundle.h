@@ -27,11 +27,11 @@ public:
     AosExtraRegErrBundle() :
             bExtraReregFailureWithErrCodeInRoaming(IMS_FALSE),
             bExtraRegErrRetryCntSharedForRegAndSub(IMS_FALSE),
-            nExtraRegErrFinalType(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED),
+            nExtraRegErrFinalType(CarrierConfig::Ims::ERROR_TYPE_NOT_SPECIFIED),
             nExtraRegErrMaxCnt(0),
             nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached(0),
             nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached(0),
-            nExtraRegErrPolicy(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED),
+            nExtraRegErrPolicy(CarrierConfig::Ims::ERROR_POLICY_NOT_SPECIFIED),
             objExtraRegErrCode(ImsVector<IMS_SINT32>()),
             objExtraReregErrCode(ImsVector<IMS_SINT32>()),
             objExtraRegErrWaitTimeSec(ImsVector<IMS_SINT32>())

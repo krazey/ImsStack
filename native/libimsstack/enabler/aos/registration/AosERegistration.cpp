@@ -340,8 +340,8 @@ AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
 PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_305()
 {
     IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetRegRetrySip305CodePolicy();
-    // It's only for CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP
-    if (nPolicy == CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
+    // It's only for CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP
+    if (nPolicy == CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP)
     {
         m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
 
@@ -957,7 +957,7 @@ PROTECTED IMS_BOOL AosERegistration::ProcessNormalDefaultFlowRecovery_Start(
 {
     if (nStatusCode == SipStatusCode::SC_305)
     {
-        // It's only for CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP in ProcessStartFailed_305()
+        // It's only for CarrierConfig::Ims::SIP_305_CODE_POLICY_3GPP in ProcessStartFailed_305()
         if (ProcessStartFailed_305())
         {
             return IMS_TRUE;
@@ -966,11 +966,11 @@ PROTECTED IMS_BOOL AosERegistration::ProcessNormalDefaultFlowRecovery_Start(
 
     IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
 
-    // It's only for awt policy is CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL and
+    // It's only for awt policy is CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL and
     // KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL is true.
     // If you need to follow the normal reg retry rule, update it below.
     IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
-    if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL &&
+    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL &&
             GET_N_CONFIG(m_nSlotId)->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
     {
         ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);

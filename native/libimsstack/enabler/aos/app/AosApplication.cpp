@@ -1932,7 +1932,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionUpdated_Pcscf()
             break;
         case IAosPcscf::TYPE_CHANGED_REORDER:
             if (GET_N_CONFIG(m_nSlotId)->GetRegistrationPcscfUpdatePolicy() ==
-                    CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME)
+                    CarrierConfig::Ims::REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME)
             {
                 A_IMS_TRACE_I(
                         APPID, "ProcessConnectionUpdated_Pcscf :: reg will be updated", 0, 0, 0);
@@ -2162,7 +2162,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
         return;
     }
 
-    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK)
+    if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK)
     {
         PerformRatBlockActions(IMS_TRUE);
 
@@ -2176,11 +2176,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     }
 
     IMS_BOOL bPlmnBlockByConfig = IMS_FALSE;
-    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED)
+    if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_REPEATED)
     {
         bPlmnBlockByConfig = IMS_TRUE;
     }
-    else if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
+    else if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
     {
         if (m_nRat == NW_REPORT_RADIO_NR)
         {

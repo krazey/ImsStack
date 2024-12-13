@@ -210,7 +210,7 @@ PROTECTED VIRTUAL void AosHandleMts::Request(IN IMS_UINT32 nType, IN IMS_UINT32 
 {
     if (nType == IAosHandle::TYPE_LIMITED_MODE)
     {
-        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Assets::REG_FEATURE_SMS))
+        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Ims::REG_FEATURE_SMS))
         {
             ProcessBlock(BLOCK_LIMITED_SMS, (nState == IAosHandle::STATE_ADD));
         }

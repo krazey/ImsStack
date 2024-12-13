@@ -633,7 +633,7 @@ TEST_F(AosPcscfTest, HasNextPcscfReturnsFalseIfNoAvailablePcscfAfterCurrentPcscf
     m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
     m_pAosPcscf->SetCurrentPcscfIndex(0);
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC));
+            .WillByDefault(Return(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_SPEC));
 
     IMS_BOOL bResult = m_pAosPcscf->HasNextPcscf();
 
@@ -646,7 +646,7 @@ TEST_F(AosPcscfTest, HasNextPcscfReturnsTrueIfAvailablePcscfExistAfterCurrentPcs
     m_pAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
     m_pAosPcscf->SetCurrentPcscfIndex(0);
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC));
+            .WillByDefault(Return(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_SPEC));
 
     IMS_BOOL bResult = m_pAosPcscf->HasNextPcscf();
 
@@ -659,7 +659,7 @@ TEST_F(AosPcscfTest, HasNextPcscfReturnsTrueIfAvailablePcscfExistInPcscfList)
     m_pAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
     m_pAosPcscf->SetCurrentPcscfIndex(1);
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
+            .WillByDefault(Return(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
 
     IMS_BOOL bResult = m_pAosPcscf->HasNextPcscf();
 
@@ -671,7 +671,7 @@ TEST_F(AosPcscfTest, GetNextPcscfReturnsFalseIfNotExist)
     m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
     m_pAosPcscf->SetCurrentPcscfIndex(0);
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC));
+            .WillByDefault(Return(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_SPEC));
 
     AString objPcscfAddress;
     IMS_UINT32 nPcscfPort;
@@ -686,7 +686,7 @@ TEST_F(AosPcscfTest, GetNextPcscfReturnsTrueIfExist)
     m_pAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
     m_pAosPcscf->SetCurrentPcscfIndex(1);
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
+            .WillByDefault(Return(CarrierConfig::Ims::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
 
     AString objPcscfAddress;
     IMS_UINT32 nPcscfPort;

@@ -292,7 +292,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT);
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigAssets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL))
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigIms::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
@@ -312,7 +312,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigAssets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL))
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigIms::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcService, IsRoaming).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);

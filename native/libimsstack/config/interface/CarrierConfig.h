@@ -147,12 +147,116 @@ public:
         static const IMS_CHAR KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY[];
         static const IMS_CHAR KEY_ISIM_INDEX_FOR_IMPU_INT[];
         static const IMS_CHAR KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY[];
-        static const IMS_CHAR KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT[];
         static const IMS_CHAR KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[];
         static const IMS_CHAR KEY_USE_TCP_TRANSPORT_FOR_REGISTER_BOOL[];
         static const IMS_CHAR KEY_PREFERRED_IMS_DSCP_INT[];
         static const IMS_CHAR KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT[];
         static const IMS_CHAR KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY[];
+        static const IMS_CHAR KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[];
+        static const IMS_CHAR KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL[];
+        static const IMS_CHAR KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[];
+        static const IMS_CHAR KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[];
+        static const IMS_CHAR KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[];
+        static const IMS_CHAR KEY_IMSI_BASED_URI_PRIORITIZED_BOOL[];
+        static const IMS_CHAR KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL[];
+        static const IMS_CHAR KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL[];
+        static const IMS_CHAR KEY_REG_CONTACT_VALIDATION_BOOL[];
+        static const IMS_CHAR KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL[];
+        static const IMS_CHAR KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL[];
+        static const IMS_CHAR KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[];
+        static const IMS_CHAR KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL[];
+        static const IMS_CHAR KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL[];
+        static const IMS_CHAR KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_CONTACT_USER_INFO_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[];
+        static const IMS_CHAR KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[];
+        static const IMS_CHAR KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL[];
+        static const IMS_CHAR KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL[];
+        static const IMS_CHAR KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT[];
+        static const IMS_CHAR KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[];
+        static const IMS_CHAR KEY_IMS_ESTABLISHMENT_TIME_SEC_INT[];
+        static const IMS_CHAR KEY_IMS_PREFERRED_IPTYPE_INT[];
+        static const IMS_CHAR KEY_IMS_SIGNALLING_DSCP_INT[];
+        static const IMS_CHAR KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_DEFAULT_WAIT_TIME_INT[];
+        static const IMS_CHAR KEY_REG_OUT_OF_SERVICE_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_PCSCF_UPDATE_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_305_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_503_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_CNT_PER_PCSCF_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_CNT_RESET_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_DEFAULT_POLICY_INT[];
+        static const IMS_CHAR KEY_REG_RETRY_TIMER_F_POLICY_INT[];
+        static const IMS_CHAR KEY_REREG_RETRY_305_POLICY_INT[];
+        static const IMS_CHAR KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[];
+        static const IMS_CHAR KEY_SUB_RETRY_503_POLICY_INT[];
+        static const IMS_CHAR KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[];
+        static const IMS_CHAR KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[];
+        static const IMS_CHAR KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY[];
+        static const IMS_CHAR KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY[];
+        static const IMS_CHAR KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY[];
+        static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY[];
+        static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY[];
+        static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY[];
+        static const IMS_CHAR KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY[];
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY[];
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[];
+        static const IMS_CHAR KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[];
+        static const IMS_CHAR KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY[];
+        // Bundle {
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_BUNDLE[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_FINAL_TYPE_INT[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_MAX_CNT_INT[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT[];
+        static const IMS_CHAR
+                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_POLICY_INT[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_INT_ARRAY[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY[];
+        static const IMS_CHAR KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY[];
+        // }
+        // Bundle {
+        static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE[];
+        static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT[];
+        static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY[];
+        static const IMS_CHAR
+                KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY[];
+        // }
+        // Bundle {
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_MAX_CNT_INT[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT[];
+        // }
+        // Bundle {
+        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE[];
+        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL[];
+        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY[];
+        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY[];
+        // }
+        // Bundle {
+        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_BUNDLE[];
+        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL[];
+        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY[];
+        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY[];
+        // }
+        // Bundle {
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE[];
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT[];
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[];
+        // }
+        // Bundle {
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE[];
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT[];
+        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY[];
+        // }
+
         // Mtc
         static const IMS_CHAR KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[];
 
@@ -262,6 +366,163 @@ public:
             PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED = 1,
             PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE = 2
         };
+
+        // Registration retry sip 305 policy
+        enum
+        {
+            SIP_305_CODE_POLICY_DEFAULT = 0,
+            SIP_305_CODE_POLICY_3GPP = 1,
+            SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF = 2,
+            SIP_305_CODE_POLICY_USE_CONTACT_VALUE = 3
+        };
+
+        // Registration Retry Timer F Policy
+        enum
+        {
+            TIMER_F_POLICY_NONE = 0,
+            TIMER_F_POLICY_SPEC = 1,
+            TIMER_F_POLICY_SPEC_WITH_AWT = 2
+        };
+
+        // Registration Retry Default Policy
+        enum
+        {
+            DEFAULT_RETRY_POLICY_SPEC = 0,
+            DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF = 1,
+            DEFAULT_RETRY_POLICY_NEXT_PCSCF = 2
+        };
+
+        // Registration and Subscription(reg event package) retry sip 503 policy
+        enum
+        {
+            SIP_503_CODE_POLICY_DEFAULT = 0,
+            SIP_503_CODE_POLICY_3GPP = 1
+        };
+
+        // specific registration error final type
+        enum
+        {
+            ERROR_TYPE_NOT_SPECIFIED = 0,
+            ERROR_TYPE_REPEATED = 1,
+            ERROR_TYPE_CRITICAL = 2,
+            ERROR_TYPE_ROAMING = 3,
+            ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK = 4,
+            ERROR_TYPE_RAT_BLOCK = 5
+        };
+
+        // specific registration error policy
+        enum
+        {
+            ERROR_POLICY_NOT_SPECIFIED = 0,
+            ERROR_POLICY_PCSCF_FAILED = 1,
+            ERROR_POLICY_SUBSCRIBER_FAILED = 2,
+            ERROR_POLICY_PDN_REACTIVATED = 3
+        };
+
+        // error code mapping for registration
+        // specific registration error policy
+        enum
+        {
+            REG_ERROR_CODE_TIMER_F = 0,
+            REG_ERROR_CODE_TRANSPORT = 1,
+            REG_ERROR_CODE_OTHER = 2,
+            REG_ERROR_CODE_3XX = 3,
+            REG_ERROR_CODE_4XX = 4,
+            REG_ERROR_CODE_5XX = 5,
+            REG_ERROR_CODE_6XX = 6,
+            REG_ERROR_CODE_ALL_RESP = 9,
+            REG_ERROR_CODE_USIM_AUTHENTICATION = 10
+        };
+
+        // registration retry count reset policy
+        enum
+        {
+            REG_RETRY_CNT_RESET_POLICY_REGISTRATION = 0,
+            REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION = 1,
+            REG_RETRY_CNT_RESET_POLICY_NOTIFY = 2
+        };
+
+        // IP verion types
+        enum
+        {
+            IP_VERSION_4 = 0,
+            IP_VERSION_6 = 1
+        };
+
+        // Reasons for terminated state of "reg" event package
+        enum
+        {
+            REG_EVENT_TERMINATED_REASON_EXPIRED = 1,
+            REG_EVENT_TERMINATED_REASON_DEACTIVATED = 2,
+            REG_EVENT_TERMINATED_REASON_PROBATION = 3,
+            REG_EVENT_TERMINATED_REASON_UNREGITERED = 4,
+            REG_EVENT_TERMINATED_REASON_REJECTED = 5
+        };
+
+        // Registration Actual Wait Time policy
+        enum
+        {
+            AWT_POLICY_RFC_RULE = 0,
+            AWT_POLICY_FAILURE_TO_EVERY_PCSCF = 1,
+            AWT_POLICY_FAILURE_TO_EACH_PCSCF = 2,
+            AWT_POLICY_SPECIFIED_INTERVAL = 3
+        };
+
+        // Registration out-of-service policy
+        enum
+        {
+            REG_OOS_POLICY_DEFAULT = 0,
+            REG_OOS_POLICY_DESTROY = 1
+        };
+
+        // Registration With Feature Tag Policy Unavailable
+        enum
+        {
+            UNAVAILABLE_FEATURE_POLICY_VOPS = 1,
+            UNAVAILABLE_FEATURE_POLICY_CAPABILITY = 2,
+            UNAVAILABLE_FEATURE_POLICY_3G = 3
+        };
+
+        // Update Pcscf Policy for registration
+        enum
+        {
+            REG_PCSCF_UPDATE_POLICY_DEFAULT = 0,
+            REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME = 1
+        };
+
+        // User Info Policy for non register message
+        enum
+        {
+            CONTACT_USER_INFO_POLICY_DEFAULT = 1,
+            CONTACT_USER_INFO_POLICY_NONE = 2,
+            CONTACT_USER_INFO_POLICY_NO_IMSI = 3
+        };
+
+        // Geolocation pidf Forming policy
+        enum
+        {
+            GEOLOCATION_POLICY_WITHOUT_POSITION = 1,
+            GEOLOCATION_POLICY_WITH_POSITION = 2,
+            GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY = 3,
+            GEOLOCATION_POLICY_WITHOUT_CIVIC = 4
+        };
+
+        // USAT Registration event download policy
+        enum
+        {
+            USAT_REG_EVENT_NOT_DOWNLOAD = 0,
+            USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1,
+            USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2
+        };
+
+        // Registration Features
+        enum
+        {
+            REG_FEATURE_MMTEL = 0,
+            REG_FEATURE_VIDEO = 1,
+            REG_FEATURE_TEXT = 2,
+            REG_FEATURE_SMS = 3
+        };
     };
 
     class ImsEmergency
@@ -277,10 +538,24 @@ public:
         // Public carrier-config - ends
         static const IMS_CHAR KEY_EMERGENCY_INVITE_18X_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT[];
+
         // Aos
         static const IMS_CHAR KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL[];
         static const IMS_CHAR KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT[];
         static const IMS_CHAR KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[];
+        static const IMS_CHAR KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[];
+        static const IMS_CHAR KEY_EREG_ON_RANDOM_PCSCF_BOOL[];
+        static const IMS_CHAR KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL[];
+        static const IMS_CHAR KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL[];
+        static const IMS_CHAR KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[];
+        static const IMS_CHAR KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[];
+        static const IMS_CHAR KEY_EPDN_PREFERRED_IPTYPE_INT[];
+        static const IMS_CHAR KEY_EREG_RETRY_MAX_CNT_INT[];
+        static const IMS_CHAR KEY_EREG_RETRY_TIMER_MILLIS_INT[];
+        static const IMS_CHAR KEY_REG_TIMER_FOR_ECALL_MILLIS_INT[];
+        static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
         // Mtc
         static const IMS_CHAR KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL[];
         static const IMS_CHAR
@@ -359,7 +634,11 @@ public:
         static const IMS_CHAR KEY_SMS_OVER_IMS_FORMAT_INT[];
         static const IMS_CHAR KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY[];
         // Public carrier-config - ends
+
+        // Aos
         static const IMS_CHAR KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL[];
+        static const IMS_CHAR KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL[];
+        // Mts
         static const IMS_CHAR KEY_SMS_REQUEST_URI_TYPE_INT[];
         static const IMS_CHAR KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[];
         static const IMS_CHAR KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[];
@@ -478,6 +757,13 @@ public:
         static const IMS_CHAR KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT[];
         // }
         // Public carrier-config - ends
+
+        // Aos
+        static const IMS_CHAR KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[];
+        static const IMS_CHAR KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL[];
+        static const IMS_CHAR KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL[];
+        static const IMS_CHAR KEY_VOLTE_HYS_TIME_SEC_INT[];
+        // Mtc
         static const IMS_CHAR KEY_18X_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL[];
         static const IMS_CHAR KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[];
@@ -951,8 +1237,25 @@ public:
         static const IMS_CHAR KEY_PIDF_SHORT_CODE_STRING_ARRAY[];
         static const IMS_CHAR KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL[];
         // Public carrier-config - ends
+
+        // Aos
         static const IMS_CHAR KEY_REGISTRATION_PRIVATE_HEADER_INT[];
         static const IMS_CHAR KEY_COUNTRY_CODE_INT[];
+        static const IMS_CHAR KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL[];
+        static const IMS_CHAR KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL[];
+        static const IMS_CHAR KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL[];
+        static const IMS_CHAR KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL[];
+        static const IMS_CHAR KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[];
+        // Bundle {
+        static const IMS_CHAR KEY_WFC_ERR_MESSAGE_BUNDLE[];
+        static const IMS_CHAR KEY_WFC_ERR_REG_403_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_REG_500_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_SUB_403_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_NOTIFY_TERMINATED_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_OTHER_FAILURES_STRING[];
+        // }
+        // Mtc
         static const IMS_CHAR KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[];
         static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[];
         static const IMS_CHAR KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[];
@@ -963,6 +1266,17 @@ public:
             REGISTRATION_P_NOT_SUPPORTED = 0,
             REGISTRATION_P_CELLULAR_NETWORK_INFO = 1,
             REGISTRATION_P_LAST_ACCESS_NETWORK_INFO = 2
+        };
+
+        // WFC error
+        enum
+        {
+            WFC_ERROR_REG_403 = 1,
+            WFC_ERROR_REG_500 = 2,
+            WFC_ERROR_NOT_SUPPORTED_COUNTRY = 3,
+            WFC_ERROR_SUB_403 = 4,
+            WFC_ERROR_NOTIFY_TERMINATED = 5,
+            WFC_ERROR_OTHER_FAILURES = 6
         };
     };
 
@@ -977,331 +1291,6 @@ public:
         enum
         {
             SUPPLEMENTARY_SERVICE_CW = 0,
-        };
-    };
-
-    class Assets
-    {
-    public:
-        // Aos
-        static const IMS_CHAR KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[];
-        static const IMS_CHAR KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL[];
-        static const IMS_CHAR KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[];
-        static const IMS_CHAR KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[];
-        static const IMS_CHAR KEY_EREG_ON_RANDOM_PCSCF_BOOL[];
-        static const IMS_CHAR KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL[];
-        static const IMS_CHAR KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL[];
-        static const IMS_CHAR KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[];
-        static const IMS_CHAR KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[];
-        static const IMS_CHAR KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[];
-        static const IMS_CHAR KEY_IMSI_BASED_URI_PRIORITIZED_BOOL[];
-        static const IMS_CHAR KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL[];
-        static const IMS_CHAR KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL[];
-        static const IMS_CHAR KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL[];
-        static const IMS_CHAR KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL[];
-        static const IMS_CHAR KEY_REG_CONTACT_VALIDATION_BOOL[];
-        static const IMS_CHAR KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL[];
-        static const IMS_CHAR KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL[];
-        static const IMS_CHAR KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[];
-        static const IMS_CHAR KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL[];
-        static const IMS_CHAR KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL[];
-        static const IMS_CHAR KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL[];
-        static const IMS_CHAR KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL[];
-        static const IMS_CHAR KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL[];
-        static const IMS_CHAR KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL[];
-        static const IMS_CHAR KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL[];
-        static const IMS_CHAR KEY_SUPPORT_CONTACT_USER_INFO_BOOL[];
-        static const IMS_CHAR KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[];
-        static const IMS_CHAR KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL[];
-        static const IMS_CHAR KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[];
-        static const IMS_CHAR KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[];
-        static const IMS_CHAR KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[];
-        static const IMS_CHAR KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[];
-        static const IMS_CHAR KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL[];
-        static const IMS_CHAR KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL[];
-        static const IMS_CHAR KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL[];
-        static const IMS_CHAR KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL[];
-
-        static const IMS_CHAR KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT[];
-        static const IMS_CHAR KEY_EPDN_PREFERRED_IPTYPE_INT[];
-        static const IMS_CHAR KEY_EREG_RETRY_MAX_CNT_INT[];
-        static const IMS_CHAR KEY_EREG_RETRY_TIMER_MILLIS_INT[];
-        static const IMS_CHAR KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[];
-        static const IMS_CHAR KEY_IMS_ESTABLISHMENT_TIME_SEC_INT[];
-        static const IMS_CHAR KEY_IMS_PREFERRED_IPTYPE_INT[];
-        static const IMS_CHAR KEY_IMS_SIGNALLING_DSCP_INT[];
-        static const IMS_CHAR KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_DEFAULT_WAIT_TIME_INT[];
-        static const IMS_CHAR KEY_REG_OUT_OF_SERVICE_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_PCSCF_UPDATE_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_305_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_503_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_CNT_ON_SINGLE_PCSCF_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_CNT_PER_PCSCF_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_CNT_RESET_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_DEFAULT_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_RETRY_TIMER_F_POLICY_INT[];
-        static const IMS_CHAR KEY_REG_TIMER_FOR_ECALL_MILLIS_INT[];
-        static const IMS_CHAR KEY_REREG_RETRY_305_POLICY_INT[];
-        static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
-        static const IMS_CHAR KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[];
-        static const IMS_CHAR KEY_SUB_RETRY_503_POLICY_INT[];
-        static const IMS_CHAR KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[];
-        static const IMS_CHAR KEY_VOLTE_HYS_TIME_SEC_INT[];
-
-        static const IMS_CHAR KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[];
-        static const IMS_CHAR KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY[];
-        static const IMS_CHAR KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY[];
-        static const IMS_CHAR KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY[];
-        static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY[];
-        static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY[];
-        static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY[];
-        static const IMS_CHAR KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY[];
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY[];
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[];
-        static const IMS_CHAR KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[];
-        static const IMS_CHAR KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY[];
-        static const IMS_CHAR KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[];
-
-        // Bundle {
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_BUNDLE[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_FINAL_TYPE_INT[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_MAX_CNT_INT[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT[];
-        static const IMS_CHAR
-                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_POLICY_INT[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_INT_ARRAY[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY[];
-        static const IMS_CHAR KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE[];
-        static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT[];
-        static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY[];
-        static const IMS_CHAR
-                KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE[];
-        static const IMS_CHAR KEY_PCSCF_RECOVERY_MAX_CNT_INT[];
-        static const IMS_CHAR KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT[];
-        static const IMS_CHAR KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT[];
-        static const IMS_CHAR KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE[];
-        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL[];
-        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY[];
-        static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_BUNDLE[];
-        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL[];
-        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY[];
-        static const IMS_CHAR KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE[];
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT[];
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE[];
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT[];
-        static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY[];
-        // }
-        // Bundle {
-        static const IMS_CHAR KEY_WFC_ERR_MESSAGE_BUNDLE[];
-        static const IMS_CHAR KEY_WFC_ERR_REG_403_STRING[];
-        static const IMS_CHAR KEY_WFC_ERR_REG_500_STRING[];
-        static const IMS_CHAR KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING[];
-        static const IMS_CHAR KEY_WFC_ERR_SUB_403_STRING[];
-        static const IMS_CHAR KEY_WFC_ERR_NOTIFY_TERMINATED_STRING[];
-        static const IMS_CHAR KEY_WFC_ERR_OTHER_FAILURES_STRING[];
-        // }
-
-        // Registration retry sip 305 policy
-        enum
-        {
-            SIP_305_CODE_POLICY_DEFAULT = 0,
-            SIP_305_CODE_POLICY_3GPP = 1,
-            SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF = 2,
-            SIP_305_CODE_POLICY_USE_CONTACT_VALUE = 3
-        };
-
-        // Registration Retry Timer F Policy
-        enum
-        {
-            TIMER_F_POLICY_NONE = 0,
-            TIMER_F_POLICY_SPEC = 1,
-            TIMER_F_POLICY_SPEC_WITH_AWT = 2
-        };
-
-        // Registration Retry Default Policy
-        enum
-        {
-            DEFAULT_RETRY_POLICY_SPEC = 0,
-            DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF = 1,
-            DEFAULT_RETRY_POLICY_NEXT_PCSCF = 2
-        };
-
-        // Registration and Subscription(reg event package) retry sip 503 policy
-        enum
-        {
-            SIP_503_CODE_POLICY_DEFAULT = 0,
-            SIP_503_CODE_POLICY_3GPP = 1
-        };
-
-        // specific registration error final type
-        enum
-        {
-            ERROR_TYPE_NOT_SPECIFIED = 0,
-            ERROR_TYPE_REPEATED = 1,
-            ERROR_TYPE_CRITICAL = 2,
-            ERROR_TYPE_ROAMING = 3,
-            ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK = 4,
-            ERROR_TYPE_RAT_BLOCK = 5
-        };
-
-        // specific registration error policy
-        enum
-        {
-            ERROR_POLICY_NOT_SPECIFIED = 0,
-            ERROR_POLICY_PCSCF_FAILED = 1,
-            ERROR_POLICY_SUBSCRIBER_FAILED = 2,
-            ERROR_POLICY_PDN_REACTIVATED = 3
-        };
-
-        // error code mapping for registration
-        // specific registration error policy
-        enum
-        {
-            REG_ERROR_CODE_TIMER_F = 0,
-            REG_ERROR_CODE_TRANSPORT = 1,
-            REG_ERROR_CODE_OTHER = 2,
-            REG_ERROR_CODE_3XX = 3,
-            REG_ERROR_CODE_4XX = 4,
-            REG_ERROR_CODE_5XX = 5,
-            REG_ERROR_CODE_6XX = 6,
-            REG_ERROR_CODE_ALL_RESP = 9,
-            REG_ERROR_CODE_USIM_AUTHENTICATION = 10
-        };
-
-        // registration retry count reset policy
-        enum
-        {
-            REG_RETRY_CNT_RESET_POLICY_REGISTRATION = 0,
-            REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION = 1,
-            REG_RETRY_CNT_RESET_POLICY_NOTIFY = 2
-        };
-
-        // WFC error
-        enum
-        {
-            WFC_ERROR_REG_403 = 1,
-            WFC_ERROR_REG_500 = 2,
-            WFC_ERROR_NOT_SUPPORTED_COUNTRY = 3,
-            WFC_ERROR_SUB_403 = 4,
-            WFC_ERROR_NOTIFY_TERMINATED = 5,
-            WFC_ERROR_OTHER_FAILURES = 6
-        };
-
-        // IP verion types
-        enum
-        {
-            IP_VERSION_4 = 0,
-            IP_VERSION_6 = 1
-        };
-
-        // Reasons for terminated state of "reg" event package
-        enum
-        {
-            REG_EVENT_TERMINATED_REASON_EXPIRED = 1,
-            REG_EVENT_TERMINATED_REASON_DEACTIVATED = 2,
-            REG_EVENT_TERMINATED_REASON_PROBATION = 3,
-            REG_EVENT_TERMINATED_REASON_UNREGITERED = 4,
-            REG_EVENT_TERMINATED_REASON_REJECTED = 5
-        };
-
-        // Registration Actual Wait Time policy
-        enum
-        {
-            AWT_POLICY_RFC_RULE = 0,
-            AWT_POLICY_FAILURE_TO_EVERY_PCSCF = 1,
-            AWT_POLICY_FAILURE_TO_EACH_PCSCF = 2,
-            AWT_POLICY_SPECIFIED_INTERVAL = 3
-        };
-
-        // Registration out-of-service policy
-        enum
-        {
-            REG_OOS_POLICY_DEFAULT = 0,
-            REG_OOS_POLICY_DESTROY = 1
-        };
-
-        // Clear Permanent Pdn Failure Reason
-        enum
-        {
-            CLEAR_REASON_SIM_STATE = 0,
-            CLEAR_REASON_AIRPLANE = 1,
-            CLEAR_REASON_PLMN_CHANGED = 2,
-            CLEAR_REASON_RAT_CHANGED = 3,
-            CLEAR_REASON_WIFI_CHANGED = 4,
-            CLEAR_REASON_VOLTE_SETTING = 5,
-            CLEAR_REASON_WFC_SETTING = 6
-        };
-
-        // Registration With Feature Tag Policy Unavailable
-        enum
-        {
-            UNAVAILABLE_FEATURE_POLICY_VOPS = 1,
-            UNAVAILABLE_FEATURE_POLICY_CAPABILITY = 2,
-            UNAVAILABLE_FEATURE_POLICY_3G = 3
-        };
-
-        // Update Pcscf Policy for registration
-        enum
-        {
-            REG_PCSCF_UPDATE_POLICY_DEFAULT = 0,
-            REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME = 1
-        };
-
-        // User Info Policy for non register message
-        enum
-        {
-            CONTACT_USER_INFO_POLICY_DEFAULT = 1,
-            CONTACT_USER_INFO_POLICY_NONE = 2,
-            CONTACT_USER_INFO_POLICY_NO_IMSI = 3
-        };
-
-        // Geolocation pidf Forming policy
-        enum
-        {
-            GEOLOCATION_POLICY_WITHOUT_POSITION = 1,
-            GEOLOCATION_POLICY_WITH_POSITION = 2,
-            GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY = 3,
-            GEOLOCATION_POLICY_WITHOUT_CIVIC = 4
-        };
-
-        // USAT Registration event download policy
-        enum
-        {
-            USAT_REG_EVENT_NOT_DOWNLOAD = 0,
-            USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1,
-            USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2
-        };
-
-        // Registration Features
-        enum
-        {
-            REG_FEATURE_MMTEL = 0,
-            REG_FEATURE_VIDEO = 1,
-            REG_FEATURE_TEXT = 2,
-            REG_FEATURE_SMS = 3
         };
     };
 

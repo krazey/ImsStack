@@ -4563,26 +4563,26 @@ TEST_F(AosHandleTest, ShouldReturnTrueIfTheUnavailableFeatureListContainsTheGive
 {
     // GIVEN
     ImsVector<IMS_SINT32> objUnavailableFeatures;
-    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    objUnavailableFeatures.Add(CarrierConfig::Ims::REG_FEATURE_VIDEO);
     ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
             .WillByDefault(ReturnRef(objUnavailableFeatures));
 
     // WHEN & THEN
-    EXPECT_TRUE(m_pAosHandle->IsFeatureUnavailableInLimitedReg(
-            CarrierConfig::Assets::REG_FEATURE_VIDEO));
+    EXPECT_TRUE(
+            m_pAosHandle->IsFeatureUnavailableInLimitedReg(CarrierConfig::Ims::REG_FEATURE_VIDEO));
 }
 
 TEST_F(AosHandleTest, ShouldReturnFalseIfTheUnavailableFeatureListNotContainTheGivenFeature)
 {
     // GIVEN
     ImsVector<IMS_SINT32> objUnavailableFeatures;
-    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    objUnavailableFeatures.Add(CarrierConfig::Ims::REG_FEATURE_VIDEO);
     ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
             .WillByDefault(ReturnRef(objUnavailableFeatures));
 
     // WHEN & THEN
-    EXPECT_FALSE(m_pAosHandle->IsFeatureUnavailableInLimitedReg(
-            CarrierConfig::Assets::REG_FEATURE_MMTEL));
+    EXPECT_FALSE(
+            m_pAosHandle->IsFeatureUnavailableInLimitedReg(CarrierConfig::Ims::REG_FEATURE_MMTEL));
 }
 
 TEST_F(AosHandleTest, ProcessNetworkChanged_Test)
