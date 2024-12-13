@@ -29,10 +29,25 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+#define DECLARE_USING(Base) using Base::InitializeServiceFeature;
+
+class TestAosHandleEmergencyMtc : public AosHandleEmergencyMtc
+{
+public:
+    DECLARE_USING(AosHandleEmergencyMtc)
+
+    inline explicit TestAosHandleEmergencyMtc(IN IAosAppContext* piAosAppContext,
+            IN const AString& strAppId, IN const AString& strServiceId,
+            IN const IMS_SINT32 nServiceType) :
+            AosHandleEmergencyMtc(piAosAppContext, strAppId, strServiceId, nServiceType)
+    {
+    }
+};
+
 class AosHandleEmergencyMtcTest : public ::testing::Test
 {
 public:
-    AosHandleEmergencyMtc* m_pAosHandleEmergencyMtc;
+    TestAosHandleEmergencyMtc* m_pAosHandleEmergencyMtc;
 
     MockIAosAppContext m_objMockIAosAppContext;
 
@@ -59,9 +74,8 @@ protected:
         AosProvider::GetInstance()->SetNConfiguration(
                 static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
 
-        m_pAosHandleEmergencyMtc =
-                new AosHandleEmergencyMtc(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                        m_strAppId, m_strServiceId, m_nServiceType);
+        m_pAosHandleEmergencyMtc = new TestAosHandleEmergencyMtc(
+                &m_objMockIAosAppContext, m_strAppId, m_strServiceId, m_nServiceType);
 
         ASSERT_TRUE(m_pAosHandleEmergencyMtc != nullptr);
     }
@@ -76,8 +90,6 @@ protected:
 
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
     }
-
-    void InitializeServiceFeature() { m_pAosHandleEmergencyMtc->InitializeServiceFeature(); }
 };
 
 TEST_F(AosHandleEmergencyMtcTest, Constructor_Test) {}
@@ -98,12 +110,12 @@ TEST_F(AosHandleEmergencyMtcTest, InitializeServiceFeature_Test)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    InitializeServiceFeature();
+    m_pAosHandleEmergencyMtc->InitializeServiceFeature();
     EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::MMTEL));
     EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::VIDEO));
     EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::TEXT));
 
-    InitializeServiceFeature();
+    m_pAosHandleEmergencyMtc->InitializeServiceFeature();
     EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::MMTEL));
     EXPECT_FALSE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::VIDEO));
     EXPECT_FALSE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::TEXT));
