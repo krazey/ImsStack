@@ -72,6 +72,11 @@ EmergencyStartErrorHandler::MaybeGetOverriddenCallReasonInfo(
 PUBLIC
 CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
+    if (IsRedialWithVoipByRttEmergencyRejectionRequired())
+    {
+        return HandleRedialWithVoipByRttEmergencyRejection();
+    }
+
     IMS_SINT32 nStatusCode =
             (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
 
@@ -191,4 +196,22 @@ void EmergencyStartErrorHandler::ControlAos(IN IMS_UINT32 nCommand) const
     {
         pAosConnector->Control(nCommand);
     }
+}
+
+PRIVATE
+IMS_BOOL EmergencyStartErrorHandler::IsRedialWithVoipByRttEmergencyRejectionRequired() const
+{
+    if (m_objContext.GetSession(&m_objSession)->GetCallType() != CallType::RTT)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_objContext.GetConfigurationProxy().GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL);
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleRedialWithVoipByRttEmergencyRejection() const
+{
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
 }

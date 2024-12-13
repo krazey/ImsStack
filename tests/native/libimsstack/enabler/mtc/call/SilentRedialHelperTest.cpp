@@ -185,6 +185,14 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithRedialEmergencyType)
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
 }
 
+TEST_F(SilentRedialHelperTest, CreateHelperWithRedialByRttEmergencyRejection)
+{
+    const CallReasonInfo objReason(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
+    pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
+}
+
 TEST_F(SilentRedialHelperTest, IsSameRedialTypeReturnsComparisonResult)
 {
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);
@@ -425,6 +433,27 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedialEmergencyWith
 
     CallInfo objCallInfo;
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is VOIP
+
+    ParticipantInfo objParticipantInfo(objContext);
+    ON_CALL(objContext, GetParticipantInfo)
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
+
+    AString strEmptyNumber;
+    EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _));
+
+    pRedialHelper->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedialByRttEmergencyRejection)
+{
+    const CallReasonInfo objAnyReason(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
+    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
+    pRedialHelper->Redial();
+
+    CallInfo objCallInfo;
+    objCallInfo.eInitialCallType = CallType::RTT;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is RTT
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)

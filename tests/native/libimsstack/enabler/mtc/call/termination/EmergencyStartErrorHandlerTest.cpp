@@ -67,7 +67,7 @@ protected:
                 .WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objMtcService));
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
-        ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objCallContext, GetSession(&objSession)).WillByDefault(Return(&objMtcSession));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
         ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
         ON_CALL(objMessageUtils, GetCauseFromReasonHeader).WillByDefault(Return(-1));
@@ -222,6 +222,37 @@ TEST_F(EmergencyStartErrorHandlerTest, RejectCodeNotRequireCrossSimRedialing)
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest,
+        HandleRedialsWithVoipFromRttIfSilentRedialByRttEmergencyRejectionRequired)
+{
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(
+                    CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandleDoesNotRedialWithVoipIfEmergencyCallIsNotRtt)
+{
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    EXPECT_FALSE(
+            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest,
+        HandleDoesNotRedialWithVoipFromRttIfSilentRedialByRttEmergencyRejectionIsNotRequired)
+{
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(
+                    CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_FALSE(
+            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION));
 }
 
 }  // namespace android

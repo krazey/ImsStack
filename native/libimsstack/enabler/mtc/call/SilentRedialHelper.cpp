@@ -149,6 +149,7 @@ void SilentRedialHelper::ReStart()
 
     // MediaInfo
     MediaInfo objMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
+    MtcMediaUtil::RefineMediaInfoByCallType(eType, objMediaInfo);
 
     // SuppService list
     ImsMap<SuppType, SuppService*> objSuppServices;
@@ -183,6 +184,7 @@ void SilentRedialHelper::SetRedialDetail()
         case EXTRA_CODE_REDIAL_FOR_REDIRECTION:
         case EXTRA_CODE_REDIAL_FOR_SDP_CHANGE:
         case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF:
+        case EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION:
             m_nInterval = 0;
             m_nMaxCount = 1;
             return;
@@ -255,6 +257,11 @@ CallType SilentRedialHelper::GetCallType() const
     {
         return MtcMediaUtil::GetCallTypeFromMediaTypes(
                 MtcMediaUtil::StringToMediaTypes(m_strExtra));
+    }
+
+    if (m_nType == EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION)
+    {
+        return CallType::VOIP;
     }
 
     return m_objContext.GetCallInfo().eInitialCallType;

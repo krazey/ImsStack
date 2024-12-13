@@ -331,3 +331,28 @@ PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::StringToMediaTypes(IN const AString& strM
 
     return eMediaTypes;
 }
+
+PUBLIC GLOBAL void MtcMediaUtil::RefineMediaInfoByCallType(
+        IN CallType eCallType, IN_OUT MediaInfo& objMediaInfo)
+{
+    for (IMS_UINT32 eMediaType : GetUnusedMediaTypeListFromCallType(eCallType))
+    {
+        if (eMediaType == MEDIATYPE_AUDIO)
+        {
+            objMediaInfo.eAudioDirection = DIRECTION_INVALID;
+            objMediaInfo.eAudioQuality = AUDIO_QUALITY_NONE;
+        }
+
+        if (eMediaType == MEDIATYPE_VIDEO)
+        {
+            objMediaInfo.eVideoDirection = DIRECTION_INVALID;
+            objMediaInfo.eVideoQuality = VIDEO_QUALITY_NONE;
+        }
+
+        if (eMediaType == MEDIATYPE_TEXT)
+        {
+            objMediaInfo.eTextDirection = DIRECTION_INVALID;
+            objMediaInfo.eGttMode = GTT_MODE_INVALID;
+        }
+    }
+}

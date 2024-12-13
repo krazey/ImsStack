@@ -721,6 +721,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reject_code_require_perm_failure_int_array";
         public static final String KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY =
                 KEY_PREFIX + "policy_for_emergency_urn_int_array";
+        public static final String KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL =
+                KEY_PREFIX + "silent_redial_with_voip_by_rtt_rejection_bool";
 
         // Emergency URN policy
         public static final int NOT_USE_SERVICE_CATEGORY = 1;
