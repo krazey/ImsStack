@@ -241,27 +241,6 @@ PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
     m_pSrvccStateManager->UpdateSrvccState(eState);
 }
 
-PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled)
-{
-    IMS_TRACE_I("SetTerminalBasedCallWaiting bEnabled[%s]", _TRACE_B_(bEnabled), 0, 0);
-
-    ImsVector<IMS_SINT32> objTerminalBasedServices =
-            ConfigService::GetConfigService()
-                    ->GetCarrierConfig(m_objContext.GetSlotId())
-                    ->GetIntArray(CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY);
-
-    for (IMS_UINT32 i = 0; i < objTerminalBasedServices.GetSize(); i++)
-    {
-        if (objTerminalBasedServices.GetAt(i) == CarrierConfig::ImsSs::SUPPLEMENTARY_SERVICE_CW)
-        {
-            IMS_TRACE_I("SetTerminalBasedCallWaiting provisioned", 0, 0, 0);
-            m_eTbcwStatus =
-                    bEnabled ? SuppStatus::PROVISIONED_ENABLED : SuppStatus::PROVISIONED_DISABLED;
-            break;
-        }
-    }
-}
-
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN ServiceType eServiceType)
 {
     m_objContext.GetEmergencyServiceManager().StartOpen(eServiceType);
@@ -287,6 +266,13 @@ PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
         default:
             break;
     }
+}
+
+PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled)
+{
+    IMS_TRACE_I("SetTerminalBasedCallWaiting bEnabled[%s]", _TRACE_B_(bEnabled), 0, 0);
+
+    m_eTbcwStatus = bEnabled ? SuppStatus::PROVISIONED_ENABLED : SuppStatus::PROVISIONED_DISABLED;
 }
 
 PUBLIC VIRTUAL void MtcService::SetTerminalBasedTir(IN IMS_BOOL bEnabled)

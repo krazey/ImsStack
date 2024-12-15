@@ -296,28 +296,6 @@ public class MtcApp implements Closeable {
     }
 
     /**
-     * Sends received terminal-based call waiting value to the Native.
-     */
-    public void setTerminalBasedCallWaiting() {
-        boolean enabled = false;
-
-        MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
-                .getMmTelFeatureRegistry();
-
-        if (mmtelFr != null) {
-            enabled = mmtelFr.isTerminalBasedCallWaitingEnabled();
-        }
-        logi("setTerminalBasedCallWaiting :: enabled=" + enabled);
-
-        Parcel parcel = Parcel.obtain();
-
-        parcel.writeInt(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING);
-        parcel.writeInt(enabled ? 1 : 0);
-
-        sendNotification(parcel);
-    }
-
-    /**
      * Sets a value for the Terminal based TIR.
      */
     public void setTerminalBasedTir(boolean enabled) {
@@ -439,6 +417,18 @@ public class MtcApp implements Closeable {
         }
 
         Message.obtain(mHandler, MSG_SEND_NOTIFICATION, parcel).sendToTarget();
+    }
+
+    private void setTerminalBasedCallWaiting() {
+        MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
+                .getMmTelFeatureRegistry();
+
+        Parcel parcel = Parcel.obtain();
+
+        parcel.writeInt(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING);
+        parcel.writeInt(mmtelFr.isTerminalBasedCallWaitingEnabled() ? 1 : 0);
+
+        sendNotification(parcel);
     }
 
     private static void log(String s) {

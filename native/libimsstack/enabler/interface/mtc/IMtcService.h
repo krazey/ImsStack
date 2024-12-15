@@ -179,13 +179,6 @@ public:
     virtual void UpdateSrvccState(IN SrvccState eState) = 0;
 
     /**
-     * @brief Sets
-     *
-     * @param bEnabled
-     */
-    virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) = 0;
-
-    /**
      * @brief Opens
      *
      */
@@ -204,6 +197,13 @@ public:
      */
     virtual void ProcessTestCommand(
             IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam) = 0;
+
+    /**
+     * @brief Sets
+     *
+     * @param bEnabled
+     */
+    virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) = 0;
 
     /**
      * @brief Gets
