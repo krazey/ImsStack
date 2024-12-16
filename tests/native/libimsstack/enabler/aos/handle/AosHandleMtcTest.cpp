@@ -54,9 +54,11 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)       \
-    using Base::IsBlockForMobile; \
-    using Base::IsBlockForWifi;   \
+#define DECLARE_USING(Base)             \
+    using Base::GetFeatures;            \
+    using Base::IsBlockForMobile;       \
+    using Base::IsBlockForWifi;         \
+    using Base::ReevaluateCapabilities; \
     using Base::Request;
 
 class TestAosHandleMtc : public AosHandleMtc
@@ -487,6 +489,87 @@ TEST_F(AosHandleMtcTest, Constructor)
 TEST_F(AosHandleMtcTest, Destructor)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).Times(1);
+}
+
+TEST_F(AosHandleMtcTest, ShouldReturnBindedFeaturesIfCallComposerFeatureTagForB2cIsTrue)
+{
+    // GIVEN
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    IMS_UINT32 nExpectedFeatures =
+            ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::TEXT);
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_UINT32 nFeatures = m_pAosHandleMtc->GetFeatures();
+
+    // THEN
+    EXPECT_EQ(nFeatures, nExpectedFeatures);
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldReturnBindedFeaturesIfB2cCallComposerNotCapableAndCallComposerFeatureTagForB2cIsFalse)
+{
+    // GIVEN
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    IMS_UINT32 nExpectedFeatures =
+            ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::TEXT);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT));
+    SetCapabilities(objCapabilities);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    IMS_UINT32 nFeatures = m_pAosHandleMtc->GetFeatures();
+
+    // THEN
+    EXPECT_EQ(nFeatures, nExpectedFeatures);
+}
+
+TEST_F(AosHandleMtcTest,
+        ShouldAddCallComposerFeatureIfB2cCallComposerCapableAndCallComposerFeatureTagForB2cIsFalse)
+{
+    // GIVEN
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    IMS_UINT32 nExpectedFeatures = ImsAosFeature::MMTEL | ImsAosFeature::VIDEO |
+            ImsAosFeature::TEXT | ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->GetBindedFeatureTagList().AddFeature(ImsAosFeature::TEXT);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    SetCapabilities(objCapabilities);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    IMS_UINT32 nFeatures = m_pAosHandleMtc->GetFeatures();
+
+    // THEN
+    EXPECT_EQ(nFeatures, nExpectedFeatures);
 }
 
 TEST_F(AosHandleMtcTest, App_Notify_Test)
@@ -1800,10 +1883,13 @@ TEST_F(AosHandleMtcTest, DoNothingIfEmergencyServiceWhenCapabilityChanged)
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
 }
 
-TEST_F(AosHandleMtcTest, BlockCallComposerCapabilityIfCallComposerBusinessOnlyIsRemoved)
+TEST_F(AosHandleMtcTest,
+        BlockCallComposerIfB2cCallComposerIsRemovedWhileCallComposerFeatureTagForB2cIsTrue)
 {
     // GIVEN
     SetNetworkType(NW_REPORT_RADIO_LTE);
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_TRUE));
 
     ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
@@ -1811,8 +1897,6 @@ TEST_F(AosHandleMtcTest, BlockCallComposerCapabilityIfCallComposerBusinessOnlyIs
                     static_cast<IMS_UINT32>(AosCapability::VIDEO) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
     SetCapabilities(objCapabilities);
-
-    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
 
     // WHEN
     objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
@@ -1824,11 +1908,14 @@ TEST_F(AosHandleMtcTest, BlockCallComposerCapabilityIfCallComposerBusinessOnlyIs
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
 }
 
-TEST_F(AosHandleMtcTest, UnblockCallComposerCapabilityIfCallComposerBusinessOnlyIsAdded)
+TEST_F(AosHandleMtcTest,
+        UnblockCallComposerIfB2cCallComposerIsAddedWhileCallComposerFeatureTagForB2cIsTrue)
 {
     // GIVEN
     SetNetworkType(NW_REPORT_RADIO_LTE);
     AddBlock(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY);
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_TRUE));
 
     ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
@@ -1845,6 +1932,58 @@ TEST_F(AosHandleMtcTest, UnblockCallComposerCapabilityIfCallComposerBusinessOnly
 
     // THEN
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest,
+        KeepBlockCallComposerIfB2cCallComposerIsRemovedWhileCallComposerFeatureTagForB2cIsFalse)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    AddBlock(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY);
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_FALSE));
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    SetCapabilities(objCapabilities);
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest,
+        KeepBlockCallComposerIfB2cCallComposerIsAddedWhileCallComposerFeatureTagForB2cIsFalse)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    AddBlock(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY);
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_FALSE));
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    SetCapabilities(objCapabilities);
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
 }
 
 TEST_F(AosHandleMtcTest, ShouldBlockTextCapabilityIfItIsNotInTheListWhenCapabilitiesChanged)
@@ -3428,6 +3567,31 @@ TEST_F(AosHandleMtcTest, VopsChangeWithPlmnChange_Plmn1_Off_Plmn1_On_Plmn2_Off)
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
     EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     ServicePhone_PlmnChanged();  // nothing to do
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotifyMtcIfB2cCallComposerCapabilityIsChanged)
+{
+    // GIVEN
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
+    ON_CALL(m_objMockIAosNConfiguration, IsB2cCallComposerFeatureTagInRegContact())
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _));
+
+    // WHEN
+    m_pAosHandleMtc->ReevaluateCapabilities(IMS_FALSE);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test1)

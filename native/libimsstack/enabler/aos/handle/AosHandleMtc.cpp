@@ -49,7 +49,8 @@ AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& st
         m_piImsRadio(IMS_NULL),
         m_piVolteHysTimer(IMS_NULL),
         m_bSsacBarred(IMS_FALSE),
-        m_bSsacHeld(IMS_FALSE)
+        m_bSsacHeld(IMS_FALSE),
+        m_bB2cCallComposerCapable(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
             sizeof(AosHandleMtc), this);
@@ -71,6 +72,31 @@ PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleMtc), this);
+}
+
+PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures()
+{
+    /* Description: This function enables call composer feature internally without registration.
+     *              MtcService will get the enabled features by this logic.
+     */
+
+    if (!IsImsConnected())
+    {
+        return ImsAosFeature::NONE;
+    }
+
+    IMS_UINT32 nFeatures = AosHandle::GetFeatures();
+
+    if (!GET_N_CONFIG(m_nSlotId)->IsB2cCallComposerFeatureTagInRegContact() &&
+            IsCapabilityExistedForNetworkType(
+                    m_nNetworkType, AosCapability::CALL_COMPOSER_BUSINESS_ONLY))
+    {
+        A_IMS_TRACE_D(APPPROFILE,
+                "GetFeatures :: Internally added Call Composer feature for B2C only", 0, 0, 0);
+        nFeatures |= ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    }
+
+    return nFeatures;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosHandleMtc::App_Notify()
@@ -645,8 +671,22 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities(IN IMS_BOOL bNetwork
 
     ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
     ProcessBlock(BLOCK_TEXT_CAPABILITY, !bIsTextCapable, IMS_FALSE);
-    ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
-            (!bIsCallComposerCapable && !bIsB2cCallComposerCapable), IMS_FALSE);
+
+    if (GET_N_CONFIG(m_nSlotId)->IsB2cCallComposerFeatureTagInRegContact())
+    {
+        ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
+                (!bIsCallComposerCapable && !bIsB2cCallComposerCapable), IMS_FALSE);
+    }
+    else
+    {
+        ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY, !bIsCallComposerCapable, IMS_FALSE);
+
+        if (m_bB2cCallComposerCapable != bIsB2cCallComposerCapable)
+        {
+            m_bB2cCallComposerCapable = bIsB2cCallComposerCapable;
+            ProcessFeatureChangedWithoutReg();
+        }
+    }
 }
 
 PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()

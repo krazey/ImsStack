@@ -34,6 +34,9 @@ public:
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     ~AosHandleMtc() override;
 
+    // IImsAos
+    IMS_UINT32 GetFeatures() override;
+
     // IAosHandle
     IMS_BOOL App_Notify() override;
 
@@ -114,6 +117,7 @@ private:
     ITimer* m_piVolteHysTimer;
     IMS_BOOL m_bSsacBarred;
     IMS_BOOL m_bSsacHeld;
+    IMS_BOOL m_bB2cCallComposerCapable;
 
 private:
     friend class AosHandleMtcTest;
