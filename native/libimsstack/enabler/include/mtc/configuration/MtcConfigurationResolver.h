@@ -150,11 +150,11 @@ public:
     }
 
     inline static ImsVector<IMS_SINT32> LookupActionForStatusCode(
-            IN const MtcConfigurationProxy& objProxy, IN IMS_SINT32 nStatusCode)
+            IN const MtcConfigurationProxy& objProxy, IN const IMS_CHAR* pszConfigName,
+            IN IMS_SINT32 nStatusCode)
     {
         ImsVector<IMS_SINT32> objActions;
-        AString strActions = ExtractConfigValue(
-                objProxy, ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY, nStatusCode);
+        AString strActions = ExtractConfigValue(objProxy, pszConfigName, nStatusCode);
         if (strActions.GetLength() > 0)
         {
             ImsList<AString> strActionArray = strActions.Split(TextParser::CHAR_COMMA);

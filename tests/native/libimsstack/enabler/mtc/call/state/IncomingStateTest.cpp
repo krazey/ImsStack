@@ -132,7 +132,7 @@ protected:
 
 TEST_F(IncomingStateTest, OnExitStopsTimer)
 {
-    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_GLARE_CONDITION));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_RETRY_UPDATE));
 
     pIncomingState->OnExit();
 }
@@ -225,7 +225,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareConditi
 
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objISession));
-    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_RETRY_UPDATE, _));
 
     EXPECT_EQ(CallStateName::INCOMING, pIncomingState->SessionEarlyMediaUpdateFailed(&objISession));
 }
@@ -427,7 +427,7 @@ TEST_F(IncomingStateTest, OnTimerExpiredInvokesSendEarlyUpdate)
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SESSION)).Times(1);
 
     EXPECT_EQ(CallStateName::INCOMING,
-            pIncomingState->OnTimerExpired(MtcCallState::TimerType::TIMER_GLARE_CONDITION));
+            pIncomingState->OnTimerExpired(MtcCallState::TimerType::TIMER_RETRY_UPDATE));
 }
 
 TEST_F(IncomingStateTest, QosReservedDoesNothingIfPrackIsNull)

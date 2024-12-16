@@ -70,7 +70,7 @@ PUBLIC VIRTUAL OutgoingState::~OutgoingState() {}
 
 PUBLIC VIRTUAL void OutgoingState::OnExit()
 {
-    m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
+    m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
     if (m_pUdpKeepAliveSender != IMS_NULL)
     {
         m_pUdpKeepAliveSender->Stop();
@@ -284,7 +284,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
     {
         m_objContext.GetMediaManager().FinalizeSdp(piSession);
-        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        m_objContext.GetTimer().Start(TIMER_RETRY_UPDATE, objReason.nExtraCode);
         return GetStateName();
     }
     HandleCancel(piSession, objReason);
@@ -710,7 +710,7 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
             OnStartFailed(GetISession(), objReason);
             return CallStateName::TERMINATING;
         }
-        case TIMER_GLARE_CONDITION:
+        case TIMER_RETRY_UPDATE:
             // TODO: Not considering that multiple early sessions are in glare condition.
             for (IMS_UINT32 i = 0; i < m_objContext.GetSessions().GetSize(); ++i)
             {

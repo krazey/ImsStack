@@ -50,7 +50,7 @@ PUBLIC VIRTUAL IncomingState::~IncomingState()
 
 PUBLIC VIRTUAL void IncomingState::OnExit()
 {
-    m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
+    m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::Reject(IN const CallReasonInfo& objReason)
@@ -112,7 +112,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISe
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
     {
         m_objContext.GetMediaManager().FinalizeSdp(piSession);
-        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        m_objContext.GetTimer().Start(TIMER_RETRY_UPDATE, objReason.nExtraCode);
         return GetStateName();
     }
     m_objContext.GetUiNotifier().SendIncomingCallRejected(
@@ -212,7 +212,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
-        case TIMER_GLARE_CONDITION:
+        case TIMER_RETRY_UPDATE:
         {
             IMtcSession* pSession = m_objContext.GetSession();
             SendEarlyUpdate(pSession->GetOngoingUpdateType(), pSession);

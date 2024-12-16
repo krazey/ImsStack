@@ -63,7 +63,7 @@ PUBLIC VIRTUAL void AlertingState::OnEnter()
 
 PUBLIC VIRTUAL void AlertingState::OnExit()
 {
-    m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
+    m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
     if (m_pUdpKeepAliveSender != IMS_NULL)
     {
         m_pUdpKeepAliveSender->Stop();
@@ -263,7 +263,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISe
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
     {
         m_objContext.GetMediaManager().FinalizeSdp(piSession);
-        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        m_objContext.GetTimer().Start(TIMER_RETRY_UPDATE, objReason.nExtraCode);
         return GetStateName();
     }
     m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
@@ -355,7 +355,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
     {
         case TIMER_MT_ALERTING:
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER));
-        case TIMER_GLARE_CONDITION:
+        case TIMER_RETRY_UPDATE:
         {
             IMtcSession* pSession = m_objContext.GetSession();
             SendEarlyUpdate(pSession->GetOngoingUpdateType(), pSession);

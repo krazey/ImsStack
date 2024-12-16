@@ -999,7 +999,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareConditi
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objSession));
-    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_RETRY_UPDATE, _));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
 }
@@ -1017,7 +1017,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503WaitsRedial)
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objSession)).Times(0);
-    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _)).Times(0);
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_RETRY_UPDATE, _)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
 
@@ -1041,7 +1041,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objSession)).Times(0);
-    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _)).Times(0);
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_RETRY_UPDATE, _)).Times(0);
 
     IMS_SINT32 nAnyRetryAfter = 10;
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))

@@ -47,6 +47,7 @@
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaUtil.h"
 #include "utility/IMessageUtils.h"
+#include <unordered_map>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -109,7 +110,8 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
     }
 
     ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
-            m_objContext.GetConfigurationProxy(), piMessage->GetStatusCode());
+            m_objContext.GetConfigurationProxy(),
+            ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY, piMessage->GetStatusCode());
     for (IMS_UINT32 i = 0; i < objActions.GetSize(); ++i)
     {
         auto it = objActionFuncMap.find(objActions.GetAt(i));
@@ -596,8 +598,8 @@ IMS_BOOL StartErrorHandler::IsByMaxCallLimit(IN const IMessage& objMessage) cons
 PRIVATE
 IMS_BOOL StartErrorHandler::IsCsfbActionRequiredStatusCode(IN IMS_SINT32 nStatusCode) const
 {
-    return MtcConfigurationResolver::LookupActionForStatusCode(
-            m_objContext.GetConfigurationProxy(), nStatusCode)
+    return MtcConfigurationResolver::LookupActionForStatusCode(m_objContext.GetConfigurationProxy(),
+            ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY, nStatusCode)
             .Contains(ConfigVoice::START_ERROR_ACTION_CSFB);
 }
 

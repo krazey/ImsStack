@@ -26,7 +26,9 @@
 #include "SipStatusCode.h"
 #include "TestConfigService.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
 #include "call/termination/UpdateErrorHandler.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/MockIMtcAosConnector.h"
@@ -52,6 +54,8 @@ public:
     MockIMtcService objMtcService;
     TestConfigService* m_pConfigService;
     MockIPassiveTimerHolder objPassiveTimerHolder;
+    MockMtcConfigurationProxy objConfigurationProxy;
+    ImsVector<AString> objActionSets;
 
 protected:
     virtual void SetUp() override
@@ -69,6 +73,8 @@ protected:
         ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimerHolder));
         ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
+
         pHandler = new UpdateErrorHandler(objContext);
     }
 
@@ -77,6 +83,31 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
         delete m_pConfigService;
     }
+
+    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += ":";
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += ",";
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
+        ON_CALL(objConfigurationProxy,
+                GetStringArray(ConfigVoice::KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
+    }
 };
 
 TEST_F(UpdateErrorHandlerTest, HandleNullMessageReturnsServerError)
@@ -84,100 +115,82 @@ TEST_F(UpdateErrorHandlerTest, HandleNullMessageReturnsServerError)
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR), pHandler->Handle(IMS_NULL));
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle3xxMessageReturnsServerError)
+TEST_F(UpdateErrorHandlerTest, HandleMessageReturnsUnspecifiedReasonIfNoActionIsConfigured)
 {
-    for (IMS_SINT32 nStatusCode = SipStatusCode::SC_300; nStatusCode < SipStatusCode::SC_400;
+    for (IMS_SINT32 nStatusCode = SipStatusCode::SC_300; nStatusCode < SipStatusCode::SC_MAX;
             nStatusCode++)
     {
+        SetActionConfigs(nStatusCode, {});
         ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
-        EXPECT_EQ(
-                CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+        EXPECT_EQ(CallReasonInfo(CODE_UNSPECIFIED), pHandler->Handle(&objMessage));
     }
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle4xxMessageReturnsTerminatedByRemote)
+TEST_F(UpdateErrorHandlerTest, HandleMessageReturnsDefaultReasonIfTerminateAction)
 {
-    std::array<IMS_SINT32, 11> objStatusCodes = {
-            SipStatusCode::SC_404,
-            SipStatusCode::SC_405,
-            SipStatusCode::SC_410,
-            SipStatusCode::SC_416,
-            SipStatusCode::SC_480,
-            SipStatusCode::SC_481,
-            SipStatusCode::SC_482,
-            SipStatusCode::SC_483,
-            SipStatusCode::SC_484,
-            SipStatusCode::SC_485,
-            SipStatusCode::SC_489,
-    };
-
-    for (IMS_SINT32 nStatusCode : objStatusCodes)
+    for (const auto& objCase : s_defaultStatusCodeAndReasonCodeMap)
     {
+        IMS_SINT32 nStatusCode = objCase.first;
+        IMS_SINT32 nExpectedReasonCode = objCase.second;
+
+        SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_TERMINATE});
         ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
-        EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode),
-                pHandler->Handle(&objMessage));
+        EXPECT_EQ(nExpectedReasonCode, pHandler->Handle(&objMessage).nCode);
     }
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle400MessageReturnsServerError)
+TEST_F(UpdateErrorHandlerTest, HandleMessageReturnsUnspecifiedIfRetryAfterActionButNoRetryAfter)
 {
-    IMS_SINT32 nStatusCode = SipStatusCode::SC_400;
+    IMS_SINT32 nStatusCode = SipStatusCode::SC_500;
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_RETRY});
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(-1));
 
-    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+    EXPECT_EQ(CODE_UNSPECIFIED, pHandler->Handle(&objMessage).nCode);
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle491MessageReturnsRequestPendingForMo)
+TEST_F(UpdateErrorHandlerTest, HandleMessageReturnsInternalRetryUpdateIfRetryAfterAction)
+{
+    IMS_SINT32 nStatusCode = SipStatusCode::SC_500;
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_RETRY});
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(10));
+
+    EXPECT_EQ(CODE_INTERNAL_RETRY_UPDATE, pHandler->Handle(&objMessage).nCode);
+}
+
+TEST_F(UpdateErrorHandlerTest, HandleMessageReturnsInternalRetryUpdateForMoIfGlareConditionAction)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_491;
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_GLARE_CONDITION});
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
     objCallInfo.ePeerType = PeerType::MO;
 
-    EXPECT_EQ(CODE_SIP_REQUEST_PENDING, pHandler->Handle(&objMessage).nCode);
+    EXPECT_EQ(CODE_INTERNAL_RETRY_UPDATE, pHandler->Handle(&objMessage).nCode);
 }
 
-TEST_F(UpdateErrorHandlerTest, Handle491MessageReturnsRequestPendingForMt)
+TEST_F(UpdateErrorHandlerTest, HandleMessageReturnsInternalRetryUpdateForMtIfGlareConditionAction)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_491;
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_GLARE_CONDITION});
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
     objCallInfo.ePeerType = PeerType::MT;
 
-    EXPECT_EQ(CODE_SIP_REQUEST_PENDING, pHandler->Handle(&objMessage).nCode);
-}
-
-TEST_F(UpdateErrorHandlerTest, Handle5xxMessageReturnsTerminatedByRemote)
-{
-    std::array<IMS_SINT32, 2> objStatusCodes = {
-            SipStatusCode::SC_501,
-            SipStatusCode::SC_502,
-    };
-
-    for (IMS_SINT32 nStatusCode : objStatusCodes)
-    {
-        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
-
-        EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode),
-                pHandler->Handle(&objMessage));
-    }
-}
-
-TEST_F(UpdateErrorHandlerTest, Handle500MessageReturnsServerError)
-{
-    IMS_SINT32 nStatusCode = SipStatusCode::SC_500;
-    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
-
-    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+    EXPECT_EQ(CODE_INTERNAL_RETRY_UPDATE, pHandler->Handle(&objMessage).nCode);
 }
 
 TEST_F(UpdateErrorHandlerTest,
-        Handle503ResponseWithoutRetryAfterReturnsServiceUnavailableWithCallingAos)
+        HandleMessageReturnsServiceUnavailableIfBlockActionButWithoutRetryAfter)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     SipMethod objMethod(SipMethod::INVITE);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
@@ -189,10 +202,11 @@ TEST_F(UpdateErrorHandlerTest,
 }
 
 TEST_F(UpdateErrorHandlerTest,
-        Handle503ResponseWithRetryAfterToInviteRequestReturnsServiceUnavailableWithCallingAos)
+        HandleMessageWithBlockActionWithRetryAfterToInviteRequestReturnsServiceUnavailableWithCallingAos)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     SipMethod objMethod(SipMethod::INVITE);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     IMS_SINT32 nAnyRetryAfter = 10;
@@ -209,10 +223,11 @@ TEST_F(UpdateErrorHandlerTest,
 }
 
 TEST_F(UpdateErrorHandlerTest,
-        Handle503ResponseWithRetryAfterToUpdateRequestReturnsServiceUnavailableWithCallingAos)
+        HandleMessageWithBlockActionWithRetryAfterToUpdateRequestReturnsServiceUnavailableWithCallingAos)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     SipMethod objMethod(SipMethod::UPDATE);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     IMS_SINT32 nAnyRetryAfter = 10;
@@ -229,10 +244,11 @@ TEST_F(UpdateErrorHandlerTest,
 }
 
 TEST_F(UpdateErrorHandlerTest,
-        Handle503ResponseWithRetryAfterReturnsServiceUnavailableWithOutCallingAos)
+        HandleMessageWithBlockActionWithRetryAfterReturnsServerErrorWithOutCallingAos)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    SetActionConfigs(nStatusCode, {ConfigVoice::UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     SipMethod objMethod(SipMethod::UPDATE);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     IMS_SINT32 nAnyRetryAfter = 10;
@@ -248,28 +264,5 @@ TEST_F(UpdateErrorHandlerTest,
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
                     IMS_FALSE))
             .Times(1);
-    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
-}
-
-TEST_F(UpdateErrorHandlerTest, Handle6xxMessageReturnsTerminatedByRemote)
-{
-    std::array<IMS_SINT32, 1> objStatusCodes = {
-            SipStatusCode::SC_604,
-    };
-
-    for (IMS_SINT32 nStatusCode : objStatusCodes)
-    {
-        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
-
-        EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode),
-                pHandler->Handle(&objMessage));
-    }
-}
-
-TEST_F(UpdateErrorHandlerTest, Handle600MessageReturnsServerError)
-{
-    IMS_SINT32 nStatusCode = SipStatusCode::SC_600;
-    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
-
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }

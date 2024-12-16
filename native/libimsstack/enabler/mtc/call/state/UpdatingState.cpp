@@ -288,32 +288,33 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
     CallReasonInfo objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
 
-    if (objReason.nCode == CODE_USER_TERMINATED_BY_REMOTE ||
-            objReason.nCode == CODE_SIP_SERVICE_UNAVAILABLE)
+    switch (objReason.nCode)
     {
-        HandleTerminate(objReason);
-        m_objContext.GetUiNotifier().SendTerminated(objReason);
-        return CallStateName::TERMINATING;
-    }
-    else if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
-    {
-        // Keep UpdatingState to block another outgoing request or pending operation
-        // during this period. Also, UpdatingInfo is going to be deleted if transits to Established.
-        // And, when a incoming request is received, transits to Established to handle the request.
-        RecoverModificationFailure();
-        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
-        return GetStateName();
-    }
+        case CODE_UNSPECIFIED:
+            StopTimer();
+            RecoverModificationFailure();
+            NotifyFailure();
+            return CallStateName::ESTABLISHED;
 
-    StopTimer();
-    RecoverModificationFailure();
-    NotifyFailure();
-    return CallStateName::ESTABLISHED;
+        case CODE_INTERNAL_RETRY_UPDATE:
+            // Keep UpdatingState to block another outgoing request or pending operation during this
+            // period. Also, UpdatingInfo is going to be deleted if transits to Established.
+            // And, when a incoming request is received, transits to Established to handle the
+            // request.
+            RecoverModificationFailure();
+            m_objContext.GetTimer().Start(TIMER_RETRY_UPDATE, objReason.nExtraCode);
+            return GetStateName();
+
+        default:
+            HandleTerminate(objReason);
+            m_objContext.GetUiNotifier().SendTerminated(objReason);
+            return CallStateName::TERMINATING;
+    }
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* piSession)
 {
-    if (m_objContext.GetTimer().IsActive(TIMER_GLARE_CONDITION))
+    if (m_objContext.GetTimer().IsActive(TIMER_RETRY_UPDATE))
     {
         IMS_TRACE_I("SessionUpdateReceived - waiting glare condition timer", 0, 0, 0);
 
@@ -522,7 +523,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
             return RejectUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
         case TIMER_CONVERT_REMOTE_RESPONSE:
             return CancelUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
-        case TIMER_GLARE_CONDITION:
+        case TIMER_RETRY_UPDATE:
             return HandleRetry();
         default:
             break;
@@ -920,7 +921,7 @@ void UpdatingState::StopTimer()
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {
         m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
-        m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
+        m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
     }
 
     if (m_objContext.GetUpdatingInfo().IsAlerted())

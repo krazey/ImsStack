@@ -351,7 +351,7 @@ TEST_F(AlertingStateTest, OnTimerExpiredInvokesSendEarlyUpdateIfGlareConditionTi
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(_));
 
     EXPECT_EQ(CallStateName::ALERTING,
-            pAlertingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION));
+            pAlertingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE));
 }
 
 TEST_F(AlertingStateTest, QosReserveFailedInvokesRejectIncomingCallIfNextActionIsRelease)
@@ -469,7 +469,7 @@ TEST_F(AlertingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareConditi
 
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objISession));
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_RETRY_UPDATE, _));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdateFailed(&objISession));
 }

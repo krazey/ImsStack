@@ -799,6 +799,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_CODE_AND_REASON_CODE_SET_STRI
         KEY_IMS_VOICE_PREFIX "reject_code_and_reason_code_set_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "reject_code_and_action_set_string_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "update_reject_code_and_action_set_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "csfb_block_condition_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT[] =

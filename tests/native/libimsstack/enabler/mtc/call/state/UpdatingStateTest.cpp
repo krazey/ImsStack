@@ -18,6 +18,7 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "ISession.h"
+#include "ImsVector.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
 #include "MockISession.h"
@@ -45,6 +46,7 @@
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
+#include <initializer_list>
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -73,6 +75,7 @@ public:
     TestConfigService objConfigService;
     MediaInfo objMediaInfo;
     SipMethod* pSipMethod;
+    ImsVector<AString> objActionSets;
 
 protected:
     virtual void SetUp() override
@@ -131,6 +134,31 @@ protected:
         ON_CALL(objMediaManager, GetNegotiationState(_))
                 .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
         ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(*pSipMethod));
+    }
+
+    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += ":";
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += ",";
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
+        ON_CALL(*pConfigurationProxy,
+                GetStringArray(ConfigVoice::KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
     }
 };
 
@@ -445,57 +473,35 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsNotModifier)
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->OnSrvccStateUpdated(SrvccState::STARTED));
 }
 
-TEST_F(UpdatingStateTest, OnTerminatedByRemoteErrorTerminatesCall)
+TEST_F(UpdatingStateTest, OnNormalReasonCodeTerminatesCall)
 {
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
-            .WillByDefault(Return(&objMessage));
-    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_404));
+            .WillByDefault(Return(nullptr));
 
     EXPECT_CALL(objUiNotifier, SendTerminated(_));
     EXPECT_EQ(CallStateName::TERMINATING, pUpdatingState->SessionUpdateFailed(&objSession));
 }
 
-TEST_F(UpdatingStateTest, OnServiceUnavailableErrorTerminatesCall)
-{
-    IMS_SINT32 nAnyRetryAfter = 10;
-    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
-            .WillByDefault(Return(&objMessage));
-    ON_CALL(objMessageUtils,
-            GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
-            .WillByDefault(Return(nAnyRetryAfter));
-    SipMethod objMethod(SipMethod::INVITE);
-    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
-    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
-    ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(ConfigIms::KEY_SIP_TIMER_B_MILLIS_INT, _))
-            .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
-    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
-    MockIMtcService objMtcService;
-    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMtcService));
-    MockIMtcAosConnector objAosConnector;
-    ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
-
-    EXPECT_CALL(objUiNotifier, SendTerminated(_));
-    EXPECT_EQ(CallStateName::TERMINATING, pUpdatingState->SessionUpdateFailed(&objSession));
-}
-
-TEST_F(UpdatingStateTest, OnRequestPendingErrorStartsGlareConditionTimer)
+TEST_F(UpdatingStateTest, OnInternalRetryUpdateStartsRetryUpdateTimer)
 {
     objCallInfo.ePeerType = PeerType::MO;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
+    SetActionConfigs(SipStatusCode::SC_491, {ConfigVoice::UPDATE_ERROR_ACTION_GLARE_CONDITION});
 
     EXPECT_CALL(objMediaManager, RestoreSdp(_));
-    EXPECT_CALL(objTimer, Start(MtcCallState::TIMER_GLARE_CONDITION, _));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TIMER_RETRY_UPDATE, _));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdateFailed(&objSession));
 }
 
-TEST_F(UpdatingStateTest, OnTerminatedByServerErrorReturnsToEstablished)
+TEST_F(UpdatingStateTest, OnCodeUnspecifiedReturnsToEstablished)
 {
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
-            .WillByDefault(Return(nullptr));
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_403));
+    SetActionConfigs(SipStatusCode::SC_403, {});
 
     EXPECT_CALL(objUiNotifier,
             SendUpdateFailed(CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION)));
@@ -517,24 +523,24 @@ TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredRetriesUpdate)
 {
     EXPECT_CALL(objPendingOperationHolder.GetMock(), Hold(pUpdatingInfo->GetModifyingInfo()));
     pUpdatingInfo->SetRequestingType(UpdateType::HOLD);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 
     EXPECT_CALL(objPendingOperationHolder.GetMock(), Resume(pUpdatingInfo->GetModifyingInfo()));
     pUpdatingInfo->SetRequestingType(UpdateType::RESUME);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 
     EXPECT_CALL(objPendingOperationHolder.GetMock(),
             Update(pUpdatingInfo->GetTargetCallType(), pUpdatingInfo->GetModifyingInfo()));
     pUpdatingInfo->SetRequestingType(UpdateType::SESSION);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 
     EXPECT_CALL(objPendingOperationHolder.GetMock(), OnSrvccStateUpdated(SrvccState::CANCELED));
     pUpdatingInfo->SetRequestingType(UpdateType::SRVCC_RECOVERED_CANCEL);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 
     EXPECT_CALL(objPendingOperationHolder.GetMock(), OnSrvccStateUpdated(SrvccState::FAILED));
     pUpdatingInfo->SetRequestingType(UpdateType::SRVCC_RECOVERED_FAILURE);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 }
 
 TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredDoesNotRetryUpdateIfInvalidUpdateType)
@@ -542,13 +548,13 @@ TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredDoesNotRetryUpdateIfInvali
     EXPECT_CALL(objPendingOperationHolder.GetMock(), OnTimerExpired(_)).Times(0);
 
     pUpdatingInfo->SetRequestingType(UpdateType::NORMAL);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 
     pUpdatingInfo->SetRequestingType(UpdateType::CONF);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 
     pUpdatingInfo->SetRequestingType(UpdateType::REFRESH);
-    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 }
 
 TEST_F(UpdatingStateTest, OnInvalidTimerExpiredDoesNothing)
@@ -558,8 +564,7 @@ TEST_F(UpdatingStateTest, OnInvalidTimerExpiredDoesNothing)
 
 TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerActive)
 {
-    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_GLARE_CONDITION))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_RETRY_UPDATE)).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objPendingOperationHolder.GetMock(), SessionUpdateReceived(&objSession)).Times(3);
 
     // No Held / Resumed case.
@@ -581,8 +586,7 @@ TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerAct
 
 TEST_F(UpdatingStateTest, SessionUpdateReceivedRejectsIfGlareTimerInActive)
 {
-    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_GLARE_CONDITION))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_RETRY_UPDATE)).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_SIP_REQUEST_PENDING)));
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdateReceived(&objSession));
 }
