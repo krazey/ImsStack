@@ -383,6 +383,42 @@ TEST_F(MtcServiceTest, IsNrChecksRatType)
     EXPECT_TRUE(pNormalMtcService->IsNr());
 }
 
+TEST_F(MtcServiceTest, IsEpsOnlyAttachChecksRatType)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsOnlyAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsOnlyAttach());
+}
+
+TEST_F(MtcServiceTest, IsEpsOnlyAttachChecksLteInfo)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsOnlyAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_UNKNOWN));
+    EXPECT_FALSE(pNormalMtcService->IsEpsOnlyAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsOnlyAttach());
+}
+
 TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksRatType)
 {
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())

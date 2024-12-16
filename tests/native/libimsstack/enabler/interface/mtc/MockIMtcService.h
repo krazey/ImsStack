@@ -44,6 +44,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergency, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsNr, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEpsOnlyAttach, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEpsCombinedAttach, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRoaming, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWlanIpCanType, (), (const, override));
