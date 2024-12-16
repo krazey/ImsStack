@@ -41,10 +41,10 @@
 #include "call/block/CallWaitingBlockRule.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
-#include "call/block/NetworkBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "call/block/RadioBlockRule.h"
 #include "call/block/RetryAfterBlockRule.h"
+#include "call/block/ServiceBlockRule.h"
 #include "call/block/SsacBlockRule.h"
 #include "call/block/VopsBlockRule.h"
 #include "call/block/WfcBlockRule.h"
@@ -541,11 +541,9 @@ PRIVATE
 ImsList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 {
     ImsList<IMtcBlockRule*> lstRules;
-
     lstRules.Append(new VopsBlockRule(m_objContext));
     lstRules.Append(new WfcBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
-    lstRules.Append(new NetworkBlockRule(m_objContext,
-            *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId())));
+    lstRules.Append(new ServiceBlockRule(m_objContext));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
@@ -560,14 +558,13 @@ PRIVATE
 ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
 {
     ImsList<IMtcBlockRule*> lstRules;
-
+    lstRules.Append(new ServiceBlockRule(m_objContext));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     lstRules.Append(new RetryAfterBlockRule(m_objContext));
-
     return lstRules;
 }
 

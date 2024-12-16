@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,32 @@
 #ifndef NETWORK_BLOCK_RULE_H_
 #define NETWORK_BLOCK_RULE_H_
 
+#include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
-class INetworkWatcher;
+class IMtcService;
 
-class NetworkBlockRule final : public IMtcBlockRule
+/**
+ * This class checks if the call is available or not by current IMS service state.
+ */
+class ServiceBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit NetworkBlockRule(
-            IN IMtcCallContext& objContext, IN INetworkWatcher& objNetworkWatcher);
-    virtual ~NetworkBlockRule();
-    NetworkBlockRule(IN const NetworkBlockRule&) = delete;
-    NetworkBlockRule& operator=(IN const NetworkBlockRule&) = delete;
+    explicit ServiceBlockRule(IN IMtcCallContext& objContext);
+    virtual ~ServiceBlockRule();
+    ServiceBlockRule(IN const ServiceBlockRule&) = delete;
+    ServiceBlockRule& operator=(IN const ServiceBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
     const IMtcService& m_objService;
-    INetworkWatcher& m_objNetworkWatcher;
-    IMS_BOOL m_bWifiTestMode;
+    IMtcCallContext& m_objContext;
+
+    CallReasonInfo GetBlockReason() const;
 };
 
 #endif
