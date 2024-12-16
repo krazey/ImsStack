@@ -305,7 +305,7 @@
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="-1"/>
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="false"/>
     <int-array name="imsvoice.registration_to_18x_timer_millis_int_array" num="2">
         <item value="20000"/> <!-- EMERGENCY_LTE-->
         <item value="20000"/> <!-- EMERGENCY_WIFI -->
