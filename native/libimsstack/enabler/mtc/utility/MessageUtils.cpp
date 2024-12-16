@@ -551,8 +551,9 @@ PUBLIC AString MessageUtils::GetParameterValueFromUri(IN IMessage* piMessage,
     return AString::ConstNull();
 }
 
-PUBLIC ImsList<AString> MessageUtils::GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC ImsList<AString> MessageUtils::GetUris(IN const IMessage* piMessage,
+        IN IMS_BOOL bWithParameters, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ImsList<SipAddress> lstAddresses;
     if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
@@ -578,7 +579,7 @@ PUBLIC ImsList<AString> MessageUtils::GetUris(IN IMessage* piMessage, IN IMS_BOO
     return lstUris;
 }
 
-PUBLIC AString MessageUtils::GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+PUBLIC AString MessageUtils::GetUri(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ImsList<AString> lstUris = GetUris(piMessage, bWithParameters, eHeaderType, strHeaderName);

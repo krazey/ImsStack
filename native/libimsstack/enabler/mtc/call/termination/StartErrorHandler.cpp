@@ -320,7 +320,13 @@ CallReasonInfo StartErrorHandler::HandleNonUeDetectableEmergencyCall(
 
     if (IsAlternativeEmergencyService(objMessage))
     {
-        return CallReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL, eSosType);
+        AString strCountrySpecificUrn;
+        if (eSosType == EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
+        {
+            strCountrySpecificUrn = m_objContext.GetMessageUtils().GetUri(
+                    &objMessage, IMS_FALSE, ISipHeader::CONTACT_NORMAL);
+        }
+        return CallReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL, eSosType, strCountrySpecificUrn);
     }
 
     return CallReasonInfo(CODE_NONE);

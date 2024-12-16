@@ -456,11 +456,18 @@ public class ImsCallUtils {
         }
     }
 
-    public static void setSosUrnFromCallReasonInfo(int category, ImsCallProfile profile) {
+    /**
+     * Sets the emergency URN information to {@link ImsCallProfile}.
+     *
+     * @param info The {@link CallReasonInfo} which contains the emergency URN information.
+     * @param profile The {@link ImsCallProfile} will be updated.
+     */
+    public static void setSosUrnFromCallReasonInfo(
+            final CallReasonInfo info, ImsCallProfile profile) {
         String sosUrn = null;
         int emergencyServiceCategory = 0;
 
-        switch (category)  {
+        switch (info.mExtraCode)  {
             case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_POLICE: {
                 sosUrn = SOS_SERVICE_URN_POLICE;
                 emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE;
@@ -485,6 +492,15 @@ public class ImsCallUtils {
                 sosUrn = SOS_SERVICE_URN_MOUNTAIN;
                 emergencyServiceCategory =
                         EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC: {
+                if (info.mExtraMessage.length() > 0) {
+                    sosUrn = info.mExtraMessage;
+                } else {
+                    sosUrn = SOS_SERVICE_URN_GENERIC;
+                }
+                emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
                 break;
             }
             default: {

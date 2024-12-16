@@ -137,7 +137,7 @@ public class CallReasonInfo implements Parcelable {
     // CODE_USER_TERMINATED
     public static final int EXTRA_USER_TERMINATED_ECT = 0;
 
-    // FAIL_REASON_SESSION_RETRY1X_E_1X|VOLTE :: CODE
+    // CODE_SIP_ALTERNATE_EMERGENCY_CALL
     public static final int EXTRA_CODE_EMERGENCYSERVICE_INVALID = -1;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_GENERIC = 0;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE = 1;
@@ -149,6 +149,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN = 7;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_POISON = 8;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_POLICE = 9;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC = 10;
 
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_406 = 1;
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_488 = 2;

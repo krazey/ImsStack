@@ -72,9 +72,9 @@ public:
     MOCK_METHOD(AString, GetParameterValueFromUri,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(ImsList<AString>, GetUris,
-            (IN IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(AString, GetUri, (IN IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&),
-            (override));
+            (IN const IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
+    MOCK_METHOD(AString, GetUri,
+            (IN const IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_SINT32, GetSosTypeFromServiceUrn,
             (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_SINT32, GetCauseFromReasonHeader, (IN const IMessage*, IN const AString&),

@@ -65,6 +65,8 @@ public class ImsCallUtilsTest {
     private static final String SOS_SERVICE_URN_MARINE = "urn:service:sos.marine";
     private static final String SOS_SERVICE_URN_MOUNTAIN = "urn:service:sos.mountain";
     private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
+    private static final String SOS_SERVICE_URN_COUNTRY_SPECIFIC =
+            "urn:service:sos.country-specific";
     public static final String EXTRA_CONFERENCE_USER_ID = "conference_user_id";
     public static final String ANONYMOUS = "anonymous";
     private static final int SLOT_ID = 0;
@@ -795,44 +797,60 @@ public class ImsCallUtilsTest {
     @Test
     public void testSetSosUrnFromCallReasonInfo() {
         List emergencyUrn;
+        CallReasonInfo info = new CallReasonInfo();
         ImsCallProfile callProfile = new ImsCallProfile();
-        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_POLICE,
-                callProfile);
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_POLICE;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
         assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE,
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();
         assertEquals(SOS_SERVICE_URN_POLICE, emergencyUrn.get(0));
 
-        ImsCallUtils.setSosUrnFromCallReasonInfo(
-                CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE, callProfile);
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
         assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE,
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();
         assertEquals(SOS_SERVICE_URN_AMBULANCE, emergencyUrn.get(0));
 
-        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_FIRE,
-                callProfile);
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_FIRE;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
         assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE,
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();
         assertEquals(SOS_SERVICE_URN_FIRE, emergencyUrn.get(0));
 
-        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MARINE,
-                callProfile);
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MARINE;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
         assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD,
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();
         assertEquals(SOS_SERVICE_URN_MARINE, emergencyUrn.get(0));
 
-        ImsCallUtils.setSosUrnFromCallReasonInfo(
-                CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN, callProfile);
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
         assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE,
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();
         assertEquals(SOS_SERVICE_URN_MOUNTAIN, emergencyUrn.get(0));
 
-        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_INVALID,
-                callProfile);
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_GENERIC, emergencyUrn.get(0));
+
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC;
+        info.mExtraMessage = SOS_SERVICE_URN_COUNTRY_SPECIFIC;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_COUNTRY_SPECIFIC, emergencyUrn.get(0));
+
+        info.mExtraCode = CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_INVALID;
+        ImsCallUtils.setSosUrnFromCallReasonInfo(info, callProfile);
         assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED,
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();

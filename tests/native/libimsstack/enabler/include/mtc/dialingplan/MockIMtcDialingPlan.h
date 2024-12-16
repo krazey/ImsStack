@@ -33,8 +33,6 @@ public:
     MOCK_METHOD(AString, GetToUri,
             (IN const AString& strNumber, IN const CallInfo& objCallInfo, IN Scheme eScheme),
             (override));
-    MOCK_METHOD(void, OnCountrySpecificServiceUrnReceived,
-            (IN const AString& strNumber, IN const AString& strServiceUrn), (override));
 };
 
 #endif

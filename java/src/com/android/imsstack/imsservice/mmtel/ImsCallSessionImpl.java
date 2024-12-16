@@ -3529,7 +3529,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             if (ImsCallUtils.isAlternateEmergencyCall(callReasonInfo)) {
-                ImsCallUtils.setSosUrnFromCallReasonInfo(callReasonInfo.mExtraCode, mCallProfile);
+                ImsCallUtils.setSosUrnFromCallReasonInfo(callReasonInfo, mCallProfile);
                 mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
                 mCallDetails.clear(CallDetails.MO_PROGRESSING);
             }

@@ -39,15 +39,6 @@ public:
      */
     virtual AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
             IN Scheme eScheme = Scheme::UNKNOWN) = 0;
-
-    /**
-     * @brief Notifies
-     *
-     * @param strNumber
-     * @param strServiceUrn
-     */
-    virtual void OnCountrySpecificServiceUrnReceived(
-            IN const AString& strNumber, IN const AString& strServiceUrn) = 0;
 };
 
 #endif
