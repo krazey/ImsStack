@@ -96,6 +96,13 @@ public:
     virtual IMS_BOOL IsNr() const = 0;
 
     /**
+     * @brief Checks if the UE is currently in LTE and has EPS only attach type.
+     *
+     * @return True if it's in LTE and has combined attach type.
+     */
+    virtual IMS_BOOL IsEpsOnlyAttach() const = 0;
+
+    /**
      * @brief Checks if the UE is currently in LTE and has combined attach type.
      *
      * @return True if it's in LTE and has combined attach type.

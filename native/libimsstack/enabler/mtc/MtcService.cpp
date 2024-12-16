@@ -152,6 +152,15 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsNr() const
                    ->GetNetRadioTechType() == NW_REPORT_RADIO_NR;
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsEpsOnlyAttach() const
+{
+    return PhoneInfoService::GetPhoneInfoService()
+                    ->GetNetworkWatcher(m_objContext.GetSlotId())
+                    ->GetNetRadioTechType() == NW_REPORT_RADIO_LTE &&
+            m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_LTE_INFO) ==
+            IMS_LTE_INFO_EPS_ONLY_ATTACHED;
+}
+
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsEpsCombinedAttach() const
 {
     return PhoneInfoService::GetPhoneInfoService()
@@ -182,7 +191,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsCsfbAvailable() const
     if (m_objContext.GetConfigurationProxy().Contains(
                 ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
                 ConfigVoice::CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH) &&
-            !IsEpsCombinedAttach())
+            IsEpsOnlyAttach())
     {
         return IMS_FALSE;
     }

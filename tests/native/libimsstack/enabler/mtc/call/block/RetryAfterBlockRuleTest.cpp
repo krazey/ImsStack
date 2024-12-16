@@ -94,12 +94,12 @@ TEST_F(RetryAfterBlockRuleTest, CheckReturnsUnblockedIfActiveCallExists)
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
-TEST_F(RetryAfterBlockRuleTest, CheckReturnsPendingIfNotEpsCombinedAttach)
+TEST_F(RetryAfterBlockRuleTest, CheckReturnsPendingIfEpsOnlyAttach)
 {
     objCallInfo.eEmergencyType = EmergencyType::NONE;
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsEpsOnlyAttach).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objPassiveTimerHolder,
             AddListener(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _))
             .Times(1);
