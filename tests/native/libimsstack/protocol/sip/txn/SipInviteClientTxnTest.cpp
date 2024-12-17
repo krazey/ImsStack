@@ -23,6 +23,7 @@
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsm.h"
 #include "txn/SipTxnFsmData.h"
+#include "txn/SipTxnUtil.h"
 
 extern SIP_BOOL MockFsm_FetchTransaction(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID**);
 extern SIP_BOOL MockFsm_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID**);
@@ -239,6 +240,10 @@ TEST_F(SipInviteClientTxnTest, CallingState)
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
 
+    EXPECT_EQ(SIP_FALSE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
@@ -383,6 +388,10 @@ RSeq: 2\r\n\
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
 
+    EXPECT_EQ(SIP_FALSE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
@@ -406,24 +415,156 @@ RSeq: 2\r\n\
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
-    /* Calling without passing transport info will be considered as reliable */
-
-    /* Calling once to make startTimer for timer D failure */
-    EXPECT_EQ(SIP_FALSE,
-            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST]
-                                 [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](
-                                         pTxn, pTxnFsmData, &nError));
-
-    /* Calling again to make startTimer for timer D success */
-    EXPECT_EQ(SIP_TRUE,
-            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST]
-                                 [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](
-                                         pTxn, pTxnFsmData, &nError));
-
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_TRANSP_ERROR_EVT](
                     pTxn, pTxnFsmData, &nError));
 
+    pTxnKey->SipDelete();
+    pTxn->SipDelete();
+    delete pTxnFsmData;
+    delete pSipUserData;
+    delete pSipTranspParam;
+    pTempSipMsg->SipDelete();
+}
+
+TEST_F(SipInviteClientTxnTest, AcceptedState)
+{
+    SIP_UINT16 nError = 0;
+    ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, SIP_NULL, &nError);
+
+    /* Calling 183 with different to-tag */
+    SipMessage* pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+
+    const SIP_CHAR* pMsg = "SIP/2.0 183 Session Progress\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+To: <sip:userA@host>;tag=too_forked\r\n\
+CSeq: 1 INVITE\r\n\
+RSeq: 2\r\n\
+\r\n";
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
+    SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+
+    SipTxnUtil::AddTxnKey(new SipTxnKey(pTempSipMsg, &nError));
+
+    /* Calling re-transmitted 183 msg */
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_RETRANSMISSION);
+
+    /* Calling 2xx with different to tag */
+    pMsg = "SIP/2.0 200 OK\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+To: <sip:userA@host>;tag=too_forked\r\n\
+CSeq: 1 INVITE\r\n\
+\r\n";
+
+    pTempSipMsg->SipDelete();
+    pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
+
+    /* Calling re-transmitted 2xx msg */
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST][SipTxn::INV_CLI_RECV_2XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
+
+    /* Calling 183 response with different to tag */
+    pMsg = "SIP/2.0 180 Ringing\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+To: <sip:userA@host>;tag=one\r\n\
+CSeq: 1 INVITE\r\n\
+RSeq: 20\r\n\
+\r\n";
+
+    pTempSipMsg->SipDelete();
+    pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
+                    pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_IGNORE_RESP);
+
+    pMsg = "SIP/2.0 380 Alternative Service\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+To: <sip:userA@host>;tag=one\r\n\
+CSeq: 1 INVITE\r\n\
+\r\n";
+
+    pTempSipMsg->SipDelete();
+    pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST]
+                                 [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](
+                                         pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_VALID_MESSAGE);
+
+    const SIP_CHAR* pAckMsg = "ACK sip:userAck@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+To: <sip:userA@host>;tag=one\r\n\
+CSeq: 1 ACK\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    SipMessage* pAckSipMessage = new SipMessage();
+    ASSERT_TRUE(pAckSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pAckSipMessage->Decode(pAckMsg, SipPf_Strlen(pAckMsg)));
+
+    SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
+    pTranspInfo->SetSentSipMsg(pAckSipMessage);
+    pTxn->UpdateTranspInfo(pTranspInfo);
+
+    /* Calling re-transmitted 380 msg */
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST]
+                                 [SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT](
+                                         pTxn, pTxnFsmData, &nError));
+    EXPECT_EQ(pTxnFsmData->m_eTxnStatus, SipTxn::STATUS_RETRANSMISSION);
+
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST][SipTxn::INV_CLI_TRANSP_ERROR_EVT](
+                    pTxn, pTxnFsmData, &nError));
+
+    SipTimeoutData* pTimeoutData =
+            new SipTimeoutData(SipTxn::INVITE_CLIENT, SipTxn::TIMER_M, SIP_NULL);
+    EXPECT_EQ(SIP_TRUE,
+            gpfSipInvClientTxnFsm[SipTxn::INV_CLI_ACCEPTED_ST]
+                                 [SipTxn::INV_CLI_TIMER_M_TIME_OUT_EVT](
+                                         pTxn, pTimeoutData, &nError));
+    delete pTimeoutData;
     pTxnKey->SipDelete();
     pTxn->SipDelete();
     delete pTxnFsmData;

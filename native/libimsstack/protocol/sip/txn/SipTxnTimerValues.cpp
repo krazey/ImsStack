@@ -32,7 +32,8 @@ SipTxnTimerValues::SipTxnTimerValues() :
         m_nTimerH_Value(SIP_ZERO),
         m_nTimerI_Value(SIP_ZERO),
         m_nTimerJ_Value(SIP_ZERO),
-        m_nTimerK_Value(SIP_ZERO)
+        m_nTimerK_Value(SIP_ZERO),
+        m_nTimerM_Value(SIP_ZERO)
 {
     SipConfiguration* pConfig = SipConfiguration::GetInstance();
 
@@ -49,6 +50,7 @@ SipTxnTimerValues::SipTxnTimerValues() :
     m_nTimerI_Value = pConfig->GetTimerI();
     m_nTimerJ_Value = pConfig->GetTimerJ();
     m_nTimerK_Value = pConfig->GetTimerK();
+    m_nTimerM_Value = pConfig->GetTimerM();
 }
 
 SIP_VOID SipTxnTimerValues::SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur)
@@ -118,6 +120,11 @@ SIP_VOID SipTxnTimerValues::SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur
         case SipTxn::TIMER_K:
         {
             m_nTimerK_Value = nDur;
+        }
+        break;
+        case SipTxn::TIMER_M:
+        {
+            m_nTimerM_Value = nDur;
         }
         break;
 
@@ -192,6 +199,11 @@ SIP_UINT32 SipTxnTimerValues::GetTimerValue(SIP_UINT32 nTimerType) const
         case SipTxn::TIMER_K:
         {
             return m_nTimerK_Value;
+        }
+        break;
+        case SipTxn::TIMER_M:
+        {
+            return m_nTimerM_Value;
         }
         break;
 
@@ -284,6 +296,11 @@ SIP_BOOL SipTxnTimerValues::UpdateSipTimers(
         SetTimerValue(SipTxn::TIMER_K, ptrTxnSipTxnTimers->m_nTimerK_Value);
     }
 
+    if (IsTimerSet(nTimerOptions, TV_TIMER_M) == SIP_TRUE)
+    {
+        SetTimerValue(SipTxn::TIMER_M, ptrTxnSipTxnTimers->m_nTimerM_Value);
+    }
+
     PrintSIPTxnTimerValues();
     return SIP_TRUE;
 }
@@ -297,11 +314,11 @@ SIP_VOID SipTxnTimerValues::PrintSIPTxnTimerValues() const
 {
     SIP_CHAR szTimerLog[SIP_TRACE_MAX_SIZE] = {SIP_ZERO};
     SIP_CHAR const* pTimerVal =
-            "(T1|T2|T4|A|B|D|E|F|G|H|I|J|K)=%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d";
+            "(T1|T2|T4|A|B|D|E|F|G|H|I|J|K|M)=%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d";
 
     SipPf_Sprintf(szTimerLog, pTimerVal, m_nT1Value, m_nT2Value, m_nT4Value, m_nTimerA_Value,
             m_nTimerB_Value, m_nTimerD_Value, m_nTimerE_Value, m_nTimerF_Value, m_nTimerG_Value,
-            m_nTimerH_Value, m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value);
+            m_nTimerH_Value, m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value, m_nTimerM_Value);
 
     SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER, "SIPTimer%s", szTimerLog, SIP_ZERO);
 }
