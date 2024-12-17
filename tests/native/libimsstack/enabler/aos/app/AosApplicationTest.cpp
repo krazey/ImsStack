@@ -2634,6 +2634,22 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNo
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotStopWhenTestModeEnabledWithoutDeactivation)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_CRITICAL));
+
+    ON_CALL(m_objMockIAosNConfiguration, IsTestModeEnabled(_)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop()).Times(0);
+
+    // WHEN
+    m_pAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(AosApplicationTest, ImsEstablishmentStart)
 {
     // TEST_F : ProcessImsEstablishmentStart

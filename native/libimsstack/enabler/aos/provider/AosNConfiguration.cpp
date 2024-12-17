@@ -461,6 +461,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVideoSupportedForEmergencyReg() con
     return m_objAsset.bSupportVideoForEmergencyReg;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTestModeEnabled(IN IMS_SINT32 nType) const
+{
+    return m_objAsset.objTestMode.Contains(nType);
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -1478,6 +1483,7 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY);
     m_objAsset.objSupportedRoamingRats =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY);
+    m_objAsset.objTestMode = piCc->GetIntArray(CarrierConfig::Ims::KEY_TEST_MODE_INT_ARRAY);
     m_objAsset.objUnavailableFeaturesInLimitedReg = piCc->GetIntArray(
             CarrierConfig::Ims::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(

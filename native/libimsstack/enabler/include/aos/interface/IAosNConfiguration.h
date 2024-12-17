@@ -539,6 +539,16 @@ public:
     virtual IMS_BOOL IsVideoSupportedForEmergencyReg() const = 0;
 
     /**
+     * @brief Flag specifying if test mode is enabled.
+     *
+     * @param nType The test mode type to be enabled.\n
+     *        #CarrierConfig#Ims#TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION
+     *
+     * @return IMS_TRUE if enabled, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5

@@ -95,6 +95,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWfcErrorMessageSupported, (IN IMS_SINT32 nError), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoSupportedForEmergencyReg, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsTestModeEnabled, (IN IMS_SINT32 nType), (const, override));
 
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));

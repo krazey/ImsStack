@@ -2195,6 +2195,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
             }
         }
     }
+    else if (nFinalErr == CarrierConfig::Ims::ERROR_TYPE_CRITICAL &&
+            GET_N_CONFIG(m_nSlotId)->IsTestModeEnabled(
+                    CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION))
+    {
+        A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: ims pdn is not disconnected", 0, 0, 0);
+        return;
+    }
 
     if (bPlmnBlockByConfig)
     {

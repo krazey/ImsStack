@@ -803,6 +803,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             objCarrierConfig, GetIntArray(CarrierConfig::Ims::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY))
             .WillOnce(Return(objSupportedRoamingRats));
 
+    ImsVector<IMS_SINT32> objTestMode;
+    EXPECT_CALL(objCarrierConfig, GetIntArray(CarrierConfig::Ims::KEY_TEST_MODE_INT_ARRAY))
+            .WillOnce(Return(objTestMode));
+
     ImsVector<IMS_SINT32> objUnavailableFeaturesInLimitedReg;
     objUnavailableFeaturesInLimitedReg.Clear();
     objUnavailableFeaturesInLimitedReg.Add(CarrierConfig::Ims::REG_FEATURE_MMTEL);
@@ -858,6 +862,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInRegContactOfInitRegUsed());
     EXPECT_FALSE(m_pAosNConfiguration->UseWfcCountryCodeAvailabilityCheck());
     EXPECT_FALSE(m_pAosNConfiguration->IsVideoOverWifiSupportedWithoutVoice());
+    EXPECT_FALSE(m_pAosNConfiguration->IsTestModeEnabled(
+            CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION));
 
     EXPECT_EQ(1, m_pAosNConfiguration->GetUserInfoPolicyForNonRegisterMessage());
     EXPECT_EQ(1, m_pAosNConfiguration->GetEmergencyPreferredIpType());

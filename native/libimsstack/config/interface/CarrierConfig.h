@@ -205,6 +205,7 @@ public:
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY[];
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[];
         static const IMS_CHAR KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[];
+        static const IMS_CHAR KEY_TEST_MODE_INT_ARRAY[];
         static const IMS_CHAR KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY[];
         // Bundle {
         static const IMS_CHAR KEY_EXTRA_REG_ERR_BUNDLE[];
@@ -522,6 +523,12 @@ public:
             REG_FEATURE_VIDEO = 1,
             REG_FEATURE_TEXT = 2,
             REG_FEATURE_SMS = 3
+        };
+
+        // Test Mode
+        enum
+        {
+            TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION = 1
         };
     };
 
