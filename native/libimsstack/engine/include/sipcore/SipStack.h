@@ -24,6 +24,7 @@
 #include "SipParameter.h"
 #include "SipStackManager.h"
 #include "SipStatusCode.h"
+#include "SipTxnContextData.h"
 #include "SipTxnKey.h"
 #include "SipStackError.h"
 #include "msg/SipMessage.h"
@@ -161,6 +162,17 @@ inline const IMS_CHAR* AddrSpec_GetHost(IN const SipAddrSpec* pAddrSpec)
 inline IMS_SINT32 AddrSpec_GetPort(IN const SipAddrSpec* pAddrSpec)
 {
     return pAddrSpec->GetSipUriAsRef()->GetPort();
+}
+
+template <typename T>
+inline void GetTransactionState(IN const ISipUserData& objUserData, IN_OUT T*& pTxnState)
+{
+    SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(objUserData.GetUserData());
+    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
+            ? static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
+            : IMS_NULL;
+    pTxnState = reinterpret_cast<T*>(
+            (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL);
 }
 
 GLOBAL IMS_BOOL AppendHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& pMessage);

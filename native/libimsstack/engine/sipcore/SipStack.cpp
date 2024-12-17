@@ -25,7 +25,7 @@
 #include "SipMessageBodyPart.h"
 #include "SipMessageBuffer.h"
 #include "SipStack.h"
-#include "SipTxnContextData.h"
+#include "SipClientTransactionState.h"
 #include "SipUtil.h"
 #include "SipUtils.h"
 #include "msg/SipMsgUtil.h"
@@ -55,33 +55,16 @@ SIP_BOOL SipNetworkUtil::SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
         return SIP_FALSE;
     }
 
-    SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTransactionState* pTState = IMS_NULL;
+    SipStack::GetTransactionState(*pUserData, pTState);
 
-    if (pTxnContext == IMS_NULL)
+    if (pTState == IMS_NULL)
     {
-        IMS_TRACE_E(0, "pstTxnContext is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "No SipTransactionState in SipTxnContextData", 0, 0, 0);
         return SIP_FALSE;
     }
 
-    SipTxnContextData* pTxnContextData =
-            static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData);
-
-    if (pTxnContextData == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "User data does not contains SipTxnContextData", 0, 0, 0);
-        return SIP_FALSE;
-    }
-
-    SipTransactionState* pTxnState = pTxnContextData->GetTxnState();
-
-    if (pTxnState == SIP_NULL)
-    {
-        IMS_TRACE_E(0, "SipTxnContextData does not contain TxnState", 0, 0, 0);
-        return SIP_FALSE;
-    }
-
-    if (!pTxnState->SendToNetwork(
-                reinterpret_cast<const IMS_BYTE*>(pTransportBuffer->GetSipBuffer()),
+    if (!pTState->SendToNetwork(reinterpret_cast<const IMS_BYTE*>(pTransportBuffer->GetSipBuffer()),
                 static_cast<IMS_SINT32>(pTransportBuffer->GetSipBufferLen())))
     {
         IMS_TRACE_E(0, "SendToNetwork failed", 0, 0, 0);
@@ -116,6 +99,16 @@ SIP_BOOL SipTxnListenerProxy::TxnTerminated(ISipUserData* pUserData)
     {
         if (pUserData->GetDeleteFlag() == SIP_TRUE)
         {
+            SipTransactionState* pTState = IMS_NULL;
+            SipStack::GetTransactionState(*pUserData, pTState);
+
+            if (pTState != IMS_NULL && pTState->GetType() == SipTransactionState::TYPE_CLIENT)
+            {
+                SipClientTransactionState* pCtState =
+                        static_cast<SipClientTransactionState*>(pTState);
+                pCtState->ClearAllForkedTransactions();
+            }
+
             SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
 
             if (pTxnContext != SIP_NULL)
@@ -4232,6 +4225,7 @@ GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType)
             "Timer_I >> ACK retransmit",
             "Timer_J >> non-INVITE server",
             "Timer_K >> non-INVITE client",
+            "Timer_M >> 2XX-INVITE retransmission or forked",
             "Timer_OTHER",
             "Timer_INVALID"
     };

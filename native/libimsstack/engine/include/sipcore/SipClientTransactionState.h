@@ -57,6 +57,8 @@ public:
     }
     IMS_BOOL UpdateRouteDetails(IN const SipMethod& objMethod);
     IMS_SINT32 HandleResponse(IN ::SipMessage* pSipMsg);
+    void ClearAllForkedTransactions();
+    IMS_BOOL IsAckSent() const;
     static IMS_SINT32 MatchTransaction(IN ::SipMessage* pSipMsg,
             IN const SipTransportAddress& objFarEnd,
             OUT RcPtr<SipClientTransactionState>& pCtState);

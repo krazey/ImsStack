@@ -34,7 +34,6 @@
 #include "SipStack.h"
 #include "SipStackState.h"
 #include "SipTimerValuesHelper.h"
-#include "SipTxnContextData.h"
 #include "SipUtils.h"
 
 __IMS_TRACE_TAG_SIP_CORE__;

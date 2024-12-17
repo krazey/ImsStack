@@ -27,6 +27,11 @@ __IMS_TRACE_TAG_SIP_CORE__;
 PUBLIC
 IMS_BOOL SipForkedTransactionManager::Add(IN SipClientTransactionState* pCtState)
 {
+    if (pCtState == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
     for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
         const RcPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
@@ -117,8 +122,7 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
         if (strCallId.Equals(pDState->GetCallId()) && strLocalTag.Equals(strNewLocalTag) &&
                 strRemoteTag.Equals(strNewRemoteTag))
         {
-            IMS_TRACE_D("ForkedTransactionManager :: Dialog "
-                        "(call-id=%s, local-tag=%s, remote-tag=%s)",
+            IMS_TRACE_D("FTM: Dialog (call-id=%s, local-tag=%s, remote-tag=%s)",
                     SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), strLocalTag.GetStr(),
                     strRemoteTag.GetStr());
             return pCtState.Get();
@@ -134,6 +138,19 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
 PUBLIC
 void SipForkedTransactionManager::Remove(IN const SipClientTransactionState* pCtState)
 {
+    if (pCtState == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pCtState->IsAckSent())
+    {
+        // Need to manage the forked transactions even if 2xx is already received
+        // to ensure that retransmitted 2xx can be handled appropriately.
+        IMS_TRACE_D("FTM: ACK-2XX sent", 0, 0, 0);
+        return;
+    }
+
     for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
         const RcPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
