@@ -3758,10 +3758,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             int preferredCode = 0;
 
-            if ((getTerminationReason(0) != 0) || mCall.isTerminated()) {
+            if (getTerminationReason(0) == ImsReasonInfo.CODE_USER_TERMINATED) {
                 preferredCode = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
-            } else if (callReasonInfo.mCode == CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE) {
-                preferredCode = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
+            } else if ((getTerminationReason(0) != 0) || mCall.isTerminated()) {
+                preferredCode = ImsReasonInfo.CODE_SUPP_SVC_FAILED;
             }
 
             ImsReasonInfo reasonInfo = ImsCallUtils.createReasonInfo(
@@ -3980,10 +3980,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             int preferredCode = 0;
 
-            if ((getTerminationReason(0) != 0) || mCall.isTerminated()) {
+            if (getTerminationReason(0) == ImsReasonInfo.CODE_USER_TERMINATED) {
                 preferredCode = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
-            } else if (callReasonInfo.mCode == CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE) {
-                preferredCode = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
+            } else if ((getTerminationReason(0) != 0) || mCall.isTerminated()) {
+                preferredCode = ImsReasonInfo.CODE_SUPP_SVC_FAILED;
             }
 
             ImsReasonInfo reasonInfo = ImsCallUtils.createReasonInfo(
