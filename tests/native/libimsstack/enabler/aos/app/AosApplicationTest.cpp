@@ -2677,7 +2677,10 @@ TEST_F(AosApplicationTest, ImsEstablishmentStart)
     m_pAosApplication->ProcessImsEstablishmentStart();
     EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
 
-    // IsSupportedNetworkTypeForCellular is true, IsPlmnBlockRequired returns false
+    // IsDataIn and IsSupportedNetworkTypeForCellular are true, IsPlmnBlockRequired returns false
+    EXPECT_CALL(m_objMockIAosNetTracker, IsDataIn())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));

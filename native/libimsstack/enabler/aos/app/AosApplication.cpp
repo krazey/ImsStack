@@ -2441,7 +2441,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 
         IMS_UINT32 nNewRat = m_piNetTracker->GetMobileNetworkType();
 
-        if (m_pUtil->IsSupportedNetworkTypeForCellular(nNewRat))
+        if (m_piNetTracker->IsDataIn() && m_pUtil->IsSupportedNetworkTypeForCellular(nNewRat))
         {
             if (!IsPlmnBlockRequired())
             {
