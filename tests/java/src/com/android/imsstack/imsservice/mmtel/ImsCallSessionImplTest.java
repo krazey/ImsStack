@@ -1108,6 +1108,148 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnCallHoldFailedWithUserTerminated() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        mImsCallSession.setTerminationReason(ImsReasonInfo.CODE_USER_TERMINATED);
+        mImsCallSession.getCallListenerProxy().onCallHoldFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeHoldFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED, capturedReasonInfo.mCode);
+    }
+
+    @Test
+    public void testOnCallHoldFailedWithCallTerminated() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        when(mMockMtcCall.isTerminated()).thenReturn(true);
+        mImsCallSession.setTerminationReason(0);
+        mImsCallSession.getCallListenerProxy().onCallHoldFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeHoldFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_SUPP_SVC_FAILED, capturedReasonInfo.mCode);
+    }
+
+    @Test
+    public void testOnCallHoldFailedWithTerminatedReasonOtherThanUserTerminated() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        mImsCallSession.setTerminationReason(ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        mImsCallSession.getCallListenerProxy().onCallHoldFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeHoldFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_SUPP_SVC_FAILED, capturedReasonInfo.mCode);
+    }
+
+    @Test
+    public void testOnCallHoldFailedWithCallReasonInfo() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        when(mMockMtcCall.isTerminated()).thenReturn(false);
+        mockCallReasonInfo.mCode = CallReasonInfo.CODE_MEDIA_NO_DATA;
+        mImsCallSession.setTerminationReason(0);
+        mImsCallSession.getCallListenerProxy().onCallHoldFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeHoldFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_MEDIA_NO_DATA, capturedReasonInfo.mCode);
+    }
+
+    @Test
+    public void testonCallResumeFailedWithUserTerminated() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        mImsCallSession.setTerminationReason(ImsReasonInfo.CODE_USER_TERMINATED);
+        mImsCallSession.getCallListenerProxy().onCallResumeFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeResumeFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED, capturedReasonInfo.mCode);
+    }
+
+    @Test
+    public void testonCallResumeFailedWithCallTerminated() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        when(mMockMtcCall.isTerminated()).thenReturn(true);
+        mImsCallSession.setTerminationReason(0);
+        mImsCallSession.getCallListenerProxy().onCallResumeFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeResumeFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_SUPP_SVC_FAILED, capturedReasonInfo.mCode);
+    }
+
+    @Test
+    public void tesonCallResumeFailedWithTerminatedReasonOtherThanUserTerminated() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        mImsCallSession.setTerminationReason(ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        mImsCallSession.getCallListenerProxy().onCallResumeFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeResumeFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_SUPP_SVC_FAILED, capturedReasonInfo.mCode);
+    }
+
+    @Test
+    public void testonCallResumeFailedWithCallReasonInfo() {
+        CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
+
+        mImsCallSession.setConferenceProxy(null);
+
+        ArgumentCaptor<ImsReasonInfo> reasonInfoCaptor =
+                ArgumentCaptor.forClass(ImsReasonInfo.class);
+
+        when(mMockMtcCall.isTerminated()).thenReturn(false);
+        mockCallReasonInfo.mCode = CallReasonInfo.CODE_MEDIA_NO_DATA;
+        mImsCallSession.setTerminationReason(0);
+        mImsCallSession.getCallListenerProxy().onCallResumeFailed(mMockMtcCall, mockCallReasonInfo);
+        verify(mMockImsCallSessionCallback).invokeResumeFailed(
+                any(ImsCallSessionImplBase.class), reasonInfoCaptor.capture());
+        ImsReasonInfo capturedReasonInfo = reasonInfoCaptor.getValue();
+        assertEquals(ImsReasonInfo.CODE_MEDIA_NO_DATA, capturedReasonInfo.mCode);
+    }
+
+    @Test
     public void testOnCallTransferred() {
         mImsCallSession.mTransferTargetSession = createImsCallSession("1");
         ImsCallSessionImpl targetSession = mImsCallSession.mTransferTargetSession;
