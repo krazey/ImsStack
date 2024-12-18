@@ -1121,12 +1121,12 @@ TEST_F(AosRegistrationTest, ClearErrorCountWhenRequestToClearServerSocketErrorCo
     EXPECT_EQ(m_pAosRegistration->GetMaxErrorCountForServerSocket(), 0);
 }
 
-TEST_F(AosRegistrationTest, UpdateDetailRegStateWhenRequestForUnavailableFeatureTag)
+TEST_F(AosRegistrationTest, UpdateDetailRegStateWhenUpdateFeatureWithoutRegRequested)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->SetImsRegState(AosRegistration::IMS_REG_STATE_REGISTERING);
 
-    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG);
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_UPDATE_FEATURE_WITHOUT_REG);
 
     EXPECT_EQ(m_pAosRegistration->GetImsRegState(), AosRegistration::IMS_REG_STATE_REGISTERED);
 }

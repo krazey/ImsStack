@@ -212,7 +212,7 @@ protected:
     void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess = IMS_TRUE);
     IMS_BOOL ProcessCheckBlock(IN IMS_BOOL bRunStateMachine = IMS_TRUE);
     void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
-    void ProcessUnavailableFeatureChanged();
+    void ProcessFeatureChangedWithoutReg();
 
     void BackupAllBlocks();
     void BackupBlocks(
@@ -235,6 +235,7 @@ protected:
     virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
     virtual IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const;
 
+    virtual void ReevaluateCapabilities(IN IMS_BOOL bNetworkChanged);
     virtual void ReevaluateUnavailableFeature();
 
     virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);

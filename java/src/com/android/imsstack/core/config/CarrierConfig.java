@@ -384,6 +384,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_preferred_accesstype_feature_tag_int";
         public static final String KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "registration_permanent_error_code_int_array";
+        public static final String KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONTACT_BOOL =
+                KEY_PREFIX + "b2c_call_composer_feature_tag_in_reg_contact_bool";
         public static final String KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL =
                 KEY_PREFIX + "block_pcscf_on_reg_failure_bool";
         public static final String KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL =

@@ -29,6 +29,7 @@
     <int name="ims.location_tolerable_distance_int" value="150"/>
 
     <!-- Aos -->
+    <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>

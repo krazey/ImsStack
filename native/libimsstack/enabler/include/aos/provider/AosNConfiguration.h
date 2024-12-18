@@ -70,6 +70,7 @@ public:
     IMS_BOOL IsSecurityServerPortInRegContactOfInitRegUsed() const override;
     IMS_BOOL IsSecurityServerPortInInitRegUsed() const override;
     IMS_BOOL IsOldSaOnEstablishingSaRemoved() const override;
+    IMS_BOOL IsB2cCallComposerFeatureTagInRegContact() const override;
     IMS_BOOL IsBlockPcscfOnRegFailure() const override;
     IMS_BOOL IsCallEndAndPdnReactivationByRegTerminated() const override;
     IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const override;

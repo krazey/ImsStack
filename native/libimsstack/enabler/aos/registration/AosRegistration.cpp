@@ -378,7 +378,7 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             ClearErrorCount();
             break;
 
-        case CMD_UNAVAILABLE_FEATURE_TAG:
+        case CMD_UPDATE_FEATURE_WITHOUT_REG:
             UpdateDetailState(GetState());
             break;
 

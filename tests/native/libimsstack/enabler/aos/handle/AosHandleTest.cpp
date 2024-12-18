@@ -94,12 +94,12 @@ using ::testing::ReturnRef;
     using Base::ProcessCapabilitiesChanged;        \
     using Base::ProcessCheckBlock;                 \
     using Base::ProcessFeatureBlock;               \
+    using Base::ProcessFeatureChangedWithoutReg;   \
     using Base::ProcessImsResumed;                 \
     using Base::ProcessImsSuspended;               \
     using Base::ProcessNetworkChanged;             \
     using Base::ProcessPsRoamingStateChanged;      \
     using Base::ProcessUnavailableFeature;         \
-    using Base::ProcessUnavailableFeatureChanged;  \
     using Base::ProcessVopsStateChanged;           \
     using Base::RadioTypeToString;                 \
     using Base::ReevaluateBlocks;                  \
@@ -3371,52 +3371,52 @@ TEST_F(AosHandleTest, ProcessUnavailableFeature_Test)
     EXPECT_EQ(m_pAosHandle->GetBindedUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
-TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test1)
+TEST_F(AosHandleTest, ProcessFeatureChangedWithoutReg_Test1)
 {
     // Test1: state not connected
-    // Expectation: Call AosRegistration::RequestCmd() with CMD_UNAVAILABLE_FEATURE_TAG param.
+    // Expectation: Call AosRegistration::RequestCmd() with CMD_UPDATE_FEATURE_WITHOUT_REG param.
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
 
-    EXPECT_CALL(
-            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_UPDATE_FEATURE_WITHOUT_REG, 0))
             .Times(1);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
 
-    m_pAosHandle->ProcessUnavailableFeatureChanged();
+    m_pAosHandle->ProcessFeatureChangedWithoutReg();
 }
 
-TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test2)
+TEST_F(AosHandleTest, ProcessFeatureChangedWithoutReg_Test2)
 {
     // Test2: state connected, listener is null
-    // Expectation: Call AosRegistration::RequestCmd() with CMD_UNAVAILABLE_FEATURE_TAG param.
+    // Expectation: Call AosRegistration::RequestCmd() with CMD_UPDATE_FEATURE_WITHOUT_REG param.
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->SetListener(IMS_NULL);
     ASSERT_EQ(m_pAosHandle->GetListener(), nullptr);
 
-    EXPECT_CALL(
-            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_UPDATE_FEATURE_WITHOUT_REG, 0))
             .Times(1);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
 
-    m_pAosHandle->ProcessUnavailableFeatureChanged();
+    m_pAosHandle->ProcessFeatureChangedWithoutReg();
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
 }
 
-TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test3)
+TEST_F(AosHandleTest, ProcessFeatureChangedWithoutReg_Test3)
 {
     // Test 3: state connected, listener is not null
-    // Expectation: Call AosRegistration::RequestCmd() with CMD_UNAVAILABLE_FEATURE_TAG param.
+    // Expectation: Call AosRegistration::RequestCmd() with CMD_UPDATE_FEATURE_WITHOUT_REG param.
     // + Call ImsAos_Connected of the listener
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    EXPECT_CALL(
-            m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_UPDATE_FEATURE_WITHOUT_REG, 0))
             .Times(1);
 
     EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
@@ -3425,7 +3425,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test3)
 
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(1);
 
-    m_pAosHandle->ProcessUnavailableFeatureChanged();
+    m_pAosHandle->ProcessFeatureChangedWithoutReg();
 
     m_pAosHandle->SetListener(IMS_NULL);
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
