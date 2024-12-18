@@ -882,6 +882,9 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
         case TIMER_MT_ALERTING:
             pszKey = ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT;
             break;
+        case TIMER_MT_PRACK_WAIT:
+            pszKey = ConfigVoice::KEY_PRACK_WAIT_TIMER_MILLIS_INT;
+            break;
         case TIMER_CONVERT_USER_RESPONSE:
             pszKey = ConfigVt::KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT;
             break;

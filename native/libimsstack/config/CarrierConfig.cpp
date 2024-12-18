@@ -758,6 +758,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_D
         KEY_IMS_VOICE_PREFIX "incoming_call_reject_code_for_user_decline_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT[] =
         KEY_IMS_VOICE_PREFIX "incoming_call_reject_code_for_no_answer_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_PRACK_WAIT_TIMER_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "prack_wait_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_PRACK_UPDATE_RESPONSE_WAIT_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "prack_update_response_wait_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT[] =

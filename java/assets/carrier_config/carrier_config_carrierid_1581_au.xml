@@ -100,6 +100,7 @@
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="5"/> <!-- MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF -->
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="500"/>
+    <int name="imsvoice.prack_wait_timer_millis_int" value="10000"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
