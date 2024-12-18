@@ -67,6 +67,7 @@ public class LocationAgent implements LocationInterface {
     private final int mSlotId;
     private final LocationApi mLocationApi;
     private final Handler mHandler;
+    private final MessageExecutor mGeocoderExecutor;
     private final GeocoderProxy mGeocoderProxy;
     private final AddressResolver mAddressResolver;
     private final LocationPolicy mPolicy = new LocationPolicy();
@@ -243,7 +244,8 @@ public class LocationAgent implements LocationInterface {
         mSlotId = slotId;
         mLocationApi = LocationApi.getInstance();
         mHandler = new Handler(AppContext.getInstance().getMainLooper());
-        mGeocoderProxy = new GeocoderProxy(AppContext.getInstance(), mHandler);
+        mGeocoderExecutor = new MessageExecutor(GeocoderProxy.class.getSimpleName());
+        mGeocoderProxy = new GeocoderProxy(AppContext.getInstance(), mGeocoderExecutor);
         // Instantiate AddressResolver to update location details
         // when location is fixed by LocationManager.
         mAddressResolver = new AddressResolver();
