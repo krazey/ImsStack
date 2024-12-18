@@ -156,6 +156,12 @@
     <string name="imsvoice.call_reject_reason_phrase_access_class_blocked_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vops_off_string"></string>
     <string name="imsemergency.p_emergency_info_header_in_invite_string"></string>
+    <string-array name="imsemergency.p_preferred_identity_header_in_invite_string_array" num="4">
+        <item value=""/> <!-- REG_MODE_NORMAL -->
+        <item value=""/> <!-- REG_MODE_ADMIN -->
+        <item value=""/> <!-- REG_MODE_INTERNAL -->
+        <item value=""/> <!-- REG_MODE_NOUICC -->
+    </string-array>
     <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
     </string-array>
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>

@@ -1139,6 +1139,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESU
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING[] =
         KEY_IMS_EMERGENCY_PREFIX "p_emergency_info_header_in_invite_string";
 const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY[] =
+                KEY_IMS_EMERGENCY_PREFIX "p_preferred_identity_header_in_invite_string_array";
+const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX "reject_code_require_immediate_termination_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY[] =

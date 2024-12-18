@@ -691,6 +691,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_emergency_urn_escv_mapping_int";
         public static final String KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING =
                 KEY_PREFIX + "p_emergency_info_header_in_invite_string";
+        public static final String KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY =
+                KEY_PREFIX + "p_preferred_identity_header_in_invite_string_array";
         public static final String KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL =
                 KEY_PREFIX + "support_ecbm_for_volte_bool";
         public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =

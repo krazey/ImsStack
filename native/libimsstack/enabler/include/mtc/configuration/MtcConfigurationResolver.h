@@ -21,7 +21,9 @@
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "ConfigDef.h"
+#include "IImsAosInfo.h"
 #include "ImsTypeDef.h"
+#include "ImsVector.h"
 #include "TextParser.h"
 
 class MtcConfigurationProxy;
@@ -189,6 +191,26 @@ public:
             return strReasonCode.ToInt32();
         }
         return CODE_NONE;
+    }
+
+    inline static AString GetPPreferredIdentityHeaderInInviteForEmergency(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_UINT32 eAosRegMode)
+    {
+        ImsVector<AString> lstConfig = objProxy.GetStringArray(
+                ConfigEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY);
+        switch (eAosRegMode)
+        {
+            case IImsAosInfo::REG_MODE_NORMAL:
+                return lstConfig[0];
+            case IImsAosInfo::REG_MODE_ADMIN:
+                return lstConfig[1];
+            case IImsAosInfo::REG_MODE_INTERNAL:
+                return lstConfig[2];
+            case IImsAosInfo::REG_MODE_NOUICC:
+                return lstConfig[3];
+            default:
+                return AString::ConstEmpty();
+        }
     }
 
 private:

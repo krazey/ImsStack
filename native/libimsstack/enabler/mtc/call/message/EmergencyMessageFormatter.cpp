@@ -22,6 +22,7 @@
 #include "IMtcService.h"
 #include "INetworkConnection.h"
 #include "ISipHeader.h"
+#include "ISubscriberConfig.h"
 #include "ServiceNetwork.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServicePhoneInfo.h"
@@ -32,6 +33,7 @@
 #include "call/ParticipantInfo.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationResolver.h"
 #include "helper/IMtcAosConnector.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
@@ -132,6 +134,13 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeader()
         return;
     }
 
+    AString strFormat = MtcConfigurationResolver::GetPPreferredIdentityHeaderInInviteForEmergency(
+            m_objContext.GetConfigurationProxy(), m_eEmergencyAosRegMode);
+    if (strFormat.GetLength() > 0)
+    {
+        return SetPPreferredIdentityHeaderByFormat(strFormat);
+    }
+
     if ((m_eNormalAosRegMode != IImsAosInfo::REG_MODE_NORMAL) &&
             (m_eNormalAosRegMode != IImsAosInfo::REG_MODE_ADMIN) &&
             (m_eEmergencyAosRegMode != IImsAosInfo::REG_MODE_NORMAL) &&
@@ -141,6 +150,19 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeader()
     }
 
     SetPPreferredIdentityHeaderByUserId();
+}
+
+PRIVATE
+void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByFormat(IN const AString& strFormat)
+{
+    AString strPpi = strFormat;
+    strPpi.Replace("#PUID#", GetPublicUserId());
+    strPpi.Replace("#IMEI#", GetDeviceId());
+    strPpi.Replace("#IP#", GetLocalAddress());
+    strPpi.Replace("#PORT#", GetLocalPort());
+
+    m_objContext.GetMessageUtils().SetHeader(
+            m_piNextMessage, strPpi, ISipHeader::P_PREFERRED_IDENTITY);
 }
 
 PRIVATE
@@ -171,14 +193,9 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByUserId()
 PRIVATE
 void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
 {
-    AString strIpAddress;
-    if (GetLocalIpAddress(strIpAddress) != IMS_SUCCESS)
-    {
-        return;
-    }
-
-    IMS_UINT32 nPort = GetLocalPort();
-    if (nPort == 0)
+    AString strIpAddress = GetLocalAddress();
+    AString strPort = GetLocalPort();
+    if (strIpAddress.GetLength() <= 0 || strPort.GetLength() <= 0)
     {
         return;
     }
@@ -211,9 +228,6 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
         strValue.Append(TextParser::STR_RSBRACKET);
     }
     strValue.Append(TextParser::CHAR_COLON);
-
-    AString strPort;
-    strPort.Sprintf("%d", nPort);
     strValue.Append(strPort);
 
     m_objContext.GetMessageUtils().SetHeader(
@@ -299,34 +313,35 @@ IMS_UINT32 EmergencyMessageFormatter::GetAosRegMode(IN ServiceType eServiceType)
 }
 
 PRIVATE
-IMS_RESULT EmergencyMessageFormatter::GetLocalIpAddress(OUT AString& strIpAddress) const
+AString EmergencyMessageFormatter::GetLocalAddress() const
 {
-    // TODO: emerency??
     IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
-        return IMS_FAILURE;
+        return AString::ConstEmpty();
     }
 
-    strIpAddress = pAosConnector->GetLocalAddress();
-    if (strIpAddress.GetLength() < 1)
-    {
-        return IMS_FAILURE;
-    }
-
-    return IMS_SUCCESS;
+    return pAosConnector->GetLocalAddress();
 }
 
 PRIVATE
-IMS_UINT32 EmergencyMessageFormatter::GetLocalPort() const
+AString EmergencyMessageFormatter::GetLocalPort() const
 {
     IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
-        return 0;
+        return AString::ConstEmpty();
     }
 
-    return pAosConnector->GetLocalPort();
+    IMS_UINT32 nPort = pAosConnector->GetLocalPort();
+    if (nPort == 0)
+    {
+        return AString::ConstEmpty();
+    }
+
+    AString strPort;
+    strPort.Sprintf("%d", nPort);
+    return strPort;
 }
 
 PRIVATE
@@ -359,4 +374,16 @@ AString EmergencyMessageFormatter::GetMacAddress() const
     }
 
     return strMacAddress;
+}
+
+PRIVATE
+const AString& EmergencyMessageFormatter::GetPublicUserId() const
+{
+    const ISubscriberConfig* pConfig = m_objContext.GetSubscriberConfig();
+    if (pConfig == IMS_NULL)
+    {
+        return AString::ConstEmpty();
+    }
+
+    return pConfig->GetPublicUserId();
 }

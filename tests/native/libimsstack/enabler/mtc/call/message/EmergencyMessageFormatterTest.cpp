@@ -16,6 +16,7 @@
 
 #include "FeatureCaps.h"
 #include "IImsAosInfo.h"
+#include "ImsVector.h"
 #include "MockICoreService.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
@@ -23,14 +24,15 @@
 #include "MockIPhoneInfoDevice.h"
 #include "MockISession.h"
 #include "MockISipMessage.h"
+#include "MockISubscriberConfig.h"
 #include "MtcDef.h"
 #include "PlatformContext.h"
 #include "ServiceNetworkPolicy.h"
 #include "SipParameter.h"
 #include "TestNetworkService.h"
 #include "TestPhoneInfoService.h"
-#include "call/ParticipantInfo.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/ParticipantInfo.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -77,6 +79,7 @@ public:
     MockIMessageUtils objMessageUtils;
     TestNetworkService objNetworkService;
     TestPhoneInfoService objPhoneInfoService;
+    MockISubscriberConfig objSubscriberConfig;
     FeatureCaps* pFeatureCaps;
 
 protected:
@@ -94,6 +97,7 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetAosConnector).WillByDefault(Return(&objAosConnector));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
         ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
         ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(pFeatureCaps));
         ON_CALL(objCoreService, GetUserIdentities)
@@ -107,6 +111,16 @@ protected:
                 PlatformContext::SERVICE_NETWORK, &objNetworkService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
+
+        ImsVector<AString> lstPpi;
+        lstPpi.Add("");
+        lstPpi.Add("");
+        lstPpi.Add("");
+        lstPpi.Add("");
+        ON_CALL(*pConfigurationProxy,
+                GetStringArray(ConfigEmergency::
+                                KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY))
+                .WillByDefault(Return(lstPpi));
 
         pFormatter = new EmergencyMessageFormatter(objContext, objSession);
     }
@@ -315,15 +329,96 @@ TEST_F(EmergencyMessageFormatterTest, GetAoSRegMode)
     EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
-TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeader)
+TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderDoesNotSetIfAlreadyPresent)
 {
-    ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_TRUE));
-    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
-    EXPECT_EQ(nResult, IMS_SUCCESS);
+    ON_CALL(objMessageUtils, IsHeaderPresent(_, ISipHeader::P_PREFERRED_IDENTITY, _))
+            .WillByDefault(Return(IMS_TRUE));
 
-    ON_CALL(objSipMessage, IsHeaderPresent).WillByDefault(Return(IMS_FALSE));
-    nResult = pFormatter->FormStartMessage(CallType::VOIP);
-    EXPECT_EQ(nResult, IMS_SUCCESS);
+    EXPECT_CALL(objMessageUtils, SetHeader(_, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils, SetHeader(_, _, ISipHeader::P_PREFERRED_IDENTITY, _)).Times(0);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderFormatsForRegModes)
+{
+    ON_CALL(objMessageUtils, IsHeaderPresent(_, ISipHeader::P_PREFERRED_IDENTITY, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ImsVector<AString> lstPpi;
+    lstPpi.Add("normal@ppi");
+    lstPpi.Add("admin@ppi");
+    lstPpi.Add("internal@ppi");
+    lstPpi.Add("nouicc@ppi");
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(
+                    ConfigEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY))
+            .WillByDefault(Return(lstPpi));
+    AString strPuid = "puid";
+    ON_CALL(objSubscriberConfig, GetPublicUserId(_)).WillByDefault(ReturnRef(strPuid));
+    ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
+            .WillByDefault(Invoke(
+                    [](Unused, OUT AString& strImei)
+                    {
+                        strImei = "imei";
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return("ip"));
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(5060));
+    EXPECT_CALL(objMessageUtils, SetHeader(_, _, _, _)).Times(AnyNumber());
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(_, AString("normal@ppi"), ISipHeader::P_PREFERRED_IDENTITY, _));
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_ADMIN));
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(_, AString("admin@ppi"), ISipHeader::P_PREFERRED_IDENTITY, _));
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(_, AString("internal@ppi"), ISipHeader::P_PREFERRED_IDENTITY, _));
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(_, AString("nouicc@ppi"), ISipHeader::P_PREFERRED_IDENTITY, _));
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderFormatsByTokens)
+{
+    ON_CALL(objMessageUtils, IsHeaderPresent(_, ISipHeader::P_PREFERRED_IDENTITY, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ImsVector<AString> lstPpi;
+    lstPpi.Add("#PUID#-#IMEI#-#IP#-#PORT#");
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(
+                    ConfigEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY))
+            .WillByDefault(Return(lstPpi));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+
+    AString strPuid = "puid";
+    ON_CALL(objSubscriberConfig, GetPublicUserId(_)).WillByDefault(ReturnRef(strPuid));
+    ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
+            .WillByDefault(Invoke(
+                    [](Unused, OUT AString& strImei)
+                    {
+                        strImei = "imei";
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return("ip"));
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(5060));
+
+    EXPECT_CALL(objMessageUtils, SetHeader(_, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(_, AString("puid-imei-ip-5060"), ISipHeader::P_PREFERRED_IDENTITY, _));
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 
 TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByDeviceId)

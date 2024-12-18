@@ -45,6 +45,7 @@ protected:
 
 private:
     void SetPPreferredIdentityHeader();
+    void SetPPreferredIdentityHeaderByFormat(IN const AString& strFormat);
     void SetPPreferredIdentityHeaderByUserId();
     void SetPPreferredIdentityHeaderByDeviceId();
     void SetRecvInfoHeader();
@@ -52,11 +53,12 @@ private:
     void SetSipInstanceFeature();
 
     IMS_UINT32 GetAosRegMode(IN ServiceType eServiceType) const;
-    IMS_RESULT GetLocalIpAddress(OUT AString& strIpAddress) const;
-    IMS_UINT32 GetLocalPort() const;
+    AString GetLocalAddress() const;
+    AString GetLocalPort() const;
     AString GetWifiCallingAddressId() const;
     AString GetDeviceId() const;
     AString GetMacAddress() const;
+    const AString& GetPublicUserId() const;
 
 private:
     IMS_UINT32 m_eNormalAosRegMode;

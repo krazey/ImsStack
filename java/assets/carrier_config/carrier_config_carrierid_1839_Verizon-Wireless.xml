@@ -314,6 +314,12 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
+    <string-array name="imsemergency.p_preferred_identity_header_in_invite_string_array" num="4">
+        <item value=""/> <!-- REG_MODE_NORMAL -->
+        <item value=""/> <!-- REG_MODE_ADMIN -->
+        <item value="#PUID#"/> <!-- REG_MODE_INTERNAL -->
+        <item value="sip:#IMEI#@#IP#:#PORT#"/> <!-- REG_MODE_NOUICC -->
+    </string-array>
 
     <!-- Mts -->
     <boolean name="imssms.sms_use_dialed_number_for_request_uri_bool" value="true"/>
