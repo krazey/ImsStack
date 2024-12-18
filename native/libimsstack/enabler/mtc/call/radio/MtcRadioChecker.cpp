@@ -65,11 +65,17 @@ PUBLIC VIRTUAL void MtcRadioChecker::SetTrafficCheckerListener(
 }
 
 PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_BOOL bEmergency,
-        IN PeerType ePeerType, IN IMS_BOOL bWifi, IN CallKey nCallKey)
+        IN PeerType ePeerType, IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey)
 {
+    if (bUssi)
+    {
+        IMS_TRACE_D("Check : unblocked - USSI MO DATA(Best Effort).", 0, 0, 0);
+        return CheckResult::UNBLOCKED;
+    }
+
     if (IsTrafficPrepared(eCallType, bEmergency, ePeerType))
     {
-        IMS_TRACE_D("Check unblocked - traffic has been prepared", 0, 0, 0);
+        IMS_TRACE_D("Check : unblocked - traffic has been prepared", 0, 0, 0);
         return CheckResult::UNBLOCKED;
     }
 
@@ -81,7 +87,7 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
 
     if (IsTrafficAllowed(eCallType, bEmergency) == IMS_FALSE)
     {
-        IMS_TRACE_D("Check blocked - traffic hasn't been allowed", 0, 0, 0);
+        IMS_TRACE_D("Check : blocked - traffic hasn't been allowed", 0, 0, 0);
         return CheckResult::BLOCKED;
     }
 

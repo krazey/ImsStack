@@ -42,9 +42,10 @@ public:
      * @param bEmergency
      * @param ePeerType
      * @param bWifi
+     * @param bUssi
      */
     virtual CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi, IN CallKey nCallKey) = 0;
+            IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey) = 0;
 };
 
 class IMtcRadioCheckerListener

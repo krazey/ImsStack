@@ -77,7 +77,7 @@ public:
 
     void SetTrafficCheckerListener(IN IMtcRadioCheckerListener* pListener) override;
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi, IN CallKey nCallKey) override;
+            IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey) override;
 
     // IMtcAosStateListener
     inline void OnAosStateChanged(IN IMtcService&, IN MtcAosState, IN IMS_UINT32) override {}
