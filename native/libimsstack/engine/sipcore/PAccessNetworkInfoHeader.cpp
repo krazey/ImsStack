@@ -125,7 +125,6 @@ PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
 
     if (piConnection->IsePDGEnabled())
     {
-        SetPrivateHeaderForPlci(nSlotId, piConnection, piSipMsg);
         SetCniHeader(nSlotId, piConnection, pSipProfile, piSipMsg);
     }
 }
@@ -343,69 +342,6 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(
     ////////
     // P-Last-Access-Network-Info header -- ends
     ////////
-}
-
-PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlci(
-        IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg)
-{
-    if (piConnection == IMS_NULL)
-    {
-        return;
-    }
-
-    const SipMethod& objMethod = piSipMsg->GetMethod();
-
-    if (objMethod.Equals(SipMethod::ACK) || objMethod.Equals(SipMethod::CANCEL))
-    {
-        return;
-    }
-
-    const AString strPlciHeaderName("P-Last-Cell-ID");
-    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
-    const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strPlciHeaderName);
-
-    if (pHeader == IMS_NULL)
-    {
-        return;
-    }
-
-    AString strLastKnownPanInfo;
-    AString strTimestamp;
-    AString strCellInfoAge;
-    AccessNetworkInfo objAnInfo;
-
-    piConnection->GetLastAccessNetworkInfo(objAnInfo, strTimestamp, strCellInfoAge);
-
-    if (!FormHeader(nSlotId, objAnInfo, strLastKnownPanInfo))
-    {
-        IMS_TRACE_D("PLCI: FormHeader fails", 0, 0, 0);
-        return;
-    }
-
-    if (strLastKnownPanInfo.GetLength() == 0)
-    {
-        IMS_TRACE_D("PLCI: length 0", 0, 0, 0);
-        return;
-    }
-
-    // Timestamp for last known cell identity
-    strLastKnownPanInfo.Append(';');
-    strLastKnownPanInfo.Append('\"');
-    strLastKnownPanInfo.Append(strTimestamp);
-    strLastKnownPanInfo.Append('\"');
-
-    // Timestamp for IMS-REG over WiFi (ePDG)
-    if (pHeader->strParameter.GetLength() > 0)
-    {
-        strLastKnownPanInfo.Append(';');
-        strLastKnownPanInfo.Append(pHeader->strParameter);
-    }
-
-    if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strLastKnownPanInfo, strPlciHeaderName) !=
-            IMS_SUCCESS)
-    {
-        IMS_TRACE_E(0, "Setting %s header failed", strPlciHeaderName.GetStr(), 0, 0);
-    }
 }
 
 PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId,

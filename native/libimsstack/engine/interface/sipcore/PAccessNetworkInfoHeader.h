@@ -87,8 +87,6 @@ private:
     static void AddCountryParameter(IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader);
     static void SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
             IN_OUT ISipMessage*& piSipMsg);
-    static void SetPrivateHeaderForPlci(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
-            IN_OUT ISipMessage*& piSipMsg);
     static void SetCniHeader(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
             IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg);
     static IMS_BOOL IsAccessNetworkTypeWiFi(IN const AccessNetworkInfo& objAni);

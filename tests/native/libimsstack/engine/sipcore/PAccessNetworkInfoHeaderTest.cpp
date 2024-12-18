@@ -262,19 +262,12 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
 
     m_pNetworkService->SetConnection(&m_objNetworkConnection);
 
-    SipRtConfig::Header objPlciHeader;
-
-    objPlciHeader.strName = "P-Last-Cell-ID";
-    objPlciHeader.strParameter = "\\2023-03-05T13%3A15%3A30Z\\";
-
-    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(IMS_SLOT_0);
-    piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlciHeader);
-
     SipRtConfig::Header objCniHeader;
 
     objCniHeader.strName = SipHeaderName::CELLULAR_NETWORK_INFO;
     objCniHeader.strParameter = "\\2023-03-05T13%3A15%3A32Z\\";
 
+    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(IMS_SLOT_0);
     piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objCniHeader);
 
     SipRtConfig::Header objPlaniHeader;
@@ -289,7 +282,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
             .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_pPhoneInfoService->GetMockNetworkWatcher(), GetNetworkType())
             .WillRepeatedly(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
-    EXPECT_CALL(objMockISipMessage, GetMethod()).Times(4);
+    EXPECT_CALL(objMockISipMessage, GetMethod()).Times(3);
     EXPECT_CALL(m_objNetworkConnection, GetExtraInfo(_, _)).Times(AnyNumber());
 
     ON_CALL(objMockISipMessage, GetMethod()).WillByDefault(ReturnRef(m_objMethod));
@@ -303,9 +296,9 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
                     }));
 
     EXPECT_CALL(m_objNetworkConnection, GetAccessNetworkInfo(_)).Times(1);
-    EXPECT_CALL(m_objNetworkConnection, GetLastAccessNetworkInfo(_, _, _)).Times(3);
+    EXPECT_CALL(m_objNetworkConnection, GetLastAccessNetworkInfo(_, _, _)).Times(2);
     EXPECT_CALL(objMockISipMessage, SetHeader(ISipHeader::UNKNOWN, _, _))
-            .Times(3)
+            .Times(2)
             .WillRepeatedly(Return(IMS_SUCCESS));
     EXPECT_CALL(objMockISipMessage, SetHeader(ISipHeader::P_ACCESS_NETWORK_INFO, _, _))
             .Times(1)
@@ -315,7 +308,6 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
 
     PAccessNetworkInfoHeader::SetHeader(IMS_SLOT_0, objIpAddress, m_pSipProfile.Get(), piSipMsg);
 
-    piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlciHeader);
     piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objCniHeader);
     piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlaniHeader);
 }
