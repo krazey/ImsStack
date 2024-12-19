@@ -293,6 +293,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
         {
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         }
+        StartTimer(TIMER_MT_PRACK_WAIT);
     }
     else
     {

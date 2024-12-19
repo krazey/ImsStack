@@ -327,6 +327,9 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRespondToPrackAndSendsIncom
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT));
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
@@ -344,6 +347,7 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRespondToPrackAndSendsIncom
     EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionPrackReceived(&objISession));
 
     // RespondToPrack fails
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT));
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
@@ -368,6 +372,9 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRejectIncomingIfOfferAnswer
     const SipMethod objMethod = SipMethod::PRACK;
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT));
     const CallReasonInfo objReason(CODE_SIP_NOT_ACCEPTABLE);
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
     EXPECT_CALL(objMtcSession, Reject(objReason));
@@ -415,6 +422,16 @@ TEST_F(IncomingStateTest, OnTimerExpiredDoesNothing)
 
     EXPECT_EQ(CallStateName::INCOMING,
             pIncomingState->OnTimerExpired(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+}
+
+TEST_F(IncomingStateTest, OnTimerExpiredByPrackWaitRejectsCall)
+{
+    EXPECT_CALL(objMtcSession,
+            Reject(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK)))
+            .Times(1);
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIncomingState->OnTimerExpired(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT));
 }
 
 TEST_F(IncomingStateTest, OnTimerExpiredInvokesSendEarlyUpdate)

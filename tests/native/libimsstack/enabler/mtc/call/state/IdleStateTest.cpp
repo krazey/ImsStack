@@ -1161,6 +1161,8 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSendProvisionalResponseFailed)
     ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE, IMS_TRUE))
             .WillByDefault(Return(IMS_FAILURE));
 
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT, _)).Times(0);
+
     const CallReasonInfo objReasonInfo(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
@@ -1186,6 +1188,12 @@ TEST_F(IdleStateTest, OnAttachedTransitsIncomingState)
             .WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_180));
 
+    IMS_SINT32 nPrackWaitTimer = 10000;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_PRACK_WAIT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nPrackWaitTimer));
+
+    EXPECT_CALL(
+            objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MT_PRACK_WAIT, nPrackWaitTimer));
     EXPECT_EQ(CallStateName::INCOMING, pIdleState->OnAttached());
 }
 

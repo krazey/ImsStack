@@ -157,6 +157,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
 PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionPrackReceived", 0, 0, 0);
+    StopTimer(TIMER_MT_PRACK_WAIT);
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession();
@@ -212,6 +213,9 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
+        case TIMER_MT_PRACK_WAIT:
+            return RejectIncomingAndToTerminating(
+                    CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK));
         case TIMER_RETRY_UPDATE:
         {
             IMtcSession* pSession = m_objContext.GetSession();
