@@ -498,6 +498,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "sub_err_code_for_stopping_by_expiration_time_int_array";
         public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
                 KEY_PREFIX + "supported_roaming_rats_int_array";
+        public static final String KEY_TEST_MODE_INT_ARRAY =
+                KEY_PREFIX + "test_mode_int_array";
         public static final String KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY =
                 KEY_PREFIX + "unavailable_features_in_limited_reg_int_array";
         // Bundle {

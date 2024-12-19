@@ -455,6 +455,8 @@
     </int-array>
     <int-array name="ims.supported_roaming_rats_int_array" num="0">
     </int-array>
+    <int-array name="ims.test_mode_int_array" num="0">
+    </int-array>
     <int-array name="ims.unavailable_features_in_limited_reg_int_array" num="0">
     </int-array>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
