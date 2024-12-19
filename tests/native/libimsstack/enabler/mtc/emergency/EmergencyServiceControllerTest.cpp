@@ -203,6 +203,64 @@ TEST_F(EmergencyServiceControllerTest,
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
 }
 
+TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedDoesNothingIfNormalServiceIsNull)
+{
+    ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL)).WillByDefault(Return(nullptr));
+
+    pController->Start();
+
+    const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(
+                    EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
+            .Times(0);
+    EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
+
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+}
+
+TEST_F(EmergencyServiceControllerTest,
+        StartAndAosDisconnectedNotifiesUnavailableIfNormalServiceIsNotActive)
+{
+    pController->Start();
+
+    const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsActive()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(
+                    EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
+            .Times(1);
+    EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
+
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+}
+
+TEST_F(EmergencyServiceControllerTest,
+        StartAndAosDisconnectedNotifiesUnavailableIfNormalServiceRegisteredOnWlan)
+{
+    pController->Start();
+
+    const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsActive()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsWlanIpCanType()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(
+                    EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
+            .Times(1);
+    EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
+
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+}
+
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesUnavailable)
 {
     pController->Start();
@@ -210,6 +268,8 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesU
     const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsActive()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetRoamingState())
             .WillByDefault(Return(1));
     EXPECT_CALL(objJniMtcServiceThread,
@@ -228,6 +288,8 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedRetriesOverImsPdnW
     const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsActive()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objNormalService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
     // EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(1); - By AsyncRunner
 

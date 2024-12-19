@@ -293,6 +293,12 @@ IMS_BOOL EmergencyServiceController::IsRetryOverImsPdnRequired(IN IMS_SINT32 eAo
         return IMS_FALSE;
     }
 
+    IMtcService* pService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    if (!pService || !pService->IsActive() || pService->IsWlanIpCanType())
+    {
+        return IMS_FALSE;
+    }
+
     INetworkWatcher* pNetworkWatcher =
             PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
     return pNetworkWatcher->GetRoamingState() == 0;
