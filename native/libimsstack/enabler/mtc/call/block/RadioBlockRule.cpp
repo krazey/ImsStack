@@ -34,14 +34,14 @@ RadioBlockRule::RadioBlockRule(IN IMtcCallContext& objContext, IN CallType eCall
 
 PUBLIC VIRTUAL RadioBlockRule::~RadioBlockRule()
 {
-    m_objContext.GetRadioChecker().SetTrafficCheckerListener(IMS_NULL);
+    m_objContext.GetRadioChecker().RemoveTrafficCheckerListener(*this);
 }
 
 PUBLIC VIRTUAL RadioBlockRule::Result RadioBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
     m_piMtcBlockRuleCheckListener = &objListener;
-    m_objContext.GetRadioChecker().SetTrafficCheckerListener(this);
+    m_objContext.GetRadioChecker().AddTrafficCheckerListener(*this);
 
     CheckResult eCheckResult = m_objContext.GetRadioChecker().Check(m_eCallType,
             m_objContext.GetCallInfo().IsEmergency(), m_objContext.GetCallInfo().ePeerType,

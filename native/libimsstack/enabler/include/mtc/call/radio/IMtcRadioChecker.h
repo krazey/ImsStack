@@ -23,26 +23,39 @@
 class IMtcRadioCheckerListener;
 enum class CheckResult;
 
+/**
+ * The {@code IMtcRadioChecker} interface defines a listener for checking the radio traffic.
+ */
 class IMtcRadioChecker
 {
 public:
     virtual ~IMtcRadioChecker() = default;
 
     /**
-     * @brief Sets
+     * Adds a traffic checker listener.
      *
-     * @param pListener
+     * @param objListener the listener to add
      */
-    virtual void SetTrafficCheckerListener(IN IMtcRadioCheckerListener* pListener) = 0;
+    virtual void AddTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) = 0;
 
     /**
-     * @brief Starts
+     * Removes a traffic checker listener.
      *
-     * @param eCallType
-     * @param bEmergency
-     * @param ePeerType
-     * @param bWifi
-     * @param bUssi
+     * @param pListener the listener to remove
+     */
+    virtual void RemoveTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) = 0;
+
+    /**
+     * Checks the radio traffic.
+     *
+     * @param eCallType the call type
+     * @param bEmergency {@code IMS_TRUE} if the call is an emergency call,
+     *                   {@code IMS_FALSE} otherwise
+     * @param ePeerType the peer type
+     * @param bWifi {@code IMS_TRUE} if the call is over Wi-Fi, {@code IMS_FALSE} otherwise
+     * @param bUssi {@code IMS_TRUE} if the call is a USSI call, {@code IMS_FALSE} otherwise
+     * @param nCallKey the call key
+     * @return the check result. Refer {@code CheckResult}
      */
     virtual CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey) = 0;

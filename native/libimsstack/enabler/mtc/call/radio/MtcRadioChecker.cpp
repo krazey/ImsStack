@@ -38,7 +38,7 @@ MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext) :
         m_piNetworkWatcher(PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
                 m_objContext.GetSlotId())),
         m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
-        m_piMtcRadioCheckerListener(IMS_NULL),
+        m_objMtcRadioCheckerListeners(ImsList<IMtcRadioCheckerListener*>()),
         m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>())
 {
     IMS_TRACE_D("+MtcRadioChecker", 0, 0, 0);
@@ -56,12 +56,29 @@ PUBLIC void MtcRadioChecker::Init()
     m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddListener(this);
     m_objContext.GetServiceByType(ServiceType::NORMAL)->AddAosStateListener(this);
     m_objContext.GetServiceByType(ServiceType::EMERGENCY)->AddAosStateListener(this);
+    m_objMtcRadioCheckerListeners.Clear();
 }
 
-PUBLIC VIRTUAL void MtcRadioChecker::SetTrafficCheckerListener(
-        IN IMtcRadioCheckerListener* pListener)
+PUBLIC VIRTUAL void MtcRadioChecker::AddTrafficCheckerListener(
+        IN IMtcRadioCheckerListener& objListener)
 {
-    m_piMtcRadioCheckerListener = pListener;
+    if (m_objMtcRadioCheckerListeners.Contains(&objListener))
+    {
+        return;
+    }
+    m_objMtcRadioCheckerListeners.Append(&objListener);
+}
+
+PUBLIC VIRTUAL void MtcRadioChecker::RemoveTrafficCheckerListener(
+        IN IMtcRadioCheckerListener& objListener)
+{
+    for (IMS_UINT32 i = 0; i < m_objMtcRadioCheckerListeners.GetSize(); i++)
+    {
+        if (m_objMtcRadioCheckerListeners.GetAt(i) == &objListener)
+        {
+            m_objMtcRadioCheckerListeners.RemoveAt(i);
+        }
+    }
 }
 
 PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_BOOL bEmergency,
@@ -140,9 +157,10 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficT
         case IImsRadio::REASON_ACCESS_DENIED:
         case IImsRadio::REASON_INTERNAL_ERROR:
         case IImsRadio::REASON_RRC_REJECT:
-            if (m_piMtcRadioCheckerListener != IMS_NULL)
+            for (IMS_UINT32 i = 0; i < m_objMtcRadioCheckerListeners.GetSize(); i++)
             {
-                m_piMtcRadioCheckerListener->OnConnectionFailed(nFailureReason, nWaitTimeMillis);
+                m_objMtcRadioCheckerListeners.GetAt(i)->OnConnectionFailed(
+                        nFailureReason, nWaitTimeMillis);
             }
             break;
 
@@ -153,11 +171,11 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficT
         case IImsRadio::REASON_NO_SERVICE:
         case IImsRadio::REASON_PDN_NOT_AVAILABLE:
         case IImsRadio::REASON_RF_BUSY:
-            if (m_piMtcRadioCheckerListener != IMS_NULL)
+            // Calls will be blocked in these cases (e.g. message cannot be sent),
+            // so they could be handled as success here.
+            for (IMS_UINT32 i = 0; i < m_objMtcRadioCheckerListeners.GetSize(); i++)
             {
-                // Calls will be blocked in these cases (e.g. message cannot be sent),
-                // so they could be handled as success here.
-                m_piMtcRadioCheckerListener->OnConnectionSetupPrepared();
+                m_objMtcRadioCheckerListeners.GetAt(i)->OnConnectionSetupPrepared();
             }
             break;
     }
@@ -167,9 +185,9 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
         IN TrafficType eTrafficType, IN CallDirection /* eCallDirection */)
 {
     IMS_TRACE_D("OnConnectionSetupPrepared TrafficType[%d]", eTrafficType, 0, 0);
-    if (m_piMtcRadioCheckerListener != IMS_NULL)
+    for (IMS_UINT32 i = 0; i < m_objMtcRadioCheckerListeners.GetSize(); i++)
     {
-        m_piMtcRadioCheckerListener->OnConnectionSetupPrepared();
+        m_objMtcRadioCheckerListeners.GetAt(i)->OnConnectionSetupPrepared();
     }
 }
 

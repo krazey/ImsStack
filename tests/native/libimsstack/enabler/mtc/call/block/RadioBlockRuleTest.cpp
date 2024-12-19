@@ -26,6 +26,7 @@
 #include <gmock/gmock.h>
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using Result = IMtcBlockRule::Result;
@@ -73,7 +74,8 @@ TEST_F(RadioBlockRuleTest, Check)
 {
     CreateRadioBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, EmergencyType::NONE);
 
-    EXPECT_CALL(objMockIMtcRadioChecker, SetTrafficCheckerListener(_)).Times(4);
+    EXPECT_CALL(objMockIMtcRadioChecker, AddTrafficCheckerListener(Ref(*pRadioBlockRule))).Times(3);
+
     EXPECT_CALL(objMockIMtcRadioChecker,
             Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE, IMS_FALSE, CALL_KEY))
             .Times(3)
@@ -85,6 +87,9 @@ TEST_F(RadioBlockRuleTest, Check)
     EXPECT_EQ(Result(Result::Status::PENDING), pRadioBlockRule->Check(BlockRuleCheckListener));
     EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)),
             pRadioBlockRule->Check(BlockRuleCheckListener));
+
+    EXPECT_CALL(objMockIMtcRadioChecker, RemoveTrafficCheckerListener(Ref(*pRadioBlockRule)))
+            .Times(1);
 }
 
 TEST_F(RadioBlockRuleTest, OnConnectionSetupPreparedNotifiesUnblocked)

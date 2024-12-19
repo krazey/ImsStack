@@ -28,8 +28,10 @@ class MockIMtcRadioChecker : public IMtcRadioChecker
 public:
     ~MockIMtcRadioChecker() = default;
 
-    MOCK_METHOD(
-            void, SetTrafficCheckerListener, (IN IMtcRadioCheckerListener * pListener), (override));
+    MOCK_METHOD(void, AddTrafficCheckerListener, (IN IMtcRadioCheckerListener & objListener),
+            (override));
+    MOCK_METHOD(void, RemoveTrafficCheckerListener, (IN IMtcRadioCheckerListener & objListener),
+            (override));
     MOCK_METHOD(CheckResult, Check,
             (IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
                     IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey),

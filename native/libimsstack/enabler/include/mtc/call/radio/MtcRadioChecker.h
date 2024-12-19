@@ -75,7 +75,8 @@ public:
 
     void Init();
 
-    void SetTrafficCheckerListener(IN IMtcRadioCheckerListener* pListener) override;
+    void AddTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) override;
+    void RemoveTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) override;
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey) override;
 
@@ -119,7 +120,7 @@ private:
     IMtcContext& m_objContext;
     INetworkWatcher* m_piNetworkWatcher;
     IImsRadio* m_piImsRadio;
-    IMtcRadioCheckerListener* m_piMtcRadioCheckerListener;
+    ImsList<IMtcRadioCheckerListener*> m_objMtcRadioCheckerListeners;
     ImsList<MtcTrafficInfo*> m_objMtcTrafficInfos;
 };
 
