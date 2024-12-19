@@ -33,6 +33,8 @@ using ::testing::ReturnRef;
 
 const AString CONTACT_FULL_MEDIA_TAGS(
         "<sip:+1234@help.me>;audio;video;text;+sip.instance=\"<urn:gsma:imei:0-0-0>\"");
+const AString CONTACT_SOS_PARAMETER(
+        "<sip:+1234@help.me;sos>;audio;+sip.instance=\"<urn:gsma:imei:0-0-0>\"");
 const IMS_SINT32 MESSAGE_ANY = 0;
 
 // AString
@@ -47,28 +49,29 @@ public:
     MockIMtcCallContext objContext;
     MockISession objISession;
     MockIMtcSession objMtcSession;
-    MockMtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy objConfiguration;
     MtcMessageMediator* pMessageMediator;
     MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationProxy = new MockMtcConfigurationProxy();
-
-        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfiguration));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
 
         pMessageMediator = new MtcMessageMediator(objContext);
+
+        ON_CALL(objConfiguration,
+                GetBoolean(ConfigVt::
+                                KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
+                .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
+                .WillByDefault(Return(IMS_TRUE));
     }
 
-    virtual void TearDown() override
-    {
-        delete pConfigurationProxy;
-        delete pMessageMediator;
-    }
+    virtual void TearDown() override { delete pMessageMediator; }
 
     MockIMedia* CreateMedia(IMS_SINT32 eSdpMediaType)
     {
@@ -88,10 +91,12 @@ protected:
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfNoContactHeader)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfiguration,
             GetBoolean(ConfigVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
 
     MockISipMessage objMessage;
     ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
@@ -106,11 +111,6 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfNoContactHeader)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfConfigIsNotSet)
 {
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVt::
-                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
-
     MockISipMessage objMessage;
     ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
             .WillByDefault(Return(CONTACT_FULL_MEDIA_TAGS));
@@ -124,7 +124,7 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfConfigIsNotSet)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtSdp)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfiguration,
             GetBoolean(ConfigVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -147,7 +147,7 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtSdp)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesVideoFeatureIfRttSdp)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfiguration,
             GetBoolean(ConfigVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -171,7 +171,7 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesVideoFeatureIfRttSdp)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfCallTypeHasChangedToVtFromRtt)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfiguration,
             GetBoolean(ConfigVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -200,7 +200,7 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfCallTypeHasChang
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtCallType)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfiguration,
             GetBoolean(ConfigVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -223,7 +223,7 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtCallType)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageSetOriginalContactIfUnknownCallType)
 {
-    ON_CALL(*pConfigurationProxy,
+    ON_CALL(objConfiguration,
             GetBoolean(ConfigVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -240,6 +240,28 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageSetOriginalContactIfUnknownCallType)
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::UNKNOWN));
 
     EXPECT_CALL(objMessage, SetHeader(ISipHeader::CONTACT_NORMAL, CONTACT_FULL_MEDIA_TAGS, _))
+            .Times(1);
+
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesSosParameter)
+{
+    ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(Return(CONTACT_SOS_PARAMETER));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::UNKNOWN));
+
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:+1234@help.me>;audio;+sip.instance=\"<urn:gsma:imei:0-0-0>\""),
+                    _))
             .Times(1);
 
     pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);

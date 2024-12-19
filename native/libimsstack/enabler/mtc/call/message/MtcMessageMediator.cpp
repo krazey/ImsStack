@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "ICoreService.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsTrace.h"
@@ -44,56 +45,70 @@ MtcMessageMediator::~MtcMessageMediator() {}
 PUBLIC IMS_RESULT MtcMessageMediator::MessageMediator_AdjustMessage(
         IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 /* nMessage */)
 {
-    if (m_strOriginalContactHeader.GetLength() <= 0)
+    if (piSipMessage->IsHeaderPresent(ISipHeader::CONTACT_NORMAL))
     {
-        m_strOriginalContactHeader = piSipMessage->GetHeader(ISipHeader::CONTACT_NORMAL);
-    }
-
-    if (piSipMessage->IsHeaderPresent(ISipHeader::CONTACT_NORMAL) &&
-            m_objContext.GetConfigurationProxy().GetBoolean(ConfigVt::
-                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
-    {
-        switch (GetCallTypeOfCurrentMessage())
-        {
-            case CallType::VT:
-                piSipMessage->SetHeader(ISipHeader::CONTACT_NORMAL,
-                        GetContactHeaderWithoutFeatureTag(MessageUtil::STR_TEXT));
-                break;
-            case CallType::RTT:
-                piSipMessage->SetHeader(ISipHeader::CONTACT_NORMAL,
-                        GetContactHeaderWithoutFeatureTag(MessageUtil::STR_VIDEO));
-                break;
-            default:
-                piSipMessage->SetHeader(ISipHeader::CONTACT_NORMAL, m_strOriginalContactHeader);
-                break;
-        }
+        MayAdjustContactHeader(piSipMessage);
     }
 
     return IMS_SUCCESS;
 }
 
 PRIVATE
-AString MtcMessageMediator::GetContactHeaderWithoutFeatureTag(IN const AString& strFeatureTag)
+void MtcMessageMediator::MayAdjustContactHeader(IN_OUT ISipMessage* pMessage)
 {
-    IMS_TRACE_D(
-            "GetContactHeaderWithoutFeatureTag : Feature tag[%s]", strFeatureTag.GetStr(), 0, 0);
-
-    ISipHeader* piHeader =
-            SipParsingHelper::CreateHeader(ISipHeader::CONTACT_NORMAL, m_strOriginalContactHeader);
-    if (!piHeader)
+    IMS_BOOL bSetVideoTextFeatureExclusively = m_objContext.GetConfigurationProxy().GetBoolean(
+            ConfigVt::
+                    KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL);
+    IMS_BOOL bAllowSosParam = m_objContext.GetConfigurationProxy().GetBoolean(
+            ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL);
+    if (bSetVideoTextFeatureExclusively == IMS_FALSE && bAllowSosParam == IMS_TRUE)
     {
-        return m_strOriginalContactHeader;
+        return;  // No need to adjust
     }
 
-    piHeader->RemoveParameter(strFeatureTag);
-    AString strModifiedHeader = piHeader->GetHeaderValue();
-    piHeader->Destroy();
+    ISipHeader* pContactHeader = SipParsingHelper::CreateHeader(
+            ISipHeader::CONTACT_NORMAL, pMessage->GetHeader(ISipHeader::CONTACT_NORMAL));
+    if (!pContactHeader)
+    {
+        return;
+    }
 
-    return strModifiedHeader;
+    if (bSetVideoTextFeatureExclusively)
+    {
+        SetVideoTextFeatureExclusively(pContactHeader);
+    }
+    if (!bAllowSosParam)
+    {
+        RemoveSosParameter(pContactHeader);
+    }
+
+    pMessage->SetHeader(ISipHeader::CONTACT_NORMAL, pContactHeader->ToStringWithoutName());
+    pContactHeader->Destroy();
 }
 
 PRIVATE
-CallType MtcMessageMediator::GetCallTypeOfCurrentMessage()
+void MtcMessageMediator::SetVideoTextFeatureExclusively(IN_OUT ISipHeader* pContactHeader)
+{
+    switch (GetCallType())
+    {
+        case CallType::VT:
+            return pContactHeader->RemoveParameter(MessageUtil::STR_TEXT);
+        case CallType::RTT:
+            return pContactHeader->RemoveParameter(MessageUtil::STR_VIDEO);
+        default:
+            return;
+    }
+}
+
+PRIVATE
+void MtcMessageMediator::RemoveSosParameter(IN_OUT ISipHeader* pContactHeader)
+{
+    SipAddress* pAddress = pContactHeader->GetSipAddress();
+    pAddress->RemoveParameter("sos");
+}
+
+PRIVATE
+CallType MtcMessageMediator::GetCallType()
 {
     // VZ_REQ_5GNRSAVOICEVIDEO_4105999311948863
     // The device shall treat a "downgraded video call" as a video call, ...
