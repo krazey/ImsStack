@@ -25,9 +25,8 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.uicc.IccUtils;
-
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -255,7 +254,7 @@ public class SmsRLStateMachine {
                 }
                 if (DBG) {
                     log("Encoded RPDU: "
-                                    + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu))
+                                    + ImsLog.hiddenString(ImsUtils.bytesToHexString(encodedPdu))
                                     + " Target Address = "
                                     + ImsLog.hiddenString(smsRLStateMachine.mPSISmsc)
                                     + " Dialled Number = "
@@ -406,7 +405,7 @@ public class SmsRLStateMachine {
                 }
                 if (DBG) {
                     log("onRPAckFromTL: Encoded RPDU = "
-                            + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu))
+                            + ImsLog.hiddenString(ImsUtils.bytesToHexString(encodedPdu))
                             + " dialled number = " + ImsLog.hiddenString(smsRLStateMachine
                                                     .mDestinationAddress)
                             + " PSI/SMSC = " + ImsLog.hiddenString(smsRLStateMachine.mPSISmsc));
@@ -440,7 +439,7 @@ public class SmsRLStateMachine {
                 }
                 if (DBG) {
                     log("onRPErrorFromTL: Encoded RPDU = "
-                            + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu))
+                            + ImsLog.hiddenString(ImsUtils.bytesToHexString(encodedPdu))
                             + " dialled number = "
                             + ImsLog.hiddenString(smsRLStateMachine.mDestinationAddress)
                             + " PSI/SMSC = " + ImsLog.hiddenString(smsRLStateMachine.mPSISmsc));

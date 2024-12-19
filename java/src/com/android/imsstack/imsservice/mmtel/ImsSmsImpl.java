@@ -20,6 +20,8 @@ import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
 import com.android.imsstack.util.ImsLog;
@@ -96,8 +98,9 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         }
         try {
             if (mScAddress == null) {
-                mScAddress = SmsManager.getSmsManagerForContextAndSubscriptionId(null,
-                                mCallContext.getSubId()).getSmscAddress();
+                SmsManagerProxy smp =
+                        AppContext.getInstance().getSystemServiceProxy(SmsManagerProxy.class);
+                mScAddress = smp.getSmscAddress();
             }
             log("SMMA smsc = " + mScAddress);
             result = mSmsTL.sendMemoryAvailabilityNotification(token, mScAddress);

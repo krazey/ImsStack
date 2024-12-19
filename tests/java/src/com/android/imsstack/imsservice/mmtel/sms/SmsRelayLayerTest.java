@@ -35,7 +35,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
-import com.android.internal.util.HexDump;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -70,18 +70,10 @@ public class SmsRelayLayerTest {
     private String mDestinationAddress = "6503907941";
     private int mStatusResultNA = 0;
     private static int sSuccessCause = 0;
-    private byte[] mTpdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
-    private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229"
+    private byte[] mTpdu = ImsUtils.hexStringToBytes("21110A81785634121000000666B2996C2603");
+    private byte[] mMtRpData = ImsUtils.hexStringToBytes("010107919130079229"
                                                         + "F0001221110A81785634121000000666"
                                                         + "B2996C2603");
-    private byte[] mMtRpData2 = HexDump.hexStringToByteArray("010207919130079229F00012"
-                                                                + "21110A81785634121000000666B299"
-                                                                + "6C2603");
-
-    //TPDU sent to framework(Smsc Address + mTpdu)
-    private byte[] mFrameworkPdu = HexDump.hexStringToByteArray("07919130079229F02111"
-                                                            + "0A81785634121000000666B2996C2603");
-    private byte[] mMoRpAck = HexDump.hexStringToByteArray("0201");
 
     @Before
     public void setUp() throws Exception {
@@ -305,7 +297,7 @@ public class SmsRelayLayerTest {
         String pduString = "0000021002020702A848D159E24006010008"
                 + "2300031010D0011410A48CBB366F418F465C"
                 + "7AF4EECE819E7E1C19000306220707183319";
-        byte[] pdu = HexDump.hexStringToByteArray(pduString);
+        byte[] pdu = ImsUtils.hexStringToBytes(pduString);
         mProxyListener.notifyIncomingMessage(SmsUtils.FORMAT_INT_3GPP2, pdu);
         int token = 0;
         try {

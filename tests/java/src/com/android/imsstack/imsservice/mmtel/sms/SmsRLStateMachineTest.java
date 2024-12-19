@@ -44,8 +44,8 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
-import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -70,18 +70,18 @@ public class SmsRLStateMachineTest {
     MtsController mMtsController;
     private Handler mHandler = null;
     int mMessageType = 2;
-    private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
-    private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
+    private byte[] mMtRpAck = ImsUtils.hexStringToBytes("0301");
+    private byte[] mMtRpError = ImsUtils.hexStringToBytes("0501016f");
     private String mDestinationAddress = "0987654321";
     private String mPsiSmsc = "+19037029920";
     private String mSmsc = "07912160130300F4";
     TestSmsRLStateMachine mSmsRLStateMachine;
     private SmsRLStateMachine.SmsRLState mCurrentState;
-    private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229"
+    private byte[] mMtRpData = ImsUtils.hexStringToBytes("010107919130079229"
                                                         + "F0001221110A81785634121000000666"
                                                         + "B2996C2603");
     private int mToken = 1;
-    private byte[] mTpdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private byte[] mTpdu = ImsUtils.hexStringToBytes("21110A81785634121000000666B2996C2603");
 
     private static Semaphore sSemaphore = new Semaphore(0);
 
