@@ -90,15 +90,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
      * Value: boolean type
      */
     private static final String EXTRA_CALL_CONTROLLED_BY_IMS = "call_controlled_by_ims";
-    public static final int CF_RTT = 0;
-    public static final int CF_TTY = 1;
-    public static final int CF_AUDIO_HOLD_WITH_INACTIVE = 2;
-    public static final int CF_VIDEO_HOLD_WITH_INACTIVE = 3;
-    public static final int CF_TEXT_HOLD_WITH_INACTIVE = 4;
-    public static final int CF_INCOMING_RESUME_EVENT = 5;
-    public static final int CF_ONE_WAY_VIDEO_LOCAL = 6;
-    public static final int CF_ONE_WAY_VIDEO_REMOTE = 7;
-    public static final int CF_CONF_USER_ANONYMOUS = 8;
+    public static final int CF_TTY = 0;
+    public static final int CF_AUDIO_HOLD_WITH_INACTIVE = 1;
+    public static final int CF_VIDEO_HOLD_WITH_INACTIVE = 2;
+    public static final int CF_TEXT_HOLD_WITH_INACTIVE = 3;
+    public static final int CF_INCOMING_RESUME_EVENT = 4;
+    public static final int CF_ONE_WAY_VIDEO_LOCAL = 5;
+    public static final int CF_ONE_WAY_VIDEO_REMOTE = 6;
+    public static final int CF_CONF_USER_ANONYMOUS = 7;
 
     private final Object mLock = new Object();
     private final ICallContext mCallContext;
@@ -1115,12 +1114,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void sendRttModifyRequest(ImsCallProfile toProfile) {
-        if (!isCallFeatureSupported(CF_RTT)) {
-            mCallback.invokeRttModifyResponseReceived(this,
-                    RttModifyStatus.SESSION_MODIFY_REQUEST_INVALID);
-            return;
-        }
-
         if (toProfile == null) {
             mCallback.invokeRttModifyResponseReceived(this,
                     RttModifyStatus.SESSION_MODIFY_REQUEST_INVALID);
@@ -1162,10 +1155,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void sendRttModifyResponse(boolean isRttOn) {
-        if (!isCallFeatureSupported(CF_RTT)) {
-            return;
-        }
-
         if (getState() != ImsCallSessionImplBase.State.RENEGOTIATING) {
             loge("sendRttModifyResponse :: Illegal state; callId=" + getCallId() +
                     ", state=" + ImsCallSessionImplBase.State.toString(getState()));
@@ -1187,8 +1176,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void sendRttMessage(String rttMessage) {
-        if (mCall == null || !isCallFeatureSupported(CF_RTT)) {
-            loge("sendRttMessage :: session is null or RTT is not supported");
+        if (mCall == null) {
+            loge("sendRttMessage :: session is null");
             return;
         }
         if (!mCallProfile.getMediaProfile().isRttCall()) {
@@ -1442,8 +1431,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private boolean getFeatureSupportedStatus(int feature) {
         int slotId = mCallContext.getSlotId();
         switch (feature) {
-            case CF_RTT:
-                return CallFeature.isRttSupported(slotId);
             case CF_TTY:
                 return CallFeature.isTtySupported(slotId);
             case CF_AUDIO_HOLD_WITH_INACTIVE:
@@ -2097,18 +2084,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void setRttGttInfo(MediaInfo mi, boolean isRttOn) {
-        boolean isRttSupported = isCallFeatureSupported(CF_RTT);
-        boolean isTtySupported = isCallFeatureSupported(CF_TTY);
-
-        if (isRttSupported && isTtySupported) {
-            if (isRttOn) {
-                setRttInfo(mi, isRttOn);
-            } else {
-                setGttInfo(mi);
-            }
-        } else if (isRttSupported) {
+        if (isRttOn) {
             setRttInfo(mi, isRttOn);
-        } else if (isTtySupported) {
+            return;
+        }
+
+        if (isCallFeatureSupported(CF_TTY)) {
             setGttInfo(mi);
         }
     }
@@ -2162,7 +2143,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void setRttInfo(MediaInfo mi, boolean isRttOn) {
-        if (!isCallFeatureSupported(CF_RTT) || mCall.isConference()) {
+        if (mCall.isConference()) {
             return;
         }
 
@@ -2219,10 +2200,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         // FEATURE_CALL_PULL
         String actualCallee = null;
-        boolean isRttOn = false;
-        if (isCallFeatureSupported(CF_RTT)) {
-            isRttOn = profile.getMediaProfile().isRttCall();
-        }
+        boolean isRttOn = profile.getMediaProfile().isRttCall();
 
         MediaInfo mi = ImsCallMediaUtils.createMediaInfoFromMediaProfile(profile.getMediaProfile());
 
@@ -2452,11 +2430,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private boolean isRttChanged(MediaInfo mi) {
-        if (isCallFeatureSupported(CF_RTT)) {
-            return (mCallProfile.getMediaProfile().isRttCall()
-                    != MtcCallUtils.isGttEnabled(mi.GTTMode));
-        }
-        return false;
+        return (mCallProfile.getMediaProfile().isRttCall()
+                != MtcCallUtils.isGttEnabled(mi.GTTMode));
     }
 
     private static void updateMediaProfile(
@@ -4135,20 +4110,18 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             // Result of RTT_MODIFY_REQUEST
-            if (isCallFeatureSupported(CF_RTT)) {
-                if (mCallDetails.is(CallDetails.RTT_TURNING_ON)) {
-                    mCallDetails.clear(CallDetails.RTT_TURNING_ON);
-                    log("onCallUpdateFailed :: RTT_TURNING_ON is cleared");
+            if (mCallDetails.is(CallDetails.RTT_TURNING_ON)) {
+                mCallDetails.clear(CallDetails.RTT_TURNING_ON);
+                log("onCallUpdateFailed :: RTT_TURNING_ON is cleared");
 
-                    mCallback.invokeRttModifyResponseReceived(ImsCallSessionImpl.this,
+                mCallback.invokeRttModifyResponseReceived(ImsCallSessionImpl.this,
                         RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL);
-                } else if (mCallDetails.is(CallDetails.RTT_TURNING_OFF)) {
-                    mCallDetails.clear(CallDetails.RTT_TURNING_OFF);
-                    log("onCallUpdateFailed :: RTT_TURNING_OFF is cleared");
+            } else if (mCallDetails.is(CallDetails.RTT_TURNING_OFF)) {
+                mCallDetails.clear(CallDetails.RTT_TURNING_OFF);
+                log("onCallUpdateFailed :: RTT_TURNING_OFF is cleared");
 
-                    mCallback.invokeRttModifyResponseReceived(ImsCallSessionImpl.this,
+                mCallback.invokeRttModifyResponseReceived(ImsCallSessionImpl.this,
                         RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL);
-                }
             }
 
             int oldState = getState();
@@ -4255,31 +4228,29 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             // FIXME: Consider the priority of RTT Upgrade vs. VT Upgrade
-            if (isCallFeatureSupported(CF_RTT)) {
-                if (MtcCallUtils.isGttEnabled(mediaInfo.GTTMode)
-                        && !MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode)) {
-                    log("onCallUpdateReceived :: RTT upgrade request");
-                    mCallback.invokeRttModifyRequestReceived(
-                            ImsCallSessionImpl.this, mProposedCallProfile);
-                    return;
-                } else if (!MtcCallUtils.isGttEnabled(mediaInfo.GTTMode) &&
-                        MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode)) {
-                    log("onCallUpdateReceived :: RTT downgrade request");
-                    postAndRunTask(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                logi("Voice call is automatically accepted (RTT)");
-                                sendRttModifyResponse(false);
-                                //FIXME: Need to Verify the Callprofile that is passed
-                                mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
-                            } catch (Throwable t) {
-                                loge("onCallUpdateReceived: " + t.toString());
-                            }
+            if (MtcCallUtils.isGttEnabled(mediaInfo.GTTMode)
+                    && !MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode)) {
+                log("onCallUpdateReceived :: RTT upgrade request");
+                mCallback.invokeRttModifyRequestReceived(
+                        ImsCallSessionImpl.this, mProposedCallProfile);
+                return;
+            } else if (!MtcCallUtils.isGttEnabled(mediaInfo.GTTMode)
+                    && MtcCallUtils.isGttEnabled(mCall.getMediaInfo().GTTMode)) {
+                log("onCallUpdateReceived :: RTT downgrade request");
+                postAndRunTask(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            logi("Voice call is automatically accepted (RTT)");
+                            sendRttModifyResponse(false);
+                            //FIXME: Need to Verify the Callprofile that is passed
+                            mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                        } catch (Throwable t) {
+                            loge("onCallUpdateReceived: " + t.toString());
                         }
-                    });
-                    return;
-                }
+                    }
+                });
+                return;
             }
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
@@ -4471,8 +4442,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         @Override
         public void onCallRttMessageReceived(MtcCall call, String data) {
-            if (!call.equals(mCall)
-                    || !isCallFeatureSupported(CF_RTT)) {
+            if (!call.equals(mCall)) {
                 return;
             }
 
@@ -4487,8 +4457,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         @Override
         public void onCallRttAudioIndication(MtcCall call,
                 boolean status) {
-            if (!call.equals(mCall)
-                    || !isCallFeatureSupported(CF_RTT)) {
+            if (!call.equals(mCall)) {
                 return;
             }
             if (!mCallProfile.getMediaProfile().isRttCall()) {
@@ -4719,10 +4688,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         private void onRttChanged(boolean isRttOn, boolean oldRttOn) {
-            if (!isCallFeatureSupported(CF_RTT)) {
-                return;
-            }
-
             log("onRttChanged :: isRttOn=" + isRttOn + "oldRttOn=" + oldRttOn);
 
             if (mCallDetails.is(CallDetails.RTT_TURNING_ON)) {

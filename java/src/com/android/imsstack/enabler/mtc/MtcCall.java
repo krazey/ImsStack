@@ -1323,10 +1323,8 @@ public class MtcCall extends Call implements ConferenceTracker {
         mAudioListener = new AudioSessionListener();
         mMediaSession.setAudioListener(mAudioListener);
 
-        if (CallFeature.isRttSupported(mContext.getSlotId())) {
-            mTextListener = new TextSessionListener();
-            mMediaSession.setTextListener(mTextListener);
-        }
+        mTextListener = new TextSessionListener();
+        mMediaSession.setTextListener(mTextListener);
     }
 
     protected MtcCall createAndSetMtcCallForConference(
