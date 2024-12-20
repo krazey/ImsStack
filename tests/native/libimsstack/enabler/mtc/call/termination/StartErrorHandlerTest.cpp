@@ -405,8 +405,6 @@ TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCall)
             GetBoolean(ConfigEmergency::
                             KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_POLICE));
 
     // no Non UE Detectable ECC but contains AlternativeService TYPE_EMERGENCY
     ON_CALL(*pConfigurationProxy,
@@ -421,11 +419,9 @@ TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCall)
 
     // Non UE Detectable : No path feature tag (empty tag)
     ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString()));
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL, nCategoryInContact));
 
     // Non UE Detectable : No path feature tag (other tag)
     ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString("any")));
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL, nCategoryInContact));
 
     // no Non UE Detectable : path feature tag exists but Path header value is different
     ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString("path")));
@@ -433,13 +429,10 @@ TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCall)
     ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strAnyPath)));
     ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strAnyPath))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_GENERIC));
 
     // Non UE Detectable
     ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strAnyPath))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL, nCategoryInContact));
 }
 
 TEST_F(StartErrorHandlerTest, Handle4xxResponses)

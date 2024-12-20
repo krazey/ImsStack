@@ -301,19 +301,26 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleNonUeDetectableEmergencyCall(
         IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleNonUeDetectableEmergencyCall", 0, 0, 0);
     IMS_SINT32 eSosType = m_objContext.GetMessageUtils().GetSosTypeFromServiceUrn(
             &objMessage, ISipHeader::CONTACT_NORMAL);
-    if (eSosType != EXTRA_CODE_EMERGENCYSERVICE_INVALID &&
-            IsNonUeDetectableEmergencyCall(objMessage))
+    if (eSosType == EXTRA_CODE_EMERGENCYSERVICE_INVALID)
     {
-        return CallReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL, eSosType);
+        return CallReasonInfo(CODE_NONE);
+    }
+
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(ConfigEmergency::
+            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
+    {
+        if (m_objContext.GetMessageUtils().GetHeaderValue(&objMessage, ISipHeader::
+                P_ASSERTED_IDENTITY) != GetPathHeader())
+        {
+            return CallReasonInfo(CODE_NONE);
+        }
     }
 
     if (IsAlternativeEmergencyService(objMessage))
     {
-        return CallReasonInfo(
-                CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
+        return CallReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL, eSosType);
     }
 
     return CallReasonInfo(CODE_NONE);
@@ -515,29 +522,6 @@ PRIVATE
 IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 {
     return piMessage == IMS_NULL;
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const
-{
-    // clang-format off
-    if (m_objContext.GetConfigurationProxy().GetBoolean(ConfigEmergency::
-            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
-    {
-        return IMS_TRUE;
-    }
-    // clang-format on
-    if (!IsAlternativeEmergencyService(objMessage))
-    {
-        return IMS_FALSE;
-    }
-    // Loose checking for some carriers don't use Path header during registration
-    AString strSupported = GetSupported();
-    if (strSupported.GetLength() <= 0 || !strSupported.Contains("path"))
-    {
-        return IMS_TRUE;
-    }
-    return m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader());
 }
 
 PRIVATE

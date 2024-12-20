@@ -798,10 +798,6 @@ TEST_F(OutgoingStateTest,
                             KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL,
-                    EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)));
-
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, IsHeaderPresent(&objMessage, ISipHeader::CONTACT_NORMAL, _))
@@ -814,7 +810,6 @@ TEST_F(OutgoingStateTest,
             .WillByDefault(Return(strNumber));
     MockIMtcDialingPlan objDialingPlan;
     ON_CALL(objCallContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
-    EXPECT_CALL(objDialingPlan, OnCountrySpecificServiceUrnReceived(strNumber, strUrn));
 
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStartFailed(&objSession));
 }

@@ -67,7 +67,6 @@ private:
     IMS_SINT32 GetDefaultExtraCode(IN const IMessage& objMessage) const;
 
     static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
-    IMS_BOOL IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const;
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL IsAlternativeEmergencyService(IN const IMessage& objMessage) const;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;
