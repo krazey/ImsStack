@@ -16,6 +16,7 @@
 -->
 <carrier_config>
     <!-- Ims General -->
+    <int name="ims.sip_device_id_type_int" value="1"/>
     <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="true"/>
     <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>

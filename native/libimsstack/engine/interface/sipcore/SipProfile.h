@@ -90,6 +90,7 @@ public:
      *
      * @return The type of device id(+sip.instance).\n
      *         #ISipConfig#DEVICE_ID_GSMA_IMEI\n
+     *         #ISipConfig#DEVICE_ID_GSMA_IMEISV\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_MD5\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_SHA1\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_NAMED_V3\n
@@ -241,6 +242,7 @@ public:
      *
      * @param nDeviceId The type of device id\n
      *                  #ISipConfig#DEVICE_ID_GSMA_IMEI\n
+     *                  #ISipConfig#DEVICE_ID_GSMA_IMEISV\n
      *                  #ISipConfig#DEVICE_ID_UUID_IMEI_MD5\n
      *                  #ISipConfig#DEVICE_ID_UUID_IMEI_SHA1\n
      *                  #ISipConfig#DEVICE_ID_UUID_IMEI_NAMED_V3\n

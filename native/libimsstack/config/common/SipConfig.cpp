@@ -172,7 +172,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
 
     m_nSipFeatureCaps = ReadSipFeatureCaps(piCc);
 
-    m_nDeviceId = DEVICE_ID_GSMA_IMEI;
+    m_nDeviceId = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_DEVICE_ID_TYPE_INT, DEVICE_ID_GSMA_IMEI);
 
     m_nTimerValue100Trying = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_100_TRYING_MILLIS_INT);
 

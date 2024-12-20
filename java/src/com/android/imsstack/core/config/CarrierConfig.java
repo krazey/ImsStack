@@ -317,6 +317,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "allow_sip_p_access_network_info_header_in_initial_register_bool";
         public static final String KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL =
                 KEY_PREFIX + "support_sip_session_id_header_bool";
+        public static final String KEY_SIP_DEVICE_ID_TYPE_INT =
+                KEY_PREFIX + "sip_device_id_type_int";
         public static final String KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY =
                 KEY_PREFIX + "pcscf_discovery_method_int_array";
         public static final String KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING =

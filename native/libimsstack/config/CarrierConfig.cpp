@@ -176,6 +176,8 @@ const IMS_CHAR
                 KEY_IMS_PREFIX "allow_sip_p_access_network_info_header_in_initial_register_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[] =
         KEY_IMS_PREFIX "support_sip_session_id_header_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_SIP_DEVICE_ID_TYPE_INT[] =
+        KEY_IMS_PREFIX "sip_device_id_type_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
         KEY_IMS_PREFIX "pcscf_discovery_method_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL[] =
