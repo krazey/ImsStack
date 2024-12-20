@@ -30,7 +30,7 @@
 
 __IMS_TRACE_TAG_IPL__;
 
-#define IMS_FD_SET ImsFdSet::TYPE_SELECT
+#define IMS_FD_SET ImsFdSet::TYPE_POLL
 
 class SocketFdManager
 {
