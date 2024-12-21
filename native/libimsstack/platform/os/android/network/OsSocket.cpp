@@ -2065,8 +2065,8 @@ PROTECTED VIRTUAL void OsSocket::NotifyClosed(IN IMS_SINT32 nErrorCode)
     SetCloseReason(CLOSE_REASON_REMOTE_ACTION);
     SetSocketConnected(IMS_FALSE);
 
-    // Remove all the events
-    DeselectEventEx(FD_READ | FD_WRITE | FD_CLOSE);
+    // Remove all events: READ/WRITE/CLOSE (common), TCP/TCP_C (PollFdSet)
+    DeselectEventEx(FD_READ | FD_WRITE | FD_CLOSE | FD_TCP | FD_TCP_C);
 
     IMS_TRACE_D("NotifyClosed - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
 
