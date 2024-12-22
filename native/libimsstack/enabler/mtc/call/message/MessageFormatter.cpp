@@ -540,11 +540,7 @@ void MessageFormatter::SetTipHeader()
 PRIVATE
 void MessageFormatter::SetPEarlyMediaHeader()
 {
-    if (m_objContext.GetCallInfo().bUssi)
-    {
-        return;
-    }
-
+    // GCF TC 8.40(Anritsu) requires to add P-Early-Media even in USSI case.
     m_objContext.GetMessageUtils().AddValueIfNotExists(
             m_piNextMessage, MessageUtil::STR_SUPPORTED, ISipHeader::P_EARLY_MEDIA);
 }

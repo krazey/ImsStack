@@ -717,10 +717,10 @@ TEST_F(MessageFormatterTest, SetTipHeader)
 
 TEST_F(MessageFormatterTest, SetPEarlyMediaHeader)
 {
-    objCallInfo.bUssi = IMS_TRUE;
-    pFormatter->FormStartMessage(CallType::VOIP);
-
-    objCallInfo.bUssi = IMS_FALSE;
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    const AString strSupported(MessageUtil::STR_SUPPORTED);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, strSupported, ISipHeader::P_EARLY_MEDIA, _));
     pFormatter->FormStartMessage(CallType::VOIP);
 }
 
