@@ -30,6 +30,7 @@
 #include "call/CallConnectionIdManager.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
+#include "call/RttAutoUpgrader.h"
 #include "conferencecall/ConferenceManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
@@ -73,6 +74,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objMtcRadioChecker(*this),
         m_pLastComeFirstServedHelper(nullptr),
         m_objCallConnectionIdManager(CallConnectionIdManager(*this)),
+        m_pRttAutoUpgrader(nullptr),
         m_bWifiTestMode(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
@@ -186,6 +188,22 @@ PUBLIC VIRTUAL ILastComeFirstServedHelper& MtcApp::GetLastComeFirstServedHelper(
     }
 
     return *m_pLastComeFirstServedHelper.get();
+}
+
+PUBLIC VIRTUAL void MtcApp::CreateRttAutoUpgrader()
+{
+    if (m_pRttAutoUpgrader == nullptr)
+    {
+        m_pRttAutoUpgrader = std::make_unique<RttAutoUpgrader>(*this);
+    }
+}
+
+PUBLIC VIRTUAL void MtcApp::DestroyRttAutoUpgrader()
+{
+    if (m_pRttAutoUpgrader)
+    {
+        m_pRttAutoUpgrader.reset();
+    }
 }
 
 PROTECTED VIRTUAL void MtcApp::CreateServices()

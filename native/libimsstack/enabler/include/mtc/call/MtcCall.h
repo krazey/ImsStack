@@ -252,6 +252,8 @@ public:
     {
         return m_objContext.GetCallConnectionIdManager();
     }
+    inline void CreateRttAutoUpgrader() override { m_objContext.CreateRttAutoUpgrader(); }
+    inline void DestroyRttAutoUpgrader() override { m_objContext.DestroyRttAutoUpgrader(); }
     inline IMS_BOOL IsWifiTestMode() override { return m_objContext.IsWifiTestMode(); }
     // end of IMtcContext
 

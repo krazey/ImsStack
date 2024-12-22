@@ -25,6 +25,7 @@
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/MtcPendingOperationHolder.h"
+#include "call/RttAutoUpgrader.h"
 #include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -82,6 +83,12 @@ PUBLIC VIRTUAL void EstablishedState::OnEnter()
     else
     {
         m_objContext.RunPendingOperationIfPossible();
+    }
+
+    if (RttAutoUpgrader::IsRequired(m_objContext.GetConfigurationProxy(),
+                m_objContext.GetCallInfo(), m_objContext.GetSession()))
+    {
+        m_objContext.CreateRttAutoUpgrader();
     }
 }
 
