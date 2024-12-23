@@ -556,7 +556,7 @@ void AosNetTracker::InitObject()
         }
     }
 
-    if (IsCnxTypeEqual(NetworkPolicy::APN_IMS))
+    if (IsCnxTypeEqual(NetworkPolicy::APN_IMS) || IsCnxTypeEqual(NetworkPolicy::APN_EMERGENCY))
     {
         m_piConnection->SetListener(this);
 
