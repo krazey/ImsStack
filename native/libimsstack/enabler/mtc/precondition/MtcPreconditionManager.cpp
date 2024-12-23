@@ -1068,7 +1068,7 @@ IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSess
 PRIVATE
 IMS_SINT32 MtcPreconditionManager::GetQosTime(IN QosTimerType eType) const
 {
-    LOCAL const IMS_SINT32 TIME_GUARD_AVAILABLE = 1000;
+    LOCAL const IMS_SINT32 TIME_GUARD_AVAILABLE = 10000;
     LOCAL const IMS_SINT32 TIME_GUARD_AFTER_LOST = 5000;
     LOCAL const IMS_SINT32 TIME_FORCE_AVAILABLE = 500;
 
