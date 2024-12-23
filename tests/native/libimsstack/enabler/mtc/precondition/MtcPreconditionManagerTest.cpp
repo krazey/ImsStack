@@ -1236,7 +1236,7 @@ TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnCallEstablishedIfLocalResourc
     SetUpNothingOnDefaultBearerSupported();
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
 
-    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 1000)).Times(1);
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 10000)).Times(1);
     pPreconditionManager->OnCallEstablished(&objISession);
 }
 
@@ -1256,7 +1256,7 @@ TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnCallModifiedIfLocalResourceIs
             .WillByDefault(Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
     SetUpSupportingPreconditionInLocal(CallType::UNKNOWN, IMS_TRUE);
 
-    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 1000)).Times(1);
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 10000)).Times(1);
     pPreconditionManager->OnCallModified(&objISession);
 }
 
@@ -1331,7 +1331,7 @@ TEST_F(MtcPreconditionManagerTest, OnQosStatusChangedIfStatusIsChangedToLostFrom
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 1000)).Times(0);
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 10000)).Times(0);
     EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_FALSE)).Times(1);
     pPreconditionManager->OnQosStatusChanged(&objISession, QosStatus::LOST, MEDIATYPE_VIDEO);
 }
@@ -1356,7 +1356,7 @@ TEST_F(MtcPreconditionManagerTest,
             .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AFTER_LOST, 5000)).Times(0);
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST)).Times(0);
-    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 1000)).Times(0);
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 10000)).Times(0);
     EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_FALSE)).Times(1);
     pPreconditionManager->OnQosStatusChanged(&objISession, QosStatus::LOST, MEDIATYPE_VIDEO);
 }
@@ -1408,7 +1408,7 @@ TEST_F(MtcPreconditionManagerTest,
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 1000)).Times(1);
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 10000)).Times(1);
     EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(1);
     EXPECT_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .Times(1)
