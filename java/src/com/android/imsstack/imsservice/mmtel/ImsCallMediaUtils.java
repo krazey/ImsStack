@@ -21,7 +21,6 @@ import android.telecom.VideoProfile;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
-import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -494,9 +493,7 @@ public class ImsCallMediaUtils {
 
         profile.getMediaProfile().copyFrom(new ImsStreamMediaProfile(audioQuality, audioDirection,
                 videoQuality, videoDirection, rttMode));
-        if (CallFeature.isRttSupported(context.getSlotId())) {
-            updateCallProfileFromMediaInfoForRtt(profile, mi);
-        }
+        updateCallProfileFromMediaInfoForRtt(profile, mi);
     }
 
     public static void updateCallProfileFromMediaInfoForRtt(ImsCallProfile profile,

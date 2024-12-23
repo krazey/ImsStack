@@ -77,11 +77,6 @@ public final class CallFeature {
                 .getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, false);
     }
 
-    public static boolean isRttSupported(int slotId) {
-        return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false);
-    }
-
     public static boolean isVideoDirectionInactiveOnVideoCallHold(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
                 .getBoolean(CarrierConfig.ImsVt.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);

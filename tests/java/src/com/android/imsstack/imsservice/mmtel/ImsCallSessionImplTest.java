@@ -230,7 +230,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallProfile = new ImsCallProfile();
         mImsCallProfile.getMediaProfile().setRttMode(1);
         mImsCallSession = createImsCallSession("2");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, false);
         mImsCallSession.start(null, mImsCallProfile);
         verify(mMockMtcCall, times(1)).start(anyInt(), anyObject(), anyObject(),
@@ -239,7 +238,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         //verify setGttInfo
         mImsCallProfile.getMediaProfile().setRttMode(0);
         mImsCallSession = createImsCallSession("3");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, false);
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, true);
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
         mImsCallSession.start(null, mImsCallProfile);
@@ -669,7 +667,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, times(1)).invokeRttModifyResponseReceived(any(
                 ImsCallSessionImplBase.class), eq(RttModifyStatus.SESSION_MODIFY_REQUEST_INVALID));
 
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.sendRttModifyRequest(toProfile);
         verify(mMockImsCallSessionCallback, times(2)).invokeRttModifyResponseReceived(any(
                 ImsCallSessionImplBase.class), eq(RttModifyStatus.SESSION_MODIFY_REQUEST_INVALID));
@@ -692,7 +689,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         mImsCallProfile.updateMediaProfile(toProfile);
         mImsCallSession = createImsCallSession("2");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHED);
         mImsCallSession.sendRttModifyRequest(toProfile);
         verify(mMockImsCallSessionCallback, times(1)).invokeRttModifyResponseReceived(any(
@@ -700,7 +696,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         mImsCallProfile = new ImsCallProfile();
         mImsCallSession = createImsCallSession("3");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.setState(ImsCallSessionImplBase.State.ESTABLISHED);
         mImsCallSession.sendRttModifyRequest(toProfile);
         assertTrue(mCallDetails.is(mCallDetails.RTT_TURNING_ON));
@@ -711,7 +706,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testSendRttModifyResponse() {
         mImsCallSession.sendRttModifyResponse(true);
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.sendRttModifyResponse(true);
         verify(mMockMtcCall, never()).accept(anyInt(), any(MediaInfo.class));
 
@@ -724,7 +718,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testSendRttMessage() {
         mImsCallSession.sendRttMessage("Hello");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.sendRttMessage("Hello");
         verify(mMockMtcCall, never()).sendRttMessage(eq("Hello"));
 
@@ -737,7 +730,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, new Bundle(), imsStreamMediaProfile);
         mImsCallSession = createImsCallSession("2");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.sendRttMessage("Hello");
         verify(mMockMtcCall).sendRttMessage(eq("Hello"));
     }
@@ -1096,7 +1088,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, never()).invokeHeld(any(ImsCallSessionImplBase.class),
                 any(ImsCallProfile.class));
 
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mMockMediaInfo.GTTMode = ImsStreamMediaProfile.RTT_MODE_FULL;
         mImsCallSession.setConferenceProxy(null);
         mImsCallSession.getCallListenerProxy().onCallHeld(mMockMtcCall, mMockCallInfo,
@@ -1373,7 +1364,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, never()).invokeRttMessageReceived(
                 any(ImsCallSessionImplBase.class), eq("123"));
 
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.getCallListenerProxy().onCallRttMessageReceived(mMockMtcCall, "123");
         verify(mMockImsCallSessionCallback, never()).invokeRttMessageReceived(
                 any(ImsCallSessionImplBase.class), eq("123"));
@@ -1384,7 +1374,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, new Bundle(), mediaProfile);
         mImsCallSession = createImsCallSession("1");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.getCallListenerProxy().onCallRttMessageReceived(mMockMtcCall, "123");
         verify(mMockImsCallSessionCallback).invokeRttMessageReceived(
                 any(ImsCallSessionImplBase.class), eq("123"));
@@ -1396,7 +1385,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         verify(mMockImsCallSessionCallback, never()).invokeRttAudioIndicatorChanged(
                 any(ImsCallSessionImplBase.class), any(ImsStreamMediaProfile.class));
 
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.getCallListenerProxy().onCallRttAudioIndication(mMockMtcCall, true);
         verify(mMockImsCallSessionCallback, never()).invokeRttAudioIndicatorChanged(
                 any(ImsCallSessionImplBase.class), any(ImsStreamMediaProfile.class));
@@ -1407,7 +1395,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, new Bundle(), mediaProfile);
         mImsCallSession = createImsCallSession("1");
-        mCallFeaturemap.put(ImsCallSessionImpl.CF_RTT, true);
         mImsCallSession.getCallListenerProxy().onCallRttAudioIndication(mMockMtcCall, true);
         verify(mMockImsCallSessionCallback).invokeRttAudioIndicatorChanged(
                 any(ImsCallSessionImplBase.class), any(ImsStreamMediaProfile.class));

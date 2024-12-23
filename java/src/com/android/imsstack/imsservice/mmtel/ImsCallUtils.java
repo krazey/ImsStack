@@ -200,9 +200,7 @@ public class ImsCallUtils {
             profile.setCallRestrictCause(ImsCallProfile.CALL_RESTRICT_CAUSE_HD);
         }
 
-        if (CallFeature.isRttSupported(context.getSlotId())) {
-            profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, ci.rttCapable);
-        }
+        profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, ci.rttCapable);
 
         if (profile.getMediaProfile().getVideoDirection()
                 == ImsStreamMediaProfile.DIRECTION_INACTIVE) {
@@ -783,10 +781,7 @@ public class ImsCallUtils {
                 MtcCallInfo.isVideoCapable(ci));
         profile.setCallExtra(ImsCallProfile.EXTRA_USSD,
                 MtcCallInfo.isUssi(ci) ? "true" : "false");
-        if (CallFeature.isRttSupported(context.getSlotId())) {
-            profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL,
-                MtcCallInfo.isRttCapable(ci));
-        }
+        profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, MtcCallInfo.isRttCapable(ci));
 
         int callType = getProfileCallTypeFromCallInfo(ci);
 

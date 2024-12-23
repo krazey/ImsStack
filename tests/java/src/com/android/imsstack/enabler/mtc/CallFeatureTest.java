@@ -95,13 +95,6 @@ public class CallFeatureTest {
         assertFalse(CallFeature.isTtySupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false))
-                .thenReturn(true)
-                .thenReturn(false);
-        assertTrue(CallFeature.isRttSupported(SLOT_ID));
-        assertFalse(CallFeature.isRttSupported(SLOT_ID));
-
-        when(mMockCarrierConfig.getBoolean(
                 CarrierConfig.ImsVt.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
