@@ -16,6 +16,7 @@
 #include "ServiceTrace.h"
 
 #include "interface/IAosAppContext.h"
+#include "interface/IAosBlock.h"
 #include "interface/IAosNConfiguration.h"
 #include "provider/AosProvider.h"
 
@@ -47,7 +48,7 @@ PROTECTED VIRTUAL void AosHandleEmergencyMtc::InitializeServiceFeature()
 
     m_objFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
 
-    if (GET_N_CONFIG(m_nSlotId)->IsVideoSupportedForEmergencyReg())
+    if (IsVideoFeatureSupported())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::VIDEO);
     }
@@ -59,4 +60,15 @@ PROTECTED VIRTUAL void AosHandleEmergencyMtc::InitializeServiceFeature()
 
     A_IMS_TRACE_I(APPPROFILE, "InitializeServiceFeature :: Features(%x)",
             m_objFeatureTagList.GetFeatures(), 0, 0);
+}
+
+PROTECTED IMS_BOOL AosHandleEmergencyMtc::IsVideoFeatureSupported()
+{
+    if (!m_piAppContext->GetBlock()->IsReasonBlocked(
+                BLOCK_SUBSCRIBER_INCOMPLETED, IMS_FALSE, SERVICE_TYPE::SERVICE_WHOLE))
+    {
+        return GET_N_CONFIG(m_nSlotId)->IsVideoSupportedForEmergencyReg();
+    }
+
+    return IMS_TRUE;
 }

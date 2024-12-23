@@ -341,9 +341,14 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
 
     if (nType == ImsAosControl::REGISTER_START || nType == ImsAosControl::REGISTER_START_WITH_WLAN)
     {
-        if (IsEmergencyService() && GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+        if (IsEmergencyService())
         {
-            NotifyEmergencyInitiated();
+            InitializeServiceFeature();
+
+            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+            {
+                NotifyEmergencyInitiated();
+            }
         }
     }
 
