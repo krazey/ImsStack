@@ -403,8 +403,7 @@ IMS_BOOL MultiEndpointManager::IsOwnDialog(const Dialog& objDialog) const
         {
             // Removing "gr=" (3 characters)
             strToken = strToken.GetSubStr(3, strToken.GetLength() - 3);
-            return SipUrnHelper::GetUrn(
-                    m_objContext.GetSlotId(), SipUrnHelper::GSMA_IMEI, IMS_FALSE)
+            return SipUrnHelper::GetUrn(m_objContext.GetSlotId(), SipUrnHelper::GSMA_IMEI)
                     .Equals(strToken);
         }
     }
