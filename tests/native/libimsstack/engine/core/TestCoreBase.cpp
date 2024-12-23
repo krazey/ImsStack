@@ -129,6 +129,8 @@ void TestCoreBase::SetUp()
             .WillByDefault(Return(&m_objContactAddress));
     ON_CALL(m_pCoreService->GetMockRegBinding(), GetIpAddress())
             .WillByDefault(ReturnRef(m_objIpAddress));
+    ON_CALL(m_pCoreService->GetMockRegBinding(), GetServiceRoutes())
+            .WillByDefault(ReturnRef(AStringArray::ConstNull()));
 
     ON_CALL(m_objSipMsg, Destroy()).WillByDefault(Return());
     ON_CALL(m_objSipMsg, Clone()).WillByDefault(Return(&m_objSipMsg));

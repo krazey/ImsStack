@@ -74,7 +74,7 @@ Session::Session(IN Service* pService) :
         m_bSdpNonRprAllowed(IMS_FALSE),
         m_bTerminateMethodBye(IMS_FALSE),
         m_bSessionUpdateNotificationInProgress(IMS_FALSE),
-        m_bImplicitRoutingRequired(IMS_FALSE),
+        m_bImplicitRoutingRequired(IMS_TRUE),
         m_nConfigValue(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE),
         m_nCompletedListenerCalls(0),
         m_nTerminationReason(TERMINATION_REASON_UNKNOWN),

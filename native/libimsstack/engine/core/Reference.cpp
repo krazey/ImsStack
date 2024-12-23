@@ -87,7 +87,7 @@ void Reference::NotifierState::RemoveScc(IN const ISipClientConnection* piScc)
 PUBLIC
 Reference::Reference(IN Service* pService, IN const AString& strReferToUri,
         IN const AString& strReferMethod, IN const Replaces& objReplaces,
-        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_FALSE*/) :
+        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_TRUE*/) :
         ServiceMethod(pService),
         m_nState(STATE_INITIATED),
         m_strReferToUri(strReferToUri),
