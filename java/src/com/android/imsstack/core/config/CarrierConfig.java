@@ -315,6 +315,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "use_sip_user_agent_header_in_ua_string_bool";
         public static final String KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL =
                 KEY_PREFIX + "allow_sip_p_access_network_info_header_in_initial_register_bool";
+        public static final String KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL =
+                KEY_PREFIX + "require_sip_expires_header_in_register_bool";
         public static final String KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL =
                 KEY_PREFIX + "support_sip_session_id_header_bool";
         public static final String KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY =

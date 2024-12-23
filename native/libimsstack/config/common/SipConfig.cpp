@@ -431,7 +431,6 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
 
     nSipFeatureCaps |= SIP_FEATURE_CAPS_TRUST_DOMAIN;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB;
-    nSipFeatureCaps |= SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_SIP_INSTANCE_FOR_CALLER_PREFERENCE;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_USER_AGENT;
@@ -491,6 +490,11 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
                         KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG;
+    }
+
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL))
+    {
+        nSipFeatureCaps |= SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG;
     }
 
     if (piCc->GetBoolean(

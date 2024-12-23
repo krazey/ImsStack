@@ -44,6 +44,7 @@
 
     <!-- Assets: non-carrier configurations -->
     <!-- Ims General -->
+    <boolean name="ims.require_sip_expires_header_in_register_bool" value="true"/>
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
