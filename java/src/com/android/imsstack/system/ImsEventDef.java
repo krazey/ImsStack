@@ -190,13 +190,13 @@ public interface ImsEventDef {
      * Parameter (param2) of {@link #IMS_EVENT_RTT_SETTING}.
      */
     // Indicates that the RTT mode is unknown.
-    int IMS_RTT_MODE_NONE = -1;
+    int IMS_RTT_MODE_NONE = 0;
     // Indicates that the RTT is not capable.
-    int IMS_RTT_CAPABLE_OFF = 0;
+    int IMS_RTT_NO_VISIBLE = 1;
     // Indicates that the RTT is visible during call.
-    int IMS_RTT_VISIBLE_DURING_CALLS = 1;
+    int IMS_RTT_VISIBLE_DURING_CALL = 2;
     // Indicates that the RTT is always visible.
-    int IMS_RTT_ALWAYS_VISIBLE = 2;
+    int IMS_RTT_ALWAYS_VISIBLE = 3;
 
     //// }
 
