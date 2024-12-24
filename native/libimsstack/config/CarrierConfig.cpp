@@ -456,13 +456,13 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
 
 // Aos
 const IMS_CHAR
-        CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL[] =
-                KEY_IMS_EMERGENCY_PREFIX "release_emergency_pdn_with_emergency_call_end_bool";
+        CarrierConfig::ImsEmergency::KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT[] =
+                KEY_IMS_EMERGENCY_PREFIX "ipcan_release_emergency_pdn_upon_emergency_call_end_int";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[] =
+        KEY_IMS_EMERGENCY_PREFIX "preferred_emergency_registration_int";
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT[] =
                 KEY_IMS_EMERGENCY_PREFIX "wait_time_sec_for_release_epdn_after_ecall_end_int";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[] =
-        KEY_IMS_EMERGENCY_PREFIX "preferred_emergency_registration_int";
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "ecall_based_on_p_associated_uri_of_normal_reg_bool";

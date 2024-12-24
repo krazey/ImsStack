@@ -271,13 +271,6 @@ public:
     virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const = 0;
 
     /**
-     * @brief Returns whether emergency PDN shall be released after the E911 call is ended.
-     *
-     * @return IMS_BOOL Return wherther to be applied or not
-     */
-    virtual IMS_BOOL IsEmergencyPdnWithEmergencyCallEndReleased() const = 0;
-
-    /**
      * @brief Flag specifying if SMS over IMS support is available or not.
      *
      * @return IMS_BOOL Return wherther to be available or not
@@ -584,6 +577,18 @@ public:
     virtual IMS_UINT32 GetIsimIndexForImpu() = 0;
 
     /**
+     * @brief Returns IPCAN that emergency PDN shall be released after the emergency call is ended.
+     *        Possible values are,
+     *        CarrierConfig::Ims::IPCAN_NONE
+     *        CarrierConfig::Ims::IPCAN_CELLULAR
+     *        CarrierConfig::Ims::IPCAN_WLAN
+     *        CarrierConfig::Ims::IPCAN_ALL
+     *
+     * @return IMS_SINT32 Return IPCAN
+     */
+    virtual IMS_SINT32 GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const = 0;
+
+    /**
      * @brief Get the IMS establishment time.
      *
      * @return IMS_SINT32 Returns IMS establishment time.
@@ -737,7 +742,8 @@ public:
      *        Emergency PDN can be released after a specific time when the emergency call ends.
      *        This returns the delay time from the end of the call to the start of the emergency
      *        PDN release. If this is set to zero, it will wait for emergency registration
-     *        expiration unless KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL is true.
+     *        expiration unless current IPCAN is in
+     *        KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT.
      * @return IMS_SINT32 Return the wait time in seconds before releasing an emergency PDN.
      */
     virtual IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const = 0;

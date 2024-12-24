@@ -42,7 +42,6 @@ public:
             bEmergencyCallbackModeSupported(IMS_FALSE),
             bTcpRequiredForReg(IMS_FALSE),
             bUnsubscribeRegistrationEventPackage(IMS_FALSE),
-            bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
             bSupportLimitedAdminSmsMode(IMS_FALSE),
             nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED),
             nSipServerPortNumber(5060),
@@ -59,9 +58,10 @@ public:
             nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
             nRegistrationPreferredAccesstypeFeatureTag(
                     CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
-            nWaitTimeSecForReleaseEPdnAfterECallEnd(0),
+            nIpcanReleaseEmergencyPdnUponEmergencyCallEnd(CarrierConfig::ImsEmergency::IPCAN_NONE),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
+            nWaitTimeSecForReleaseEPdnAfterECallEnd(0),
             nRegistrationPrivateHeader(0),
             objCarrierNrAvailabilities(ImsVector<IMS_SINT32>()),
             objPcscfDiscoveryMethod(ImsVector<IMS_SINT32>()),
@@ -109,8 +109,6 @@ public:
     /// carrier_config - ims
     IMS_BOOL bTcpRequiredForReg;
     IMS_BOOL bUnsubscribeRegistrationEventPackage;
-    /// carrier_config - imsemergency.
-    IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
     /// carrier_config - imssms.
     IMS_BOOL bSupportLimitedAdminSmsMode;
 
@@ -134,8 +132,9 @@ public:
     IMS_SINT32 nPreferredImsDscp;
     IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
     /// carrier_config - imsemergency.
-    IMS_SINT32 nWaitTimeSecForReleaseEPdnAfterECallEnd;
+    IMS_SINT32 nIpcanReleaseEmergencyPdnUponEmergencyCallEnd;
     IMS_SINT32 nPreferredEmergencyRegistration;
+    IMS_SINT32 nWaitTimeSecForReleaseEPdnAfterECallEnd;
     /// carrier_config - imswfc.
     IMS_SINT32 nRegistrationPrivateHeader;
 

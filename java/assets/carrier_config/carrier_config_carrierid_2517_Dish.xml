@@ -16,6 +16,6 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
+    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
 </carrier_config>

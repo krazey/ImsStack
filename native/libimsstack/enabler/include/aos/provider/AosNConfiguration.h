@@ -74,7 +74,6 @@ public:
     IMS_BOOL IsBlockPcscfOnRegFailure() const override;
     IMS_BOOL IsCallEndAndPdnReactivationByRegTerminated() const override;
     IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const override;
-    IMS_BOOL IsEmergencyPdnWithEmergencyCallEndReleased() const override;
     IMS_BOOL IsSmsOverImsSupported() const override;
     IMS_BOOL IsImsOverNrEnabled() const override;
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
@@ -124,8 +123,9 @@ public:
     IMS_SINT32 GetSipPreferredTransport() const override;
     IMS_SINT32 GetIpv4MtuSize() const override;
     IMS_SINT32 GetIpv6MtuSize() const override;
-    IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const override;
+    IMS_SINT32 GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const override;
     IMS_SINT32 GetPreferredEmergencyRegistration() const override;
+    IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const override;
     IMS_SINT32 GetEmergencyRegistrationTimerMillis() const override;
     IMS_SINT32 GetImsSignallingDscp() const override;
     IMS_SINT32 GetRegistrationPrivateHeader() const override;

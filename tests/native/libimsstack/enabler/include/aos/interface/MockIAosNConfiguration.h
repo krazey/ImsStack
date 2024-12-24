@@ -59,7 +59,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsBlockPcscfOnRegFailure, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCallEndAndPdnReactivationByRegTerminated, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUnsecureTcpSocketOnAccomplishingRegDestroyed, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsEmergencyPdnWithEmergencyCallEndReleased, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsOverNrEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
@@ -113,8 +112,9 @@ public:
     MOCK_METHOD(IMS_SINT32, GetSipPreferredTransport, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIpv4MtuSize, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIpv6MtuSize, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetWaitTimeSecForReleaseEPdnAfterECallEnd, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredEmergencyRegistration, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetWaitTimeSecForReleaseEPdnAfterECallEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyRegistrationTimerMillis, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsSignallingDscp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPrivateHeader, (), (const, override));

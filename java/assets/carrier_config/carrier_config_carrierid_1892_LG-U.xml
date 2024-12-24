@@ -51,7 +51,7 @@
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
+    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
     <!-- Assets: non-carrier configurations -->
     <!-- Ims General -->

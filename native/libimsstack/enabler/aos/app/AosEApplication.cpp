@@ -122,6 +122,26 @@ PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
     return m_bRegBlockInCbm;
 }
 
+PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd() const
+{
+    IMS_UINT32 nIpcan = GET_N_CONFIG(m_nSlotId)->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd();
+
+    switch (nIpcan)
+    {
+        case CarrierConfig::ImsEmergency::IPCAN_CELLULAR:
+            return !m_bEpdgEnabled;
+
+        case CarrierConfig::ImsEmergency::IPCAN_WLAN:
+            return m_bEpdgEnabled;
+
+        case CarrierConfig::ImsEmergency::IPCAN_ALL:
+            return IMS_TRUE;
+
+        default:
+            return IMS_FALSE;
+    }
+}
+
 PROTECTED VIRTUAL void AosEApplication::ClearConnection()
 {
     m_pConnector->Stop();
@@ -545,7 +565,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->IsEmergencyPdnWithEmergencyCallEndReleased() ||
+    if (IsReleaseEmergencyPdnUponEmergencyCallEnd() ||
             m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
     {
         StartTimer(TIMER_APP_TERMINATED, EPDN_RELEASE_DELAY_TIME_MILLIS);
@@ -557,16 +577,6 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
     {
         StartTimer(TIMER_APP_TERMINATED, delayTime * 1000);
         return;
-    }
-
-    if (!IsTimerRunning(TIMER_APP_ACTIVATED))
-    {
-        // clean when e-call is terminated over ePDG
-        if (m_piContext->GetConnection()->IsEpdgEnabled())
-        {
-            ProcessCleanAll();
-            return;
-        }
     }
 }
 

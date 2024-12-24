@@ -650,12 +650,12 @@ public class CarrierConfig {
         public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
                 KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
         // Aos
-        public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL =
-                KEY_PREFIX + "release_emergency_pdn_with_emergency_call_end_bool";
-        public static final String KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT =
-                KEY_PREFIX + "wait_time_sec_for_release_epdn_after_ecall_end_int";
+        public static final String KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT =
+                KEY_PREFIX + "ipcan_release_emergency_pdn_upon_emergency_call_end_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
                 KEY_PREFIX + "preferred_emergency_registration_int";
+        public static final String KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT =
+                KEY_PREFIX + "wait_time_sec_for_release_epdn_after_ecall_end_int";
         public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
                 KEY_PREFIX + "ecall_based_on_p_associated_uri_of_normal_reg_bool";
         public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =

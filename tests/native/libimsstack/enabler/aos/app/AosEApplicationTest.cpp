@@ -205,6 +205,20 @@ public:
     FRIEND_TEST(AosEApplicationTest, ProcessRegBlockedTimerExpired);
     FRIEND_TEST(AosEApplicationTest, ProcessECallStarted);
     FRIEND_TEST(AosEApplicationTest, ProcessECallTerminated);
+    FRIEND_TEST(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfWlanConfiguredToRelease);
+    FRIEND_TEST(
+            AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfAllIpcanConfiguredToRelease);
+    FRIEND_TEST(
+            AosEApplicationTest, KeepEPdnWhenECallTerminatedOnWlanIfCellularConfiguredToRelease);
+    FRIEND_TEST(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnWlanIfNoIpanConfiguredToRelease);
+    FRIEND_TEST(AosEApplicationTest,
+            ReleaseEPdnWhenECallTerminatedOnCellularIfCellularConfiguredToRelease);
+    FRIEND_TEST(AosEApplicationTest,
+            ReleaseEPdnWhenECallTerminatedOnCellularIfAllIpcanConfiguredToRelease);
+    FRIEND_TEST(
+            AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfWlanConfiguredToRelease);
+    FRIEND_TEST(
+            AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfNoIpcanConfiguredToRelease);
     FRIEND_TEST(AosEApplicationTest, UpdateRegState);
     FRIEND_TEST(AosEApplicationTest, UpdateConnectedServices);
     FRIEND_TEST(AosEApplicationTest, Condition_RequestCommand);
@@ -894,16 +908,6 @@ TEST_F(AosEApplicationTest, ResetRegBlockInCbmWhenECallStarted)
 
 TEST_F(AosEApplicationTest, ProcessECallTerminated)
 {
-    // e-call over ePDG is terminated
-    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
-    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE));
-    m_pTestAosEApplication->ProcessECallTerminated();
-    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
-
     // fake mode
     m_pTestAosEApplication->SetImsCall(IMS_TRUE);
     EXPECT_CALL(m_objMockIAosRegistration, GetMode()).WillOnce(Return(IAosRegistration::MODE_FAKE));
@@ -926,13 +930,137 @@ TEST_F(AosEApplicationTest, ProcessECallTerminated)
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
 }
 
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfWlanConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_WLAN));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+
+    // Clean Up
+    m_pTestAosEApplication->StopTimer(TIMER_APP_TERMINATED);
+}
+
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfAllIpcanConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_ALL));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+
+    // Clean Up
+    m_pTestAosEApplication->StopTimer(TIMER_APP_TERMINATED);
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnWlanIfCellularConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_CELLULAR));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnWlanIfNoIpanConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+}
+
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnCellularIfCellularConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_CELLULAR));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+
+    // Clean Up
+    m_pTestAosEApplication->StopTimer(TIMER_APP_TERMINATED);
+}
+
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnCellularIfAllIpcanConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_ALL));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+
+    // Clean Up
+    m_pTestAosEApplication->StopTimer(TIMER_APP_TERMINATED);
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfWlanConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_WLAN));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfNoIpcanConfiguredToRelease)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+}
+
 TEST_F(AosEApplicationTest, StartAppTerminatedTimerIfEPdnReleaseDelayIsSetWhenECallTerminated)
 {
     ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosRegistration, GetMode())
             .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
-    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyPdnWithEmergencyCallEndReleased())
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
     ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeSecForReleaseEPdnAfterECallEnd())
             .WillByDefault(Return(240));
 

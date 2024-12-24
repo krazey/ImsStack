@@ -39,6 +39,7 @@ public:
 protected:
     void SetRegBlockInCbm(IN IMS_BOOL bBlock);
     IMS_BOOL IsRegBlockInCbm() const;
+    IMS_BOOL IsReleaseEmergencyPdnUponEmergencyCallEnd() const;
 
     // Clean
     void ClearConnection() override;

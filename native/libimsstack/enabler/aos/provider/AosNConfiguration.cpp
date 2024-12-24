@@ -267,11 +267,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingReg
     return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyPdnWithEmergencyCallEndReleased() const
-{
-    return m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsSupported() const
 {
     return m_objCarrierConfig.bSmsOverImsSupported;
@@ -546,14 +541,19 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetIpv6MtuSize() const
     return m_objCarrierConfig.nIpv6SipMtuSizeCellular;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetWaitTimeSecForReleaseEPdnAfterECallEnd() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const
 {
-    return m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd;
+    return m_objCarrierConfig.nIpcanReleaseEmergencyPdnUponEmergencyCallEnd;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredEmergencyRegistration() const
 {
     return m_objCarrierConfig.nPreferredEmergencyRegistration;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetWaitTimeSecForReleaseEPdnAfterECallEnd() const
+{
+    return m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyRegistrationTimerMillis() const
@@ -1327,12 +1327,12 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY);
 
     /// imsemergency.
-    m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd = piCc->GetBoolean(
-            CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL);
-    m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd = piCc->GetInt(
-            CarrierConfig::ImsEmergency::KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT);
+    m_objCarrierConfig.nIpcanReleaseEmergencyPdnUponEmergencyCallEnd = piCc->GetInt(CarrierConfig::
+                    ImsEmergency::KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT);
     m_objCarrierConfig.nPreferredEmergencyRegistration =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT);
+    m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd = piCc->GetInt(
+            CarrierConfig::ImsEmergency::KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT);
     /// imssms.
     m_objCarrierConfig.bSupportLimitedAdminSmsMode =
             piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL);

@@ -92,8 +92,8 @@
             <item value="0"/>
         </int-array>
     </pbundle>
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
+    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <int name="imswfc.registration_private_header_int" value="2"/>
     <boolean name="imswfc.rereg_with_changed_country_on_wifi_bool" value="true"/>
