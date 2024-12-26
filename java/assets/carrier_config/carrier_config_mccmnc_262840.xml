@@ -17,4 +17,66 @@
 <carrier_config>
     <!-- Aos -->
     <int name="ims.isim_index_for_impu_int" value="0"/>
+
+    <!-- Media -->
+    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
+        <int-array name="imsvt.h264_payload_type_int_array" num="2">
+            <item value="115"/>
+            <item value="116"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvt.h264_payload_description_bundle">
+        <pbundle name="115">
+            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C01E</string>
+            <int name="imsvt.video_codec_attribute_frame_rate_int" value="24"/>
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+                <item value="480"/>
+                <item value="640"/>
+            </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0LAFtoHgUZA,aM4G8g==</string>
+        </pbundle>
+        <pbundle name="116">
+            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C01E</string>
+            <int name="imsvt.video_codec_attribute_frame_rate_int" value="20"/>
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+                <item value="240"/>
+                <item value="320"/>
+            </int-array>
+            <string name="imsvt.avc_sprop_parameter_sets_string">Z0LAFtoHgUZA,aM4G8g==</string>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
+        <int name="imsrtt.t140_payload_type_int" value="111"/>
+        <int name="imsrtt.red_payload_type_int" value="112"/>
+    </pbundle>
+
+    <int name="imsvt.video_cvo_value_int" value="4"/>
+    <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
+    <int name="imsvt.video_lowest_bitrate_bps_int" value="100000"/>
+    <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
+    <int name="imsvt.video_avpf_feature_int" value="31"/>
+    <int name="imsvt.video_as_bandwidth_kbps_int" value="512"/>
+    <int name="imsvt.video_rs_bandwidth_bps_int" value="8000"/>
+    <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
+    <int-array name="imsvt.video_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="5"/>
+    </int-array>
+    <int-array name="imsvt.video_rtp_port_range_int_array" num="2">
+        <item value="50010"/>
+        <item value="50060"/>
+    </int-array>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
+    <int name="imsvt.video_send_periodic_sps_pps_int" value="2"/>
+    <boolean name="imsvt.video_bw_nego_option_bool" value="false"/>
+    <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
+    <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="5"/>
+    </int-array>
+    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
+    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
 </carrier_config>
