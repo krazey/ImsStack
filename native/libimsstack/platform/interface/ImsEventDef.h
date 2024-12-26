@@ -101,10 +101,10 @@
 
 #define IMS_EVENT_RTT_SETTING                  (0x00000400)
 // WParam
-#define IMS_RTT_MODE_NONE                      (-1)
-#define IMS_RTT_CAPABLE_OFF                    (0)
-#define IMS_RTT_VISIBLE_DURING_CALLS           (1)
-#define IMS_RTT_ALWAYS_VISIBLE                 (2)
+#define IMS_RTT_MODE_NONE                      (0)
+#define IMS_RTT_NO_VISIBLE                     (1)
+#define IMS_RTT_VISIBLE_DURING_CALL            (2)
+#define IMS_RTT_ALWAYS_VISIBLE                 (3)
 
 // 1  MUST NOT use the above(>=) 0x80000000 from java to native
 
