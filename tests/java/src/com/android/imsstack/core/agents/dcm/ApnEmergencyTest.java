@@ -227,26 +227,13 @@ public class ApnEmergencyTest {
 
     @Test
     public void testHandleDataConnectionFailed() throws Exception {
-        int failureCause = 33;
-        replaceInstance(Apn.class, "mDcSettings", mApnEmergency, mMockIDcSettings);
-        when(mMockIDcSettings.isPermanentFailure(EApnType.EMERGENCY, failureCause))
-                .thenReturn(false)
-                .thenReturn(true);
-
-        // if apn has been requested before, notify data connection state change
+        // only when the apn has been requested before, notify data connection state change
         mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
-        // not permanent failure
         Message msg1 = Message.obtain();
         msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg1.obj = failureCause;
+        msg1.obj = 33;
         mApnEmergency.sendMessage(msg1);
-
-        // permanent failure
-        Message msg2 = Message.obtain();
-        msg2.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg2.obj = failureCause;
-        mApnEmergency.sendMessage(msg2);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem).notifyDataConnectionStateChanged(
@@ -255,16 +242,11 @@ public class ApnEmergencyTest {
 
     @Test
     public void testHandleDataConnectionFailed_invalidCase() throws Exception {
-        int failureCause = 33;
-        replaceInstance(Apn.class, "mDcSettings", mApnEmergency, mMockIDcSettings);
-        when(mMockIDcSettings.isPermanentFailure(EApnType.EMERGENCY, failureCause))
-                .thenReturn(true);
-
         // if apn is not requested, ignore event
         mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_IDLE);
         Message msg1 = Message.obtain();
         msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg1.obj = failureCause;
+        msg1.obj = 33;
         mApnEmergency.sendMessage(msg1);
         mTestableLooper.processAllMessages();
 

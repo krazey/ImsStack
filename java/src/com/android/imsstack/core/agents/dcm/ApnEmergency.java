@@ -171,13 +171,7 @@ public final class ApnEmergency extends Apn {
                 ImsLog.w("apn is not requested, ignore event");
                 return;
             }
-
-            int causeCode = (int) msg.obj;
-            if (mDcSettings != null) {
-                if (mDcSettings.isPermanentFailure(mType, causeCode)) {
-                    sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
-                }
-            }
+            sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
         }
     }
 }
