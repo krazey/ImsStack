@@ -210,27 +210,6 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
-    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
-        <int-array name="imsvt.h264_payload_type_int_array" num="1">
-            <item value="104"/>
-        </int-array>
-    </pbundle>
-    <pbundle name="imsvt.h264_payload_description_bundle">
-        <pbundle name="104">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C016</string>
-            <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="240"/>
-                <item value="320"/>
-            </int-array>
-        </pbundle>
-    </pbundle>
-    <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="false"/>
-    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
-        <int name="imsrtt.t140_payload_type_int" value="111"/>
-        <int name="imsrtt.red_payload_type_int" value="112"/>
-    </pbundle>
     <int-array name="imsvoice.audio_jitter_buffer_size_int_array" num="3">
         <item value="4"/>
         <item value="4"/>
@@ -241,47 +220,8 @@
         <item value="5"/>
     </int-array>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
-    <int-array name="imsvt.video_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="5"/>
-    </int-array>
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="false"/>
-    <int name="imsvt.video_avpf_feature_int" value="0"/>
-    <int-array name="imsvt.video_codec_bitrate_int_array" num="2">
-        <item value="384"/>
-        <item value="512"/>
-    </int-array>
-    <string-array name="imsvt.video_codec_image_attr_string_array" num="0">
-    </string-array>
-    <string-array name="imsvt.video_codec_frame_size_string_array" num="1">
-        <item value="96 480 640"/>
-    </string-array>
-    <int-array name="imsvt.video_codec_hevc_profile_int_array" num="0">
-    </int-array>
-    <int-array name="imsvt.video_codec_hevc_level_int_array" num="0">
-    </int-array>
-    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="5"/>
-    </int-array>
 <!-- media additional -->
-    <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-        <item value="240"/>
-        <item value="320"/>
-    </int-array>
-    <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
-    <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-    <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C016</string>
-    <int-array name="imsvt.h264_payload_type_int_array" num="1">
-        <item value="104"/>
-    </int-array>
-    <int name="imsvt.video_as_bandwidth_kbps_int" value="960"/>
-    <int name="imsvt.video_rs_bandwidth_bps_int" value="8000"/>
-    <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
-    <int name="imsrtt.text_as_bandwidth_kbps_int" value="4"/>
-    <int name="imsrtt.text_rs_bandwidth_bps_int" value="100"/>
-    <int name="imsrtt.text_rr_bandwidth_bps_int" value="300"/>
-
     <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string"></string>
     <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="0">
@@ -695,33 +635,10 @@
     <boolean name="imsvoice.audio_rtcpxr_voip_metrics_bool" value="false"/>
     <boolean name="imsvoice.audio_rtcpxr_packet_loss_rle_bool" value="false"/>
     <boolean name="imsvoice.audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
-
-    <int-array name="imsvt.video_rtp_port_range_int_array" num="2">
-        <item value="50010"/>
-        <item value="50060"/>
-    </int-array>
-    <int name="imsvt.video_cvo_value_int" value="1"/>
-    <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
-    <boolean name="imsvt.video_avpf_enable_bool" value="false"/>
-    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
-    <int name="imsvt.video_send_periodic_sps_pps_int" value="2"/>
-    <boolean name="imsvt.video_bw_nego_option_bool" value="false"/>
-    <int name="imsvt.video_lowest_bitrate_bps_int" value="0"/>
-    <int-array name="imsrtt.text_rtp_port_range_int_array" num="2">
-        <item value="50010"/>
-        <item value="50060"/>
-    </int-array>
-    <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
-    <int name="imsrtt.text_rtp_dscp_int" value="46"/>
-    <int name="imsrtt.text_codec_redundancy_level_int" value="-1"/>
-    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="20000"/>
     <boolean name="dynamic_video_quality_supported_bool" value="false"/>
-
     <!-- TODO Media - to testcases-->
     <int name="asset_evs_codec_attribute_hf_only_int" value="-1"/>
     <int name="asset_evs_codec_attribute_mode_switch_int" value="-1"/>
-
     <!-- Media additional for CallFeature-->
     <boolean name="imsvoice.audio_hold_with_direction_inactive_bool" value="false"/>
     <boolean name="imsvt.video_hold_with_direction_inactive_bool" value="false"/>
