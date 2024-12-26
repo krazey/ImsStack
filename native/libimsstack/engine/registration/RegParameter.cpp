@@ -351,7 +351,7 @@ IMS_RESULT RegParameter::FormHeaders(
         piSipMsg->AddHeader(ISipHeader::SUPPORTED, Sip::STR_GRUU);
     }
 
-    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), pStateTracker->GetSipProfile()))
+    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
     {
         piSipMsg->AddHeader(ISipHeader::SUPPORTED, "outbound");
     }

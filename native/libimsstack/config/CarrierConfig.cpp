@@ -210,6 +210,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL
         KEY_IMS_PREFIX "support_country_param_in_pani_header_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[] =
         KEY_IMS_PREFIX "support_local_session_timer_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_MULTIPLE_REGISTRATION_INT[] =
+        KEY_IMS_PREFIX "support_multiple_registration_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[] =
         KEY_IMS_PREFIX "retransmission_allowed_of_geolocation_pidf_string";
 

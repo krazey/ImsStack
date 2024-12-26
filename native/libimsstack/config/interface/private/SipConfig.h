@@ -114,7 +114,12 @@ public:
     inline IMS_BOOL IsKeepAliveConfigured() const { return HasFeature(SIP_FEATURE_CAPS_KEEP); }
     inline IMS_BOOL IsMultipleRegConfigured() const
     {
-        return HasFeature(SIP_FEATURE_CAPS_MULTIPLE_REG);
+        return m_nSupportMultipleReg == CarrierConfig::Ims::MULTIPLE_REGISTRATION_FULL;
+    }
+    inline IMS_BOOL IsRegIdParameterConfigured() const
+    {
+        return m_nSupportMultipleReg == CarrierConfig::Ims::MULTIPLE_REGISTRATION_REG_ID_ONLY ||
+                m_nSupportMultipleReg == CarrierConfig::Ims::MULTIPLE_REGISTRATION_FULL;
     }
     inline IMS_BOOL IsNoAcceptContactHeaderInBYE() const
     {
@@ -281,6 +286,7 @@ private:
     TcpTimerValues m_objTcpTimerValues;
 
     IMS_SINT32 m_nHideMacInPaniHeader;
+    IMS_SINT32 m_nSupportMultipleReg;
 
     // Registration parameters
     enum

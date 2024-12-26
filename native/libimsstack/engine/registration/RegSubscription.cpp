@@ -1297,8 +1297,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
 
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()))
     {
-        if (SipConfigProxy::IsMultipleRegConfigured(
-                    GetSlotId(), m_pRegStateTracker->GetSipProfile()))
+        if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
         {
             SipAddress objContact;
 
@@ -1330,12 +1329,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
                                                     : m_pRegStateTracker->GetContactAddress();
             }
 
-            if (SipConfigProxy::IsMultipleRegConfigured(
-                        GetSlotId(), m_pRegStateTracker->GetSipProfile()))
-            {
-                objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
-            }
-
+            objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
             strContact = objContact.ToString();
         }
         else
@@ -1373,19 +1367,12 @@ IMS_BOOL RegSubscription::SetContactHeader(
     }
     else
     {
-        if (SipConfigProxy::IsMultipleRegConfigured(
-                    GetSlotId(), m_pRegStateTracker->GetSipProfile()))
+        if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
         {
             const SipAddress* pContact = m_pRegStateTracker->GetContactAddressForOutgoingMessage();
             SipAddress objContact =
                     (pContact != IMS_NULL) ? *pContact : m_pRegStateTracker->GetContactAddress();
-
-            if (SipConfigProxy::IsMultipleRegConfigured(
-                        GetSlotId(), m_pRegStateTracker->GetSipProfile()))
-            {
-                objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
-            }
-
+            objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
             strContact = objContact.ToString();
         }
         else

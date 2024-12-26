@@ -73,6 +73,7 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_FALSE(SipConfigProxy::IsGruuConfigured(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsKeepAliveConfigured(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsMultipleRegConfigured(IMS_SLOT_0));
+    EXPECT_FALSE(SipConfigProxy::IsRegIdParameterConfigured(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsNoAcceptContactHeaderInBye(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsPanInfoInInitialRegRequired(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsPPreferredIdInRegSubRequired(IMS_SLOT_0));
@@ -254,7 +255,6 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_TRUE(SipConfigProxy::IsIpSecConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsGruuConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsKeepAliveConfigured(IMS_SLOT_0, &objSipProfile));
-    EXPECT_TRUE(SipConfigProxy::IsMultipleRegConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsNoAcceptContactHeaderInBye(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsPanInfoInInitialRegRequired(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsPPreferredIdInRegSubRequired(IMS_SLOT_0, &objSipProfile));

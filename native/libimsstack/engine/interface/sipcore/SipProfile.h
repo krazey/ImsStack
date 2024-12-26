@@ -123,7 +123,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_GRUU\n
      *         #ISipConfig#SIP_FEATURE_CAPS_RPORT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_KEEP\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -278,7 +277,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_GRUU\n
      *         #ISipConfig#SIP_FEATURE_CAPS_RPORT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_KEEP\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -497,16 +495,6 @@ public:
     inline IMS_BOOL IsKeepAliveConfigured() const
     {
         return HasFeature(ISipConfig::SIP_FEATURE_CAPS_KEEP);
-    }
-
-    /**
-     * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
-     *
-     * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
-     */
-    inline IMS_BOOL IsMultipleRegConfigured() const
-    {
-        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_MULTIPLE_REG);
     }
 
     /**

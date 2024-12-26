@@ -56,7 +56,6 @@ public:
      *         #SIP_FEATURE_CAPS_GRUU\n
      *         #SIP_FEATURE_CAPS_RPORT\n
      *         #SIP_FEATURE_CAPS_KEEP\n
-     *         #SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -109,9 +108,8 @@ public:
         SIP_FEATURE_CAPS_GRUU = 1 << 1,
         SIP_FEATURE_CAPS_RPORT = 1 << 2,
         SIP_FEATURE_CAPS_KEEP = 1 << 3,
-        SIP_FEATURE_CAPS_MULTIPLE_REG = 1 << 4,
-        SIP_FEATURE_CAPS_TRUST_DOMAIN = 1 << 5,
-        SIP_FEATURE_CAPS_UDP_FALLBACK = 1 << 6,
+        SIP_FEATURE_CAPS_TRUST_DOMAIN = 1 << 4,
+        SIP_FEATURE_CAPS_UDP_FALLBACK = 1 << 5,
 
         /// For SIP engine operations
         SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR = 1 << 8,

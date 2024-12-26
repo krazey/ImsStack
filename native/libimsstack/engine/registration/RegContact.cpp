@@ -35,8 +35,7 @@ __IMS_TRACE_TAG_REG__;
 
 PUBLIC
 RegContact::RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
-        IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId /*= (-1)*/,
-        IN const SipProfile* pProfile /*= IMS_NULL*/) :
+        IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId /*= (-1)*/) :
         ImsSlot(nSlotId),
         m_nState(STATE_CREATED),
         m_pAor(IMS_NULL),
@@ -61,19 +60,11 @@ RegContact::RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN 
     m_objContactAddress.SetHost(objIpAddr.ToString());
     m_objContactAddress.SetPort(nPort);
 
-    if (nRegId > 0)
+    if (nRegId > 0 && SipConfigProxy::IsRegIdParameterConfigured(GetSlotId()))
     {
-        if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), pProfile))
-        {
-            AString strRegId;
-            strRegId.SetNumber(nRegId);
-
-            m_pRegIdParameter = new SipParameter(Sip::STR_REG_ID, strRegId);
-        }
-        else
-        {
-            IMS_TRACE_D("Multiple registration is not configured; reg-id=%d", nRegId, 0, 0);
-        }
+        AString strRegId;
+        strRegId.SetNumber(nRegId);
+        m_pRegIdParameter = new SipParameter(Sip::STR_REG_ID, strRegId);
     }
 }
 

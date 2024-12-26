@@ -351,6 +351,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_country_param_in_pani_header_bool";
         public static final String KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL =
                 KEY_PREFIX + "support_local_session_timer_bool";
+        public static final String KEY_SUPPORT_MULTIPLE_REGISTRATION_INT =
+                KEY_PREFIX + "support_multiple_registration_int";
         public static final String KEY_LOCATION_POLICY_UPDATE_TYPE_INT =
                 KEY_PREFIX + "location_policy_update_type_int";
         public static final String KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL =

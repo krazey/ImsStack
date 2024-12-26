@@ -748,7 +748,7 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
     IMS_BOOL bGruuSupported =
             SipConfigProxy::IsGruuConfigured(GetSlotId(), pService->GetSipProfile());
 
-    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), pService->GetSipProfile()))
+    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
     {
         SipAddress objContact;
         // 4 Consider the Privacy information (temp-gruu)
@@ -766,12 +766,7 @@ IMS_BOOL Capabilities::CreateContactHeader(OUT AString& strContactHeader,
             objContact = (pContact != IMS_NULL) ? *pContact : pService->GetContactAddress();
         }
 
-        if (SipConfigProxy::IsMultipleRegConfigured(
-                    pService->GetSlotId(), pService->GetSipProfile()))
-        {
-            objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
-        }
-
+        objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
         strContact = objContact.ToString();
     }
     else

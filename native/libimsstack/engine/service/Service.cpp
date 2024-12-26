@@ -1919,7 +1919,7 @@ void Service::FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPriv
 
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), GetSipProfile()))
     {
-        if (bRequest && SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), GetSipProfile()))
+        if (bRequest && SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
         {
             SipAddress objContact;
 
@@ -2012,7 +2012,7 @@ void Service::FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPriv
     }
     else
     {
-        if (bRequest && SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), GetSipProfile()))
+        if (bRequest && SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
         {
             const SipAddress* pContact = GetContactAddressForOutgoingMessage();
             SipAddress objContact = (pContact != IMS_NULL) ? *pContact : GetContactAddress();
