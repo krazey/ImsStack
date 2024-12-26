@@ -248,18 +248,11 @@ public:
     virtual UdpKeepAliveSender* CreateUdpKeepAliveSender() = 0;
 
     /**
-     * @brief Removes
+     * @brief Removes the given MtcSession.
      *
-     * @param piSession
+     * @param objSession MtcSession to remove.
      */
-    virtual void RemoveSession(IN const ISession* piSession) = 0;
-
-    /**
-     * @brief Removes
-     *
-     * @param piActiveSession
-     */
-    virtual void RemoveInactiveSessions(IN const ISession* piActiveSession) = 0;
+    virtual void RemoveSession(IN IMtcSession& objSession) = 0;
 
     /**
      * @brief Deletes

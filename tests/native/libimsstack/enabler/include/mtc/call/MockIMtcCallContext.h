@@ -87,8 +87,7 @@ public:
     MOCK_METHOD(JniCallInfo, CreateJniCallInfo, (), (override));
     MOCK_METHOD(ISipClientConnection*, CreateClientConnection, (IN SipMethod eMethod), (override));
     MOCK_METHOD(UdpKeepAliveSender*, CreateUdpKeepAliveSender, (), (override));
-    MOCK_METHOD(void, RemoveSession, (IN const ISession* piSession), (override));
-    MOCK_METHOD(void, RemoveInactiveSessions, (IN const ISession* piActiveSession), (override));
+    MOCK_METHOD(void, RemoveSession, (IN IMtcSession & objSession), (override));
     MOCK_METHOD(void, DeleteUpdatingInfo, (), (override));
     MOCK_METHOD(void, RunPendingOperationIfPossible, (), (override));
 

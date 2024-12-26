@@ -39,6 +39,7 @@
 #include <vector>
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -250,7 +251,7 @@ TEST_F(SilentRedialHelperTest, IsSynchronousCallRequiredReturnsTrue)
 TEST_F(SilentRedialHelperTest, RedialReleasesSessionResources)
 {
     EXPECT_CALL(objMediaManager, DestroyMediaSession());
-    EXPECT_CALL(objContext, RemoveSession(&objSession));
+    EXPECT_CALL(objContext, RemoveSession(Ref(objMtcSession)));
     EXPECT_CALL(objTimerWrapper, StopAll());
 
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);
@@ -261,7 +262,7 @@ TEST_F(SilentRedialHelperTest, RedialReleasesSessionResources)
 TEST_F(SilentRedialHelperTest, RedialReleaseSessionResourceIfRedialEmergency)
 {
     EXPECT_CALL(objMediaManager, DestroyMediaSession());
-    EXPECT_CALL(objContext, RemoveSession(&objSession));
+    EXPECT_CALL(objContext, RemoveSession(Ref(objMtcSession)));
     EXPECT_CALL(objTimerWrapper, Stop(_));
 
     const CallReasonInfo objAnyReason(

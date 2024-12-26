@@ -65,6 +65,7 @@
 #include <initializer_list>
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -1139,7 +1140,7 @@ TEST_F(OutgoingStateTest, SessionForkedResponseReceivedAddsISession)
     EXPECT_CALL(objMtcSession,
             Terminate(IMS_TRUE, CallReasonInfo(CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED)))
             .Times(0);
-    EXPECT_CALL(objCallContext, RemoveSession(&objSession)).Times(0);
+    EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(0);
 
     MockISession objForkedSession;
     EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objForkedSession));
@@ -1155,7 +1156,7 @@ TEST_F(OutgoingStateTest, SessionForkedResponseReceivedTerminatesOriginalSession
     EXPECT_CALL(objMtcSession,
             Terminate(IMS_TRUE, CallReasonInfo(CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED)))
             .Times(1);
-    EXPECT_CALL(objCallContext, RemoveSession(&objSession)).Times(1);
+    EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(1);
 
     MockISession objForkedSession;
     EXPECT_EQ(CallStateName::OUTGOING,
@@ -1173,7 +1174,7 @@ TEST_F(OutgoingStateTest, SessionForkedResponseReceivedDoesNotTerminateOriginalS
     EXPECT_CALL(objMtcSession,
             Terminate(IMS_TRUE, CallReasonInfo(CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED)))
             .Times(0);
-    EXPECT_CALL(objCallContext, RemoveSession(&objSession)).Times(0);
+    EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(0);
 
     MockISession objForkedSession;
     EXPECT_EQ(CallStateName::OUTGOING,

@@ -34,6 +34,7 @@
 #include "call/IMtcSession.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcSession.h"
 #include "call/MtcCall.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/NullCall.h"
@@ -930,66 +931,19 @@ TEST_F(MtcCallTest, CreateUdpKeepAliveSenderReturnsInstance)
     delete pUdpKeepAliveSender;
 }
 
-TEST_F(MtcCallTest, RemoveSessionDoesNothingIfNoMatchingSession)
-{
-    MockISession objSession1;
-    MockISession objSession2;
-
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    objCall.CreateSession(&objSession1);
-
-    objCall.RemoveSession(&objSession2);
-
-    EXPECT_NE(nullptr, objCall.GetSession(&objSession1));
-}
-
 TEST_F(MtcCallTest, RemoveSessionRemovesMatchingSession)
 {
     MockISession objSession1;
     MockISession objSession2;
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    objCall.CreateSession(&objSession1);
-    objCall.CreateSession(&objSession2);
+    IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
+    IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
 
-    objCall.RemoveSession(&objSession2);
+    objCall.RemoveSession(*piMtcSession2);
 
     EXPECT_NE(nullptr, objCall.GetSession(&objSession1));
     EXPECT_EQ(nullptr, objCall.GetSession(&objSession2));
-}
-
-TEST_F(MtcCallTest, RemoveInactiveSessionsDoesNothingIfActiveSessionNotFound)
-{
-    MockISession objSession1;
-    MockISession objSession2;
-    MockISession objActiveSession;
-
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    objCall.CreateSession(&objSession1);
-    objCall.CreateSession(&objSession2);
-
-    objCall.RemoveInactiveSessions(&objActiveSession);
-
-    EXPECT_NE(nullptr, objCall.GetSession(&objSession1));
-    EXPECT_NE(nullptr, objCall.GetSession(&objSession2));
-}
-
-TEST_F(MtcCallTest, RemoveInactiveSessionsRemovesOthersIfActiveSessionFound)
-{
-    MockISession objSession1;
-    MockISession objSession2;
-    MockISession objActiveSession;
-
-    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-    objCall.CreateSession(&objSession1);
-    objCall.CreateSession(&objActiveSession);
-    objCall.CreateSession(&objSession2);
-
-    objCall.RemoveInactiveSessions(&objActiveSession);
-
-    EXPECT_EQ(nullptr, objCall.GetSession(&objSession1));
-    EXPECT_EQ(nullptr, objCall.GetSession(&objSession2));
-    EXPECT_NE(nullptr, objCall.GetSession(&objActiveSession));
 }
 
 TEST_F(MtcCallTest, DeleteUpdatingInfoDeletesPreviousOne)

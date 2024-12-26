@@ -170,8 +170,7 @@ public:
     JniCallInfo CreateJniCallInfo() override;
     ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) override;
     UdpKeepAliveSender* CreateUdpKeepAliveSender() override;
-    void RemoveSession(IN const ISession* piSession) override;
-    void RemoveInactiveSessions(IN const ISession* piActiveSession) override;
+    void RemoveSession(IN IMtcSession& objSession) override;
     void DeleteUpdatingInfo() override;
     void RunPendingOperationIfPossible() override;
 

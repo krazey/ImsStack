@@ -212,7 +212,7 @@ void SilentRedialHelper::ReleaseCallResources()
     IMtcSession* pSession = m_objContext.GetSession();
     if (pSession != IMS_NULL)
     {
-        m_objContext.RemoveSession(&pSession->GetISession());
+        m_objContext.RemoveSession(*pSession);
     }
 
     m_objContext.GetMediaManager().DestroyMediaSession();

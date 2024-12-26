@@ -518,44 +518,10 @@ PUBLIC VIRTUAL UdpKeepAliveSender* MtcCall::CreateUdpKeepAliveSender()
     return new UdpKeepAliveSender(pKeepAliveHelper, *this);
 }
 
-PUBLIC VIRTUAL void MtcCall::RemoveSession(IN const ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::RemoveSession(IN IMtcSession& objSession)
 {
-    for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
-    {
-        IMtcSession* pSession = m_lstSessions.GetAt(nIndex);
-        if (&pSession->GetISession() == piSession)
-        {
-            m_lstSessions.RemoveAt(nIndex);
-            delete pSession;
-
-            IMS_TRACE_D("RemoveSession : Session count[%d]", m_lstSessions.GetSize(), 0, 0);
-            return;
-        }
-    }
-
-    IMS_TRACE_E(0, "RemoveSession : Not exists", 0, 0, 0);
-}
-
-PUBLIC VIRTUAL void MtcCall::RemoveInactiveSessions(IN const ISession* piActiveSession)
-{
-    IMtcSession* pActiveSession = GetSession(piActiveSession);
-    if (pActiveSession == IMS_NULL)
-    {
-        return;
-    }
-
-    for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
-    {
-        IMtcSession* pSession = m_lstSessions.GetAt(nIndex);
-        if (pSession != pActiveSession)
-        {
-            delete pSession;
-        }
-    }
-    m_lstSessions.Clear();
-
-    m_lstSessions.Append(pActiveSession);
-    IMS_TRACE_D("RemoveInactiveSessions : Session count[%d]", m_lstSessions.GetSize(), 0, 0);
+    m_lstSessions.Remove(&objSession);
+    delete &objSession;
 }
 
 PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
