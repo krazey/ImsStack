@@ -77,7 +77,6 @@ private:
     IMS_BOOL HandleB1TimerAfterTerminate(
             IN IMtcSession* piMtcSession, IN const CallReasonInfo& objReason);
     CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
-    void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
     void OnStarted(IN ISession* piSession);
     void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason,
             IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);

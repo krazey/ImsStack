@@ -42,7 +42,6 @@
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "dialingplan/IMtcDialingPlan.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
@@ -826,29 +825,6 @@ CallStateName OutgoingState::HandleSilentRedial(
 }
 
 PRIVATE
-void OutgoingState::HandleCountrySpecificServiceUrn(IN IMessage* piMessage)
-{
-    // If there is an alternative service URN in the Contact header of the 380 response,
-    // it should be used to the subsequent emergency call.
-    IMS_TRACE_D("HandleCountrySpecificServiceUrn", 0, 0, 0);
-
-    if ((piMessage->GetStatusCode() == SipStatusCode::SC_380) &&
-            m_objContext.GetMessageUtils().IsHeaderPresent(piMessage, ISipHeader::CONTACT_NORMAL))
-    {
-        AString strServiceUrn =
-                m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
-
-        if (strServiceUrn.Contains("urn:service:sos.country-specific"))
-        {
-            AString strNumber =
-                    m_objContext.GetMessageUtils().GetUserPart(piMessage, ISipHeader::TO);
-            m_objContext.GetDialingPlan().OnCountrySpecificServiceUrnReceived(
-                    strNumber, strServiceUrn);
-        }
-    }
-}
-
-PRIVATE
 void OutgoingState::OnStarted(IN ISession* piSession)
 {
     m_objContext.RemoveInactiveSessions(piSession);
@@ -862,13 +838,6 @@ PRIVATE
 void OutgoingState::OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason,
         IN IMS_BOOL bReasonFromErrorHandler /* = IMS_FALSE*/)
 {
-    // TODO : need to modify this after emergency domain selection policy is decided.
-    if (objReason.nCode == CODE_SIP_ALTERNATE_EMERGENCY_CALL &&
-            objReason.nExtraCode == EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
-    {
-        HandleCountrySpecificServiceUrn(piSession->GetPreviousResponse(IMessage::SESSION_START));
-    }
-
     if (m_objContext.GetCallInfo().IsEmergency() && !bReasonFromErrorHandler)
     {
         const auto objMaybeOverriddenReason =

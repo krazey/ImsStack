@@ -21,7 +21,6 @@
 #include "ImsIdentity.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
-#include <memory>
 
 class IMtcContext;
 class ISubscriberInfo;
@@ -44,9 +43,6 @@ public:
     AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
             IN Scheme eScheme = Scheme::UNKNOWN) override;
 
-    void OnCountrySpecificServiceUrnReceived(
-            IN const AString& strNumber, IN const AString& strServiceUrn) override;
-
 private:
     static IMS_BOOL IsUriForm(IN const AString& strNumber);
     AString GetConferenceFactoryUri() const;
@@ -57,27 +53,7 @@ protected:
     ImsIdentityProxy* m_pIdentityProxy;
 
 private:
-    struct TemporaryServiceUrn final
-    {
-    public:
-        TemporaryServiceUrn(IN const AString& strNumber_, IN const AString& strUrn_) :
-                strNumber(strNumber_),
-                strUrn(strUrn_)
-        {
-        }
-        TemporaryServiceUrn(IN const TemporaryServiceUrn&) = delete;
-        TemporaryServiceUrn& operator=(IN const TemporaryServiceUrn&) = delete;
-
-        inline const AString& GetNumber() const { return strNumber; }
-        inline const AString& GetUrn() const { return strUrn; }
-
-        AString strNumber;
-        AString strUrn;
-    };
-
     IMtcContext& m_objContext;
-    // TODO: no requirement found... try to find the standard again and update the logic.
-    std::unique_ptr<TemporaryServiceUrn> m_pTemporaryServiceUrn;
     ISubscriberInfo& m_objSubscriberInfo;
 };
 

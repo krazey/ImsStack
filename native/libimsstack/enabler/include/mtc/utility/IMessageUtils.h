@@ -263,7 +263,7 @@ public:
      * @param strHeaderName
      * @return
      */
-    virtual ImsList<AString> GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+    virtual ImsList<AString> GetUris(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
     /**
@@ -275,7 +275,7 @@ public:
      * @param strHeaderName
      * @return
      */
-    virtual AString GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+    virtual AString GetUri(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
     /**

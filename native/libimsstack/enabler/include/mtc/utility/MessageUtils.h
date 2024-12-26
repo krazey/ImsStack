@@ -85,10 +85,11 @@ public:
     AString GetParameterValueFromUri(IN IMessage* piMessage, IN const AString& strParameterName,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    ImsList<AString> GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+    ImsList<AString> GetUris(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    AString GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters, IN IMS_SINT32 eHeaderType,
+    AString GetUri(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
+            IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_SINT32 GetSosTypeFromServiceUrn(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;

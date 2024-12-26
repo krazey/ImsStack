@@ -207,26 +207,6 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsInputValueIfItIsUriForm)
     EXPECT_EQ(strUriWithScheme, pDialingPlan->GetToUri(strUriWithScheme, objCallInfo));
 }
 
-TEST_F(MtcDialingPlanTest, GetToUriReturnsStoredServiceUrn)
-{
-    AString strNumber("123");
-    AString strServiceUrn("sos.country-specific.test");
-
-    pDialingPlan->OnCountrySpecificServiceUrnReceived(strNumber, strServiceUrn);
-    EXPECT_EQ(strServiceUrn, pDialingPlan->GetToUri(strNumber, objCallInfo));
-}
-
-TEST_F(MtcDialingPlanTest, GetToUriUsingDifferentNumberResetsTemporaryUrn)
-{
-    AString strNumber("123");
-    AString strServiceUrn("sos.country-specific.test");
-    AString strDifferentNumber("123");
-
-    pDialingPlan->OnCountrySpecificServiceUrnReceived(strNumber, strServiceUrn);
-    pDialingPlan->GetToUri(strDifferentNumber, objCallInfo);
-    EXPECT_NE(strServiceUrn, pDialingPlan->GetToUri(strNumber, objCallInfo));
-}
-
 TEST_F(MtcDialingPlanTest, GetToUriReturnsDialStringFormatIfUssi)
 {
     objCallInfo.bUssi = IMS_TRUE;

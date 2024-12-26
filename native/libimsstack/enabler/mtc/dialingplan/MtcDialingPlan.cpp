@@ -33,7 +33,6 @@
 #include "dialingplan/ImsIdentityProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "util/TextParser.h"
-#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -41,7 +40,6 @@ PUBLIC
 MtcDialingPlan::MtcDialingPlan(IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo) :
         m_pIdentityProxy(new ImsIdentityProxy()),
         m_objContext(objContext),
-        m_pTemporaryServiceUrn(nullptr),
         m_objSubscriberInfo(objSubscriberInfo)
 {
     IMS_TRACE_I("+MtcDialingPlan", 0, 0, 0);
@@ -66,17 +64,6 @@ AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo&
         return strUri;
     }
 
-    if (m_pTemporaryServiceUrn)
-    {
-        if (m_pTemporaryServiceUrn->GetNumber().Equals(strNumber))
-        {
-            AString strUrn = m_pTemporaryServiceUrn->GetUrn();
-            m_pTemporaryServiceUrn = nullptr;
-            return strUrn;
-        }
-        m_pTemporaryServiceUrn = nullptr;
-    }
-
     if (objCallInfo.IsEmergency())
     {
         IMS_TRACE_D("GetToUri Emergency URN will be obtained using SuppType::TARGET_URI", 0, 0, 0);
@@ -95,14 +82,6 @@ AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo&
     }
 
     return NormalDialingPlan::GetTranslatedUri(m_objContext, strUri, eScheme, *m_pIdentityProxy);
-}
-
-PUBLIC
-void MtcDialingPlan::OnCountrySpecificServiceUrnReceived(
-        IN const AString& strNumber, IN const AString& strServiceUrn)
-{
-    // if already exists, overwrite.
-    m_pTemporaryServiceUrn = std::make_unique<TemporaryServiceUrn>(strNumber, strServiceUrn);
 }
 
 PRIVATE
