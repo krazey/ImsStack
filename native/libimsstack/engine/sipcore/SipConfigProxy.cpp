@@ -446,20 +446,16 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsKeepAliveConfigured(
     return pSipConfig->IsKeepAliveConfigured();
 }
 
-PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMultipleRegConfigured(
-        IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMultipleRegConfigured(IN IMS_SINT32 nSlotId)
 {
-    if (pProfile != IMS_NULL)
-    {
-        if (pProfile->IsSipFeatureProvisioned())
-        {
-            return pProfile->IsMultipleRegConfigured();
-        }
-    }
-
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
-
     return pSipConfig->IsMultipleRegConfigured();
+}
+
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsRegIdParameterConfigured(IN IMS_SINT32 nSlotId)
+{
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
+    return pSipConfig->IsRegIdParameterConfigured();
 }
 
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsNoAcceptContactHeaderInBye(

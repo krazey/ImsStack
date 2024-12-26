@@ -144,6 +144,7 @@ public:
         static const IMS_CHAR KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT[];
         static const IMS_CHAR KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[];
+        static const IMS_CHAR KEY_SUPPORT_MULTIPLE_REGISTRATION_INT[];
         static const IMS_CHAR KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[];
         // Aos
         static const IMS_CHAR KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY[];
@@ -532,6 +533,14 @@ public:
         enum
         {
             TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION = 1
+        };
+
+        // Feature: Multiple Registration
+        enum
+        {
+            MULTIPLE_REGISTRATION_NONE = 0,
+            MULTIPLE_REGISTRATION_REG_ID_ONLY = 1,
+            MULTIPLE_REGISTRATION_FULL = 2
         };
     };
 

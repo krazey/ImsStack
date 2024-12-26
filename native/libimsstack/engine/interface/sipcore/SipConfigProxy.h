@@ -81,7 +81,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_GRUU\n
      *         #ISipConfig#SIP_FEATURE_CAPS_RPORT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_KEEP\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -356,16 +355,19 @@ public:
     static IMS_BOOL IsKeepAliveConfigured(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
-     * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
-     *
-     * SipProfile is preferred than a default SipConfig.
+     * @brief Checks if the multiple registration feature is configured or not.
      *
      * @param nSlotId The current slot id
-     * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsMultipleRegConfigured(
-            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsMultipleRegConfigured(IN IMS_SINT32 nSlotId);
+    /**
+     * @brief Checks if the "reg-id" parameter in REGISTER request is configured or not.
+     *
+     * @param nSlotId The current slot id
+     * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
+     */
+    static IMS_BOOL IsRegIdParameterConfigured(IN IMS_SINT32 nSlotId);
     /**
      * @brief Checks if the Accept-Contact header in BYE request should not be added or not.
      *

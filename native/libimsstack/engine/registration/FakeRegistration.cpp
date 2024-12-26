@@ -250,11 +250,9 @@ PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IpAddress&
         }
     }
 
-    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
-
     // If not present, add a new Contact information
-    RegContact* pNewContact = new RegContact(GetSlotId(), objIpAddr, nPort, this,
-            (-1) /*pRegFlow->GetRegKey().GetFlowId()*/, pProfile);
+    RegContact* pNewContact = new RegContact(
+            GetSlotId(), objIpAddr, nPort, this, (-1) /*pRegFlow->GetRegKey().GetFlowId()*/);
 
     if (pNewContact == IMS_NULL)
     {
@@ -265,6 +263,7 @@ PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IpAddress&
     // Set user-info field
     pNewContact->SetAor(m_pStateTracker->GetAor());
 
+    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
     // Set "+sip.instance" parameter
     IMS_SINT32 nDeviceId = SipConfigProxy::GetDeviceId(GetSlotId(), pProfile);
 

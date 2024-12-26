@@ -29,8 +29,7 @@ class RegContact final : public ImsSlot, public IRegContact
 {
 public:
     RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
-            IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId = (-1),
-            IN const SipProfile* pProfile = IMS_NULL);
+            IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId = (-1));
     virtual ~RegContact();
 
     RegContact(IN const RegContact&) = delete;

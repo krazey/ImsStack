@@ -623,11 +623,9 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN const IpAddress& obj
         }
     }
 
-    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
-
     // If not present, add a new Contact information
     RegContact* pNewContact = new RegContact(
-            GetSlotId(), objIpAddr, nPort, this, m_pRegFlow->GetRegKey().GetFlowId(), pProfile);
+            GetSlotId(), objIpAddr, nPort, this, m_pRegFlow->GetRegKey().GetFlowId());
 
     if (pNewContact == IMS_NULL)
     {
@@ -638,6 +636,7 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN const IpAddress& obj
     // Set user-info field
     pNewContact->SetAor(m_pStateTracker->GetAor());
 
+    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
     // Set "+sip.instance" parameter
     IMS_SINT32 nDeviceId = SipConfigProxy::GetDeviceId(GetSlotId(), pProfile);
 
@@ -2268,8 +2267,8 @@ IMS_BOOL Registration::IsFlowControlRequired() const
     ISipMessage* piResponse = GetPreviousResponse();
     const RegContact* pRegContact = m_pStateTracker->GetPreferredContact();
 
-    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), m_pStateTracker->GetSipProfile()) &&
-            (piRequest != IMS_NULL) && (piResponse != IMS_NULL) && (pRegContact != IMS_NULL))
+    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()) && (piRequest != IMS_NULL) &&
+            (piResponse != IMS_NULL) && (pRegContact != IMS_NULL))
     {
         const AString strOutbound("outbound");
 
