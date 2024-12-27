@@ -41,9 +41,6 @@ import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDcApn;
-import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
@@ -124,7 +121,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private ConferenceProxy mConferenceProxy = null;
     private MoPendingCall mMoPendingCall = null;
     private TtyModeListenerProxy mTtyModeListener = null;
-    private ApnListener mApnListener = null;
     private MtcServiceStateListener mServiceStateListener = null;
     private final ImsVideoCallSession mVideoCallSession;
     private final ImsVideoCallProviderBase mVideoCallProvider;
@@ -211,9 +207,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mTtyModeListener = new TtyModeListenerProxy();
             tmt.addListener(mTtyModeListener);
         }
-
-        setApnListener();
-        updateCallExtraForRatType(mCallProfile, true);
     }
 
     @VisibleForTesting
@@ -229,7 +222,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         clearPendingCall();
         clearLocationBasedCall();
         clearUsatBasedCall();
-        clearApnListener();
 
         logi("close");
 
@@ -1367,30 +1359,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         && getState() == ImsCallSessionImplBase.State.ESTABLISHED) {
                     mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
                 }
-            }
-        }
-    }
-
-    // DISPLAY_WFC_ICON_DURING_CALLING
-    public static void setCallExtraForRatType(ICallContext callContext, ImsCallProfile profile) {
-        if (!ServiceCaps.isWfcEnabledByPlatform(callContext.getSlotId())) {
-            // If Wi-Fi calling is not supported, do not update this call extra.
-            return;
-        }
-
-        IDcApn dcApn = callContext.getDcApn();
-
-        if (dcApn != null) {
-            int ipcanCategory = dcApn.getIpcanCategory(EApnType.IMS.getType());
-
-            if (ipcanCategory == IApn.IPCAN_CATEGORY_WLAN) {
-                log("Wi-Fi calling...");
-                profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
-                        TelephonyManager.NETWORK_TYPE_IWLAN);
-            }
-            else
-            {
-                // LTE: it's not required in the moment.
             }
         }
     }
@@ -2755,9 +2723,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     return RESULT_OK;
                 }
 
-                // Consider different RAT type by handover during call initiation
-                updateCallExtraForRatType(mCallProfile, false);
-
                 ICallLocationPolicy clp = mCallContext.getCallLocationPolicy();
 
                 if ((clp != null) && clp.isLocationRequired(mCallee, mCallProfile)) {
@@ -3228,22 +3193,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private class ApnListener implements IApn.Listener {
-        @Override
-        public void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
-            log("onIpcanCategoryChanged :: apnType="
-                    + apnType + ", ipcanCategory=" + ipcanCategory);
-
-            if (updateCallExtraForRatType(mCallProfile, false)) {
-                int state = getState();
-                if ((state > ImsCallSessionImplBase.State.INITIATED)
-                        && (state < ImsCallSessionImplBase.State.RENEGOTIATING)) {
-                    mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
-                }
-            }
-        }
-    }
-
     private class MtcServiceStateListener implements IServiceStateTracker.Listener {
         @Override
         public void onEmergencyServiceStateChanged(MtcServiceState serviceState) {
@@ -3268,80 +3217,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         } else {
             return EApnType.IMS.getType();
         }
-    }
-
-    private void clearApnListener() {
-        if (mApnListener == null) {
-            return;
-        }
-
-        IDcApn dcApn = mCallContext.getDcApn();
-        IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
-
-        if (apn != null) {
-            apn.removeListener(mApnListener);
-        }
-
-        mApnListener = null;
-    }
-
-    private void setApnListener() {
-        if (!ServiceCaps.isWfcEnabledByPlatform(mCallContext.getSlotId())) {
-            return;
-        }
-
-        IDcApn dcApn = mCallContext.getDcApn();
-        IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
-
-        if (apn != null) {
-            mApnListener = new ApnListener();
-            apn.addListener(mApnListener);
-        }
-    }
-
-    private boolean updateCallExtraForRatType(ImsCallProfile profile, boolean isInitialSet) {
-        if (mApnListener == null) {
-            // If Wi-Fi calling is not supported, do not update this call extra.
-            return false;
-        }
-
-        int oldRatType = profile.getCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        int ratType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-
-        //To-Do:- Need to find the way Emergency call Over VoWiFi
-            //ratType = TelephonyManager.NETWORK_TYPE_IWLAN;
-        if (isInitialSet && mCallDetails.is(CallDetails.MO)
-                && (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY)) {
-            // Emergency call SHOULD be initiated via LTE
-            // if there is no flag to indicate Wi-Fi calling.
-            ratType = TelephonyManager.NETWORK_TYPE_LTE;
-        } else {
-            IDcApn dcApn = mCallContext.getDcApn();
-
-            if (dcApn != null) {
-                int ipcanCategory = dcApn.getIpcanCategory(getApnType(profile));
-
-                if (ipcanCategory == IApn.IPCAN_CATEGORY_WLAN) {
-                    ratType = TelephonyManager.NETWORK_TYPE_IWLAN;
-                } else {
-                    ratType = TelephonyManager.NETWORK_TYPE_LTE;
-                }
-            }
-        }
-
-        if (ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-
-            if (ratType != oldRatType) {
-                logi("Call RAT changed :: " + ((oldRatType == 0) ? "none" : oldRatType)
-                        + " >> " + ratType);
-
-                profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
-                return true;
-            }
-        }
-
-        return false;
     }
 
     protected class MtcCallListenerProxy extends MtcCall.Listener {
@@ -4258,7 +4133,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, callInfo, mediaInfo);
 
             updateCallExtraForHDVoice(profile, mediaInfo);
-            updateCallExtraForRatType(profile, false);
 
             mCallback.invokeUpdateReceived(ImsCallSessionImpl.this, profile);
         }
@@ -4315,8 +4189,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mLocalCallProfile.getMediaProfile().copyFrom(new ImsStreamMediaProfile(audioQuality,
                     tMediaprofile.getAudioDirection(), videoQuality,
                     tMediaprofile.getVideoDirection(), tMediaprofile.getRttMode()));
-
-            updateCallExtraForRatType(mCallProfile, true);
 
             mCT.updateCallState(ImsCallSessionImpl.this,
                     CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);

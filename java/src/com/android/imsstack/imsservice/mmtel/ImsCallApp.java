@@ -264,15 +264,6 @@ public class ImsCallApp extends ImsApp {
                     ImsStreamMediaProfile.RTT_MODE_DISABLED);
         }
 
-        if (callProfile == null) {
-            return null;
-        }
-
-        // DISPLAY_WFC_ICON_DURING_CALLING
-        if (serviceType == ImsCallProfile.SERVICE_TYPE_NORMAL) {
-            ImsCallSessionImpl.setCallExtraForRatType(mCallContext, callProfile);
-        }
-
         return callProfile;
     }
 
