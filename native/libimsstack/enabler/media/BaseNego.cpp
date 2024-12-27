@@ -309,17 +309,28 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
     {
         OaModel* pLatestOaModel = GetNegotiatedOaModel();
 
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE ||
-                pLatestOaModel->pNegotiatedProfile->GetDataPort() == 0)
+        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
         {
             return IMS_NULL;
         }
 
         MediaBaseProfile* pProfile = GetNegotiatedProfile(pLatestOaModel);
 
-        if (pProfile->GetPayloadList().GetSize() == 0)
+        if (pProfile == IMS_NULL)
         {
             return IMS_NULL;
+        }
+        if (pProfile->GetPayloadList().GetSize() == 0)
+        {
+            if (pProfile->GetDataPort() == 0)
+            {
+                IMS_TRACE_D("GetNegotiatedPayload() - empty Payload list, zero port", 0, 0, 0);
+                pProfile->CopyPayloads(GetLocalProfile(pLatestOaModel)->GetPayloadList());
+            }
+            else
+            {
+                return IMS_NULL;
+            }
         }
 
         return (pProfile->GetNegotiatedPayloadIndex() > 0)

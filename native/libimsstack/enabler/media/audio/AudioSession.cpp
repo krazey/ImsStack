@@ -177,7 +177,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     if (pNegoProfile->GetPayloadList().GetSize() == 0 ||
             pPeerProfile->GetPayloadList().GetSize() == 0)
     {
-        IMS_TRACE_E(0, "UpdateRtpConfig() - no payload to update", 0, 0, 0);
+        IMS_TRACE_E(0, "UpdateRtpConfig() - empty Payload list", 0, 0, 0);
         return IMS_NULL;
     }
 

@@ -58,29 +58,44 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
         ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
     }
 
-    AudioProfile::Payload* pNegotiatedPayload = IMS_NULL;
-    pNegotiatedPayload = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
-
-    if (pNegotiatedPayload == IMS_NULL)
+    if (pPeerProfile->GetPayloadList().GetSize() == 0)
     {
-        return IMS_FALSE;
+        IMS_TRACE_I("Negotiate() - empty Payload list", 0, 0, 0);
+        pNegotiatedProfile->CopyPayloads(pLocalProfile->GetPayloadList());
+    }
+    else
+    {
+        AudioProfile::Payload* pNegotiatedPayload = IMS_NULL;
+        pNegotiatedPayload = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
+
+        if (pNegotiatedPayload == IMS_NULL)
+        {
+            IMS_TRACE_D("Negotiate() - Null negotiated payload", 0, 0, 0);
+            return IMS_FALSE;
+        }
+        if (NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
+        {
+            IMS_TRACE_D("Negotiate() - Direction negotiation fail", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        NegotiateRtcpXr(pLocalProfile, pNegotiatedProfile);
+        NegotiatePtime(pNegotiatedProfile, pLocalProfile->GetPtime());
+        NegotiateMaxPtime(pNegotiatedProfile, pLocalProfile->GetMaxPtime());
+        NegotiateAnbr(pLocalProfile->IsAnbrSupported(), pPeerProfile->IsAnbrSupported(),
+                pNegotiatedProfile);
+        pNegotiatedProfile->SetCandidateAttr(pLocalProfile->GetCandidateAttr());
+        NegotiateBandwidth(
+                pLocalProfile, pPeerProfile, pNegotiatedProfile, pNegotiatedPayload, pConfig);
+        NegotiateRtcpInterval(pNegotiatedProfile, pConfig->GetRtcpIntervalOnHold(),
+                pConfig->GetRtcpIntervalOnActive());
     }
 
-    if (NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
+    if (pNegotiatedProfile->GetDataPort() == 0)
     {
-        return IMS_FALSE;
+        IMS_TRACE_I("Negotiate() - Set Inactive Direction", 0, 0, 0);
+        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
     }
-
-    NegotiateRtcpXr(pLocalProfile, pNegotiatedProfile);
-    NegotiatePtime(pNegotiatedProfile, pLocalProfile->GetPtime());
-    NegotiateMaxPtime(pNegotiatedProfile, pLocalProfile->GetMaxPtime());
-    NegotiateAnbr(
-            pLocalProfile->IsAnbrSupported(), pPeerProfile->IsAnbrSupported(), pNegotiatedProfile);
-    pNegotiatedProfile->SetCandidateAttr(pLocalProfile->GetCandidateAttr());
-    NegotiateBandwidth(
-            pLocalProfile, pPeerProfile, pNegotiatedProfile, pNegotiatedPayload, pConfig);
-    NegotiateRtcpInterval(pNegotiatedProfile, pConfig->GetRtcpIntervalOnHold(),
-            pConfig->GetRtcpIntervalOnActive());
 
     return IMS_TRUE;
 }

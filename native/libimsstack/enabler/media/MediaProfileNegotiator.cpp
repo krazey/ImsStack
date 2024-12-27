@@ -49,10 +49,10 @@ IMS_BOOL MediaProfileNegotiator::NegotiateIpPort(IN MediaBaseProfile* pLocalProf
 
     if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0)
     {
-        IMS_TRACE_D("NegotiateIpPort() ZERO Port. DO NOT Use the media type[%d], negotiated "
-                    "port[%d], peer port[%d]",
+        pNegotiatedProfile->SetDataPort(0);
+
+        IMS_TRACE_D("NegotiateIpPort() ZERO Port Media type[%d], negotiatedPort[%d], peerPort[%d]",
                 m_eType, pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort());
-        return IMS_FALSE;
     }
 
     return IMS_TRUE;
