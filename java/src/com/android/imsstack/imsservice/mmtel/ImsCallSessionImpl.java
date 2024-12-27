@@ -2053,7 +2053,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE,
                 mCallProfile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE));
 
-        // Call RAT type : LTE / IWLAN / UNKNOWN
+        // Call RAT type : NR/ LTE / IWLAN / UNKNOWN
         ImsCallUtils.setCallExtraIfPresent(mCallProfile,
                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT, profile);
 
@@ -3369,14 +3369,15 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         @Override
         public void onCallInitiating(MtcCall call,
-                CallInfo callInfo, MediaInfo mediaInfo) {
+                CallInfo callInfo, MediaInfo mediaInfo, int ratType) {
             if (!call.equals(mCall)) {
                 return;
             }
 
+            mCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
+
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
                     mCallContext, callInfo, mediaInfo);
-
             setCallInfo(profile);
 
             mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
@@ -4285,7 +4286,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         @Override
-        public void onCallIncomingReceived(MtcCall call, IncomingMtcCall incomingCall) {
+        public void onCallIncomingReceived(
+                MtcCall call, IncomingMtcCall incomingCall, int ratType) {
             if (!call.equals(mCall)) {
                 return;
             }
@@ -4294,8 +4296,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             int videoQuality = tMediaprofile.getVideoQuality();
 
+
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromIncomingCallInfo(
                     mCallContext, incomingCall);
+            profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
             initCallProfile(profile);
 
             // For Google native behavior
@@ -4318,6 +4322,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
 
             notifyE2eeCallInfo(incomingCall.suppInfo, mCall.getRemoteNumber());
+        }
+
+        @Override
+        public void onCallRatChanged(int ratType) {
+            log("onCallRatChanged ratType=" + ratType);
+            if (!mCallProfile.getCallExtras().containsKey(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE)) {
+                return;
+            }
+
+            mCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
+            mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
         }
 
         @Override

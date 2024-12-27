@@ -59,6 +59,7 @@ public:
     void SendReplacedBy(IN IMS_SINTP nKey, IN IMS_UINTP nType) override;
     void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
     void SendCallPushCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
+    void SendRatChanged(IN IMS_SINT32 eRatType) override;
 
 private:
     IMtcCallContext& m_objContext;

@@ -189,6 +189,13 @@ public:
      */
     virtual void SendCallPushCompleted(
             IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies the RAT has changed.
+     *
+     * @param eRatType The changed RAT type.
+     */
+    virtual void SendRatChanged(IN IMS_SINT32 eRatType) = 0;
 };
 
 #endif

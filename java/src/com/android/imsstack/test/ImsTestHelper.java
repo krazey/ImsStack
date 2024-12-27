@@ -343,7 +343,7 @@ public final class ImsTestHelper {
                         sTempCall.setListener(new MtcCall.Listener() {
                             @Override
                             public void onCallIncomingReceived(MtcCall call,
-                                    IncomingMtcCall incomingCall) {
+                                    IncomingMtcCall incomingCall, int ratType) {
                                 ImsLog.d("onCallIncomingReceived");
                                 call.alertUser();
                             }

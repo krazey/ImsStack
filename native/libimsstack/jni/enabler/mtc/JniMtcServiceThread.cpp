@@ -98,6 +98,8 @@ void JniMtcServiceThread::OnRejectedIncomingCall(IN const JniCallInfo& objCallIn
 
     JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
 
+    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
+
     SendData2Java(objParcel);
 }
 

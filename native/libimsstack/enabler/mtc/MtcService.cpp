@@ -51,9 +51,11 @@
 #include "common/IMediaConfig.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
+#include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcAosEventHandler.h"
 #include "helper/MtcCapabilityQueryHandler.h"
+#include "helper/MtcNetworkWatcher.h"
 #include "helper/SrvccStateManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -73,6 +75,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_pAosConnector(IMS_NULL),
         m_pAosEventHandler(IMS_NULL),
         m_pSrvccStateManager(IMS_NULL),
+        m_pNetworkWatcher(IMS_NULL),
         m_pRoutingRejectHandler(IMS_NULL),
         m_eTbcwStatus(SuppStatus::UNPROVISIONED),
         m_eTirStatus(SuppStatus::UNPROVISIONED)
@@ -110,6 +113,7 @@ PUBLIC VIRTUAL MtcService::~MtcService()
 
     delete m_pAosEventHandler;
     delete m_pSrvccStateManager;
+    delete m_pNetworkWatcher;
 
     if (m_pRoutingRejectHandler)
     {
@@ -138,6 +142,27 @@ PUBLIC VIRTUAL void MtcService::AddSrvccStateListener(IN ISrvccStateListener* pi
 PUBLIC VIRTUAL void MtcService::RemoveSrvccStateListener(IN ISrvccStateListener* piListener)
 {
     m_pSrvccStateManager->RemoveListener(piListener);
+}
+
+PUBLIC VIRTUAL void MtcService::AddNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener)
+{
+    m_pNetworkWatcher->AddListener(*piListener);
+}
+
+PUBLIC VIRTUAL void MtcService::RemoveNetworkWatcherListener(
+        IN IMtcNetworkWatcherListener* piListener)
+{
+    m_pNetworkWatcher->RemoveListener(*piListener);
+}
+
+PUBLIC VIRTUAL IMS_SINT32 MtcService::GetRatType() const
+{
+    return m_pNetworkWatcher->GetRatType();
+}
+
+PUBLIC VIRTUAL IMS_SINT32 MtcService::GetMobileRatType() const
+{
+    return m_pNetworkWatcher->GetMobileRatType();
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsNr() const
@@ -328,6 +353,9 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
     {
         UpdateCallComposerFeature(nFeatures);
     }
+
+    m_pNetworkWatcher->OnServiceConnected(nIpcan);
+
     m_pAosEventHandler->OnConnected(nFeatures, nIpcan);
     SetAosReady(IMS_TRUE);
 }
@@ -381,6 +409,7 @@ void MtcService::Init()
 
     m_pAosEventHandler = new MtcAosEventHandler(*this, m_objContext.GetConfigurationProxy());
     m_pSrvccStateManager = new SrvccStateManager();
+    m_pNetworkWatcher = new MtcNetworkWatcher(*this, m_objContext.GetSlotId());
 
     AttachCoreServiceInterface();
     AttachAosInterface();

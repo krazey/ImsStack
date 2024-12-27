@@ -54,6 +54,7 @@ public:
     MOCK_METHOD(void, SendReplacedBy, (IN IMS_SINTP, IN IMS_UINTP), (override));
     MOCK_METHOD(void, SendEctCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, SendCallPushCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
+    MOCK_METHOD(void, SendRatChanged, (IN IMS_SINT32), (override));
 };
 
 #endif

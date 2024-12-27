@@ -26,6 +26,7 @@ class ICoreService;
 class IJniMtcServiceThread;
 class IMtcAosConnector;
 class IMtcAosStateListener;
+class IMtcNetworkWatcherListener;
 class ISrvccStateListener;
 enum class ServiceStatus;
 enum class ServiceType;
@@ -39,8 +40,12 @@ public:
     MOCK_METHOD(ServiceType, GetServiceType, (), (const, override));
     MOCK_METHOD(void, AddAosStateListener, (IN IMtcAosStateListener*), (override));
     MOCK_METHOD(void, RemoveAosStateListener, (IN IMtcAosStateListener*), (override));
-    MOCK_METHOD(void, AddSrvccStateListener, (IN ISrvccStateListener* piListener), (override));
-    MOCK_METHOD(void, RemoveSrvccStateListener, (IN ISrvccStateListener* piListener), (override));
+    MOCK_METHOD(void, AddSrvccStateListener, (IN ISrvccStateListener*), (override));
+    MOCK_METHOD(void, RemoveSrvccStateListener, (IN ISrvccStateListener*), (override));
+    MOCK_METHOD(void, AddNetworkWatcherListener, (IN IMtcNetworkWatcherListener*), (override));
+    MOCK_METHOD(void, RemoveNetworkWatcherListener, (IN IMtcNetworkWatcherListener*), (override));
+    MOCK_METHOD(IMS_SINT32, GetRatType, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetMobileRatType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergency, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsNr, (), (const, override));
@@ -56,13 +61,13 @@ public:
     MOCK_METHOD(IJniMtcServiceThread*, GetJniServiceThread, (), (const, override));
     MOCK_METHOD(SrvccState, GetSrvccState, (), (const, override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState eState), (override));
-    MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bEnabled), (override));
-    MOCK_METHOD(void, OpenEmergencyService, (IN ServiceType eServiceType), (override));
+    MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL), (override));
+    MOCK_METHOD(void, OpenEmergencyService, (IN ServiceType), (override));
     MOCK_METHOD(void, StopEmergencyService, (), (override));
     MOCK_METHOD(
             void, ProcessTestCommand, (IN IMS_SINT32, IN IMS_SINT32, IN IMS_SINT32), (override));
     MOCK_METHOD(SuppStatus, GetTbcwStatus, (), (const, override));
-    MOCK_METHOD(void, SetTerminalBasedTir, (IN IMS_BOOL bEnabled), (override));
+    MOCK_METHOD(void, SetTerminalBasedTir, (IN IMS_BOOL), (override));
     MOCK_METHOD(SuppStatus, GetTirStatus, (), (const, override));
 
     // IEnablerService

@@ -135,6 +135,9 @@ public class ImsCallUtils {
         newProfile.updateCallExtras(profile);
         newProfile.getMediaProfile().copyFrom(profile.getMediaProfile());
 
+        ImsCallUtils.setCallExtraIfPresent(profile,
+                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT, newProfile);
+
         return newProfile;
     }
 

@@ -56,9 +56,10 @@ public:
      *
      * @param objCallInfo The call information.
      * @param objMediaInfo The media information related to the call.
+     * @param eRatType The current RAT type.
      */
-    virtual void OnInitiating(
-            IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) = 0;
+    virtual void OnInitiating(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
+            IN IMS_SINT32 eRatType) = 0;
 
     /**
      * @brief Notifies
@@ -257,16 +258,17 @@ public:
      * @brief Notifies there is an incoming call that needs to be processed.
      *
      * @param nCallKey
-     * @param objCallInfo
-     * @param objMediaInfo
-     * @param objSuppServices
-     * @param eOipType
-     * @param strRemoteNumber
+     * @param objCallInfo The call information.
+     * @param objMediaInfo The media information related to the call.
+     * @param objSuppServices The supplementary services information related to the call.
+     * @param eOipType The OIP type to determine whether show a caller identification or not.
+     * @param strRemoteNumber The number of a caller.
+     * @param eRatType The current RAT type.
      */
     virtual void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
             IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-            IN const AString& strRemoteNumber) = 0;
+            IN const AString& strRemoteNumber, IN IMS_SINT32 eRatType) = 0;
 
     /**
      * @brief Notifies
@@ -278,6 +280,13 @@ public:
      */
     virtual void OnInformationNotificationReceived(IN IMS_UINT32 eType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) = 0;
+
+    /**
+     * @brief Notifies the RAT has changed.
+     *
+     * @param eRatType The changed RAT type.
+     */
+    virtual void OnRatChanged(IN IMS_SINT32 eRatType) = 0;
 };
 
 #endif

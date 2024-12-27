@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "IMediaManager.h"
 #include "IMessage.h"
+#include "INetworkWatcher.h"
 #include "IReference.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
@@ -83,6 +84,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
     m_objMediaManager.SetMediaReportEventListener(this);
     m_objService.AddAosStateListener(this);
     m_objService.AddSrvccStateListener(this);
+    m_objService.AddNetworkWatcherListener(this);
 }
 
 PUBLIC VIRTUAL MtcCall::~MtcCall()
@@ -91,6 +93,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
 
     m_objService.RemoveAosStateListener(this);
     m_objService.RemoveSrvccStateListener(this);
+    m_objService.RemoveNetworkWatcherListener(this);
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
     {
@@ -1245,13 +1248,20 @@ PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
 
 PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, IN IMS_UINT32 eIpcan)
 {
-    IMS_TRACE_I("OnIpcanChanged IpCan[%d]", 0, 0, 0);
+    IMS_TRACE_I("OnIpcanChanged IpCan[%d]", eIpcan, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
                 return pState->OnIpcanChanged(eIpcan);
             });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnRatChanged(IMS_SINT32 eRatType)
+{
+    IMS_TRACE_I("OnRatChanged :  RAT=%d", eRatType, 0, 0);
+
+    m_objUiNotifier.SendRatChanged(eRatType);
 }
 
 PRIVATE

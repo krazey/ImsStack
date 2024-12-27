@@ -48,8 +48,10 @@
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIMtcAosStateListener.h"
+#include "helper/MockIMtcNetworkWatcherListener.h"
 #include "helper/MockISrvccStateListener.h"
 #include "helper/MockMtcAosEventHandler.h"
+#include "helper/MockMtcNetworkWatcher.h"
 #include "helper/MockSrvccStateManager.h"
 #include "service/IReasonInfo.h"
 #include <gtest/gtest.h>
@@ -57,6 +59,7 @@
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -94,6 +97,12 @@ public:
         delete m_pAosConnector;
         m_pAosConnector = pAosConnector;
     }
+
+    inline void ReplaceNetworkWatcher(IN MtcNetworkWatcher* pNetworkWatcher)
+    {
+        delete m_pNetworkWatcher;
+        m_pNetworkWatcher = pNetworkWatcher;
+    }
 };
 
 LOCAL IMS_UINTP FAKE_ADDRESS = 1;
@@ -118,6 +127,7 @@ public:
     TestPhoneInfoService objPhoneInfoService;
     MockIMtcImsEventReceiver objEventReceiver;
     TestConnector objConnector;
+    MockMtcNetworkWatcher* pNetworkWatcher;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -182,6 +192,9 @@ protected:
 
         pMockAosConnector = new MockIMtcAosConnector();
         pService->ReplaceAosConnector(pMockAosConnector);
+
+        pNetworkWatcher = new MockMtcNetworkWatcher(*pService, objMockContext.GetSlotId());
+        pService->ReplaceNetworkWatcher(pNetworkWatcher);
         return pService;
     }
 
@@ -284,9 +297,44 @@ TEST_F(MtcServiceTest, RemoveSrvccStateListenerThenNotBeingNotified)
     pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
 }
 
+TEST_F(MtcServiceTest, AddNetworkWatcherListenerInvokesMtcNetworkWatcher)
+{
+    MockIMtcNetworkWatcherListener objNetworkWatcherListener;
+    EXPECT_CALL(*pNetworkWatcher, AddListener(Ref(objNetworkWatcherListener))).Times(1);
+
+    pNormalMtcService->AddNetworkWatcherListener(&objNetworkWatcherListener);
+}
+
+TEST_F(MtcServiceTest, RemoveNetworkWatcherListenerInvokesMtcNetworkWatcher)
+{
+    MockIMtcNetworkWatcherListener objNetworkWatcherListener;
+    EXPECT_CALL(*pNetworkWatcher, RemoveListener(Ref(objNetworkWatcherListener))).Times(1);
+
+    pNormalMtcService->RemoveNetworkWatcherListener(&objNetworkWatcherListener);
+}
+
 TEST_F(MtcServiceTest, IsActiveReturnsFalseBeforeAosConnected)
 {
     EXPECT_EQ(pNormalMtcService->IsActive(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, GetRatTypeReturnsCorrectValue)
+{
+    EXPECT_CALL(*pNetworkWatcher, GetRatType()).Times(2).WillOnce(Return(0)).WillOnce(Return(1));
+
+    EXPECT_EQ(0, pNormalMtcService->GetRatType());
+    EXPECT_EQ(1, pNormalMtcService->GetRatType());
+}
+
+TEST_F(MtcServiceTest, GetMobileRatTypeReturnsCorrectValue)
+{
+    EXPECT_CALL(*pNetworkWatcher, GetMobileRatType())
+            .Times(2)
+            .WillOnce(Return(1))
+            .WillOnce(Return(0));
+
+    EXPECT_EQ(1, pNormalMtcService->GetMobileRatType());
+    EXPECT_EQ(0, pNormalMtcService->GetMobileRatType());
 }
 
 TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosConnecting)

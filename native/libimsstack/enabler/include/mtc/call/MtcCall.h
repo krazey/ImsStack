@@ -38,6 +38,7 @@
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/IMtcTimerListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MtcSupplementaryService.h"
@@ -92,7 +93,8 @@ class MtcCall final :
         public ISipErrorListener,
         public IMediaReportEventListener,
         public ISrvccStateListener,
-        public IMtcAosStateListener
+        public IMtcAosStateListener,
+        public IMtcNetworkWatcherListener
 {
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo,
@@ -311,6 +313,8 @@ public:
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;
     void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
+
+    void OnRatChanged(IMS_SINT32 eRatType) override;
 
 private:
     static IMutex* s_pKeyCreationLock;

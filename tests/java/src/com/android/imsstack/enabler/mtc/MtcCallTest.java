@@ -528,7 +528,7 @@ public class MtcCallTest extends ImsStackTest {
         mTestMtcCall.start(IUMtcCall.CALLTYPE_VT, mCallee, "", new MediaInfo(), new SuppInfo());
         processAllMessages();
 
-        verify(mListener, times(0)).onCallInitiating(eq(mTestMtcCall), any(), any());
+        verify(mListener, times(0)).onCallInitiating(eq(mTestMtcCall), any(), any(), anyInt());
     }
 
     @Test
@@ -558,7 +558,7 @@ public class MtcCallTest extends ImsStackTest {
                 IUMtcCall.CALLTYPE_VOIP, usersInfo, new MediaInfo(), new SuppInfo());
         processAllMessages();
 
-        verify(mListener, times(0)).onCallInitiating(eq(mTestMtcCall), any(), any());
+        verify(mListener, times(0)).onCallInitiating(eq(mTestMtcCall), any(), any(), anyInt());
     }
 
     @Test
@@ -806,7 +806,7 @@ public class MtcCallTest extends ImsStackTest {
 
         verify(mCT, times(1)).updateCallState(eq(mTestMtcCall),
                 eq(CallTracker.CALL_EVENT_INCOMING_RECEIVED), eq(null));
-        verify(mListener, times(1)).onCallIncomingReceived(eq(mTestMtcCall), any());
+        verify(mListener, times(1)).onCallIncomingReceived(eq(mTestMtcCall), any(), anyInt());
     }
 
     @Test
@@ -865,7 +865,7 @@ public class MtcCallTest extends ImsStackTest {
 
         assertEquals(CallTracker.CALL_STATE_IDLE, mTestMtcCallWithMockJniProxy.getCallState());
         verify(mListener, times(1)).onCallInitiating(
-                eq(mTestMtcCallWithMockJniProxy), any(), any());
+                eq(mTestMtcCallWithMockJniProxy), any(), any(), anyInt());
     }
 
     @Test
@@ -1030,7 +1030,8 @@ public class MtcCallTest extends ImsStackTest {
 
         verify(mCT, times(1)).updateCallState(eq(mTestMtcCallWithMockJniProxy),
                 eq(CallTracker.CALL_EVENT_INCOMING_RECEIVED), eq(null));
-        verify(mListener, times(1)).onCallIncomingReceived(eq(mTestMtcCallWithMockJniProxy), any());
+        verify(mListener, times(1)).onCallIncomingReceived(
+                eq(mTestMtcCallWithMockJniProxy), any(), anyInt());
     }
 
     @Test

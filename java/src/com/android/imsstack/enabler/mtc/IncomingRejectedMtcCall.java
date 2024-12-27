@@ -44,9 +44,9 @@ public class IncomingRejectedMtcCall extends IncomingMtcCall implements Parcelab
         suppInfo = new SuppInfo(source);
         rejectedReason = source.readInt();
 
-        logTag = "";
+        logTag = source.readString();
 
-        ImsLog.d("callType  : " + callInfo.callType
+        ImsLog.d("[" + logTag + "]callType  : " + callInfo.callType
                 + " OIPType : " + OIPType
                 + " callerPartyNum : " + callerPartyNum
                 + " rejectedReason : " + rejectedReason

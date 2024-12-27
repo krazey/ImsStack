@@ -74,7 +74,8 @@ void MtcUiNotifier::SendIncomingCallReceived()
             m_objContext.GetMediaManager().GetMediaInfo(),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
-            m_objContext.GetParticipantInfo().GetRemoteNumber());
+            m_objContext.GetParticipantInfo().GetRemoteNumber(),
+            m_objContext.GetService().GetRatType());
 }
 
 PUBLIC
@@ -137,8 +138,8 @@ void MtcUiNotifier::SendInitiating()
         return;
     }
 
-    piThread->OnInitiating(
-            m_objContext.CreateJniCallInfo(), m_objContext.GetMediaManager().GetMediaInfo());
+    piThread->OnInitiating(m_objContext.CreateJniCallInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(), m_objContext.GetService().GetRatType());
 }
 
 PUBLIC
@@ -404,6 +405,19 @@ void MtcUiNotifier::SendCallPushCompleted(
     {
         return;
     }
+}
+
+PUBLIC VIRTUAL void MtcUiNotifier::SendRatChanged(IN IMS_SINT32 eRatType)
+{
+    IMS_TRACE_I("SendRatChanged RAT=%d", eRatType, 0, 0);
+
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
+    {
+        return;
+    }
+
+    piThread->OnRatChanged(eRatType);
 }
 
 PRIVATE

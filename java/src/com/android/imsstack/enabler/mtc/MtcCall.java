@@ -76,7 +76,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         public void onCallInitiating(MtcCall call,
-                CallInfo callInfo, MediaInfo mediaInfo) {
+                CallInfo callInfo, MediaInfo mediaInfo, int ratType) {
             // no-op
         }
 
@@ -183,7 +183,15 @@ public class MtcCall extends Call implements ConferenceTracker {
         /**
          * When incoming call received, notify ImsCallManager.
          */
-        public void onCallIncomingReceived(MtcCall call, IncomingMtcCall incomingCall) {
+        public void onCallIncomingReceived(
+                MtcCall call, IncomingMtcCall incomingCall, int ratType) {
+            // no-op
+        }
+
+        /**
+         * called when network is changed.
+         */
+        public void onCallRatChanged(int ratType) {
             // no-op
         }
 
@@ -1291,7 +1299,7 @@ public class MtcCall extends Call implements ConferenceTracker {
      */
     public void invokeIncomingCallReceivedForAutoRejecting(IncomingMtcCall incomingCall) {
         log("invokeIncomingCallReceivedForAutoRejecting");
-        mNativeListener.onIncomingCallReceived(incomingCall);
+        mNativeListener.onIncomingCallReceived(incomingCall, 0);
     }
 
     private boolean checkAndHandleMediaMessage(int msg, Parcel parcel) {
@@ -1802,8 +1810,9 @@ public class MtcCall extends Call implements ConferenceTracker {
                 case IUMtcCall.INITIATING: {
                     CallInfo callInfo = new CallInfo(parcel);
                     MediaInfo mediaInfo = new MediaInfo(parcel);
+                    int ratType = parcel.readInt();
 
-                    onInitiating(callInfo, mediaInfo);
+                    onInitiating(callInfo, mediaInfo, ratType);
                     break;
                 }
                 case IUMtcCall.PROGRESSING: {
@@ -1917,7 +1926,13 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.INCOMING_CALL_RECEIVED: {
-                    onIncomingCallReceived(new IncomingMtcCall(parcel));
+                    IncomingMtcCall incomingCall = new IncomingMtcCall(parcel);
+                    int ratType = parcel.readInt();
+                    onIncomingCallReceived(incomingCall, ratType);
+                    break;
+                }
+                case IUMtcCall.NETWORK_CHANGED: {
+                    onRatChanged(parcel.readInt());
                     break;
                 }
                 case IUMtcCall.ECT_COMPLETED: {
@@ -1991,11 +2006,11 @@ public class MtcCall extends Call implements ConferenceTracker {
             closeInternal(MtcCall.this);
         }
 
-        private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo) {
+        private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo, int ratType) {
             logi("INITIATING");
 
             if (mListener != null) {
-                mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo);
+                mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo, ratType);
             }
         }
 
@@ -2302,7 +2317,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        private void onIncomingCallReceived(IncomingMtcCall incomingCall) {
+        private void onIncomingCallReceived(IncomingMtcCall incomingCall, int ratType) {
             logi("INCOMING_CALL_RECEIVED");
             setDetails(Details.ON_PRE_INCOMING, false);
             setRemoteNumber(incomingCall.callerPartyNum);
@@ -2312,7 +2327,13 @@ public class MtcCall extends Call implements ConferenceTracker {
                     MtcCall.this, CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
 
             if (mListener != null) {
-                mListener.onCallIncomingReceived(MtcCall.this, incomingCall);
+                mListener.onCallIncomingReceived(MtcCall.this, incomingCall, ratType);
+            }
+        }
+
+        private void onRatChanged(int ratType) {
+            if (mListener != null) {
+                mListener.onCallRatChanged(ratType);
             }
         }
 

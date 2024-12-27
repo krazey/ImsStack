@@ -86,6 +86,7 @@ public:
     static const IMS_SINT32 INCOMING_RESUME = (EVENT_I2U + 17);
     static const IMS_SINT32 SET_PROPERTY = (EVENT_I2U + 18);
     static const IMS_SINT32 INCOMING_CALL_RECEIVED = (EVENT_I2U + 19);
+    static const IMS_SINT32 NETWORK_CHANGED = (EVENT_I2U + 20);
 
     static const IMS_SINT32 CONF_EXPANDED = (EVENT_CONF_I2U + 1);
     static const IMS_SINT32 CONF_EXPANDFAILED = (EVENT_CONF_I2U + 2);

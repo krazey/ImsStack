@@ -125,12 +125,15 @@ TEST_F(MtcUiNotifierTest, SendPreIncomingCallReceived)
 
 TEST_F(MtcUiNotifierTest, SendIncomingCallReceived)
 {
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _)).Times(1);
+    MockIMtcService objService;
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, GetRatType).WillByDefault(Return(0));
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _, 0)).Times(1);
 
     pNotifier->SendIncomingCallReceived();
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _, 0)).Times(0);
     pNotifier->SendIncomingCallReceived();
 }
 
@@ -176,11 +179,14 @@ TEST_F(MtcUiNotifierTest, SendStartFailed)
 
 TEST_F(MtcUiNotifierTest, SendInitiating)
 {
-    EXPECT_CALL(objMockCallThread, OnInitiating(_, _)).Times(1);
+    MockIMtcService objService;
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, GetRatType).WillByDefault(Return(0));
+    EXPECT_CALL(objMockCallThread, OnInitiating(_, _, 0)).Times(1);
     pNotifier->SendInitiating();
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnInitiating(_, _)).Times(0);
+    EXPECT_CALL(objMockCallThread, OnInitiating(_, _, 0)).Times(0);
     pNotifier->SendInitiating();
 }
 

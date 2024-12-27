@@ -119,7 +119,7 @@ TEST_F(JniMtcCallThreadTest, OnInitiating)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnInitiating(objCallInfo, objMediaInfo);
+    pJniCallThread->OnInitiating(objCallInfo, objMediaInfo, 0);
 }
 
 TEST_F(JniMtcCallThreadTest, OnProgressing)
@@ -387,7 +387,7 @@ TEST_F(JniMtcCallThreadTest, OnIncomingCallReceived)
 
     ImsList<ConfUser*> objUsers;
     pJniCallThread->OnIncomingCallReceived(
-            1, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "");
+            1, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", 0);
 }
 
 TEST_F(JniMtcCallThreadTest, OnInformationNotificationReceived)

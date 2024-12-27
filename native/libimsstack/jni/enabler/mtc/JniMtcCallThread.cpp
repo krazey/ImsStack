@@ -60,12 +60,13 @@ void JniMtcCallThread::OnStartFailed(IN const CallReasonInfo& objReason)
 
 PUBLIC
 void JniMtcCallThread::OnInitiating(
-        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo)
+        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo, IN IMS_SINT32 eRatType)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::INITIATING);
     JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
     JniMtcUtils::WriteMediaInfoToParcel(objMediaInfo, objParcel);
+    objParcel.writeInt32(eRatType);
     SendData2Java(objParcel);
 }
 
@@ -286,7 +287,7 @@ void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const CallReason
 void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
         IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
         IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-        IN const AString& strRemoteNumber)
+        IN const AString& strRemoteNumber, IN IMS_SINT32 eRatType)
 {
     IMS_TRACE_D("OnIncomingCallReceived", 0, 0, 0);
     Parcel objParcel;
@@ -305,6 +306,10 @@ void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
     /* Supp Info */
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
 
+    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
+
+    objParcel.writeInt32(eRatType);
+
     SendData2Java(objParcel);
 }
 
@@ -317,6 +322,15 @@ void JniMtcCallThread::OnInformationNotificationReceived(
     objParcel.writeString16(android::String16(strValue.GetStr()));
     objParcel.writeInt32(nValue);
     objParcel.writeInt32(bValue);
+
+    SendData2Java(objParcel);
+}
+
+void JniMtcCallThread::OnRatChanged(IN IMS_SINT32 eRatType)
+{
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::NETWORK_CHANGED);
+    objParcel.writeInt32(eRatType);
 
     SendData2Java(objParcel);
 }
