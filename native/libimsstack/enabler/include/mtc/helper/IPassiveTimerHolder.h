@@ -37,6 +37,7 @@ public:
         PRE_ALERTING_GUARD,
         REGISTRATION_TO_18X,
         SILENT_REDIAL_MAX_DURATION,
+        RTT_AUTO_UPGRADE_GUARD,
     };
 
     virtual ~IPassiveTimerHolder() = default;

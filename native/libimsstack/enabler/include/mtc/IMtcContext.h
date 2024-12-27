@@ -42,6 +42,7 @@ class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class ISubscriberConfig;
 class MtcConfigurationProxy;
+class RttAutoUpgrader;
 class OperationAsyncRunner;
 
 class IMtcContext
@@ -232,6 +233,20 @@ public:
      * @return
      */
     virtual CallConnectionIdManager& GetCallConnectionIdManager() = 0;
+
+    /**
+     * @brief Creates
+     *
+     * @return
+     */
+    virtual void CreateRttAutoUpgrader() = 0;
+
+    /**
+     * @brief Destroy
+     *
+     * @return
+     */
+    virtual void DestroyRttAutoUpgrader() = 0;
 
     /**
      * @brief Checks

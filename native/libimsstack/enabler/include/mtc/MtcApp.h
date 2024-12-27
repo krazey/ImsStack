@@ -60,6 +60,7 @@ class IPassiveTimerHolder;
 class LastComeFirstServedHelper;
 class MtcTimerWrapper;
 class OperationAsyncRunner;
+class RttAutoUpgrader;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {
@@ -116,6 +117,8 @@ public:
         return m_objCallConnectionIdManager;
     }
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
+    void CreateRttAutoUpgrader() override;
+    void DestroyRttAutoUpgrader() override;
 
 protected:
     virtual void CreateServices();
@@ -142,6 +145,7 @@ protected:
     MtcRadioChecker m_objMtcRadioChecker;
     std::unique_ptr<LastComeFirstServedHelper> m_pLastComeFirstServedHelper;
     CallConnectionIdManager m_objCallConnectionIdManager;
+    std::unique_ptr<RttAutoUpgrader> m_pRttAutoUpgrader;
 
     IMS_BOOL m_bWifiTestMode;
 };
