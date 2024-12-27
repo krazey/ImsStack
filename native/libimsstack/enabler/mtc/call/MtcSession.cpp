@@ -379,7 +379,8 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
     lstExtensions.Append(new MtcExtension(
             m_objContext, MtcExtensionSet::OPTION_TAG_HISTORY_INFO, {RequestType::START}, {}));
     lstExtensions.Append(
-            new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_REPLACES, {}, {}));
+            new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_REPLACES,
+            {RequestType::START}, {ResponseType::PROVISIONAL_RESPONSE}));
     lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG,
             {RequestType::START}, {ResponseType::ACCEPT}));
     lstExtensions.Append(new MtcExtension(m_objContext,
