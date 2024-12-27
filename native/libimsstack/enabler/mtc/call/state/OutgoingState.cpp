@@ -286,6 +286,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
         m_objContext.GetTimer().Start(TIMER_RETRY_UPDATE, objReason.nExtraCode);
         return GetStateName();
     }
+
+    if (MultipleDialogHandler().OnDialogRequestFailed(m_objContext,
+                *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
+    {
+        return GetStateName();
+    }
+
     HandleCancel(piSession, objReason);
     OnStartFailed(objReason);
 
@@ -347,7 +354,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
     m_objContext.GetMediaManager().CreateMediaProfile(piForkedSession, IMS_TRUE, IMS_TRUE);
     m_objContext.GetPreconditionManager().CreateQos(piForkedSession);
 
-    OnSessionForked(piSession);
+    MultipleDialogHandler().OnSessionForked(m_objContext, m_objContext.GetSession(piSession));
 
     // TODO: need any timer for the forked session?
 
@@ -415,6 +422,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
                 ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
     {
         IMS_TRACE_D("SessionPrackDeliveryFailed : Ignore", 0, 0, 0);
+        return GetStateName();
+    }
+
+    if (MultipleDialogHandler().OnDialogRequestFailed(m_objContext,
+                *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
+    {
         return GetStateName();
     }
 
@@ -556,6 +569,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
+        if (MultipleDialogHandler().OnUnavailableDialogCreated(m_objContext,
+                    *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
+        {
+            return GetStateName();
+        }
         CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(objReason);
@@ -827,7 +845,7 @@ CallStateName OutgoingState::HandleSilentRedial(
 PRIVATE
 void OutgoingState::OnStarted(IN IMtcSession& objMtcSession)
 {
-    MultipleDialogHandler().OnCallConnected(m_objContext, objMtcSession);
+    MultipleDialogHandler().OnStarted(m_objContext, objMtcSession);
 
     // TODO: stop call init timers
 
@@ -851,28 +869,4 @@ void OutgoingState::OnStartFailed(
     }
 
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
-}
-
-PRIVATE
-void OutgoingState::OnSessionForked(IN ISession* piOriginSession)
-{
-    if (m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL))
-    {
-        return;
-    }
-
-    IMtcSession* pOriginMtcSession = m_objContext.GetSession(piOriginSession);
-    if (pOriginMtcSession == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("OnSessionForked : Terminate previous session", 0, 0, 0);
-
-    pOriginMtcSession->Terminate(
-            IMS_TRUE, CallReasonInfo(CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED));
-
-    m_objContext.GetMediaManager().DestroyMediaProfile(piOriginSession);
-    m_objContext.RemoveSession(*pOriginMtcSession);
 }

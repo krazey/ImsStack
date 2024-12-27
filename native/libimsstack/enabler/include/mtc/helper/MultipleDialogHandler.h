@@ -25,12 +25,22 @@ class IMtcSession;
 class MultipleDialogHandler final
 {
 public:
+    enum class Result
+    {
+        HANDLED = 0,
+        NOT_HANDLED,
+    };
+
     MultipleDialogHandler();
     virtual ~MultipleDialogHandler() = default;
     MultipleDialogHandler(IN const MultipleDialogHandler&) = delete;
     MultipleDialogHandler& operator=(IN const MultipleDialogHandler&) = delete;
 
-    void OnCallConnected(IN IMtcCallContext& objContext, IN IMtcSession& objSession);
+    void OnStarted(IN IMtcCallContext& objContext, IN IMtcSession& objSession);
+    void OnSessionForked(IN IMtcCallContext& objContext, IN IMtcSession* piOriginalMtcSession);
+    Result OnDialogRequestFailed(IN IMtcCallContext& objContext, IN IMtcSession& objMtcSession);
+    Result OnUnavailableDialogCreated(
+            IN IMtcCallContext& objContext, IN IMtcSession& objMtcSession);
 };
 
 #endif

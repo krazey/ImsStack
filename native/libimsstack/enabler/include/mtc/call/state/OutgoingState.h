@@ -80,7 +80,6 @@ private:
     void OnStarted(IN IMtcSession& objMtcSession);
     void OnStartFailed(
             IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
-    void OnSessionForked(IN ISession* piOriginSession);
 
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
     IMS_BOOL m_bTimer100WaitExpired;
