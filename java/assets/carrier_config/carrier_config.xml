@@ -376,6 +376,7 @@
     <boolean name="ims.sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
     <boolean name="ims.support_contact_user_info_bool" value="true"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="false"/>
+    <boolean name="ims.support_verstat_based_on_network_for_reg_bool" value="false"/>
     <boolean name="ims.support_verstat_for_reg_bool" value="false"/>
     <boolean name="ims.use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="ims.use_security_server_port_in_init_reg_bool" value="false"/>

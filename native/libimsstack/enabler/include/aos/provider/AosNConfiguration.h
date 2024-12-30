@@ -103,6 +103,7 @@ public:
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
+    IMS_BOOL IsVerstatSupportedBasedOnNetworkForReg() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
     IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
     IMS_BOOL IsVideoSupportedForEmergencyReg() const override;

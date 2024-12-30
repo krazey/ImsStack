@@ -271,6 +271,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_CONTACT_USER_INFO_BOOL[] =
         KEY_IMS_PREFIX "support_contact_user_info_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL[] =
         KEY_IMS_PREFIX "support_reg_with_feature_tag_unavailable_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL[] =
+        KEY_IMS_PREFIX "support_verstat_based_on_network_for_reg_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
         KEY_IMS_PREFIX "support_verstat_for_reg_bool";
 const IMS_CHAR

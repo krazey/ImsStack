@@ -522,9 +522,17 @@ public:
     /**
      * @brief Flag specifying if verstat is supported for registration or not
      *
-     * @return IMS_BOOL Return wherther to be supported or not
+     * @return IMS_BOOL Return whether to be supported or not
      */
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
+
+    /**
+     * @brief Flag specifying if verstat is supported only when +g.3gpp.verstat feature tag is
+     *        present in the 200 OK response to REGISTER message.
+     *
+     * @return IMS_BOOL Return TRUE if network feature is required for verstat, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsVerstatSupportedBasedOnNetworkForReg() const = 0;
 
     /**
      * @brief Flag specifying if service fallback is required when voice call is unavailable.

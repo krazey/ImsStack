@@ -435,6 +435,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() c
     return m_objAsset.bSupportVerstatForReg;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatSupportedBasedOnNetworkForReg() const
+{
+    return m_objAsset.bSupportVerstatBasedOnNetworkForReg;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const
 {
     return m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
@@ -1416,6 +1421,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportRegWithFeatureTagUnavailable =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
+    m_objAsset.bSupportVerstatBasedOnNetworkForReg =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL);
     m_objAsset.bSupportVerstatForReg =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
     m_objAsset.bSupportVideoForEmergencyReg =

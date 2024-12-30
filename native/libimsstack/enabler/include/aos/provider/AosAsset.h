@@ -56,6 +56,7 @@ public:
             bSupportContactUserInfo(IMS_TRUE),
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
+            bSupportVerstatBasedOnNetworkForReg(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
             bSupportVideoForEmergencyReg(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
@@ -145,6 +146,7 @@ public:
     IMS_BOOL bSupportContactUserInfo;
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
+    IMS_BOOL bSupportVerstatBasedOnNetworkForReg;
     IMS_BOOL bSupportVerstatForReg;
     IMS_BOOL bSupportVideoForEmergencyReg;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
