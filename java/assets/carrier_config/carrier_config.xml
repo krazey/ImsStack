@@ -222,6 +222,19 @@
     </int-array>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="false"/>
+    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
+        <int name="imsrtt.t140_payload_type_int" value="111"/>
+        <int name="imsrtt.red_payload_type_int" value="112"/>
+    </pbundle>
+    <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
+    <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="5"/>
+    </int-array>
+    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
+    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
+
 <!-- media additional -->
     <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string"></string>
