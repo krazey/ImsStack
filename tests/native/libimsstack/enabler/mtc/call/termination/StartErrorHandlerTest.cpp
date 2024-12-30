@@ -391,48 +391,92 @@ TEST_F(StartErrorHandlerTest, Handle380Response)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
 }
 
-TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCall)
+TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCallInvalidContactHeader)
 {
     SetMessageCode(SipStatusCode::SC_380);
     SetActionConfig(SipStatusCode::SC_380,
             ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL);
 
-    IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_POLICE;
-    // by configuration
+    IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_INVALID;
     ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(pMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(nCategoryInContact));
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
+}
+
+TEST_F(StartErrorHandlerTest,
+        Handle380ResponseWithUeUnDetectableEmergencyCallPathIsNotTheSameAsPai)
+{
+    SetMessageCode(SipStatusCode::SC_380);
+    SetActionConfig(SipStatusCode::SC_380,
+            ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL);
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::
+            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    AString strAnyPath("sip:anyPath");
+    AString strPai("sip:anyPai");
+    ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strAnyPath)));
+    ON_CALL(objMessageUtils, GetHeaderValue(pMessage, ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(AString(strPai)));
+
+    IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_POLICE;
+    ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(pMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(nCategoryInContact));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
+}
+
+TEST_F(StartErrorHandlerTest,
+        Handle380ResponseWithUeUnDetectableEmergencyCallCheckAlternativeServiceType)
+{
+    SetMessageCode(SipStatusCode::SC_380);
+    SetActionConfig(SipStatusCode::SC_380,
+            ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL);
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::
+            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
-    // no Non UE Detectable ECC but contains AlternativeService TYPE_EMERGENCY
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::
-                            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
+    IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_POLICE;
+    ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(pMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(nCategoryInContact));
+
+    Ims3gppData objIms3gppData;
+    objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
+    objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_EMERGENCY;
+    ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_POLICE));
+
+    objIms3gppData.eType = Ims3gpp::TYPE_UNKNOWN;
+    ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
+}
+
+TEST_F(StartErrorHandlerTest,
+        Handle380ResponseWithUeUnDetectableEmergencyCallWithCountrySpecificUrn)
+{
+    SetMessageCode(SipStatusCode::SC_380);
+    SetActionConfig(SipStatusCode::SC_380,
+            ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL);
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigEmergency::
+            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     Ims3gppData objIms3gppData;
     objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
     objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_EMERGENCY;
     ON_CALL(objMessageUtils, GetIms3gppData(pMessage)).WillByDefault(Return(objIms3gppData));
 
-    // Non UE Detectable : No path feature tag (empty tag)
-    ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString()));
+    IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC;
+    ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(pMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(nCategoryInContact));
 
-    // Non UE Detectable : No path feature tag (other tag)
-    ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString("any")));
-
-    // no Non UE Detectable : path feature tag exists but Path header value is different
-    ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString("path")));
-    AString strAnyPath("sip:anyPath");
-    ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strAnyPath)));
-    ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strAnyPath))
-            .WillByDefault(Return(IMS_FALSE));
-
-    // Non UE Detectable
-    ON_CALL(objMessageUtils, ContainsAddressInPaid(pMessage, strAnyPath))
-            .WillByDefault(Return(IMS_TRUE));
+    AString strCountrySpecificUrn("urn:service:sos.country-specific.xy.567");
+    ON_CALL(objMessageUtils, GetUri(pMessage, IMS_FALSE, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(strCountrySpecificUrn));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL,
+            EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC, strCountrySpecificUrn));
 }
 
 TEST_F(StartErrorHandlerTest, Handle4xxResponses)
