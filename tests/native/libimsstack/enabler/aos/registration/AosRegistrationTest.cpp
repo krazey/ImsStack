@@ -95,6 +95,7 @@ using ::testing::SetArgReferee;
     using Base::CallTracker_StateChanged;                         \
     using Base::CheckPending;                                     \
     using Base::CleanUp;                                          \
+    using Base::ClearCallingNumberVerification;                   \
     using Base::ClearIpsecBlock;                                  \
     using Base::ClearPcscf;                                       \
     using Base::ClearRetryCount;                                  \
@@ -177,6 +178,7 @@ using ::testing::SetArgReferee;
     using Base::Transaction_OnConnectionFailed;                   \
     using Base::Transaction_OnTrafficPriorityChanged;             \
     using Base::TryNextPcscf;                                     \
+    using Base::UpdateCallingNumberVerification;                  \
     using Base::UpdateFeatureTag;                                 \
     using Base::UpdateIpsecSupported;                             \
     using Base::UpdatePreloadedRoute;                             \
@@ -275,9 +277,13 @@ public:
         m_nErrorCountForServerSocket = AosRegistration::RECONNECT_SERVER_SOCKET_ERROR_MAX_COUNT;
     }
     inline IMS_UINT32 GetMaxErrorCountForServerSocket() { return m_nErrorCountForServerSocket; }
-    inline void SetCallingNumberVerificationSupported(IMS_BOOL bSurpported)
+    inline void SetCallingNumberVerificationSupported(IMS_BOOL bSupported)
     {
-        m_bCallingNumberVerificationSupported = bSurpported;
+        m_bCallingNumberVerificationSupported = bSupported;
+    }
+    inline IMS_BOOL IsCallingNumberVerificationSupported()
+    {
+        return m_bCallingNumberVerificationSupported;
     }
     inline IMS_UINT32 GetNetworkBindingFeatures() { return m_nNetworkBindingFeatures; }
     inline void SetEps5GsOnly(IMS_BOOL bEps5GsOnly) { m_bEps5GsOnly = bEps5GsOnly; }
@@ -6292,4 +6298,95 @@ TEST_F(AosRegistrationTest, ShouldSetAllPcscfValidWhenClearPcscf)
     m_pAosRegistration->ClearPcscf();
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest,
+        NoUpdateCallingNumberVerificationIfSupportVerstatRegardlessOfNetworkFeature)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->UpdateCallingNumberVerification());
+}
+
+TEST_F(AosRegistrationTest, NoUpdateCallingNumberVerificationIfIRegisrationIsNull)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->UpdateRegInstances(nullptr, &m_objMockAosSubscription,
+            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->UpdateCallingNumberVerification());
+}
+
+TEST_F(AosRegistrationTest, VerstatIsSupportedIfNetworkFeatureExists)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString(AosString::STR_VERSTAT_FEATURE));
+    ON_CALL(m_objMockISipMessage, GetHeaders(ISipHeader::FEATURE_CAPS, _))
+            .WillByDefault(Return(objHeaders));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosRegistration->UpdateCallingNumberVerification());
+
+    // THEN
+    EXPECT_TRUE(m_pAosRegistration->IsCallingNumberVerificationSupported());
+}
+
+TEST_F(AosRegistrationTest, VerstatIsNotSupportedIfNetworkFeatureNotExist)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<AString> objHeaders;
+    ON_CALL(m_objMockISipMessage, GetHeaders(ISipHeader::FEATURE_CAPS, _))
+            .WillByDefault(Return(objHeaders));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosRegistration->UpdateCallingNumberVerification());
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsCallingNumberVerificationSupported());
+}
+
+TEST_F(AosRegistrationTest, ShouldResetVerstatToNotSupportedWhenClearing)
+{
+    // GIVEN
+    m_pAosRegistration->SetCallingNumberVerificationSupported(IMS_TRUE);
+
+    // WHEN
+    m_pAosRegistration->ClearCallingNumberVerification();
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsCallingNumberVerificationSupported());
+}
+
+TEST_F(AosRegistrationTest,
+        ShouldNotRemoveVerstatFeatureFromHandleWhenClearingIfConfiguredToNotConsiderNetworkFeature)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosAppContext, GetHandle(ImsAosService::MTC))
+            .WillByDefault(Return(&m_objMockIAosHandle));
+    ON_CALL(m_objMockIAosHandle, GetServiceType()).WillByDefault(Return(ImsAosService::MTC));
+
+    AosFeatureTagList objBindedList;
+    objBindedList.AddFeature(ImsAosFeature::VERSTAT);
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+
+    // WHEN
+    m_pAosRegistration->ClearCallingNumberVerification();
+
+    // THEN
+    EXPECT_TRUE(objBindedList.HasFeature(ImsAosFeature::VERSTAT));
 }

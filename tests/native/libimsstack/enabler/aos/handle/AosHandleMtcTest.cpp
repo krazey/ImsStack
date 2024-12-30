@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
@@ -51,8 +52,10 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SetArgReferee;
 
 #define DECLARE_USING(Base)             \
     using Base::GetFeatures;            \
@@ -156,6 +159,9 @@ protected:
                 IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(IMS_FALSE));
+
+        ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+                .WillByDefault(Return(IMS_TRUE));
 
         m_piAosService = AosProvider::GetInstance()->GetService();
         AosProvider::GetInstance()->SetService(static_cast<IAosService*>(&m_objMockIAosService));
@@ -572,6 +578,54 @@ TEST_F(AosHandleMtcTest,
 
     // THEN
     EXPECT_EQ(nFeatures, nExpectedFeatures);
+}
+
+TEST_F(AosHandleMtcTest, ShouldAddVerstatFeatureIfConfiguredToNotConsiderNetworkFeature)
+{
+    // GIVEN
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    IMS_UINT32 nFeatures = m_pAosHandleMtc->GetFeatures();
+
+    // THEN
+    EXPECT_TRUE((nFeatures & ImsAosFeature::VERSTAT) > 0);
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotAddVerstatFeatureIfNoNetworkFeature)
+{
+    // GIVEN
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION, _, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(AosSupportability::NOT_SUPPORTED), Return(0)));
+
+    // WHEN
+    IMS_UINT32 nFeatures = m_pAosHandleMtc->GetFeatures();
+
+    // THEN
+    EXPECT_FALSE((nFeatures & ImsAosFeature::VERSTAT) > 0);
+}
+
+TEST_F(AosHandleMtcTest, ShouldAddVerstatFeatureIfNetworkFeatureExists)
+{
+    // GIVEN
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION, _, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(AosSupportability::SUPPORTED), Return(0)));
+
+    // WHEN
+    IMS_UINT32 nFeatures = m_pAosHandleMtc->GetFeatures();
+
+    // THEN
+    EXPECT_TRUE((nFeatures & ImsAosFeature::VERSTAT) > 0);
 }
 
 TEST_F(AosHandleMtcTest, App_Notify_Test)
