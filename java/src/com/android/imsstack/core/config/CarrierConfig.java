@@ -78,6 +78,7 @@ public class CarrierConfig {
         CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL,
         CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL,
         CarrierConfigManager.KEY_GBA_MODE_INT,
+        CarrierConfigManager.KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY,
 
         // Internal usage temporarily
         CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL,

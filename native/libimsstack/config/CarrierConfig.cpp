@@ -57,6 +57,8 @@ const IMS_CHAR CarrierConfig::KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL[] =
         "support_ims_conference_event_package_bool";
 const IMS_CHAR CarrierConfig::KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL[] =
         "support_ims_conference_event_package_on_peer_bool";
+const IMS_CHAR CarrierConfig::KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY[] =
+        "iwlan_handover_policy_string_array";
 // Public carrier-config - ends
 
 //// Ims

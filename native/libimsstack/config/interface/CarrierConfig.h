@@ -51,6 +51,7 @@ public:
     static const IMS_CHAR KEY_RTT_DOWNGRADE_SUPPORTED_BOOL[];
     static const IMS_CHAR KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL[];
     static const IMS_CHAR KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL[];
+    static const IMS_CHAR KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY[];
     // Public carrier-config - ends
 
     // USSD Method

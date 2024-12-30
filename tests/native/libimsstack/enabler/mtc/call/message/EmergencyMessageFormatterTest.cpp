@@ -320,6 +320,83 @@ TEST_F(EmergencyMessageFormatterTest, FormStartMessageAddsPeiHeaderWithMacAddres
     EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 
+TEST_F(EmergencyMessageFormatterTest,
+        FormStartMessageDoesNotAddPComServiceTypeHeaderIfNotConfigured)
+{
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_COM_SERVICETYPE))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ImsVector<AString> lstRules;
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(CarrierConfig::KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY))
+            .WillByDefault(Return(lstRules));
+
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(_, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, AString("Static-Emergency"), ISipHeader::UNKNOWN,
+                    AString("P-Com.ServiceType")))
+            .Times(0);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest,
+        FormStartMessageDoesNotAddPComServiceTypeHeaderIfWifiToLteHandoverIsAllowed)
+{
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_COM_SERVICETYPE))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<AString> lstRules;
+    lstRules.Add("source=UNKNOWN, target=EUTRAN|GERAN, type=allowed, capabilities=EIMS|XCAP");
+    lstRules.Add("source=GERAN|IWLAN|UNKNOWN, target=EUTRAN|GERAN, type=allowed, "
+                 "capabilities=EIMS|XCAP");
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(CarrierConfig::KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY))
+            .WillByDefault(Return(lstRules));
+
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(_, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, AString("Static-Emergency"), ISipHeader::UNKNOWN,
+                    AString("P-Com.ServiceType")))
+            .Times(0);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest,
+        FormStartMessageAddsPComServiceTypeHeaderIfWifiToLteHandoverIsDisallowed)
+{
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_COM_SERVICETYPE))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<AString> lstRules;
+    lstRules.Add(
+            "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN|UNKNOWN, target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
+            "roaming=true, type=disallowed, capabilities=IMS|EIMS|MMS|XCAP|CBS");
+    lstRules.Add("source=IWLAN|UNKNOWN, target=GERAN|UTRAN, type=disallowed, "
+                 "capabilities=IMS|EIMS|MMS|XCAP|CBS");
+    lstRules.Add("source=GERAN|UTRAN, target=IWLAN, type=disallowed, "
+                 "capabilities=IMS|EIMS|MMS|XCAP|CBS");
+    lstRules.Add("source=EUTRAN|NGRAN|IWLAN|UNKNOWN, target=EUTRAN|NGRAN|IWLAN, type=disallowed, "
+                 "capabilities=EIMS");
+    lstRules.Add("source=EUTRAN|NGRAN|IWLAN, target=EUTRAN|NGRAN|IWLAN, type=allowed, "
+                 "capabilities=IMS|MMS|XCAP|CBS");
+
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(CarrierConfig::KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY))
+            .WillByDefault(Return(lstRules));
+
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(_, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, AString("Static-Emergency"), ISipHeader::UNKNOWN,
+                    AString("P-Com.ServiceType")));
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
 TEST_F(EmergencyMessageFormatterTest, GetAoSRegMode)
 {
     ON_CALL(objContext, GetAosConnector).WillByDefault(Return(nullptr));

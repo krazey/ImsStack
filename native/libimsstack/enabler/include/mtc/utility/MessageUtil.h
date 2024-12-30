@@ -78,6 +78,8 @@ public:
     static const IMS_CHAR STR_AVCHANGE[];
     static const IMS_CHAR STR_REASON_USER_SESSIONEXPIRED[];
     static const IMS_CHAR STR_P_COM_ENABLETRANSCODING[];
+    static const IMS_CHAR STR_P_COM_SERVICETYPE[];
+    static const IMS_CHAR STR_STATIC_EMERGENCY[];
 };
 
 #endif

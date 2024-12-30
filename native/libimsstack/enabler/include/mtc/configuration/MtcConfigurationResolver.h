@@ -22,6 +22,7 @@
 #include "CarrierConfig.h"
 #include "ConfigDef.h"
 #include "IImsAosInfo.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "ImsVector.h"
 #include "TextParser.h"
@@ -211,6 +212,70 @@ public:
             default:
                 return AString::ConstEmpty();
         }
+    }
+
+    inline static IMS_BOOL IsCallHandoverAllowed(IN const MtcConfigurationProxy& objProxy,
+            IN const AString& strSource, IN const AString& strTarget, IN const IMS_BOOL bEmergency,
+            IN const IMS_BOOL bRoaming)
+    {
+        ImsVector<AString> lstRules =
+                objProxy.GetStringArray(CarrierConfig::KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY);
+        for (IMS_SINT32 i = static_cast<IMS_SINT32>(lstRules.GetSize()) - 1; i >= 0; i--)
+        {
+            ImsList<AString> lstRule = lstRules[i].Split(TextParser::CHAR_COMMA);
+            AString strSourceRule;
+            AString strTargetRule;
+            AString strTypeRule;
+            AString strCapabilitiesRule;
+            IMS_BOOL bRoamingOnlyRule = IMS_FALSE;
+
+            for (IMS_UINT32 j = 0; j < lstRule.GetSize(); j++)
+            {
+                AString strKey;
+                AString strValue;
+                lstRule.GetAt(j).SplitF(TextParser::CHAR_EQUAL, strKey, strValue);
+
+                if (strKey.Equals("source"))
+                {
+                    strSourceRule = strValue;
+                }
+                else if (strKey.Equals("target"))
+                {
+                    strTargetRule = strValue;
+                }
+                else if (strKey.Equals("type"))
+                {
+                    strTypeRule = strValue;
+                }
+                else if (strKey.Equals("capabilities"))
+                {
+                    strCapabilitiesRule = strValue;
+                }
+                else if (strKey.Equals("roaming"))
+                {
+                    bRoamingOnlyRule = strValue.EqualsIgnoreCase("true");
+                }
+            }
+
+            if ((bRoamingOnlyRule && !bRoaming) ||
+                    (bEmergency && !strCapabilitiesRule.Contains("EIMS")) ||
+                    (!bEmergency && !strCapabilitiesRule.Contains("IMS")) ||
+                    !strSourceRule.Contains(strSource) || !strTargetRule.Contains(strTarget))
+            {
+                continue;  // Not matching, find other rules
+            }
+
+            if (strTypeRule.Equals("allowed"))
+            {
+                return IMS_TRUE;
+            }
+            else if (strTypeRule.Equals("disallowed"))
+            {
+                return IMS_FALSE;
+            }
+        }
+
+        return IMS_FALSE;
     }
 
 private:

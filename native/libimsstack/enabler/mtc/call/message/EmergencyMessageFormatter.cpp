@@ -75,6 +75,7 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallTyp
     SetRecvInfoHeader();
     SetPEmergencyInfoHeader();
     SetSipInstanceFeature();
+    SetPComServiceTypeHeader();
 
     return IMS_SUCCESS;
 }
@@ -298,6 +299,27 @@ void EmergencyMessageFormatter::SetPEmergencyInfoHeader()
 
     m_objContext.GetMessageUtils().AddValueIfNotExists(
             m_piNextMessage, strPei, ISipHeader::UNKNOWN, HEADER_P_EMERGENCY_INFO);
+}
+
+PRIVATE
+void EmergencyMessageFormatter::SetPComServiceTypeHeader()
+{
+    if (!m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                MessageUtil::STR_P_COM_SERVICETYPE))
+    {
+        return;
+    }
+
+    if (MtcConfigurationResolver::IsCallHandoverAllowed(m_objContext.GetConfigurationProxy(),
+                "IWLAN", "EUTRAN", IMS_TRUE, m_objContext.GetService().IsRoaming()))
+    {
+        return;
+    }
+
+    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
+            MessageUtil::STR_STATIC_EMERGENCY, ISipHeader::UNKNOWN,
+            MessageUtil::STR_P_COM_SERVICETYPE);
 }
 
 PRIVATE

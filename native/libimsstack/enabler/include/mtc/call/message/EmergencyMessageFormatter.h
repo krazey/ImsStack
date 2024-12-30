@@ -51,6 +51,7 @@ private:
     void SetRecvInfoHeader();
     void SetPEmergencyInfoHeader();
     void SetSipInstanceFeature();
+    void SetPComServiceTypeHeader();
 
     IMS_UINT32 GetAosRegMode(IN ServiceType eServiceType) const;
     AString GetLocalAddress() const;

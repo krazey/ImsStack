@@ -198,8 +198,7 @@
     <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="true"/>
     <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="3">
         <item value="P-Com.ServiceType"/>
-        <item value="P-Com.E911ServiceType"/>
-        <item value="Reason.User.SessionExpired"/>
+        <item value="Reason.User.SessionExpired"/> <!-- Reason header -->
     </string-array>
     <boolean name="imsemergency.block_wifi_emergency_call_if_not_provisioned_bool" value="true"/>
     <boolean name="imsvoice.support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>

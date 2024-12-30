@@ -53,6 +53,8 @@
     <boolean name="rtt_downgrade_supported_bool" value=""/>
     <int name="gba_mode_int" value="" />
     <boolean name="ignore_data_enabled_changed_for_video_calls" value=""/>
+    <string-array name="iwlan_handover_policy_string_array" num="0">
+    </string-array>
 
     <!-- vilte_data_is_metered_bool -->
     <!-- carrier_default_wfc_ims_mode_int -->
