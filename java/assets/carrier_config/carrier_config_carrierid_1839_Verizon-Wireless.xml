@@ -196,7 +196,7 @@
     <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="603"/>
     <boolean name="imsvt.set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="true"/>
     <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="true"/>
-    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="3">
+    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="2">
         <item value="P-Com.ServiceType"/>
         <item value="Reason.User.SessionExpired"/> <!-- Reason header -->
     </string-array>
