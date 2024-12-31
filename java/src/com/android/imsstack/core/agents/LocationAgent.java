@@ -124,6 +124,10 @@ public class LocationAgent implements LocationInterface {
     private long mCachedTimeMotionDetected = 0L;
     private String mLastKnownCountryCode = GeocoderProxy.UNKNOWN_COUNTRY;
 
+    // b/362156367 - support confidence of 90% by following scale factors
+    private static final float HORIZONTAL_SCALE_FACTOR = 1.42155f;
+    private static final float VERTICAL_SCALE_FACTOR = 1.645f;
+
     private LocationApi.Listener mLocationListener = new LocationApi.Listener () {
         public void onLocationChanged(Location location) {
             ImsLog.d(this, mSlotId, "onLocationChanged: " + LocationApi.getProvider(location));
@@ -637,9 +641,6 @@ public class LocationAgent implements LocationInterface {
             return null;
         }
 
-        // confidence is defined as 68
-        int confidence = 68;
-
         String method = "";
 
         if (LocationApi.isLocationFromGps(location)) {
@@ -660,9 +661,6 @@ public class LocationAgent implements LocationInterface {
         } else if (LocationApi.isLocationFromFlp(location)) {
             method = "Hybrid_A-GPS";
         }
-
-        ImsLog.d(this, mSlotId, method + ": accuracy=" + location.getAccuracy()
-                + ", category=" + category);
 
         if (TextUtils.isEmpty(method)) {
             return null;
@@ -714,19 +712,30 @@ public class LocationAgent implements LocationInterface {
             }
         }
 
+        // b/362156367 - confidence is defined as 90
+        int confidence = 90;
+        float h_accuracy = location.getAccuracy() * HORIZONTAL_SCALE_FACTOR;
+        float v_accuracy = location.getVerticalAccuracyMeters() * VERTICAL_SCALE_FACTOR;
+
+        ImsLog.d(this, mSlotId, method + ": original h_accuracy=" + location.getAccuracy()
+                + ": scaled h_accuracy=" + h_accuracy + ", category=" + category);
+        ImsLog.d(this, mSlotId, method + ": original v_accuracy="
+                + location.getVerticalAccuracyMeters() + ": scaled v_accuracy="
+                + v_accuracy + ", category=" + category);
+
         // Latitude / Longitude / Radius / Shape / Confidence / Timestamp / Method /
         // Altitude / Vertical Accuracy
         String[] locationInfo = new String[13];
 
         locationInfo[0] = Double.toString(location.getLatitude());
         locationInfo[1] = Double.toString(location.getLongitude());
-        locationInfo[2] = Float.toString(location.getAccuracy());
+        locationInfo[2] = Float.toString(h_accuracy);
         locationInfo[3] = mPolicy.getShape();
         locationInfo[4] = Integer.toString(confidence);
         locationInfo[5] = ImsUtils.getUtcTimeFormat(location.getTime());
         locationInfo[6] = method;
         locationInfo[11] = Double.toString(location.getAltitude());
-        locationInfo[12] = Float.toString(location.getVerticalAccuracyMeters());
+        locationInfo[12] = Float.toString(v_accuracy);
 
         // Country code / State / City / Postal
         if (address == null) {
@@ -1296,21 +1305,21 @@ public class LocationAgent implements LocationInterface {
             sb.append(", ");
             sb.append(location.getLongitude());
             sb.append(", ");
-            sb.append(location.getAccuracy());
+            sb.append(location.getAccuracy() * HORIZONTAL_SCALE_FACTOR);
             sb.append(", ");
-            sb.append("68, ");
+            sb.append("90, ");
             sb.append(ImsUtils.getUtcTimeFormat(location.getTime()));
             sb.append(", ");
             sb.append("NA, ");
             sb.append(location.getAltitude());
             sb.append(", ");
-            sb.append(location.getVerticalAccuracyMeters());
+            sb.append(location.getVerticalAccuracyMeters() * VERTICAL_SCALE_FACTOR);
             sb.append(", ");
         } else {
             sb.append("null, ");
             sb.append("null, ");
             sb.append("null, ");
-            sb.append("68, ");
+            sb.append("90, ");
             sb.append("null, ");
             sb.append("NA, ");
             sb.append("null, ");
