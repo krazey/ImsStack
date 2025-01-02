@@ -230,6 +230,14 @@ public class WifiAgent implements WifiInterface {
     }
 
     @Override
+    public String getMacAddress() {
+        String macAddress = (mWifiInfo != null) ? mWifiInfo.getMacAddress() : null;
+        return (macAddress != null && !WifiInfo.DEFAULT_MAC_ADDRESS.equals(macAddress))
+                ? macAddress
+                : null;
+    }
+
+    @Override
     public void addListener(Listener listener) {
         mListeners.add(listener);
     }

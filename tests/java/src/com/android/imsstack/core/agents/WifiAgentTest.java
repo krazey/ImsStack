@@ -67,7 +67,6 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
@@ -82,10 +81,13 @@ public class WifiAgentTest {
     private static final LinkAddress TEST_LINK_ADDRV6 =
             new LinkAddress(TEST_ADDRV6 + "/64");
     private static final String TEST_HOST_NAME = "ims.com";
-    private static final String TEST_SSID = "TestSsid1";
-    private static final String TEST_BSSID = "01:02:03:04:05:06";
+    private static final String TEST_SS_ID = "TestSsid1";
+    private static final String TEST_BSS_ID = "01:02:03:04:05:06";
+    private static final String TEST_MAC_ADDRESS = "82:11:22:33:44:55";
 
     @Mock private Network mNetwork;
+    @Mock private NetworkCapabilities mNetworkCapabilities;
+    @Mock private WifiInfo mWifiInfo;
     @Mock private SystemInterface mSystemInterface;
     @Mock private WifiInterface.Listener mWifiListener;
     // Mock objects
@@ -93,7 +95,6 @@ public class WifiAgentTest {
     private ConnectivityManagerProxy mConnectivityManagerProxy;
 
     private final LinkProperties mLinkProperties;
-    private final NetworkCapabilities mNetworkCapabilities;
     private final List<InetAddress> mHostAddrs;
     private TestAppContext mTestAppContext;
     private TestableLooper mTestableLooper;
@@ -104,14 +105,6 @@ public class WifiAgentTest {
         mLinkProperties.setInterfaceName(TEST_IFACE_NAME);
         mLinkProperties.setMtu(TEST_MTU);
         mLinkProperties.setLinkAddresses(List.of(TEST_LINK_ADDRV6, TEST_LINK_ADDRV4));
-
-        WifiInfo wifiInfo = new WifiInfo.Builder()
-                .setSsid(TEST_SSID.getBytes(StandardCharsets.UTF_8))
-                .setBssid(TEST_BSSID)
-                .build();
-        mNetworkCapabilities = new NetworkCapabilities.Builder()
-                .setTransportInfo(wifiInfo)
-                .build();
 
         mHostAddrs = List.of(
                 InetAddresses.parseNumericAddress(TEST_ADDRV6),
@@ -134,6 +127,10 @@ public class WifiAgentTest {
         when(mNetwork.getNetId()).thenReturn(TEST_NETWORK_ID);
         when(mNetwork.getAllByName(eq(TEST_HOST_NAME)))
                 .thenReturn(mHostAddrs.toArray(new InetAddress[0]));
+        when(mWifiInfo.getSSID()).thenReturn(TEST_SS_ID);
+        when(mWifiInfo.getBSSID()).thenReturn(TEST_BSS_ID);
+        when(mWifiInfo.getMacAddress()).thenReturn(TEST_MAC_ADDRESS);
+        when(mNetworkCapabilities.getTransportInfo()).thenReturn(mWifiInfo);
 
         mWifiAgent = new WifiAgent();
         mWifiAgent.init(mTestAppContext.getContext());
@@ -472,7 +469,7 @@ public class WifiAgentTest {
         networkCallback.onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
         networkCallback.onLinkPropertiesChanged(mNetwork, mLinkProperties);
 
-        assertEquals(TEST_BSSID, mWifiAgent.getBssId());
+        assertEquals(TEST_BSS_ID, mWifiAgent.getBssId());
 
         networkCallback.onLost(mNetwork);
 
@@ -490,11 +487,32 @@ public class WifiAgentTest {
         networkCallback.onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
         networkCallback.onLinkPropertiesChanged(mNetwork, mLinkProperties);
 
-        assertEquals(TEST_SSID, mWifiAgent.getSsId());
+        assertEquals(TEST_SS_ID, mWifiAgent.getSsId());
 
         networkCallback.onLost(mNetwork);
 
         assertNull(mWifiAgent.getSsId());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetMacAddress() {
+        assertNull(mWifiAgent.getMacAddress());
+
+        ConnectivityManager.NetworkCallback networkCallback = getNetworkCallback();
+        assertNotNull(networkCallback);
+
+        networkCallback.onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
+        networkCallback.onLinkPropertiesChanged(mNetwork, mLinkProperties);
+
+        assertEquals(TEST_MAC_ADDRESS, mWifiAgent.getMacAddress());
+
+        when(mWifiInfo.getMacAddress()).thenReturn(WifiInfo.DEFAULT_MAC_ADDRESS);
+        assertNull(mWifiAgent.getMacAddress());
+
+        networkCallback.onLost(mNetwork);
+
+        assertNull(mWifiAgent.getMacAddress());
     }
 
     @Test
