@@ -21,6 +21,7 @@
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
+    <int name="imswfc.registration_private_header_int" value="1"/>
 
     <!-- Ut/Xcap AOSP -->
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>

@@ -28,7 +28,7 @@
         <item value="403"/>
     </int-array>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
-    <int name="imswfc.registration_private_header_int" value="2"/>
+    <int name="imswfc.registration_private_header_int" value="1"/>
 
     <!-- Ut/Xcap AOSP -->
     <!-- Previous solution was using 80 and TCP, but VDF AU requirements support both TCP and TLS,
