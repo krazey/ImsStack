@@ -171,6 +171,13 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithSdpChangeType)
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
 }
 
+TEST_F(SilentRedialHelperTest, CreateHelperWithByEpsfbType)
+{
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
+    pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
+}
+
 TEST_F(SilentRedialHelperTest, CreateHelperWithRedialNormalType)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
