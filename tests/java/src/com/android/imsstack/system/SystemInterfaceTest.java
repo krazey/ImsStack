@@ -959,6 +959,27 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testSystemCallGetUuid() {
+        setUpSystemInterface();
+        int version = 3;
+        String name = "device-name";
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(MSimUtils.DEFAULT_SLOT_ID);
+            data.writeInt(SystemConstants.GET_UUID);
+            data.writeInt(version);
+            data.writeString(name);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mDefaultSystemCall).getUuid(eq(version), eq(name));
+    }
+
+    @Test
+    @SmallTest
     public void testSystemCallGetBatteryLevel() {
         setUpSystemInterface();
         Parcel data = Parcel.obtain();

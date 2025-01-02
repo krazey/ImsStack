@@ -58,9 +58,10 @@ public interface SystemConstants {
      */
 
     /**
-     * Power-related information
+     * Common information
      */
-    int GET_BATTERY_LEVEL = CATEGORY_BASE + 1;
+    int GET_UUID = CATEGORY_BASE + 1;
+    int GET_BATTERY_LEVEL = CATEGORY_BASE + 2;
 
     /**
      * Device & UICC-related information

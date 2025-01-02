@@ -48,6 +48,7 @@ public class SystemInterface implements JniSystemListener {
     private static final Map<Integer, String> METHOD_TO_STRING = Map.ofEntries(
             Map.entry(SystemConstants.SET_TIMER, "SET_TIMER"),
             Map.entry(SystemConstants.KILL_TIMER, "KILL_TIMER"),
+            Map.entry(SystemConstants.GET_UUID, "GET_UUID"),
             Map.entry(SystemConstants.GET_BATTERY_LEVEL, "GET_BATTERY_LEVEL"),
             Map.entry(SystemConstants.IS_EMERGENCY_NUMBER, "IS_EMERGENCY_NUMBER"),
             Map.entry(SystemConstants.GET_TTY_MODE, "GET_TTY_MODE"),
@@ -454,8 +455,9 @@ public class SystemInterface implements JniSystemListener {
             case SystemConstants.GET_WIFI_SSID:
                 handleSystemCallForWifi(method, out);
                 break;
+            case SystemConstants.GET_UUID: // fall through
             case SystemConstants.GET_BATTERY_LEVEL:
-                handleSystemCallForBattery(method, out);
+                handleSystemCallForCommon(method, in, out);
                 break;
             case SystemConstants.GET_DEVICE_NAME: // fall through
             case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
@@ -536,8 +538,12 @@ public class SystemInterface implements JniSystemListener {
         }
     }
 
-    private void handleSystemCallForBattery(int method, Parcel out) {
-        if (method == SystemConstants.GET_BATTERY_LEVEL) {
+    private void handleSystemCallForCommon(int method, Parcel in, Parcel out) {
+        if (method == SystemConstants.GET_UUID) {
+            int version = in.readInt();
+            String name = (version == 3) ? in.readString() : null;
+            out.writeString(mDefaultSystemCall.getUuid(version, name));
+        } else if (method == SystemConstants.GET_BATTERY_LEVEL) {
             out.writeInt(mDefaultSystemCall.getBatteryLevel());
         }
     }

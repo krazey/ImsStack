@@ -18,10 +18,13 @@ package com.android.imsstack.core.agents;
 
 import android.telephony.TelephonyManager;
 
+import androidx.annotation.Nullable;
+
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.system.DefaultSystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.ImsUtils;
 
 /**
  * An agent class to handle the default system calls.
@@ -123,6 +126,27 @@ public final class DefaultSystemCallAgent implements DefaultSystemCallInterface 
     @Override
     public String getExternalStoragePath() {
         return AppContext.getExternalStoragePath();
+    }
+
+    /**
+     * Returns the generated UUID string.
+     *
+     * @param version The UUID version.
+     * @param name The name to be used to construct UUID.
+     *             May be null according to the {@code version}.
+     * @return The generated UUID string or null if any errors occur.
+     */
+    @Override
+    public String getUuid(int version, @Nullable String name) {
+        if (version == 1) {
+            WifiInterface wifi = getWifiInterface();
+            return ImsUtils.getUuid1((wifi != null) ? wifi.getMacAddress() : null);
+        } else if (version == 3) {
+            return ImsUtils.getUuid3(name);
+        } else if (version == 4) {
+            return ImsUtils.getUuid4();
+        }
+        return null;
     }
 
     /**
