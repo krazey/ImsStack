@@ -61,7 +61,7 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 
                 ((nType == GSMA_IMEI) || (nType == GSMA_IMEISV) || (nType == UUID_IMEI_MD5) ||
                         (nType == UUID_IMEI_SHA1)))
         {
-            nType = UUID_IMEI_NAMED_V5;
+            nType = UUID_IMEI_NAMED_V3;
         }
     }
 
@@ -175,24 +175,6 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 
             objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_3, strImei));
             break;
         }
-        case UUID_IMEI_NAMED_V5:
-        {
-            // tac (8) + snr (6)
-            strImei = strImei.GetSubStr(0, 14);
-
-            objUrn.Append("urn:uuid:");
-            objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_5, strImei));
-            break;
-        }
-        case UUID_IMEI_V4:
-        {
-            // tac (8) + snr (6)
-            strImei = strImei.GetSubStr(0, 14);
-
-            objUrn.Append("urn:uuid:");
-            objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_4, strImei));
-            break;
-        }
         default:
             break;
     }
@@ -200,12 +182,20 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 
     return static_cast<const AStringBuffer&>(objUrn).GetString();
 }
 
-PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nVersion, IN const AString& strName)
+PUBLIC GLOBAL AString SipUrnHelper::GetUuidUrn(
+        IN IMS_SINT32 nVersion, IN const AString& strName /* = AString::ConstNull()*/)
 {
+    AString strUuid = ImsUuid::GetUuid(nVersion, strName);
+
+    if (strUuid.GetLength() == 0)
+    {
+        return AString::ConstNull();
+    }
+
     AStringBuffer objUrn(64);
 
     objUrn.Append("urn:uuid:");
-    objUrn.Append(ImsUuid::GetUuid(nVersion, strName));
+    objUrn.Append(strUuid);
 
     return static_cast<const AStringBuffer&>(objUrn).GetString();
 }

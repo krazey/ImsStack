@@ -15,12 +15,13 @@
  */
 #include <gtest/gtest.h>
 
+#include "ImsUuid.h"
 #include "PlatformContext.h"
 #include "TestPhoneInfoService.h"
+#include "TestUtilService.h"
 
 #include "SipUrnHelper.h"
 
-using ::testing::AnyNumber;
 using ::testing::Invoke;
 using ::testing::Unused;
 
@@ -31,6 +32,7 @@ class SipUrnHelperTest : public ::testing::Test
 {
 protected:
     TestPhoneInfoService m_objPhoneInfoService;
+    TestUtilService m_objUtilService;
 
     AString m_strImei;
     AString m_strSv;
@@ -40,33 +42,34 @@ protected:
     {
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
-
-        EXPECT_CALL(m_objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId)
-                .Times(AnyNumber())
-                .WillRepeatedly(Invoke(
-                        [&](Unused, AString& strImei)
-                        {
-                            strImei = m_strImei;
-                            return IMS_TRUE;
-                        }));
-        EXPECT_CALL(m_objPhoneInfoService.GetMockDeviceInfo(), GetDeviceSoftwareVersion)
-                .Times(AnyNumber())
-                .WillRepeatedly(Invoke(
-                        [&](Unused, AString& strSv)
-                        {
-                            strSv = m_strSv;
-                            return IMS_TRUE;
-                        }));
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_UTIL, &m_objUtilService);
     }
 
     virtual void TearDown() override
     {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 };
 
 TEST_F(SipUrnHelperTest, GetUrn)
 {
+    ON_CALL(m_objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId)
+            .WillByDefault(Invoke(
+                    [&](Unused, AString& strImei)
+                    {
+                        strImei = m_strImei;
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(m_objPhoneInfoService.GetMockDeviceInfo(), GetDeviceSoftwareVersion)
+            .WillByDefault(Invoke(
+                    [&](Unused, AString& strSv)
+                    {
+                        strSv = m_strSv;
+                        return IMS_TRUE;
+                    }));
+
     AString strUrnImei = "urn:gsma:imei:00000000-000000-0";
     AString strUrnImeiSv = "urn:gsma:imei:00000000-000000-0;svn=00";
 
@@ -102,14 +105,23 @@ TEST_F(SipUrnHelperTest, GetUrn)
     strUrnUuid = SipUrnHelper::GetUrn(IMS_SLOT_0, SipUrnHelper::UUID_IMEI_NAMED_V3);
     EXPECT_TRUE(strUrnUuid.StartsWith(strUrnUuidPrefix));
 
-    strUrnUuid = SipUrnHelper::GetUrn(IMS_SLOT_0, SipUrnHelper::UUID_IMEI_NAMED_V5);
-    EXPECT_TRUE(strUrnUuid.StartsWith(strUrnUuidPrefix));
-
-    strUrnUuid = SipUrnHelper::GetUrn(IMS_SLOT_0, SipUrnHelper::UUID_IMEI_V4);
-    EXPECT_TRUE(strUrnUuid.StartsWith(strUrnUuidPrefix));
-
     strUrnUuid = SipUrnHelper::GetUrn(IMS_SLOT_0, -1);
     EXPECT_EQ(strUrnUuid.GetLength(), 0);
+}
+
+TEST_F(SipUrnHelperTest, GetUuidUrn)
+{
+    EXPECT_EQ(SipUrnHelper::GetUuidUrn(ImsUuid::VERSION_3), AString::ConstNull());
+
+    ON_CALL(m_objUtilService.GetMockSystemUtil(), GetUuid)
+            .WillByDefault(Invoke(
+                    [&](Unused, AString& strUuid, Unused)
+                    {
+                        strUuid = "7d444840-9dc0-11d1-b245-5ffdce74fad2";
+                    }));
+
+    AString strUuidUrn = "urn:uuid:7d444840-9dc0-11d1-b245-5ffdce74fad2";
+    EXPECT_EQ(SipUrnHelper::GetUuidUrn(ImsUuid::VERSION_1), strUuidUrn);
 }
 
 }  // namespace android

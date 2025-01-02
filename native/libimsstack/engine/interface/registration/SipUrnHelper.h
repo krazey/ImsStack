@@ -38,11 +38,7 @@ public:
         /// Hashed value of IMEI - UUID (SHA1)
         UUID_IMEI_SHA1,
         /// UUID version 3
-        UUID_IMEI_NAMED_V3,
-        /// UUID version 5
-        UUID_IMEI_NAMED_V5,
-        /// UUID version 4
-        UUID_IMEI_V4
+        UUID_IMEI_NAMED_V3
     };
 
 private:
@@ -58,9 +54,7 @@ public:
      *              #GSMA_IMEISV\n
      *              #UUID_IMEI_MD5\n
      *              #UUID_IMEI_SHA1\n
-     *              #UUID_IMEI_NAMED_V3\n
-     *              #UUID_IMEI_NAMED_V5\n
-     *              #UUID_IMEI_V4
+     *              #UUID_IMEI_NAMED_V3
      * @return An IMEI URN string.
      */
     static AString GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType);
@@ -70,14 +64,13 @@ public:
      *
      * @param nVersion UUID version\n
      *                 ImsUuid::VERSION_1\n
-     *                 ImsUuid::VERSION_2\n
      *                 ImsUuid::VERSION_3\n
-     *                 ImsUuid::VERSION_4\n
-     *                 ImsUuid::VERSION_5
+     *                 ImsUuid::VERSION_4
      * @param strName Any string to be hashed
      * @return An UUID URN string.
      */
-    static AString GetUrn(IN IMS_SINT32 nVersion, IN const AString& strName);
+    static AString GetUuidUrn(
+            IN IMS_SINT32 nVersion, IN const AString& strName = AString::ConstNull());
 
 private:
     static const IMS_CHAR IMEI[];
