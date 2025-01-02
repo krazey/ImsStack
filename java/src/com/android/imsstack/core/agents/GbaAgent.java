@@ -65,16 +65,17 @@ public class GbaAgent implements GbaInterface {
 
     @Override
     public GbaCredentials getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
-            String securityProtocol, boolean forceBootStrapping) {
+            String securityProtocol, boolean forceBootStrapping, int timeoutSeconds) {
         ImsLog.d(this, mSlotId, "appType: " + appType + ", gbaMode: " + gbaMode
                 + ", isTls: " + isTls + ", nafFqdn: " + nafFqdn + ", protocol: " + securityProtocol
-                + ", forceBootStrapping: " + forceBootStrapping);
+                + ", forceBootStrapping: " + forceBootStrapping + ", timeoutSeconds: "
+                + timeoutSeconds);
 
         Uri nafUri = getNafUri(gbaMode, isTls, nafFqdn);
         GbaCredentials credentials = null;
         try {
             credentials = requestTelephonyGbaAuthentication(appType, nafUri, securityProtocol,
-                    forceBootStrapping).get(30L, TimeUnit.SECONDS);
+                    forceBootStrapping).get(timeoutSeconds, TimeUnit.SECONDS);
         } catch (CancellationException e) {
             ImsLog.e(this, mSlotId, "CancellationException");
             credentials = new GbaCredentials(GBA_FAILURE_REASON_CANCELLATION_EXCEPTION);

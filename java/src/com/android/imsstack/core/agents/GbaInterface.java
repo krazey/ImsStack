@@ -126,16 +126,21 @@ public interface GbaInterface extends IAgent {
     /**
      * This method triggers bootstrapping procedure to get B-TID and Ks_(ext)_NAF.
      *
-     * @param appType icc application type
-     * @param gbaMode Gba mechanism that depends on NAF Key to be returned
-     * @param isTls true=TLS protocol is used between UE and NAF, otherwise false
+     * @param appType icc application type.
+     * @param gbaMode Gba mechanism that depends on NAF Key to be returned.
+     * @param isTls If true, TLS protocol is used between UE and NAF, otherwise false.
      * @param nafFqdn A URI to specify Network Application Function(NAF) fully qualified domain
-     * name (FQDN)
-     * @param securityProtocol Security protocol identifier between UE and NAF
-     * @param forceBootStrapping true=trigger bootstrapping, false=do not force bootstrapping
+     * name (FQDN).
+     * @param securityProtocol Security protocol identifier between UE and NAF.
+     * @param forceBootStrapping If true, always triggers bootstrapping. If false, it will return
+     * the previous bootstrapping result if valid.
+     * @param timeoutSeconds The Timer to wait for the bootstrapping completion. On expiry, the
+     * bootstrapping will be regarded as failure. If {@code config_gba_release_time} is not -1, the
+     * {@code timeoutSeconds} value should be less than {@code config_gba_release_time}.
+     *
      * @return GbaCredentials that includes the result of Gba operation, an error reason when
-     * failed, B-TID and Ks_(ext)_NAF key
+     * failed, B-TID and Ks_(ext)_NAF key.
      */
     GbaCredentials getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
-            String securityProtocol, boolean forceBootStrapping);
+            String securityProtocol, boolean forceBootStrapping, int timeoutSeconds);
 }

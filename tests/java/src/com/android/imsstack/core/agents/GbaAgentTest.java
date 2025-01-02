@@ -52,6 +52,7 @@ import java.util.concurrent.ExecutorService;
 @RunWith(JUnit4.class)
 public class GbaAgentTest {
     private static final int SLOT_0 = 0;
+    private static final int BOOTSTRAPPING_TIMEOUT_SEC = 30;
     private static final String BOOTSTRAPPING_TRANSACTION_IDENTIFIER =
             "VVVVVVVVVVVVVVVVVVVVVQ==@bsf.test.3gpp.com";
     private static final String KS_NAF = "U4yEyAhUBaFyqDaLxcPWT0nZc+j/5CphIns7D1G6U6M=";
@@ -114,7 +115,8 @@ public class GbaAgentTest {
         String securityProtocol = null;
         boolean forceBootStrapping = false;
 
-        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping);
+        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping,
+                BOOTSTRAPPING_TIMEOUT_SEC);
 
         verify(mTelephonyManager).bootstrapAuthenticationRequest(mAppTypeCaptor.capture(),
                 mNafUriCaptor.capture(), mUspiCaptor.capture(), mForceBootstrappingCaptor.capture(),
@@ -147,7 +149,8 @@ public class GbaAgentTest {
         String securityProtocol = null;
         boolean forceBootStrapping = false;
 
-        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping);
+        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping,
+                BOOTSTRAPPING_TIMEOUT_SEC);
 
         verify(mTelephonyManager).bootstrapAuthenticationRequest(mAppTypeCaptor.capture(),
                 mNafUriCaptor.capture(), mUspiCaptor.capture(), mForceBootstrappingCaptor.capture(),
@@ -180,7 +183,8 @@ public class GbaAgentTest {
         String securityProtocol = "TLS_WRONG_MD5";
         boolean forceBootStrapping = false;
 
-        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping);
+        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping,
+                BOOTSTRAPPING_TIMEOUT_SEC);
 
         verify(mTelephonyManager).bootstrapAuthenticationRequest(mAppTypeCaptor.capture(),
                 mNafUriCaptor.capture(), mUspiCaptor.capture(), mForceBootstrappingCaptor.capture(),
@@ -212,7 +216,8 @@ public class GbaAgentTest {
         String securityProtocol = "TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256";
         boolean forceBootStrapping = true;
 
-        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping);
+        mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn, securityProtocol, forceBootStrapping,
+                BOOTSTRAPPING_TIMEOUT_SEC);
 
         verify(mTelephonyManager).bootstrapAuthenticationRequest(mAppTypeCaptor.capture(),
                 mNafUriCaptor.capture(), mUspiCaptor.capture(), mForceBootstrappingCaptor.capture(),
@@ -245,7 +250,7 @@ public class GbaAgentTest {
         boolean forceBootStrapping = true;
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());
@@ -270,7 +275,7 @@ public class GbaAgentTest {
                 anyBoolean(), any(), mCallbackCaptor.capture());
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());
@@ -295,7 +300,7 @@ public class GbaAgentTest {
                 anyBoolean(), any(), mCallbackCaptor.capture());
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());
@@ -319,7 +324,7 @@ public class GbaAgentTest {
                 anyBoolean(), any(), mCallbackCaptor.capture());
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());
@@ -344,7 +349,7 @@ public class GbaAgentTest {
                 anyBoolean(), any(), mCallbackCaptor.capture());
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());
@@ -361,7 +366,7 @@ public class GbaAgentTest {
         boolean forceBootStrapping = false;
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_SUCCESS, credentials.getResult());
@@ -386,7 +391,7 @@ public class GbaAgentTest {
                 anyBoolean(), any(), mCallbackCaptor.capture());
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());
@@ -410,7 +415,7 @@ public class GbaAgentTest {
                 anyBoolean(), any(), mCallbackCaptor.capture());
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());
@@ -434,7 +439,7 @@ public class GbaAgentTest {
                 anyBoolean(), any(), mCallbackCaptor.capture());
 
         GbaCredentials credentials = mGbaAgent.getGbaKey(appType, gbaMode, tls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, BOOTSTRAPPING_TIMEOUT_SEC);
 
         assertNotNull(credentials);
         assertEquals(GbaInterface.RESULT_FAILURE, credentials.getResult());

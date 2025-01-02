@@ -326,7 +326,7 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
-                eq(securityProtocol), eq(true)))
+                eq(securityProtocol), eq(true), anyInt()))
                 .thenReturn(new GbaCredentials(GbaInterface.GBA_FAILURE_REASON_KEY_INVALID));
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
@@ -341,7 +341,7 @@ public class SscTransactionTest {
         verify(mMockSscAuthAgent).getNafFqdn();
         verify(mMockSscAuthAgent).getCipherSuite();
         verify(mMockGbaAgent).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
-                eq(securityProtocol), eq(true));
+                eq(securityProtocol), eq(true), anyInt());
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
         verify(mMockSscServiceStateAgent).setGbaRequestFailed(eq(SLOT_0), eq(true));
 
@@ -361,7 +361,7 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
-                eq(securityProtocol), eq(true)))
+                eq(securityProtocol), eq(true), anyInt()))
                 .thenReturn(new GbaCredentials("B-TID", "Ks_NAF_KEY"));
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
@@ -373,7 +373,7 @@ public class SscTransactionTest {
                 ISscHttpConnection.HTTP_REQUEST_GET, mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscAuthAgent, atLeast(2)).isCredentialInfoUpdated();
         verify(mMockGbaAgent).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
-                eq(securityProtocol), eq(true));
+                eq(securityProtocol), eq(true), anyInt());
         verify(mMockSscHttpConnectionGov, atLeast(2)).sendRequest(SLOT_0,
                 ISscHttpConnection.HTTP_REQUEST_GET, mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
