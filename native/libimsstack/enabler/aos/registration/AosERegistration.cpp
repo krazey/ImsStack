@@ -29,10 +29,12 @@
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosCallTracker.h"
+#include "interface/IAosConnection.h"
 #include "interface/IAosEmergencyListener.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosPcscf.h"
+#include "interface/IAosSubscriber.h"
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
 #include "provider/AosRetryRepository.h"
@@ -821,8 +823,26 @@ PROTECTED IMS_BOOL AosERegistration::IsRefreshRequiredByCbm()
 
 PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
 {
-    return m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-            m_piContext->GetNetTracker()->IsEmergencyLteAttach();
+    if (m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED))
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_piContext->GetNetTracker()->IsEmergencyLteAttach())
+    {
+        return IMS_TRUE;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode())
+    {
+        AStringArray objImpu = m_piContext->GetSubscriber()->GetConfiguredImpus();
+        if (objImpu.GetCount() == 1 || m_piContext->GetConnection()->IsLimitedServicePcoValue())
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED IMS_BOOL AosERegistration::IsReinitiationRequested() const
