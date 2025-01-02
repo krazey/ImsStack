@@ -23,6 +23,7 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "ISubscriberConfig.h"
+#include "SipUrnHelper.h"
 
 #include "IXmlStreamWriter.h"
 #include "XmlFactory.h"
@@ -309,9 +310,7 @@ AString GeolocationPidfCreator::GetDeviceId() const
         return m_strDeviceId;
     }
 
-    AString strDeviceId = "urn:uuid:";
-    strDeviceId.Append(ImsUuid::GetUuid(ImsUuid::VERSION_1));
-    return strDeviceId;
+    return SipUrnHelper::GetUuidUrn(ImsUuid::VERSION_1);
 }
 
 PRIVATE
