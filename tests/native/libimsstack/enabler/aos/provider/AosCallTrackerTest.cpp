@@ -75,6 +75,8 @@ public:
 
     inline void SetSlotId(IN IMS_SINT32 nSlotId) { m_nSlotId = nSlotId; }
 
+    inline void SetReady(IN IMS_BOOL bReady) { m_bMtcReady = bReady; }
+
     inline ImsList<IAosCallTrackerListener*> GetListeners() { return m_objListeners; }
 };
 
@@ -109,14 +111,25 @@ protected:
     }
 };
 
-TEST_F(AosCallTrackerTest, SucceedsSetMtcReady)
+TEST_F(AosCallTrackerTest, ShouldAddCallStateListenerIfNotAdded)
 {
-    // GIVEN
     // WHEN
     IMS_BOOL bResult = m_pAosCallTracker->SetMtcReady();
 
     // THEN
     EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosCallTrackerTest, ShouldNotAddCallStateListenerIfAlreadyAdded)
+{
+    // GIVEN
+    m_pAosCallTracker->SetReady(IMS_TRUE);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosCallTracker->SetMtcReady();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
 TEST_F(AosCallTrackerTest, ReturnsFalseWhenCsCallStateIsSmallerThenActiveCsState)

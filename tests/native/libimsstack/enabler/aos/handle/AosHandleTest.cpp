@@ -1025,35 +1025,75 @@ TEST_F(AosHandleTest, SetMonitor_GetMonitor)
     m_pAosHandle->SetMonitor(piMonitor);
 }
 
-TEST_F(AosHandleTest, SetReady_Not_Mtc)
+TEST_F(AosHandleTest, ShouldNotSetReadyForNotReadyState)
 {
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTS));
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTC));
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTS));
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::UCE));
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::SIP_CONTROLLER));
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_FALSE, ImsAosService::MTC));
 }
 
-TEST_F(AosHandleTest, SetReady_Null_CallTracker)
+TEST_F(AosHandleTest, ShouldNotSetReadyIfCallTrackerIsNull)
 {
+    // Pre-processing
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker();
 
+    // GIVEN
     AosProvider::GetInstance()->SetCallTracker(IMS_NULL, 0);
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_FALSE, ImsAosService::MTC));
 
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
+
+    // Post-processing
     AosProvider::GetInstance()->SetCallTracker(piCallTracker);
 }
 
-TEST_F(AosHandleTest, SetReady_Mtc)
+TEST_F(AosHandleTest, SetReadyForMtc)
 {
+    // Pre-processing
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker();
 
+    // GIVEN
     MockIAosCallTracker objMockIAosCallTracker;
     AosProvider::GetInstance()->SetCallTracker(&objMockIAosCallTracker, 0);
-    EXPECT_TRUE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
-    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_FALSE, ImsAosService::MTC));
 
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
+
+    // Post-processing
+    AosProvider::GetInstance()->SetCallTracker(piCallTracker);
+}
+
+TEST_F(AosHandleTest, SetReadyForEmergencyMtc)
+{
+    // Pre-processing
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker();
+
+    // GIVEN
+    MockIAosCallTracker objMockIAosCallTracker;
+    AosProvider::GetInstance()->SetCallTracker(&objMockIAosCallTracker, 0);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTC));
+
+    // Post-processing
+    AosProvider::GetInstance()->SetCallTracker(piCallTracker);
+}
+
+TEST_F(AosHandleTest, ShouldNotSetReadyForServicesOtherThanMtcOrEmergencyMtc)
+{
+    // Pre-processing
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker();
+
+    // GIVEN
+    MockIAosCallTracker objMockIAosCallTracker;
+    AosProvider::GetInstance()->SetCallTracker(&objMockIAosCallTracker, 0);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTS));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTS));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::SIP_CONTROLLER));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::UCE));
+
+    // Post-processing
     AosProvider::GetInstance()->SetCallTracker(piCallTracker);
 }
 
