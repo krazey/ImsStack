@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include "IImsAosInfo.h"
 #include "ISipHeader.h"
+#include "MockIMtcService.h"
 #include "MockISession.h"
 #include "MockISipMessage.h"
 #include "call/MockIMtcCallContext.h"
@@ -22,6 +24,7 @@
 #include "call/message/MtcMessageMediator.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "helper/MockIMtcAosConnector.h"
 #include "media/MockIMedia.h"
 #include "media/MockIMediaDescriptor.h"
 #include "utility/MessageUtils.h"
@@ -47,6 +50,8 @@ class MtcMessageMediatorTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objContext;
+    MockIMtcService objService;
+    MockIMtcAosConnector objAosConnector;
     MockISession objISession;
     MockIMtcSession objMtcSession;
     MockMtcConfigurationProxy objConfiguration;
@@ -56,9 +61,11 @@ public:
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfiguration));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetAosConnector).WillByDefault(Return(&objAosConnector));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
 
         pMessageMediator = new MtcMessageMediator(objContext);
@@ -69,6 +76,15 @@ protected:
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
                 .WillByDefault(Return(IMS_TRUE));
+
+        ImsVector<AString> lstContactAddress;
+        lstContactAddress.Add("");
+        lstContactAddress.Add("");
+        lstContactAddress.Add("");
+        lstContactAddress.Add("");
+        ON_CALL(objConfiguration,
+                GetStringArray(ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY))
+                .WillByDefault(Return(lstContactAddress));
     }
 
     virtual void TearDown() override { delete pMessageMediator; }
@@ -242,6 +258,186 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageSetOriginalContactIfUnknownCallType)
     EXPECT_CALL(objMessage, SetHeader(ISipHeader::CONTACT_NORMAL, CONTACT_FULL_MEDIA_TAGS, _))
             .Times(1);
 
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNotFormatContactAddressForNormalService)
+{
+    ImsVector<AString> lstContactAddress;
+    lstContactAddress.Add("sip:normal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:admin@#IP#:#PORT#");
+    lstContactAddress.Add("sip:internal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:nouicc@#IP#:#PORT#");
+    ON_CALL(objConfiguration,
+            GetStringArray(ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY))
+            .WillByDefault(Return(lstContactAddress));
+
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
+
+    const AString strLocalIp = "::1";
+    const IMS_UINT32 nLocalPort = 5060;
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIp));
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
+
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(Return(CONTACT_SOS_PARAMETER));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+
+    EXPECT_CALL(objMessage, SetHeader(ISipHeader::CONTACT_NORMAL, _, _)).Times(0);
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNotFormatContactAddressIfAosConnectorIsNull)
+{
+    ImsVector<AString> lstContactAddress;
+    lstContactAddress.Add("sip:normal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:admin@#IP#:#PORT#");
+    lstContactAddress.Add("sip:internal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:nouicc@#IP#:#PORT#");
+    ON_CALL(objConfiguration,
+            GetStringArray(ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY))
+            .WillByDefault(Return(lstContactAddress));
+
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::EMERGENCY));
+    ON_CALL(objContext, GetAosConnector).WillByDefault(Return(IMS_NULL));
+
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(Return(CONTACT_SOS_PARAMETER));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+
+    EXPECT_CALL(objMessage, SetHeader(ISipHeader::CONTACT_NORMAL, _, _)).Times(0);
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageFormatsContactAddressWithIpv4Address)
+{
+    ImsVector<AString> lstContactAddress;
+    lstContactAddress.Add("sip:normal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:admin@#IP#:#PORT#");
+    lstContactAddress.Add("sip:internal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:nouicc@#IP#:#PORT#");
+    ON_CALL(objConfiguration,
+            GetStringArray(ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY))
+            .WillByDefault(Return(lstContactAddress));
+
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::EMERGENCY));
+
+    const AString strLocalIp = "127.0.0.1";
+    const IMS_UINT32 nLocalPort = 5060;
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIp));
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
+
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(Return(CONTACT_SOS_PARAMETER));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:normal@127.0.0.1:5060;sos>;audio;+sip.instance=\"<urn:gsma:imei:"
+                            "0-0-0>\""),
+                    _));
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_ADMIN));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:admin@127.0.0.1:5060;sos>;audio;+sip.instance=\"<urn:gsma:imei:0-"
+                            "0-0>\""),
+                    _));
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:internal@127.0.0.1:5060;sos>;audio;+sip.instance=\"<urn:gsma:"
+                            "imei:0-0-0>\""),
+                    _));
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:nouicc@127.0.0.1:5060;sos>;audio;+sip.instance=\"<urn:gsma:imei:"
+                            "0-0-0>\""),
+                    _));
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageFormatsContactAddressWithIpv6Address)
+{
+    ImsVector<AString> lstContactAddress;
+    lstContactAddress.Add("sip:normal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:admin@#IP#:#PORT#");
+    lstContactAddress.Add("sip:internal@#IP#:#PORT#");
+    lstContactAddress.Add("sip:nouicc@#IP#:#PORT#");
+    ON_CALL(objConfiguration,
+            GetStringArray(ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY))
+            .WillByDefault(Return(lstContactAddress));
+
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::EMERGENCY));
+
+    const AString strLocalIp = "::1";
+    const IMS_UINT32 nLocalPort = 5060;
+    ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(strLocalIp));
+    ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(nLocalPort));
+
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(Return(CONTACT_SOS_PARAMETER));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:normal@[::1]:5060;sos>;audio;+sip.instance=\"<urn:gsma:imei:0-0-"
+                            "0>\""),
+                    _));
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_ADMIN));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:admin@[::1]:5060;sos>;audio;+sip.instance=\"<urn:gsma:imei:0-0-0>"
+                            "\""),
+                    _));
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:internal@[::1]:5060;sos>;audio;+sip.instance=\"<urn:gsma:imei:0-"
+                            "0-0>\""),
+                    _));
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("<sip:nouicc@[::1]:5060;sos>;audio;+sip.instance=\"<urn:gsma:imei:0-0-"
+                            "0>\""),
+                    _));
     pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
 }
 

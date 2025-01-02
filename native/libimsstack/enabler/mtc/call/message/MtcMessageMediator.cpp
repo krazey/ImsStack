@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "ICoreService.h"
+#include "IImsAosInfo.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsTrace.h"
@@ -26,7 +27,10 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/message/MtcMessageMediator.h"
+#include "call/message/TemplateFormatter.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationResolver.h"
+#include "helper/IMtcAosConnector.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
@@ -56,59 +60,97 @@ PUBLIC IMS_RESULT MtcMessageMediator::MessageMediator_AdjustMessage(
 PRIVATE
 void MtcMessageMediator::MayAdjustContactHeader(IN_OUT ISipMessage* pMessage)
 {
-    IMS_BOOL bSetVideoTextFeatureExclusively = m_objContext.GetConfigurationProxy().GetBoolean(
-            ConfigVt::
-                    KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL);
-    IMS_BOOL bAllowSosParam = m_objContext.GetConfigurationProxy().GetBoolean(
-            ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL);
-    if (bSetVideoTextFeatureExclusively == IMS_FALSE && bAllowSosParam == IMS_TRUE)
-    {
-        return;  // No need to adjust
-    }
+    ISipHeader* pContactHeader = IMS_NULL;
+    MaySetVideoTextFeatureExclusively(&pContactHeader, pMessage);
+    MayFormatContactAddress(&pContactHeader, pMessage);
+    MayRemoveSosParameter(&pContactHeader, pMessage);
 
-    ISipHeader* pContactHeader = SipParsingHelper::CreateHeader(
-            ISipHeader::CONTACT_NORMAL, pMessage->GetHeader(ISipHeader::CONTACT_NORMAL));
-    if (!pContactHeader)
+    if (pContactHeader)
+    {
+        pMessage->SetHeader(ISipHeader::CONTACT_NORMAL, pContactHeader->ToStringWithoutName());
+        pContactHeader->Destroy();
+    }
+}
+
+PRIVATE
+void MtcMessageMediator::MaySetVideoTextFeatureExclusively(
+        IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage)
+{
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(ConfigVt::
+                        KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
     {
         return;
     }
 
-    if (bSetVideoTextFeatureExclusively)
+    if (*pContactHeader == IMS_NULL)
     {
-        SetVideoTextFeatureExclusively(pContactHeader);
+        *pContactHeader = CreateContactHeader(pMessage);
     }
-    if (!bAllowSosParam)
-    {
-        RemoveSosParameter(pContactHeader);
-    }
-
-    pMessage->SetHeader(ISipHeader::CONTACT_NORMAL, pContactHeader->ToStringWithoutName());
-    pContactHeader->Destroy();
-}
-
-PRIVATE
-void MtcMessageMediator::SetVideoTextFeatureExclusively(IN_OUT ISipHeader* pContactHeader)
-{
     switch (GetCallType())
     {
         case CallType::VT:
-            return pContactHeader->RemoveParameter(MessageUtil::STR_TEXT);
+            return (*pContactHeader)->RemoveParameter(MessageUtil::STR_TEXT);
         case CallType::RTT:
-            return pContactHeader->RemoveParameter(MessageUtil::STR_VIDEO);
+            return (*pContactHeader)->RemoveParameter(MessageUtil::STR_VIDEO);
         default:
             return;
     }
 }
 
 PRIVATE
-void MtcMessageMediator::RemoveSosParameter(IN_OUT ISipHeader* pContactHeader)
+void MtcMessageMediator::MayFormatContactAddress(
+        IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage)
 {
-    SipAddress* pAddress = pContactHeader->GetSipAddress();
-    pAddress->RemoveParameter("sos");
+    if (m_objContext.GetService().GetServiceType() != ServiceType::EMERGENCY)
+    {
+        return;
+    }
+    AString strFormat = MtcConfigurationResolver::GetContactHeaderAddressInInviteForEmergency(
+            m_objContext.GetConfigurationProxy(), GetAosEmergencyRegMode());
+    if (strFormat.GetLength() <= 0)
+    {
+        return;
+    }
+
+    if (*pContactHeader == IMS_NULL)
+    {
+        *pContactHeader = CreateContactHeader(pMessage);
+    }
+    (*pContactHeader)->GetSipAddress()->SetUri(TemplateFormatter::Format(strFormat, m_objContext));
 }
 
 PRIVATE
-CallType MtcMessageMediator::GetCallType()
+void MtcMessageMediator::MayRemoveSosParameter(
+        IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage)
+{
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
+    {
+        return;
+    }
+
+    if (*pContactHeader == IMS_NULL)
+    {
+        *pContactHeader = CreateContactHeader(pMessage);
+    }
+    (*pContactHeader)->GetSipAddress()->RemoveParameter("sos");
+}
+
+PRIVATE
+ISipHeader* MtcMessageMediator::CreateContactHeader(IN const ISipMessage* pMessage) const
+{
+    ISipHeader* pContactHeader = SipParsingHelper::CreateHeader(
+            ISipHeader::CONTACT_NORMAL, pMessage->GetHeader(ISipHeader::CONTACT_NORMAL));
+    if (!pContactHeader)
+    {
+        IMS_TRACE_E(0, "Failed to create a Contact header", 0, 0, 0);
+    }
+
+    return pContactHeader;
+}
+
+PRIVATE
+CallType MtcMessageMediator::GetCallType() const
 {
     // VZ_REQ_5GNRSAVOICEVIDEO_4105999311948863
     // The device shall treat a "downgraded video call" as a video call, ...
@@ -120,4 +162,17 @@ CallType MtcMessageMediator::GetCallType()
     }
 
     return m_objContext.GetSession()->GetCallType();
+}
+
+PRIVATE
+IMS_UINT32 MtcMessageMediator::GetAosEmergencyRegMode() const
+{
+    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    if (pAosConnector == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "IMtcAosConnector is null", 0, 0, 0);
+        return IImsAosInfo::REG_MODE_UNKNOWN;
+    }
+
+    return pAosConnector->GetRegistrationMode();
 }

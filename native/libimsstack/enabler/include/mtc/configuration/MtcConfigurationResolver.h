@@ -194,6 +194,26 @@ public:
         return CODE_NONE;
     }
 
+    inline static AString GetContactHeaderAddressInInviteForEmergency(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_UINT32 eAosRegMode)
+    {
+        ImsVector<AString> lstConfig = objProxy.GetStringArray(
+                ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY);
+        switch (eAosRegMode)
+        {
+            case IImsAosInfo::REG_MODE_NORMAL:
+                return lstConfig[0];
+            case IImsAosInfo::REG_MODE_ADMIN:
+                return lstConfig[1];
+            case IImsAosInfo::REG_MODE_INTERNAL:
+                return lstConfig[2];
+            case IImsAosInfo::REG_MODE_NOUICC:
+                return lstConfig[3];
+            default:
+                return AString::ConstEmpty();
+        }
+    }
+
     inline static AString GetPPreferredIdentityHeaderInInviteForEmergency(
             IN const MtcConfigurationProxy& objProxy, IN IMS_UINT32 eAosRegMode)
     {

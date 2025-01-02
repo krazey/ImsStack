@@ -37,10 +37,15 @@ public:
 
 private:
     void MayAdjustContactHeader(IN_OUT ISipMessage* pMessage);
+    void MaySetVideoTextFeatureExclusively(
+            IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
+    void MayFormatContactAddress(
+            IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
+    void MayRemoveSosParameter(IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
+    ISipHeader* CreateContactHeader(IN const ISipMessage* pMessage) const;
 
-    void SetVideoTextFeatureExclusively(IN_OUT ISipHeader* pContactHeader);
-    void RemoveSosParameter(IN_OUT ISipHeader* pContactHeader);
-    CallType GetCallType();
+    CallType GetCallType() const;
+    IMS_UINT32 GetAosEmergencyRegMode() const;
 
     IMtcCallContext& m_objContext;
     AString m_strOriginalContactHeader;
