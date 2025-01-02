@@ -118,6 +118,11 @@ public interface WifiInterface extends IAgent {
     String getSsId();
 
     /**
+     * Returns the local MAC address.
+     */
+    String getMacAddress();
+
+    /**
      * Adds a listener to monitor the Wi-Fi state change.
      *
      * @param listener The listener to be set.
