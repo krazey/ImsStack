@@ -25,14 +25,15 @@ protected:
 
 public:
     /**
-     * @brief Gets the time or random based UUID (version 1).
-     *        The time-based UUID will be prioritized.
+     * @brief Generates the UUID string.
      *
-     * @param nOption The options for UUID generation; it's not used in the moment.
-     *                The default is a time-based UUID.
-     * @return A time or random based UUID string.
+     * @param nVersion The UUID version to be generated.
+     * @param strUuid The generated UUID string.
+     * @param strName The name to be used to generate UUID string.
+     * @return UUID string based on the version
      */
-    virtual AString GetUuid(IN IMS_SINT32 nOption = 0) = 0;
+    virtual void GetUuid(IN IMS_SINT32 nVersion, OUT AString& strUuid,
+            IN const AString& strName = AString::ConstNull()) = 0;
 };
 
 #endif

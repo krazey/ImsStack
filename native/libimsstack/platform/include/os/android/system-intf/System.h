@@ -49,8 +49,9 @@ public:
             IN IMS_SINT32 nSlotId) override;
 
     ////
-    // Power-related information
+    // Common information
     ////
+    void GetUuid(IN IMS_SINT32 nVersion, IN const AString& strName, OUT AString& strUuid) override;
     IMS_SINT32 GetPowerLevel() override;
 
     ////

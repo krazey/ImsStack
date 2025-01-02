@@ -24,10 +24,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -48,6 +50,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.UUID;
 
 @RunWith(JUnit4.class)
 public class DefaultSystemCallAgentTest {
@@ -207,6 +211,54 @@ public class DefaultSystemCallAgentTest {
     @SmallTest
     public void testGetExternalStoragePath() {
         assertNotNull(mDefaultSystemCallAgent.getExternalStoragePath());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetUuid() {
+        String name = "test";
+
+        // Version 1
+        when(mWifiInterface.getMacAddress()).thenReturn("11:22:33:44:55:66");
+        String uuid = mDefaultSystemCallAgent.getUuid(1, name);
+
+        verify(mWifiInterface).getMacAddress();
+        assertNotNull(uuid);
+        UUID newUuid = UUID.fromString(uuid);
+        assertEquals(1, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        // Version 1 - no MAC address
+        when(mWifiInterface.getMacAddress()).thenReturn(null);
+        uuid = mDefaultSystemCallAgent.getUuid(1, name);
+
+        verify(mWifiInterface, times(2)).getMacAddress();
+        assertNotNull(uuid);
+        newUuid = UUID.fromString(uuid);
+        assertEquals(1, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        // Version 3
+        uuid = mDefaultSystemCallAgent.getUuid(3, name);
+        assertNotNull(uuid);
+        newUuid = UUID.fromString(uuid);
+        assertEquals(3, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        assertThrows(NullPointerException.class, () -> {
+            mDefaultSystemCallAgent.getUuid(3, null);
+        });
+
+        // Version 4
+        uuid = mDefaultSystemCallAgent.getUuid(4, name);
+        assertNotNull(uuid);
+        newUuid = UUID.fromString(uuid);
+        assertEquals(4, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        // Unsupported version
+        uuid = mDefaultSystemCallAgent.getUuid(5, name);
+        assertNull(uuid);
     }
 
     @Test

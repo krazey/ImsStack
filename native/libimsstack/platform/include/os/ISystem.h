@@ -36,8 +36,10 @@ public:
             IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId) = 0;
 
     ////
-    // Power-related information
+    // Common information
     ////
+    virtual void GetUuid(
+            IN IMS_SINT32 nVersion, IN const AString& strName, OUT AString& strUuid) = 0;
     virtual IMS_SINT32 GetPowerLevel() = 0;
 
     ////

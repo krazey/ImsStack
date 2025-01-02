@@ -16,6 +16,8 @@
 
 package com.android.imsstack.system;
 
+import androidx.annotation.Nullable;
+
 import com.android.imsstack.core.agents.WifiInterface;
 
 /**
@@ -73,6 +75,16 @@ public interface DefaultSystemCallInterface {
      * @return An external storage path.
      */
     String getExternalStoragePath();
+
+    /**
+     * Returns the generated UUID string.
+     *
+     * @param version The UUID version.
+     * @param name The name to be used to construct UUID.
+     *             May be null according to the {@code version}.
+     * @return The generated UUID string or null if any errors occur.
+     */
+    String getUuid(int version, @Nullable String name);
 
     /**
      * Returns a string value from the specified preference file for a specified slot.

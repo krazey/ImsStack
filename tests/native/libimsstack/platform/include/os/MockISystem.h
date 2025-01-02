@@ -40,8 +40,10 @@ public:
             (override));
 
     ////
-    // Power-related information
+    // Common information
     ////
+    MOCK_METHOD(void, GetUuid,
+            (IN IMS_SINT32 nVersion, IN const AString& strName, OUT AString& strUuid), (override));
     MOCK_METHOD(IMS_SINT32, GetPowerLevel, (), (override));
 
     ////

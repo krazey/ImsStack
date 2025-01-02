@@ -15,18 +15,24 @@
  */
 package com.android.imsstack.util;
 
+import android.net.MacAddress;
 import android.os.Build;
 import android.telephony.PhoneNumberUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * This class provides the utility and helper APIs for ImsStack application.
@@ -52,6 +58,10 @@ public final class ImsUtils {
     private static final char PAUSE = ',';
     private static final char WILD = 'N';
     private static final char WAIT = ';';
+
+    // The number of 100-ns intervals between the UUID epoch 1582-10-15 00:00:00
+    // and the Unix epoch 1970-01-01 00:00:00.
+    private static final long UUID_BASE_TIME = 0x01B21DD213814000L;
 
     /**
      * Closes the {@link AutoCloseable} object silently.
@@ -279,6 +289,82 @@ public final class ImsUtils {
         }
 
         return true;
+    }
+
+    /*
+     * The random number generator used by this class to create any random number.
+     * In a holder class to defer initialization until needed.
+     */
+    private static class UuidHolder {
+        static final SecureRandom sSecureRandom = new SecureRandom();
+        static final Random sRandom = new Random();
+    }
+
+    /**
+     * Returns the time-based generated UUID (version 1) string.
+     *
+     * @param macAddress The MAC address to be used for node identifier.
+     *                   If the given MAC address is null, the node identifier will be generated
+     *                   using the random number generator.
+     * @return A generated UUID string.
+     */
+    public static @NonNull String getUuid1(@Nullable String macAddress) {
+        // Most significant long
+        //   0xFFFFFFFF00000000 time_low
+        //   0x00000000FFFF0000 time_mid
+        //   0x000000000000F000 version
+        //   0x0000000000000FFF time_hi
+        // Least significant long
+        //   0xC000000000000000 variant
+        //   0x3FFF000000000000 clock_seq
+        //   0x0000FFFFFFFFFFFF node-id
+        byte[] nodeId;
+        if (macAddress != null) {
+            nodeId = MacAddress.fromString(macAddress).toByteArray();
+        } else {
+            nodeId = new byte[6]; // 48-bit
+            UuidHolder.sSecureRandom.nextBytes(nodeId);
+            nodeId[0] |= 0x01;
+            Log.d(Log.TAG, "random-node-id=" + bytesToHexString(nodeId));
+        }
+
+        // 100-ns ticks
+        long currentTime = System.currentTimeMillis() * 10000 + UUID_BASE_TIME;
+        long time_low = (currentTime & 0x0000_0000_FFFF_FFFFL) << 32;
+        long time_mid = ((currentTime >> 32) & 0xFFFFL) << 16;
+        long version = 1 << 12;
+        long time_hi = ((currentTime >> 48) & 0x0FFFL);
+        short randomNumber = ((short) (UuidHolder.sRandom.nextDouble() * Short.MAX_VALUE));
+        long clock_seq = (randomNumber & 0x3FFFL) << 48;
+        long node = 0;
+        for (int i = 0; i < nodeId.length; ++i) {
+            node |= ((nodeId[i] & 0xFFL) << (8 * ((nodeId.length - 1) - i)));
+        }
+
+        long mostSignificantBits = time_low | time_mid | version | time_hi;
+        long leastSignificantBits = 0x8000_0000_0000_0000L | clock_seq | node;
+        UUID uuid = new UUID(mostSignificantBits, leastSignificantBits);
+        return uuid.toString();
+    }
+
+    /**
+     * Returns the name-based generated UUID (version 3) string.
+     *
+     * @param name The name to be used to construct UUID string.
+     * @return A generated UUID string.
+     */
+    public static @NonNull String getUuid3(@NonNull String name) {
+        Objects.requireNonNull(name, "name must not be null");
+        return UUID.nameUUIDFromBytes(name.getBytes()).toString();
+    }
+
+    /**
+     * Returns the randomly or pseudo-randomly generated UUID (version 4) string.
+     *
+     * @return A generated UUID string.
+     */
+    public static @NonNull String getUuid4() {
+        return UUID.randomUUID().toString();
     }
 
     private ImsUtils() {}

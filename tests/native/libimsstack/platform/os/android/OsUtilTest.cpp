@@ -31,16 +31,14 @@ namespace android
 
 class OsUtilTest : public ::testing::Test
 {
-public:
-    MockISystem m_objMockSystem;
-    ISystem* m_piDefaultSystem;
-
+protected:
+    MockISystem m_objSystem;
     OsUtil* m_pOsUtil;
 
 protected:
     virtual void SetUp() override
     {
-        m_piDefaultSystem = PlatformContext::GetInstance()->SetSystem(&m_objMockSystem);
+        PlatformContext::GetInstance()->SetSystem(&m_objSystem);
 
         m_pOsUtil = new OsUtil();
         ASSERT_TRUE(m_pOsUtil != nullptr);
@@ -53,7 +51,7 @@ protected:
             delete m_pOsUtil;
             m_pOsUtil = IMS_NULL;
         }
-        PlatformContext::GetInstance()->SetSystem(m_piDefaultSystem);
+        PlatformContext::GetInstance()->SetSystem(IMS_NULL);
     }
 };
 
@@ -78,9 +76,17 @@ TEST_F(OsUtilTest, IsServerInfoHiddenInLog)
 
 TEST_F(OsUtilTest, SystemUtil)
 {
+    ON_CALL(m_objSystem, GetUuid)
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, AString& strUuid)
+                    {
+                        strUuid = "7d444840-9dc0-11d1-b245-5ffdce74fad2";
+                    }));
+    AString strUuid;
     ISystemUtil* piSystemUtil = static_cast<ISystemUtil*>(m_pOsUtil);
-    AString strUid("00000000-0000-0000-0000-000000000000");
-    EXPECT_EQ(piSystemUtil->GetUuid(), strUid);
+    piSystemUtil->GetUuid(1, strUuid);
+    const AString strDefaultUuid("7d444840-9dc0-11d1-b245-5ffdce74fad2");
+    EXPECT_EQ(strUuid, strDefaultUuid);
 }
 
 TEST_F(OsUtilTest, SystemProperty)

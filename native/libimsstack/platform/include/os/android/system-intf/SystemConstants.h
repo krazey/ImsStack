@@ -94,9 +94,10 @@ public:
     ////
 
     ////
-    // Power-related information
+    // Common information
     ////
-    static const IMS_UINT32 GET_BATTERY_LEVEL = CATEGORY_BASE + 1;
+    static const IMS_UINT32 GET_UUID = CATEGORY_BASE + 1;
+    static const IMS_UINT32 GET_BATTERY_LEVEL = CATEGORY_BASE + 2;
 
     ////
     // Device & UICC-related information

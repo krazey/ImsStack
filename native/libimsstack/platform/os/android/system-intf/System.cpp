@@ -430,6 +430,37 @@ void System::RemoveListener(
 }
 
 PUBLIC
+void System::GetUuid(IN IMS_SINT32 nVersion, IN const AString& strName, OUT AString& strUuid)
+{
+    strUuid = AString::ConstNull();
+
+    if (m_pCallback == IMS_NULL)
+    {
+        return;
+    }
+
+    android::Parcel in;
+    android::Parcel out;
+
+    in.writeInt32(IMS_SLOT_0);
+    in.writeInt32(SystemConstants::GET_UUID);
+    in.writeInt32(nVersion);
+
+    if (strName.GetLength() != 0)
+    {
+        String16 str16Name(strName.GetStr());
+        in.writeString16(str16Name);
+    }
+
+    if (m_pCallback->SendDataToJava(in, out) == 1)
+    {
+        String16 str16 = out.readString16();
+        String8 str8(str16);
+        strUuid = str8.c_str();
+    }
+}
+
+PUBLIC
 IMS_SINT32 System::GetPowerLevel()
 {
     return GetInt(SystemConstants::GET_BATTERY_LEVEL);
