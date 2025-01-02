@@ -436,8 +436,13 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_Others(IN IMS_SINT32
 {
     if (m_piTransactionTimer != IMS_NULL)
     {
-        A_IMS_TRACE_I(REGID, "ProcessStartFailed_Others :: Reason(%d), Wait transaction timeout",
+        A_IMS_TRACE_D(REGID, "ProcessStartFailed_Others :: Reason(%d), Wait transaction timeout",
                 nReason, 0, 0);
+        if (nReason == IRegistration::REASON_CLIENT_SOCKET_ERROR ||
+                nReason == IRegistration::REASON_SERVER_SOCKET_ERROR)
+        {
+            m_eImsReasonCode = AosReasonCode::REG_RESP_NETWORK_TIMEOUT;
+        }
         return;
     }
 
@@ -525,13 +530,16 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
         }
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
-            CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
+    if (m_eImsReasonCode != AosReasonCode::REG_RESP_NETWORK_TIMEOUT)
     {
-        A_IMS_TRACE_I(REGID, "ProcessTransactionTimerExpired :: try the fake E-REG", 0, 0, 0);
+        if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
+                CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
+        {
+            A_IMS_TRACE_I(REGID, "ProcessTransactionTimerExpired :: try the fake E-REG", 0, 0, 0);
 
-        ProcessFakeMode();
-        return;
+            ProcessFakeMode();
+            return;
+        }
     }
 
     ProcessUnpredictableFailure();
