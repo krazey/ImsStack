@@ -645,8 +645,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
     }
 
     // Check if the peer UA supports the session timer
-    IMS_BOOL bCheckSePresentity = IsSessionTimerSupportedBySessionExpires();
-    IMS_BOOL bTimerOptionSupported = IsSessionTimerSupported(piSc, IMS_FALSE, bCheckSePresentity);
+    IMS_BOOL bTimerOptionSupported = IsSessionTimerSupported(piSc, IMS_FALSE);
 
     if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
     {
@@ -871,9 +870,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageSent(IN const ISi
             // Hence, reset the refresh request parameter of the session timer.
             m_nRefreshRequest = SipMethod::INVALID;
 
-            IMS_BOOL bCheckSePresentity = IsSessionTimerSupportedBySessionExpires();
-            UpdateProperties(
-                    piSc, IsSessionTimerSupported(piSc, IMS_TRUE, bCheckSePresentity), IMS_TRUE);
+            UpdateProperties(piSc, IsSessionTimerSupported(piSc, IMS_TRUE), IMS_TRUE);
 
             if ((GetDuration() > 0) && IsSessionRefreshRequired(piSc))
             {
@@ -965,8 +962,8 @@ IMS_SINT32 SessionRefreshHelper::GetRefreshMethod() const
 }
 
 PUBLIC
-IMS_BOOL SessionRefreshHelper::IsSessionTimerSupported(IN const ISipConnection* piSc,
-        IN IMS_BOOL bSent, IN IMS_BOOL bCheckSePresentity /*= IMS_TRUE*/)
+IMS_BOOL SessionRefreshHelper::IsSessionTimerSupported(
+        IN const ISipConnection* piSc, IN IMS_BOOL bSent)
 {
     ISipMessage* piSipMsg = piSc->GetMessage();
 
@@ -1010,8 +1007,8 @@ IMS_BOOL SessionRefreshHelper::IsSessionTimerSupported(IN const ISipConnection* 
         }
     }
 
-    // NON-STANDARD :: for IMS client's flexibility
-    if (bCheckSePresentity && piSipMsg->IsHeaderPresent(ISipHeader::SESSION_EXPIRES))
+    // NON-STANDARD: for IMS client's flexibility
+    if (piSipMsg->IsHeaderPresent(ISipHeader::SESSION_EXPIRES))
     {
         IMS_TRACE_D("Session timer is supported by Session-Expires header", 0, 0, 0);
         return IMS_TRUE;
@@ -1536,7 +1533,7 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
                             m_nLocalSessionTimerDuration, m_nMinSe, 0);
                 }
             }
-            else if (m_nSessionTimerDuration == 0)
+            else if (m_nSessionTimerDuration == 0 && !IsSessionTimerTurnOffAllowed())
             {
                 const SipConfigV* pSipConfigV = m_pService->GetSipConfigV();
 
@@ -1553,6 +1550,10 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
                                 " but it supports \"timer\" option tag(%d:%d).",
                             m_nSessionTimerDuration, m_nMinSe, 0);
                 }
+            }
+            else
+            {
+                IMS_TRACE_I("Session timer is turned off by remote endpoint.", 0, 0, 0);
             }
         }
     }

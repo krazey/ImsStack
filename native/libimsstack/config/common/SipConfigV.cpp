@@ -224,8 +224,12 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
     m_objSession.nSessionExpires =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_SESSION_EXPIRES_TIMER_SEC_INT);
 
-    m_objSession.nHeaders = SESSION_HEADER_SESSION_EXPIRES | SESSION_HEADER_MIN_SE |
-            SESSION_HEADER_CHECK_SESSION_EXPIRES;
+    m_objSession.nHeaders = SESSION_HEADER_SESSION_EXPIRES | SESSION_HEADER_MIN_SE;
+
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_ALLOW_SESSION_TIMER_TURN_OFF_BOOL))
+    {
+        m_objSession.nHeaders |= SESSION_HEADER_SESSION_TIMER_TURN_OFF_ALLOWED;
+    }
 
     if (piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL))
     {
