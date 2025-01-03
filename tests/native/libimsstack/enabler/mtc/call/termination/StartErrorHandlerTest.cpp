@@ -1078,6 +1078,26 @@ TEST_F(StartErrorHandlerTest, Handle6xxResponses)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_GLOBAL_ERROR, ANY_REJECT_CODE));
 }
 
+TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbInNonNr)
+{
+    SetMessageCode(SipStatusCode::SC_500);
+    SetActionConfig(SipStatusCode::SC_500, ConfigVoice::START_ERROR_ACTION_TRIGGER_EPSFB);
+
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
+}
+
+TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbInNr)
+{
+    SetMessageCode(SipStatusCode::SC_500);
+    SetActionConfig(SipStatusCode::SC_500, ConfigVoice::START_ERROR_ACTION_TRIGGER_EPSFB);
+
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK));
+}
+
 TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
 {
     IMS_SINT32 nAnyCause = 12345;

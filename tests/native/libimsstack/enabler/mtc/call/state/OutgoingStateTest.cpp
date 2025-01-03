@@ -449,6 +449,9 @@ TEST_F(OutgoingStateTest, HandleAosConnectedRedialsIfWaitingEpsFallback)
             .WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
 
+    const CallReasonInfo objReasonByEpsfb(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
+    EXPECT_CALL(objController, GetRedialHelper(Ref(objCallContext), objReasonByEpsfb))
+            .WillOnce(ReturnRef(objRedialHelper));
     EXPECT_CALL(objRedialHelper, Redial).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));

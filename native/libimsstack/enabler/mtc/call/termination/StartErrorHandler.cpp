@@ -442,8 +442,11 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleTriggerEpsfb(IN const IMessage& /*objMessage*/) const
 {
     IMS_TRACE_I("HandleTriggerEpsfb", 0, 0, 0);
-    // TODO: b/361459657
-    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
+    if (m_objContext.GetService().IsNr())
+    {
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
+    }
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE

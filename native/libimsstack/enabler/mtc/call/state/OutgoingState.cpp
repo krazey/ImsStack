@@ -693,7 +693,7 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
         return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
-                CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT));
+                CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
     }
     else if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
     {
