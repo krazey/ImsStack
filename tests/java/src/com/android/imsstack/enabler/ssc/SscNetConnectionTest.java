@@ -53,6 +53,7 @@ public class SscNetConnectionTest {
     private static final int SLOT_0 = 0;
     private static final EApnType APN_TYPE = EApnType.XCAP;
     private static final int INACTIVITY_TIME_SEC = 100;
+    private static final long PDN_CONNECTION_TIMEOUT_MS = 30 * 1000;
     private static final long TIMER_ID = 1L;
 
     private SscNetConnection mSscNetConnection = null;
@@ -161,7 +162,7 @@ public class SscNetConnectionTest {
     public void connect_apnTypeNull() {
         mSscNetConnection.init(null);
 
-        boolean result = mSscNetConnection.connect();
+        boolean result = mSscNetConnection.connect(PDN_CONNECTION_TIMEOUT_MS);
         assertEquals(false, result);
         verify(mMockDcApn, never()).connect(APN_TYPE.getType());
     }
@@ -171,7 +172,7 @@ public class SscNetConnectionTest {
         when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_CONNECTED);
 
-        boolean result = mSscNetConnection.connect();
+        boolean result = mSscNetConnection.connect(PDN_CONNECTION_TIMEOUT_MS);
         verify(mMockDcApn).getDataState(APN_TYPE.getType());
         assertEquals(true, result);
     }
@@ -182,7 +183,7 @@ public class SscNetConnectionTest {
         when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
 
-        boolean result = mSscNetConnection.connect();
+        boolean result = mSscNetConnection.connect(PDN_CONNECTION_TIMEOUT_MS);
         assertEquals(false, result);
     }
 
@@ -192,7 +193,7 @@ public class SscNetConnectionTest {
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
         when(mMockDcApn.connect(eq(APN_TYPE.getType()))).thenReturn(false);
 
-        boolean result = mSscNetConnection.connect();
+        boolean result = mSscNetConnection.connect(PDN_CONNECTION_TIMEOUT_MS);
         assertEquals(false, result);
     }
 
@@ -201,14 +202,12 @@ public class SscNetConnectionTest {
         when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
         when(mMockDcApn.connect(eq(APN_TYPE.getType()))).thenReturn(true);
-        when(mMockTimerInterface.startTimer(
-                eq(SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER),
+        when(mMockTimerInterface.startTimer(eq(PDN_CONNECTION_TIMEOUT_MS),
                 any(TimerInterface.Listener.class))).thenReturn(TIMER_ID);
 
-        boolean result = mSscNetConnection.connect();
+        boolean result = mSscNetConnection.connect(PDN_CONNECTION_TIMEOUT_MS);
 
-        verify(mMockTimerInterface).startTimer(
-                eq(SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER),
+        verify(mMockTimerInterface).startTimer(eq(PDN_CONNECTION_TIMEOUT_MS),
                 any(TimerInterface.Listener.class));
 
         assertEquals(Long.valueOf(TIMER_ID),

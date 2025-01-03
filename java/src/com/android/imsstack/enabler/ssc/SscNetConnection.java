@@ -46,7 +46,6 @@ public class SscNetConnection implements ISscNetConnection {
     protected static final int EVENT_PDN_IPCAN_CHANGED = 2003;
 
     protected static final long DISCONNECTION_DELAY = 1000; // 1 sec
-    protected static final long PDN_CONNECTION_TIMEOUT_TIMER = 30 * 1000; // 30 sec
 
     @VisibleForTesting
     protected Handler mSscTransactionHandler = null;
@@ -161,8 +160,13 @@ public class SscNetConnection implements ISscNetConnection {
     }
 
     @Override
-    public boolean connect() {
+    public boolean connect(long timeoutMs) {
         ImsLog.d(mSlotId, "");
+
+        if (timeoutMs <= 0) {
+            ImsLog.e(mSlotId, "invalid timeoutMs : " + timeoutMs);
+            return false;
+        }
 
         if (mApnType == null) {
             ImsLog.e(mSlotId, "mApnType is null");
@@ -184,7 +188,7 @@ public class SscNetConnection implements ISscNetConnection {
             return false;
         }
 
-        startTimer(EVENT_PDN_REQUEST_TIMEOUT, PDN_CONNECTION_TIMEOUT_TIMER);
+        startTimer(EVENT_PDN_REQUEST_TIMEOUT, timeoutMs);
         return true;
     }
 

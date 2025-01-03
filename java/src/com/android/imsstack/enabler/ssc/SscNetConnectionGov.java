@@ -63,13 +63,13 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
     }
 
     @Override
-    public boolean connect(int slotId) {
+    public boolean connect(int slotId, long timeoutMs) {
         ISscNetConnection netConnection = mSscNetConnection.get(slotId);
         if (netConnection == null) {
             return false;
         }
 
-        return netConnection.connect();
+        return netConnection.connect(timeoutMs);
     }
 
     @Override

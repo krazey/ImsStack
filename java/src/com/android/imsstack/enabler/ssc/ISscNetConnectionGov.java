@@ -44,8 +44,10 @@ public interface ISscNetConnectionGov {
 
     /**
      * Call connect() of SscNetConnection for a given slotId
+     *
+     * @param timeoutMs The timer to wait for connection.
      */
-    boolean connect(int slotId);
+    boolean connect(int slotId, long timeoutMs);
 
     /**
      * Call disconnect() of SscNetConnection for a given slotId

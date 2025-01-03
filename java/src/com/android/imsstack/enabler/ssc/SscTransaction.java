@@ -42,6 +42,7 @@ import org.w3c.dom.Document;
 public class SscTransaction {
     public static final int EVENT_SEND_HTTP_REQUEST = 1001;
     private static final int DEFAULT_GBA_TIMEOUT_SEC = 30;
+    private static final int DEFAULT_PDN_CONNECTION_TIMEOUT_MS = 30 * 1000; // 30 sec
 
     private final int mSlotId;
     private final SscXmlGov mXmlGov;
@@ -169,7 +170,7 @@ public class SscTransaction {
                 netConnectionGov.refreshConnectionTimer(mSlotId);
             } else {
                 ImsLog.i(mSlotId, "PDN is not connected. Trying to Connect");
-                if (!netConnectionGov.connect(mSlotId)) {
+                if (!netConnectionGov.connect(mSlotId, DEFAULT_PDN_CONNECTION_TIMEOUT_MS)) {
                     ImsLog.i(mSlotId, "PDN connection fail");
                     sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 }

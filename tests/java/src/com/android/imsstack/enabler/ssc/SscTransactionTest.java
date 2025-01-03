@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -147,7 +148,7 @@ public class SscTransactionTest {
     @Test
     public void startTransaction_requestToConnectFailure() {
         when(mMockSscConnection.isConnected()).thenReturn(false);
-        when(mMockSscConnection.connect()).thenReturn(false);
+        when(mMockSscConnection.connect(anyLong())).thenReturn(false);
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
@@ -158,7 +159,7 @@ public class SscTransactionTest {
     @Test
     public void startTransaction_pdnDisconnected() {
         when(mMockSscConnection.isConnected()).thenReturn(false);
-        when(mMockSscConnection.connect()).thenReturn(true);
+        when(mMockSscConnection.connect(anyLong())).thenReturn(true);
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
@@ -170,7 +171,7 @@ public class SscTransactionTest {
     @Test
     public void startTransaction_pdnRequestTimeout() {
         when(mMockSscConnection.isConnected()).thenReturn(false);
-        when(mMockSscConnection.connect()).thenReturn(true);
+        when(mMockSscConnection.connect(anyLong())).thenReturn(true);
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
@@ -182,7 +183,7 @@ public class SscTransactionTest {
     @Test
     public void startTransaction_pdnConnectionFailure() {
         when(mMockSscConnection.isConnected()).thenReturn(false);
-        when(mMockSscConnection.connect()).thenReturn(true);
+        when(mMockSscConnection.connect(anyLong())).thenReturn(true);
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
@@ -527,7 +528,7 @@ public class SscTransactionTest {
             mSscTransaction.getTransactionHandler()
                     .sendEmptyMessage(SscNetConnection.EVENT_PDN_CONNECTED);
             return true;
-        }).when(mMockSscConnection).connect();
+        }).when(mMockSscConnection).connect(anyLong());
 
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();

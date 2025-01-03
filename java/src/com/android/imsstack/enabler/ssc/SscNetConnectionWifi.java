@@ -48,7 +48,7 @@ public class SscNetConnectionWifi extends SscNetConnection {
     }
 
     @Override
-    public boolean connect() {
+    public boolean connect(long timeoutMs) {
         if (isConnected()) {
             ImsLog.e(mSlotId, "Wifi is already connected");
             return true;
