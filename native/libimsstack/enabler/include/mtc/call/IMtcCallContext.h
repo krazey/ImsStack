@@ -138,7 +138,7 @@ public:
      *
      * @return
      */
-    virtual MtcTimerWrapper& GetTimer() = 0;
+    virtual MtcTimerWrapper& GetTimer() const = 0;
 
     /**
      * @brief Gets
