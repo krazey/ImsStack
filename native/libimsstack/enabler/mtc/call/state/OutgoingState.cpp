@@ -743,8 +743,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
     }
 }
 
-PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(
-        IN IMS_UINT32 nFailureReason, IN [[maybe_unused]] IMS_UINT32 nWaitTimeMillis)
+PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
+        [[maybe_unused]] IMS_UINT32 nFailureReason,
+        IN [[maybe_unused]] IMS_UINT32 nWaitTimeMillis)
 {
     if (m_objContext.GetMessageUtils().GetPreviousResponse(
                 GetISession(), IMessage::SESSION_START) != IMS_NULL)

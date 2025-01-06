@@ -1151,8 +1151,11 @@ public:
         // Media type for an incoming re-INVITE without SDP
         enum
         {
-            OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT = 0,
-            OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED = 1
+            OFFERLESS_REINVITE_MEDIA_TYPE_FULL = 0,
+            OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO = 1,
+            OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT = 2,
+            OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY = 3,
+            OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED = 4,
         };
 
         // Policy for MO call timeout

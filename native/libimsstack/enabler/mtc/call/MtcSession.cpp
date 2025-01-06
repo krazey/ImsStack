@@ -319,8 +319,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
             }
             else
             {
-                // TODO: b/363128073 - Revisit when supporting HK operators
-                SetCallType(GetCallTypeByHistory());
+                SetCallType(GetCallTypeForOfferlessReInvite());
             }
 
             SetInConference(objRequest);
@@ -508,6 +507,26 @@ CallType MtcSession::GetCallTypeForOfferlessInvite()
 }
 
 PRIVATE
+CallType MtcSession::GetCallTypeForOfferlessReInvite()
+{
+    IMS_SINT32 eMediaType = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT);
+    switch (eMediaType)
+    {
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_FULL:
+            return GetCallTypeByRegisteredFeature();
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO:
+            return CallType::VOIP;
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT:
+            return m_eCallType;
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY:
+            return GetCallTypeByHistory();
+        default:  // OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED
+            return MayGetFirstCallType();
+    }
+}
+
+PRIVATE
 CallType MtcSession::GetCallTypeByRegisteredFeature()
 {
     IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
@@ -538,6 +557,19 @@ CallType MtcSession::GetCallTypeByRegisteredFeature()
         }
     }
 
+    return CallType::VOIP;
+}
+
+PRIVATE
+CallType MtcSession::MayGetFirstCallType()
+{
+    for (const auto& callType : m_objCallTypeHistory)
+    {
+        if (callType != CallType::UNKNOWN)
+        {
+            return callType;
+        }
+    }
     return CallType::VOIP;
 }
 
