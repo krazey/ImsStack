@@ -1432,7 +1432,8 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpAck));
 
     EXPECT_CALL(objMockMessage, GetStatusCode())
-            .Times(4)
+            .Times(5)
+            .WillOnce(Return(SipStatusCode::SC_407))
             .WillOnce(Return(SipStatusCode::SC_407))
             .WillOnce(Return(SipStatusCode::SC_407))
             .WillOnce(Return(SipStatusCode::SC_407))

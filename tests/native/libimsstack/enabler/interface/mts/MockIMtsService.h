@@ -33,6 +33,8 @@ public:
             (override));
     MOCK_METHOD(void, SetListener, (IN IMtsServiceListener * piMtsServiceListener), (override));
     MOCK_METHOD(void, RequestRegistrationRecovery, (IN IMS_UINT32 nRecoveryType), (override));
+    MOCK_METHOD(
+            void, RequestRegisterWithNextPcscf, (IN const IMS_UINT32 nRetryAfterValue), (override));
 
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
     MOCK_METHOD(void, SendMoSms,

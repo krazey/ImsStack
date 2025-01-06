@@ -70,8 +70,7 @@ MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService
     IMS_TRACE_I("+MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
 
     m_piMtsService->SetListener(this);
-    m_piMtsErrorHandler =
-            new MtsErrorHandler(ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId));
+    m_piMtsErrorHandler = new MtsErrorHandler(m_nSlotId);
 }
 
 PUBLIC MtsMessageController::~MtsMessageController()

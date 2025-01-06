@@ -246,6 +246,21 @@ TEST_F(MtsServiceTest, RequestRegistrationRecoveryWhenAosIsDetached)
     pMtsService->RequestRegistrationRecovery(ImsAosControl::PCSCF_NEXT);
 }
 
+TEST_F(MtsServiceTest, RequestRegisterWithNextPcscfToAos)
+{
+    IMS_UINT32 nRetryAfterValue = 32;
+    EXPECT_CALL(objMockIImsAos, RegisterWithNextPcscf(nRetryAfterValue)).Times(1);
+    pMtsService->RequestRegisterWithNextPcscf(nRetryAfterValue);
+}
+
+TEST_F(MtsServiceTest, RequestRegisterWithNextPcscfWhenAosIsDetached)
+{
+    IMS_UINT32 nRetryAfterValue = 32;
+    pMtsService->SetIImsAos(IMS_NULL);
+    EXPECT_CALL(objMockIImsAos, RegisterWithNextPcscf(nRetryAfterValue)).Times(0);
+    pMtsService->RequestRegisterWithNextPcscf(nRetryAfterValue);
+}
+
 TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";

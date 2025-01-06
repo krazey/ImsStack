@@ -15,12 +15,16 @@
  */
 
 #include "CarrierConfig.h"
+#include "Engine.h"
 #include "ICarrierConfig.h"
+#include "IConfiguration.h"
 #include "IMessage.h"
 #include "IMtsService.h"
+#include "ISipConfigV.h"
 #include "ImsAosParameter.h"
 #include "IuMtsService.h"
 #include "MtsDef.h"
+#include "ServiceConfig.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
@@ -30,11 +34,12 @@
 __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
-MtsErrorHandler::MtsErrorHandler(IN ICarrierConfig* piCarrierConfig) :
-        m_piCarrierConfig(piCarrierConfig),
+MtsErrorHandler::MtsErrorHandler(IN IMS_SINT32 nSlotId) :
         m_nCumulativeDuration(0),
         m_nCurrentRetryCount(0),
-        m_nRetryAfterValue(0)
+        m_nRetryAfterValue(0),
+        m_nSlotId(nSlotId),
+        m_piCarrierConfig(ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId))
 {
     IMS_TRACE_I("+MtsErrorHandler", 0, 0, 0);
 }
@@ -83,7 +88,12 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService* piMtsService,
     {
         CalculateRetryAfterCondition(
                 pMtsDynamicLoader->GetMtsSipFormUtils()->GetRetryAfterValue(piMessage));
-        if (IsRetryPossible())
+        if (IsRegisterWithNextPcscfRequired(piMessage) && nPolicy == MTS_REG_RECOVERY_POLICY_NONE)
+        {
+            piMtsService->RequestRegisterWithNextPcscf(m_nRetryAfterValue);
+            nResult = MO_ERROR_GENERIC;
+        }
+        else if (IsRetryPossible())
         {
             nResult = MO_ERROR_BY_RETRY_AFTER;
         }
@@ -263,6 +273,12 @@ IMS_SINT32 MtsErrorHandler::Get504ResponsePolicy() const
 PRIVATE
 void MtsErrorHandler::CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAfterValue)
 {
+    if (nRetryAfterValue <= 0)
+    {
+        // The error response does not have Retry-After header
+        return;
+    }
+
     m_nRetryAfterValue = nRetryAfterValue;
     m_nCurrentRetryCount++;
     m_nCumulativeDuration += m_nRetryAfterValue;
@@ -298,4 +314,20 @@ IMS_BOOL MtsErrorHandler::IsRetryPossible() const
     }
 
     return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL MtsErrorHandler::IsRegisterWithNextPcscfRequired(IN const IMessage* piMessage) const
+{
+    IMS_SINT32 nStatusCode =
+            (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+
+    if (nStatusCode != SipStatusCode::SC_503 || m_nRetryAfterValue <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_nRetryAfterValue * 1000 >
+            Engine::GetConfiguration()->GetSipConfig(m_nSlotId)->GetSipConfigV()->GetTimerValue(
+                    ISipConfigV::TIMER_F);
 }

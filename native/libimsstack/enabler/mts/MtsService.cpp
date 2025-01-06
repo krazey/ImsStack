@@ -330,6 +330,19 @@ void MtsService::RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType)
 }
 
 PUBLIC
+void MtsService::RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue)
+{
+    if (m_piImsAos != IMS_NULL)
+    {
+        m_piImsAos->RegisterWithNextPcscf(nRetryAfterValue);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
+    }
+}
+
+PUBLIC
 void MtsService::Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
 {

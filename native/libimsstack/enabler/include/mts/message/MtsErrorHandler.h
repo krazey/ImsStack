@@ -25,7 +25,7 @@ class MtsDynamicLoader;
 class MtsErrorHandler final : public IMtsErrorHandler
 {
 public:
-    explicit MtsErrorHandler(IN ICarrierConfig* piCarrierConfig);
+    explicit MtsErrorHandler(IN IMS_SINT32 nSlotId);
     ~MtsErrorHandler();
 
     IMS_SINT32 Handle(IN IMtsService* piMtsService, IN MtsDynamicLoader* pMtsDynamicLoader,
@@ -56,12 +56,14 @@ private:
 
     void CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAfterValue);
     IMS_BOOL IsRetryPossible() const;
+    IMS_BOOL IsRegisterWithNextPcscfRequired(IN const IMessage* piMessage) const;
 
 private:
-    ICarrierConfig* m_piCarrierConfig;
     IMS_SINT32 m_nCumulativeDuration;
     IMS_SINT32 m_nCurrentRetryCount;
     IMS_SINT32 m_nRetryAfterValue;
+    IMS_SINT32 m_nSlotId;
+    ICarrierConfig* m_piCarrierConfig;
 };
 
 #endif
