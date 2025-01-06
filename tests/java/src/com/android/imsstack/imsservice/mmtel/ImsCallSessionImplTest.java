@@ -1241,6 +1241,40 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testonCallUpdateReceivedForDowngradeToAudioFromRtt() {
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
+        mImsCallProfile.getMediaProfile().mAudioDirection =
+                ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
+        mImsCallProfile.getMediaProfile().setRttMode(ImsStreamMediaProfile.RTT_MODE_FULL);
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+
+        assertEquals(IUMtcCall.CALLTYPE_RTT, ImsCallUtils.getCallTypeFromProfile(
+                mImsCallProfile.getCallType(), mImsCallProfile.getMediaProfile().isRttCall()));
+
+        mMockMediaInfo.GTTMode = MediaInfo.GTTMODE_FULL;
+        when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
+
+        MediaInfo mNewMockMediaInfo = Mockito.mock(MediaInfo.class);
+        mNewMockMediaInfo.ADir = MediaInfo.DIRECTION_RECEIVE;
+        mNewMockMediaInfo.GTTMode = MediaInfo.GTTMODE_INACTIVE;
+        SuppInfo mockSuppInfo = Mockito.mock(SuppInfo.class);
+        mImsCallSession.getCallListenerProxy().onCallUpdateReceived(
+                    mMockMtcCall, mMockCallInfo, mNewMockMediaInfo, mockSuppInfo);
+        processAllMessages();
+
+        ArgumentCaptor<Integer> callTypeCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<MediaInfo> mediaInfoCaptor = ArgumentCaptor.forClass(MediaInfo.class);
+
+        verify(mMockMtcCall).accept(callTypeCaptor.capture(), mediaInfoCaptor.capture());
+        int callType = callTypeCaptor.getValue();
+        assertEquals(IUMtcCall.CALLTYPE_VOIP, callType);
+        assertEquals(MediaInfo.DIRECTION_RECEIVE, mediaInfoCaptor.getValue().ADir);
+    }
+
+    @Test
     public void testOnCallTransferred() {
         mImsCallSession.mTransferTargetSession = createImsCallSession("1");
         ImsCallSessionImpl targetSession = mImsCallSession.mTransferTargetSession;

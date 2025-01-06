@@ -1153,8 +1153,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
-        MediaInfo mediaInfo =
-                ImsCallMediaUtils.createMediaInfoFromMediaProfile(mCallProfile.getMediaProfile());
+        MediaInfo mediaInfo = ImsCallMediaUtils.createMediaInfoFromMediaProfile(
+                mProposedCallProfile.getMediaProfile());
 
         setRttInfo(mediaInfo, isRttOn);
 
