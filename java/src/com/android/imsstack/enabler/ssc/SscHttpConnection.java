@@ -44,9 +44,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class SscHttpConnection implements ISscHttpConnection {
-    private static final int HTTP_CONNECTION_TIMEOUT = 30 * 1000;
-    private static final int HTTP_READ_TIMEOUT = 20 * 1000;
-
     protected final int mSlotId;
     private final EApnType mApnType;
     protected HttpURLConnection mConnection = null;
@@ -67,8 +64,9 @@ public class SscHttpConnection implements ISscHttpConnection {
 
     @Override
     public int sendRequest(@HttpRequestType int requestType, String requestUri, String xui,
-            String body) {
-        ImsLog.d(mSlotId, "requestType : " + requestType + ", body : \n" + body);
+            String body, int timeoutMs) {
+        ImsLog.d(mSlotId, "requestType : " + requestType + ", timeout=" + timeoutMs + ", body : \n"
+                + body);
 
         if (TextUtils.isEmpty(requestUri)) {
             ImsLog.e("requestUri or xui is invalid");
@@ -114,8 +112,8 @@ public class SscHttpConnection implements ISscHttpConnection {
             setHostnameVerifier();
 
             // Sets timer values
-            mConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT);
-            mConnection.setReadTimeout(HTTP_READ_TIMEOUT);
+            mConnection.setConnectTimeout(timeoutMs);
+            mConnection.setReadTimeout(timeoutMs);
 
             setAuthorizationHeader(requestType, requestUri, body);
 

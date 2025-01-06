@@ -66,6 +66,7 @@ import java.util.Map;
 @RunWith(JUnit4.class)
 public class SscHttpConnectionTest {
     private static final int SLOT_0 = 0;
+    private static final int DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS = 30 * 1000;
     private EApnType mApnType = EApnType.XCAP;
     private String mXui = "tel:+1234567890";
     private String mRequestUri = "/simservs.ngn.etsi.org/users/" + mXui + "/simservs.xml";
@@ -114,7 +115,7 @@ public class SscHttpConnectionTest {
     @Test
     public void close_shouldDisconnectConnection() {
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
         mSscHttpConnection.close();
 
         verify(mMockConnection).disconnect();
@@ -125,7 +126,7 @@ public class SscHttpConnectionTest {
     public void sendRequest_invalidRequestUri() {
         String invalidRequestUri = null;
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                invalidRequestUri, mXui, "");
+                invalidRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_INVALID_URI, result);
     }
@@ -134,7 +135,7 @@ public class SscHttpConnectionTest {
     public void sendRequest_invalidXui() {
         String invalidXui = null;
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, invalidXui, "");
+                mRequestUri, invalidXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_INVALID_XUI, result);
     }
@@ -144,7 +145,7 @@ public class SscHttpConnectionTest {
         when(mMockSscUrl.getConnectionUrl(SLOT_0, mRequestUri)).thenReturn(null);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockSscUrl).getConnectionUrl(SLOT_0, mRequestUri);
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_INVALID_XCAP_ROOT_URI, result);
@@ -155,7 +156,7 @@ public class SscHttpConnectionTest {
         when(mMockDcApn.getNetworkByCapability(mApnType.getType())).thenReturn(null);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockDcApn).getNetworkByCapability(mApnType.getType());
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_NO_NETWORK, result);
@@ -168,7 +169,7 @@ public class SscHttpConnectionTest {
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_NO_NETWORK, result);
     }
@@ -180,7 +181,7 @@ public class SscHttpConnectionTest {
         when(mMockWifiInterface.getNetwork()).thenReturn(null);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_NO_NETWORK, result);
     }
@@ -190,7 +191,7 @@ public class SscHttpConnectionTest {
         when(mMockNetwork.openConnection(any())).thenReturn(null);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockNetwork).openConnection(any());
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_CONNECTION, result);
@@ -198,7 +199,8 @@ public class SscHttpConnectionTest {
 
     @Test
     public void sendRequest_setAuthHeaderWhenCredentialNotUpdated() {
-        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "");
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "",
+                DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection, times(0)).setRequestProperty(eq("Authorization"), any());
     }
@@ -209,7 +211,8 @@ public class SscHttpConnectionTest {
         when(mMockSscAuthAgent.calculateResponse(anyString(), anyString(), anyString()))
                 .thenReturn(false);
 
-        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "");
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "",
+                DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection, times(0)).setRequestProperty(eq("Authorization"), any());
     }
@@ -221,7 +224,8 @@ public class SscHttpConnectionTest {
                 .thenReturn(true);
         when(mMockSscAuthAgent.getCredentialInfoString()).thenReturn("credentialInfo");
 
-        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "");
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "",
+                DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).setRequestProperty("Authorization", "credentialInfo");
     }
@@ -234,7 +238,7 @@ public class SscHttpConnectionTest {
                 .thenReturn("ImsClient");
 
         mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui,
-                xmlBody);
+                xmlBody, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).setRequestProperty("X-3GPP-Intended-Identity", identity);
         verify(mMockConnection).setRequestProperty("Host", mFqdn);
@@ -254,7 +258,7 @@ public class SscHttpConnectionTest {
                 .thenReturn("ImsClient");
 
         mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_PUT, mRequestUri, mXui,
-                xmlBody);
+                xmlBody, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).setRequestProperty("X-3GPP-Intended-Identity", identity);
         verify(mMockConnection).setRequestProperty("Host", mFqdn);
@@ -271,7 +275,7 @@ public class SscHttpConnectionTest {
         doThrow(new UnknownHostException()).when(mMockConnection).connect();
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         verify(mMockConnection).disconnect();
@@ -284,7 +288,7 @@ public class SscHttpConnectionTest {
         doThrow(new SocketTimeoutException()).when(mMockConnection).connect();
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         verify(mMockConnection).disconnect();
@@ -297,7 +301,7 @@ public class SscHttpConnectionTest {
         doThrow(new IOException()).when(mMockConnection).getResponseCode();
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         verify(mMockConnection).disconnect();
@@ -314,7 +318,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getErrorStream()).thenReturn(createInputStream(xml));
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         verify(mMockConnection).getErrorStream();
@@ -332,7 +336,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getErrorStream()).thenReturn(createInputStream(xml));
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         verify(mMockConnection).getErrorStream();
@@ -351,7 +355,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getHeaderField("WWW-Authenticate")).thenReturn(wwwAuthenticate);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         verify(mMockSscAuthAgent).parse(wwwAuthenticate);
@@ -368,7 +372,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getContentLength()).thenReturn(xml.length());
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         assertEquals(SscConstant.HTTP_OK, result);
@@ -386,7 +390,7 @@ public class SscHttpConnectionTest {
         doThrow(new IOException()).when(inputStream).close();
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         assertEquals(SscConstant.HTTP_OK, result);
@@ -402,7 +406,7 @@ public class SscHttpConnectionTest {
         doThrow(new IOException()).when(mMockConnection).getResponseMessage();
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).connect();
         verify(mMockConnection).getResponseMessage();
@@ -434,7 +438,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getHeaderField(0)).thenReturn("ETag-1234");
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).setRequestMethod("GET");
         verify(mMockConnection).setRequestProperty("Connection", "Keep-Alive");
@@ -470,7 +474,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getHeaderField(0)).thenReturn("");
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+                mRequestUri, mXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).setRequestMethod("GET");
         verify(mMockConnection).setRequestProperty("Connection", "Keep-Alive");
@@ -499,7 +503,7 @@ public class SscHttpConnectionTest {
         when(mMockConnection.getOutputStream()).thenReturn(mMockOutputStream);
 
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_PUT,
-                mRequestUri, mXui, xml);
+                mRequestUri, mXui, xml, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockConnection).setRequestMethod("PUT");
         verify(mMockConnection).setDoOutput(true);

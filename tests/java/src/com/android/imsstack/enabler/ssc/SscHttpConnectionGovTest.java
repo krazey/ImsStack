@@ -44,6 +44,7 @@ import java.util.Map;
 @RunWith(JUnit4.class)
 public class SscHttpConnectionGovTest {
     private static final int SLOT_0 = 0;
+    private static final int DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS = 30 * 1000;
 
     ISscHttpConnectionGov mSscHttConnectionGov;
 
@@ -136,10 +137,11 @@ public class SscHttpConnectionGovTest {
         when(mMockSscHttpConnections.get(SLOT_0)).thenReturn(mMockSscHttpConnection);
 
         mSscHttConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET, requestUri,
-                xui, null);
+                xui, null, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockSscHttpConnection)
-                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null);
+                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null,
+                        DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
     }
 
     @Test
@@ -150,10 +152,11 @@ public class SscHttpConnectionGovTest {
         when(mMockSscHttpConnections.get(SLOT_0)).thenReturn(null);
 
         mSscHttConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET, requestUri,
-                xui, null);
+                xui, null, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockSscHttpConnection, never())
-                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null);
+                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null,
+                        DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
     }
 
     @Test
