@@ -44,6 +44,7 @@
     </int-array>
     <int-array name="ims.update_registration_with_rat_change_int_array" num="0">
     </int-array>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="2"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="2"/>
     <int name="imsemergency.wait_time_sec_for_release_epdn_after_ecall_end_int" value="0"/>

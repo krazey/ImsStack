@@ -590,6 +590,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Ims::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(
+                    CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -851,6 +856,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsContactUriValidationChecked());
     EXPECT_FALSE(m_pAosNConfiguration->IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegRetryWithIpVerFallback());
+    EXPECT_TRUE(m_pAosNConfiguration->IsReleaseEPdnUponECallEndInFakeMode());
     EXPECT_FALSE(m_pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(m_pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
     EXPECT_FALSE(m_pAosNConfiguration->IsRequiredVolteBlockBySsac());
