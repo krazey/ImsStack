@@ -1853,11 +1853,19 @@ IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
     if (StartTimer(TIMER_EXPONENTIAL, nExponentialRetryTimeSec))
     {
         DestroyPublication();
+        m_nExponentialRetryCount++;
         if (GetState() == PUBLISHING || GetState() == REFRESHING)
         {
+            if (GetState() == REFRESHING)
+            {
+                IMS_TRACE_D(
+                        "ProcessExponentialRetryResponseScenario:reset m_nExponentialRetryCount", 0,
+                        0, 0);
+                m_nExponentialRetryCount = 0;
+            }
+            // Set state to ON to invoke the initial PUBLISH.
             SetState(ON);
         }
-        m_nExponentialRetryCount++;
         return IMS_TRUE;
     }
     SetState(ON);
