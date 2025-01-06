@@ -30,6 +30,8 @@ typedef enum
     BLOCK_AC_INCOMPLETED = BLOCK_START,
     /// authentication is failed
     BLOCK_AUTHENTICATION_FAILED,
+    /// USIM authentication is failed
+    BLOCK_USIM_AUTHENTICATION_FAILED,
     /// aos boot-up hasn't been done yet.
     BLOCK_AOS_INCOMPLETED,
     /// cs call is active. ims may need to be de-registered while cs calling.

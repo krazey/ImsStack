@@ -266,7 +266,8 @@ IMS_BOOL AosInfo::IsForbiddenBlock()
 
     if (piBlock->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
             piBlock->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
-            piBlock->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED))
+            piBlock->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+            piBlock->IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED))
     {
         return IMS_TRUE;
     }

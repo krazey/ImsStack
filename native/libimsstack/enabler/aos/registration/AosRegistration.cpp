@@ -3299,20 +3299,24 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegTerminatedByNotify()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
 {
-    if (IsUsimAuthFailureHandlingNeeded())
+    IMS_BOOL bIsUsimAuthFailureNeeded = IsUsimAuthFailureHandlingNeeded();
+
+    if (bIsUsimAuthFailureNeeded)
     {
         m_eImsReasonCode = AosReasonCode::USIM_AUTHENTICATION_FAILURES;
     }
     else if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED)
     {
-        if (GetState() == STATE_REGISTERING)
+        IMS_UINT32 nState = GetState();
+
+        if (nState == STATE_REGISTERING)
         {
             ProcessDefaultFlowRecovery_Start();
             return;
         }
 
-        if (GetState() == STATE_REFRESHING)
+        if (nState == STATE_REFRESHING)
         {
             ProcessDefaultFlowRecovery_Update();
             return;
@@ -3320,7 +3324,10 @@ PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
     }
 
     Destroy();
-    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_AUTHENTICATION);
+
+    ReportStateChanged(RESULT_FAILURE,
+            bIsUsimAuthFailureNeeded ? REASON_FAILURE_USIM_AUTHENTICATION
+                                     : REASON_FAILURE_AUTHENTICATION);
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithWaitTime(IN IMS_SINT32 nWaitTime)

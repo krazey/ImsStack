@@ -274,6 +274,7 @@ PROTECTED VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
     {
         m_piBlock->ResetBlockReason(BLOCK_IMS_DISABLED);
         m_piBlock->ResetBlockReason(BLOCK_AUTHENTICATION_FAILED);
+        m_piBlock->ResetBlockReason(BLOCK_USIM_AUTHENTICATION_FAILED);
     }
 }
 

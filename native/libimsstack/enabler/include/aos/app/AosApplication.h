@@ -215,6 +215,7 @@ protected:
     virtual void ProcessRegControlEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nReason);
     virtual void ProcessRegInternalFailed(IN IMS_UINT32 nReason = 0);
     virtual void ProcessRegAuthenticationFailed();
+    virtual void ProcessRegUsimAuthenticationFailed();
     virtual void ProcessRegTerminated();
     virtual void ProcessPingCommand();
     virtual void ProcessRegTerminating();

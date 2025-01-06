@@ -232,6 +232,9 @@ TEST_F(AosInfoTest, GetImsState_Test2)
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED, _, _))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED, _, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -263,6 +266,9 @@ TEST_F(AosInfoTest, GetImsState_Test3)
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED, _, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED, _, _))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
@@ -576,21 +582,26 @@ TEST_F(AosInfoTest, IsForbiddenBlock_Test)
             .WillRepeatedly(Return(static_cast<IAosBlock*>(&objMockIAosBlock)));
 
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_IMS_DISABLED, _, _))
-            .Times(4)
+            .Times(5)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED, _, _))
-            .Times(3)
+            .Times(4)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED, _, _))
+            .Times(3)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED, _, _))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
+    EXPECT_TRUE(IsForbiddenBlock());
     EXPECT_TRUE(IsForbiddenBlock());
     EXPECT_TRUE(IsForbiddenBlock());
     EXPECT_TRUE(IsForbiddenBlock());
