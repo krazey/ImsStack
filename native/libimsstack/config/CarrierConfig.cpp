@@ -888,6 +888,10 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL[] =
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY[] =
                 KEY_IMS_VOICE_PREFIX "rat_condition_for_not_waiting_dedicated_bearer_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL[] =
+                KEY_IMS_VOICE_PREFIX
+        "trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool";
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_jitter_buffer_size_int_array";

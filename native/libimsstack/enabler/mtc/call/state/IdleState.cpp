@@ -405,6 +405,7 @@ CallStateName IdleState::ContinueStart()
         return CallStateName::TERMINATING;
     }
 
+    m_objContext.GetPreconditionManager().OnInitialInviteSent(GetISession());
     m_objContext.GetUiNotifier().SendInitiating();
     StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
     if (!m_objContext.GetTimer().IsActive(TIMER_MO_18X_WAIT))
@@ -439,6 +440,7 @@ CallStateName IdleState::ContinueConference()
         return CallStateName::TERMINATING;
     }
 
+    m_objContext.GetPreconditionManager().OnInitialInviteSent(GetISession());
     m_objContext.GetUiNotifier().SendInitiating();
     StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
     StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);

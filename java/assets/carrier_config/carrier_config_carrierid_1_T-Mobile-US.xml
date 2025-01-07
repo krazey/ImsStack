@@ -258,6 +258,7 @@
         <item value="0"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_NR -->
         <item value="1"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK -->
     </int-array>
+    <boolean name="imsvoice.trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool" value="true"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>

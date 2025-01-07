@@ -102,6 +102,7 @@ public:
     virtual void OnCallEstablished(IN ISession* piSession) override;
     virtual void OnCallModified(IN ISession* piSession) override;
     virtual void OnRatChanged(IN IMS_SINT32 eRatType) override;
+    virtual void OnInitialInviteSent(IN ISession* piSession) override;
 
 public:
     virtual void OnQosStatusChanged(

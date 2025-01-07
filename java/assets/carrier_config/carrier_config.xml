@@ -175,6 +175,7 @@
     </string-array>
     <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_int_array" num="0">
     </int-array>
+    <boolean name="imsvoice.trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool" value="false"/>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">

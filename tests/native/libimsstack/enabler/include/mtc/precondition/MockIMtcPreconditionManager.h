@@ -51,6 +51,7 @@ public:
     MOCK_METHOD(void, OnCallEstablished, (IN ISession* piSession), (override));
     MOCK_METHOD(void, OnCallModified, (IN ISession* piSession), (override));
     MOCK_METHOD(void, OnRatChanged, (IN IMS_SINT32 eRatType), (override));
+    MOCK_METHOD(void, OnInitialInviteSent, (IN ISession * piSession), (override));
 };
 
 #endif

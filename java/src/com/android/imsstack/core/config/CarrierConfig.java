@@ -1159,6 +1159,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "allow_sos_param_in_contact_bool";
         public static final String KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY =
                 KEY_PREFIX + "rat_condition_for_not_waiting_dedicated_bearer_int_array";
+        public static final String KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL =
+                KEY_PREFIX + "trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool";
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "audio_rtp_port_range_int_array";

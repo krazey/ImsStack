@@ -397,6 +397,27 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
     UpdateMobileRatType(m_objContext.GetService().GetMobileRatType());
 }
 
+PUBLIC VIRTUAL void MtcPreconditionManager::OnInitialInviteSent(IN ISession* piSession)
+{
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(ConfigVoice::
+                        KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL))
+    {
+        return;
+    }
+
+    if (IsLocalResourceReservedByMediaType(piSession, MEDIATYPE_AUDIO))
+    {
+        return;
+    }
+
+    if (IsNotUsingDedicatedWaitTimerByRatCondition())
+    {
+        return;
+    }
+
+    StartQosTimer(piSession, QosTimerType::WAIT_AUDIO_AVAILABLE);
+}
+
 PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
         IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType)
 {
