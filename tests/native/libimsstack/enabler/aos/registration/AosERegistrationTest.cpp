@@ -61,20 +61,21 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                                                  \
+    using Base::CallbackModeChanged;                                         \
     using Base::ClearTimers;                                                 \
+    using Base::IsFakeModeCondition;                                         \
     using Base::IsReregFailureReportOnIpcanChangeRequired;                   \
     using Base::IsTransactionStarted;                                        \
+    using Base::ProcessDefaultFlowRecovery_Start;                            \
+    using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
+    using Base::ProcessNormalDefaultFlowRecovery_Start;                      \
+    using Base::ProcessTransactionTimerExpired;                              \
     using Base::SetImsCall;                                                  \
     using Base::SetReregFailureReportOnIpcanChangeRequired;                  \
     using Base::SetState;                                                    \
     using Base::StopTimer;                                                   \
-    using Base::UpdateTransactionStarted;                                    \
     using Base::UpdateRegIpcanCategory;                                      \
-    using Base::ProcessDefaultFlowRecovery_Start;                            \
-    using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
-    using Base::ProcessTransactionTimerExpired;                              \
-    using Base::CallbackModeChanged;                                         \
-    using Base::ProcessNormalDefaultFlowRecovery_Start;
+    using Base::UpdateTransactionStarted;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -1367,6 +1368,71 @@ TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegNotTried)
             EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
     EXPECT_FALSE(m_pAosERegistration->IsRefreshRequiredByCbm());
+}
+
+TEST_F(AosERegistrationTest, FakeModeConditionIfSubscriberIncompleted)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
+}
+
+TEST_F(AosERegistrationTest, FakeModeConditionIfEmergencyLteAttach)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
+}
+
+TEST_F(AosERegistrationTest, NotFakeModeConditionIfNotSupportLimitedAdminSmsMode)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosERegistration->IsFakeModeCondition());
+}
+
+TEST_F(AosERegistrationTest, NotFakeModeConditionIf2ImpusAndNotPco5)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosERegistration->IsFakeModeCondition());
+}
+
+TEST_F(AosERegistrationTest, FakeModeConditionIf1Impu)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+
+    AStringArray objImpus;
+    objImpus.AddElement(AString("sip:1111@ims.co.kr"));
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).WillByDefault(ReturnRef(objImpus));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
+}
+
+TEST_F(AosERegistrationTest, FakeModeConditionIfPco5)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
 }
 
 TEST_F(AosERegistrationTest, IsRetryAllowedWhenPcscfAvailable)
