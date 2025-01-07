@@ -15,6 +15,8 @@
  */
 
 #include "CarrierConfig.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ImsAosParameter.h"
 #include "IuMtsService.h"
 #include "MockICarrierConfig.h"
@@ -22,6 +24,7 @@
 #include "MockIMtsService.h"
 #include "MtsDef.h"
 #include "PlatformContext.h"
+#include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "TestConfigService.h"
 #include "message/MtsErrorHandler.h"
@@ -56,7 +59,7 @@ protected:
 
         pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
         pMtsDynamicLoader->Initialize();
-        pMtsErrorHandler = new MtsErrorHandler(&objConfigService.GetMockCarrierConfig());
+        pMtsErrorHandler = new MtsErrorHandler(SLOT_ID);
     }
 
     virtual void TearDown() override
@@ -284,6 +287,34 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(_)).Times(0);
 
+    IMS_SINT32 nResult =
+            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
+}
+
+TEST_F(MtsErrorHandlerTest, Handle503ErrorWithNextPcscfRequired)
+{
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+    objErrorCodes.Push(SipStatusCode::SC_504);
+    const AString strRetryAfter(SipHeaderName::RETRY_AFTER);
+    ImsList<AString> objRetryAfterHeaders;
+    objRetryAfterHeaders.Append("130");
+
+    ON_CALL(objMockMessage, GetHeaders(strRetryAfter)).WillByDefault(Return(objRetryAfterHeaders));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            .WillByDefault(Return(objErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT,
+                    MTS_REG_RECOVERY_POLICY_NONE))
+            .WillByDefault(Return(MTS_REG_RECOVERY_POLICY_NONE));
+    Engine::GetConfiguration()->RefreshConfigs(SLOT_ID);
+
+    EXPECT_CALL(objMockMtsService,
+            RequestRegisterWithNextPcscf(objRetryAfterHeaders.GetAt(0).ToInt32()))
+            .Times(1);
     IMS_SINT32 nResult =
             pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);

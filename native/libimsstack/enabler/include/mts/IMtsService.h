@@ -35,6 +35,7 @@ public:
             IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId) = 0;
     virtual void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) = 0;
     virtual void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) = 0;
+    virtual void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) = 0;
     virtual void SetListener(IN IMtsServiceListener* piMtsServiceListener) = 0;
 
     virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
