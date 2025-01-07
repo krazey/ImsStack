@@ -55,21 +55,30 @@ PUBLIC
 EstablishedState::EstablishedState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::ESTABLISHED, objContext)
 {
+    IMS_TRACE_D("+EstablishedState", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL EstablishedState::~EstablishedState()
 {
+    IMS_TRACE_D("~EstablishedState", 0, 0, 0);
     m_objContext.ReleaseAsyncOperation(this);
 }
 
 PUBLIC VIRTUAL void EstablishedState::OnEnter()
 {
+    IMS_TRACE_D("OnEnter", 0, 0, 0);
     if (CurrentLocationDiscoveryController::IsPeriodicLocationDiscoveryRequired(
                 m_objContext.GetCallInfo().IsEmergency(),
                 m_objContext.GetConfigurationProxy().GetInt(
                         ConfigEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT)))
     {
         m_objContext.GetCurrentLocationDiscoveryController().StartPeriodicLocationDiscovery();
+    }
+
+    if (RttAutoUpgrader::IsRequired(m_objContext.GetConfigurationProxy(),
+                m_objContext.GetCallInfo(), m_objContext.GetSession()))
+    {
+        m_objContext.CreateRttAutoUpgrader();
     }
 
     if (ShouldPendOperation())
@@ -83,12 +92,9 @@ PUBLIC VIRTUAL void EstablishedState::OnEnter()
     else
     {
         m_objContext.RunPendingOperationIfPossible();
-    }
-
-    if (RttAutoUpgrader::IsRequired(m_objContext.GetConfigurationProxy(),
-                m_objContext.GetCallInfo(), m_objContext.GetSession()))
-    {
-        m_objContext.CreateRttAutoUpgrader();
+        // TODO: b/388210264 - common fix is required.
+        // A pending operation can delete EstablishedState.
+        // So, do not add any operation after this line.
     }
 }
 
