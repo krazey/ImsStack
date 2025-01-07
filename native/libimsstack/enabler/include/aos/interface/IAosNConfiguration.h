@@ -566,6 +566,16 @@ public:
     virtual IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const = 0;
 
     /**
+     * @brief Get the SIP timer T1
+     *
+     *        This value is defined as per 3GPP TS 24.229 Table 7.7.1
+     *        It defines in millisecond.
+     *
+     * @return IMS_SINT32 Return the SIP timer T1
+     */
+    virtual IMS_SINT32 GetSipTimerT1() = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
@@ -753,16 +763,14 @@ public:
     virtual IMS_SINT32 GetIpv6MtuSize() const = 0;
 
     /**
-     * @brief Returns the wait time in seconds before releasing an emergency PDN.
+     * @brief Returns the wait time in millisecond before releasing an emergency PDN.
      *
      *        Emergency PDN can be released after a specific time when the emergency call ends.
      *        This returns the delay time from the end of the call to the start of the emergency
-     *        PDN release. If this is set to zero, it will wait for emergency registration
-     *        expiration unless current IPCAN is in
-     *        KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT.
-     * @return IMS_SINT32 Return the wait time in seconds before releasing an emergency PDN.
+     *        PDN release. If this is set to -1, it will wait for T1 time.
+     * @return IMS_SINT32 Return the wait time in millisecond before releasing an emergency PDN.
      */
-    virtual IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const = 0;
+    virtual IMS_SINT32 GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const = 0;
 
     /**
      * @brief Indicate whether emergency call is tried without emergency registration

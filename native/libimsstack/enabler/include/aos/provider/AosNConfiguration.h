@@ -110,6 +110,7 @@ public:
     IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const override;
     IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const override;
 
+    IMS_SINT32 GetSipTimerT1() override;
     IMS_UINT32 GetRegistrationRetryBaseTime() override;
     IMS_UINT32 GetRegistrationRetryMaxTime() override;
     IMS_UINT32 GetIsimIndexForImpu() override;
@@ -127,7 +128,7 @@ public:
     IMS_SINT32 GetIpv6MtuSize() const override;
     IMS_SINT32 GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const override;
     IMS_SINT32 GetPreferredEmergencyRegistration() const override;
-    IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const override;
+    IMS_SINT32 GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const override;
     IMS_SINT32 GetEmergencyRegistrationTimerMillis() const override;
     IMS_SINT32 GetImsSignallingDscp() const override;
     IMS_SINT32 GetRegistrationPrivateHeader() const override;

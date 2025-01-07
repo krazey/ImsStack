@@ -471,8 +471,8 @@ const IMS_CHAR
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "preferred_emergency_registration_int";
 const IMS_CHAR
-        CarrierConfig::ImsEmergency::KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT[] =
-                KEY_IMS_EMERGENCY_PREFIX "wait_time_sec_for_release_epdn_after_ecall_end_int";
+        CarrierConfig::ImsEmergency::KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT[] =
+                KEY_IMS_EMERGENCY_PREFIX "wait_time_millis_for_release_epdn_after_ecall_end_int";
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "ecall_based_on_p_associated_uri_of_normal_reg_bool";

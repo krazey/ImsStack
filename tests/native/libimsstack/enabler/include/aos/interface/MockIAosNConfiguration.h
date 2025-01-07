@@ -99,6 +99,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVideoSupportedForEmergencyReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTestModeEnabled, (IN IMS_SINT32 nType), (const, override));
 
+    MOCK_METHOD(IMS_SINT32, GetSipTimerT1, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetIsimIndexForImpu, (), (override));
@@ -116,7 +117,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetIpv6MtuSize, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredEmergencyRegistration, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetWaitTimeSecForReleaseEPdnAfterECallEnd, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetWaitTimeMillisForReleaseEPdnAfterECallEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyRegistrationTimerMillis, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsSignallingDscp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPrivateHeader, (), (const, override));

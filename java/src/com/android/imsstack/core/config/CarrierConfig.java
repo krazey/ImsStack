@@ -663,8 +663,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ipcan_release_emergency_pdn_upon_emergency_call_end_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
                 KEY_PREFIX + "preferred_emergency_registration_int";
-        public static final String KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT =
-                KEY_PREFIX + "wait_time_sec_for_release_epdn_after_ecall_end_int";
+        public static final String KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT =
+                KEY_PREFIX + "wait_time_millis_for_release_epdn_after_ecall_end_int";
         public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
                 KEY_PREFIX + "ecall_based_on_p_associated_uri_of_normal_reg_bool";
         public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =

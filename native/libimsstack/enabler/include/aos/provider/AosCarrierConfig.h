@@ -44,6 +44,7 @@ public:
             bUnsubscribeRegistrationEventPackage(IMS_FALSE),
             bSupportLimitedAdminSmsMode(IMS_FALSE),
             nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED),
+            nSipTimerT1Millis(2000),
             nSipServerPortNumber(5060),
             nSipPreferredTransport(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP),
             nIpv4SipMtuSizeCellular(1500),
@@ -61,7 +62,7 @@ public:
             nIpcanReleaseEmergencyPdnUponEmergencyCallEnd(CarrierConfig::ImsEmergency::IPCAN_NONE),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
-            nWaitTimeSecForReleaseEPdnAfterECallEnd(0),
+            nWaitTimeMillisForReleaseEPdnAfterECallEnd(-1),
             nRegistrationPrivateHeader(0),
             objCarrierNrAvailabilities(ImsVector<IMS_SINT32>()),
             objPcscfDiscoveryMethod(ImsVector<IMS_SINT32>()),
@@ -115,6 +116,7 @@ public:
     /// aosp_carrier_config - no prefix
     IMS_SINT32 nCarrierUssdMethod;
     /// aosp_carrier_config - ims.
+    IMS_SINT32 nSipTimerT1Millis;
     IMS_SINT32 nSipServerPortNumber;
     IMS_SINT32 nSipPreferredTransport;
     IMS_SINT32 nIpv4SipMtuSizeCellular;
@@ -134,7 +136,7 @@ public:
     /// carrier_config - imsemergency.
     IMS_SINT32 nIpcanReleaseEmergencyPdnUponEmergencyCallEnd;
     IMS_SINT32 nPreferredEmergencyRegistration;
-    IMS_SINT32 nWaitTimeSecForReleaseEPdnAfterECallEnd;
+    IMS_SINT32 nWaitTimeMillisForReleaseEPdnAfterECallEnd;
     /// carrier_config - imswfc.
     IMS_SINT32 nRegistrationPrivateHeader;
 

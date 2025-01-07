@@ -85,6 +85,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpsecAuthenticationAlgorithms().GetSize());
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpsecEncryptionAlgorithms().GetSize());
 
+    EXPECT_EQ(2000, m_pAosNConfiguration->GetSipTimerT1());
     // KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT
     EXPECT_EQ(30000, m_pAosNConfiguration->GetRegistrationRetryBaseTime());
     EXPECT_EQ(1800000, m_pAosNConfiguration->GetRegistrationRetryMaxTime());
@@ -114,7 +115,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(0, m_pAosNConfiguration->GetWaitTimeSecForReleaseEPdnAfterECallEnd());
+    EXPECT_EQ(-1, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
 
@@ -233,6 +234,9 @@ TEST_F(AosNConfigurationTest, InitConfig)
             objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT, -1))
             .Times(2)
             .WillRepeatedly(Return(600000));
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T1_MILLIS_INT, -1))
+            .Times(2)
+            .WillRepeatedly(Return(2000));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Ims::KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT, -1))
             .Times(2)
@@ -376,10 +380,10 @@ TEST_F(AosNConfigurationTest, InitConfig)
 
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::ImsEmergency::
-                            KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT,
+                            KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT,
                     -1))
             .Times(2)
-            .WillRepeatedly(Return(240));
+            .WillRepeatedly(Return(240000));
 
     /// imssms
     EXPECT_CALL(objCarrierConfig,
@@ -418,6 +422,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(2, m_pAosNConfiguration->GetIpsecAuthenticationAlgorithms().GetSize());
     EXPECT_EQ(3, m_pAosNConfiguration->GetIpsecEncryptionAlgorithms().GetSize());
 
+    EXPECT_EQ(2000, m_pAosNConfiguration->GetSipTimerT1());
     // KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT
     EXPECT_EQ(30000, m_pAosNConfiguration->GetRegistrationRetryBaseTime());
     EXPECT_EQ(1800000, m_pAosNConfiguration->GetRegistrationRetryMaxTime());
@@ -449,7 +454,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(240, m_pAosNConfiguration->GetWaitTimeSecForReleaseEPdnAfterECallEnd());
+    EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
 
@@ -479,6 +484,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(2, m_pAosNConfiguration->GetIpsecAuthenticationAlgorithms().GetSize());
     EXPECT_EQ(3, m_pAosNConfiguration->GetIpsecEncryptionAlgorithms().GetSize());
 
+    EXPECT_EQ(2000, m_pAosNConfiguration->GetSipTimerT1());
     // KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT
     EXPECT_EQ(30000, m_pAosNConfiguration->GetRegistrationRetryBaseTime());
     EXPECT_EQ(1800000, m_pAosNConfiguration->GetRegistrationRetryMaxTime());
@@ -510,7 +516,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(240, m_pAosNConfiguration->GetWaitTimeSecForReleaseEPdnAfterECallEnd());
+    EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
 }
