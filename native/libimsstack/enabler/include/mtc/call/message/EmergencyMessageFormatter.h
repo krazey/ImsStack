@@ -42,9 +42,9 @@ public:
 protected:
     void SetAcceptHeader() override;
     void SetCallerIdHeader() override;
+    void SetPPreferredIdentityHeader() override;
 
 private:
-    void SetPPreferredIdentityHeader();
     void SetPPreferredIdentityHeaderByFormat(IN const AString& strFormat);
     void SetPPreferredIdentityHeaderByUserId();
     void SetPPreferredIdentityHeaderByDeviceId();
@@ -56,10 +56,6 @@ private:
     IMS_UINT32 GetAosRegMode(IN ServiceType eServiceType) const;
     AString GetLocalAddress() const;
     AString GetLocalPort() const;
-    AString GetWifiCallingAddressId() const;
-    AString GetDeviceId() const;
-    AString GetMacAddress() const;
-    const AString& GetPublicUserId() const;
 
 private:
     IMS_UINT32 m_eNormalAosRegMode;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "AString.h"
+#include "AStringArray.h"
 #include "FeatureCaps.h"
 #include "IImsAosInfo.h"
 #include "ImsVector.h"
@@ -480,8 +482,9 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderFormatsByTokens
     ON_CALL(objAosConnector, GetRegistrationMode)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
 
-    AString strPuid = "puid";
-    ON_CALL(objSubscriberConfig, GetPublicUserId(_)).WillByDefault(ReturnRef(strPuid));
+    AStringArray lstPuids;
+    lstPuids.AddElement("puid");
+    ON_CALL(objSubscriberConfig, GetPublicUserIds).WillByDefault(ReturnRef(lstPuids));
     ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
             .WillByDefault(Invoke(
                     [](Unused, OUT AString& strImei)

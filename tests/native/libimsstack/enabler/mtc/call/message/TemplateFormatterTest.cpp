@@ -15,6 +15,7 @@
  */
 
 #include "AString.h"
+#include "AStringArray.h"
 #include "MockIMtcService.h"
 #include "MockIPhoneInfoDevice.h"
 #include "MockISubscriberConfig.h"
@@ -135,10 +136,15 @@ TEST_F(TemplateFormatterTest, FormatWithPort)
 
 TEST_F(TemplateFormatterTest, FormatWithPublicUserId)
 {
-    AString strPuid = "some_puid";
-    ON_CALL(objSubscriberConfig, GetPublicUserId(_)).WillByDefault(ReturnRef(strPuid));
+    AStringArray lstPuids;
+    lstPuids.AddElement("sip:0000@ims.mnc0.mcc0.3gppnetwork.org");
+    lstPuids.AddElement("sip:+0000@abc.com");
+    lstPuids.AddElement("tel:0000");
 
-    EXPECT_STREQ("<some_puid>", TemplateFormatter::Format("<#PUID#>", objContext).GetStr());
+    ON_CALL(objSubscriberConfig, GetPublicUserIds).WillByDefault(ReturnRef(lstPuids));
+
+    EXPECT_STREQ("<sip:0000@ims.mnc0.mcc0.3gppnetwork.org>",
+            TemplateFormatter::Format("<#PUID#>", objContext).GetStr());
 }
 
 TEST_F(TemplateFormatterTest, FormatWithAid)

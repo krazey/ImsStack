@@ -85,6 +85,7 @@ protected:
     virtual void SetAcceptHeader();
     virtual void SetLocation();
     virtual void SetCallerIdHeader();
+    virtual void SetPPreferredIdentityHeader() {}
     void SetOirHeaders();
 
     ICoreService* GetICoreService();
