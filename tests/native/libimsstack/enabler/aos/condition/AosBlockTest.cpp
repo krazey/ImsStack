@@ -97,6 +97,7 @@ INSTANTIATE_TEST_SUITE_P(AosBlockTestInstantiation, AosBlockTest,
         ValuesIn<AosBlockParams>({
                 {BLOCK_AC_INCOMPLETED,                "AC_INCOMPLETED"               },
                 {BLOCK_AUTHENTICATION_FAILED,         "AUTHENTICATION_FAILED"        },
+                {BLOCK_USIM_AUTHENTICATION_FAILED,    "USIM_AUTHENTICATION_FAILED"   },
                 {BLOCK_AOS_INCOMPLETED,               "AOS_INCOMPLETED"              },
                 {BLOCK_CSCALL_STARTED,                "CSCALL_STARTED"               },
                 {BLOCK_PERMANENT_DATA_FAILED,         "PERMANENT_DATA_FAILED"        },

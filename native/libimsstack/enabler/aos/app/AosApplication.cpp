@@ -1199,6 +1199,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentControl(IN IMSMSG&
 
         if (m_pCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED) ||
@@ -1710,6 +1711,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateConnecting(IN IMS_U
             ProcessRegAuthenticationFailed();
             break;
 
+        case IAosRegistration::REASON_FAILURE_USIM_AUTHENTICATION:
+            ProcessRegUsimAuthenticationFailed();
+            break;
+
         case IAosRegistration::REASON_FAILURE_TERMINATED:
             ProcessRegTerminated();
             break;
@@ -1821,6 +1826,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateUpdating(IN IMS_UIN
         case IAosRegistration::REASON_FAILURE_FORBIDDEN:  // FALL-THROUGH
         case IAosRegistration::REASON_FAILURE_AUTHENTICATION:
             ProcessRegAuthenticationFailed();
+            break;
+
+        case IAosRegistration::REASON_FAILURE_USIM_AUTHENTICATION:
+            ProcessRegUsimAuthenticationFailed();
             break;
 
         case IAosRegistration::REASON_FAILURE_TERMINATED:
@@ -2106,6 +2115,14 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegInternalFailed(IN IMS_UINT32 nR
 PROTECTED VIRTUAL void AosApplication::ProcessRegAuthenticationFailed()
 {
     m_pCondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
+
+    CleanAll(AosReason::IMS_DISABLED);
+    Report_StateChanged(IMS_FALSE);
+}
+
+PROTECTED VIRTUAL void AosApplication::ProcessRegUsimAuthenticationFailed()
+{
+    m_pCondition->SetBlock(BLOCK_USIM_AUTHENTICATION_FAILED);
 
     CleanAll(AosReason::IMS_DISABLED);
     Report_StateChanged(IMS_FALSE);
@@ -2470,6 +2487,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 
         if (m_pCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED) ||
@@ -3066,6 +3084,10 @@ PROTECTED VIRTUAL void AosApplication::Connector_Activated()
 PROTECTED VIRTUAL void AosApplication::Connector_Deactivated(IN IMS_UINT32 nReason)
 {
     A_IMS_TRACE_I(APPID, "Connection_Deactivated :: reason(%d)", nReason, 0, 0);
+
+    // To allow IMS registration to resume upon IMS PDN reconnection, the USIM authentication
+    // failure block is released when the IMS PDN disconnects. (SKT specific)
+    m_pCondition->ResetBlock(BLOCK_USIM_AUTHENTICATION_FAILED);
 
     if (IsNotReady())
     {

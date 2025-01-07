@@ -369,6 +369,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_AUTHENTICATION_FAILED:
             return "AUTHENTICATION_FAILED";
 
+        case BLOCK_USIM_AUTHENTICATION_FAILED:
+            return "USIM_AUTHENTICATION_FAILED";
+
         case BLOCK_AOS_INCOMPLETED:
             return "AOS_INCOMPLETED";
 

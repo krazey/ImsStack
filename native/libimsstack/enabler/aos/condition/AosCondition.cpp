@@ -836,6 +836,7 @@ void AosCondition::ClearRegistrationAndDataFailureBlocks()
 {
     A_IMS_TRACE_D(APPPROFILE, "ClearRegistrationAndDataFailureBlocks", 0, 0, 0);
     ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_USIM_AUTHENTICATION_FAILED);
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
     ProcessBlockReason(IMS_FALSE, BLOCK_INVALID_CONNECTION);

@@ -583,7 +583,7 @@ TEST_F(AosServiceAvailableWifiTest, HandleLocationInfoChanged_CountryNotSame)
 
     // Set IAosBlock
     MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
+    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(3);
 
     m_pServiceAvailableWifi->SetBlock(&objMockIAosBlock);
 
