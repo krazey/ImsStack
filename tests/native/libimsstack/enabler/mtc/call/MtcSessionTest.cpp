@@ -884,36 +884,6 @@ TEST_F(MtcSessionTest, HandleRequestUpdatesVideoCapabilityByAvchange)
     EXPECT_FALSE(pMtcSession->IsVideoCapable());
 }
 
-TEST_F(MtcSessionTest, HandleUpdateRequestInvokesSetCallTypeIfSameCallType)
-{
-    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
-    RequestType eType = RequestType::UPDATE;
-
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationProxy,
-            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
-                    MessageUtil::STR_P_TTA_VOLTE_INFO))
-            .WillByDefault(Return(IMS_FALSE));
-
-    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::VT));
-    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
-
-    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
-    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
-
-    pMtcSession->HandleRequest(eType, objMessage);
-
-    // previous call type is changed.
-    EXPECT_EQ(CallType::VT, pMtcSession->GetPreviousCallType());
-    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
-}
-
 TEST_F(MtcSessionTest, HandleEarlyUpdateRequestDoesNotInvokeSetCallTypeIfSameCallType)
 {
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -976,21 +946,121 @@ TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByRegisteredFeatureAndRetu
     EXPECT_EQ(CallType::VIDEO_RTT, pMtcSession->GetCallType());
 }
 
-TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByHistory)
+TEST_F(MtcSessionTest, HandleUpdateRequestWithSdpInvokesSetCallTypeIfSameCallType)
 {
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    RequestType eType = RequestType::UPDATE;
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_TTA_VOLTE_INFO))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    // previous call type is changed.
+    EXPECT_EQ(CallType::VT, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeByRegisteredFeature)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_FULL));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_FALSE, IMS_TRUE);
+    pMtcSession->SetCallType(CallType::VIDEO_RTT);
+    RequestType eType = RequestType::UPDATE;
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::RTT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithVoip)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     pMtcSession->SetCallType(CallType::VIDEO_RTT);
     RequestType eType = RequestType::UPDATE;
 
-    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithCurrentType)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT));
+
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::UNKNOWN));
+
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    pMtcSession->SetCallType(CallType::RTT);
+    pMtcSession->SetCallType(CallType::VIDEO_RTT);
+    RequestType eType = RequestType::UPDATE;
 
     pMtcSession->HandleRequest(eType, objMessage);
 
     EXPECT_EQ(CallType::VIDEO_RTT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeByHistory)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    pMtcSession->SetCallType(CallType::VIDEO_RTT);
+    pMtcSession->SetCallType(CallType::RTT);
+    pMtcSession->SetCallType(CallType::VT);
+    RequestType eType = RequestType::UPDATE;
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::VIDEO_RTT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithInitialOfferedType)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    pMtcSession->SetCallType(CallType::VOIP);
+    RequestType eType = RequestType::UPDATE;
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
 }
 
 TEST_F(MtcSessionTest, HandleResponseInvokesSetCallTypeIfDifferentCallType)

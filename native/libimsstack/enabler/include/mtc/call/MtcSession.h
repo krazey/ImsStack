@@ -97,8 +97,10 @@ private:
     void SetInConference(IN const IMessage& objMessage);
     CallType RestrictCallTypeByRegisteredFeature(IN CallType& eCallType);
     CallType GetCallTypeForOfferlessInvite();
+    CallType GetCallTypeForOfferlessReInvite();
     CallType GetCallTypeByRegisteredFeature();
     CallType GetCallTypeByHistory();
+    CallType MayGetFirstCallType();
     ResultSetSdp SetSdpToSend(
             IN IMS_BOOL bAllowReOffer, IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE);
 
