@@ -2389,6 +2389,12 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
         return;
     }
 
+    if (m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED))
+    {
+        return;
+    }
+
     A_IMS_TRACE_I(
             APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout", 0, 0, 0);
     NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
