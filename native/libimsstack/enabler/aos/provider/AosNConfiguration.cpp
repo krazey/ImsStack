@@ -895,6 +895,11 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetUnavailableFeaturesI
     return m_objAsset.objUnavailableFeaturesInLimitedReg;
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetERegErrCodeNotSupportedCommonPolicy()
+{
+    return m_objAsset.objERegErrCodeNotSupportedCommonPolicy;
+}
+
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_nSlotId != nSlotId)
@@ -1493,6 +1498,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.objTestMode = piCc->GetIntArray(CarrierConfig::Ims::KEY_TEST_MODE_INT_ARRAY);
     m_objAsset.objUnavailableFeaturesInLimitedReg = piCc->GetIntArray(
             CarrierConfig::Ims::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY);
+    m_objAsset.objERegErrCodeNotSupportedCommonPolicy = piCc->GetIntArray(
+            CarrierConfig::ImsEmergency::KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::ImsWfc::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
 }

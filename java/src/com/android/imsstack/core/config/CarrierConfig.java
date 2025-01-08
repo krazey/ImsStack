@@ -685,6 +685,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reg_timer_for_ecall_millis_int";
         public static final String KEY_ROAMING_PREFERRED_EREG_INT =
                 KEY_PREFIX + "roaming_preferred_ereg_int";
+        public static final String KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY =
+                KEY_PREFIX + "ereg_err_code_not_supported_common_policy_int_array";
         // Mtc
         public static final String KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL =
                 KEY_PREFIX + "emergency_call_over_emergency_pdn_on_cellular_bool";

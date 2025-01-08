@@ -576,6 +576,7 @@ public:
         static const IMS_CHAR KEY_EREG_RETRY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_REG_TIMER_FOR_ECALL_MILLIS_INT[];
         static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
+        static const IMS_CHAR KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY[];
         // Mtc
         static const IMS_CHAR KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL[];
         static const IMS_CHAR

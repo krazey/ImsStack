@@ -1541,6 +1541,14 @@ public:
      */
     virtual ImsVector<IMS_SINT32>& GetUnavailableFeaturesInLimitedReg() = 0;
 
+    /**
+     * @brief Indicate the error codes of emergency registration which does not supported the common
+     *        policy. The UE follows default retry logic when receiving the code on this list.
+     *
+     * @return vector error code
+     */
+    virtual ImsVector<IMS_SINT32>& GetERegErrCodeNotSupportedCommonPolicy() = 0;
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,
