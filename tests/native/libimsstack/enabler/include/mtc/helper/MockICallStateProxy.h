@@ -35,6 +35,8 @@ public:
             (IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
                     IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason),
             (override));
+    MOCK_METHOD(void, NotifyCallSessionReleased,
+            (IN CallKey nCallkey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished), (override));
 };
 
 #endif

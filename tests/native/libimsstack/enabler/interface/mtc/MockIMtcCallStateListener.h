@@ -32,6 +32,7 @@ public:
                     IN IMS_BOOL, IN IMS_SINT32),
             (override));
     MOCK_METHOD(void, OnTotalCallStateChanged, (IN IMtcCallStateListener::State), (override));
+    MOCK_METHOD(void, OnCallSessionReleased, (IN CallKey, IN IMS_BOOL, IN IMS_BOOL));
     MOCK_METHOD(IMS_BOOL, IsSynchronousCallRequired, (), (override));
 };
 

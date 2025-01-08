@@ -19,6 +19,7 @@
 
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/state/MtcCallState.h"
 
 class TerminatingState : public MtcCallState
@@ -30,6 +31,15 @@ public:
     TerminatingState& operator=(IN const TerminatingState&) = delete;
 
     void OnEnter() override;
+    CallStateName SessionStartFailed(IN ISession* piSession) override;
+    CallStateName SessionTerminated(IN ISession* piSession) override;
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+
+private:
+    void HandleCallSessionReleased();
+    void NotifyCallSessionReleased();
+
+    IMS_BOOL m_bSessionReleasedNotified;
 };
 
 #endif

@@ -54,6 +54,9 @@ public:
      */
     virtual void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState,
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE) = 0;
+
+    virtual void NotifyCallSessionReleased(
+            IN CallKey nCallkey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) = 0;
 };
 
 #endif

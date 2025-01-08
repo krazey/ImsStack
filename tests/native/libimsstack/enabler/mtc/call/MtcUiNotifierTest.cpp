@@ -167,11 +167,25 @@ TEST_F(MtcUiNotifierTest, SendStarted)
 
 TEST_F(MtcUiNotifierTest, SendStartFailed)
 {
+    CallInfo objInfo;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objInfo));
+
     EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(1);
 
     pNotifier->SendStartFailed(*pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
+    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
+
+    pNotifier->SendStartFailed(*pReason);
+}
+
+TEST_F(MtcUiNotifierTest, SendStartFailedBlocksNotificationIfEmergencyCall)
+{
+    CallInfo objInfo;
+    objInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objInfo));
+
     EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
 
     pNotifier->SendStartFailed(*pReason);
@@ -284,6 +298,9 @@ TEST_F(MtcUiNotifierTest, SendResumedBy)
 
 TEST_F(MtcUiNotifierTest, SendTerminated)
 {
+    CallInfo objInfo;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objInfo));
+
     EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(1);
 
     pNotifier->SendTerminated(*pReason);
@@ -291,6 +308,16 @@ TEST_F(MtcUiNotifierTest, SendTerminated)
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
     EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
 
+    pNotifier->SendTerminated(*pReason);
+}
+
+TEST_F(MtcUiNotifierTest, SendTerminatedBlocksNotificationIfEmergencyCall)
+{
+    CallInfo objInfo;
+    objInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objInfo));
+
+    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
     pNotifier->SendTerminated(*pReason);
 }
 
@@ -408,6 +435,46 @@ TEST_F(MtcUiNotifierTest, SendCallPushCompleted)
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
     pNotifier->SendCallPushCompleted(IMS_SUCCESS, *pReason);
+}
+
+TEST_F(MtcUiNotifierTest, OnCallSessionReleasedDoesNothingIfNothingIsBlocking)
+{
+    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
+    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
+
+    pNotifier->OnCallSessionReleased();
+}
+
+TEST_F(MtcUiNotifierTest, OnCallSessionReleasedInvokesBlockingStartFailed)
+{
+    CallInfo objInfo;
+    objInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objInfo));
+
+    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
+    pNotifier->SendStartFailed(*pReason);
+
+    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(1);
+    pNotifier->OnCallSessionReleased();
+
+    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
+    pNotifier->OnCallSessionReleased();
+}
+
+TEST_F(MtcUiNotifierTest, OnCallSessionReleasedInvokesBlockingTerminated)
+{
+    CallInfo objInfo;
+    objInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objInfo));
+
+    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
+    pNotifier->SendTerminated(*pReason);
+
+    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(1);
+    pNotifier->OnCallSessionReleased();
+
+    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
+    pNotifier->OnCallSessionReleased();
 }
 
 }  // namespace android

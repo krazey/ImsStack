@@ -196,6 +196,8 @@ public:
      * @param eRatType The changed RAT type.
      */
     virtual void SendRatChanged(IN IMS_SINT32 eRatType) = 0;
+
+    virtual void OnCallSessionReleased() = 0;
 };
 
 #endif

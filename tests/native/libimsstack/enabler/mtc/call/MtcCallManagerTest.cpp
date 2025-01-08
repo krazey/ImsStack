@@ -19,6 +19,7 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcSession.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
 #include "call/radio/MockIMtcRadioChecker.h"
@@ -43,6 +44,7 @@ public:
     MtcCallManager* pCallManager;
     MockIMtcService objService;
     MockIMtcRadioChecker objRadioChecker;
+    MockIMtcSession objMtcSession;
 
 protected:
     virtual void SetUp() override
