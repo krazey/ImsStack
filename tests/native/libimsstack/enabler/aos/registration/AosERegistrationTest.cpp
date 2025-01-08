@@ -69,6 +69,7 @@ using ::testing::ReturnRef;
     using Base::ProcessDefaultFlowRecovery_Start;                            \
     using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
     using Base::ProcessNormalDefaultFlowRecovery_Start;                      \
+    using Base::ProcessStartFailed_StatusCode;                               \
     using Base::ProcessTransactionTimerExpired;                              \
     using Base::SetImsCall;                                                  \
     using Base::SetReregFailureReportOnIpcanChangeRequired;                  \
@@ -92,8 +93,6 @@ public:
     }
     inline ~TestAosERegistration() override { delete m_pCounter; }
     inline IRegistration* GetRegistration() override { return m_piReg; }
-    inline void SetRegistrationForRegManager(IN IRegistration* piReg) { m_piReg = piReg; }
-    inline void SetRegParameter(IN IRegParameter* piRegParam) { m_piRegParameter = piRegParam; }
     inline void ClearEModeInfo()
     {
         if (m_pEModeInfo != IMS_NULL)
@@ -101,6 +100,13 @@ public:
             delete m_pEModeInfo;
             m_pEModeInfo = IMS_NULL;
         }
+    }
+
+    inline void UpdateRegInstances(IN IRegistration* piReg, IN IRegParameter* piParam)
+    {
+        m_piReg = piReg;
+        m_piRegistration = piReg;
+        m_piRegParameter = piParam;
     }
 
     inline EmergencyModeInfo* GetEModeInfo() { return m_pEModeInfo; }
@@ -158,7 +164,6 @@ public:
     FRIEND_TEST(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenFakeRegistration);
     FRIEND_TEST(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenConfiguredAsFallback);
     FRIEND_TEST(AosERegistrationTest, DefaultFlowRecoveryDuringUpdateWhenNeitherEcbmNorScbm);
-    FRIEND_TEST(AosERegistrationTest, StartFailedWithStatusCode423);
     FRIEND_TEST(AosERegistrationTest, StartFailedWithOtherStatusCode);
     FRIEND_TEST(AosERegistrationTest, UpdateFailedWithStatusCode423);
     FRIEND_TEST(AosERegistrationTest, UpdateFailedWithOtherStatusCode);
@@ -283,6 +288,7 @@ public:
     AStringArray m_objPcscfs;
     ImsList<IMS_SINT32> m_objPcscfPorts;
     ImsMap<AString, IAosHandle*> m_objHandles;
+    ImsVector<IMS_SINT32> m_objEmptyErrCode;
 
 protected:
     virtual void SetUp() override
@@ -350,6 +356,8 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
                 .WillByDefault(Return(
                         CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+        ON_CALL(m_objMockIAosNConfiguration, GetERegErrCodeNotSupportedCommonPolicy())
+                .WillByDefault(ReturnRef(m_objEmptyErrCode));
 
         // IAosSubscriber
         m_objImpus.AddElement(AString("sip:1111@ims.co.kr"));
@@ -406,8 +414,7 @@ protected:
 
         m_pAosERegistration = new TestAosERegistration(
                 &m_objMockIAosAppContext, m_pAosStaticProfile->GetRegistrationId());
-        m_pAosERegistration->SetRegistrationForRegManager(&m_objMockIRegistration);
-        m_pAosERegistration->SetRegParameter(&m_objMockIRegParameter);
+        m_pAosERegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockIRegParameter);
         m_pAosERegistration->SetListener(&m_objMockIAosRegistrationListener);
     }
 
@@ -878,9 +885,8 @@ TEST_F(AosERegistrationTest, ReturnFalseWhenFollowingNoramlRuleAndSharedCntNotUs
     EXPECT_FALSE(m_pAosERegistration->ProcessNormalDefaultFlowRecovery_Start(400));
 }
 
-TEST_F(AosERegistrationTest, StartFailedWithStatusCode423)
+TEST_F(AosERegistrationTest, SetRegisteringStateWhenStartFailedWith423)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
     ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
             .WillByDefault(Return(AString("60")));
 
@@ -889,6 +895,23 @@ TEST_F(AosERegistrationTest, StartFailedWithStatusCode423)
     m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_423);
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosERegistrationTest, SetRegstopStateWhenStartFailedWith423AndRequiredNotSupportCommonPolicy)
+{
+    ImsVector<IMS_SINT32> objErrCodeNotSupporteCommonPolicy;
+    objErrCodeNotSupporteCommonPolicy.Add(SipStatusCode::SC_423);
+    ON_CALL(m_objMockIAosNConfiguration, GetERegErrCodeNotSupportedCommonPolicy())
+            .WillByDefault(ReturnRef(objErrCodeNotSupporteCommonPolicy));
+
+    EXPECT_CALL(m_objMockIAosTransaction, StopEmergencyTraffic());
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_423);
+
+    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 }
 
 TEST_F(AosERegistrationTest, StartFailedWithOtherStatusCode)
@@ -1013,6 +1036,7 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsNotAllowedAndConf
 
 TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenRegistrationIsNull)
 {
+    m_pAosERegistration->Destroy();
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
 

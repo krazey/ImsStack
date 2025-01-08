@@ -98,6 +98,7 @@ protected:
     void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
 
     IMS_BOOL ProcessStartFailed_305() final;
+    void ProcessStartFailed_423() final;
 
     void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
     void ProcessStartFailed_TxnTimeout() final;

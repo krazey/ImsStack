@@ -339,6 +339,20 @@ AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
     }
 }
 
+PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
+        IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
+{
+    if (!IsImsCall() && m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsEcbm() &&
+            !m_pEModeInfo->IsScbm())
+    {
+        ProcessUnpredictableFailure();
+        return;
+    }
+
+    SetState(STATE_REFRESHSTOP);
+    SetTraffic(IMS_FALSE);
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_305()
 {
     IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetRegRetrySip305CodePolicy();
@@ -378,18 +392,17 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_305()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
-        IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
+PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_423()
 {
-    if (!IsImsCall() && m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsEcbm() &&
-            !m_pEModeInfo->IsScbm())
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetERegErrCodeNotSupportedCommonPolicy(),
+                SipStatusCode::SC_423))
     {
-        ProcessUnpredictableFailure();
-        return;
+        ProcessDefaultFlowRecovery_Start();
     }
-
-    SetState(STATE_REFRESHSTOP);
-    SetTraffic(IMS_FALSE);
+    else
+    {
+        AosRegistration::ProcessStartFailed_423();
+    }
 }
 
 PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)

@@ -908,6 +908,32 @@ IMS_BOOL AosRegistration::IsReregFailureReportOnIpcanChangeRequired() const
 }
 
 PROTECTED
+IMS_BOOL AosRegistration::IsErrorCodeExisted(
+        IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const
+{
+    for (int i = 0; i < objErrorCode.GetSize(); i++)
+    {
+        IMS_SINT32 nErrorCode = objErrorCode.GetAt(i);
+        if (nCode == nErrorCode)
+        {
+            return IMS_TRUE;
+        }
+
+        if (SipStatusCode::IsFinalFailure(nCode))
+        {
+            IMS_SINT32 nGroupCode = (nCode / 100);
+            if (nErrorCode == CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP ||
+                    nErrorCode == nGroupCode)
+            {
+                return IMS_TRUE;
+            }
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
 IMS_SINT32 AosRegistration::GetRegExpires()
 {
     return (m_piRegContact != IMS_NULL) ? m_piRegContact->GetExpires() : -1;
@@ -6334,32 +6360,6 @@ void AosRegistration::NotifyTechnologyChangeFailed()
         piService->NotifyTechnologyChangeFailed(
                 nImsRegType, GetNetworkTypeForImsRegState(), m_eImsReasonCode);
     }
-}
-
-PRIVATE
-IMS_BOOL AosRegistration::IsErrorCodeExisted(
-        IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const
-{
-    for (int i = 0; i < objErrorCode.GetSize(); i++)
-    {
-        IMS_SINT32 nErrorCode = objErrorCode.GetAt(i);
-        if (nCode == nErrorCode)
-        {
-            return IMS_TRUE;
-        }
-
-        if (SipStatusCode::IsFinalFailure(nCode))
-        {
-            IMS_SINT32 nGroupCode = (nCode / 100);
-            if (nErrorCode == CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP ||
-                    nErrorCode == nGroupCode)
-            {
-                return IMS_TRUE;
-            }
-        }
-    }
-
-    return IMS_FALSE;
 }
 
 PRIVATE

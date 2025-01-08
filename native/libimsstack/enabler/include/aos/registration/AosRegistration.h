@@ -132,6 +132,8 @@ protected:
     IMS_BOOL IsRadioWaiting() const;
     IMS_BOOL IsTrafficPriorityBlocked() const;
     IMS_BOOL IsReregFailureReportOnIpcanChangeRequired() const;
+    IMS_BOOL IsErrorCodeExisted(
+            IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
 
     IMS_SINT32 GetRegExpires();
 
@@ -402,8 +404,6 @@ private:
     void UpdateModeToHandles();
     void NotifyTechnologyChangeFailed();
 
-    IMS_BOOL IsErrorCodeExisted(
-            IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
     IMS_BOOL IsPdnReactivationRequired();
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);
     IMS_BOOL IsNeedToSetLimitedMode();
