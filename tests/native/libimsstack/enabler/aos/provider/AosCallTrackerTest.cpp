@@ -46,6 +46,7 @@ const IMS_SINT32 SLOT_ID = 0;
     using Base::ServicePhone_PreciseCallStateChanged; \
     using Base::OnCallStateChanged;                   \
     using Base::OnTotalCallStateChanged;              \
+    using Base::OnCallSessionReleased;                \
     using Base::TypeToString;                         \
     using Base::StateToString;                        \
     using Base::CallTypeToString;                     \
@@ -66,6 +67,11 @@ public:
     inline void SetNormalCalls(IN ImsMap<CallKey, CallState> objCalls)
     {
         m_objNormalCalls = objCalls;
+    }
+
+    inline void SetEmergencyCalls(IN ImsMap<CallKey, CallState> objCalls)
+    {
+        m_objEmergencyCalls = objCalls;
     }
 
     inline void SetNormalCallTypes(IN ImsMap<CallKey, CallType> objCallTypes)
@@ -988,6 +994,55 @@ TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVideoRtt)
 TEST_F(AosCallTrackerTest, OnTotalCallStateChanged)
 {
     m_pAosCallTracker->OnTotalCallStateChanged(IMtcCall::State::IDLE);
+}
+
+TEST_F(AosCallTrackerTest, ShouldNotifyIncludingIdleStateOnCallSessionReleasedAndRemoveCall)
+{
+    m_pAosCallTracker->GetListeners().Clear();
+
+    MockIAosCallTrackerListener objListener;
+    m_pAosCallTracker->SetListener(&objListener);
+    IMS_ULONG nKey = 1000;
+    ImsMap<CallKey, CallState> objEmergencyCalls;
+    m_pAosCallTracker->AddOrUpdateCall(objEmergencyCalls, nKey, CallState::OFFHOOK);
+    m_pAosCallTracker->SetEmergencyCalls(objEmergencyCalls);
+
+    EXPECT_CALL(objListener,
+            CallTracker_StateChanged(IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE));
+    EXPECT_CALL(objListener, CallTracker_ECallSessionReleased(IMS_TRUE));
+
+    m_pAosCallTracker->OnCallSessionReleased(nKey, IMS_TRUE, IMS_TRUE);
+}
+
+TEST_F(AosCallTrackerTest, ShouldNotifyListenersOnCallSessionReleasedForEmergencyType)
+{
+    m_pAosCallTracker->GetListeners().Clear();
+
+    MockIAosCallTrackerListener objListener;
+    m_pAosCallTracker->SetListener(&objListener);
+
+    EXPECT_CALL(objListener, CallTracker_ECallSessionReleased(IMS_TRUE));
+
+    IMS_ULONG nKey = 1000;
+    m_pAosCallTracker->OnCallSessionReleased(nKey, IMS_TRUE, IMS_TRUE);
+}
+
+TEST_F(AosCallTrackerTest, ShouldNotNotifyListenersOnCallSessionReleasedIfRemainingCallIsExist)
+{
+    m_pAosCallTracker->GetListeners().Clear();
+
+    MockIAosCallTrackerListener objListener;
+    m_pAosCallTracker->SetListener(&objListener);
+    IMS_ULONG nKey1 = 1001;
+    IMS_ULONG nKey2 = 1002;
+    ImsMap<CallKey, CallState> objEmergencyCalls;
+    m_pAosCallTracker->AddOrUpdateCall(objEmergencyCalls, nKey1, CallState::OFFHOOK);
+    m_pAosCallTracker->AddOrUpdateCall(objEmergencyCalls, nKey2, CallState::OFFHOOK);
+    m_pAosCallTracker->SetEmergencyCalls(objEmergencyCalls);
+
+    EXPECT_CALL(objListener, CallTracker_ECallSessionReleased(IMS_TRUE)).Times(0);
+
+    m_pAosCallTracker->OnCallSessionReleased(nKey2, IMS_TRUE, IMS_TRUE);
 }
 
 TEST_F(AosCallTrackerTest, TypeToString)

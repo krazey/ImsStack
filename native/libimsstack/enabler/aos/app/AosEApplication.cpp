@@ -690,6 +690,25 @@ PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
     }
 }
 
+PROTECTED VIRTUAL void AosEApplication::CallTracker_ECallSessionReleased(IN IMS_BOOL bEstablished)
+{
+    A_IMS_TRACE_I(APPID, "CallTracker_ECallSessionReleased", 0, 0, 0);
+
+    if (GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable() && !bEstablished)
+    {
+        A_IMS_TRACE_I(
+                APPID, "do not release emergency pdn if the session is not established", 0, 0, 0);
+        return;
+    }
+
+    SetImsCall(IMS_FALSE);
+
+    if ((IsReleaseEmergencyPdnUponEmergencyCallEnd() || m_piRegistration->IsTerminated()))
+    {
+        ProcessCleanAll();
+    }
+}
+
 PROTECTED VIRTUAL void AosEApplication::NConfiguration_NotifyConfigChanged()
 {
     AosApplication::NConfiguration_NotifyConfigChanged();
