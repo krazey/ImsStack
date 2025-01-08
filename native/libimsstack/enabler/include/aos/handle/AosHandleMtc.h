@@ -63,6 +63,7 @@ protected:
     void RemoveListeners() override;
 
     IMS_BOOL IsHandleBlocked() const override;
+    IMS_BOOL IsFeatureBlocked(IN IMS_UINT32 nFeature) const override;
 
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked) override;
     void ProcessBlockChanged() override;

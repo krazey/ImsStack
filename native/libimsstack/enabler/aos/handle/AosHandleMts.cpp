@@ -176,6 +176,18 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsHandleBlocked() const
     return (AosHandle::IsHandleBlocked(BLOCK_SMS_CAPABILITY) || m_bMtcBlocked);
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsFeatureBlocked(IN IMS_UINT32 nFeature) const
+{
+    switch (nFeature)
+    {
+        case ImsAosFeature::SMSIP:
+            return AosHandle::IsHandleBlocked(BLOCK_SMS_CAPABILITY | BLOCK_LIMITED_SMS);
+
+        default:
+            return IMS_FALSE;
+    }
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsSupportedNetworkTypeForCellular(
         IN IMS_UINT32 nType) const
 {

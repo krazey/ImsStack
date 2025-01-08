@@ -39,7 +39,8 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base) \
+#define DECLARE_USING(Base)       \
+    using Base::IsFeatureBlocked; \
     using Base::Request;
 
 class TestAosHandleMts : public AosHandleMts
@@ -492,6 +493,30 @@ TEST_F(AosHandleMtsTest, HandleIsNotBlockedIfSmsCapabilityAndMtcHandleAreNotBloc
 {
     // WHEN & THEN
     EXPECT_FALSE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtsTest, SmsIsBlockedIfSmsCapabilityBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_SMS_CAPABILITY);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMts->IsFeatureBlocked(ImsAosFeature::SMSIP));
+}
+
+TEST_F(AosHandleMtsTest, SmsIsBlockedIfLimitedSmsBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_LIMITED_SMS);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMts->IsFeatureBlocked(ImsAosFeature::SMSIP));
+}
+
+TEST_F(AosHandleMtsTest, ShouldNotBlockNonMtsFeatures)
+{
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandleMts->IsFeatureBlocked(ImsAosFeature::TEXT));
 }
 
 TEST_F(AosHandleMtsTest, IsSupportedNetworkTypeForCellular_Test)

@@ -810,6 +810,7 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
         case BLOCK_VOLTE_CAPABILITY:   // FALL-THROUGH
         case BLOCK_VOWIFI_CAPABILITY:  // FALL-THROUGH
         case BLOCK_VOPS:               // FALL-THROUGH
+        case BLOCK_SSAC:               // FALL-THROUGH
         case BLOCK_LIMITED_MMTEL:
             nFeature = ImsAosFeature::MMTEL;
             break;
@@ -1208,6 +1209,13 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::IsHandleBlocked() const
     return (m_nBlocks != BLOCK_NONE);
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsFeatureBlocked(IN IMS_UINT32 /*nFeature*/) const
+{
+    // Implemented in child classes
+
+    return IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void AosHandle::ProcessBlockChanged() {}
 
 PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForMobile(IN IMS_UINT32 nBlock) const
@@ -1254,6 +1262,11 @@ PROTECTED VIRTUAL void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN
     }
     else
     {
+        if (IsFeatureBlocked(nFeature))
+        {
+            return;
+        }
+
         m_objFeatureTagList.AddFeature(nFeature);
     }
 

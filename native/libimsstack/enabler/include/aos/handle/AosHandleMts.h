@@ -46,6 +46,7 @@ protected:
     void ProcessNetworkChanged() override;
 
     IMS_BOOL IsHandleBlocked() const override;
+    IMS_BOOL IsFeatureBlocked(IN IMS_UINT32 nFeature) const override;
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const override;
     void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked) override;
 

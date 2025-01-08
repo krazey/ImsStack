@@ -442,6 +442,29 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
             BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_SSAC | BLOCK_NETWORK | BLOCK_3G);
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsFeatureBlocked(IN IMS_UINT32 nFeature) const
+{
+    switch (nFeature)
+    {
+        case ImsAosFeature::MMTEL:
+            return AosHandle::IsHandleBlocked(BLOCK_VOLTE_CAPABILITY | BLOCK_VOWIFI_CAPABILITY |
+                    BLOCK_VOPS | BLOCK_SSAC | BLOCK_LIMITED_MMTEL);
+
+        case ImsAosFeature::VIDEO:
+            return AosHandle::IsHandleBlocked(
+                    BLOCK_VILTE_CAPABILITY | BLOCK_VIWIFI_CAPABILITY | BLOCK_LIMITED_VIDEO);
+
+        case ImsAosFeature::TEXT:
+            return AosHandle::IsHandleBlocked(BLOCK_TEXT_CAPABILITY | BLOCK_LIMITED_TEXT);
+
+        case ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY:
+            return AosHandle::IsHandleBlocked(BLOCK_CALL_COMPOSER_CAPABILITY);
+
+        default:
+            return IMS_FALSE;
+    }
+}
+
 PROTECTED VIRTUAL void AosHandleMtc::ProcessFeatureBlock(
         IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
 {

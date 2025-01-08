@@ -58,6 +58,8 @@ using ::testing::ReturnRef;
     using Base::GetFeatures;            \
     using Base::IsBlockForMobile;       \
     using Base::IsBlockForWifi;         \
+    using Base::IsFeatureBlocked;       \
+    using Base::ProcessFeatureBlock;    \
     using Base::ReevaluateCapabilities; \
     using Base::Request;
 
@@ -1766,6 +1768,136 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
             .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
 
     EXPECT_FALSE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, MmtelIsBlockedIfVolteCapabilityBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::MMTEL));
+}
+
+TEST_F(AosHandleMtcTest, MmtelIsBlockedIfVowifiCapabilityBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::MMTEL));
+}
+
+TEST_F(AosHandleMtcTest, MmtelIsBlockedIfVopsBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_VOPS);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::MMTEL));
+}
+
+TEST_F(AosHandleMtcTest, MmtelIsBlockedIfSsacBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_SSAC);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::MMTEL));
+}
+
+TEST_F(AosHandleMtcTest, MmtelIsBlockedIfLimitedMmtelBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_LIMITED_MMTEL);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::MMTEL));
+}
+
+TEST_F(AosHandleMtcTest, VideoIsBlockedIfVilteCapabilityBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::VIDEO));
+}
+
+TEST_F(AosHandleMtcTest, VideoIsBlockedIfViwifiCapabilityBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::VIDEO));
+}
+
+TEST_F(AosHandleMtcTest, VideoIsBlockedIfLimitedVideoBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_LIMITED_VIDEO);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::VIDEO));
+}
+
+TEST_F(AosHandleMtcTest, TextIsBlockedIfTextCapabilityBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_TEXT_CAPABILITY);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::TEXT));
+}
+
+TEST_F(AosHandleMtcTest, TextIsBlockedIfLimitedTextBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_LIMITED_TEXT);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::TEXT));
+}
+
+TEST_F(AosHandleMtcTest, CallComposerIsBlockedIfCallComposerCapabilityBlocked)
+{
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY));
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotBlockNonMtcFeatures)
+{
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsFeatureBlocked(ImsAosFeature::SMSIP));
+}
+
+TEST_F(AosHandleMtcTest, ShouldAddFeatureIfTheFeatureNotBlocked)
+{
+    // GIVEN
+    m_pAosHandleMtc->GetFeatureTagList().RemoveFeature(ImsAosFeature::VIDEO);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessFeatureBlock(ImsAosFeature::VIDEO, IMS_FALSE);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(ImsAosFeature::VIDEO));
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotAddFeatureIfTheFeatureBlocked)
+{
+    // GIVEN
+    m_pAosHandleMtc->GetFeatureTagList().RemoveFeature(ImsAosFeature::VIDEO);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessFeatureBlock(ImsAosFeature::VIDEO, IMS_FALSE);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(ImsAosFeature::VIDEO));
 }
 
 TEST_F(AosHandleMtcTest, ProcessFeatureBlock_Test)

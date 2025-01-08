@@ -230,6 +230,7 @@ protected:
     IMS_BOOL IsHandleBlocked(IN const IMS_UINT32& nBlocks, IN IMS_UINT32 nType) const;
 
     virtual IMS_BOOL IsHandleBlocked() const;
+    virtual IMS_BOOL IsFeatureBlocked(IN IMS_UINT32 nFeature) const;
     virtual void ProcessBlockChanged();
 
     virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
