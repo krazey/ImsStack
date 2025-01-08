@@ -826,6 +826,13 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Ims::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY))
             .WillOnce(Return(objUnavailableFeaturesInLimitedReg));
 
+    ImsVector<IMS_SINT32> objERegErrCodeNotSupportedCommonPolicy;
+    objERegErrCodeNotSupportedCommonPolicy.Add(423);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::ImsEmergency::
+                            KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY))
+            .WillOnce(Return(objERegErrCodeNotSupportedCommonPolicy));
+
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
     objVowifiSubErrorCodeForInitReg.Clear();
     objVowifiSubErrorCodeForInitReg.Add(0);
@@ -965,6 +972,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
         }
     }
     EXPECT_TRUE(bNrSupported);
+    objErrCode.Clear();
+    objErrCode = m_pAosNConfiguration->GetERegErrCodeNotSupportedCommonPolicy();
+    EXPECT_EQ(423, objErrCode.GetAt(0));
     objErrCode.Clear();
     objErrCode = m_pAosNConfiguration->GetVowifiSubErrorRegRequired();
     cnt = 0;

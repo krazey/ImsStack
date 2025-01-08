@@ -496,6 +496,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT[]
         KEY_IMS_EMERGENCY_PREFIX "reg_timer_for_ecall_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_ROAMING_PREFERRED_EREG_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "roaming_preferred_ereg_int";
+const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY[] =
+                KEY_IMS_EMERGENCY_PREFIX "ereg_err_code_not_supported_common_policy_int_array";
 
 // Mtc
 const IMS_CHAR
