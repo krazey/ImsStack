@@ -36,8 +36,11 @@ public:
             IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage) override;
 
 private:
-    AString GetContactHeaderWithoutFeatureTag(IN const AString& strFeatureTag);
-    CallType GetCallTypeOfCurrentMessage();
+    void MayAdjustContactHeader(IN_OUT ISipMessage* pMessage);
+
+    void SetVideoTextFeatureExclusively(IN_OUT ISipHeader* pContactHeader);
+    void RemoveSosParameter(IN_OUT ISipHeader* pContactHeader);
+    CallType GetCallType();
 
     IMtcCallContext& m_objContext;
     AString m_strOriginalContactHeader;

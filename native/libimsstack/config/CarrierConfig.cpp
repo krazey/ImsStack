@@ -883,6 +883,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOPS_OFF_S
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_vops_off_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "registration_to_18x_timer_millis_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "allow_sos_param_in_contact_bool";
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "audio_jitter_buffer_size_int_array";

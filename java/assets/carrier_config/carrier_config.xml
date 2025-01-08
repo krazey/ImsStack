@@ -609,6 +609,7 @@
     <int name="imsemergency.call_periodic_location_discovery_method_int" value="0"/>
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="0"/>
     <boolean name="imsemergency.silent_redial_with_voip_by_rtt_rejection_bool" value="false"/>
+    <boolean name="imsvoice.allow_sos_param_in_contact_bool" value="true"/>
 
     <!-- Media -->
     <boolean name="imsvoice.support_multi_config_in_early_session_bool" value="false"/>

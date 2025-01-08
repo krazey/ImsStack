@@ -51,7 +51,7 @@ public:
     // ISipHeader interface
     ISipHeader* Clone() const override;
     IMS_BOOL Equals(IN const ISipHeader* piHeader) const override;
-    inline const SipAddress* GetSipAddress() const override { return m_pAddress; }
+    inline SipAddress* GetSipAddress() const override { return m_pAddress; }
     AString GetHeaderValue() const override;
     inline const AString& GetName() const override { return m_strName; }
     const SipParameter* GetParameter(IN const AString& strName) const override;
