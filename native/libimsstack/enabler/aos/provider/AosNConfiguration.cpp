@@ -410,6 +410,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRetryWithIpVerFallback() const
     return m_objAsset.bRegRetryWithIpVerFallback;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReleaseEPdnUponECallEndInFakeMode() const
+{
+    return m_objAsset.bReleaseEPdnUponECallEndInFakeMode;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUserInfoInContactSupported() const
 {
     return m_objAsset.bSupportContactUserInfo;
@@ -1382,6 +1387,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL);
     m_objAsset.bRegRetryWithIpVerFallback =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL);
+    m_objAsset.bReleaseEPdnUponECallEndInFakeMode = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
     m_objAsset.bRequiredCdmalessFeatureTag =

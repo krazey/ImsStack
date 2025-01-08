@@ -489,6 +489,14 @@ public:
     virtual IMS_BOOL IsRegRetryWithIpVerFallback() const = 0;
 
     /**
+     * @brief Flag specifying if emergency PDN would be released upon emergency call is terminated
+     *        in fake mode.
+     *
+     * @return IMS_TRUE if released, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const = 0;
+
+    /**
      * @brief Flag indicating whether the User Info is included or not in contact
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.

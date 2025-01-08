@@ -908,13 +908,6 @@ TEST_F(AosEApplicationTest, ResetRegBlockInCbmWhenECallStarted)
 
 TEST_F(AosEApplicationTest, ProcessECallTerminated)
 {
-    // fake mode
-    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosRegistration, GetMode()).WillOnce(Return(IAosRegistration::MODE_FAKE));
-    m_pTestAosEApplication->ProcessECallTerminated();
-    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
-    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
-
     // TIMER_APP_TERMINATED is running
     m_pTestAosEApplication->SetImsCall(IMS_TRUE);
     m_pTestAosEApplication->ProcessECallTerminated();
@@ -928,6 +921,39 @@ TEST_F(AosEApplicationTest, ProcessECallTerminated)
     m_pTestAosEApplication->ProcessECallTerminated();
     EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedInFakeModeIfConfigured)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_FAKE));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndInFakeMode())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+
+    // Clean Up
+    m_pTestAosEApplication->StopTimer(TIMER_APP_TERMINATED);
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedInFakeModeIfNotConfigured)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosRegistration, GetMode())
+            .WillByDefault(Return(IAosRegistration::MODE_FAKE));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndInFakeMode())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pTestAosEApplication->ProcessECallTerminated();
+
+    // THEN
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
 }
 
 TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfWlanConfiguredToRelease)

@@ -124,6 +124,14 @@ PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
 
 PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd() const
 {
+    // FAKE MODE
+    if (m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE &&
+            GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndInFakeMode())
+    {
+        return IMS_TRUE;
+    }
+
+    // IPCAN
     IMS_UINT32 nIpcan = GET_N_CONFIG(m_nSlotId)->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd();
 
     switch (nIpcan)
@@ -565,8 +573,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         return;
     }
 
-    if (IsReleaseEmergencyPdnUponEmergencyCallEnd() ||
-            m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
+    if (IsReleaseEmergencyPdnUponEmergencyCallEnd())
     {
         StartTimer(TIMER_APP_TERMINATED, EPDN_RELEASE_DELAY_TIME_MILLIS);
         return;

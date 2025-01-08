@@ -653,6 +653,8 @@ public class CarrierConfig {
         public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
                 KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
         // Aos
+        public static final String KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL =
+                KEY_PREFIX + "release_epdn_upon_ecall_end_in_fake_mode_bool";
         public static final String KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT =
                 KEY_PREFIX + "ipcan_release_emergency_pdn_upon_emergency_call_end_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
