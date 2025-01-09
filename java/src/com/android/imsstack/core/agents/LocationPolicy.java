@@ -15,6 +15,11 @@
  */
 package com.android.imsstack.core.agents;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.Objects;
+
 /**
  * This class defines the rules to obtain the location information.
  */
@@ -114,7 +119,7 @@ public final class LocationPolicy {
     /**
      * Indicates if fused location provider is used instead of NLP + GPS.
      */
-    public static final int POLICY_USE_FLP = 0x00080000;
+    public static final int POLICY_USE_FUSED_PROVIDER = 0x00080000;
 
     /** 10 minutes. (seconds) */
     public static final int LOCATION_UPDATE_INTERVAL = 10 * 60;
@@ -154,7 +159,8 @@ public final class LocationPolicy {
     public LocationPolicy() {
     }
 
-    public LocationPolicy(LocationPolicy lp) {
+    public LocationPolicy(@NonNull LocationPolicy lp) {
+        Objects.requireNonNull(lp, "lp must not be null");
         set(lp);
     }
 
@@ -186,7 +192,8 @@ public final class LocationPolicy {
      *
      * @param lp The location policy to be set.
      */
-    public void set(LocationPolicy lp) {
+    public void set(@NonNull LocationPolicy lp) {
+        Objects.requireNonNull(lp, "lp must not be null");
         mPolicy = lp.mPolicy;
         mDefaultUpdateInterval = lp.mDefaultUpdateInterval;
         mSearchDurationNlp = lp.mSearchDurationNlp;
@@ -386,10 +393,50 @@ public final class LocationPolicy {
     }
 
     @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof LocationPolicy)) {
+            return false;
+        }
+
+        LocationPolicy lp = (LocationPolicy) o;
+        return mPolicy == lp.mPolicy
+                && mDefaultUpdateInterval == lp.mDefaultUpdateInterval
+                && mSearchDurationNlp == lp.mSearchDurationNlp
+                && mSearchDurationGps == lp.mSearchDurationGps
+                && mSearchDurationFlp == lp.mSearchDurationFlp
+                && mDefaultAddressResolutionTime == lp.mDefaultAddressResolutionTime
+                && mFixedUpdateInterval == lp.mFixedUpdateInterval
+                && mValidityPeriod == lp.mValidityPeriod
+                && mCachedAddressTolerableDistance == lp.mCachedAddressTolerableDistance
+                && mAddressValidityPeriod == lp.mAddressValidityPeriod
+                && mRecentLocationValidPeriod == lp.mRecentLocationValidPeriod
+                && Objects.equals(mShape, lp.mShape);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPolicy,
+                mDefaultUpdateInterval,
+                mSearchDurationNlp,
+                mSearchDurationGps,
+                mSearchDurationFlp,
+                mDefaultAddressResolutionTime,
+                mFixedUpdateInterval,
+                mValidityPeriod,
+                mCachedAddressTolerableDistance,
+                mAddressValidityPeriod,
+                mRecentLocationValidPeriod,
+                mShape);
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("LocationPolicy :: [ ");
+        sb.append("LocationPolicy: [ ");
         sb.append("policy=" + Integer.toHexString(mPolicy));
         sb.append(", defaultUpdateInterval=" + mDefaultUpdateInterval);
         sb.append(", searchDurationNlp=" + mSearchDurationNlp);
