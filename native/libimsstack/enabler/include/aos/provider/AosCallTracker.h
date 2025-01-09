@@ -34,7 +34,7 @@ public:
     explicit AosCallTracker(IN IMS_SINT32 nSlotId);
     ~AosCallTracker() override;
 
-    IMS_BOOL SetMtcReady() const override;
+    IMS_BOOL SetMtcReady() override;
 
     IMS_BOOL IsCsCallActive() const override;
     IMS_BOOL IsNormalCallActive() const override;
@@ -96,6 +96,7 @@ protected:
     CallState m_eEmergencyState;
     IMS_UINT32 m_nNormalCallType;
     CallState m_eActiveCsState;
+    IMS_BOOL m_bMtcReady;
 
     ImsMap<CallKey, CallState> m_objNormalCalls;
     ImsMap<CallKey, CallState> m_objEmergencyCalls;

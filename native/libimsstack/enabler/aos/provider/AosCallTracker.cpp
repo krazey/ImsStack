@@ -39,6 +39,7 @@ AosCallTracker::AosCallTracker(IN IMS_SINT32 nSlotId) :
         m_eEmergencyState(CallState::IDLE),
         m_nNormalCallType(static_cast<IMS_UINT32>(CallType::UNKNOWN)),
         m_eActiveCsState(CallState::IDLE),
+        m_bMtcReady(IMS_FALSE),
         m_objNormalCalls(ImsMap<CallKey, CallState>()),
         m_objEmergencyCalls(ImsMap<CallKey, CallState>()),
         m_objNormalCallTypes(ImsMap<CallKey, CallType>()),
@@ -66,10 +67,16 @@ PUBLIC VIRTUAL AosCallTracker::~AosCallTracker()
     MtcConnector::RemoveCallStateListener(m_nSlotId, DYNAMIC_CAST(IMtcCallStateListener*, this));
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosCallTracker::SetMtcReady() const
+PUBLIC VIRTUAL IMS_BOOL AosCallTracker::SetMtcReady()
 {
+    if (m_bMtcReady)
+    {
+        return IMS_FALSE;
+    }
+
     A_IMS_TRACE_I(AOSTAG, "SetMtcReady", 0, 0, 0);
     MtcConnector::AddCallStateListener(m_nSlotId, DYNAMIC_CAST(IMtcCallStateListener*, this));
+    m_bMtcReady = IMS_TRUE;
 
     return IMS_TRUE;
 }

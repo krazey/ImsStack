@@ -410,7 +410,7 @@ PUBLIC VIRTUAL void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
 
 PUBLIC VIRTUAL IMS_BOOL AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService)
 {
-    if (nService != ImsAosService::MTC || !bReady)
+    if ((nService != ImsAosService::MTC && nService != ImsAosService::EMERGENCY_MTC) || !bReady)
     {
         return IMS_FALSE;
     }
@@ -418,7 +418,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nS
     A_IMS_TRACE_D(
             APPPROFILE, "SetReady :: bReady[%s], nService(%d)", _TRACE_B_(bReady), nService, 0);
 
-    const IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
     {
         piCallTracker->SetMtcReady();
