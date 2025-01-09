@@ -383,6 +383,7 @@ static SIP_BOOL CompletedState_ReceiveAckRequest(
     SIP_UINT16 nNextState;
 
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
+    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
     /* For Unreliable Transport */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
@@ -392,7 +393,6 @@ static SIP_BOOL CompletedState_ReceiveAckRequest(
 
         nNextState = SipTxn::INV_SER_CONFIRMED_ST;
 
-        pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
 
         if (pTxn->StartTxnTimer(SipTxn::TIMER_I, nDurationTI, pnError) == SIP_FALSE)
