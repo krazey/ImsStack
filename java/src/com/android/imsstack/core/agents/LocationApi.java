@@ -227,6 +227,13 @@ public final class LocationApi {
         return (location != null) && location.getProvider().equals(FUSED_PROVIDER);
     }
 
+    /**
+     * Returns the string of the provider for specified location.
+     */
+    public static String getProvider(Location location) {
+        return (location != null) ? location.getProvider() : "unknown";
+    }
+
     private boolean isLocationApiReady() {
         synchronized (mLock) {
             return (mFlag & FLAG_LOCATION_API_READY) != 0;
@@ -340,8 +347,10 @@ public final class LocationApi {
             LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
-                return lmp.getLastKnownLocation(
-                        provider, new LastLocationRequest.Builder().build());
+                return lmp.getLastKnownLocation(provider,
+                        new LastLocationRequest.Builder()
+                                .setLocationSettingsIgnored(true)
+                                .build());
             } catch (Exception e) {
                 loge(e.toString());
             }

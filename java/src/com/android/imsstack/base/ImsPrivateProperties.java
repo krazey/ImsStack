@@ -415,6 +415,11 @@ public final class ImsPrivateProperties {
         public static final String KEY_CONFIG_IMPU_LIST = "config_impu_list";
         public static final String KEY_CONFIG_HOME_DOMAIN_NAME = "config_home_domain_name";
 
+        /**
+         * Keeps the PIDF location information.
+         */
+        public static final String KEY_PIDF_LOCATION = "pidf_location";
+
         public static final String[] CONFIG_PROPERTIES = {
             KEY_CONFIG_PCSCF_ADDRESS_LIST,
             KEY_CONFIG_IMPI,

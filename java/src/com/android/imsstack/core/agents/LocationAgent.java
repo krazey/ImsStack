@@ -15,6 +15,12 @@
  */
 package com.android.imsstack.core.agents;
 
+import static android.telephony.CarrierConfigManager.Ims.GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
+import static android.telephony.CarrierConfigManager.Ims.GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI;
+import static android.telephony.CarrierConfigManager.Ims.GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI;
+import static android.telephony.CarrierConfigManager.Ims.KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY;
+import static android.telephony.CarrierConfigManager.ImsEmergency.KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT;
+
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.TriggerEvent;
@@ -24,12 +30,22 @@ import android.location.Location;
 import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
 import android.os.SystemClock;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyCallback;
+import android.telephony.emergency.EmergencyNumber;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.SystemServiceProxy.SensorManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -42,10 +58,13 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class for providing the location information to report the device's location to the network.
@@ -107,8 +126,7 @@ public class LocationAgent implements LocationInterface {
 
     private LocationApi.Listener mLocationListener = new LocationApi.Listener () {
         public void onLocationChanged(Location location) {
-            ImsLog.d(this, mSlotId, "Provider: "
-                    + (location == null ? "null" : location.getProvider()));
+            ImsLog.d(this, mSlotId, "onLocationChanged: " + LocationApi.getProvider(location));
 
             // To prevent updating from network provider repeatedly
             if (LocationApi.isLocationFromNetwork(location)) {
@@ -133,7 +151,7 @@ public class LocationAgent implements LocationInterface {
                         requestSmd();
                     }
                 } else {
-                    ImsLog.d(this, mSlotId, "Wait for an update by gps");
+                    ImsLog.d(this, mSlotId, "Wait for gps update");
 
                     if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD)) {
                         if (location != null) {
@@ -151,7 +169,7 @@ public class LocationAgent implements LocationInterface {
             }
 
             // Called when a new location is found.
-            updateLocation(location);
+            updateLocation(location, true);
 
             if (mPolicy.hasPolicy(
                 LocationPolicy.POLICY_NOTIFY_LOCATION_FIXED_FOR_INSTANT_REQUEST)) {
@@ -234,10 +252,19 @@ public class LocationAgent implements LocationInterface {
         @Override
         public void onCarrierConfigChanged(int slotId, int subId) {
             ImsLog.d(this, mSlotId, "onCarrierConfigChanged: subId=" + subId);
-            initPolicy();
+            boolean policyChanged = initPolicy();
+            readPidfLoConfig();
+            startLocationUpdateForEmergencyCall(policyChanged);
+            startLocationUpdateForVoWifiCall();
         }
     };
 
+    private boolean mPidfLoRequiredOnEmergencyCall;
+    private boolean mPidfLoRequiredOnVoWifiCall;
+    private boolean mCachedLocationLoaded;
+    private boolean mLocationUpdateRequestedForPidfLo;
+    private EmergencyCallListener mEmergencyCallListener;
+    private WifiInterface.Listener mWifiListener;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     public LocationAgent(int slotId) {
@@ -263,10 +290,16 @@ public class LocationAgent implements LocationInterface {
 
         initPolicy();
         mLocationApi.start();
+        readPidfLoConfig();
+        startLocationUpdateForEmergencyCall(false);
+        startLocationUpdateForVoWifiCall();
     }
 
     @Override
     public void cleanup() {
+        stopLocationUpdateForVoWifiCall();
+        stopLocationUpdateForEmergencyCall();
+
         mLocationApi.stop();
         stopListeningForLocation();
         removeLocationUpdates();
@@ -289,6 +322,7 @@ public class LocationAgent implements LocationInterface {
         mResolvedAddress = null;
         mUpdateInterval = LocationPolicy.LOCATION_UPDATE_INTERVAL;
         mLastKnownCountryCode = GeocoderProxy.UNKNOWN_COUNTRY;
+        mCachedTimeMotionDetected = 0L;
     }
 
     @Override
@@ -339,41 +373,37 @@ public class LocationAgent implements LocationInterface {
 
             StringBuilder log = new StringBuilder("Last known location ::");
 
-            Location locationFromFlp = null;
-            if (mLocationApi.isProviderEnabled(LocationApi.FUSED_PROVIDER)
-                    && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_FLP)) {
+            if (mLocationApi.isProviderEnabled(LocationApi.FUSED_PROVIDER)) {
                 log.append(" FLP enabled");
 
-                locationFromFlp = mLocationApi.getLastKnownLocation(LocationApi.FUSED_PROVIDER);
-                updateFusedLocation(locationFromFlp);
+                Location location = mLocationApi.getLastKnownLocation(LocationApi.FUSED_PROVIDER);
+                updateLocation(location, false);
 
-                if (locationFromFlp == null) {
+                if (location == null) {
                     log.append("(null)");
                 }
             }
 
-            if (locationFromFlp == null) {
-                if (mLocationApi.isProviderEnabled(LocationApi.GPS_PROVIDER)) {
-                    log.append(" GPS enabled");
+            if (mLocationApi.isProviderEnabled(LocationApi.GPS_PROVIDER)) {
+                log.append(" GPS enabled");
 
-                    Location location = mLocationApi.getLastKnownLocation(LocationApi.GPS_PROVIDER);
-                    updateGpsLocation(location);
+                Location location = mLocationApi.getLastKnownLocation(LocationApi.GPS_PROVIDER);
+                updateLocation(location, false);
 
-                    if (location == null) {
-                        log.append("(null)");
-                    }
+                if (location == null) {
+                    log.append("(null)");
                 }
+            }
 
-                if (mLocationApi.isProviderEnabled(LocationApi.NETWORK_PROVIDER)) {
-                    log.append(" NLP enabled");
+            if (mLocationApi.isProviderEnabled(LocationApi.NETWORK_PROVIDER)) {
+                log.append(" NLP enabled");
 
-                    Location location = mLocationApi.getLastKnownLocation(
-                            LocationApi.NETWORK_PROVIDER);
-                    updateNetworkLocation(location);
+                Location location = mLocationApi.getLastKnownLocation(
+                        LocationApi.NETWORK_PROVIDER);
+                updateLocation(location, false);
 
-                    if (location == null) {
-                        log.append("(null)");
-                    }
+                if (location == null) {
+                    log.append("(null)");
                 }
             }
 
@@ -496,7 +526,7 @@ public class LocationAgent implements LocationInterface {
 
         int searchTime = 0;
 
-        if (isFusedProviderEnabled && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_FLP)) {
+        if (isFusedProviderEnabled && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_FUSED_PROVIDER)) {
             final LocationRequest request = new LocationRequest.Builder(0)
                     .setMinUpdateIntervalMillis(0)
                     .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
@@ -565,7 +595,7 @@ public class LocationAgent implements LocationInterface {
 
     private Location findLatestLocation(Location... locations) {
         Location latestLocation = null;
-        StringBuilder log = new StringBuilder("Elapsed time:");
+        StringBuilder log = new StringBuilder("Most recent location:");
 
         for (Location location : locations) {
             if (location == null) {
@@ -577,15 +607,25 @@ public class LocationAgent implements LocationInterface {
                     .append("=")
                     .append(location.getElapsedRealtimeNanos());
 
-            if (latestLocation == null ||
-                    location.getElapsedRealtimeNanos()
-                        > latestLocation.getElapsedRealtimeNanos()) {
+            if (latestLocation == null) {
+                latestLocation = location;
+                continue;
+            }
+
+            long timeNs = location.getElapsedRealtimeNanos();
+            long latestTimeNs = latestLocation.getElapsedRealtimeNanos();
+
+            if (latestTimeNs == 0 && timeNs < 0) {
+                // Cached location is valid.
+                latestLocation = location;
+            } else if (timeNs == 0 && latestTimeNs < 0) {
+                // Cached location is already latest one.
+            } else if (timeNs > latestTimeNs) {
                 latestLocation = location;
             }
         }
 
-        log.append(" >> ")
-                .append(latestLocation == null ? "null" : latestLocation.getProvider());
+        log.append(" >> ").append(LocationApi.getProvider(latestLocation));
         ImsLog.d(this, mSlotId, log.toString());
 
         return latestLocation;
@@ -823,7 +863,7 @@ public class LocationAgent implements LocationInterface {
         }
     }
 
-    private void updateLocation(Location location) {
+    private boolean updateLocationByType(Location location) {
         if (LocationApi.isLocationFromGps(location)) {
             updateGpsLocation(location);
         } else if (LocationApi.isLocationFromNetwork(location)) {
@@ -831,54 +871,84 @@ public class LocationAgent implements LocationInterface {
         } else if (LocationApi.isLocationFromFlp(location)) {
             updateFusedLocation(location);
         } else {
+            return false;
+        }
+        ImsLog.i(this, mSlotId, "Location updated: " + LocationApi.getProvider(location)
+                + ", time-ns=" + (location != null ? location.getElapsedRealtimeNanos() : "0"));
+        return true;
+    }
+
+    private void updateLocation(Location location, boolean resolveAddress) {
+        if (!updateLocationByType(location)) {
             return;
         }
 
+        Location betterLocation = null;
+
+        synchronized (mLock) {
+            betterLocation = findLatestLocation(
+                    mFusedLocation, mGpsLocation, mNetworkLocation);
+        }
+
+        if (betterLocation == null) {
+            return;
+        }
+
+        if (mPolicy.hasPolicy(LocationPolicy.POLICY_ENABLE_CACHED_LOCATION)) {
+            writeLocation(betterLocation);
+        }
+
         // Update cached data from the recent location when location is fixed.
-        if (mPolicy.hasPolicy(LocationPolicy.POLICY_UPDATE_ADDRESS_AFTER_LOCATION_ACQUIRED)) {
-            Location betterLocation = null;
-
-            synchronized (mLock) {
-                betterLocation = findLatestLocation(
-                        mFusedLocation, mGpsLocation, mNetworkLocation);
-            }
-
-            if (betterLocation != null) {
-                mAddressResolver.updateLocationDetails(new Location(betterLocation));
-            }
+        if (resolveAddress && mPolicy.hasPolicy(
+                LocationPolicy.POLICY_UPDATE_ADDRESS_AFTER_LOCATION_ACQUIRED)) {
+            mAddressResolver.updateLocationDetails(new Location(betterLocation));
         }
     }
 
     private boolean isValidLocation(Location l) {
-        if (l == null) {
-            return false;
-        }
-
         if (mPolicy.getValidityPeriod() <= 0L) {
             return true;
         }
 
-        long locationUpdateTime = l.getElapsedRealtimeNanos();
-        long currentTime = SystemClock.elapsedRealtimeNanos();
-        long timeLag = (currentTime - locationUpdateTime);
+        long locationTimeNs = l.getElapsedRealtimeNanos();
+        long currentTimeNs = SystemClock.elapsedRealtimeNanos();
+        long timeLag = currentTimeNs - locationTimeNs;
 
         if (ImsLog.isDebuggable()) {
             ImsLog.d(this, mSlotId, "Location: timeLag=" + timeLag
-                    + "; " + locationUpdateTime
-                    + "(" + ImsUtils.getUtcTimeFormat(locationUpdateTime / 1000000) + ")"
-                    + " >> " + currentTime
-                    + "(" + ImsUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
+                    + "; " + locationTimeNs
+                    + "(" + ImsUtils.getUtcTimeFormat(locationTimeNs / 1000000) + ")"
+                    + " >> " + currentTimeNs
+                    + "(" + ImsUtils.getUtcTimeFormat(currentTimeNs / 1000000) + ")");
         } else {
             ImsLog.d(this, mSlotId, "Location: timeLag=" + timeLag
-                    + "; " + locationUpdateTime + " >> " + currentTime);
+                    + "; " + locationTimeNs + " >> " + currentTimeNs);
         }
 
         if ((timeLag > 0) && (timeLag > mPolicy.getValidityPeriod())) {
-            ImsLog.d(this, mSlotId, l.getProvider() + ": Location is considered as expiration");
+            ImsLog.i(this, mSlotId, l.getProvider() + ": Location is already expired");
             return false;
         }
 
         return true;
+    }
+
+    private long getElapsedTimeMs(Location l) {
+        long locationTimeMs = l.getTime();
+        long currentTimeMs = System.currentTimeMillis();
+        long elapsedTimeMs = currentTimeMs - locationTimeMs;
+
+        if (ImsLog.isDebuggable()) {
+            ImsLog.d(this, mSlotId, "Location: elapsedTime=" + elapsedTimeMs
+                    + "; " + locationTimeMs
+                    + "(" + ImsUtils.getUtcTimeFormat(locationTimeMs) + ")"
+                    + " >> " + currentTimeMs
+                    + "(" + ImsUtils.getUtcTimeFormat(currentTimeMs) + ")");
+        } else {
+            ImsLog.d(this, mSlotId, "Location: elapsedTime=" + elapsedTimeMs
+                    + "; " + locationTimeMs + " >> " + currentTimeMs);
+        }
+        return elapsedTimeMs;
     }
 
     public int getUpdateInterval() {
@@ -1072,7 +1142,7 @@ public class LocationAgent implements LocationInterface {
             if (location != null
                     && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_CACHED_LOCATION)) {
 
-                location = updateCurrentTimeFromCachedTime(location);
+                adjustLocationFixTime(location);
 
                 if (!isValidLocation(location)) {
                     location = null;
@@ -1093,15 +1163,14 @@ public class LocationAgent implements LocationInterface {
             }
 
             if (location != null) {
-                location = updateCurrentTimeFromCachedTime(location);
+                adjustLocationFixTime(location);
+
+                if (!isValidLocation(location)) {
+                    location = null;
+                }
             }
 
-            if (!isValidLocation(location)) {
-                location = null;
-            }
-
-            ImsLog.d(this, mSlotId, "Cached location: "
-                    + ((location != null) ? location.getProvider() : "(null)"));
+            ImsLog.d(this, mSlotId, "Cached location: " + LocationApi.getProvider(location));
         }
 
         return location;
@@ -1351,8 +1420,9 @@ public class LocationAgent implements LocationInterface {
     }
 
     private boolean requestSmd() {
-        if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD) == false) {
+        if (!mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD)) {
             // SMD policy is not enabled
+            mCachedTimeMotionDetected = 0L;
             return false;
         }
 
@@ -1397,25 +1467,12 @@ public class LocationAgent implements LocationInterface {
         smp.cancelTriggerSensor(mSmdListener, sigMotion);
     }
 
-    private Location updateCurrentTimeFromCachedTime(Location currentLocation) {
-        ImsLog.d(this, mSlotId, "updateCurrentTimeFromCachedTime");
-
-        Location updatedLocation = currentLocation;
-
-        if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD) == false) {
-            return updatedLocation;
+    private void adjustLocationFixTime(Location location) {
+        // If cached time is more recent than last known location, set this time.
+        if (mCachedTimeMotionDetected != 0L && mCachedTimeMotionDetected > location.getTime()) {
+            ImsLog.i(this, mSlotId, "adjustLocationFixTime: " + mCachedTimeMotionDetected);
+            location.setTime(mCachedTimeMotionDetected);
         }
-
-        if (mCachedTimeMotionDetected == 0L) {
-            return updatedLocation;
-        }
-
-        if (mCachedTimeMotionDetected > currentLocation.getTime()) {
-            // if cached time is more recent than last known location info
-            updatedLocation.setTime(mCachedTimeMotionDetected);
-        }
-
-        return updatedLocation;
     }
 
     private Boolean isGpsLocationUpdatedRecently() {
@@ -1452,7 +1509,7 @@ public class LocationAgent implements LocationInterface {
         }
 
         Location lastLocGPS = mLocationApi.getLastKnownLocation(LocationApi.GPS_PROVIDER);
-        updateLocation(lastLocGPS);
+        updateLocation(lastLocGPS, true);
 
         if (mPolicy.hasPolicy(
                 LocationPolicy.POLICY_NOTIFY_LOCATION_FIXED_FOR_INSTANT_REQUEST)) {
@@ -1460,26 +1517,24 @@ public class LocationAgent implements LocationInterface {
         }
     }
 
-    // TODO: Need to refactor this based on carrier requirements.
-    private void initPolicy() {
-        LocationPolicy lp = null;
+    private boolean initPolicy() {
+        LocationPolicy oldLp = new LocationPolicy(mPolicy);
+        LocationPolicy newLp = null;
         int policy = LocationPolicy.POLICY_ENABLE_CACHED_LOCATION
                 | LocationPolicy.POLICY_USE_CACHED_LOCATION;
 
         ConfigInterface config = getConfigInterface();
-        if (config != null) {
-            int updateType = CarrierConfig.Ims.LOCATION_UPDATE_POLICY_NONE;
-            CarrierConfig cc = config.getCarrierConfig();
-            if (cc != null) {
-                updateType = cc.getInt(CarrierConfig.Ims.KEY_LOCATION_POLICY_UPDATE_TYPE_INT);
-            }
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        if (cc != null) {
+            int updateType = cc.getInt(CarrierConfig.Ims.KEY_LOCATION_POLICY_UPDATE_TYPE_INT,
+                    CarrierConfig.Ims.LOCATION_UPDATE_POLICY_NONE);
 
             if ((CarrierConfig.Ims.LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED == updateType
                     && ServiceCaps.isWfcEnabledByPlatform(mSlotId))
                     || CarrierConfig.Ims.LOCATION_UPDATE_POLICY_ALWAYS == updateType) {
-                lp = getLocationPolicy();
+                newLp = getLocationPolicy();
 
-                policy |= cc.getInt(CarrierConfig.Ims.KEY_LOCATION_ACQUISITION_POLICY_INT);
+                policy |= cc.getInt(CarrierConfig.Ims.KEY_LOCATION_ACQUISITION_POLICY_INT, 0);
                 if (cc.getBoolean(CarrierConfig.Ims
                         .KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL)) {
                     SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
@@ -1491,26 +1546,28 @@ public class LocationAgent implements LocationInterface {
                     }
                 }
 
-                lp.setDefaultAddressResolutionTime(cc.getInt(
-                        CarrierConfig.Ims.KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT));
+                newLp.setDefaultAddressResolutionTime(cc.getInt(
+                        CarrierConfig.Ims.KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT,
+                        LocationPolicy.ADDRESS_RESOLUTION_MAX_TIME));
                 int validityMinutes = cc.getInt(
-                        CarrierConfig.Ims.KEY_LOCATION_VALIDITY_PERIOD_MIN_INT);
-                lp.setValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
+                        CarrierConfig.Ims.KEY_LOCATION_VALIDITY_PERIOD_MIN_INT, 0);
+                newLp.setValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
                 validityMinutes = cc.getInt(
-                        CarrierConfig.Ims.KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT);
-                lp.setAddressValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
-                lp.setAddressTolerableDistance(cc.getInt(
-                        CarrierConfig.Ims.KEY_LOCATION_TOLERABLE_DISTANCE_INT));
-                lp.setSearchDurationForGps(cc.getInt(
-                        CarrierConfig.Ims.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT));
+                        CarrierConfig.Ims.KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT, 0);
+                newLp.setAddressValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
+                newLp.setAddressTolerableDistance(cc.getInt(
+                        CarrierConfig.Ims.KEY_LOCATION_TOLERABLE_DISTANCE_INT, 0));
+                newLp.setSearchDurationForGps(cc.getInt(
+                        CarrierConfig.Ims.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT,
+                        LocationPolicy.LOCATION_SEARCH_DURATION_GPS));
                 int shape = cc.getInt(CarrierConfig.Ims.KEY_LOCATION_GEODETIC_SHAPE_INT);
-                lp.setShape(CarrierConfig.Ims.GEODETIC_SHAPE_ELLIPSOID == shape
+                newLp.setShape(CarrierConfig.Ims.GEODETIC_SHAPE_ELLIPSOID == shape
                         ? LocationPolicy.SHAPE_ELLIPSOID : LocationPolicy.SHAPE_CIRCLE);
             }
         }
 
-        if (lp == null && ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
-            lp = getLocationPolicy();
+        if (newLp == null && ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
+            newLp = getLocationPolicy();
 
             policy |= LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
             policy |= LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD;
@@ -1519,22 +1576,243 @@ public class LocationAgent implements LocationInterface {
             policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_TIME;
             // policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_FROM_USIM;
 
-            lp.setAddressTolerableDistance(3000);
-            lp.setDefaultUpdateInterval(3600);
+            newLp.setAddressTolerableDistance(3000);
+            newLp.setDefaultUpdateInterval(3600);
             // 10 Min: 10 * 60 * 1000 * 1000000L
-            lp.setAddressValidityPeriod(10 * 60 * 1000 * 1000000L);
+            newLp.setAddressValidityPeriod(10 * 60 * 1000 * 1000000L);
         }
 
-        if (lp != null) {
-            lp.setPolicy(policy);
+        if (newLp != null) {
+            newLp.setPolicy(policy);
 
-            ImsLog.d(this, mSlotId, lp.toString());
+            ImsLog.d(this, mSlotId, newLp.toString());
 
-            setLocationPolicy(lp);
+            setLocationPolicy(newLp);
         }
+
+        return !Objects.equals(oldLp, newLp);
     }
 
     private ConfigInterface getConfigInterface() {
         return AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
+    }
+
+    private void loadCachedLocation() {
+        Location location = readLocation();
+
+        if (location == null) {
+            return;
+        }
+
+        long currentTimeNs = SystemClock.elapsedRealtimeNanos();
+
+        // If cached location is not valid, discard it.
+        if (mPolicy.getValidityPeriod() > 0L) {
+            long elapsedTimeNs = TimeUnit.MILLISECONDS.toNanos(getElapsedTimeMs(location));
+
+            if (elapsedTimeNs >= mPolicy.getValidityPeriod()) {
+                ImsLog.i(this, mSlotId, location.getProvider() + ": Location is already expired");
+                return;
+            }
+            currentTimeNs -= elapsedTimeNs;
+        }
+
+        // Set the location fix time based on the elapsed time.
+        location.setElapsedRealtimeNanos(currentTimeNs);
+        // Update the cached location as if it's obtained.
+        updateLocationByType(location);
+    }
+
+    private @Nullable Location readLocation() {
+        String encodedLocation = ImsPrivateProperties.Persistent.get(
+                ImsPrivateProperties.Persistent.KEY_PIDF_LOCATION, "", mSlotId);
+
+        if (encodedLocation.isEmpty()) {
+            return null;
+        }
+
+        Location location = null;
+        Parcel parcel = Parcel.obtain();
+        try {
+            byte[] data = Base64.getDecoder().decode(encodedLocation);
+            parcel.unmarshall(data, 0, data.length);
+            parcel.setDataPosition(0);
+            location = Location.CREATOR.createFromParcel(parcel);
+        } catch (Exception e) {
+            ImsLog.d(this, mSlotId, "readLocation: " + e.toString());
+        } finally {
+            parcel.recycle();
+        }
+        return location;
+    }
+
+    private void writeLocation(@NonNull Location location) {
+        String encodedLocation = null;
+        Parcel parcel = Parcel.obtain();
+        try {
+            location.writeToParcel(parcel, 0);
+            byte[] data = parcel.marshall();
+            encodedLocation = Base64.getEncoder().encodeToString(data);
+        } catch (Exception e) {
+            ImsLog.d(this, mSlotId, "writeLocation: " + e.toString());
+        } finally {
+            parcel.recycle();
+        }
+
+        if (encodedLocation != null) {
+            ImsPrivateProperties.Persistent.set(
+                    ImsPrivateProperties.Persistent.KEY_PIDF_LOCATION, encodedLocation, mSlotId);
+        }
+    }
+
+    private void readPidfLoConfig() {
+        mPidfLoRequiredOnEmergencyCall = false;
+        mPidfLoRequiredOnVoWifiCall = false;
+
+        ConfigInterface config = getConfigInterface();
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+
+        if (cc == null) {
+            return;
+        }
+
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        boolean isConfigForIdentifiedCarrier = ccmp.isConfigForIdentifiedCarrier(cc.getConfig());
+        int refreshTimeout = cc.getInt(KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT, 0);
+        int[] pidfInviteSupportTypes =
+                cc.getIntArray(KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY);
+
+        if (pidfInviteSupportTypes == null) {
+            return;
+        }
+
+        for (int type : pidfInviteSupportTypes) {
+            if (type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
+                    && isConfigForIdentifiedCarrier) {
+                if (refreshTimeout > 0) {
+                    mPidfLoRequiredOnEmergencyCall = true;
+                }
+                mPidfLoRequiredOnVoWifiCall = true;
+            } else if (type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR) {
+                if (refreshTimeout > 0) {
+                    mPidfLoRequiredOnEmergencyCall = true;
+                }
+            } else if (type == GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI) {
+                if (isConfigForIdentifiedCarrier) {
+                    mPidfLoRequiredOnVoWifiCall = true;
+                }
+            }
+        }
+
+        ImsLog.d(this, mSlotId, "readPidfLoConfig"
+                + ": requiredOnEmergencyCall=" + mPidfLoRequiredOnEmergencyCall
+                + ", requiredOnVoWifiCall=" + mPidfLoRequiredOnVoWifiCall);
+    }
+
+    private void startLocationUpdateForVoWifiCall() {
+        if (!mPidfLoRequiredOnVoWifiCall) {
+            stopLocationUpdateForVoWifiCall();
+            return;
+        }
+
+        ImsLog.d(this, mSlotId, "startLocationUpdateForVoWifiCall");
+
+        WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+
+        if (wifi != null && mWifiListener == null) {
+            mWifiListener = new WifiInterface.Listener() {
+                @Override
+                public void onWifiStateChanged() {
+                    WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+
+                    if (wifi != null && wifi.isWifiEnabled()) {
+                        // Start to refresh the location when Wi-Fi is enabled.
+                        startInstantLocationUpdate();
+                    }
+                }
+            };
+            wifi.addListener(mWifiListener);
+        }
+    }
+
+    private void stopLocationUpdateForVoWifiCall() {
+        if (mWifiListener != null) {
+            ImsLog.d(this, mSlotId, "stopLocationUpdateForVoWifiCall");
+            WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+            if (wifi != null) {
+                wifi.removeListener(mWifiListener);
+            }
+            mWifiListener = null;
+        }
+    }
+
+    private void startLocationUpdateForEmergencyCall(boolean locationPolicyChanged) {
+        if (!mPidfLoRequiredOnEmergencyCall) {
+            stopLocationUpdateForEmergencyCall();
+            return;
+        }
+
+        ImsLog.d(this, mSlotId, "startLocationUpdateForEmergencyCall"
+                + ": locationPolicyChanged=" + locationPolicyChanged);
+
+        if (mEmergencyCallListener == null) {
+            mEmergencyCallListener = new EmergencyCallListener();
+            TelephonyManagerProxy tmp =
+                    AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+            tmp.registerTelephonyCallback(mHandler::post, mEmergencyCallListener);
+        }
+
+        if ((!mCachedLocationLoaded || locationPolicyChanged)
+                && mPolicy.hasPolicy(LocationPolicy.POLICY_ENABLE_CACHED_LOCATION)) {
+            mCachedLocationLoaded = true;
+            loadCachedLocation();
+        }
+
+        if (!mLocationUpdateRequestedForPidfLo || locationPolicyChanged) {
+            mLocationUpdateRequestedForPidfLo = true;
+            // To ensure to obtain the location before dialing any emergency calls.
+            // Even if the emergency call may not be initiated, it would be efficient to obtain
+            // the location once when ImsStack starts or SIM hot swap happens.
+            startInstantLocationUpdate();
+        }
+    }
+
+    private void stopLocationUpdateForEmergencyCall() {
+        if (mEmergencyCallListener != null) {
+            ImsLog.d(this, mSlotId, "stopLocationUpdateForEmergencyCall");
+            TelephonyManagerProxy tmp =
+                    AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+            tmp.unregisterTelephonyCallback(mEmergencyCallListener);
+            mEmergencyCallListener = null;
+        }
+
+        mLocationUpdateRequestedForPidfLo = false;
+        mCachedLocationLoaded = false;
+    }
+
+    private class EmergencyCallListener extends TelephonyCallback implements
+            TelephonyCallback.OutgoingEmergencyCallListener {
+        @Override
+        public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber,
+                int subscriptionId) {
+            ImsLog.d(this, mSlotId, "onOutgoingEmergencyCall: subId=" + subscriptionId);
+
+            if (subscriptionId == MSimUtils.INVALID_SUB_ID
+                    && mSlotId != MSimUtils.DEFAULT_SLOT_ID) {
+                // If the subscription is invalid,
+                // Assume that SIM1(slot-0) is used for an emergency call.
+                return;
+            }
+
+            if (subscriptionId != MSimUtils.INVALID_SUB_ID
+                    && mSlotId != MSimUtils.getSlotId(subscriptionId)) {
+                return;
+            }
+
+            if (mPidfLoRequiredOnEmergencyCall) {
+                startInstantLocationUpdate();
+            }
+        }
     }
 }
