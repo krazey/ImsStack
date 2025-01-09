@@ -2344,6 +2344,10 @@ TEST_F(AosApplicationTest, Process)
     m_pAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
     m_pAosApplication->SetLteExtraInfo(IMS_LTE_INFO_EXTRA_NONE);
     m_pAosApplication->ProcessImsEstablishmentTimerExpired();
+    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED))
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED))
+            .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
             .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
     EXPECT_CALL(m_objMockIAosService,
@@ -2441,6 +2445,27 @@ TEST_F(AosApplicationTest, Process)
     // TEST_F : UpdateMonitorNotify()
     EXPECT_CALL(m_objMockIImsAosMonitor, ImsAosMonitor_Notify(0, 0)).Times(1);
     m_pAosApplication->UpdateMonitorNotify(0, 0);
+}
+
+TEST_F(AosApplicationTest, ProcessImsEstTimerExpiredShouldNotInvokeNotifyDeregisteredWhenIsBlock)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetImsCall(IMS_FALSE);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentTimerExpired();
+
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosApplicationTest, RegTerminating)
