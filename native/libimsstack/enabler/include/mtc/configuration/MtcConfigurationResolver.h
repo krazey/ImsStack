@@ -195,20 +195,21 @@ public:
     }
 
     inline static AString GetContactHeaderAddressInInviteForEmergency(
-            IN const MtcConfigurationProxy& objProxy, IN IMS_UINT32 eAosRegMode)
+            IN const MtcConfigurationProxy& objProxy, IN IMS_UINT32 eAosRegMode,
+            IN IMS_BOOL bRoaming)
     {
         ImsVector<AString> lstConfig = objProxy.GetStringArray(
                 ConfigEmergency::KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY);
         switch (eAosRegMode)
         {
             case IImsAosInfo::REG_MODE_NORMAL:
-                return lstConfig[0];
+                return lstConfig[bRoaming ? 4 : 0];
             case IImsAosInfo::REG_MODE_ADMIN:
-                return lstConfig[1];
+                return lstConfig[bRoaming ? 5 : 1];
             case IImsAosInfo::REG_MODE_INTERNAL:
-                return lstConfig[2];
+                return lstConfig[bRoaming ? 6 : 2];
             case IImsAosInfo::REG_MODE_NOUICC:
-                return lstConfig[3];
+                return lstConfig[bRoaming ? 7 : 3];
             default:
                 return AString::ConstEmpty();
         }
