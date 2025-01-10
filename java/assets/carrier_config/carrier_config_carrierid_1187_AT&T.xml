@@ -35,6 +35,8 @@
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="true"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
+    <boolean name="ims.support_verstat_based_on_network_for_reg_bool" value="true"/>
+    <boolean name="ims.support_verstat_for_reg_bool" value="true"/>
     <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="true"/>
     <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="2"/>
     <int name="ims.ims_establishment_time_sec_int" value="300"/>
