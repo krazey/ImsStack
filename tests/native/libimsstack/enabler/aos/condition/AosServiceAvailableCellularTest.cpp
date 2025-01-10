@@ -57,7 +57,7 @@ public:
     NiceMock<MockIAosBlock> m_objMockIAosBlock;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pServiceAvailableCellular = new TestAosServiceAvailableCellular();
         ASSERT_TRUE(m_pServiceAvailableCellular != nullptr);
@@ -73,7 +73,7 @@ protected:
         m_pServiceAvailableCellular->SetBlock(&m_objMockIAosBlock);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pServiceAvailableCellular)
         {

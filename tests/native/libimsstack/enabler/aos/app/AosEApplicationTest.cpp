@@ -276,7 +276,7 @@ public:
     AStringArray m_objPcscfs;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
@@ -394,7 +394,7 @@ protected:
                 static_cast<IAosCallTracker*>(&m_objMockIAosCallTracker));
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);

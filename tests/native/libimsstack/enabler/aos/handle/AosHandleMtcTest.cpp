@@ -101,7 +101,7 @@ public:
     TestImsRadioService m_objTestImsRadioService;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
                 .Times(AnyNumber())
@@ -174,7 +174,7 @@ protected:
         m_pAosHandleMtc->m_bVopsIgnoredForVolteEnabled = IMS_FALSE;
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosHandleMtc != nullptr)
         {

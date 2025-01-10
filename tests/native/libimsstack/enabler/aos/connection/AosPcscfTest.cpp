@@ -125,7 +125,7 @@ public:
     MockITimer& m_objMockITimer;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
@@ -148,7 +148,7 @@ protected:
         ASSERT_TRUE(m_pAosPcscf != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         m_objPcscfAddressPreset.RemoveAllElements();
         m_objPcscfPortPreset.Clear();

@@ -170,7 +170,7 @@ public:
     MockITimer m_objMockITimer;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
@@ -192,7 +192,7 @@ protected:
         m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         m_objPcscfs.RemoveAllElements();
         if (m_pAosConnector)

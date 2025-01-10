@@ -43,13 +43,13 @@ public:
     AosProvider* m_pProvider;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pProvider = new AosProvider();
         ASSERT_TRUE(m_pProvider != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pProvider)
         {

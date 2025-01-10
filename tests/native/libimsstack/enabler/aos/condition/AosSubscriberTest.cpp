@@ -76,7 +76,7 @@ public:
     NiceMock<MockIAosNConfiguration> m_objMockIAosNConfiguration;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ReplaceOriginWithMock();
 
@@ -97,7 +97,7 @@ protected:
         m_pAosSubscriber->SetListener(&m_objMockListener);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         RestoreOriginInstance();
 

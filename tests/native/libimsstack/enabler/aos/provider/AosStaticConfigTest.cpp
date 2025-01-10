@@ -24,7 +24,7 @@ public:
     AosStaticConfig* m_pConfig;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pConfig = new AosStaticConfig();
         ASSERT_TRUE(m_pConfig != nullptr);
@@ -32,7 +32,7 @@ protected:
         m_pConfig->Create();
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pConfig)
         {

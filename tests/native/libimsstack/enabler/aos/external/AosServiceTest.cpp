@@ -78,13 +78,13 @@ public:
     MockIAosEmergencyListener m_objMockIAosEmergencyListener3;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosService = new TestAosService(SLOT_ID);
         ASSERT_TRUE(m_pAosService != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosService)
         {

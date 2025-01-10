@@ -28,13 +28,13 @@ public:
     ImsAos* pImsAos;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         pImsAos = new ImsAos();
         ASSERT_TRUE(pImsAos != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (pImsAos)
         {

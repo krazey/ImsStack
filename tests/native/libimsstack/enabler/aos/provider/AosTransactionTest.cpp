@@ -128,7 +128,7 @@ public:
     MockIImsRadio m_objMockIImsRadio;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosTransaction = new TestAosTransaction(SLOT_ID);
 
@@ -143,7 +143,7 @@ protected:
         EXPECT_CALL(m_objMockIImsRadio, RemoveListenerForTrafficPriority(_)).Times(AnyNumber());
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosTransaction)
         {

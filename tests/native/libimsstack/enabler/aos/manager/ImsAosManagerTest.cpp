@@ -27,13 +27,13 @@ public:
     ImsAosManager* pImsAosManager;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         pImsAosManager = new ImsAosManager("ims.app.mtc");
         ASSERT_TRUE(pImsAosManager != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (pImsAosManager)
         {

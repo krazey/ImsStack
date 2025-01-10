@@ -319,7 +319,7 @@ public:
     const IMS_UINT32 m_nServiceType = -1;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
         ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(m_strProfileId));
@@ -346,7 +346,7 @@ protected:
         ASSERT_TRUE(m_pAosHandle != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosHandle != nullptr)
         {

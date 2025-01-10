@@ -44,13 +44,13 @@ public:
     TestAosNConfiguration* m_pAosNConfiguration;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosNConfiguration = new TestAosNConfiguration();
         ASSERT_TRUE(m_pAosNConfiguration != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosNConfiguration)
         {

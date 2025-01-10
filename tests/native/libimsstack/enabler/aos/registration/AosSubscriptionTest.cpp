@@ -240,7 +240,7 @@ public:
     const AString m_strQvalue = "";
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ConfigurationManager::GetInstance()->Initialize();
 
@@ -314,7 +314,7 @@ protected:
         m_pAosSubscription->SetRegSubscription(&m_objMockIRegSubscription);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosSubscription)
         {

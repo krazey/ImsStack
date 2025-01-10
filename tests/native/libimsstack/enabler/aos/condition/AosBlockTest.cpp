@@ -74,7 +74,7 @@ public:
     MockIAosBlockSilentListener m_objMockIAosBlockSilentListener3;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
 
@@ -84,7 +84,7 @@ protected:
         ASSERT_TRUE(m_pAosBlock != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosBlock)
         {

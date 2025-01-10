@@ -129,7 +129,7 @@ public:
     ImsVector<IMS_SINT32> objRats;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
@@ -154,7 +154,7 @@ protected:
         m_pAosNetTracker->InitObject();
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosNetTracker)
         {

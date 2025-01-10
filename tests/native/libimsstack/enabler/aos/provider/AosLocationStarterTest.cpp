@@ -82,7 +82,7 @@ protected:
     static const IMS_SINT32 OPERATION_REMOVE = 1;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_objPhoneInfoService.SetLocationInfo(&m_objMockILocationInfo);
         PlatformContext::GetInstance()->SetService(
@@ -98,7 +98,7 @@ protected:
         m_pAosLocationStarter->SetAppContext(&m_objMockIAosAppContext);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosLocationStarter)
         {

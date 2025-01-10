@@ -35,7 +35,7 @@ public:
     TestUtilService m_objUtilService;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_UTIL, &m_objUtilService);
@@ -44,7 +44,7 @@ protected:
         ASSERT_TRUE(m_pProfile != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pProfile)
         {

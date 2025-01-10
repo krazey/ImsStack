@@ -272,7 +272,7 @@ public:
     const AString m_strIpAddr2 = AString("10.168.219.104");
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosStaticProfile = new AosStaticProfile();
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
@@ -290,7 +290,7 @@ protected:
         m_pAosNewIpsec = new TestAosIpsecEx(&m_objIAosIpsecListener, SLOT_ID);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         AosProvider::GetInstance()->SetNConfiguration(m_pOriginAosNConfiguration, SLOT_ID);
 

@@ -108,7 +108,7 @@ public:
     MockINetworkConnection m_objMockINetworkConnection;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
@@ -120,7 +120,7 @@ protected:
         m_pAosConnection->SetListener(&m_objMockIAosConnectionListener);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosConnection)
         {

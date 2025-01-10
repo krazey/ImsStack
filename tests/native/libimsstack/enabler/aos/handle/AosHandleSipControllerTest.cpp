@@ -40,7 +40,7 @@ public:
     MockIAosNConfiguration m_objMockIAosNConfiguration;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
                 .Times(AnyNumber())
@@ -66,7 +66,7 @@ protected:
         ASSERT_TRUE(m_pAosHandleSipController != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosHandleSipController != nullptr)
         {

@@ -33,13 +33,13 @@ public:
     MockIAosIpsecListener objIAosIpsecListener;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosIpsec = new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
         ASSERT_TRUE(m_pAosIpsec != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosIpsec)
         {

@@ -28,9 +28,9 @@ public:
     const IMS_UINT32 m_nServiceType = -1;
 
 protected:
-    virtual void SetUp() override { m_pAosMngr = new AosMngr(IMS_SLOT_0); }
+    void SetUp() override { m_pAosMngr = new AosMngr(IMS_SLOT_0); }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosMngr != nullptr)
         {

@@ -524,7 +524,7 @@ public:
     AosFeatureTagList m_objEmptyFeatureTagList;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         // IAosAppContext
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
@@ -715,7 +715,7 @@ protected:
         m_pAosRegistration->SetListener(&m_objMockIAosRegistrationListener);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosRegistration)
         {

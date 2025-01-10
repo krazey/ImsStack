@@ -53,7 +53,7 @@ public:
     };
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ON_CALL(m_objMockIRegistration, GetPreviousResponse())
                 .WillByDefault(Return(&m_objMockISipMsg));
@@ -62,7 +62,7 @@ protected:
         ASSERT_TRUE(m_pAosUtil != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosUtil)
         {

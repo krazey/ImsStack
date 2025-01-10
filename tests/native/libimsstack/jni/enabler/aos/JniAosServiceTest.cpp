@@ -54,7 +54,7 @@ public:
     NiceMock<MockIAosService> m_objMockIAosService;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         JniEnablerConnector::GetInstance().SetNativeEnabler(
                 SLOT_ID, EnablerType::AOS_SERVICE, &m_objMockIAosService);
@@ -63,7 +63,7 @@ protected:
                 new TestJniAosService(reinterpret_cast<Jni_SendDataToJava>(0x01), SLOT_ID);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pJniAosService)
         {

@@ -75,7 +75,7 @@ public:
     MockIAosKeepAliveListener m_objMockIAosKeepAliveListener;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosKeepAlive = new TestAosKeepAlive(SLOT_ID);
         ASSERT_TRUE(m_pAosKeepAlive != nullptr);
@@ -83,7 +83,7 @@ protected:
         m_pAosKeepAlive->SetKeepAliveHelper(&m_objMockSipKeepAliveHelper);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosKeepAlive)
         {

@@ -180,7 +180,7 @@ public:
     NiceMock<MockIAosBlock> m_objMockIAosBlock;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ReplaceOriginWithMock();
 
@@ -205,7 +205,7 @@ protected:
         m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         RestoreOriginInstance();
 

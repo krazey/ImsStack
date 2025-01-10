@@ -145,7 +145,7 @@ public:
     MockIAosServiceAvailableListener m_objListener5;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosServiceAvailable = new TestAosServiceAvailable(AString(NAME));
         ASSERT_TRUE(m_pAosServiceAvailable != nullptr);
@@ -157,7 +157,7 @@ protected:
         m_pAosServiceAvailable->SetBlock(&m_objMockIAosBlock);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         AosProvider::GetInstance()->SetCallTracker(m_pOriginIAosCallTracker, SLOT_ID);
         if (m_pAosServiceAvailable)

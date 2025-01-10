@@ -44,7 +44,7 @@ public:
     const IMS_UINT32 m_nServiceType = -1;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
                 .Times(AnyNumber())
@@ -66,7 +66,7 @@ protected:
         ASSERT_TRUE(m_pAosHandleEmergencyMts != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosHandleEmergencyMts != nullptr)
         {

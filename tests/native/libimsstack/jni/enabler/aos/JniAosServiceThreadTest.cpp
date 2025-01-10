@@ -28,7 +28,7 @@ public:
     ImsList<AString> m_objFeatureTags;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pJniAosServiceThread = new JniAosServiceThread();
         ASSERT_TRUE(m_pJniAosServiceThread != nullptr);
@@ -39,7 +39,7 @@ protected:
         m_objFeatureTags.Append(AString("featureTag3"));
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         m_objFeatureTags.Clear();
 

@@ -55,13 +55,13 @@ public:
     MockINetworkConnection m_objMockINetworkConnection;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosDnsQuery = new TestAosDnsQuery(IMS_TRUE);
         ASSERT_TRUE(m_pAosDnsQuery != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosDnsQuery)
         {

@@ -88,7 +88,7 @@ public:
     MockIAosService m_objMockIAosService;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosCallTracker = new TestAosCallTracker(SLOT_ID);
         ASSERT_TRUE(m_pAosCallTracker != nullptr);
@@ -100,7 +100,7 @@ protected:
         AosProvider::GetInstance()->SetService(&m_objMockIAosService);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosCallTracker)
         {

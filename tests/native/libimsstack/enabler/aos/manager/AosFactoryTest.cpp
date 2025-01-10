@@ -66,7 +66,7 @@ public:
     ImsMap<IMS_SINT32, ImsAosManager*> m_objOriginManagers;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pOriginAosFactory = TestAosFactory::GetAosFactory();
         m_pOriginLock = TestAosFactory::GetLock();
@@ -77,7 +77,7 @@ protected:
         TestAosFactory::GetManagers().Remove(IMS_SLOT_0);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         ImsAosManager* pAoSMngr = TestAosFactory::GetManager(IMS_SLOT_0);
         if (pAoSMngr != null)

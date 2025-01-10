@@ -67,7 +67,7 @@ public:
     const AString m_strProfile = "aos_normal";
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosStaticProfile = new AosStaticProfile();
         ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
@@ -81,7 +81,7 @@ protected:
         ASSERT_TRUE(m_pAosBuilder != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosStaticProfile)
         {

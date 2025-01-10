@@ -60,7 +60,7 @@ public:
     MockIAosNConfiguration m_objMockIAosConfig;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosRetryRepository = new TestAosRetryRepository(SLOT_ID);
         ASSERT_TRUE(m_pAosRetryRepository != nullptr);
@@ -68,7 +68,7 @@ protected:
         ON_CALL(m_objMockIAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(5));
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosRetryRepository)
         {

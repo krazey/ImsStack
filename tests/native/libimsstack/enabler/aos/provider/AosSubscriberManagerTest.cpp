@@ -267,7 +267,7 @@ public:
     AString m_objStrTestMnc;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_objStrTestImsi = AString("123456789");
         m_objStrTestMcc = AString("123");
@@ -295,7 +295,7 @@ protected:
         m_pSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pSubscriberManager)
         {

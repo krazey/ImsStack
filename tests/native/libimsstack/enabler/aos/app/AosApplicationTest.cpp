@@ -398,7 +398,7 @@ public:
     AStringArray m_objPcscfs;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         ReplaceOriginWithMock();
         SetDefaultValues();
@@ -466,7 +466,7 @@ protected:
         m_pAosApplication->SetAosRegistration(&m_objMockIAosRegistration);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         ClearDefaultValues();
         RestoreOriginInstance();

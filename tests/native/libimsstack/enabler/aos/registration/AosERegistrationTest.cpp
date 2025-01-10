@@ -292,7 +292,7 @@ public:
     ImsVector<IMS_SINT32> m_objEmptyErrCode;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         // IAosAppContext
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
@@ -419,7 +419,7 @@ protected:
         m_pAosERegistration->SetListener(&m_objMockIAosRegistrationListener);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         m_pAosERegistration->ClearEModeInfo();
 

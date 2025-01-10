@@ -122,7 +122,7 @@ public:
     NiceMock<MockIAosConnection> m_objMockIAosConnection;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pServiceAvailableWifi = new TestAosServiceAvailableWifi();
         ASSERT_TRUE(m_pServiceAvailableWifi != nullptr);
@@ -143,7 +143,7 @@ protected:
                 TestAosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pServiceAvailableWifi)
         {
