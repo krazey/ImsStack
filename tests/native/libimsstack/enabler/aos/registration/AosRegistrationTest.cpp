@@ -121,6 +121,7 @@ using ::testing::SetArgReferee;
     using Base::NConfiguration_NotifyConfigChanged;               \
     using Base::NetTracker_StatusChanged;                         \
     using Base::NotifyFailureWithImsReason;                       \
+    using Base::SetRetryTimeToProperty;                           \
     using Base::OnMessage;                                        \
     using Base::ProcessForbiddenFailed;                           \
     using Base::ProcessIpcanChanged;                              \
@@ -1510,6 +1511,35 @@ TEST_F(AosRegistrationTest, DoNotSetReasonToRegResp403WhenStatusCodeIsNot403)
             IRegistration::REASON_STATUS_CODE, SipStatusCode::SC_500);
 
     EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_403);
+}
+
+TEST_F(AosRegistrationTest, DoNotSetRetryTimeToPropIfNotCdmalessConfigured)
+{
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(0);
+
+    m_pAosRegistration->SetRetryTimeToProperty(60);
+}
+
+TEST_F(AosRegistrationTest, DoNotSetRetryTimeToPropIfNotNormalRegType)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(0);
+
+    m_pAosRegistration->SetRetryTimeToProperty(60);
+}
+
+TEST_F(AosRegistrationTest, DoSetRetryTimeToPropIfCdmalessAndNormalRegType)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(AnyNumber());
+
+    m_pAosRegistration->SetRetryTimeToProperty(60);
 }
 
 TEST_F(AosRegistrationTest, IgnoreUpdatePreloadedRouteIfRegParameterIsNull)
