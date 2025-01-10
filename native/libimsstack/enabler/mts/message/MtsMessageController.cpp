@@ -33,6 +33,7 @@
 #include "ISipMessage.h"
 #include "ISipHeader.h"
 #include "IPageMessage.h"
+#include "IMtsContext.h"
 #include "IMessageBodyPart.h"
 #include "IuMtsService.h"
 #include "MtsStringDef.h"
@@ -43,7 +44,9 @@
 #include "message/MtsErrorHandler.h"
 #include "message/MtsMessage.h"
 #include "message/MtsMessageController.h"
-#include "utility/MtsDynamicLoader.h"
+#include "utility/IMtsDynamicLoader.h"
+#include "utility/MtsSipFormUtils.h"
+#include "utility/MtsSmUtils.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
@@ -51,31 +54,28 @@ LOCAL const IMS_CHAR CONTENT_TYPE_PIDF_XML[] = "application/pidf+xml";
 LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
 
 PUBLIC
-MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
-        IN MtsDynamicLoader* pMtsDynamicLoader) :
+MtsMessageController::MtsMessageController(IN IMtsContext& objContext) :
         m_objMsgList(ImsList<IMtsMessage*>()),
+        m_objContext(objContext),
         m_bProcessingMsg(IMS_FALSE),
-        m_nSlotId(nSlotId),
         m_strLastRcvIpsmgwAddr(AString::ConstNull()),
         m_strPreviousCallId(AString::ConstNull()),
-        m_piMtsService(piMtsService),
         m_piMtsErrorHandler(IMS_NULL),
-        m_pMtsDynamicLoader(pMtsDynamicLoader),
         m_piRetryAfterTimer(IMS_NULL),
         m_objRetryFunction(),
         m_pRetryContent(IMS_NULL),
-        m_objTimerUpdateHelper(ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId),
-                Engine::GetConfiguration()->GetSipConfig(m_nSlotId))
+        m_objTimerUpdateHelper(
+                ConfigService::GetConfigService()->GetCarrierConfig(m_objContext.GetSlotId()),
+                Engine::GetConfiguration()->GetSipConfig(m_objContext.GetSlotId()))
 {
-    IMS_TRACE_I("+MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("+MtsMessageController [slot_%d]", m_objContext.GetSlotId(), 0, 0);
 
-    m_piMtsService->SetListener(this);
-    m_piMtsErrorHandler = new MtsErrorHandler(m_nSlotId);
+    m_piMtsErrorHandler = new MtsErrorHandler(m_objContext.GetSlotId());
 }
 
 PUBLIC MtsMessageController::~MtsMessageController()
 {
-    IMS_TRACE_I("~MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("~MtsMessageController [slot_%d]", m_objContext.GetSlotId(), 0, 0);
 
     DestroyMtsMessage();
     StopRetryAfterTimer();
@@ -140,8 +140,8 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     }
 
     IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
-    IMS_SINT32 nResult =
-            m_piMtsErrorHandler->Handle(m_piMtsService, m_pMtsDynamicLoader, piMessage);
+    IMS_SINT32 nResult = m_piMtsErrorHandler->Handle(
+            m_objContext.GetService(), m_objContext.GetDynamicLoader(), piMessage);
     if (nResult == MO_ERROR_BY_RETRY_AFTER)
     {
         StartRetryAfterTimer(m_piMtsErrorHandler->GetRetryAfterValue());
@@ -192,16 +192,9 @@ PUBLIC void MtsMessageController::NotifyMtSms(IN IPageMessage* piPageMessage)
     ReceiveMtsMessage(piPageMessage, IMS_FALSE);
 }
 
-PUBLIC void MtsMessageController::OnServiceDisconnected()
+PUBLIC void MtsMessageController::ClearAllMessages()
 {
-    IMS_TRACE_I("OnDisconnected", 0, 0, 0);
-
-    TerminateAllMessages();
-}
-
-PUBLIC void MtsMessageController::OnServiceSuspended()
-{
-    IMS_TRACE_I("OnSuspended", 0, 0, 0);
+    IMS_TRACE_I("ClearAllMessages", 0, 0, 0);
 
     TerminateAllMessages();
 }
@@ -261,7 +254,7 @@ PRIVATE void MtsMessageController::DestroyMtsMessage()
 {
     IMS_UINT32 nMsgSize = m_objMsgList.GetSize();
 
-    IMS_TRACE_I("DestroyMtsMessage : nMsgSize[%d], m_nSlotId[%d]", nMsgSize, m_nSlotId, 0);
+    IMS_TRACE_I("DestroyMtsMessage : nMsgSize[%d]", nMsgSize, 0, 0);
 
     if (nMsgSize == 0)
     {
@@ -414,7 +407,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
 {
     IMS_TRACE_I("ReceiveMtsMessage : bEmergency[%s]", _TRACE_B_(bEmergency), 0, 0);
 
-    if (m_piMtsService->GetIMtsServiceState()->IsMtServiceBlocked())
+    if (m_objContext.GetService().GetIMtsServiceState()->IsMtServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts is NOTREADY STATE", 0, 0, 0);
 
@@ -424,7 +417,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         return;
     }
 
-    ICoreService* pMtsICoreService = m_piMtsService->GetICoreService(bEmergency);
+    ICoreService* pMtsICoreService = m_objContext.GetService().GetICoreService(bEmergency);
 
     if (pMtsICoreService == IMS_NULL)
     {
@@ -439,7 +432,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
     // remove the MtsMessage(RP-DATA) for further MO SMS request.
     CleanMtsMessageWithInReplyTo(piPageMessage);
 
-    IMtsMessage* piMtsMessage = new MtsMessage(m_nSlotId);
+    IMtsMessage* piMtsMessage = new MtsMessage(m_objContext.GetSlotId());
     AString strImpu = pMtsICoreService->GetAuthorizedUserId().GetUri();
     piMtsMessage->SetImpu(strImpu);
 
@@ -485,7 +478,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
         return IMS_FAILURE;
     }
 
-    if (m_piMtsService->GetIMtsServiceState()->IsMoServiceBlocked())
+    if (m_objContext.GetService().GetIMtsServiceState()->IsMoServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts is not READY STATE ", 0, 0, 0);
         ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
@@ -520,7 +513,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     IMS_SINT32 nGsmMti = SMS_MTI_NONE;
     if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
     {
-        nGsmMti = m_pMtsDynamicLoader->GetMtsSmUtils()->GetMti(
+        nGsmMti = m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
                 SmsFormatType::SMSFORMAT_3GPP, *pContent);
     }
 
@@ -546,7 +539,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
         return IMS_FAILURE;
     }
 
-    piMtsMessage = new MtsMessage(m_nSlotId);
+    piMtsMessage = new MtsMessage(m_objContext.GetSlotId());
     piMtsMessage->SetSeqId(nSeqId);
     IMessage* piMessage = piPageMessage->GetNextRequest();
     if (ConstructSendMessage(piMessage, *pContent, eSmsFormat, bEmergency) == IMS_FALSE)
@@ -560,8 +553,8 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     m_objTimerUpdateHelper.SetMessageTransactionTimer(nGsmMti);
 
     if (piPageMessage->Send(*pContent,
-                m_pMtsDynamicLoader->GetMtsSipFormUtils()->FormContentTypeEnumToStr(eSmsFormat)) ==
-            IMS_FAILURE)
+                m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->FormContentTypeEnumToStr(
+                        eSmsFormat)) == IMS_FAILURE)
     {
         IMS_TRACE_E(0, "Failed to send a IPageMessage", 0, 0, 0);
         m_objTimerUpdateHelper.ResetMessageTransactionTimer(nGsmMti);
@@ -617,7 +610,7 @@ PRIVATE void MtsMessageController::ReportMoStatus(
             PS_MoStatus(nReason), nReason, PS_SmsFormatType(eSmsFormat), nSeqId);
     IMS_TRACE_I("ReportMoStatus :  %s", acLog, 0, 0);
 
-    m_piMtsService->ReportMoStatus(nReason, eSmsFormat, nSeqId);
+    m_objContext.GetService().ReportMoStatus(nReason, eSmsFormat, nSeqId);
 }
 
 PRIVATE void MtsMessageController::ReportMtSms(
@@ -630,7 +623,7 @@ PRIVATE void MtsMessageController::ReportMtSms(
     strContent.Attach(reinterpret_cast<const IMS_CHAR*>(pbyContent), nContentLength);
     ByteArray objContent = strContent.ToBase64();
 
-    m_piMtsService->ReportMtSms(eSmsFormat, objContent);
+    m_objContext.GetService().ReportMtSms(eSmsFormat, objContent);
 }
 
 PRIVATE
@@ -653,12 +646,12 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
 
     if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
     {
-        IMS_SINT32 nMti = m_pMtsDynamicLoader->GetMtsSmUtils()->GetMti(
+        IMS_SINT32 nMti = m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
                 SmsFormatType::SMSFORMAT_3GPP, objContent);
         if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
         {
             IMtsMessage* piMtsMessage =
-                    Search(m_pMtsDynamicLoader->GetMtsSmUtils()->GetRpMr(objContent));
+                    Search(m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetRpMr(objContent));
             AString strCallId = GetPreviousCallId(piMtsMessage);
             // Set the Call-ID in the In-Reply-To header
             if (strCallId.GetLength())
@@ -670,7 +663,8 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
 
     if (bEmergency)
     {
-        ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+        ICarrierConfig* piCc =
+                ConfigService::GetConfigService()->GetCarrierConfig(m_objContext.GetSlotId());
         IMS_BOOL bSupportPidf = piCc->GetBoolean(
                 CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL);
 
@@ -693,7 +687,7 @@ IMS_BOOL MtsMessageController::FormDestinationByMti(IN SmsFormatType eSmsFormat,
 
     if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
     {
-        IMS_SINT32 nGsmMti = m_pMtsDynamicLoader->GetMtsSmUtils()->GetMti(
+        IMS_SINT32 nGsmMti = m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
                 SmsFormatType::SMSFORMAT_3GPP, objContent);
         bIsAckOrError =
                 (nGsmMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nGsmMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
@@ -703,7 +697,7 @@ IMS_BOOL MtsMessageController::FormDestinationByMti(IN SmsFormatType eSmsFormat,
         if (bIsAckOrError)
         {
             IMtsMessage* pMtsMessage =
-                    Search(m_pMtsDynamicLoader->GetMtsSmUtils()->GetRpMr(objContent));
+                    Search(m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetRpMr(objContent));
 
             if (pMtsMessage != IMS_NULL)
             {
@@ -735,8 +729,8 @@ IMS_BOOL MtsMessageController::FormDestinationByMti(IN SmsFormatType eSmsFormat,
         }
     }
 
-    if (m_pMtsDynamicLoader->GetMtsSipFormUtils()->FormDestination(
-            strAddress, bIsAckOrError, strLastIpSmgw, strDestination) == IMS_FALSE)
+    if (m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->FormDestination(
+                strAddress, bIsAckOrError, strLastIpSmgw, strDestination) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Failed to form the destination!!", 0, 0, 0);
         ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
@@ -792,7 +786,8 @@ const ByteArray& MtsMessageController::ProcessReceivedMessage(
     AString strContentType = objMessageBodies.GetAt(0)->GetHeader(AString("Content-Type"));
 
     SmsFormatType eContentSmsType =
-            m_pMtsDynamicLoader->GetMtsSipFormUtils()->FormContentTypeStrToEnum(strContentType);
+            m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->FormContentTypeStrToEnum(
+                    strContentType);
 
     if (eContentSmsType == SmsFormatType::SMSFORMAT_INVALID)
     {
@@ -869,8 +864,9 @@ IMS_RESULT MtsMessageController::RespondReceivedMessage(
     }
     else if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_N || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_N)
     {
-        if (ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
-                    CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL) &&
+        if (ConfigService::GetConfigService()
+                        ->GetCarrierConfig(m_objContext.GetSlotId())
+                        ->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL) &&
                 ValidateInReplyToHeader(*piPageMessage) == IMS_FALSE)
         {
             IMS_TRACE_I("RespondReceivedMessage : In-Reply-To header is mismatched", 0, 0, 0);
@@ -1053,7 +1049,7 @@ PRIVATE void MtsMessageController::SetLocationToMessage(IN IMessage* piMessage)
     IMS_TRACE_I("SetLocationToMessage", 0, 0, 0);
 
     GeolocationPidfCreator* pPidfCreator =
-            GeolocationHelper::GetInstance()->GetPidfCreator(m_nSlotId);
+            GeolocationHelper::GetInstance()->GetPidfCreator(m_objContext.GetSlotId());
 
     if (pPidfCreator == IMS_NULL)
     {
@@ -1076,7 +1072,7 @@ PRIVATE void MtsMessageController::SetLocationToMessage(IN IMessage* piMessage)
     // Set a Location Content-Type
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, CONTENT_TYPE_PIDF_XML);
 
-    AString strNewContentId = GeolocationHelper::CreateContentId(m_nSlotId);
+    AString strNewContentId = GeolocationHelper::CreateContentId(m_objContext.GetSlotId());
 
     // Set a Location Content-ID
     AString strContentId;
@@ -1102,14 +1098,15 @@ PRIVATE
 ICoreService* MtsMessageController::GetICoreService(IN IMS_BOOL bEmergency) const
 {
     if (bEmergency &&
-            ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
-                    CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
+            ConfigService::GetConfigService()
+                    ->GetCarrierConfig(m_objContext.GetSlotId())
+                    ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
     {
-        return m_piMtsService->GetICoreService(IMS_TRUE);
+        return m_objContext.GetService().GetICoreService(IMS_TRUE);
     }
     else
     {
-        return m_piMtsService->GetICoreService(IMS_FALSE);
+        return m_objContext.GetService().GetICoreService(IMS_FALSE);
     }
 }
 
@@ -1238,7 +1235,8 @@ PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN IPageMessage* piPageM
 
     AString strContentType = objMessageBodies.GetAt(0)->GetHeader(AString("Content-Type"));
     SmsFormatType nContentSmsType =
-            m_pMtsDynamicLoader->GetMtsSipFormUtils()->FormContentTypeStrToEnum(strContentType);
+            m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->FormContentTypeStrToEnum(
+                    strContentType);
 
     if (SmsFormatType::SMSFORMAT_INVALID == nContentSmsType)
     {
@@ -1250,7 +1248,7 @@ PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN IPageMessage* piPageM
 
     if (nContentSmsType == SmsFormatType::SMSFORMAT_3GPP)
     {
-        IMS_SINT32 nGsmMti = m_pMtsDynamicLoader->GetMtsSmUtils()->GetMti(
+        IMS_SINT32 nGsmMti = m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
                 SmsFormatType::SMSFORMAT_3GPP, objContent);
 
         if (nGsmMti == SMS_3GPP_MTI_RP_DATA_FROM_N || nGsmMti == SMS_3GPP_MTI_RP_ACK_FROM_N ||
@@ -1281,17 +1279,19 @@ void MtsMessageController::SetMessageInfo(IN IPageMessage* piPageMessage,
     piMtsMessage->SetSmSize(objContent.GetLength());
     piMtsMessage->SetDestination(strDestination);
 
-    MtsSmUtils* pMtsSmUtils = m_pMtsDynamicLoader->GetMtsSmUtils();
     if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
     {
         piMtsMessage->SetSmsFormat(SmsFormatType::SMSFORMAT_3GPP);
-        piMtsMessage->SetMti(pMtsSmUtils->GetMti(SmsFormatType::SMSFORMAT_3GPP, objContent));
-        piMtsMessage->SetMessageReference(pMtsSmUtils->GetRpMr(objContent));
+        piMtsMessage->SetMti(m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
+                SmsFormatType::SMSFORMAT_3GPP, objContent));
+        piMtsMessage->SetMessageReference(
+                m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetRpMr(objContent));
     }
     else if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP2)
     {
         piMtsMessage->SetSmsFormat(SmsFormatType::SMSFORMAT_3GPP2);
-        piMtsMessage->SetMti(pMtsSmUtils->GetMti(SmsFormatType::SMSFORMAT_3GPP2, objContent));
+        piMtsMessage->SetMti(m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
+                SmsFormatType::SMSFORMAT_3GPP2, objContent));
     }
 }
 

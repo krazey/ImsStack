@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTS_SERVICE_LISTENER_H_
-#define INTERFACE_MTS_SERVICE_LISTENER_H_
+#ifndef INTERFACE_MTS_DYNAMIC_LOADER_H_
+#define INTERFACE_MTS_DYNAMIC_LOADER_H_
 
-#include "MtsDef.h"
+class MtsSipFormUtils;
+class MtsSmUtils;
 
-class IPageMessage;
-
-class IMtsServiceListener
+class IMtsDynamicLoader
 {
 public:
-    virtual ~IMtsServiceListener() {}
+    virtual ~IMtsDynamicLoader() {}
 
-    virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
-    virtual void NotifyMtSms(IN IPageMessage* piMessage) = 0;
-    virtual void OnServiceDisconnected() = 0;
-    virtual void OnServiceSuspended() = 0;
+    virtual MtsSipFormUtils* GetMtsSipFormUtils() const = 0;
+    virtual MtsSmUtils* GetMtsSmUtils() const = 0;
 };
 
 #endif

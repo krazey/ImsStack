@@ -26,6 +26,7 @@
 class IImsAos;
 class IImsRadio;
 class IJniMtsServiceThread;
+class IMtsContext;
 class IMtsTraffic;
 class INetworkWatcher;
 
@@ -37,11 +38,12 @@ class MtsService final :
         public ImsService
 {
 public:
-    explicit MtsService(IN IMS_SINT32 nSlotId);
-    ~MtsService();
+    explicit MtsService(IN IMtsContext& objContext);
+    virtual ~MtsService();
     MtsService(IN const MtsService&) = delete;
     MtsService& operator=(IN const MtsService&) = delete;
 
+    // ICoreServiceListener
     void CoreService_PageMessageReceived(
             IN ICoreService* piService, IN IPageMessage* piMessage) override;
     void CoreService_ReferenceReceived(
@@ -55,6 +57,7 @@ public:
     void CoreService_CapabilityQueryReceived(
             IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 
+    // IImsAosListener
     void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
     void ImsAos_Connecting() override;
     void ImsAos_Disconnecting(IN IMS_UINT32 nReason) override;
@@ -62,6 +65,7 @@ public:
     void ImsAos_Suspended(IN IMS_UINT32 nReason) override;
     void ImsAos_Resumed() override;
 
+    // IMtsService
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
     inline IMtsServiceState* GetIMtsServiceState() override { return m_piMtsServiceState; }
     void ReportMoStatus(
@@ -69,11 +73,11 @@ public:
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) override;
     void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
     void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) override;
-    void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
     inline void NotifyJniEnablerSet() override {}
     void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
 
+    // IMtsTrafficListener
     void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
             IN IMS_UINT32 nWaitTimeMillis) override;
@@ -101,14 +105,13 @@ private:
     void Init();
     void DeInit();
 
+    IMtsContext& m_objContext;
     IImsAos* m_piImsAos;
     IImsAos* m_piImsEmergencyAos;
     INetworkWatcher* m_piNetWatcherInfo;
     AString m_strAppId;
-    IMS_UINT32 m_nSlotId;
     ICoreService* m_piCoreService;
     ICoreService* m_piEmergencyCoreService;
-    IMtsServiceListener* m_piMtsServiceListener;
     IMtsServiceState* m_piMtsServiceState;
     IImsRadio* m_piImsRadio;
     ImsList<IMtsTraffic*> m_objMtsTraffics;

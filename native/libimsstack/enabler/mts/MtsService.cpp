@@ -22,7 +22,7 @@
 #include "IImsAosInfo.h"
 #include "IJniEnabler.h"
 #include "IJniMtsServiceThread.h"
-#include "IMtsServiceListener.h"
+#include "IMtsContext.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipHeader.h"
 #include "ImsAos.h"
@@ -37,35 +37,35 @@
 #include "MtsTraffic.h"
 #include "ServiceImsRadio.h"
 #include "ServicePhoneInfo.h"
+#include "message/IMtsMessageController.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
-MtsService::MtsService(IN IMS_SINT32 nSlotId) :
+MtsService::MtsService(IN IMtsContext& objContext) :
         ImsService(AString::ConstNull()),
+        m_objContext(objContext),
         m_piImsAos(IMS_NULL),
         m_piImsEmergencyAos(IMS_NULL),
         m_piNetWatcherInfo(IMS_NULL),
         m_strAppId(ImsServiceConfig::GetAppName(ImsAppId::MTS)),
-        m_nSlotId(nSlotId),
         m_piCoreService(IMS_NULL),
         m_piEmergencyCoreService(IMS_NULL),
-        m_piMtsServiceListener(IMS_NULL),
-        m_piMtsServiceState(new MtsServiceState(nSlotId)),
-        m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(nSlotId)),
+        m_piMtsServiceState(new MtsServiceState(m_objContext.GetSlotId())),
+        m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
         m_objMtsTraffics(ImsList<IMtsTraffic*>()),
         m_pSmsInfo(IMS_NULL)
 {
-    IMS_TRACE_I("+MtsService [slot_%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("+MtsService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
     Init();
 }
 
 PUBLIC
 MtsService::~MtsService()
 {
-    IMS_TRACE_I("~MtsService [slot_%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("~MtsService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
 
     JniEnablerConnector::GetInstance().SetNativeEnabler(
-            m_nSlotId, EnablerType::MTS_SERVICE, IMS_NULL);
+            m_objContext.GetSlotId(), EnablerType::MTS_SERVICE, IMS_NULL);
 
     DeInit();
 }
@@ -76,19 +76,15 @@ ICoreService* MtsService::GetICoreService(IN IMS_BOOL bEmergency) const
     return bEmergency ? m_piEmergencyCoreService : m_piCoreService;
 }
 
-PUBLIC VIRTUAL void MtsService::SetListener(IN IMtsServiceListener* piMtsServiceListener)
-{
-    m_piMtsServiceListener = piMtsServiceListener;
-}
-
 PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
         IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency)
 {
     IMS_TRACE_I("SendMoSms", 0, 0, 0);
 
     if (bEmergency &&
-            ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
-                    CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
+            ConfigService::GetConfigService()
+                    ->GetCarrierConfig(m_objContext.GetSlotId())
+                    ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
     {
         if (m_pSmsInfo != IMS_NULL)
         {
@@ -106,7 +102,8 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
     if (piMtsTraffic->IsRadioGuardTimerActive())
     {
         piMtsTraffic->StartRadioGuardTimer();
-        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
+        m_objContext.GetMessageController().NotifyMoSms(
+                eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
     }
     else
     {
@@ -128,7 +125,7 @@ void MtsService::ReportMoStatus(
     IJniMtsServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
-        piJniThread->ReportMoStatus(nReason, eSmsFormat, nSeqId, m_nSlotId);
+        piJniThread->ReportMoStatus(nReason, eSmsFormat, nSeqId, m_objContext.GetSlotId());
     }
 }
 
@@ -140,7 +137,7 @@ void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& ob
     IJniMtsServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
-        piJniThread->ReportMtSms(eSmsFormat, objContent, m_nSlotId);
+        piJniThread->ReportMtSms(eSmsFormat, objContent, m_objContext.GetSlotId());
     }
 }
 
@@ -186,7 +183,7 @@ void MtsService::CoreService_PageMessageReceived(
                 nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MT, piMtsTraffic);
         piMtsTraffic->StartRadioGuardTimer();
     }
-    m_piMtsServiceListener->NotifyMtSms(piMessage);
+    m_objContext.GetMessageController().NotifyMtSms(piMessage);
 }
 
 PUBLIC
@@ -248,7 +245,7 @@ void MtsService::CoreService_CapabilityQueryReceived(
 PUBLIC
 void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
-    IMS_TRACE_I("ImsAos_Connected : m_nSlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("ImsAos_Connected : slot_[%d]", m_objContext.GetSlotId(), 0, 0);
     (void)nFeatures;
     (void)nIpcan;
 
@@ -264,8 +261,9 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
             if (piMtsTraffic->IsRadioGuardTimerActive())
             {
                 piMtsTraffic->StartRadioGuardTimer();
-                m_piMtsServiceListener->NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->pContent,
-                        m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergency);
+                m_objContext.GetMessageController().NotifyMoSms(m_pSmsInfo->eSmsFormat,
+                        m_pSmsInfo->pContent, m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId,
+                        m_pSmsInfo->bEmergency);
 
                 delete m_pSmsInfo;
                 m_pSmsInfo = IMS_NULL;
@@ -288,7 +286,7 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 
     m_piMtsServiceState->OnImsDisconnected(nReason);
     // if ims data connection is disconnected, terminate all pending messages.
-    m_piMtsServiceListener->OnServiceDisconnected();
+    m_objContext.GetMessageController().ClearAllMessages();
 }
 
 PUBLIC
@@ -305,7 +303,7 @@ void MtsService::ImsAos_Suspended(IN IMS_UINT32 nReason)
     IMS_TRACE_I("ImsAos_Suspended : Reason[%d]", nReason, 0, 0);
 
     m_piMtsServiceState->OnImsSuspended(nReason);
-    m_piMtsServiceListener->OnServiceSuspended();
+    m_objContext.GetMessageController().ClearAllMessages();
 }
 
 PUBLIC
@@ -357,13 +355,12 @@ void MtsService::Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 n
     (void)nCauseCode;
     (void)nWaitTimeMillis;
 
-    // TODO(Mts): This notification will be replaced to IMtsMessageController::ClearAllMessages().
     if (m_pSmsInfo != IMS_NULL)
     {
         delete m_pSmsInfo;
         m_pSmsInfo = IMS_NULL;
     }
-    m_piMtsServiceListener->OnServiceDisconnected();
+    m_objContext.GetMessageController().ClearAllMessages();
 }
 
 PUBLIC
@@ -391,7 +388,7 @@ void MtsService::Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_U
     }
 
     piMtsTraffic->StartRadioGuardTimer();
-    m_piMtsServiceListener->NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->pContent,
+    m_objContext.GetMessageController().NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->pContent,
             m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergency);
 
     delete m_pSmsInfo;
@@ -423,15 +420,16 @@ void MtsService::InitMtsServiceState()
 PRIVATE
 void MtsService::AttachJni()
 {
-    JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::MTS_SERVICE, this);
+    JniEnablerConnector::GetInstance().SetNativeEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTS_SERVICE, this);
 }
 
 PRIVATE
 void MtsService::AttachAos()
 {
     // Get the normal-type interface of AoS and register as the listener.
-    m_piImsAos = ImsAos::GetImsAos(
-            m_strAppId, ImsServiceConfig::GetServiceName(ImsServiceId::MTS), m_nSlotId);
+    m_piImsAos = ImsAos::GetImsAos(m_strAppId, ImsServiceConfig::GetServiceName(ImsServiceId::MTS),
+            m_objContext.GetSlotId());
 
     if (m_piImsAos != IMS_NULL)
     {
@@ -443,8 +441,9 @@ void MtsService::AttachAos()
     }
 
     // Get the emergency-type interface of AoS and register as the listener.
-    m_piImsEmergencyAos = ImsAos::GetImsAos(
-            m_strAppId, ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY), m_nSlotId);
+    m_piImsEmergencyAos = ImsAos::GetImsAos(m_strAppId,
+            ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY),
+            m_objContext.GetSlotId());
 
     if (m_piImsEmergencyAos != IMS_NULL)
     {
@@ -621,8 +620,8 @@ IMtsTraffic* MtsService::GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nD
 PRIVATE
 IJniMtsServiceThread* MtsService::GetJniThread()
 {
-    IJniEnabler* piJniEnabler =
-            JniEnablerConnector::GetInstance().GetJniEnabler(m_nSlotId, EnablerType::MTS_SERVICE);
+    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTS_SERVICE);
     if (piJniEnabler == IMS_NULL)
     {
         IMS_TRACE_E(0, "JniMtsServiceThread is null", 0, 0, 0);
@@ -664,7 +663,8 @@ void MtsService::Init()
     AttachAos();
     AttachCoreService();
     InitMtsServiceState();
-    m_piNetWatcherInfo = PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
+    m_piNetWatcherInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
     m_objMtsTraffics.Append(
             new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_SMS, *this));
     m_objMtsTraffics.Append(

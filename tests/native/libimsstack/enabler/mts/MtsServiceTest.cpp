@@ -27,7 +27,8 @@
 #include "MockICarrierConfig.h"
 #include "MockIImsAos.h"
 #include "MockIImsAosInfo.h"
-#include "MockIMtsServiceListener.h"
+#include "MockIMtsContext.h"
+#include "MockIMtsMessageController.h"
 #include "MockIReference.h"
 #include "MtsDef.h"
 #include "MtsService.h"
@@ -42,6 +43,7 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
@@ -57,7 +59,8 @@ public:
     MockIImsAos objMockIImsAos;
     MockIImsAos objMockIImsEmergencyAos;
     MockIImsAosInfo objMockIImsAosInfo;
-    MockIMtsServiceListener objMtsServiceListener;
+    MockIMtsContext objContext;
+    MockIMtsMessageController objMessageController;
     MockICoreService objEmergencyCoreService;
     MtsService* pMtsService;
 
@@ -69,6 +72,9 @@ public:
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+        ON_CALL(objContext, GetMessageController).WillByDefault(ReturnRef(objMessageController));
+
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
         PlatformContext::GetInstance()->SetService(
@@ -86,10 +92,9 @@ protected:
         objConnector.SetCoreService(ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY),
                 &objEmergencyCoreService);
 
-        pMtsService = new MtsService(SLOT_ID);
+        pMtsService = new MtsService(objContext);
         pMtsService->SetIImsAos(&objMockIImsAos);
         pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
-        pMtsService->SetListener(&objMtsServiceListener);
         pMtsService->InitMtsServiceState();
 
         ON_CALL(objMockIImsAos, GetAosInfo()).WillByDefault(Return(&objMockIImsAosInfo));
@@ -116,7 +121,7 @@ TEST_F(MtsServiceTest, CoreServicePageMessageReceived)
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_FALSE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMtSms(piMessage)).Times(1);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
 
@@ -137,7 +142,7 @@ TEST_F(MtsServiceTest, CoreServicePageMessageReceivedWithInvalidParameter)
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_FALSE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(0);
+    EXPECT_CALL(objMessageController, NotifyMtSms(piMessage)).Times(0);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, IMS_NULL);
     pMtsService->CoreService_PageMessageReceived(IMS_NULL, piMessage);
@@ -190,6 +195,8 @@ TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosConnecting)
 {
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
+
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
     pMtsService->ImsAos_Connecting();
@@ -199,6 +206,8 @@ TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosConnecting)
 TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosDisconnected)
 {
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
@@ -218,6 +227,8 @@ TEST_F(MtsServiceTest, GetStateReturnsLimitedAfterAosSuspended)
 {
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
+
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
     EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_LIMITED);
@@ -226,6 +237,8 @@ TEST_F(MtsServiceTest, GetStateReturnsLimitedAfterAosSuspended)
 TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosResumed)
 {
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
@@ -273,7 +286,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(0);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
@@ -293,7 +306,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -318,8 +331,8 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(0);
-    EXPECT_CALL(objMtsServiceListener, OnServiceDisconnected()).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -344,7 +357,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndInvalidTrafficTypeIsAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(0);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -370,7 +383,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(2);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -404,7 +417,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -432,7 +445,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowedButDoNotUseEPDN)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -458,7 +471,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(2);
+    EXPECT_CALL(objMessageController, NotifyMoSms(_, _, _, _, _)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -482,7 +495,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsWhenTrafficIsAllowed)
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_FALSE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(_)).Times(2);
+    EXPECT_CALL(objMessageController, NotifyMtSms(_)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(2);
@@ -501,7 +514,7 @@ TEST_F(MtsServiceTest, ReceivedE911MtSmsWhenTrafficIsAllowed)
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_TRUE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(_)).Times(2);
+    EXPECT_CALL(objMessageController, NotifyMtSms(_)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(2);
@@ -521,7 +534,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughIWLAN)
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
     ON_CALL(objMockIImsAosInfo, GetIpcanType()).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMtSms(piMessage)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
@@ -537,7 +550,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughHSPA)
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
     ON_CALL(objMockIImsAosInfo, GetIpcanType()).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMtSms(piMessage)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
@@ -555,7 +568,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughLTE)
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
     ON_CALL(objMockIImsAosInfo, GetIpcanType()).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMtSms(piMessage)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
@@ -573,7 +586,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughNR)
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
     ON_CALL(objMockIImsAosInfo, GetIpcanType()).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMtSms(piMessage)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);
@@ -591,7 +604,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughUnknownNetworkType)
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
     ON_CALL(objMockIImsAosInfo, GetIpcanType()).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-    EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
+    EXPECT_CALL(objMessageController, NotifyMtSms(piMessage)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
             .Times(1);

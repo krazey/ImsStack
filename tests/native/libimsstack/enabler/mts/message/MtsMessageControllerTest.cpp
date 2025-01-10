@@ -22,6 +22,7 @@
 #include "MockICoreService.h"
 #include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
+#include "MockIMtsContext.h"
 #include "MockIMtsService.h"
 #include "MockIMtsServiceState.h"
 #include "MockIPageMessage.h"
@@ -53,9 +54,8 @@ const IMS_SINT32 SEQ_ID = 1;
 class TestMtsMessageController : public MtsMessageController
 {
 public:
-    TestMtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
-            IN MtsDynamicLoader* pMtsDynamicLoader) :
-            MtsMessageController(nSlotId, piMtsService, pMtsDynamicLoader)
+    TestMtsMessageController(IN IMtsContext& objContext) :
+            MtsMessageController(objContext)
     {
     }
     virtual ~TestMtsMessageController() {}
@@ -68,9 +68,8 @@ class MtsMessageControllerTest : public ::testing::Test
 {
 public:
     inline MtsMessageControllerTest() :
-            pMtsDynamicLoader(IMS_NULL),
-            pTimerService(new TestTimerService()),
             pMtsMessageController(IMS_NULL),
+            pTimerService(new TestTimerService()),
             objTimer(pTimerService->GetMockTimer())
     {
         objPhoneInfoService.SetLocationInfo(&objMockILocationInfo);
@@ -91,20 +90,22 @@ public:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 
+    TestMtsMessageController* pMtsMessageController;
+
     MockICoreService objMockCoreService;
     MockILocationInfo objMockILocationInfo;
     MockILocationProperties objMockILocationProperties;
     MockIMessage objMockMessage;
     MockIMessageBodyPart objMockMessageBodyPart;
-    MockISipMessage objMockSipMessage;
+    MockIMtsContext objContext;
     MockIMtsService objMockMtsService;
     MockIMtsServiceState objMockMtsServiceState;
     MockIPageMessage objMockPageMessage;
+    MockISipMessage objMockSipMessage;
     MtsDynamicLoader* pMtsDynamicLoader;
     TestConfigService objConfigService;
     TestPhoneInfoService objPhoneInfoService;
     TestTimerService* pTimerService;
-    TestMtsMessageController* pMtsMessageController;
     MockITimer& objTimer;
 
     AString strLocationProperties = AString("LocationProperties");
@@ -112,10 +113,12 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
-        pMtsDynamicLoader->Initialize();
-        pMtsMessageController =
-                new TestMtsMessageController(SLOT_ID, &objMockMtsService, pMtsDynamicLoader);
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMockMtsService));
+        pMtsMessageController = new TestMtsMessageController(objContext);
+
+        pMtsDynamicLoader = new MtsDynamicLoader(objContext);
+        ON_CALL(objContext, GetDynamicLoader).WillByDefault(ReturnRef(*pMtsDynamicLoader));
     }
 
     virtual void TearDown() override
@@ -1295,7 +1298,7 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 }
 
-TEST_F(MtsMessageControllerTest, OnServiceDisconnectedThenRemoveAllMessages)
+TEST_F(MtsMessageControllerTest, DataConnectionLostThenRemoveAllMessages)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
@@ -1326,49 +1329,14 @@ TEST_F(MtsMessageControllerTest, OnServiceDisconnectedThenRemoveAllMessages)
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
 
-    pMtsMessageController->OnServiceDisconnected();
-    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
-}
-
-TEST_F(MtsMessageControllerTest, OnServiceSuspendedThenRemoveAllMessages)
-{
-    IMS_BOOL bEmergency = IMS_FALSE;
-    AString strTargetAddress = "sip:+12345678901@ims.google.com";
-    SipAddress objSipAddress;
-    objSipAddress.Create(strTargetAddress);
-    AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
-    ImsList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
-
-    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
-    pContent->Append((IMS_BYTE)0x02);                     // message reference
-    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
-
-    ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockMtsService, GetICoreService(bEmergency))
-            .WillByDefault(Return(&objMockCoreService));
-    ON_CALL(objMockMtsService, GetIMtsServiceState())
-            .WillByDefault(Return(&objMockMtsServiceState));
-    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
-    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
-    ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
-    ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
-
-    pMtsMessageController->NotifyMoSms(
-            SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
-    EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
-
-    pMtsMessageController->OnServiceSuspended();
+    pMtsMessageController->ClearAllMessages();
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
 }
 
 TEST_F(MtsMessageControllerTest, TerminateAllMessagesDoesNothingWhenThereIsNoMessage)
 {
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
-    pMtsMessageController->OnServiceSuspended();
+    pMtsMessageController->ClearAllMessages();
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
 }
 

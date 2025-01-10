@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
+#include "IMtsContext.h"
 #include "ServiceTrace.h"
 #include "utility/MtsDynamicLoader.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
-MtsDynamicLoader::MtsDynamicLoader(IN IMS_SINT32 nSlotId) :
-        m_nSlotId(nSlotId),
+MtsDynamicLoader::MtsDynamicLoader(IN IMtsContext& objContext) :
+        m_objContext(objContext),
         m_pMtsSipFormUtils(IMS_NULL),
         m_pMtsSmUtils(IMS_NULL)
 {
-    IMS_TRACE_D("+MtsDynamicLoader [slot_%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("+MtsDynamicLoader [slot_%d]", m_objContext.GetSlotId(), 0, 0);
     Initialize();
 }
 
@@ -35,19 +36,19 @@ MtsDynamicLoader::~MtsDynamicLoader()
     DestroyAll();
 }
 
-PUBLIC
+PRIVATE
 void MtsDynamicLoader::Initialize()
 {
-    IMS_TRACE_D("Initialize : nSlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("Initialize : nSlotId[%d]", m_objContext.GetSlotId(), 0, 0);
 
-    m_pMtsSipFormUtils = new MtsSipFormUtils(m_nSlotId);
+    m_pMtsSipFormUtils = new MtsSipFormUtils(m_objContext.GetSlotId());
     m_pMtsSmUtils = new MtsSmUtils();
 }
 
 PRIVATE
 void MtsDynamicLoader::DestroyAll()
 {
-    IMS_TRACE_I("DestroyAll : nSlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_I("DestroyAll : nSlotId[%d]", m_objContext.GetSlotId(), 0, 0);
 
     if (m_pMtsSipFormUtils != IMS_NULL)
     {

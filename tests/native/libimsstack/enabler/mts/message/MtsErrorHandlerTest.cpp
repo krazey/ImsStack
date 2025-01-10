@@ -21,6 +21,7 @@
 #include "IuMtsService.h"
 #include "MockICarrierConfig.h"
 #include "MockIMessage.h"
+#include "MockIMtsContext.h"
 #include "MockIMtsService.h"
 #include "MtsDef.h"
 #include "PlatformContext.h"
@@ -46,6 +47,7 @@ class MtsErrorHandlerTest : public ::testing::Test
 {
 public:
     MockIMessage objMockMessage;
+    MockIMtsContext objContext;
     MockIMtsService objMockMtsService;
     MtsDynamicLoader* pMtsDynamicLoader;
     MtsErrorHandler* pMtsErrorHandler;
@@ -54,12 +56,15 @@ public:
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMockMtsService));
+
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
 
-        pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
-        pMtsDynamicLoader->Initialize();
         pMtsErrorHandler = new MtsErrorHandler(SLOT_ID);
+
+        pMtsDynamicLoader = new MtsDynamicLoader(objContext);
+        ON_CALL(objContext, GetDynamicLoader).WillByDefault(ReturnRef(*pMtsDynamicLoader));
     }
 
     virtual void TearDown() override
@@ -99,7 +104,7 @@ TEST_F(MtsErrorHandlerTest, Handle403Error)
             .Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -125,7 +130,7 @@ TEST_F(MtsErrorHandlerTest, Handle404Error)
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(ImsAosControl::PCSCF_NEXT)).Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -152,7 +157,7 @@ TEST_F(MtsErrorHandlerTest, Handle406Error)
             .Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -181,7 +186,7 @@ TEST_F(MtsErrorHandlerTest, Handle408Error)
             .Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -208,7 +213,7 @@ TEST_F(MtsErrorHandlerTest, Handle500Error)
             .Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -235,7 +240,7 @@ TEST_F(MtsErrorHandlerTest, Handle503Error)
             .Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -262,7 +267,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
             .Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -288,7 +293,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(_)).Times(0);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -316,7 +321,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithNextPcscfRequired)
             RequestRegisterWithNextPcscf(objRetryAfterHeaders.GetAt(0).ToInt32()))
             .Times(1);
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -343,7 +348,7 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
             .Times(1);
 
     IMS_SINT32 nResult =
-            pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader, &objMockMessage);
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -367,7 +372,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportGenericError)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult = pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
@@ -393,7 +398,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportErrorRetry)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult = pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader);
     EXPECT_EQ(nResult, MO_ERROR_RETRY);
 }
 
@@ -419,7 +424,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportFallback)
                     ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
             .Times(1);
 
-    IMS_SINT32 nResult = pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader);
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader);
     EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 

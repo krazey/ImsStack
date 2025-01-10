@@ -17,11 +17,12 @@
 #ifndef INTERFACE_MTS_SERVICE_H_
 #define INTERFACE_MTS_SERVICE_H_
 
+#include "ByteArray.h"
 #include "INativeEnabler.h"
+#include "ImsTypeDef.h"
 #include "MtsDef.h"
 
 class ICoreService;
-class IMtsServiceListener;
 class IMtsServiceState;
 
 class IMtsService : public INativeEnabler
@@ -36,8 +37,6 @@ public:
     virtual void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) = 0;
     virtual void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) = 0;
     virtual void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) = 0;
-    virtual void SetListener(IN IMtsServiceListener* piMtsServiceListener) = 0;
-
     virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
 };

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+#include "MockIMtsContext.h"
 #include "utility/MtsDynamicLoader.h"
 #include <gtest/gtest.h>
+
+using ::testing::Return;
 
 namespace android
 {
@@ -25,10 +28,16 @@ const IMS_SINT32 SLOT_ID = 0;
 class MtsDynamicLoaderTest : public ::testing::Test
 {
 public:
+    MockIMtsContext objContext;
     MtsDynamicLoader* pMtsDynamicLoader;
 
 protected:
-    virtual void SetUp() override { pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID); }
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+
+        pMtsDynamicLoader = new MtsDynamicLoader(objContext);
+    }
 
     virtual void TearDown() override { delete pMtsDynamicLoader; }
 };
@@ -36,17 +45,7 @@ protected:
 TEST_F(MtsDynamicLoaderTest, Constructor)
 {
     ASSERT_NE(pMtsDynamicLoader, nullptr);
-}
-
-TEST_F(MtsDynamicLoaderTest, CreateMtsSipFormUtilsAfterInitialize)
-{
-    pMtsDynamicLoader->Initialize();
     ASSERT_NE(pMtsDynamicLoader->GetMtsSipFormUtils(), nullptr);
-}
-
-TEST_F(MtsDynamicLoaderTest, CreateMtsSmUtilsAfterInitialize)
-{
-    pMtsDynamicLoader->Initialize();
     ASSERT_NE(pMtsDynamicLoader->GetMtsSmUtils(), nullptr);
 }
 

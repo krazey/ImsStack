@@ -20,7 +20,9 @@
 #include "message/IMtsErrorHandler.h"
 
 class ICarrierConfig;
-class MtsDynamicLoader;
+class IMessage;
+class IMtsDynamicLoader;
+class IMtsService;
 
 class MtsErrorHandler final : public IMtsErrorHandler
 {
@@ -28,7 +30,8 @@ public:
     explicit MtsErrorHandler(IN IMS_SINT32 nSlotId);
     ~MtsErrorHandler();
 
-    IMS_SINT32 Handle(IN IMtsService* piMtsService, IN MtsDynamicLoader* pMtsDynamicLoader,
+    IMS_SINT32 Handle(IN IMtsService& objMtsService,
+            IN const IMtsDynamicLoader& objMtsDynamicLoader,
             IN const IMessage* piMessage = IMS_NULL) override;
     inline IMS_SINT32 GetRetryAfterValue() const override { return m_nRetryAfterValue; }
     inline void ResetRetryAfterStatus() override

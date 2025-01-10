@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTS_ERROR_HANDLER_H_
-#define INTERFACE_MTS_ERROR_HANDLER_H_
+#ifndef INTERFACE_MTS_MESSAGE_CONTROLLER_H_
+#define INTERFACE_MTS_MESSAGE_CONTROLLER_H_
 
-#include "ImsTypeDef.h"
+#include "MtsDef.h"
 
-class IMessage;
-class IMtsDynamicLoader;
-class IMtsService;
+class IPageMessage;
 
-class IMtsErrorHandler
+class IMtsMessageController
 {
 public:
-    virtual ~IMtsErrorHandler() {}
+    virtual ~IMtsMessageController() {}
 
-    virtual IMS_SINT32 Handle(IN IMtsService& objMtsService,
-            IN const IMtsDynamicLoader& objMtsDynamicLoader,
-            IN const IMessage* piMessage = IMS_NULL) = 0;
-    virtual IMS_SINT32 GetRetryAfterValue() const = 0;
-    virtual void ResetRetryAfterStatus() = 0;
+    virtual void NotifyMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
+    virtual void NotifyMtSms(IN IPageMessage* piMessage) = 0;
+    virtual void ClearAllMessages() = 0;
 };
 
 #endif

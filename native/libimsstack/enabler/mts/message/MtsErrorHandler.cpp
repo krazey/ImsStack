@@ -29,7 +29,8 @@
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "message/MtsErrorHandler.h"
-#include "utility/MtsDynamicLoader.h"
+#include "utility/IMtsDynamicLoader.h"
+#include "utility/MtsSipFormUtils.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
@@ -51,8 +52,8 @@ MtsErrorHandler::~MtsErrorHandler()
 }
 
 PUBLIC
-IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService* piMtsService,
-        IN MtsDynamicLoader* pMtsDynamicLoader, IN const IMessage* piMessage)
+IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService& objMtsService,
+        IN const IMtsDynamicLoader& objMtsDynamicLoader, IN const IMessage* piMessage)
 {
     IMS_SINT32 nResult;
     ImsVector<IMS_SINT32> objGenericErrorCodes = m_piCarrierConfig->GetIntArray(
@@ -81,16 +82,16 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService* piMtsService,
     IMS_SINT32 nPolicy = GetRegistrationRecoveryPolicy(piMessage);
     if (nPolicy != MTS_REG_RECOVERY_POLICY_NONE)
     {
-        piMtsService->RequestRegistrationRecovery(nPolicy);
+        objMtsService.RequestRegistrationRecovery(nPolicy);
     }
 
     if (nResult != MO_ERROR_GENERIC)
     {
         CalculateRetryAfterCondition(
-                pMtsDynamicLoader->GetMtsSipFormUtils()->GetRetryAfterValue(piMessage));
+                objMtsDynamicLoader.GetMtsSipFormUtils()->GetRetryAfterValue(piMessage));
         if (IsRegisterWithNextPcscfRequired(piMessage) && nPolicy == MTS_REG_RECOVERY_POLICY_NONE)
         {
-            piMtsService->RequestRegisterWithNextPcscf(m_nRetryAfterValue);
+            objMtsService.RequestRegisterWithNextPcscf(m_nRetryAfterValue);
             nResult = MO_ERROR_GENERIC;
         }
         else if (IsRetryPossible())

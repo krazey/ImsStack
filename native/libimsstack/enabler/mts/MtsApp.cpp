@@ -16,10 +16,10 @@
 
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "IMtsServiceState.h"
 #include "ImsServiceConfig.h"
 #include "MtsApp.h"
 #include "MtsService.h"
-#include "IMtsServiceState.h"
 #include "ServiceTrace.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
@@ -32,9 +32,9 @@ PUBLIC
 MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTS_APP_NAME),
         m_nSlotId(nSlotId),
-        m_piMtsService(IMS_NULL),
-        m_pMtsDynamicLoader(IMS_NULL),
-        m_pMtsMessageController(IMS_NULL)
+        m_objMtsService(MtsService(*this)),
+        m_objMtsMessageController(MtsMessageController(*this)),
+        m_objMtsDynamicLoader(MtsDynamicLoader(*this))
 {
     IMS_TRACE_I("+MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
@@ -45,71 +45,18 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
 PUBLIC MtsApp::~MtsApp()
 {
     IMS_TRACE_I("~MtsApp [slot_%d]", m_nSlotId, 0, 0);
-
-    if (m_pMtsDynamicLoader != IMS_NULL)
-    {
-        delete m_pMtsDynamicLoader;
-        m_pMtsDynamicLoader = IMS_NULL;
-    }
-
-    if (m_piMtsService != IMS_NULL)
-    {
-        delete m_piMtsService;
-        m_piMtsService = IMS_NULL;
-    }
-
-    if (m_pMtsMessageController != IMS_NULL)
-    {
-        delete m_pMtsMessageController;
-        m_pMtsMessageController = IMS_NULL;
-    }
 }
 
 PUBLIC VIRTUAL void MtsApp::Start()
 {
     IMS_TRACE_I("SMS Start [slot_%d]", m_nSlotId, 0, 0);
 
-    // 1. MtsUtils
-    /*===================*/
-    CreateMtsUtils();
-
-    // 2. MtsService
-    /*===================*/
-    CreateMtsService();
-
-    // 3. MtsMessageController
-    /*===================*/
-    CreateMtsMessageController();
+    // Do nothing
 }
 
 PUBLIC VIRTUAL void MtsApp::Stop()
 {
     IMS_TRACE_I("SMS Stop [slot_%d]", m_nSlotId, 0, 0);
 
-    if (m_piMtsService != IMS_NULL)
-    {
-        m_piMtsService->GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
-    }
-}
-
-PRIVATE void MtsApp::CreateMtsService()
-{
-    IMS_TRACE_I("CreateMtsService [slot_%d]", m_nSlotId, 0, 0);
-
-    m_piMtsService = new MtsService(m_nSlotId);
-}
-
-PRIVATE void MtsApp::CreateMtsMessageController()
-{
-    IMS_TRACE_I("CreateMtsMessageController [slot_%d]", m_nSlotId, 0, 0);
-
-    m_pMtsMessageController =
-            new MtsMessageController(m_nSlotId, m_piMtsService, m_pMtsDynamicLoader);
-}
-
-PRIVATE void MtsApp::CreateMtsUtils()
-{
-    IMS_TRACE_I("CreateMtsUtils [slot_%d]", m_nSlotId, 0, 0);
-
-    m_pMtsDynamicLoader = new MtsDynamicLoader(m_nSlotId);
+    m_objMtsService.GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
 }

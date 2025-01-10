@@ -18,43 +18,43 @@
 #define MTS_MESSAGE_CONTROLLER_H_
 
 #include "ByteArray.h"
-#include "IMtsServiceListener.h"
 #include "IPageMessageListener.h"
 #include "ITimer.h"
 #include "ImsActivityEx.h"
 #include "MtsDef.h"
 #include "helper/MtsTransactionTimerUpdateHelper.h"
+#include "message/IMtsMessageController.h"
 #include <functional>
 
 class IMessage;
+class IMtsContext;
 class IMtsMessage;
-class IMtsService;
 class IPageMessage;
-class MtsDynamicLoader;
 class IMtsErrorHandler;
 
 class MtsMessageController :
         public ImsActivityEx,
         public IPageMessageListener,
-        public IMtsServiceListener,
+        public IMtsMessageController,
         public ITimerListener
 {
 public:
-    MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
-            IN MtsDynamicLoader* pMtsDynamicLoader);
+    MtsMessageController(IN IMtsContext& objContext);
     virtual ~MtsMessageController();
     MtsMessageController(IN const MtsMessageController&) = delete;
     MtsMessageController& operator=(IN const MtsMessageController&) = delete;
 
+    // IPageMessageListener
     void PageMessageDelivered(IN IPageMessage* piPageMessage) override;
     void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
 
+    // IMtsMessageController
     void NotifyMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void NotifyMtSms(IN IPageMessage* piPageMessage) override;
-    void OnServiceDisconnected() override;
-    void OnServiceSuspended() override;
+    void ClearAllMessages() override;
 
+    // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
 protected:
@@ -119,13 +119,11 @@ protected:
     ImsList<IMtsMessage*> m_objMsgList;
 
 private:
+    IMtsContext& m_objContext;
     IMS_BOOL m_bProcessingMsg;
-    IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
     AString m_strPreviousCallId;
-    IMtsService* m_piMtsService;
     IMtsErrorHandler* m_piMtsErrorHandler;
-    MtsDynamicLoader* m_pMtsDynamicLoader;
     ITimer* m_piRetryAfterTimer;
     std::function<void()> m_objRetryFunction;
     ByteArray* m_pRetryContent;

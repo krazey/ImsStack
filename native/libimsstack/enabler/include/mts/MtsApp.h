@@ -18,36 +18,45 @@
 #define MTS_APP_H_
 
 #include "IMtsApp.h"
+#include "IMtsContext.h"
 #include "ImsApp.h"
+#include "MtsService.h"
+#include "message/MtsMessageController.h"
+#include "utility/MtsDynamicLoader.h"
 
+class IMtsDynamicLoader;
+class IMtsMessageController;
 class IMtsService;
-class MtsDynamicLoader;
-class MtsMessageController;
 
-class MtsApp final : public IMtsApp, public ImsApp
+class MtsApp final : public IMtsApp, public ImsApp, public IMtsContext
 {
 public:
     explicit MtsApp(IN IMS_SINT32 nSlotId);
     ~MtsApp();
+    MtsApp(IN const MtsApp&) = delete;
+    MtsApp& operator=(IN const MtsApp&) = delete;
 
     // IMtsApp
     virtual void Start() override;
     virtual void Stop() override;
 
-    inline IMtsService* GetMtsService() { return m_piMtsService; }
-    inline MtsDynamicLoader* GetMtsDynamicLoader() { return m_pMtsDynamicLoader; }
-    inline MtsMessageController* GetMtsMessageController() { return m_pMtsMessageController; }
-
-private:
-    void CreateMtsMessageController();
-    void CreateMtsService();
-    void CreateMtsUtils();
+    // IMtsContext
+    inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
+    inline IMtsService& GetService() override { return m_objMtsService; }
+    inline IMtsMessageController& GetMessageController() override
+    {
+        return m_objMtsMessageController;
+    }
+    inline const IMtsDynamicLoader& GetDynamicLoader() const override
+    {
+        return m_objMtsDynamicLoader;
+    }
 
 private:
     IMS_SINT32 m_nSlotId;
-    IMtsService* m_piMtsService;
-    MtsDynamicLoader* m_pMtsDynamicLoader;
-    MtsMessageController* m_pMtsMessageController;
+    MtsService m_objMtsService;
+    MtsMessageController m_objMtsMessageController;
+    MtsDynamicLoader m_objMtsDynamicLoader;
 };
 
 #endif

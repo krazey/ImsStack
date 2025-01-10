@@ -31,7 +31,6 @@ public:
             (IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId), (override));
     MOCK_METHOD(void, ReportMtSms, (IN SmsFormatType eSmsFormat, IN const ByteArray& objContent),
             (override));
-    MOCK_METHOD(void, SetListener, (IN IMtsServiceListener * piMtsServiceListener), (override));
     MOCK_METHOD(void, RequestRegistrationRecovery, (IN IMS_UINT32 nRecoveryType), (override));
     MOCK_METHOD(
             void, RequestRegisterWithNextPcscf, (IN const IMS_UINT32 nRetryAfterValue), (override));
