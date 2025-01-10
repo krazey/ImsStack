@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "ICoreService.h"
+#include "IImsRadio.h"
 #include "IMessage.h"
 #include "IMtcCallController.h"
 #include "ISession.h"
@@ -755,6 +756,15 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
     }
 
     IMS_TRACE_E(0, "OnConnectionFailed", 0, 0, 0);
+
+    if (EpsFallbackTrigger::ShouldTriggerByReasonInfo(m_objContext,
+                ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
+    {
+        m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
+                EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
+        return GetStateName();
+    }
+
     IMS_SINT32 eCode;
     IMS_SINT32 eExtraCode;
     if (m_objContext.GetService().IsCsfbAvailable())
@@ -898,4 +908,21 @@ void OutgoingState::OnStartFailed(
     }
 
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
+}
+
+PRIVATE
+CallReasonInfo OutgoingState::ConvertConnectionFailureToCallReasonInfo(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const
+{
+    switch (nFailureReason)
+    {
+        case IImsRadio::REASON_RRC_REJECT:
+            return CallReasonInfo(CODE_INTERNAL_RRC_REJECT, nWaitTimeMillis);
+        case IImsRadio::REASON_ACCESS_DENIED:
+            return CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED);
+        case IImsRadio::REASON_INTERNAL_ERROR:
+            return CallReasonInfo(CODE_RADIO_INTERNAL_ERROR);
+        default:
+            return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
+    }
 }

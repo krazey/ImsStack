@@ -202,6 +202,7 @@ PUBLIC GLOBAL IMS_BOOL MtcRadioChecker::IsReasonToIgnore(IN IMS_UINT32 nFailureR
     switch (nFailureReason)
     {
         case IImsRadio::REASON_ACCESS_DENIED:
+        case IImsRadio::REASON_RRC_REJECT:
         case IImsRadio::REASON_INTERNAL_ERROR:
             return IMS_FALSE;
 

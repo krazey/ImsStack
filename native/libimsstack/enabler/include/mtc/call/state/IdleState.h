@@ -69,7 +69,6 @@ private:
     CallStateName ContinueHandleIncoming();
     CallStateName ContinueStartUssi();
 
-    IMS_BOOL IsEpsFallbackRequired(IN const CallReasonInfo& objReason) const;
     void SetResourceListForConference(IN_OUT IMessage& objMessage);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();

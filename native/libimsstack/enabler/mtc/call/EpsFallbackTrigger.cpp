@@ -66,6 +66,33 @@ PUBLIC VIRTUAL EpsFallbackTrigger::~EpsFallbackTrigger()
     }
 }
 
+PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+        IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason)
+{
+    if (objContext.GetCallInfo().ePeerType != PeerType::MO || !objContext.GetService().IsNr())
+    {
+        return IMS_FALSE;
+    }
+
+    if (objReason.nCode == CODE_ACCESS_CLASS_BLOCKED)
+    {
+        return IMS_TRUE;
+    }
+    else if (objReason.nCode == CODE_INTERNAL_RRC_REJECT &&
+            objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL))
+    {
+        const IMS_UINT32 nRrcRejectWaitTimeMillis = objReason.nExtraCode;
+        const IMS_UINT32 nMoCallRequestTimeoutMillis = objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT);
+        IMS_TRACE_D("RRC reject wait time: %d, MO call request timeout duration: %d",
+                nRrcRejectWaitTimeMillis, nMoCallRequestTimeoutMillis, 0);
+
+        return nRrcRejectWaitTimeMillis >= nMoCallRequestTimeoutMillis;
+    }
+    return IMS_FALSE;
+}
+
 PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(
         IN IMtcCallContext& objContext)
 {
