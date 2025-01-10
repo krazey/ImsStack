@@ -54,8 +54,7 @@ import java.util.concurrent.TimeUnit;
 public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
-    private final MessageExecutor mExecutor =
-            new MessageExecutor(TelephonyManagerProxyImpl.class.getSimpleName());
+
     TelephonyManagerProxyImpl(@NonNull Context context) {
         mContext = context;
         mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
@@ -234,7 +233,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             }
         };
 
-        tm.getSimServiceTable(appType, mExecutor, callback);
+        tm.getSimServiceTable(appType, ExecutorHolder.sExecutor, callback);
 
         try {
             return future.get(1, TimeUnit.SECONDS);
@@ -385,5 +384,16 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             return regState.getAccessNetworkTechnology();
         }
         return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    }
+
+    /*
+     * An executor holder class to defer initialization until needed.
+     *
+     * Currently, this executor is used to communicate with the Phone process and read the SIM's
+     * service table, so communicating with the Phone process with a single instance is sufficient.
+     */
+    private static class ExecutorHolder {
+        static final MessageExecutor sExecutor =
+                new MessageExecutor(TelephonyManagerProxyImpl.class.getSimpleName());
     }
 }
