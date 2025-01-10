@@ -47,12 +47,28 @@ using ::testing::SetArgPointee;
 const IMS_UINT32 TIMER_ICC_LOADED_WAITING = 100;
 const IMS_UINT32 TIMER_PHONE_RESTART_RECOVERY = 101;
 
-#define DECLARE_USING(Base)      \
-    using Base::CheckIsimValues; \
-    using Base::Init;            \
-    using Base::IsTimerRunning;  \
-    using Base::SetProvisioned;  \
-    using Base::StartTimer;
+#define DECLARE_USING(Base)                           \
+    using Base::CheckIsimValues;                      \
+    using Base::ConfigUpdate_NotifyUpdate;            \
+    using Base::IdentityPriorityToString;             \
+    using Base::Init;                                 \
+    using Base::IsProvisioned;                        \
+    using Base::IsRefreshStarted;                     \
+    using Base::IsTimerRunning;                       \
+    using Base::NConfiguration_NotifyConfigChanged;   \
+    using Base::PrintIdentity;                        \
+    using Base::ServicePhone_IsimStateChanged;        \
+    using Base::ServicePhone_PhoneNumberStateChanged; \
+    using Base::SetProvisioned;                       \
+    using Base::SetUsim;                              \
+    using Base::StartTimer;                           \
+    using Base::StateToString;                        \
+    using Base::SubscriberConfig_InitCompleted;       \
+    using Base::SubscriberConfig_NotifyError;         \
+    using Base::SubscriberConfig_RefreshCompleted;    \
+    using Base::SubscriberConfig_RefreshStarted;      \
+    using Base::Timer_TimerExpired;                   \
+    using Base::TimerToString;
 
 class TestAosSubscriberManager : public AosSubscriberManager
 {
@@ -91,6 +107,10 @@ public:
         m_piSubscriberConfigFake = piSubscriberConfig;
     }
 
+    inline IMS_BOOL GetUsimFallback() { return m_bUsimFallback; }
+
+    inline void SetUsimFallback(IN IMS_BOOL bUsimFallback) { m_bUsimFallback = bUsimFallback; }
+
     inline ImsList<IAosSubscriberManagerListener*> getListeners() { return m_objListeners; }
 
     inline ImsList<IAosSubscriberManagerListener*> getMonitorListeners()
@@ -116,6 +136,18 @@ public:
     inline void SetTimerToPhoneRestartRecovery(IN ITimer* piTimer)
     {
         m_piTimerToPhoneRestartRecovery = piTimer;
+    }
+
+    inline void SetNConfig(IN IAosNConfiguration* piNConfig) { m_piNConfig = piNConfig; }
+
+    inline void SetIsimIndexForImpu(IN IMS_UINT32 nIsimIndexForImpu)
+    {
+        m_nIsimIndexForImpu = nIsimIndexForImpu;
+    };
+
+    inline void SetSupportLimitedAdminSmsMode(IN IMS_BOOL bSupportLimitedAdminSmsMode)
+    {
+        m_bSupportLimitedAdminSmsMode = bSupportLimitedAdminSmsMode;
     }
 
     inline void SetImsIdentityPriority(IN ImsVector<IMS_SINT32> objImsIdentityPriority)
@@ -201,45 +233,6 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenIsSipUriWithZeroImpu);
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSip);
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSips);
-    // TEST : NConfiguration_NotifyConfigChanged
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsUpdateNConfiguration);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsSame);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenNConfigIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration);
-    // TEST : SubscriberConfig_InitCompleted
-    FRIEND_TEST(AosSubscriberManagerTest, ClearAllWhenInitCompletedWithNotSupportUsim);
-    // TEST : SubscriberConfig_RefreshCompleted
-    FRIEND_TEST(AosSubscriberManagerTest, ClearAllWhenRefreshCompletedWithNotSupportUsim);
-    // TEST : SubscriberConfig_RefreshStarted
-    FRIEND_TEST(AosSubscriberManagerTest, EnableRefreshStartedValueWhenInvokesRefreshStarted);
-    // TEST : SubscriberConfig_NotifyError
-    FRIEND_TEST(AosSubscriberManagerTest, ClearAllWhenNotifyErrorWithNotSupportFallback);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedFallbackOnNotifyErrorWhenTimerIsRunning);
-    // TEST : ConfigUpdate_NotifyUpdate
-    FRIEND_TEST(AosSubscriberManagerTest, InvokesConfigUpdateNotifyUpdate);
-    // TEST : Timer_TimerExpired
-    FRIEND_TEST(AosSubscriberManagerTest, FailedStartProcessWhenTimerExpiredWithInvalidTimer);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsStopTimerWhenIccLoadedWaitingTimerExpired);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsStopTimerWhenIsimRecoveryTimerExpired);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsStopTimerWhenRecoveryTimerExpired);
-    // TEST : ServicePhone_PhoneNumberStateChanged
-    FRIEND_TEST(AosSubscriberManagerTest, RestartsWhenPhoneNumberStateChangedWithNotReady);
-    // TEST : ServicePhone_IsimStateChanged
-    FRIEND_TEST(AosSubscriberManagerTest, DisableUsimFallbackValueWhenIsimStateChanged);
-    // TEST : IdentityPriorityToString
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsEmptyWhenIdentityPriorityToStringWithEmpty);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsIsimUsimWhenIdentityPriorityToStringWithIsimUsim);
-    FRIEND_TEST(AosSubscriberManagerTest,
-            ReturnsIsimAndIsimImsiWhenIdentityPriorityToStringWithIsimAndIsimImsi);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsConfWhenIdentityPriorityToStringWithConf);
-    // TEST : PrintIdentity
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnValidStringWhenPrintIdentity);
-    // TEST : TimerToString
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsValidStringWhenTimerToString);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsInvalidWhenTimerToStringWithInvalidtimer);
-    // TEST : StateToString
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsStateWhenStateToString);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsInvalidWhenStateToStringWithInvalidState);
 };
 
 class AosSubscriberManagerTest : public ::testing::Test
@@ -785,7 +778,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetIsimAt)
 {
     // GIVEN
     IMS_UINT32 isimIndex = 1;
-    m_pSubscriberManager->m_nIsimIndexForImpu = isimIndex;
+    m_pSubscriberManager->SetIsimIndexForImpu(isimIndex);
 
     // WHEN
     IMS_UINT32 nIndex = m_pSubscriberManager->GetIsimAt();
@@ -1149,7 +1142,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetImpuWhenLimitedAdminSmsModeAndOneVal
 
     ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds()).WillByDefault(ReturnRef(objOnePuid));
 
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_TRUE;
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult = m_pSubscriberManager->UpdateImpuFromIsim(m_objOutPuids);
@@ -1170,7 +1163,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetImpuWhenLimitedAdminSmsModeAndInvali
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objInvalidPuids));
 
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_TRUE;
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult = m_pSubscriberManager->UpdateImpuFromIsim(m_objOutPuids);
@@ -1191,7 +1184,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetImpuWhenSipImpuAndPhoneNumberIsGreat
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipPuids));
 
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_TRUE;
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_TRUE);
 
     // strPhoneNumber.GetLength() > USIM_MSISDN_LENGTH
     m_pSubscriberManager->m_strPhoneNumber = AString("1231234567892");
@@ -1215,7 +1208,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetImpuWhenSipImpuAndPhoneNumberIsLessT
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipPuids));
 
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_TRUE;
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_TRUE);
 
     // strPhoneNumber.GetLength() > USIM_MSISDN_LENGTH
     m_pSubscriberManager->m_strPhoneNumber = AString("1234567892");
@@ -1239,7 +1232,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetImpuWhenSecondImpuIsNotSip)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipPuids));
 
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_TRUE;
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_TRUE);
     m_pSubscriberManager->m_strPhoneNumber = AString("1231234567892");
 
     // WHEN
@@ -1341,7 +1334,7 @@ TEST_F(AosSubscriberManagerTest, ReturnsTrueProcessFallback)
 TEST_F(AosSubscriberManagerTest, ReconfigureFallbackReturnsFalseWhenNoFallbackNeeded)
 {
     // GIVEN
-    m_pSubscriberManager->m_bUsimFallback = IMS_FALSE;
+    m_pSubscriberManager->SetUsimFallback(IMS_FALSE);
 
     // WHEN
     IMS_BOOL bResult = m_pSubscriberManager->ReconfigureFallback(IMS_FALSE);
@@ -1674,8 +1667,8 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfiguration)
     objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
-    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->SetIsimIndexForImpu(0);
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_FALSE);
     m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
@@ -1684,7 +1677,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfiguration)
     ON_CALL(m_objMockIAosNConfiguration, GetImsIdentityPriority())
             .WillByDefault(ReturnRef(objUpdatedImsIdentityPriority));
     ON_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
-    m_pSubscriberManager->m_piNConfig = &m_objMockIAosNConfiguration;
+    m_pSubscriberManager->SetNConfig(&m_objMockIAosNConfiguration);
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
 
@@ -1710,8 +1703,8 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsS
     objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
-    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->SetIsimIndexForImpu(0);
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_FALSE);
     m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
@@ -1721,7 +1714,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsS
             .WillByDefault(ReturnRef(objUpdatedImsIdentityPriority));
     ON_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
 
-    m_pSubscriberManager->m_piNConfig = &m_objMockIAosNConfiguration;
+    m_pSubscriberManager->SetNConfig(&m_objMockIAosNConfiguration);
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
 
@@ -1738,14 +1731,14 @@ TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenNConfigIsNull)
     // GIVEN
     m_pSubscriberManager->SetPuids(m_objValidPuids);
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
-    m_pSubscriberManager->m_piNConfig = IMS_NULL;
+    m_pSubscriberManager->SetNConfig(IMS_NULL);
 
     ImsVector<IMS_SINT32> objImsIdentityPriority;
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
 
-    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->SetIsimIndexForImpu(0);
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_FALSE);
     m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
@@ -1768,8 +1761,8 @@ TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
-    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
-    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->SetIsimIndexForImpu(0);
+    m_pSubscriberManager->SetSupportLimitedAdminSmsMode(IMS_FALSE);
     m_pSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);
 
     ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(0));
@@ -1779,7 +1772,7 @@ TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration
             .WillByDefault(ReturnRef(objImsIdentityPriority));
     ON_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
 
-    m_pSubscriberManager->m_piNConfig = &m_objMockIAosNConfiguration;
+    m_pSubscriberManager->SetNConfig(&m_objMockIAosNConfiguration);
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
 
@@ -1951,7 +1944,7 @@ TEST_F(AosSubscriberManagerTest, RestartsWhenPhoneNumberStateChangedWithNotReady
 TEST_F(AosSubscriberManagerTest, DisableUsimFallbackValueWhenIsimStateChanged)
 {
     // GIVEN
-    m_pSubscriberManager->m_bUsimFallback = IMS_TRUE;
+    m_pSubscriberManager->SetUsimFallback(IMS_TRUE);
 
     ON_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .WillByDefault(Return(&m_objMockIConfigurable));
@@ -1970,7 +1963,7 @@ TEST_F(AosSubscriberManagerTest, DisableUsimFallbackValueWhenIsimStateChanged)
     m_pSubscriberManager->ServicePhone_IsimStateChanged(IsimState::LOADED);
 
     // THEN
-    EXPECT_FALSE(m_pSubscriberManager->m_bUsimFallback);
+    EXPECT_FALSE(m_pSubscriberManager->GetUsimFallback());
 }
 
 TEST_F(AosSubscriberManagerTest, ReturnsEmptyWhenIdentityPriorityToStringWithEmpty)
@@ -2050,16 +2043,7 @@ TEST_F(AosSubscriberManagerTest, ReturnsValidStringWhenTimerToString)
             "TIMER_ICC_LOADED_WAITING");
     EXPECT_STREQ(m_pSubscriberManager->TimerToString(TIMER_PHONE_RESTART_RECOVERY),
             "TIMER_PHONE_RESTART_RECOVERY");
-}
-
-TEST_F(AosSubscriberManagerTest, ReturnsInvalidWhenTimerToStringWithInvalidtimer)
-{
-    // GIVEN
-    const IMS_UINT32 INVALID_TIMER = 999;
-
-    // WHEN
-    // THEN
-    EXPECT_STREQ(m_pSubscriberManager->TimerToString(INVALID_TIMER), "__INVALID__");
+    EXPECT_STREQ(m_pSubscriberManager->TimerToString(999 /* INVALID_TIMER */), "__INVALID__");
 }
 
 TEST_F(AosSubscriberManagerTest, ReturnsStateWhenStateToString)
@@ -2072,14 +2056,5 @@ TEST_F(AosSubscriberManagerTest, ReturnsStateWhenStateToString)
             "REFRESH_COMPLETED");
     EXPECT_STREQ(
             m_pSubscriberManager->StateToString(IAosSubscriber::REFRESH_FAILED), "REFRESH_FAILED");
-}
-
-TEST_F(AosSubscriberManagerTest, ReturnsInvalidWhenStateToStringWithInvalidState)
-{
-    // GIVEN
-    const IMS_SINT32 INVALID_STATE = 100;
-
-    // WHEN
-    // THEN
-    EXPECT_STREQ(m_pSubscriberManager->StateToString(INVALID_STATE), "INVALID");
+    EXPECT_STREQ(m_pSubscriberManager->StateToString(100 /* INVALID_STATE */), "INVALID");
 }
