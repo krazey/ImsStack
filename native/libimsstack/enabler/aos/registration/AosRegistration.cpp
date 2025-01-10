@@ -1093,6 +1093,29 @@ void AosRegistration::NotifyDeregistered()
 }
 
 PROTECTED
+IMS_BOOL AosRegistration::UpdateCallingNumberVerification()
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsVerstatSupportedBasedOnNetworkForReg())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_piRegistration == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    m_bCallingNumberVerificationSupported =
+            m_pUtil->IsParameterIncluded(m_piRegistration->GetPreviousResponse(),
+                    ISipHeader::FEATURE_CAPS, AosString::STR_VERSTAT_FEATURE);
+
+    A_IMS_TRACE_D(REGID, "Network supports verstat (%s)",
+            _TRACE_B_(m_bCallingNumberVerificationSupported), 0, 0);
+
+    return IMS_TRUE;
+}
+
+PROTECTED
 void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
 {
     IMS_SINT32 nImsRegState = IMS_REG_STATE_DEREGISTERED;
@@ -6301,38 +6324,6 @@ void AosRegistration::UpdateUserInfoInContact()
         A_IMS_TRACE_D(REGID, "UpdateUserInfoInContact :: apply none policy", 0, 0, 0);
         m_piRegistration->SetUserInfoForContactHeader(AString::ConstEmpty());
     }
-}
-
-PRIVATE
-void AosRegistration::UpdateCallingNumberVerification()
-{
-    /*  TODO : change impl.
-        if (m_piContext->GetConfig()->IsCallingNumberVerificationSupported() == IMS_FALSE)
-        {
-            return;
-        }
-
-        m_bCallingNumberVerificationSupported = IMS_FALSE;
-
-        if (m_piRegistration == IMS_NULL)
-        {
-            return;
-        }
-
-        IMS_BOOL bIsFeatureIncluded = m_pUtil->IsParameterIncluded(
-                m_piRegistration->GetPreviousResponse(), ISipHeader::FEATURE_CAPS,
-                AosString::STR_VERSTAT_FEATURE);
-
-        if (bIsFeatureIncluded)
-        {
-            IMS_TRACE_I("Calling number verification is supported", 0, 0, 0);
-            m_bCallingNumberVerificationSupported = IMS_TRUE;
-        }
-        else
-        {
-            IMS_TRACE_I("Calling number verification is not supported", 0, 0, 0);
-        }
-    */
 }
 
 PRIVATE

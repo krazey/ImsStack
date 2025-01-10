@@ -149,6 +149,8 @@ protected:
     void NotifyFailureWithImsReason(IN IMS_SINT32 nReason, IN IMS_SINT32 nStatusCode);
     void NotifyDeregistered();
 
+    IMS_BOOL UpdateCallingNumberVerification();
+
     /// Set Detail State
     void UpdateDetailState(IN IMS_UINT32 nState);
 
@@ -400,7 +402,6 @@ private:
     void SetPcniHeader();
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
-    void UpdateCallingNumberVerification();
     void UpdateModeToHandles();
     void NotifyTechnologyChangeFailed();
 

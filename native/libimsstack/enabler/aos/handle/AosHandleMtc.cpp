@@ -23,6 +23,7 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 
 #include "IImsAosListener.h"
@@ -31,6 +32,7 @@
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
+#include "interface/IAosRegistration.h"
 
 #include "provider/AosProvider.h"
 #include "provider/AosString.h"
@@ -76,7 +78,7 @@ PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
 
 PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures()
 {
-    /* Description: This function enables call composer feature internally without registration.
+    /* Description: This function enables some features internally.
      *              MtcService will get the enabled features by this logic.
      */
 
@@ -87,6 +89,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures()
 
     IMS_UINT32 nFeatures = AosHandle::GetFeatures();
 
+    // CALL_COMPOSER
     if (!GET_N_CONFIG(m_nSlotId)->IsB2cCallComposerFeatureTagInRegContact() &&
             IsCapabilityExistedForNetworkType(
                     m_nNetworkType, AosCapability::CALL_COMPOSER_BUSINESS_ONLY))
@@ -95,6 +98,28 @@ PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures()
                 "GetFeatures :: Internally added Call Composer feature for B2C only", 0, 0, 0);
         nFeatures |= ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
     }
+
+    // VERSTAT
+    if (GET_N_CONFIG(m_nSlotId)->IsVerstatSupportedBasedOnNetworkForReg())
+    {
+        AString strNa;
+        IMS_UINT32 nState;
+        m_piAppContext->GetRegistration()->GetProperty(
+                IAosRegistration::PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION, nState, strNa);
+
+        if (nState == AosSupportability::SUPPORTED)
+        {
+            nFeatures |= ImsAosFeature::VERSTAT;
+        }
+    }
+    else  // Will be always supported if not based on network feature
+    {
+        A_IMS_TRACE_D(
+                APPPROFILE, "GetFeatures :: Internally added VERSTAT feature by default", 0, 0, 0);
+        nFeatures |= ImsAosFeature::VERSTAT;
+    }
+
+    A_IMS_TRACE_D(APPPROFILE, "GetFeatures :: (%x)", nFeatures, 0, 0);
 
     return nFeatures;
 }
