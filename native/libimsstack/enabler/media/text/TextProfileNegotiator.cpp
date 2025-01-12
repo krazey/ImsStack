@@ -203,7 +203,15 @@ void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
         IN TextProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
         OUT TextProfile* pNegotiatedProfile)
 {
-    IMS_TRACE_D("NegotiateBandwidth()", 0, 0, 0);
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I("NegotiateBandwidth() - Received rs[%d] and rr[%d]", pPeerProfile->GetBandwidthRs(),
+            pPeerProfile->GetBandwidthRr(), 0);
+    pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
+    pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
 
     if (m_bIsOfferReceived == IMS_FALSE)
     {
@@ -222,12 +230,10 @@ void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
             pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
             IMS_TRACE_D("NegotiateBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-                    pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
-                    pLocalProfile->GetBandwidthRr());
+                    pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+                    pNegotiatedProfile->GetBandwidthRr());
+            return;
         }
-
-        pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
-        pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
     }
     else
     {
@@ -252,9 +258,9 @@ void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
             pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
             pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
-            IMS_TRACE_D("NegotiateBandwidth() - AS[%d] RS[%d] RR[%d]",
-                    pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
-                    pLocalProfile->GetBandwidthRr());
+            IMS_TRACE_D("NegotiateBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
+                    pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+                    pNegotiatedProfile->GetBandwidthRr());
             return;
         }
 
@@ -271,20 +277,18 @@ void TextProfileNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
 
             return;
         }
-
-        pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
-        pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
     }
 
     IMS_TRACE_D("NegotiateBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-            pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
-            pLocalProfile->GetBandwidthRr());
+            pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+            pNegotiatedProfile->GetBandwidthRr());
 }
 
 PRIVATE
 void TextProfileNegotiator::NegotiateRtcpInterval(
         OUT TextProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig)
 {
+    IMS_TRACE_D("NegotiateRtcpInterval()", 0, 0, 0);
     if (pNegotiatedProfile == IMS_NULL || pConfig == IMS_NULL)
     {
         return;
