@@ -64,22 +64,41 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)                \
-    using Base::GetAppState;               \
-    using Base::SetRegBlockInCbm;          \
-    using Base::IsRegBlockInCbm;           \
-    using Base::IsTimerRunning;            \
-    using Base::SetAppState;               \
-    using Base::ProcessMessage;            \
-    using Base::ProcessRegStart;           \
-    using Base::StateReady_Connection;     \
-    using Base::StateConnected_Connection; \
-    using Base::ProcessConnectionUpdated;  \
-    using Base::StartTimer;                \
-    using Base::StopTimer;                 \
-    using Base::ClearTimers;               \
-    using Base::ProcessECallStarted;       \
-    using Base::ProcessECallTerminated;
+#define DECLARE_USING(Base)                       \
+    using Base::CallTracker_StateChanged;         \
+    using Base::ClearConnection;                  \
+    using Base::ClearTimers;                      \
+    using Base::Condition_RequestCommand;         \
+    using Base::GetAppState;                      \
+    using Base::GetState;                         \
+    using Base::IsImsCall;                        \
+    using Base::IsRegBlockInCbm;                  \
+    using Base::IsTimerRunning;                   \
+    using Base::ProcessAppActivatedTimerExpired;  \
+    using Base::ProcessAppConnectedTimerExpired;  \
+    using Base::ProcessAppTerminatedTimerExpired; \
+    using Base::ProcessConnectionUpdated;         \
+    using Base::ProcessECallStarted;              \
+    using Base::ProcessECallTerminated;           \
+    using Base::ProcessMessage;                   \
+    using Base::ProcessReconfigTimerExpired;      \
+    using Base::ProcessRegBlockedTimerExpired;    \
+    using Base::ProcessRegStart;                  \
+    using Base::SetAppState;                      \
+    using Base::SetImsCall;                       \
+    using Base::SetRegBlockInCbm;                 \
+    using Base::StateConnected_Connection;        \
+    using Base::StateConnected_Registration;      \
+    using Base::StateConnecting_Connection;       \
+    using Base::StateConnecting_Registration;     \
+    using Base::StateDisconnecting_Connection;    \
+    using Base::StateNotReady_Condition;          \
+    using Base::StateReady_Condition;             \
+    using Base::StateReady_Connection;            \
+    using Base::StateUpdating_Registration;       \
+    using Base::StartTimer;                       \
+    using Base::StopTimer;                        \
+    using Base::UpdateConnectedServices;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -177,52 +196,6 @@ public:
     {
         m_pUtil = AosUtil::GetInstance();
     }
-
-    friend class AosEApplicationTest;
-
-    FRIEND_TEST(AosEApplicationTest, RequestCmd);
-    FRIEND_TEST(AosEApplicationTest, GetProperty);
-    FRIEND_TEST(AosEApplicationTest, ClearConnection);
-    FRIEND_TEST(AosEApplicationTest, ProcessMessage);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegStart);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegStop);
-    FRIEND_TEST(AosEApplicationTest, StateNotReady_Condition);
-    FRIEND_TEST(AosEApplicationTest, StateReady_Connection);
-    FRIEND_TEST(AosEApplicationTest, StateReady_Condition);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_StateUpdating);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_StateConnecting);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_StateConnected);
-    FRIEND_TEST(AosEApplicationTest, ProcessConnectionUpdated_StateDisconnecting);
-    FRIEND_TEST(AosEApplicationTest, ProcessConnectionDeactivated);
-    FRIEND_TEST(AosEApplicationTest, ProcessConnectionUpdated);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegSucceeded);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_Start);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_Update);
-    FRIEND_TEST(AosEApplicationTest, ProcessAppActivatedTimerExpired);
-    FRIEND_TEST(AosEApplicationTest, ProcessAppConnectedTimerExpired);
-    FRIEND_TEST(AosEApplicationTest, ProcessAppTerminatedTimerExpired);
-    FRIEND_TEST(AosEApplicationTest, ProcessReconfigTimerExpired);
-    FRIEND_TEST(AosEApplicationTest, ProcessRegBlockedTimerExpired);
-    FRIEND_TEST(AosEApplicationTest, ProcessECallStarted);
-    FRIEND_TEST(AosEApplicationTest, ProcessECallTerminated);
-    FRIEND_TEST(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfWlanConfiguredToRelease);
-    FRIEND_TEST(
-            AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfAllIpcanConfiguredToRelease);
-    FRIEND_TEST(
-            AosEApplicationTest, KeepEPdnWhenECallTerminatedOnWlanIfCellularConfiguredToRelease);
-    FRIEND_TEST(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnWlanIfNoIpanConfiguredToRelease);
-    FRIEND_TEST(AosEApplicationTest,
-            ReleaseEPdnWhenECallTerminatedOnCellularIfCellularConfiguredToRelease);
-    FRIEND_TEST(AosEApplicationTest,
-            ReleaseEPdnWhenECallTerminatedOnCellularIfAllIpcanConfiguredToRelease);
-    FRIEND_TEST(
-            AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfWlanConfiguredToRelease);
-    FRIEND_TEST(
-            AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfNoIpcanConfiguredToRelease);
-    FRIEND_TEST(AosEApplicationTest, UpdateRegState);
-    FRIEND_TEST(AosEApplicationTest, UpdateConnectedServices);
-    FRIEND_TEST(AosEApplicationTest, Condition_RequestCommand);
-    FRIEND_TEST(AosEApplicationTest, CallTracker_StateChanged);
 
     inline void SetAosCondition(IN AosCondition* pCondition) { m_pCondition = pCondition; }
 
