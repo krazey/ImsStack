@@ -174,6 +174,8 @@ public:
     FRIEND_TEST(AosERegistrationTest,
             TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsFallback);
     FRIEND_TEST(AosERegistrationTest,
+            TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsFallbackWhenNwTimeout);
+    FRIEND_TEST(AosERegistrationTest,
             TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsNotFallback);
     FRIEND_TEST(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenRegistrationIsNull);
     FRIEND_TEST(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenTransactionIsNotStarted);
@@ -1016,6 +1018,30 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsNotAllowedAndConf
     EXPECT_TRUE(m_pAosERegistration->IsReinitiationRequested());
 }
 
+TEST_F(AosERegistrationTest,
+        TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsFallbackWhenNwTimeout)
+{
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->m_nConsecutiveFailure = 2;
+    m_pAosERegistration->m_eImsReasonCode = AosReasonCode::REG_RESP_NETWORK_TIMEOUT;
+    ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
+
+    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosERegistration->ProcessTransactionTimerExpired();
+
+    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
 TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsNotFallback)
 {
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
@@ -1170,6 +1196,7 @@ TEST_F(AosERegistrationTest, RegistrationStartFailed_failedWithOthers)
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
     EXPECT_NE(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->m_eImsReasonCode, AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
 }
 
 TEST_F(AosERegistrationTest, RegistrationTerminatedDuringCall_PendingTerminated)
