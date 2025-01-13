@@ -144,6 +144,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage(IN CallType eCallTy
 
     SetAcceptContactHeader(eCallType);
     SetAcceptHeader();
+    SetPPreferredIdentityHeader();
     SetPPreferredServiceHeader();
     AddSrvccFeature();
     SetCallerIdHeader();
@@ -236,6 +237,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptMessage()
     }
 
     SetSrvccContactParameter();
+    SetPPreferredIdentityHeader();
     SetTipHeader();
     SetCarrierSpecificHeaders();
 
@@ -285,6 +287,8 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAckMessage()
 PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormUpdateMessage(
         IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo)
 {
+    // UPDATEs for session refresh won't be formatted here.
+
     if (InitVariables(FormType::UPDATE) == IMS_FAILURE)
     {
         return IMS_FAILURE;
@@ -335,6 +339,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const CallRe
 
     AString strReason;
     GetTerminateReason(objReason, strReason);
+    SetPPreferredIdentityHeader();
     SetReasonHeader(strReason);
     SetCarrierSpecificHeaders();
 

@@ -127,10 +127,17 @@ PRIVATE GLOBAL const AString& TemplateFormatter::GetPublicUserId(IN IMtcCallCont
     const ISubscriberConfig* pConfig = objContext.GetSubscriberConfig();
     if (pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "No subscriber", 0, 0, 0);
         return AString::ConstEmpty();
     }
 
-    return pConfig->GetPublicUserId();
+    const AStringArray& lstPuids = pConfig->GetPublicUserIds();
+    if (lstPuids.GetCount() <= 0)
+    {
+        IMS_TRACE_E(0, "No PUID", 0, 0, 0);
+    }
+
+    return lstPuids.GetElementAt(0);
 }
 
 PRIVATE GLOBAL AString TemplateFormatter::GetWifiCallingAddressId(IN IMtcCallContext& objContext)
