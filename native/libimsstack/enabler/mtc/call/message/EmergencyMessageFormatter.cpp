@@ -22,7 +22,7 @@
 #include "IMtcService.h"
 #include "INetworkConnection.h"
 #include "ISipHeader.h"
-#include "ServicePhoneInfo.h"
+#include "ServiceTrace.h"
 #include "Sip.h"
 #include "SipParameter.h"
 #include "TextParser.h"
@@ -42,9 +42,7 @@ LOCAL const AString HEADER_P_EMERGENCY_INFO = "P-Emergency-Info";
 
 EmergencyMessageFormatter::EmergencyMessageFormatter(
         IN IMtcCallContext& objContext, IN ISession& objSession) :
-        MessageFormatter(objContext, objSession),
-        m_eNormalAosRegMode(IImsAosInfo::REG_MODE_UNKNOWN),
-        m_eEmergencyAosRegMode(IImsAosInfo::REG_MODE_UNKNOWN)
+        MessageFormatter(objContext, objSession)
 {
     IMS_TRACE_I("+EmergencyMessageFormatter", 0, 0, 0);
 }
@@ -56,10 +54,8 @@ PUBLIC VIRTUAL EmergencyMessageFormatter::~EmergencyMessageFormatter()
 
 PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallType eCallType)
 {
-    m_eNormalAosRegMode = GetAosRegMode(ServiceType::NORMAL);
-    m_eEmergencyAosRegMode = GetAosRegMode(ServiceType::EMERGENCY);
-    if (m_eNormalAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN ||
-            m_eEmergencyAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN)
+    if (GetAosRegMode(ServiceType::NORMAL) == IImsAosInfo::REG_MODE_UNKNOWN ||
+            GetAosRegMode(ServiceType::EMERGENCY) == IImsAosInfo::REG_MODE_UNKNOWN)
     {
         return IMS_FAILURE;
     }
@@ -132,21 +128,12 @@ PROTECTED VIRTUAL void EmergencyMessageFormatter::SetPPreferredIdentityHeader()
     }
 
     AString strFormat = MtcConfigurationResolver::GetPPreferredIdentityHeaderInInviteForEmergency(
-            m_objContext.GetConfigurationProxy(), m_eEmergencyAosRegMode);
+            m_objContext.GetConfigurationProxy(), GetAosRegMode(ServiceType::EMERGENCY));
     if (strFormat.GetLength() > 0)
     {
         return SetPPreferredIdentityHeaderByFormat(strFormat);
     }
-
-    if (m_eNormalAosRegMode != IImsAosInfo::REG_MODE_NORMAL &&
-            m_eNormalAosRegMode != IImsAosInfo::REG_MODE_ADMIN &&
-            m_eEmergencyAosRegMode != IImsAosInfo::REG_MODE_NORMAL &&
-            m_eEmergencyAosRegMode != IImsAosInfo::REG_MODE_ADMIN)
-    {
-        return SetPPreferredIdentityHeaderByDeviceId();
-    }
-
-    SetPPreferredIdentityHeaderByUserId();
+    return SetPPreferredIdentityHeaderByUserId();
 }
 
 PRIVATE
@@ -183,45 +170,11 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByUserId()
 }
 
 PRIVATE
-void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
-{
-    AString strIpAddress = GetLocalAddress();
-    AString strPort = GetLocalPort();
-    if (strIpAddress.GetLength() <= 0 || strPort.GetLength() <= 0)
-    {
-        return;
-    }
-
-    AString strImei;
-    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(
-            m_objContext.GetSlotId(), strImei);
-
-    LOCAL const IMS_UINT32 LEN_IMEI_TAC = 8;
-    LOCAL const IMS_UINT32 LEN_IMEI_SNR = 6;
-    strImei = strImei.AlignLeft(LEN_IMEI_TAC + LEN_IMEI_SNR, '0');
-
-    AString strValue;
-    strValue.Append(Sip::STR_SIP);
-    strValue.Append(TextParser::CHAR_COLON);
-
-    strValue.Append(strImei.GetSubStr(0, LEN_IMEI_TAC));
-    strValue.Append(strImei.GetSubStr(LEN_IMEI_TAC, LEN_IMEI_SNR));
-    strValue.Append('0');
-    strValue.Append(TextParser::STR_AT);
-
-    strValue.Append(strIpAddress);
-    strValue.Append(TextParser::CHAR_COLON);
-    strValue.Append(strPort);
-
-    m_objContext.GetMessageUtils().SetHeader(
-            m_piNextMessage, strValue, ISipHeader::P_PREFERRED_IDENTITY);
-}
-
-PRIVATE
 void EmergencyMessageFormatter::SetSipInstanceFeature()
 {
-    if ((m_eNormalAosRegMode == IImsAosInfo::REG_MODE_NORMAL) ||
-            (m_eNormalAosRegMode == IImsAosInfo::REG_MODE_ADMIN))
+    IMS_UINT32 eNormalAosRegMode = GetAosRegMode(ServiceType::NORMAL);
+    if (eNormalAosRegMode == IImsAosInfo::REG_MODE_NORMAL ||
+            eNormalAosRegMode == IImsAosInfo::REG_MODE_ADMIN)
     {
         return;
     }
@@ -311,47 +264,4 @@ IMS_UINT32 EmergencyMessageFormatter::GetAosRegMode(IN ServiceType eServiceType)
     }
 
     return pAosConnector->GetRegistrationMode();
-}
-
-PRIVATE
-AString EmergencyMessageFormatter::GetLocalAddress() const
-{
-    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
-    if (pAosConnector == IMS_NULL)
-    {
-        return AString::ConstEmpty();
-    }
-
-    AString strAddress = pAosConnector->GetLocalAddress();
-
-    IpAddress objHost;
-    if (objHost.Parse(strAddress) && objHost.IsIPv6Address())
-    {
-        AString strEnclosedAddress;
-        strEnclosedAddress += TextParser::CHAR_LSBRACKET;
-        strEnclosedAddress += strAddress;
-        strEnclosedAddress += TextParser::CHAR_RSBRACKET;
-        return strEnclosedAddress;
-    }
-    return strAddress;
-}
-
-PRIVATE
-AString EmergencyMessageFormatter::GetLocalPort() const
-{
-    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
-    if (pAosConnector == IMS_NULL)
-    {
-        return AString::ConstEmpty();
-    }
-
-    IMS_UINT32 nPort = pAosConnector->GetLocalPort();
-    if (nPort == 0)
-    {
-        return AString::ConstEmpty();
-    }
-
-    AString strPort;
-    strPort.Sprintf("%d", nPort);
-    return strPort;
 }
