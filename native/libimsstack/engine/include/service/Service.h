@@ -221,6 +221,16 @@ private:
     {
         return (IsImsConnected() && (m_piRegBinding != IMS_NULL));
     }
+    // RFC 3325: INVITE/BYE/OPTIONS/SUBSCRIBE/NOTIFY/REFER
+    // RFC 5876: all requests except for ACK/CANCEL
+    // 3GPP Profile: INVITE/BYE/MESSAGE/PUBLISH/REFER/SUBSCRIBE/OPTIONS
+    inline IMS_BOOL IsPpiHeaderRequired(IN const SipMethod& objMethod) const
+    {
+        return objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::BYE) ||
+                objMethod.Equals(SipMethod::MESSAGE) || objMethod.Equals(SipMethod::PUBLISH) ||
+                objMethod.Equals(SipMethod::REFER) || objMethod.Equals(SipMethod::SUBSCRIBE) ||
+                objMethod.Equals(SipMethod::OPTIONS);
+    }
     IMS_BOOL SetPPreferredIdentityHeader(
             IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSipMsg) const;
     void SetRegBinding(IN IRegBinding* piRegBinding);
