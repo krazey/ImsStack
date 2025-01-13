@@ -35,7 +35,6 @@ public:
     EmergencyMessageFormatter(IN const MessageFormatter&) = delete;
     EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
-public:
     IMS_RESULT FormStartMessage(IN CallType eCallType) override;
     IMS_RESULT FormUpdateMessage(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo) override;
 
@@ -47,19 +46,12 @@ protected:
 private:
     void SetPPreferredIdentityHeaderByFormat(IN const AString& strFormat);
     void SetPPreferredIdentityHeaderByUserId();
-    void SetPPreferredIdentityHeaderByDeviceId();
     void SetRecvInfoHeader();
     void SetPEmergencyInfoHeader();
     void SetSipInstanceFeature();
     void SetPComServiceTypeHeader();
 
     IMS_UINT32 GetAosRegMode(IN ServiceType eServiceType) const;
-    AString GetLocalAddress() const;
-    AString GetLocalPort() const;
-
-private:
-    IMS_UINT32 m_eNormalAosRegMode;
-    IMS_UINT32 m_eEmergencyAosRegMode;
 };
 
 #endif

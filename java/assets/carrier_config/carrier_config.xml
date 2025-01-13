@@ -172,8 +172,8 @@
     <string-array name="imsemergency.p_preferred_identity_header_in_invite_string_array" num="4">
         <item value=""/> <!-- REG_MODE_NORMAL -->
         <item value=""/> <!-- REG_MODE_ADMIN -->
-        <item value=""/> <!-- REG_MODE_INTERNAL -->
-        <item value=""/> <!-- REG_MODE_NOUICC -->
+        <item value="sip:#IMEI#@#IP#:#PORT#"/> <!-- REG_MODE_INTERNAL -->
+        <item value="sip:#IMEI#@#IP#:#PORT#"/> <!-- REG_MODE_NOUICC -->
     </string-array>
     <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
     </string-array>
