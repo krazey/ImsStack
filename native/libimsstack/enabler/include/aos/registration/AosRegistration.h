@@ -154,6 +154,8 @@ protected:
     /// Set Detail State
     void UpdateDetailState(IN IMS_UINT32 nState);
 
+    void SetRetryTimeToProperty(IN IMS_UINT32 nSeconds);
+
     /// Log
     AString FeatureToString();
 

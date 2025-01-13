@@ -1188,6 +1188,27 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
     }
 }
 
+PROTECTED
+void AosRegistration::SetRetryTimeToProperty(IN IMS_UINT32 nSeconds)
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired())
+    {
+        return;
+    }
+
+    if (m_eRegType != AosRegistrationType::NORMAL)
+    {
+        return;
+    }
+
+    AString strName;
+    AString strSecs;
+    strName = (m_nSlotId == 0) ? AosString::STR_REG_RETRY_TIME0 : AosString::STR_REG_RETRY_TIME1;
+    strSecs.SetNumber(nSeconds);
+
+    UtilService::GetUtilService()->GetSystemProperty()->Set(strName, strSecs);
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::OnMessage(IN IMSMSG& objMsg)
 {
     A_IMS_TRACE_I(REGID, "OnMessage :: (%s)",
@@ -2826,6 +2847,8 @@ PROTECTED VIRTUAL void AosRegistration::ClearRetryCount(IN IMS_BOOL bForced /* =
                 ->GetRetryRepository(m_piContext->GetSlotId())
                 ->ResetRetryCount(nType);
     }
+
+    SetRetryTimeToProperty(0);
 }
 
 PROTECTED VIRTUAL void AosRegistration::ClearRetryValues(IN IMS_BOOL bRegSuccess /* = IMS_FALSE */)
@@ -5469,6 +5492,11 @@ PROTECTED VIRTUAL void AosRegistration::StartTimer(IN IMS_UINT32 nType, IN IMS_U
 
     *ppiTimer =
             m_pUtil->StartTimer(nDuration, this, AosProvider::GetLog()->RegTimerToString(nType));
+
+    if (nType == TIMER_STOP_RETRY)
+    {
+        SetRetryTimeToProperty(nDuration / 1000);
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::StopTimer(IN IMS_UINT32 nType)

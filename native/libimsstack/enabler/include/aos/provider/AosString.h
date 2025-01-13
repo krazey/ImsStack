@@ -37,6 +37,8 @@ public:
     static const IMS_CHAR STR_CS[];
     static const IMS_CHAR STR_CS_WITH_DQ[];
     static const IMS_CHAR STR_VOLTE[];
+    static const IMS_CHAR STR_REG_RETRY_TIME0[];
+    static const IMS_CHAR STR_REG_RETRY_TIME1[];
 };
 
 class FeatureTags
