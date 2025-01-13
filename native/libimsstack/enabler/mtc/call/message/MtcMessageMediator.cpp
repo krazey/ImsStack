@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IImsAosInfo.h"
+#include "IMtcService.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsTrace.h"
@@ -106,7 +107,8 @@ void MtcMessageMediator::MayFormatContactAddress(
         return;
     }
     AString strFormat = MtcConfigurationResolver::GetContactHeaderAddressInInviteForEmergency(
-            m_objContext.GetConfigurationProxy(), GetAosEmergencyRegMode());
+            m_objContext.GetConfigurationProxy(), GetAosEmergencyRegMode(),
+            m_objContext.GetService().IsRoaming());
     if (strFormat.GetLength() <= 0)
     {
         return;
