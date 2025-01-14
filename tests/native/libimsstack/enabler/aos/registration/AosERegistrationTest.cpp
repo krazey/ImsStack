@@ -62,19 +62,50 @@ using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                                                  \
     using Base::CallbackModeChanged;                                         \
+    using Base::CallTracker_StateChanged;                                    \
+    using Base::CleanUp;                                                     \
     using Base::ClearTimers;                                                 \
+    using Base::CreateIpsecHelper;                                           \
+    using Base::DestroyIpsecHelper;                                          \
+    using Base::GetPreferredRegScheme;                                       \
+    using Base::Init;                                                        \
     using Base::IsFakeModeCondition;                                         \
+    using Base::IsFakeRegistration;                                          \
+    using Base::IsImsCall;                                                   \
+    using Base::IsRefreshRequiredByCbm;                                      \
+    using Base::IsReinitiationRequested;                                     \
     using Base::IsReregFailureReportOnIpcanChangeRequired;                   \
+    using Base::IsRetryAllowed;                                              \
     using Base::IsTransactionStarted;                                        \
+    using Base::NConfiguration_NotifyConfigChanged;                          \
+    using Base::OnMessage;                                                   \
+    using Base::ProcessAuthenticationFailed;                                 \
     using Base::ProcessDefaultFlowRecovery_Start;                            \
     using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
+    using Base::ProcessDefaultFlowRecovery_Update;                           \
     using Base::ProcessNormalDefaultFlowRecovery_Start;                      \
+    using Base::ProcessRearrangePcscf;                                       \
+    using Base::ProcessReinitiateWithRegState;                               \
     using Base::ProcessStartFailed_StatusCode;                               \
+    using Base::ProcessStartFailed_TxnTimeout;                               \
     using Base::ProcessTransactionTimerExpired;                              \
+    using Base::ProcessUpdateFailed_Others;                                  \
+    using Base::ProcessUpdateFailed_StatusCode;                              \
+    using Base::ProcessUpdateFailed_TxnTimeout;                              \
+    using Base::Registration_RefreshTimerExpired;                            \
+    using Base::Registration_StartFailed;                                    \
+    using Base::Registration_Started;                                        \
+    using Base::Registration_Terminated;                                     \
+    using Base::Registration_Updated;                                        \
+    using Base::SetFakeReg;                                                  \
     using Base::SetImsCall;                                                  \
+    using Base::SetReinitiationRequested;                                    \
     using Base::SetReregFailureReportOnIpcanChangeRequired;                  \
     using Base::SetState;                                                    \
     using Base::StopTimer;                                                   \
+    using Base::Transaction_OnConnectionFailed;                              \
+    using Base::Transaction_OnConnectionSetupPrepared;                       \
+    using Base::Transaction_OnTrafficPriorityChanged;                        \
     using Base::UpdateRegIpcanCategory;                                      \
     using Base::UpdateTransactionStarted;
 
@@ -121,6 +152,34 @@ public:
 
     inline void SetConsecutiveFailure(IN IMS_UINT32 nValue) { m_nConsecutiveFailure = nValue; }
 
+    inline ITimer* GetTransactionTimer() { return m_piTransactionTimer; }
+
+    inline void SetRegistration(IN IRegistration* piRegistration)
+    {
+        m_piRegistration = piRegistration;
+    }
+
+    inline void SetEModeInfo(IN EmergencyModeInfo* pEModeInfo) { m_pEModeInfo = pEModeInfo; }
+
+    inline AosReasonCode GetImsReasonCode() { return m_eImsReasonCode; }
+
+    inline void SetImsReasonCode(IN AosReasonCode eImsReasonCode)
+    {
+        m_eImsReasonCode = eImsReasonCode;
+    }
+
+    inline IMS_BOOL IsTransactionStarted() { return m_bIsTransactionStarted; }
+
+    inline AosUtil* GetUtil() { return m_pUtil; }
+
+    inline IMS_UINT32 GetFeature() { return m_nFeature; }
+
+    inline void SetFeature(IN IMS_UINT32 nFeature) { m_nFeature = nFeature; }
+
+    inline void SetRegContact(IN IRegContact* piRegContact) { m_piRegContact = piRegContact; }
+
+    inline IMS_UINT32 GetTxnPending() { return m_nTxnPending; }
+
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
 
     // Functions where calls are being counted
@@ -136,81 +195,6 @@ public:
         m_pCounter->AddCount(__IMS_FUNC__);
         AosERegistration::StartTimer(nType, nDuration);
     }
-
-    FRIEND_TEST(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode);
-    FRIEND_TEST(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetFakeMode);
-    FRIEND_TEST(AosERegistrationTest, Start_SetNormalModeEmergRetrySupported);
-    FRIEND_TEST(AosERegistrationTest, Start_SetNormalModeEmergRetryNotSupported);
-    FRIEND_TEST(AosERegistrationTest, Start_SetNormalModeCreateRegistrationFailure);
-    FRIEND_TEST(AosERegistrationTest, UpdateWhenInRegStopState_ProcessRetry);
-    FRIEND_TEST(AosERegistrationTest, UpdateWhenInRegisteredState_ProcessReregister);
-    FRIEND_TEST(AosERegistrationTest, UpdateWhenInOfflineState_Ignored);
-    FRIEND_TEST(AosERegistrationTest, RequestFakeModeCmdWithSamePcscfReason_HandleFakeMode);
-    FRIEND_TEST(AosERegistrationTest, RequestFakeModeCmdWithNextPcscfReason_HandleFakeMode);
-    FRIEND_TEST(AosERegistrationTest, RequestECallCmd_HandleECallState);
-    FRIEND_TEST(AosERegistrationTest, RequestECallCmdWhenEmergencyCallbackModeNotSupported);
-    FRIEND_TEST(AosERegistrationTest, RequestESmsCmd_HandleESmsState);
-    FRIEND_TEST(AosERegistrationTest, RequestESmsCmdhenEmergencyCallbackModeNotSupported);
-    FRIEND_TEST(AosERegistrationTest, RequestUnspecifiedCmd_ProcessedByAosRegistration);
-    FRIEND_TEST(AosERegistrationTest, MsgRegReinitiate_ProcessReinitiate);
-    FRIEND_TEST(AosERegistrationTest, MsgRegReinitiateWithRegState_ProcessReinitiateWithRegState);
-    FRIEND_TEST(AosERegistrationTest, ProcessReinitiateWithRegState_FailToCreateRegistration);
-    FRIEND_TEST(AosERegistrationTest, ProcessReinitiateWithRegStateWhenNotRegisteredBefore);
-    FRIEND_TEST(AosERegistrationTest, UninterestedMsg_Ignored);
-    FRIEND_TEST(AosERegistrationTest, Initialize_SetListenersSuccessfully);
-    FRIEND_TEST(AosERegistrationTest, CleanUp_RemoveListenersSuccessfully);
-    FRIEND_TEST(AosERegistrationTest, AuthenticationFailedWhenEModeInfoIsNotECall);
-    FRIEND_TEST(AosERegistrationTest, StartFailedWithTxnTimeoutWhenReinitiationIsRequested);
-    FRIEND_TEST(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenFakeRegistration);
-    FRIEND_TEST(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenConfiguredAsFallback);
-    FRIEND_TEST(AosERegistrationTest, DefaultFlowRecoveryDuringUpdateWhenNeitherEcbmNorScbm);
-    FRIEND_TEST(AosERegistrationTest, StartFailedWithOtherStatusCode);
-    FRIEND_TEST(AosERegistrationTest, UpdateFailedWithStatusCode423);
-    FRIEND_TEST(AosERegistrationTest, UpdateFailedWithOtherStatusCode);
-    FRIEND_TEST(AosERegistrationTest, UpdateFailedWithTxnTimeout);
-    FRIEND_TEST(AosERegistrationTest, UpdateFailedWithOthers);
-    FRIEND_TEST(AosERegistrationTest, TransactionTimerExpiredWhenNotRegisteringState);
-    FRIEND_TEST(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsAllowed);
-    FRIEND_TEST(AosERegistrationTest,
-            TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsFallback);
-    FRIEND_TEST(AosERegistrationTest,
-            TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsFallbackWhenNwTimeout);
-    FRIEND_TEST(AosERegistrationTest,
-            TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsNotFallback);
-    FRIEND_TEST(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenRegistrationIsNull);
-    FRIEND_TEST(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenTransactionIsNotStarted);
-    FRIEND_TEST(AosERegistrationTest, RegistrationRefreshTimerExpiredButFailToCreateIpsec);
-    FRIEND_TEST(AosERegistrationTest, RegistrationRefreshTimerExpired_DoRefresh);
-    FRIEND_TEST(AosERegistrationTest, RegistrationStarted_ChangeStateToRegistered);
-    FRIEND_TEST(AosERegistrationTest, RegistrationUpdated_ChangeStateToRegistered);
-    FRIEND_TEST(AosERegistrationTest, RegistrationStartFailed_ChangeStateToRegstop);
-    FRIEND_TEST(AosERegistrationTest, RegistrationStartFailed_failedWithOthers);
-    FRIEND_TEST(AosERegistrationTest, RegistrationTerminatedDuringCall_PendingTerminated);
-    FRIEND_TEST(AosERegistrationTest, RegistrationTerminated_ChangeStateToOffline);
-    FRIEND_TEST(AosERegistrationTest, CallTrackerStateChangedForNonEmergencyType_Ignored);
-    FRIEND_TEST(AosERegistrationTest, CallTrackerStateChangedForEmergencyType_UpdateCallStatus);
-    FRIEND_TEST(AosERegistrationTest, NotifyConfigChangedWhenEmergencyCallbackModeSupported);
-    FRIEND_TEST(AosERegistrationTest, NotifyConfigChangedWhenEmergencyCallbackModeNotSupported);
-    FRIEND_TEST(AosERegistrationTest, TransactionConnectionFailedWhenRegistered_Ignored);
-    FRIEND_TEST(AosERegistrationTest, TransactionConnectionFailedWhenNotRegistered_Destroy);
-    FRIEND_TEST(AosERegistrationTest, TransactionConnectionSetupPrepared_DoNothing);
-    FRIEND_TEST(AosERegistrationTest, TransactionTrafficPriorityChanged_DoNothing);
-    FRIEND_TEST(AosERegistrationTest, CallbackModeChangedWhenEmergencyCallbackModeNotSupported);
-    FRIEND_TEST(AosERegistrationTest, CallbackModeChangedAsStartForCallType);
-    FRIEND_TEST(AosERegistrationTest, CallbackModeChangedAsStartForSmsTypeDuringRegisteredState);
-    FRIEND_TEST(AosERegistrationTest, RefreshIsRequiredByCbmIfESmsIsSet);
-    FRIEND_TEST(AosERegistrationTest, RefreshIsRequiredByCbmWhenReRegTried);
-    FRIEND_TEST(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegTried);
-    FRIEND_TEST(AosERegistrationTest, RefreshIsRequiredByCbmWhenWhenReRegNotTried);
-    FRIEND_TEST(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegNotTried);
-    FRIEND_TEST(AosERegistrationTest, IsRetryAllowedWhenPcscfAvailable);
-    FRIEND_TEST(AosERegistrationTest, IsRetryAllowedWhenNoAvailablePcscfs);
-    FRIEND_TEST(AosERegistrationTest, IsRetryAllowedWhenNotReachMaximumRetries);
-    FRIEND_TEST(AosERegistrationTest, IsRetryAllowedWhenMaximumNumberOfRetries);
-    FRIEND_TEST(AosERegistrationTest, ProcessRearrangePcscfWhenRearrangeNotSupported);
-    FRIEND_TEST(AosERegistrationTest, ProcessRearrangePcscfWhenPcscfCountIsLessThanTwo);
-    FRIEND_TEST(AosERegistrationTest, ProcessRearrangePcscfWhenPcscfCountIsTwo);
-    FRIEND_TEST(AosERegistrationTest, GetPreferredRegSchemeWhenRoamingSchemeIsConfigured);
 
 private:
     AosCounter* m_pCounter;
@@ -446,7 +430,7 @@ TEST_F(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode)
     EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
     EXPECT_TRUE(m_pAosERegistration->IsFakeRegistration());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetFakeMode)
@@ -462,7 +446,7 @@ TEST_F(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetF
     EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
     EXPECT_TRUE(m_pAosERegistration->IsFakeRegistration());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetrySupported)
@@ -480,7 +464,7 @@ TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetrySupported)
     EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_NORMAL);
     EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
-    EXPECT_NE(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_NE(m_pAosERegistration->GetTransactionTimer(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetryNotSupported)
@@ -498,7 +482,7 @@ TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetryNotSupported)
     EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_NORMAL);
     EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, Start_SetNormalModeCreateRegistrationFailure)
@@ -517,12 +501,12 @@ TEST_F(AosERegistrationTest, Start_SetNormalModeCreateRegistrationFailure)
     EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_NORMAL);
     EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, UpdateWhenInRegStopState_ProcessRetry)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGSTOP);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
@@ -534,7 +518,7 @@ TEST_F(AosERegistrationTest, UpdateWhenInRegStopState_ProcessRetry)
 
 TEST_F(AosERegistrationTest, UpdateWhenInRegisteredState_ProcessReregister)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
@@ -546,7 +530,7 @@ TEST_F(AosERegistrationTest, UpdateWhenInRegisteredState_ProcessReregister)
 
 TEST_F(AosERegistrationTest, UpdateWhenInOfflineState_Ignored)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_OFFLINE);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).Times(0);
@@ -587,46 +571,46 @@ TEST_F(AosERegistrationTest, RequestFakeModeCmdWithNextPcscfReason_HandleFakeMod
 
 TEST_F(AosERegistrationTest, RequestECallCmd_HandleECallState)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosERegistration->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
 
-    EXPECT_TRUE(m_pAosERegistration->m_pEModeInfo->IsECall());
+    EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsECall());
 }
 
 TEST_F(AosERegistrationTest, RequestECallCmdWhenEmergencyCallbackModeNotSupported)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_FALSE));
 
     m_pAosERegistration->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
 
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsECall());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsECall());
 }
 
 TEST_F(AosERegistrationTest, RequestESmsCmd_HandleESmsState)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosERegistration->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
 
-    EXPECT_TRUE(m_pAosERegistration->m_pEModeInfo->IsESms());
+    EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsESms());
 }
 
 TEST_F(AosERegistrationTest, RequestESmsCmdhenEmergencyCallbackModeNotSupported)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
             .WillByDefault(Return(IMS_FALSE));
 
     m_pAosERegistration->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
 
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsESms());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsESms());
 }
 
 TEST_F(AosERegistrationTest, RequestUnspecifiedCmd_ProcessedByAosRegistration)
@@ -701,12 +685,12 @@ TEST_F(AosERegistrationTest, Initialize_SetListenersSuccessfully)
 
     m_pAosERegistration->Init();
 
-    EXPECT_NE(m_pAosERegistration->m_pEModeInfo, nullptr);
+    EXPECT_NE(m_pAosERegistration->GetEModeInfo(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, CleanUp_RemoveListenersSuccessfully)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
 
     EXPECT_CALL(m_objMockIAosService, RemoveListener(m_pAosERegistration)).Times(1);
     EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(m_pAosERegistration)).Times(1);
@@ -717,10 +701,10 @@ TEST_F(AosERegistrationTest, CleanUp_RemoveListenersSuccessfully)
 
 TEST_F(AosERegistrationTest, AuthenticationFailedWhenEModeInfoIsNotECall)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
     m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_TRANSACTION, 10000);
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
 
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -731,12 +715,12 @@ TEST_F(AosERegistrationTest, AuthenticationFailedWhenEModeInfoIsNotECall)
     m_pAosERegistration->ProcessAuthenticationFailed();
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, StartFailedWithTxnTimeoutWhenReinitiationIsRequested)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
     m_pAosERegistration->SetReinitiationRequested(IMS_TRUE);
 
@@ -765,7 +749,7 @@ TEST_F(AosERegistrationTest, StartWithSpecifiedIntervalPolicytWhenRetryRuleForER
 
 TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenFakeRegistration)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
     m_pAosERegistration->SetFakeReg(IMS_TRUE);
 
@@ -795,9 +779,9 @@ TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenConfiguredAsFallb
 
 TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringUpdateWhenNeitherEcbmNorScbm)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
 
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -931,12 +915,12 @@ TEST_F(AosERegistrationTest, StartFailedWithOtherStatusCode)
     m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_500);
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
 }
 
 TEST_F(AosERegistrationTest, UpdateFailedWithStatusCode423)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
             .WillByDefault(Return(AString("60")));
 
@@ -986,8 +970,8 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenNotRegisteringState)
 TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsAllowed)
 {
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosERegistration->m_nConsecutiveFailure = 1;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
+    m_pAosERegistration->SetConsecutiveFailure(1);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(3));
     ON_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillByDefault(Return(1));
@@ -1004,8 +988,8 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsAllowed)
 TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsFallback)
 {
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosERegistration->m_nConsecutiveFailure = 2;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
+    m_pAosERegistration->SetConsecutiveFailure(2);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
@@ -1022,9 +1006,9 @@ TEST_F(AosERegistrationTest,
         TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsFallbackWhenNwTimeout)
 {
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosERegistration->m_nConsecutiveFailure = 2;
-    m_pAosERegistration->m_eImsReasonCode = AosReasonCode::REG_RESP_NETWORK_TIMEOUT;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
+    m_pAosERegistration->SetConsecutiveFailure(2);
+    m_pAosERegistration->SetImsReasonCode(AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
@@ -1045,8 +1029,8 @@ TEST_F(AosERegistrationTest,
 TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsNotAllowedAndConfiguredAsNotFallback)
 {
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosERegistration->m_nConsecutiveFailure = 2;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
+    m_pAosERegistration->SetConsecutiveFailure(2);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
@@ -1074,16 +1058,16 @@ TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenRegistrationIsNu
     m_pAosERegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
 
     EXPECT_FALSE(bDoImplicitRefresh);
-    EXPECT_TRUE(m_pAosERegistration->m_bIsTransactionStarted);
+    EXPECT_TRUE(m_pAosERegistration->IsTransactionStarted());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERED);
 }
 
 TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenTransactionIsNotStarted)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillOnce(Return(IMS_TRUE));
@@ -1091,24 +1075,24 @@ TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpiredWhenTransactionIsNot
     m_pAosERegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
 
     EXPECT_FALSE(bDoImplicitRefresh);
-    EXPECT_FALSE(m_pAosERegistration->m_bIsTransactionStarted);
+    EXPECT_FALSE(m_pAosERegistration->IsTransactionStarted());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
 }
 
 TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpiredButFailToCreateIpsec)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosERegistration->SetImsCall(IMS_TRUE);
-    m_pAosERegistration->m_pUtil->AddFeature(
-            TestAosERegistration::FEATURE_IPSEC, m_pAosERegistration->m_nFeature);
+    m_pAosERegistration->SetFeature(
+            m_pAosERegistration->GetFeature() | TestAosERegistration::FEATURE_IPSEC);
     m_pAosERegistration->CreateIpsecHelper();
 
     m_pAosERegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
 
     EXPECT_FALSE(bDoImplicitRefresh);
-    EXPECT_TRUE(m_pAosERegistration->m_bIsTransactionStarted);
+    EXPECT_TRUE(m_pAosERegistration->IsTransactionStarted());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
     m_pAosERegistration->DestroyIpsecHelper();
 }
@@ -1116,7 +1100,7 @@ TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpiredButFailToCreateIpsec
 TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpired_DoRefresh)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosERegistration->SetImsCall(IMS_TRUE);
 
@@ -1128,13 +1112,13 @@ TEST_F(AosERegistrationTest, RegistrationRefreshTimerExpired_DoRefresh)
     m_pAosERegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
 
     EXPECT_TRUE(bDoImplicitRefresh);
-    EXPECT_TRUE(m_pAosERegistration->m_bIsTransactionStarted);
+    EXPECT_TRUE(m_pAosERegistration->IsTransactionStarted());
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REFRESHING);
 }
 
 TEST_F(AosERegistrationTest, RegistrationStarted_ChangeStateToRegistered)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
     m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_TRANSACTION, 10000);
 
@@ -1146,13 +1130,13 @@ TEST_F(AosERegistrationTest, RegistrationStarted_ChangeStateToRegistered)
 
     m_pAosERegistration->Registration_Started();
 
-    EXPECT_EQ(m_pAosERegistration->m_piTransactionTimer, nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetTransactionTimer(), nullptr);
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERED);
 }
 
 TEST_F(AosERegistrationTest, RegistrationUpdated_ChangeStateToRegistered)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REFRESHING);
 
     EXPECT_CALL(m_objMockIAosTransaction, StopEmergencyTraffic()).Times(1);
@@ -1168,7 +1152,7 @@ TEST_F(AosERegistrationTest, RegistrationUpdated_ChangeStateToRegistered)
 
 TEST_F(AosERegistrationTest, RegistrationStartFailed_ChangeStateToRegstop)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -1183,7 +1167,7 @@ TEST_F(AosERegistrationTest, RegistrationStartFailed_ChangeStateToRegstop)
 
 TEST_F(AosERegistrationTest, RegistrationStartFailed_failedWithOthers)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERING);
     m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_TRANSACTION, 10000);
 
@@ -1195,23 +1179,23 @@ TEST_F(AosERegistrationTest, RegistrationStartFailed_failedWithOthers)
     m_pAosERegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
 
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGISTERING);
-    EXPECT_NE(m_pAosERegistration->m_piTransactionTimer, nullptr);
-    EXPECT_EQ(m_pAosERegistration->m_eImsReasonCode, AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
+    EXPECT_NE(m_pAosERegistration->GetTransactionTimer(), nullptr);
+    EXPECT_EQ(m_pAosERegistration->GetImsReasonCode(), AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
 }
 
 TEST_F(AosERegistrationTest, RegistrationTerminatedDuringCall_PendingTerminated)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosERegistration->SetImsCall(IMS_TRUE);
-    m_pAosERegistration->m_pUtil->AddFeature(
-            TestAosERegistration::FEATURE_IPSEC, m_pAosERegistration->m_nFeature);
+    m_pAosERegistration->SetFeature(
+            m_pAosERegistration->GetFeature() | TestAosERegistration::FEATURE_IPSEC);
     m_pAosERegistration->CreateIpsecHelper();
 
     m_pAosERegistration->Registration_Terminated(IRegistration::REASON_NONE);
 
-    IMS_BOOL bIsFeatureOn = m_pAosERegistration->m_pUtil->IsFeatureOn(
-            TestAosERegistration::PENDING_TERMINATED, m_pAosERegistration->m_nTxnPending);
+    IMS_BOOL bIsFeatureOn = m_pAosERegistration->GetUtil()->IsFeatureOn(
+            TestAosERegistration::PENDING_TERMINATED, m_pAosERegistration->GetTxnPending());
     EXPECT_TRUE(bIsFeatureOn);
 
     m_pAosERegistration->DestroyIpsecHelper();
@@ -1219,7 +1203,7 @@ TEST_F(AosERegistrationTest, RegistrationTerminatedDuringCall_PendingTerminated)
 
 TEST_F(AosERegistrationTest, RegistrationTerminated_ChangeStateToOffline)
 {
-    m_pAosERegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
@@ -1265,7 +1249,7 @@ TEST_F(AosERegistrationTest, NotifyConfigChangedWhenEmergencyCallbackModeSupport
 
 TEST_F(AosERegistrationTest, NotifyConfigChangedWhenEmergencyCallbackModeNotSupported)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_FALSE));
 
@@ -1309,35 +1293,35 @@ TEST_F(AosERegistrationTest, TransactionTrafficPriorityChanged_DoNothing)
 
 TEST_F(AosERegistrationTest, CallbackModeChangedWhenEmergencyCallbackModeNotSupported)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_FALSE));
 
     m_pAosERegistration->CallbackModeChanged(
             EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
 }
 
 TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForCallType)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
     m_pAosERegistration->CallbackModeChanged(
             EmergencyCallbackModeType::CALL, EmergencyCallbackMode::START, 300);
 
-    EXPECT_TRUE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsScbm());
+    EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
 }
 
 TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForSmsTypeDuringRegisteredState)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    m_pAosERegistration->m_piRegContact = &m_objMockIRegContact;
+    m_pAosERegistration->SetRegContact(&m_objMockIRegContact);
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(700));
@@ -1345,9 +1329,9 @@ TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForSmsTypeDuringRegistere
     m_pAosERegistration->CallbackModeChanged(
             EmergencyCallbackModeType::SMS, EmergencyCallbackMode::START, 300);
 
-    EXPECT_FALSE(m_pAosERegistration->m_pEModeInfo->IsEcbm());
-    EXPECT_TRUE(m_pAosERegistration->m_pEModeInfo->IsScbm());
-    EXPECT_FALSE(m_pAosERegistration->m_bIsTransactionStarted);
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
+    EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsScbm());
+    EXPECT_FALSE(m_pAosERegistration->IsTransactionStarted());
 }
 
 TEST_F(AosERegistrationTest, EcbmIsFalseWhenStoppingEcbmCalled)
@@ -1380,18 +1364,18 @@ TEST_F(AosERegistrationTest, ScbmIsOnlyFalseWhenStoppingScbmCalledAfterBothEcbmA
 
 TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmIfESmsIsSet)
 {
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
-    m_pAosERegistration->m_pEModeInfo->SetScbm(IMS_TRUE);
-    m_pAosERegistration->m_pEModeInfo->SetESms(IMS_TRUE);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
+    m_pAosERegistration->GetEModeInfo()->SetESms(IMS_TRUE);
 
     EXPECT_TRUE(m_pAosERegistration->IsRefreshRequiredByCbm());
 }
 
 TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmWhenReRegTried)
 {
-    m_pAosERegistration->m_piRegContact = &m_objMockIRegContact;
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
-    m_pAosERegistration->m_pEModeInfo->SetReRegTryTime(IMS_SYS_GetTimeInSeconds() - 100);
+    m_pAosERegistration->SetRegContact(&m_objMockIRegContact);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetReRegTryTime(IMS_SYS_GetTimeInSeconds() - 100);
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(700));
@@ -1403,9 +1387,9 @@ TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmWhenReRegTried)
 
 TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegTried)
 {
-    m_pAosERegistration->m_piRegContact = &m_objMockIRegContact;
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
-    m_pAosERegistration->m_pEModeInfo->SetReRegTryTime(IMS_SYS_GetTimeInSeconds() - 10);
+    m_pAosERegistration->SetRegContact(&m_objMockIRegContact);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetReRegTryTime(IMS_SYS_GetTimeInSeconds() - 10);
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(700));
@@ -1417,8 +1401,8 @@ TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegTried)
 
 TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmWhenWhenReRegNotTried)
 {
-    m_pAosERegistration->m_piRegContact = &m_objMockIRegContact;
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetRegContact(&m_objMockIRegContact);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(400));
@@ -1430,8 +1414,8 @@ TEST_F(AosERegistrationTest, RefreshIsRequiredByCbmWhenWhenReRegNotTried)
 
 TEST_F(AosERegistrationTest, RefreshIsNotRequiredByCbmWhenWhenReRegNotTried)
 {
-    m_pAosERegistration->m_piRegContact = &m_objMockIRegContact;
-    m_pAosERegistration->m_pEModeInfo = new EmergencyModeInfo();
+    m_pAosERegistration->SetRegContact(&m_objMockIRegContact);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(800));
@@ -1509,7 +1493,7 @@ TEST_F(AosERegistrationTest, FakeModeConditionIfPco5)
 TEST_F(AosERegistrationTest, IsRetryAllowedWhenPcscfAvailable)
 {
     m_objPcscfs.AddElement(AString("192.168.0.101"));  // Adding 2nd P-CSCF
-    m_pAosERegistration->m_nConsecutiveFailure = 1;
+    m_pAosERegistration->SetConsecutiveFailure(1);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(0));
 
     IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
@@ -1520,7 +1504,7 @@ TEST_F(AosERegistrationTest, IsRetryAllowedWhenPcscfAvailable)
 TEST_F(AosERegistrationTest, IsRetryAllowedWhenNoAvailablePcscfs)
 {
     m_objPcscfs.AddElement(AString("192.168.0.101"));  // Adding 2nd P-CSCF
-    m_pAosERegistration->m_nConsecutiveFailure = 2;
+    m_pAosERegistration->SetConsecutiveFailure(2);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(0));
 
     IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
@@ -1530,7 +1514,7 @@ TEST_F(AosERegistrationTest, IsRetryAllowedWhenNoAvailablePcscfs)
 
 TEST_F(AosERegistrationTest, IsRetryAllowedWhenNotReachMaximumRetries)
 {
-    m_pAosERegistration->m_nConsecutiveFailure = 2;
+    m_pAosERegistration->SetConsecutiveFailure(2);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
 
     IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
@@ -1540,7 +1524,7 @@ TEST_F(AosERegistrationTest, IsRetryAllowedWhenNotReachMaximumRetries)
 
 TEST_F(AosERegistrationTest, IsRetryAllowedWhenMaximumNumberOfRetries)
 {
-    m_pAosERegistration->m_nConsecutiveFailure = 3;
+    m_pAosERegistration->SetConsecutiveFailure(3);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
 
     IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
