@@ -365,12 +365,6 @@ public final class ImsPrivateProperties {
         public static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
 
         /**
-         * Stores VoWiFi's entitlement identifier(AT&T: E911 AID).
-         * Value : string
-         */
-        public static final String KEY_VOWIFI_ENTITLEMENT_ID = "vowifi_entitlement_id";
-
-        /**
          * Keeps the test carrier id.
          * Value : int
          */

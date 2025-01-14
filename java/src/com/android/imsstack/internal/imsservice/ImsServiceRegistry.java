@@ -18,6 +18,7 @@ package com.android.imsstack.internal.imsservice;
 
 import android.annotation.NonNull;
 import android.telephony.ims.feature.MmTelFeature;
+import android.telephony.ims.stub.ImsConfigImplBase;
 import android.util.SparseArray;
 
 import com.android.imsstack.util.ImsLog;
@@ -58,6 +59,7 @@ public class ImsServiceRegistry {
     private final int mSlotId;
     private volatile boolean mImsEnabled;
     private volatile MmTelFeature mMmTelFeature;
+    private volatile ImsConfigImplBase mImsConfig;
     private final MmTelFeatureRegistry mMmTelFeatureRegistry;
     private final MmTelMediaRegistry mMmTelMediaRegistry;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -66,6 +68,7 @@ public class ImsServiceRegistry {
         mSlotId = slotId;
         mImsEnabled = true;
         mMmTelFeature = null;
+        mImsConfig = null;
         mMmTelFeatureRegistry = new MmTelFeatureRegistry(slotId);
         mMmTelMediaRegistry = new MmTelMediaRegistry();
     }
@@ -111,6 +114,28 @@ public class ImsServiceRegistry {
         if (!Objects.equals(mMmTelFeature, feature)) {
             mMmTelFeature = feature;
             notifyMmTelFeatureChanged();
+        }
+    }
+
+    /**
+     * Returns a ImsConfigImplBase to access the IMS configurations.
+     *
+     * @return A ImsConfigImplBase.
+     */
+    public ImsConfigImplBase getImsConfig() {
+        return mImsConfig;
+    }
+
+    /**
+     * Sets a ImsConfigImplBase to access of the IMS configurations.
+     *
+     * This is called by the ImsService implementation layer when ImsConfigImpl is instantiated.
+     *
+     * @param imsconfig A ImsConfigImplBase to be set.
+     */
+    public void setImsConfig(ImsConfigImplBase imsconfig) {
+        if (!Objects.equals(mImsConfig, imsconfig)) {
+            mImsConfig = imsconfig;
         }
     }
 

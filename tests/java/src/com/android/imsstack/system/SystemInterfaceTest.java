@@ -40,12 +40,13 @@ import android.os.Parcel;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsMmTelManager;
+import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.stub.ImsConfigImplBase;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.LocationInterface;
@@ -71,6 +72,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
@@ -1383,12 +1385,15 @@ public class SystemInterfaceTest {
     @Test
     @SmallTest
     public void testSystemCallGetWfcAddressId() {
+        ImsConfigImplBase originalImsConfig = ImsServiceRegistry.getInstance(SLOT0).getImsConfig();
+        ImsConfigImplBase mockImsConfigImplBase = Mockito.mock(ImsConfigImplBase.class);
+        ImsServiceRegistry.getInstance(SLOT0).setImsConfig(mockImsConfigImplBase);
         setUpSystemInterface();
         setUpSystem();
         String entitlementId = "123456";
-        setUpSharedPreferences(ImsPrivateProperties.Persistent.KEY_VOWIFI_ENTITLEMENT_ID,
-                entitlementId);
-
+        when(mockImsConfigImplBase.getConfigString(
+                eq(ProvisioningManager.KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID)))
+                .thenReturn(entitlementId);
         byte[] result;
         Parcel data = Parcel.obtain();
         try {
@@ -1409,6 +1414,7 @@ public class SystemInterfaceTest {
         } finally {
             resultData.recycle();
         }
+        ImsServiceRegistry.getInstance(SLOT0).setImsConfig(originalImsConfig);
     }
 
     @Test

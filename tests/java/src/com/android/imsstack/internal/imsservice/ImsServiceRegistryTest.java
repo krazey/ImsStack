@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
 import android.telephony.ims.feature.MmTelFeature;
+import android.telephony.ims.stub.ImsConfigImplBase;
 
 import androidx.test.filters.SmallTest;
 
@@ -46,6 +47,7 @@ public class ImsServiceRegistryTest {
 
     @Mock Context mContext;
     @Mock MmTelFeature mMmTelFeature;
+    @Mock ImsConfigImplBase mImsConfigImplBase;
     @Mock ImsServiceRegistry.Listener mListener;
     private ImsServiceRegistry mServiceRegistry;
 
@@ -64,6 +66,7 @@ public class ImsServiceRegistryTest {
         AppContext.deinit();
         mListener = null;
         mMmTelFeature = null;
+        mImsConfigImplBase = null;
         mContext = null;
     }
 
@@ -75,6 +78,16 @@ public class ImsServiceRegistryTest {
 
         mServiceRegistry.setMmTelFeature(null);
         assertNull(mServiceRegistry.getMmTelFeature());
+    }
+
+    @Test
+    @SmallTest
+    public void setImsConfig() throws Exception {
+        mServiceRegistry.setImsConfig(mImsConfigImplBase);
+        assertEquals(mImsConfigImplBase, mServiceRegistry.getImsConfig());
+
+        mServiceRegistry.setImsConfig(null);
+        assertNull(mServiceRegistry.getImsConfig());
     }
 
     @Test

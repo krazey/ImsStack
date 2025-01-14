@@ -17,6 +17,8 @@ package com.android.imsstack.system;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
+import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.stub.ImsConfigImplBase;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -1441,9 +1443,9 @@ public class SystemInterface implements JniSystemListener {
                 // Need to be checked whether this is necessary or not.
                 out.writeInt(1);
             } else if (method == SystemConstants.GET_WFC_ADDRESS_ID) {
-                out.writeString(ImsPrivateProperties.Persistent.get(
-                        ImsPrivateProperties.Persistent.KEY_VOWIFI_ENTITLEMENT_ID,
-                        "", mSlotId));
+                ImsConfigImplBase config = ImsServiceRegistry.getInstance(mSlotId).getImsConfig();
+                out.writeString(config != null ? config.getConfigString(
+                        ProvisioningManager.KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID) : "");
             }
         }
 
