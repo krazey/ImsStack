@@ -350,6 +350,7 @@
     <int name="ims.hide_mac_address_in_pani_header_int" value="1"/>
     <boolean name="ims.support_country_param_in_pani_header_bool" value="false"/>
     <boolean name="ims.support_local_session_timer_bool" value="false"/>
+    <boolean name="ims.allow_session_timer_turn_off_bool" value="false"/>
     <boolean name="imsemergency.support_ecbm_for_volte_bool" value="false"/>
     <boolean name="imsemergency.support_ecbm_for_vowifi_bool" value="false"/>
     <int name="ims.location_policy_update_type_int" value="0"/>

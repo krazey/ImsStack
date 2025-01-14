@@ -92,8 +92,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
 
     if (pRefreshHelper != IMS_NULL)
     {
-        bTimerOptionSupported = pRefreshHelper->IsSessionTimerSupported(
-                piSsc, pRefreshHelper->IsSessionTimerSupportedBySessionExpires());
+        bTimerOptionSupported = pRefreshHelper->IsSessionTimerSupported(piSsc, IMS_FALSE);
     }
 
     if (CreateResponse(piSsc, nStatusCode, strReason) == IMS_FALSE)

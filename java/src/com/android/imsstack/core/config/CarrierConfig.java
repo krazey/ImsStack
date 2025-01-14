@@ -332,6 +332,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "request_uri_validation_required_in_mid_dialog_bool";
         public static final String KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL =
                 KEY_PREFIX + "session_timer_update_required_in_session_update_by_reinvite_bool";
+        public static final String KEY_ALLOW_SESSION_TIMER_TURN_OFF_BOOL =
+                KEY_PREFIX + "allow_session_timer_turn_off_bool";
         public static final String KEY_ALLOW_SIP_INSTANCE_PARAM_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL =
                 KEY_PREFIX + "allow_sip_instance_param_in_contact_for_non_register_request_bool";
         public static final String KEY_SIP_TIMER_100_TRYING_MILLIS_INT =

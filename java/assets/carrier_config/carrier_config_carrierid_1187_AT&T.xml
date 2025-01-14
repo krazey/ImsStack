@@ -18,6 +18,7 @@
     <!-- Ims General -->
     <boolean name="ims.require_sip_expires_header_in_register_bool" value="true"/>
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <boolean name="ims.allow_session_timer_turn_off_bool" value="true"/>
     <boolean name="ims.use_tuple_element_in_geolocation_pidf_bool" value="true"/>
     <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <int name="imsvoice.sip_status_code_for_rejecting_call_type_change_int" value="200"/>

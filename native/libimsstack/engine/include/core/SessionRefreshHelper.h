@@ -39,12 +39,7 @@ public:
     IMS_BOOL AddSpecificHeaderOnEarlyUpdate(
             IN ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported);
     IMS_SINT32 GetRefreshMethod() const;
-    IMS_BOOL IsSessionTimerSupported(IN const ISipConnection* piSc, IN IMS_BOOL bSent,
-            IN IMS_BOOL bCheckSePresentity = IMS_TRUE);
-    inline IMS_BOOL IsSessionTimerSupportedBySessionExpires() const
-    {
-        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_CHECK_SESSION_EXPIRES) != 0);
-    }
+    IMS_BOOL IsSessionTimerSupported(IN const ISipConnection* piSc, IN IMS_BOOL bSent);
     void StopSessionTimer(IN const ISipConnection* piSc);
     void UpdateTimerOptionOnRequestReceived(IN const ISipConnection* piSc);
 
@@ -92,6 +87,10 @@ private:
     {
         return IsTimerSupportedOnRemoteEnd(TIMER_SUPPORTED_ON_INITIAL_INVITE) ||
                 IsTimerSupportedOnRemoteEnd(TIMER_SUPPORTED_ON_SESSION_UPDATE);
+    }
+    inline IMS_BOOL IsSessionTimerTurnOffAllowed() const
+    {
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_SESSION_TIMER_TURN_OFF_ALLOWED) != 0);
     }
     void NegotiateRefresher(IN IMS_BOOL bTimerOptionSupported);
     void UpdateProperties(IN const ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported,

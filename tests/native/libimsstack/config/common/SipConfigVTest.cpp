@@ -192,12 +192,15 @@ TEST_F(SipConfigVTest, GetSessionHeaders)
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL, _))
             .WillByDefault(ReturnRoundRobin({IMS_FALSE, IMS_TRUE}));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::Ims::KEY_ALLOW_SESSION_TIMER_TURN_OFF_BOOL, _))
+            .WillByDefault(ReturnRoundRobin({IMS_FALSE, IMS_TRUE}));
 
     SipConfigV objSipConfigV(IMS_SLOT_0);
     objSipConfigV.Init();
 
-    IMS_SINT32 nDefaultSessionHeaders = SipConfigV::SESSION_HEADER_SESSION_EXPIRES |
-            SipConfigV::SESSION_HEADER_MIN_SE | SipConfigV::SESSION_HEADER_CHECK_SESSION_EXPIRES;
+    IMS_SINT32 nDefaultSessionHeaders =
+            SipConfigV::SESSION_HEADER_SESSION_EXPIRES | SipConfigV::SESSION_HEADER_MIN_SE;
     EXPECT_EQ(objSipConfigV.GetSessionHeaders(), nDefaultSessionHeaders);
 
     // Refresh
@@ -205,6 +208,7 @@ TEST_F(SipConfigVTest, GetSessionHeaders)
     objListener.CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
 
     nDefaultSessionHeaders |= SipConfigV::SESSION_HEADER_LOCAL_TIMER_REQUIRED;
+    nDefaultSessionHeaders |= SipConfigV::SESSION_HEADER_SESSION_TIMER_TURN_OFF_ALLOWED;
     EXPECT_EQ(objSipConfigV.GetSessionHeaders(), nDefaultSessionHeaders);
 }
 

@@ -191,6 +191,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DI
 const IMS_CHAR
         CarrierConfig::Ims::KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL[] =
                 KEY_IMS_PREFIX "session_timer_update_required_in_session_update_by_reinvite_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_SESSION_TIMER_TURN_OFF_BOOL[] =
+        KEY_IMS_PREFIX "allow_session_timer_turn_off_bool";
 const IMS_CHAR CarrierConfig::Ims::
         KEY_ALLOW_SIP_INSTANCE_PARAM_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL[] =
                 KEY_IMS_PREFIX "allow_sip_instance_param_in_contact_for_non_register_request_bool";
