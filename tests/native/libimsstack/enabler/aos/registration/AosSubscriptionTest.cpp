@@ -146,7 +146,7 @@ public:
 
     inline ITimer* GetTimer() { return m_piRetryTimer; }
 
-    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+    IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
 
     // Functions where calls are being counted
     void ProcessNotifyState_InvalidBody() override

@@ -299,7 +299,7 @@ public:
         return AosRegistration::CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME;
     }
 
-    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+    IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
     IMS_BOOL CheckRadioReadyAndSetTxnPending() override
     {
         m_pCounter->AddCount(__IMS_FUNC__);

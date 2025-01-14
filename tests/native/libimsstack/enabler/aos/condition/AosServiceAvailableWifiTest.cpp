@@ -99,7 +99,7 @@ public:
         m_piTestLocation = piTestLocation;
     }
 
-    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+    IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
 
     // Functions where calls are being counted
     void HandleWifiConnectionChanged() override

@@ -27,7 +27,7 @@ public:
     {
     }
 
-    inline void AddCount(IN const AString strName)
+    inline void AddCount(IN const AString& strName)
     {
         if (m_objCountMap.GetIndexOfKey(strName) < 0)
         {
@@ -39,7 +39,7 @@ public:
         }
     }
 
-    inline IMS_UINT32 GetCount(IN const AString strName)
+    inline IMS_UINT32 GetCount(IN const AString& strName)
     {
         return (m_objCountMap.GetIndexOfKey(strName) >= 0) ? m_objCountMap.GetValue(strName) : 0;
     }

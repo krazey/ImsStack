@@ -75,7 +75,7 @@ public:
         m_bAvailableLastNotified = bAvailable;
     }
 
-    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+    IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
 
     // Functions where calls are being counted
     void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) override
