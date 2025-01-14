@@ -41,6 +41,7 @@ import org.w3c.dom.Document;
 
 public class SscTransaction {
     public static final int EVENT_SEND_HTTP_REQUEST = 1001;
+    private static final int DEFAULT_GBA_TIMEOUT_SEC = 30;
 
     private final int mSlotId;
     private final SscXmlGov mXmlGov;
@@ -450,7 +451,7 @@ public class SscTransaction {
         String securityProtocol = authAgent.getCipherSuite();
 
         GbaCredentials gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,
-                securityProtocol, forceBootStrapping);
+                securityProtocol, forceBootStrapping, DEFAULT_GBA_TIMEOUT_SEC);
         if (gbaCredentials == null || gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
             ImsLog.e(mSlotId, "Getting gba key failure");
             authAgent.setIsCredentialInfoUpdated(false);
