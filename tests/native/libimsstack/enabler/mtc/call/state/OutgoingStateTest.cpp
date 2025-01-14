@@ -281,76 +281,19 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedIgnoredIfConfigOn)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
 }
 
-TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfNoUserTerminateCase)
+TEST_F(OutgoingStateTest, ResponseWaitTimeoutForReasonExpirationUpdatesReason)
 {
-    EXPECT_CALL(objAosConnector, Control).Times(0);
-
-    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
-    const CallReasonInfo objReason(CODE_UNSPECIFIED);
-    pOutgoingState->Terminate(objReason);
-}
-
-TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIf100WaitTimerIsNotYetExpired)
-{
-    EXPECT_CALL(objAosConnector, Control).Times(0);
-
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
-    pOutgoingState->Terminate(objReason);
-}
 
-TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponse)
-{
-    EXPECT_CALL(objAosConnector, Control).Times(0);
-
-    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
-            GetInt(ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT))
-            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(8000));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
+            .WillByDefault(Return(IMS_FALSE));
 
-    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
-    const CallReasonInfo objReason(CODE_USER_TERMINATED);
-    pOutgoingState->Terminate(objReason);
-}
-
-TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponseInWifi)
-{
-    EXPECT_CALL(objAosConnector, Control).Times(0);
-
-    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationProxy,
-            GetInt(ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT))
-            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
-
-    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
-    const CallReasonInfo objReason(CODE_USER_TERMINATED);
-    pOutgoingState->Terminate(objReason);
-}
-
-TEST_F(OutgoingStateTest, HandleB1TimerIsHandled)
-{
-    EXPECT_CALL(objAosConnector, Control).Times(1);
-
-    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationProxy,
-            GetInt(ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT))
-            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
-
-    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
-    const CallReasonInfo objReason(CODE_USER_TERMINATED);
-    pOutgoingState->Terminate(objReason);
-}
-
-TEST_F(OutgoingStateTest, HandleB1TimerIsHandledInWifi)
-{
-    EXPECT_CALL(objAosConnector, Control).Times(1);
-
-    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationProxy,
-            GetInt(ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT))
-            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
-
-    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
-    const CallReasonInfo objReason(CODE_USER_TERMINATED);
+    EXPECT_CALL(objMtcSession,
+            Terminate(_,
+                    CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT)));
     pOutgoingState->Terminate(objReason);
 }
 
@@ -948,11 +891,11 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
             GetBoolean(ConfigEmergency::
                             KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    ImsVector<AString> objArrary;
+    ImsVector<AString> objArray;
     ON_CALL(*pConfigurationProxy,
             GetStringArray(
                     ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY))
-            .WillByDefault(Return(objArrary));
+            .WillByDefault(Return(objArray));
     ON_CALL(objService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
     ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
@@ -968,7 +911,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
 TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
 {
     ON_CALL(objService, GetSrvccState()).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT))
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
@@ -986,7 +929,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
 
-    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
@@ -1494,9 +1437,9 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStopsTimersIfNot100)
 
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(SipStatusCode::SC_183));
-    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT))
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
@@ -1514,9 +1457,9 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStops100WaitTimerIf1
 
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(SipStatusCode::SC_100));
-    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT))
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
@@ -1633,9 +1576,9 @@ TEST_F(OutgoingStateTest, SessionRprReceivedStopsTimers)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT))
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));

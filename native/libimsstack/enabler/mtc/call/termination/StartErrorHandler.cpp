@@ -147,8 +147,14 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
     {
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END:
             break;
-        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE:
-            ControlAos(ImsAosControl::PCSCF_NEXT);
+        case ConfigVoice::
+                MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB:
+            if (m_objContext.GetService().IsCsfbAvailable())
+            {
+                nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+                nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
+            }
+            ControlAos(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
             break;
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
@@ -177,7 +183,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             nReason = CODE_INTERNAL_REDIAL;
             nExtraCode = EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT;
             break;
-        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT:
+        default:  // MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT:
             return HandleRedialByNetworkContext();
     }
 

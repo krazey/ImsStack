@@ -60,41 +60,49 @@ protected:
 TEST_F(MtcTimerWrapperTest, StartStopInvokesAddingRemovingTimer)
 {
     EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
-    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    pMtcTimerWrapper->Start(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON, nAnyDuration);
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 
     EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer);
-    pMtcTimerWrapper->Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT);
-    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    pMtcTimerWrapper->Stop(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 }
 
 TEST_F(MtcTimerWrapperTest, StartDoesNothingWithInvalidDuration)
 {
     EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper)).Times(0);
 
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, -1);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON, -1);
 
-    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 }
 
 TEST_F(MtcTimerWrapperTest, StartInvokesStopIfExistedType)
 {
     EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
-    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    pMtcTimerWrapper->Start(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON, nAnyDuration);
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 
     EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer);
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, -1);
-    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON, -1);
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 }
 
 TEST_F(MtcTimerWrapperTest, StartInvokesAddingTimerWithDuration0)
 {
     EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(0, pMtcTimerWrapper));
 
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, 0);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON, 0);
 
-    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 }
 
 TEST_F(MtcTimerWrapperTest, StopDoesNothingWithNotExistedType)
@@ -133,9 +141,11 @@ TEST_F(MtcTimerWrapperTest, TimerTimerExpiredRemovesTimerAndNotifies)
 {
     EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
 
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
+    pMtcTimerWrapper->Start(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON, nAnyDuration);
 
-    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
     EXPECT_FALSE(bTimerExpired);
 
     EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer);
@@ -145,7 +155,8 @@ TEST_F(MtcTimerWrapperTest, TimerTimerExpiredRemovesTimerAndNotifies)
     ITimer* piTimer = objTimerService.CreateTimer();
     pMtcTimerWrapper->Timer_TimerExpired(piTimer);
 
-    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(
+            MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
     EXPECT_TRUE(bTimerExpired);
 }
 

@@ -76,15 +76,13 @@ protected:
 
 private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
-    IMS_BOOL HandleB1TimerAfterTerminate(
-            IN IMtcSession* piMtcSession, IN const CallReasonInfo& objReason);
+    CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode);
     CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void OnStarted(IN IMtcSession& objMtcSession);
     void OnStartFailed(
             IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
 
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
-    IMS_BOOL m_bTimer100WaitExpired;
     IMS_BOOL m_bWaitingRedial;
 };
 

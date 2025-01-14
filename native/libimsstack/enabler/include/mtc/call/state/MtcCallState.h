@@ -155,9 +155,9 @@ public:
 
     enum TimerType
     {
-        TIMER_MO_100_WAIT,
         TIMER_MO_18X_WAIT,
         TIMER_MO_NOANSWER,
+        TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
         TIMER_MT_ALERTING,
         TIMER_MT_PRACK_WAIT,
 
