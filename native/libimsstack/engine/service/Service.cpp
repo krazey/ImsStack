@@ -401,15 +401,16 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN const SipAddre
         }
 
         // Sets P-Preferred-Identity (except for REGISTER) header fields
-        // RFC 3325, INVITE/BYE/OPTIONS/SUBSCRIBE/NOTIFY/REFER
-        // RFC 5876, all requests except for ACK/CANCEL
-        if (!SetPPreferredIdentityHeader(pSipConfigV->GetPreferredId(), piSipMsg))
+        if (IsPpiHeaderRequired(objMethod))
         {
-            piScc->Close();
-            Ims::SetLastError(ImsError::GENERAL_ERROR);
+            if (!SetPPreferredIdentityHeader(pSipConfigV->GetPreferredId(), piSipMsg))
+            {
+                piScc->Close();
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
-            IMS_TRACE_E(0, "Setting P-Preferred-Identity header failed", 0, 0, 0);
-            return IMS_NULL;
+                IMS_TRACE_E(0, "Setting P-Preferred-Identity header failed", 0, 0, 0);
+                return IMS_NULL;
+            }
         }
     }
 
@@ -595,15 +596,16 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
         }
 
         // Sets P-Preferred-Identity (except for REGISTER) header fields
-        // RFC 3325, INVITE/BYE/OPTIONS/SUBSCRIBE/NOTIFY/REFER
-        // RFC 5876, all requests except for ACK/CANCEL
-        if (!SetPPreferredIdentityHeader(pSipConfigV->GetPreferredId(), piSipMsg))
+        if (IsPpiHeaderRequired(objMethod))
         {
-            piScc->Close();
-            Ims::SetLastError(ImsError::GENERAL_ERROR);
+            if (!SetPPreferredIdentityHeader(pSipConfigV->GetPreferredId(), piSipMsg))
+            {
+                piScc->Close();
+                Ims::SetLastError(ImsError::GENERAL_ERROR);
 
-            IMS_TRACE_E(0, "Setting P-Preferred-Identity header failed", 0, 0, 0);
-            return IMS_NULL;
+                IMS_TRACE_E(0, "Setting P-Preferred-Identity header failed", 0, 0, 0);
+                return IMS_NULL;
+            }
         }
     }
 
