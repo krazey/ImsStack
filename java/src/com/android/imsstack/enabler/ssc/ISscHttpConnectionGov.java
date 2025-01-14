@@ -42,7 +42,8 @@ public interface ISscHttpConnectionGov {
     /**
      * Call sendRequest() of SscHttpConnection for a given slotId
      */
-    int  sendRequest(int slotId, int requestType, String requestUri, String xui, String body);
+    int  sendRequest(int slotId, int requestType, String requestUri, String xui, String body,
+            int timeout);
 
     /**
      * Call getInputStream() of SscHttpConnection for a given slotId

@@ -43,6 +43,7 @@ public class SscTransaction {
     public static final int EVENT_SEND_HTTP_REQUEST = 1001;
     private static final int DEFAULT_GBA_TIMEOUT_SEC = 30;
     private static final int DEFAULT_PDN_CONNECTION_TIMEOUT_MS = 30 * 1000; // 30 sec
+    private static final int DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS = 30 * 1000; // 30 sec
 
     private final int mSlotId;
     private final SscXmlGov mXmlGov;
@@ -224,7 +225,7 @@ public class SscTransaction {
 
             ISscHttpConnectionGov httpConnection = getSscHttpConnectionGov();
             int responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                    xui, body);
+                    xui, body, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
             ImsLog.i(mSlotId, "response Code : " + responseCode);
 
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED) {
@@ -236,7 +237,7 @@ public class SscTransaction {
                     }
 
                     responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                            xui, body);
+                            xui, body, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
                 }
             }
 

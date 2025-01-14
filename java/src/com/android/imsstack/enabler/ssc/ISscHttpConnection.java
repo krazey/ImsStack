@@ -74,18 +74,21 @@ public interface ISscHttpConnection {
     void close();
 
     /**
-     * Sending HTTP/HTTPS request to requestUri with body
+     * Sending HTTP/HTTPS request to requestUri with body.
      *
-     * @param requestType The request type, one of {@link HttpRequestType}
-     * @param requestUri The URI used for HTTP request
-     * @param xui The URI getting from P-Associated-Uri of IMS registration
-     * @param body The XML body that is set in HTTP PUT request
-     * @return The HTTP response code from HTTP server or one of {@link HttpRequestFailureReason}
+     * @param requestType The request type, one of {@link HttpRequestType}.
+     * @param requestUri The URI used for HTTP request.
+     * @param xui The URI getting from P-Associated-Uri of IMS registration.
+     * @param body The XML body that is set in HTTP PUT request.
+     * @param timeoutMs The timer to wait for completion of the HTTP request.
+     *
+     * @return The HTTP response code from HTTP server or one of {@link HttpRequestFailureReason}.
      */
-    int sendRequest(@HttpRequestType int requestType, String requestUri, String xui, String body);
+    int sendRequest(@HttpRequestType int requestType, String requestUri, String xui, String body,
+            int timeoutMs);
 
     /**
-     * Returns XML data received from HTTP server
+     * Returns XML data received from HTTP server.
      */
     Document getInputStream();
 }
