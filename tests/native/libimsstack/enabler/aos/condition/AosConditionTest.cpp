@@ -101,7 +101,7 @@ public:
 
     inline void SetAosBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 
-    inline void SetAosBlockToCellur(IN IAosBlock* piBlock)
+    inline void SetAosBlockToCellular(IN IAosBlock* piBlock)
     {
         m_pAvailableCellular->SetBlock(piBlock);
     }
@@ -803,7 +803,7 @@ TEST_F(AosConditionTest, ResetBlockWhenNetTrackerStatusChangedWithServiceIn)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
 
-    m_pAosCondition->SetAosBlockToCellur(&m_objMockIAosBlock);
+    m_pAosCondition->SetAosBlockToCellular(&m_objMockIAosBlock);
 
     // WHEN
     m_pAosCondition->NetTracker_StatusChanged();
@@ -824,7 +824,7 @@ TEST_F(AosConditionTest, SetBlockWhenNetTrackerStatusChangedWithServiceOut)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlockToCellur(&m_objMockIAosBlock);
+    m_pAosCondition->SetAosBlockToCellular(&m_objMockIAosBlock);
 
     // WHEN
     m_pAosCondition->NetTracker_StatusChanged();
@@ -857,7 +857,7 @@ TEST_F(AosConditionTest, Block_Changed)
     EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_TRUE));
 
     // Set IAosBlock
-    m_pAosCondition->SetAosBlockToCellur(&m_objMockIAosBlock);
+    m_pAosCondition->SetAosBlockToCellular(&m_objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosBlock, IsCleared(_))
             .Times(AnyNumber())
