@@ -4512,7 +4512,7 @@ TEST_F(AosRegistrationTest, TriggerRegReInitateIfFailToProcessAuthenticationChal
 
     EXPECT_FALSE(bResponseToChallenge);
     EXPECT_EQ(
-            m_pAosRegistration->GetIpsecBlockReason(), AosRegistration::IPSEC_BLOCK_AUTENTICATION);
+            m_pAosRegistration->GetIpsecBlockReason(), AosRegistration::IPSEC_BLOCK_AUTHENTICATION);
 }
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseIsNotHandledWhenIpsecIsNotSupported)

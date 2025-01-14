@@ -4913,7 +4913,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
             if (m_nAuthIpsecCount >
                     GET_N_CONFIG(m_nSlotId)->GetRegRetryCountWithIpsecOnAuthFailure())
             {
-                UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_AUTENTICATION);
+                UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_AUTHENTICATION);
             }
 
             if (GetState() == STATE_REGISTERING)
