@@ -82,6 +82,8 @@ private:
     void OnStarted(IN IMtcSession& objMtcSession);
     void OnStartFailed(
             IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
+    CallReasonInfo ConvertConnectionFailureToCallReasonInfo(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
 
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
     IMS_BOOL m_bTimer100WaitExpired;

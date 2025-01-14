@@ -55,6 +55,7 @@ public:
     MockMtcConfigurationProxy* pConfigurationProxy;
     TestImsRadioService objImsRadioService;
     TestTimerService objTimerService;
+    CallInfo objCallInfo;
     MockITimer& objTimer;
     EpsFallbackTrigger* pEpsFbTrigger;
 
@@ -72,6 +73,7 @@ protected:
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         pEpsFbTrigger = new EpsFallbackTrigger(objContext);
     }
@@ -85,6 +87,87 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
     }
 };
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseIfMt)
+{
+    objCallInfo.ePeerType = PeerType::MT;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseIfNotInNr)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsTrueForAcBlocked)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));
+}
+
+TEST_F(EpsFallbackTriggerTest,
+        ShouldTriggerByReasonInfoReturnsFalseForRrcRejectIfRejectTimeIsLessThanMoRequestTimeout)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(1000));
+
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_INTERNAL_RRC_REJECT, 2000)));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseForRrcRejectIfConfigOff)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(2000));
+
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_INTERNAL_RRC_REJECT, 2000)));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsTrueForRrcReject)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(2000));
+
+    EXPECT_TRUE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_INTERNAL_RRC_REJECT, 2000)));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseForOtherReasons)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_RADIO_INTERNAL_ERROR)));
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));
+}
 
 TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfNotInNr)
 {

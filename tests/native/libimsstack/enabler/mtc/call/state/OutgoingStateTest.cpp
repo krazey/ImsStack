@@ -162,6 +162,8 @@ protected:
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(12345));
 
+        objCallInfo.ePeerType = PeerType::MO;
+
         pOutgoingState = new OutgoingState(objCallContext);
     }
 
@@ -422,8 +424,20 @@ TEST_F(OutgoingStateTest, OnConnectionFailedTerminatesCall)
             pOutgoingState->OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 2));
 }
 
+TEST_F(OutgoingStateTest, OnConnectionFailedTriggersEpsfbIfRequired)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_CALL(
+            *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE));
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 2));
+}
+
 TEST_F(OutgoingStateTest, OnConnectionFailedPerformsCsfb)
 {
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(IMS_NULL));
@@ -442,6 +456,7 @@ TEST_F(OutgoingStateTest, OnConnectionFailedPerformsCsfb)
 
 TEST_F(OutgoingStateTest, OnConnectionFailedDoesNothingIfAlreadyReceivedResponse)
 {
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
@@ -485,6 +500,7 @@ TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objRedialHelper, Redial).Times(0);
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted).Times(0);
@@ -492,11 +508,12 @@ TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback
             CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
 
-TEST_F(OutgoingStateTest, HandleAosConnectedRedialsIfWaitingEpsFallback)
+TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesAndRedialsIfWaitingEpsFallbackForNoResponse)
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
 
     const CallReasonInfo objReasonByEpsfb(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
     EXPECT_CALL(objController, GetRedialHelper(Ref(objCallContext), objReasonByEpsfb))
@@ -504,6 +521,20 @@ TEST_F(OutgoingStateTest, HandleAosConnectedRedialsIfWaitingEpsFallback)
     EXPECT_CALL(objRedialHelper, Redial).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+}
+
+TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesIfWaitingEpsFallbackForNoTrigger)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(6000));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objController, GetRedialHelper(_, _)).WillByDefault(ReturnRef(objRedialHelper));
+
+    EXPECT_CALL(objRedialHelper, Redial).Times(0);
+    EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
+    EXPECT_EQ(
+            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
 
 TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)

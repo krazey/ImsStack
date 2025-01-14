@@ -241,7 +241,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
         case IMtcBlockChecker::Result::Status::BLOCKED:
             m_pBlockChecker.reset();
 
-            if (IsEpsFallbackRequired(objResult.objReason))
+            if (EpsFallbackTrigger::ShouldTriggerByReasonInfo(m_objContext, objResult.objReason))
             {
                 m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
                         EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
@@ -492,32 +492,6 @@ CallStateName IdleState::ContinueStartUssi()
     StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
     StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
     return CallStateName::OUTGOING;
-}
-
-IMS_BOOL IdleState::IsEpsFallbackRequired(IN const CallReasonInfo& objReason) const
-{
-    if (m_objContext.GetCallInfo().ePeerType != PeerType::MO || !m_objContext.GetService().IsNr())
-    {
-        return IMS_FALSE;
-    }
-
-    if (objReason.nCode == CODE_ACCESS_CLASS_BLOCKED)
-    {
-        return IMS_TRUE;
-    }
-    else if (objReason.nCode == CODE_INTERNAL_RRC_REJECT &&
-            m_objContext.GetConfigurationProxy().GetBoolean(
-                    ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL))
-    {
-        const IMS_UINT32 nRrcRejectWaitTimeMillis = objReason.nExtraCode;
-        const IMS_UINT32 nMoCallRequestTimeoutMillis = m_objContext.GetConfigurationProxy().GetInt(
-                ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT);
-        IMS_TRACE_D("RRC reject wait time: %d, MO call request timeout duration: %d",
-                nRrcRejectWaitTimeMillis, nMoCallRequestTimeoutMillis, 0);
-
-        return nRrcRejectWaitTimeMillis >= nMoCallRequestTimeoutMillis;
-    }
-    return IMS_FALSE;
 }
 
 PRIVATE

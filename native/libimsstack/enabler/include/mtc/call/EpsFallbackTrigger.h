@@ -23,6 +23,8 @@
 
 class IMtcCallContext;
 class MtcConfigurationProxy;
+struct CallReasonInfo;
+
 enum class EpsFallbackReason
 {
     NO_NETWORK_TRIGGER,
@@ -37,6 +39,8 @@ public:
     EpsFallbackTrigger(IN const EpsFallbackTrigger&) = delete;
     EpsFallbackTrigger& operator=(IN const EpsFallbackTrigger&) = delete;
 
+    static IMS_BOOL ShouldTriggerByReasonInfo(
+            IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason);
     static IMS_BOOL ShouldTriggerByWatchdogTimer(IN IMtcCallContext& objContext);
     static IMS_BOOL ShouldTriggerByMoRequestTimeout(IN IMtcCallContext& objContext);
 
