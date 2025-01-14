@@ -47,28 +47,44 @@ using ::testing::SetArgPointee;
 const IMS_UINT32 TIMER_ICC_LOADED_WAITING = 100;
 const IMS_UINT32 TIMER_PHONE_RESTART_RECOVERY = 101;
 
-#define DECLARE_USING(Base)                           \
-    using Base::CheckIsimValues;                      \
-    using Base::ConfigUpdate_NotifyUpdate;            \
-    using Base::IdentityPriorityToString;             \
-    using Base::Init;                                 \
-    using Base::IsProvisioned;                        \
-    using Base::IsRefreshStarted;                     \
-    using Base::IsTimerRunning;                       \
-    using Base::NConfiguration_NotifyConfigChanged;   \
-    using Base::PrintIdentity;                        \
-    using Base::ServicePhone_IsimStateChanged;        \
-    using Base::ServicePhone_PhoneNumberStateChanged; \
-    using Base::SetProvisioned;                       \
-    using Base::SetUsim;                              \
-    using Base::StartTimer;                           \
-    using Base::StateToString;                        \
-    using Base::SubscriberConfig_InitCompleted;       \
-    using Base::SubscriberConfig_NotifyError;         \
-    using Base::SubscriberConfig_RefreshCompleted;    \
-    using Base::SubscriberConfig_RefreshStarted;      \
-    using Base::Timer_TimerExpired;                   \
-    using Base::TimerToString;
+#define DECLARE_USING(Base)                              \
+    using Base::CheckIsimValues;                         \
+    using Base::ConfigUpdate_NotifyUpdate;               \
+    using Base::ConfigureAsDefault;                      \
+    using Base::ConfigureAsFake;                         \
+    using Base::GetIsimAt;                               \
+    using Base::IdentityPriorityToString;                \
+    using Base::Init;                                    \
+    using Base::IsPrimaryImpuValid;                      \
+    using Base::IsProvisioned;                           \
+    using Base::IsRefreshStarted;                        \
+    using Base::IsSipUri;                                \
+    using Base::IsTimerRunning;                          \
+    using Base::NConfiguration_NotifyConfigChanged;      \
+    using Base::NotifyMonitorState;                      \
+    using Base::NotifyState;                             \
+    using Base::PrintIdentity;                           \
+    using Base::ProcessIsimStateChange;                  \
+    using Base::ProcessPhoneNumberAvailable;             \
+    using Base::ProcessPhoneRestarted;                   \
+    using Base::ProcessPhoneRestartRecoveryTimerExpired; \
+    using Base::ReconfigureFallback;                     \
+    using Base::ServicePhone_IsimStateChanged;           \
+    using Base::ServicePhone_PhoneNumberStateChanged;    \
+    using Base::SetIsim;                                 \
+    using Base::SetProvisioned;                          \
+    using Base::SetUsim;                                 \
+    using Base::StateToString;                           \
+    using Base::StartTimer;                              \
+    using Base::SubscriberConfig_InitCompleted;          \
+    using Base::SubscriberConfig_NotifyError;            \
+    using Base::SubscriberConfig_RefreshCompleted;       \
+    using Base::SubscriberConfig_RefreshStarted;         \
+    using Base::Timer_TimerExpired;                      \
+    using Base::TimerToString;                           \
+    using Base::UpdateImpuFromIsim;                      \
+    using Base::UpdateImsi;                              \
+    using Base::UpdateSubscriberInfoWithTempImpu;
 
 class TestAosSubscriberManager : public AosSubscriberManager
 {
@@ -159,80 +175,6 @@ public:
     {
         m_bPrioritizeImsiBasedUri = bEnable;
     }
-
-    // TEST : GetIsimAt
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetIsimAt);
-    // TEST : ConfigureAsDefault
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsConfigureAsDefaultWhenIsimTrueProvisioningDone);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsDefaultWithoutSubscriberConfig);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsDefaultWhenIsimTrueProvisioningNotDone);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsDefaultWhenFailedGetImpuFromIsim);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsConfigureAsDefaultWhenUsimAndValidTempImpu);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsDefaultWhenFailedUpdateSubscriberInfo);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsConfigureAsDefaultWhenConf);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsDefaultWhenInvalidPuids);
-    // TEST : ConfigureAsFake
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsConfigureAsFake);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenSubscriberConfigFakeIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenGetInvalidPuids);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenGetInvalidImpu);
-    // TEST : UpdateImpuFromIsim
-    FRIEND_TEST(AosSubscriberManagerTest, FailedGetImpuFromIsimWhenGetEmptyPuids);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetImpuWhenLimitedAdminSmsModeAndOneValidImpu);
-    FRIEND_TEST(
-            AosSubscriberManagerTest, SucceedsGetImpuWhenLimitedAdminSmsModeAndInvalidPrimaryImpu);
-    FRIEND_TEST(
-            AosSubscriberManagerTest, SucceedsGetImpuWhenSipImpuAndPhoneNumberIsGreaterThenMsisdn);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetImpuWhenSipImpuAndPhoneNumberIsLessThenMsisdn);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetImpuWhenSecondImpuIsNotSip);
-    // TEST : UpdateSubscriberInfoWithTempImpu
-    FRIEND_TEST(
-            AosSubscriberManagerTest, UpdateSubscriberInfoWithTempImpuReturnsFalseWhenInvalidImpu);
-    FRIEND_TEST(
-            AosSubscriberManagerTest, UpdateSubscriberInfoWithTempImpuReturnsFalseWhenInvalidImpi);
-    FRIEND_TEST(
-            AosSubscriberManagerTest, UpdateSubscriberInfoWithTempImpuReturnsFalseWhenInvalidHdn);
-    // TEST : UpdateImsi
-    FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateImsiWhenSubsInfoIsNull);
-    // TEST : UpdateImsIdentity
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsUpdateImsIdentity);
-    FRIEND_TEST(
-            AosSubscriberManagerTest, ReturnsFalseWhenFailedUpdateImsIdentityWithoutIConfigurable);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenFailedUpdateImsIdentityWithIsimIdentity);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenFailedUpdateImsIdentityWithUsimIdentity);
-    // TEST : ReconfigureFallback
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueProcessFallback);
-    FRIEND_TEST(AosSubscriberManagerTest, ReconfigureFallbackReturnsFalseWhenNoFallbackNeeded);
-    // TEST : ProcessPhoneNumberAvailable
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenTimerIsRunning);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenIsNotReady);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenSupportIsim);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenNotSupportUsim);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenInvalidImpus);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenInvalidTempImpus);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenEqualsTempImpu);
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsProcessPhoneNumberAvailable);
-    // TEST : ProcessIsimStateChange
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithLoaded);
-    FRIEND_TEST(
-            AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithRefreshCompleted);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithNotReady);
-    // TEST : ProcessPhoneRestarted
-    FRIEND_TEST(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted);
-    // TEST : ProcessPhoneRestartRecoveryTimerExpired
-    FRIEND_TEST(AosSubscriberManagerTest, ShouldStopTimerPhoneRestartRecoveryWhenTimerExpired);
-    // TEST : NotifyState
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsNotifyState);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedNotifyStateWhenEmptyListener);
-    // TEST : NotifyMonitorState
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedsNotifyMonitorState);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedNotifyMonitorStateWhenEmptyListener);
-    // TEST : IsPrimaryImpuValid
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnFalsePrimaryImpuValidWhenInvalidPhoneNumber);
-    // TEST : IsSipUri
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenIsSipUriWithZeroImpu);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSip);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSips);
 };
 
 class AosSubscriberManagerTest : public ::testing::Test
