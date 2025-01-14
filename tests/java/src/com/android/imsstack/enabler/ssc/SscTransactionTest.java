@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.ssc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -109,6 +111,7 @@ public class SscTransactionTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        when(mMockSscUtils.getCurrentUtcTimeEpochMs()).thenReturn(1000L);
         when(mMockSscConnection.isConnected()).thenReturn(true);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false);
         when(mMockSscXui.getXui(eq(SLOT_0), eq(null))).thenReturn(mDefaultXui);
@@ -144,6 +147,46 @@ public class SscTransactionTest {
         AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT_0);
         mSscTransaction.close();
         SscConfig.clear(SLOT_0);
+    }
+
+    @Test
+    public void startTransaction_setTransactionExpiryTime() {
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(30);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        assertNotEquals(0, mSscTransaction.getTransactionExpiryTime());
+    }
+
+    @Test
+    public void startTransaction_notSetTransactionExpiryTime() {
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(0);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        assertEquals(0, mSscTransaction.getTransactionExpiryTime());
+    }
+
+    @Test
+    public void startTransaction_transactionTimeoutBeforePdnRequest() {
+        int transactionTimeoutSec = 5;
+        Long timeAtInitial = 1000L;
+        Long timeAtPdnRequest = timeAtInitial + 10000L; // 10s
+
+        when(mMockSscUtils.getCurrentUtcTimeEpochMs()).thenReturn(timeAtInitial, timeAtPdnRequest);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(transactionTimeoutSec);
+        when(mMockSscConnection.isConnected()).thenReturn(false);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        verify(mMockSscConnection, times(0)).connect(anyLong());
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
@@ -351,6 +394,99 @@ public class SscTransactionTest {
     }
 
     @Test
+    public void sendRequest_transactionTimeoutBeforeHttpRequest() {
+        int transactionTimeoutSec = 15;
+        Long timeAtInitial = 1000L;
+        Long timeAtHttpRequest = timeAtInitial + 20000L; // 20s
+
+        when(mMockSscUtils.getCurrentUtcTimeEpochMs()).thenReturn(timeAtInitial, timeAtHttpRequest);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(transactionTimeoutSec);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+        waitThreadWorkFinished();
+
+        verifyNoMoreInteractions(mMockSscHttpConnectionGov);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
+    }
+
+    @Test
+    public void sendRequest_transactionTimeoutBeforeGbaRequest() {
+        int transactionTimeoutSec = 25;
+        Long timeAtInitial = 1000L;
+        Long timeAtHttpRequest = timeAtInitial + 20000L; // 20s
+        Long timeAtGbaRequest = timeAtInitial + 30000L; // 30s
+
+        when(mMockSscUtils.getCurrentUtcTimeEpochMs())
+                .thenReturn(timeAtInitial, timeAtHttpRequest, timeAtGbaRequest);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(transactionTimeoutSec);
+        when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false, true);
+        when(mMockSscHttpConnectionGov.sendRequest(eq(SLOT_0),
+                eq(ISscHttpConnection.HTTP_REQUEST_GET), eq(mDefaultRequestUri), eq(mDefaultXui),
+                eq(""), anyInt())).thenReturn(SscConstant.HTTP_UNAUTHORIZED);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+        waitThreadWorkFinished();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
+                eq(ISscHttpConnection.HTTP_REQUEST_GET), eq(mDefaultRequestUri), eq(mDefaultXui),
+                eq(""), anyInt());
+        verify(mMockSscAuthAgent, atLeast(2)).isCredentialInfoUpdated();
+        verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
+        verify(mMockSscServiceStateAgent).setGbaRequestFailed(eq(SLOT_0), eq(true));
+        verifyNoMoreInteractions(mMockSscAuthAgent);
+        verifyNoMoreInteractions(mMockGbaAgent);
+        verifyNoMoreInteractions(mMockSscHttpConnectionGov);
+
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
+    }
+
+    @Test
+    public void sendRequest_transactionTimeoutBefore2ndHttpRequest() {
+        int transactionTimeoutSec = 35;
+        Long timeAtInitial = 1000L;
+        Long timeAtHttpRequest1st = timeAtInitial + 20000L; // 20s
+        Long timeAtGbaRequest = timeAtInitial + 30000L; // 30s
+        Long timeAtHttpRequest2nd = timeAtInitial + 40000L; // 40s
+        int expectedHttpRequestTimeout =
+                (int) (timeAtInitial + transactionTimeoutSec * 1000L - timeAtHttpRequest1st);
+        String nafFqdn = "xcap.3gpp.com";
+        String securityProtocol = "TLS_NULL_WITH_NULL_NULL";
+        int appType = SscConstant.APPTYPE_USIM;
+
+        when(mMockSscUtils.getCurrentUtcTimeEpochMs()).thenReturn(timeAtInitial,
+                timeAtHttpRequest1st, timeAtGbaRequest, timeAtHttpRequest2nd);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(transactionTimeoutSec);
+        when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false, true);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
+                mDefaultRequestUri, mDefaultXui, "", expectedHttpRequestTimeout))
+                .thenReturn(SscConstant.HTTP_UNAUTHORIZED);
+        when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
+        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
+        when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt()))
+                .thenReturn(new GbaCredentials("B-TID", "Ks_NAF_KEY"));
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+        waitThreadWorkFinished();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
+                mDefaultRequestUri, mDefaultXui, "", expectedHttpRequestTimeout);
+        verify(mMockSscAuthAgent, atLeast(2)).isCredentialInfoUpdated();
+        verify(mMockGbaAgent).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
+                eq(securityProtocol), eq(true), anyInt());
+        verifyNoMoreInteractions(mMockSscHttpConnectionGov);
+
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
+    }
+
+    @Test
     public void sendRequest_unauthorizedTwiceWithGbaKey() {
         String nafFqdn = "xcap.3gpp.com";
         String securityProtocol = "TLS_NULL_WITH_NULL_NULL";
@@ -549,6 +685,73 @@ public class SscTransactionTest {
 
         verifyTransactionSuccess(SscConstant.EVENT_SSC_QUERY_CF,
                 ISscHttpConnection.HTTP_REQUEST_GET);
+    }
+
+    @Test
+    public void startGetTransaction_successWithinTransactionTimeout() {
+        int transactionTimeoutSec = 25;
+        Long timeAtInitial = 1000L;
+        Long timeAtPdnRequest = timeAtInitial + 10000L; // 10s
+        Long timeAtHttpRequest = timeAtInitial + 20000L; // 20s
+        int expectedHttpRequestTimeout =
+                (int) (timeAtInitial + transactionTimeoutSec * 1000L - timeAtHttpRequest);
+
+        when(mMockSscUtils.getCurrentUtcTimeEpochMs()).thenReturn(timeAtInitial, timeAtPdnRequest,
+                timeAtHttpRequest);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(transactionTimeoutSec);
+        int httpSuccessResponse = SscConstant.HTTP_OK;
+        SscServiceQueryData queryData = getQueryData(SscConstant.CONDITION_CFU);
+
+        when(mMockSscConnection.isConnected()).thenReturn(false, true);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
+                mDefaultRequestUri, mDefaultXui, "", expectedHttpRequestTimeout))
+                .thenReturn(httpSuccessResponse);
+        when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(getInputStream());
+        when(mMockSscXmlGov.parseXmlStream(eq(queryData), any()))
+                .thenReturn(parseXmlStream(queryData));
+        doAnswer((Answer<Boolean>) (invocation) -> {
+            mSscTransaction.getTransactionHandler()
+                    .sendEmptyMessage(SscNetConnection.EVENT_PDN_CONNECTED);
+            return true;
+        }).when(mMockSscConnection).connect(anyLong());
+
+        mSscTransaction.startGetTransaction(queryData);
+        sleepToWaitThreadRun();
+        waitThreadWorkFinished();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
+                mDefaultRequestUri, mDefaultXui, "", expectedHttpRequestTimeout);
+        verify(mMockSscXmlGov).parseXmlStream(eq(queryData), any());
+
+        verifyTransactionSuccess(SscConstant.EVENT_SSC_QUERY_CF,
+                ISscHttpConnection.HTTP_REQUEST_GET);
+    }
+
+    @Test
+    public void startPutTransaction_setTransactionExpiryTime() {
+        SscServiceData updateData = getUpdateData(SscConstant.CONDITION_CFU,
+                SscConstant.ACTION_ACTIVATION, "+1234567890", 0);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(30);
+
+        mSscTransaction.startPutTransaction(updateData);
+        sleepToWaitThreadRun();
+
+        assertNotEquals(0, mSscTransaction.getTransactionExpiryTime());
+    }
+
+    @Test
+    public void startPutTransaction_notSetTransactionExpiryTime() {
+        SscServiceData updateData = getUpdateData(SscConstant.CONDITION_CFU,
+                SscConstant.ACTION_ACTIVATION, "+1234567890", 0);
+        when(mMockCarrierConfig.getInt(eq(CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT)))
+                .thenReturn(0);
+
+        mSscTransaction.startPutTransaction(updateData);
+        sleepToWaitThreadRun();
+
+        assertEquals(0, mSscTransaction.getTransactionExpiryTime());
     }
 
     @Test

@@ -335,6 +335,10 @@ public class SscUtils {
         }
     }
 
+    protected long getCurrentUtcTimeEpochMs() {
+        return java.time.Instant.now().toEpochMilli();
+    }
+
     @VisibleForTesting
     protected SscUtils() {
     }

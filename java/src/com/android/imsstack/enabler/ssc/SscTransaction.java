@@ -41,9 +41,7 @@ import org.w3c.dom.Document;
 
 public class SscTransaction {
     public static final int EVENT_SEND_HTTP_REQUEST = 1001;
-    private static final int DEFAULT_GBA_TIMEOUT_SEC = 30;
-    private static final int DEFAULT_PDN_CONNECTION_TIMEOUT_MS = 30 * 1000; // 30 sec
-    private static final int DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS = 30 * 1000; // 30 sec
+
 
     private final int mSlotId;
     private final SscXmlGov mXmlGov;
@@ -51,6 +49,7 @@ public class SscTransaction {
 
     private int mEventNumber = 0;
     private int mTransactionId = 0;
+    private long mTransactionExpiryTime = 0;
     private boolean mXcapTrafficNotified = false;
     private boolean mXcapTrafficStarted = false;
 
@@ -116,6 +115,8 @@ public class SscTransaction {
         mTransaction = new GetTransaction(data);
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
+        setTransactionExpiryTime();
+
         mSscTransactionThread.start();
     }
 
@@ -126,6 +127,8 @@ public class SscTransaction {
         mTransaction = new PutTransaction(data);
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
+        setTransactionExpiryTime();
+
         mSscTransactionThread.start();
     }
 
@@ -171,8 +174,13 @@ public class SscTransaction {
                 netConnectionGov.refreshConnectionTimer(mSlotId);
             } else {
                 ImsLog.i(mSlotId, "PDN is not connected. Trying to Connect");
-                if (!netConnectionGov.connect(mSlotId, DEFAULT_PDN_CONNECTION_TIMEOUT_MS)) {
-                    ImsLog.i(mSlotId, "PDN connection fail");
+
+                long timeLeftMs = getTransactionTimeLeftMs();
+                if (timeLeftMs == 0) {
+                    ImsLog.d(mSlotId, "Transaction Timer Expired");
+                    sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                } else if (!netConnectionGov.connect(mSlotId, timeLeftMs)) {
+                    ImsLog.e(mSlotId, "PDN connection fail");
                     sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 }
                 return;
@@ -224,8 +232,14 @@ public class SscTransaction {
             }
 
             ISscHttpConnectionGov httpConnection = getSscHttpConnectionGov();
+            int timeLeftMs = getTransactionTimeLeftMs();
+            if (timeLeftMs == 0) {
+                ImsLog.d(mSlotId, "Transaction Timer Expired");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                return;
+            }
             int responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                    xui, body, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
+                    xui, body, timeLeftMs);
             ImsLog.i(mSlotId, "response Code : " + responseCode);
 
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED) {
@@ -236,8 +250,15 @@ public class SscTransaction {
                         return;
                     }
 
+                    timeLeftMs = getTransactionTimeLeftMs();
+                    if (timeLeftMs == 0) {
+                        ImsLog.d(mSlotId, "Transaction Timer Expired");
+                        sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                        return;
+                    }
+
                     responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                            xui, body, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
+                            xui, body, timeLeftMs);
                 }
             }
 
@@ -386,6 +407,11 @@ public class SscTransaction {
     }
 
     @VisibleForTesting
+    protected long getTransactionExpiryTime() {
+        return mTransactionExpiryTime;
+    }
+
+    @VisibleForTesting
     protected Handler getTransactionHandler() {
         return mTransactionHandler;
     }
@@ -446,6 +472,13 @@ public class SscTransaction {
             return false;
         }
 
+        int timeLeftSec = getTransactionTimeLeftMs() / 1000;
+        if (timeLeftSec == 0) {
+            ImsLog.d(mSlotId, "Transaction Timer Expired");
+            authAgent.setIsCredentialInfoUpdated(false);
+            return false;
+        }
+
         int appType = getSscUtils().getTelephonySimType(mSlotId);
         int gbaMode = SscConfig.getGbaMode(mSlotId);
         boolean isTls = SscConfig.isTls(mSlotId);
@@ -453,7 +486,7 @@ public class SscTransaction {
         String securityProtocol = authAgent.getCipherSuite();
 
         GbaCredentials gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,
-                securityProtocol, forceBootStrapping, DEFAULT_GBA_TIMEOUT_SEC);
+                securityProtocol, forceBootStrapping, timeLeftSec);
         if (gbaCredentials == null || gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
             ImsLog.e(mSlotId, "Getting gba key failure");
             authAgent.setIsCredentialInfoUpdated(false);
@@ -475,6 +508,29 @@ public class SscTransaction {
                     ImsRadioInterface.DIRECTION_MO, mConnectionListener);
             mXcapTrafficNotified = true;
         }
+    }
+
+    @VisibleForTesting
+    protected long getCurrentTime() {
+        return getSscUtils().getCurrentUtcTimeEpochMs();
+    }
+
+    private void setTransactionExpiryTime() {
+        int utTransactionTimer = SscConfig.getUtTransactionTimer(mSlotId);
+        if (utTransactionTimer > 0) {
+            mTransactionExpiryTime = getCurrentTime() + (utTransactionTimer * 1000L);
+            ImsLog.d(mSlotId, "utTransactionTimer = " + utTransactionTimer);
+        }
+    }
+
+    private int getTransactionTimeLeftMs() {
+        int minTimeoutMs = 1000; // 1 sec.
+        if (mTransactionExpiryTime > 0) {
+            int timeLeft = (int) (mTransactionExpiryTime - getCurrentTime());
+            return (timeLeft > minTimeoutMs) ? timeLeft : 0;
+        }
+
+        return 30 * 1000; // Default timeout 30 sec.
     }
 
     private final class SscTransactionThread extends Thread {

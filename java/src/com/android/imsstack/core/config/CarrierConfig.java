@@ -886,6 +886,8 @@ public class CarrierConfig {
         public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT =
                 KEY_PREFIX + "ut_uri_type_for_cf_target_number_int";
         public static final String KEY_UT_NAF_FQDN_STRING = KEY_PREFIX + "ut_naf_fqdn_string";
+        public static final String KEY_UT_TRANSACTION_TIMER_SEC_INT =
+                KEY_PREFIX + "ut_transaction_timer_sec_int";
 
         private ImsSs() {}
     }
