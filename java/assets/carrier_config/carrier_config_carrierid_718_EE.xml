@@ -27,5 +27,6 @@
 
     <!-- Ut/Xcap -->
     <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
+    <int name="imsss.ut_transaction_timer_sec_int" value="30"/>
 
 </carrier_config>
