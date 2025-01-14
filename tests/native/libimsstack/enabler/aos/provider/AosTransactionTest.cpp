@@ -35,70 +35,32 @@ using ::testing::Return;
 
 const IMS_SINT32 SLOT_ID = 0;
 
+#define DECLARE_USING(Base)                        \
+    using Base::ClearListeners;                    \
+    using Base::ClearTraffics;                     \
+    using Base::GetAccessNetworkType;              \
+    using Base::GetListeners;                      \
+    using Base::ImsRadio_OnTrafficPriorityChanged; \
+    using Base::IsResponseWaiting;                 \
+    using Base::IsStarted;                         \
+    using Base::IsStartUpdated;                    \
+    using Base::IsTimerRunning;                    \
+    using Base::IsTrafficResponseWaiting;          \
+    using Base::Timer_TimerExpired;                \
+    using Base::Traffic_OnConnectionFailed;        \
+    using Base::Traffic_OnConnectionSetupPrepared;
+
 class TestAosTransaction : public AosTransaction
 {
 public:
+    DECLARE_USING(AosTransaction)
+
     inline explicit TestAosTransaction(IN IMS_SINT32 nSlotId) :
             AosTransaction(nSlotId),
             piOriginRadio(IMS_NULL)
     {
     }
 
-    FRIEND_TEST(AosTransactionTest, NullListenerIsNotAddedToTheList);
-    FRIEND_TEST(AosTransactionTest, AddListOfTheTypeToTheMapIfDifferentTypeOfListener);
-    FRIEND_TEST(AosTransactionTest, SameListenerIsNotAddedToTheList);
-    FRIEND_TEST(AosTransactionTest, DifferentListenerIsAddedToTheList);
-    FRIEND_TEST(AosTransactionTest, DoNothingIfListenerIsNullWhenRemoveListener);
-    FRIEND_TEST(AosTransactionTest, DoNothingIfNoListenerForTheTypeWhenRemoveListener);
-    FRIEND_TEST(AosTransactionTest, TransactionIsNotAllowedIfImsRadioIsNull);
-    FRIEND_TEST(AosTransactionTest, CallIsImsTrafficAllowedWithRegType);
-    FRIEND_TEST(AosTransactionTest, CallIsImsTrafficAllowedWithEmergencyType);
-    FRIEND_TEST(AosTransactionTest, StartTrafficReturnTrueIfImsRadioIsNull);
-    FRIEND_TEST(AosTransactionTest, StartTrafficReturnTrueIfAlreadyStarted);
-    FRIEND_TEST(AosTransactionTest, StartTrafficStopsTimerIfStartUpdatedAndStopTimerIsRunning);
-    FRIEND_TEST(AosTransactionTest,
-            AddTheTrafficTypeToTheWaitingListIfStartUpdatedAndTrafficResponseWaiting);
-    FRIEND_TEST(AosTransactionTest,
-            DoNothingIfStartUpdatedButTrafficResponseWaitingWhenTrafficIsStarted);
-    FRIEND_TEST(
-            AosTransactionTest, ShouldNotStartImsTrafficIfNoTrafficInstanceWhenTrafficIsStarted);
-    FRIEND_TEST(AosTransactionTest, StartImsTrafficIfStartNotUpdated);
-    FRIEND_TEST(AosTransactionTest, EmergencyTrafficIsNotStartedIfImsRadioIsNull);
-    FRIEND_TEST(AosTransactionTest, EmergencyTrafficIsNotStartedIfNoTrafficInstance);
-    FRIEND_TEST(AosTransactionTest, StartingEmergencyTrafficIsNotDuplicated);
-    FRIEND_TEST(AosTransactionTest, TrafficCannotBeStoppedIfNotStarted);
-    FRIEND_TEST(AosTransactionTest, StopTrafficForTheTypeAndStartTimerIfTrafficStarted);
-    FRIEND_TEST(AosTransactionTest, EmergencyTrafficCannotBeStoppedIfNotStarted);
-    FRIEND_TEST(AosTransactionTest, EmergencyTrafficCanBeStoppedIfStarted);
-    FRIEND_TEST(AosTransactionTest, CannotSetWlanIfImsTrafficIsNull);
-    FRIEND_TEST(AosTransactionTest, SetWlanWithGivenValue);
-    FRIEND_TEST(AosTransactionTest, NrIsConvertedToNgran);
-    FRIEND_TEST(AosTransactionTest, LteIsConvertedToEutran);
-    FRIEND_TEST(AosTransactionTest, EhrpdIsConvertedToUtran);
-    FRIEND_TEST(AosTransactionTest, WcdmaIsConvertedToUtran);
-    FRIEND_TEST(AosTransactionTest, HspaIsConvertedToUtran);
-    FRIEND_TEST(AosTransactionTest, WlanIsConvertedToIwlan);
-    FRIEND_TEST(AosTransactionTest, OtherRatsAreConvertedToUnknown);
-    FRIEND_TEST(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionIsFailed);
-    FRIEND_TEST(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFailed);
-    FRIEND_TEST(AosTransactionTest,
-            ShouldNotifyToTheListenerForTypeRegWhenTrafficConnectionIsFailedForTypeReg);
-    FRIEND_TEST(AosTransactionTest,
-            ShouldNotifyToTheListenerForTypeSubWhenTrafficConnectionIsFailedForTypeSub);
-    FRIEND_TEST(
-            AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionSetupIsPrepared);
-    FRIEND_TEST(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionSetupIsPrepared);
-    FRIEND_TEST(AosTransactionTest,
-            ShouldNotifyToTheListenerForTypeRegWhenTrafficConnectionSetupIsPreparedForTypeReg);
-    FRIEND_TEST(AosTransactionTest,
-            ShouldNotifyToTheListenerForTypeSubWhenTrafficConnectionSetupIsPreparedForTypeSub);
-    FRIEND_TEST(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficPriorityChanged);
-    FRIEND_TEST(AosTransactionTest, ShouldNotifyToOneListenerWhenTrafficPriorityChanged);
-    FRIEND_TEST(AosTransactionTest, ShouldNotifyToTwoListenersWhenTrafficPriorityChanged);
-    FRIEND_TEST(AosTransactionTest, DoNothingIfTheTimerIsNullWhenTimerIsExpired);
-    FRIEND_TEST(AosTransactionTest, DoNothingIfInvalidTimerWhenTimerIsExpired);
-
-public:
     inline void SetMockIImsRadio(IN IImsRadio* piImsRadio)
     {
         piOriginRadio = m_piImsRadio;
@@ -243,7 +205,7 @@ TEST_F(AosTransactionTest, DoNothingIfNoListenerForTheTypeWhenRemoveListener)
 TEST_F(AosTransactionTest, TransactionIsNotAllowedIfImsRadioIsNull)
 {
     // GIVEN
-    m_pAosTransaction->m_piImsRadio = nullptr;
+    m_pAosTransaction->SetMockIImsRadio(nullptr);
 
     // WHEN
     EXPECT_FALSE(m_pAosTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG));
@@ -276,7 +238,7 @@ TEST_F(AosTransactionTest, CallIsImsTrafficAllowedWithEmergencyType)
 TEST_F(AosTransactionTest, StartTrafficReturnTrueIfImsRadioIsNull)
 {
     // GIVEN
-    m_pAosTransaction->m_piImsRadio = nullptr;
+    m_pAosTransaction->SetMockIImsRadio(nullptr);
 
     // WHEN
     EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
@@ -381,7 +343,7 @@ TEST_F(AosTransactionTest, StartImsTrafficIfStartNotUpdated)
 TEST_F(AosTransactionTest, EmergencyTrafficIsNotStartedIfImsRadioIsNull)
 {
     // GIVEN
-    m_pAosTransaction->m_piImsRadio = nullptr;
+    m_pAosTransaction->SetMockIImsRadio(nullptr);
     EXPECT_CALL(m_objMockIImsRadio,
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, _, IImsRadio::DIRECTION_MO, _))
             .Times(0);
