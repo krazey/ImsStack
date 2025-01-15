@@ -82,7 +82,6 @@ protected:
 
     void UpdateGGsmaRcsTelephonyFeatureTag();
 
-private:
     IMS_UINT32 GetVoiceBlockReasonForIpcan();
     IMS_UINT32 GetVideoBlockReasonForIpcan();
 
