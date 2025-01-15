@@ -59,6 +59,7 @@ PUBLIC GLOBAL const IMS_CHAR Sip::STR_RPORT[] = "rport";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_RECEIVED[] = "received";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_REG_ID[] = "reg-id";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_SIP_INSTANCE[] = "+sip.instance";
+PUBLIC GLOBAL const IMS_CHAR Sip::STR_SOS[] = "sos";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_TYPE[] = "type";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_TRANSPORT_EXT[] = "transport-ext";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_FROM_TAG[] = "from-tag";

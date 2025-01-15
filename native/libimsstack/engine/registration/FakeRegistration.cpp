@@ -1024,6 +1024,8 @@ void FakeRegistration::StorePersistentHeaders()
     // Security-Client / Security-Verify headers
     m_pStateTracker->SetSecurityClients(m_pRegParam->GetSecurityClients());
     m_pStateTracker->SetSecurityVerifys(m_pRegParam->GetSecurityVerifys());
+
+    m_pStateTracker->AdjustRegistrationDedicatedParameters();
 }
 
 PRIVATE

@@ -18,6 +18,7 @@
 
 #include "RegContact.h"
 #include "RegStateTracker.h"
+#include "Sip.h"
 #include "SipConfigProxy.h"
 
 __IMS_TRACE_TAG_REG__;
@@ -110,6 +111,25 @@ IMS_BOOL RegStateTracker::IsWithinTrustDomain(IN IMS_SINT32 nSlotId) const
 }
 
 PRIVATE
+void RegStateTracker::AdjustRegistrationDedicatedParameters()
+{
+    if (m_pContactAddressForOutgoingMessage == IMS_NULL)
+    {
+        const SipAddress& objContactAddress = GetContactAddress();
+
+        if (objContactAddress.GetParameter(Sip::STR_SOS) != IMS_NULL)
+        {
+            m_pContactAddressForOutgoingMessage = new SipAddress(objContactAddress);
+        }
+    }
+
+    if (m_pContactAddressForOutgoingMessage != IMS_NULL)
+    {
+        m_pContactAddressForOutgoingMessage->RemoveParameter(Sip::STR_SOS);
+    }
+}
+
+PRIVATE
 void RegStateTracker::SetAssociatedUris(IN const AStringArray& objAssociatedUris)
 {
     m_objAssociatedUris = objAssociatedUris;
@@ -198,6 +218,7 @@ void RegStateTracker::SetUserInfoForContactHeader(IN const AString& strUserInfo)
 
     if (strUserInfo.IsNull())
     {
+        AdjustRegistrationDedicatedParameters();
         return;
     }
 
@@ -207,5 +228,6 @@ void RegStateTracker::SetUserInfoForContactHeader(IN const AString& strUserInfo)
     {
         m_pContactAddressForOutgoingMessage->SetUser(
                 strUserInfo.IsEmpty() ? AString::ConstNull() : strUserInfo);
+        AdjustRegistrationDedicatedParameters();
     }
 }
