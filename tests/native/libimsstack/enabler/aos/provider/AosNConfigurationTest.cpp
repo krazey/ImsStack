@@ -624,9 +624,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_CONTACT_USER_INFO_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -875,7 +872,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());
     EXPECT_TRUE(m_pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsAvailableWithoutVoiceCapability());
-    EXPECT_TRUE(m_pAosNConfiguration->IsUserInfoInContactSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatSupportedBasedOnNetworkForReg());

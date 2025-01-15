@@ -269,8 +269,6 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_R
         KEY_IMS_PREFIX "required_init_reg_after_ims_call_end_on_reg_held_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL[] =
         KEY_IMS_PREFIX "sip_over_ipsec_enabled_in_roaming_bool";
-const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_CONTACT_USER_INFO_BOOL[] =
-        KEY_IMS_PREFIX "support_contact_user_info_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL[] =
         KEY_IMS_PREFIX "support_reg_with_feature_tag_unavailable_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_BOOL[] =

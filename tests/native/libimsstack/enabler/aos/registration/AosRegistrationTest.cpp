@@ -623,8 +623,6 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsIpsecInitializedWithNewPcscf())
                 .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(m_objMockIAosNConfiguration, IsUserInfoInContactSupported())
-                .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));

@@ -99,7 +99,6 @@ public:
     IMS_BOOL IsContactUriValidationChecked() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported() const override;
     IMS_BOOL IsRegRetryWithIpVerFallback() const override;
-    IMS_BOOL IsUserInfoInContactSupported() const override;
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
