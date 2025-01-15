@@ -91,6 +91,23 @@ public:
         m_bVopsIgnoredForVolteEnabled = bIgnored;
     }
     inline IMS_BOOL IsVopsIgnoredForVolteEnabled() { return m_bVopsIgnoredForVolteEnabled; }
+
+    IMS_BOOL IsHandleBlocked() const { return AosHandleMtc::IsHandleBlocked(); }
+    IMS_BOOL IsHandleBlockedBase() const { return AosHandle::IsHandleBlocked(); }
+    void AddFeature(IN IMS_UINT32 nFeature) { m_objFeatureTagList.AddFeature(nFeature); }
+    void RemoveFeature(IN IMS_UINT32 nFeature) { m_objFeatureTagList.RemoveFeature(nFeature); }
+    void AddBindedFeature(IN IMS_UINT32 nFeature)
+    {
+        m_objBindedFeatureTagList.AddFeature(nFeature);
+    }
+    IMS_BOOL AddFeatureTag(IN const AString& strName, IN const AString& strValue)
+    {
+        return m_objFeatureTagList.AddFeatureTag(strName, strValue);
+    }
+    IMS_BOOL AddBindedFeatureTag(IN const AString& strName, IN const AString& strValue)
+    {
+        return m_objBindedFeatureTagList.AddFeatureTag(strName, strValue);
+    }
 };
 
 class AosHandleMtcTest : public ::testing::Test
@@ -214,35 +231,6 @@ protected:
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock)
     {
         return m_pAosHandleMtc->AosHandle::IsHandleBlocked(nBlock);
-    }
-
-    IMS_BOOL IsHandleBlocked() { return m_pAosHandleMtc->IsHandleBlocked(); }
-
-    IMS_BOOL IsHandleBlockedBase() { return m_pAosHandleMtc->AosHandle::IsHandleBlocked(); }
-
-    void AddFeature(IN IMS_UINT32 nFeature)
-    {
-        m_pAosHandleMtc->m_objFeatureTagList.AddFeature(nFeature);
-    }
-
-    void RemoveFeature(IN IMS_UINT32 nFeature)
-    {
-        m_pAosHandleMtc->m_objFeatureTagList.RemoveFeature(nFeature);
-    }
-
-    void AddBindedFeature(IN IMS_UINT32 nFeature)
-    {
-        m_pAosHandleMtc->m_objBindedFeatureTagList.AddFeature(nFeature);
-    }
-
-    IMS_BOOL AddFeatureTag(IN const AString& strName, IN const AString& strValue)
-    {
-        return m_pAosHandleMtc->m_objFeatureTagList.AddFeatureTag(strName, strValue);
-    }
-
-    IMS_BOOL AddBindedFeatureTag(IN const AString& strName, IN const AString& strValue)
-    {
-        return m_pAosHandleMtc->m_objBindedFeatureTagList.AddFeatureTag(strName, strValue);
     }
 
     void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_pAosHandleMtc->m_bEpdgEnabled = bEnabled; }
@@ -770,10 +758,10 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test6)
     // Test6: vzw vowifi feature tag test. Idle -> Offhook -> Idle
     // Expectation: "cs" in idle, "cs,volte" in offhook
 
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
-    AddBindedFeature(ImsAosFeature::VIDEO);
-    AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     SetEpdgEnabled(IMS_TRUE);
 
@@ -1092,15 +1080,15 @@ TEST_F(AosHandleMtcTest, InitializeHoldingBlocksPolicy_Test)
 
 TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
 {
-    // Expectation: Set m_bBlocked depending on AosHandleMtc::IsHandleBlocked()
+    // Expectation: Set m_bBlocked depending on AosHandleMtc::m_pAosHandleMtc->IsHandleBlocked()
 
     AddBlock(AosHandle::BLOCK_VOPS);
     InitializeServiceBlock();
-    EXPECT_TRUE(IsHandleBlockedBase());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlockedBase());
 
     RemoveBlock(AosHandle::BLOCK_VOPS);
     InitializeServiceBlock();
-    EXPECT_FALSE(IsHandleBlockedBase());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase());
 }
 
 TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test1)
@@ -1185,7 +1173,7 @@ TEST_F(AosHandleMtcTest, InitializeFeatureTags_Test)
 {
     // Expectation: Include +cdmaless, "cs,volte" feature tags
 
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
 
     AosFeatureTagList objExpectedFeatureTagList;
     objExpectedFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
@@ -1216,10 +1204,10 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test1)
     // Test1: vzw vowifi "cs" feature tag for call test. Idle -> Offhook -> Idle
     // Expectation: "cs" in idle, "cs,volte" in offhook
 
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
-    AddBindedFeature(ImsAosFeature::VIDEO);
-    AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     SetEpdgEnabled(IMS_TRUE);
 
@@ -1264,10 +1252,10 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test2)
     // Test2: VZW VoWiFi IMS Registration Table Test - Wifi Only.
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     SetEpdgEnabled(IMS_TRUE);
 
@@ -1303,18 +1291,18 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test2)
             .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
 
     // Video
-    RemoveFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::MMTEL);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
 
     // Mmtel
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
 
     // No mmtel and video
-    RemoveFeature(ImsAosFeature::MMTEL);
-    RemoveFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::VIDEO);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
 }
@@ -1324,10 +1312,10 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test3)
     // Test3: VZW VoWiFi IMS Registration Table Test - CS Roam + Wifi
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     SetEpdgEnabled(IMS_TRUE);
 
@@ -1363,18 +1351,18 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test3)
             .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
 
     // Video
-    RemoveFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::MMTEL);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
 
     // Mmtel
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
 
     // No mmtel and video
-    RemoveFeature(ImsAosFeature::MMTEL);
-    RemoveFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::VIDEO);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
 }
@@ -1384,10 +1372,10 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test4)
     // Test4: VZW VoWiFi IMS Registration Table Test - Changing to Wifi Only.
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
-    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     SetEpdgEnabled(IMS_TRUE);
 
@@ -1427,18 +1415,18 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test4)
             .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
 
     // Video
-    RemoveFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::MMTEL);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
 
     // Mmtel
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
 
     // No mmtel and video
-    RemoveFeature(ImsAosFeature::MMTEL);
-    RemoveFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::VIDEO);
     UpdateGGsmaRcsTelephonyFeatureTag();
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
 }
@@ -1731,7 +1719,7 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test1)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtcTest, IsHandleBlocked_Test2)
@@ -1748,7 +1736,7 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtcTest, IsHandleBlocked_Test3)
@@ -1764,7 +1752,7 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtcTest, IsHandleBlocked_Test4)
@@ -1779,22 +1767,22 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test4)
     AddBlock(AosHandle::BLOCK_NETWORK);
     AddBlock(AosHandle::BLOCK_3G);
     AddBlock(AosHandle::BLOCK_SSAC);
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_VOPS);
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_NETWORK);
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_3G);
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_SSAC);
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
@@ -1818,7 +1806,7 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
 
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtcTest, MmtelIsBlockedIfVolteCapabilityBlocked)
@@ -2683,7 +2671,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
             .WillRepeatedly(Return(IMS_FALSE));
 
     ProcessNetworkChanged();
-    EXPECT_FALSE(IsHandleBlockedBase());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase());
 }
 
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test2)
@@ -2834,7 +2822,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test5)
 
     SetNetworkType(NW_REPORT_RADIO_WCDMA);
     ProcessNetworkChanged();
-    EXPECT_FALSE(IsHandleBlockedBase());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase());
 
     ProcessCapabilitiesChanged(objCapabilitiesVoice);
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
@@ -2890,7 +2878,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test6)
             .WillRepeatedly(Return(IMS_TRUE));
 
     ProcessNetworkChanged();
-    EXPECT_FALSE(IsHandleBlockedBase());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase());
 }
 
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test7)
@@ -2928,7 +2916,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test7)
             .WillRepeatedly(Return(IMS_TRUE));
 
     ProcessNetworkChanged();
-    EXPECT_FALSE(IsHandleBlockedBase());
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlockedBase());
 }
 
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test8)
@@ -4021,10 +4009,10 @@ TEST_F(AosHandleMtcTest, IsCsFeatureTagRequired_Test)
     EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
-    RemoveFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->RemoveFeature(ImsAosFeature::VIDEO);
     EXPECT_FALSE(IsCsFeatureTagRequired());
 
-    AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
     SetEpdgEnabled(IMS_FALSE);
     EXPECT_FALSE(IsCsFeatureTagRequired());
 
