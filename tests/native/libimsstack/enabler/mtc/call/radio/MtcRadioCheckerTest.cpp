@@ -242,11 +242,18 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingExistsMtcTrafficInfoWithCal
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
                     IImsRadio::DIRECTION_MO, _))
-            .Times(0);
+            .Times(1);
 
     EXPECT_EQ(CheckResult::PENDING,
             m_pMtcRadioChecker->Check(
                     CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+
+    // To check that not adding same call key
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingEmergency)
@@ -474,9 +481,9 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyWithOutMtcTrafficInfo)
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener2);
 
-    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(0);
-    EXPECT_CALL(m_objIMtcRadioCheckerListener2, OnConnectionFailed).Times(1);
+    EXPECT_CALL(m_objIMtcRadioCheckerListener2, OnConnectionFailed).Times(0);
 
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_ACCESS_DENIED, 0, 0);
@@ -485,14 +492,22 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyWithOutMtcTrafficInfo)
 TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyExistsMtcTrafficInfoWithCallKey)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
-            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO, IMS_TRUE, CALL_KEY1);
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(0);
 
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_ACCESS_DENIED, 0, 0);
+
+    // To check that that reason is impacting on traffic availability
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyExistsMtcTrafficInfoWithOutCallKey)
@@ -511,26 +526,31 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyExistsMtcTrafficInfoWit
 TEST_F(MtcRadioCheckerTest, OnConnectionFailedTemporarily)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
-            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO, IMS_TRUE, CALL_KEY1);
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(7);
 
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_NAS_FAILURE, 0, 0);
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_RACH_FAILURE, 0, 0);
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_RLC_FAILURE, 0, 0);
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_RRC_TIMEOUT, 0, 0);
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_NO_SERVICE, 0, 0);
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_PDN_NOT_AVAILABLE, 0, 0);
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_RF_BUSY, 0, 0);
+
+    // To check that those reasons are not impacting on traffic availability
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPrepared)
@@ -540,13 +560,21 @@ TEST_F(MtcRadioCheckerTest, OnConnectionSetupPrepared)
     m_pMtcRadioChecker->AddTrafficCheckerListener(m_objIMtcRadioCheckerListener);
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(0);
+
+    m_pMtcRadioChecker->OnConnectionSetupPrepared(
+            IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
+
+    m_pMtcRadioChecker->OnConnectionSetupPrepared(
+            IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
+
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(2);
 
     m_pMtcRadioChecker->OnConnectionSetupPrepared(
-            IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
-
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT);
     m_pMtcRadioChecker->OnConnectionSetupPrepared(
-            IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT);
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesToAllListeners)
@@ -562,10 +590,10 @@ TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesToAllListeners)
     EXPECT_CALL(m_objIMtcRadioCheckerListener2, OnConnectionSetupPrepared).Times(2);
 
     m_pMtcRadioChecker->OnConnectionSetupPrepared(
-            IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT);
 
     m_pMtcRadioChecker->OnConnectionSetupPrepared(
-            IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT);
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesOnceIfSameListenerIsAdded)
@@ -579,7 +607,7 @@ TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesOnceIfSameListenerI
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(1);
 
     m_pMtcRadioChecker->OnConnectionSetupPrepared(
-            IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT);
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedDoesNotNotifyIfNoListeners)
@@ -656,6 +684,35 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionSetupPreparedNotif
     EXPECT_CALL(m_objIMtcRadioCheckerListener2, OnConnectionSetupPrepared).Times(1);
 
     m_piImsRadioConnectionListener->ImsRadio_OnConnectionSetupPrepared();
+}
+
+TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesTrafficDeactivating)
+{
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
+            IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MO, IMS_TRUE, CALL_KEY1);
+
+    m_pMtcRadioChecker->OnRatChanged(ServiceType::NORMAL, 0, 0);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _, _)).Times(1);
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(
+                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY2));
+}
+
+TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesTrafficDeactivating)
+{
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
+            IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MO, IMS_TRUE, CALL_KEY1);
+
+    m_pMtcRadioChecker->OnRatChanged(ServiceType::EMERGENCY, 0, 0);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _, _)).Times(0);
+    EXPECT_EQ(CheckResult::UNBLOCKED,
+            m_pMtcRadioChecker->Check(
+                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY2));
 }
 
 }  // namespace android

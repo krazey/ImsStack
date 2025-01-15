@@ -24,6 +24,7 @@
 #include "call/IMtcCall.h"
 #include "call/radio/IMtcRadioChecker.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 
 using TrafficType = IMS_UINT32;
@@ -61,11 +62,28 @@ class IMtcContext;
 class IMtcService;
 class MtcTrafficInfo;
 
+/**
+ * Decides whether calling `StartImsTraffic` and `StopImsTraffic` APIs to the Radio and relays
+ * response from the Radio.
+ *
+ * The decision is made as follows.
+ * 1. Do `StartImsTraffic` and `StopImsTraffic`
+ *    per same traffic type(EMERGENCY/VOICE/VIDEO) and call direction(MO/MT).
+ * 2. Do not `StartImsTraffic` again if that traffic and direction pair was activated.
+ * 3. The Calling `StartImsTraffic` should call the `StopImsTraffic` at the end regardless of
+ *    the IImsRadioConnectionListener notification.
+ * 4. The IImsRadioConnectionListener callback will be invoked after StartImsTraffic.
+ * 5. Do `StartImsTraffic` again when the RAT is changed.(handover including NR<->LTE, EPSFB)
+ *    and with this case, still one `StopImsTraffic` is required at the end.
+ * 6. Even if the UE received `OnConnectionFailed`, if the INVITE is not blocked for some reasons,
+ *    consider that traffic and direction pair is activated.
+ */
 class MtcRadioChecker final :
         public IMtcRadioChecker,
+        public IMtcAosStateListener,
         public IInterfaceHolderListener,
         public IMtcRadioConnectionListener,
-        public IMtcAosStateListener
+        public IMtcNetworkWatcherListener
 {
 public:
     explicit MtcRadioChecker(IN IMtcContext& objContext);
@@ -77,6 +95,7 @@ public:
 
     void AddTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) override;
     void RemoveTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) override;
+    void OnTerminatedBeforeCreatingSession(IN CallKey nCallKey) override;
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey) override;
 
@@ -94,6 +113,10 @@ public:
     void OnConnectionSetupPrepared(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) override;
 
+    // IMtcNetworkWatcherListener
+    void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
+            IN IMS_SINT32 eRatType) override;
+
     // for test
     void CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
             IN CallDirection eCallDirection, IN IMS_BOOL bActive, IN CallKey nCallKeyIn);
@@ -104,7 +127,7 @@ private:
     void DeInit();
     static TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency);
     IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
-    void AddCallKey(IN MtcTrafficInfo& pMtcTrafficInfo, IN CallKey nCallKey);
+    void AddCallKey(IN MtcTrafficInfo& objMtcTrafficInfo, IN CallKey nCallKey);
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
     MtcTrafficInfo* GetCallTrafficInfo(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) const;
