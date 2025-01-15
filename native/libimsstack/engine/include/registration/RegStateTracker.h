@@ -61,6 +61,7 @@ public:
     IMS_BOOL IsWithinTrustDomain(IN IMS_SINT32 nSlotId) const;
 
 private:
+    void AdjustRegistrationDedicatedParameters();
     inline void SetAor(IN const SipAddress& objAor) { m_objAor = objAor; }
     void SetAssociatedUris(IN const AStringArray& objAssociatedUris);
     inline void SetPathHeaders(IN const AStringArray& objPaths) { m_objPaths = objPaths; }

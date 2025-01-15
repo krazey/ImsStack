@@ -158,6 +158,7 @@ public:
     static const IMS_CHAR STR_RECEIVED[];
     static const IMS_CHAR STR_REG_ID[];
     static const IMS_CHAR STR_SIP_INSTANCE[];
+    static const IMS_CHAR STR_SOS[];
     static const IMS_CHAR STR_TYPE[];
     // Non-standard parameters
     // MULTI_REG_TRANSPORT
