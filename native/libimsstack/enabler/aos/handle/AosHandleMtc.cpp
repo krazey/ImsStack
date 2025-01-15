@@ -802,7 +802,7 @@ PROTECTED VIRTUAL void AosHandleMtc::Request(IN IMS_UINT32 nType, IN IMS_UINT32 
     }
 }
 
-PRIVATE
+PROTECTED
 void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
 {
     /* VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6230394
