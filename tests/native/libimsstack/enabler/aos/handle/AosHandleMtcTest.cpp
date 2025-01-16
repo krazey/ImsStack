@@ -280,8 +280,8 @@ protected:
 
         ASSERT_TRUE(m_pAosHandleMtc != nullptr);
 
-        m_pAosHandleMtc->m_bDataConnected = IMS_TRUE;
-        m_pAosHandleMtc->m_bVopsIgnoredForVolteEnabled = IMS_FALSE;
+        m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+        m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
     }
 
     void TearDown() override

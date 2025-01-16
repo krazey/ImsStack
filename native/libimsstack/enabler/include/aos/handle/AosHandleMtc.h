@@ -117,8 +117,5 @@ protected:
     IMS_BOOL m_bSsacBarred;
     IMS_BOOL m_bSsacHeld;
     IMS_BOOL m_bB2cCallComposerCapable;
-
-private:
-    friend class AosHandleMtcTest;
 };
 #endif  // AOS_HANDLE_MTC_H_
