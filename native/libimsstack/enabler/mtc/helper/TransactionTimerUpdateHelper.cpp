@@ -73,28 +73,29 @@ PUBLIC VIRTUAL void TransactionTimerUpdateHelper::ResetNonInviteTransactionTimer
 }
 
 PRIVATE
-void TransactionTimerUpdateHelper::UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue)
+IMS_BOOL TransactionTimerUpdateHelper::UpdateTimer(
+        IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue)
 {
     if (nValue <= 0)
     {
-        return;
+        return IMS_FALSE;
     }
 
     if (m_pSipConfig == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     const ISipConfigV* piSipConfigV = m_pSipConfig->GetSipConfigV();
     if (piSipConfigV == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     IConfigurable* piConfigurable = piSipConfigV->GetConfigurable();
     if (piConfigurable == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     IMS_TRACE_D("UpdateTimer INVITE[%s] value[%d]", _TRACE_B_(bInviteTransaction), nValue, 0);
@@ -106,18 +107,17 @@ void TransactionTimerUpdateHelper::UpdateTimer(IN IMS_BOOL bInviteTransaction, I
     {
         IMS_TRACE_E(0, "Update FAIL", 0, 0, 0);
     }
+    return IMS_TRUE;
 }
 
 PRIVATE
 IMS_BOOL TransactionTimerUpdateHelper::MayUpdateForEpsFallbackTrigger()
 {
-    IMS_SINT32 nTimeMillis = m_objConfiguration.GetInt(
-            ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT);
-
-    if (nTimeMillis >= 0 && m_objContext.GetService().IsNr())
+    if (m_objContext.GetService().IsNr())
     {
-        UpdateTimer(IMS_TRUE, nTimeMillis);
-        return IMS_TRUE;
+        return UpdateTimer(IMS_TRUE,
+                m_objConfiguration.GetInt(ConfigVoice::
+                                KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT));
     }
 
     return IMS_FALSE;
@@ -126,18 +126,10 @@ IMS_BOOL TransactionTimerUpdateHelper::MayUpdateForEpsFallbackTrigger()
 PRIVATE
 IMS_BOOL TransactionTimerUpdateHelper::MayUpdateForTcallTimerExpiry()
 {
-    if (GetPolicyForTcallTimerExpiry(m_objContext.GetCallInfo().IsEmergency(),
-                m_objContext.GetService().IsWlanIpCanType()) ==
-            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE)
-    {
-        return IMS_FALSE;
-    }
-
     const IMS_CHAR* pszKey = m_objContext.GetCallInfo().IsEmergency()
             ? ConfigEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT
             : ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT;
-    UpdateTimer(IMS_TRUE, m_objConfiguration.GetInt(pszKey));
-    return IMS_TRUE;
+    return UpdateTimer(IMS_TRUE, m_objConfiguration.GetInt(pszKey));
 }
 
 PRIVATE

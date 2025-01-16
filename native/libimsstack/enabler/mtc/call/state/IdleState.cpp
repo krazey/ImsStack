@@ -406,7 +406,7 @@ CallStateName IdleState::ContinueStart()
     }
 
     m_objContext.GetUiNotifier().SendInitiating();
-    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
     if (!m_objContext.GetTimer().IsActive(TIMER_MO_18X_WAIT))
     {
         // The 18x wait timer may already be activated in some redial cases.
@@ -440,7 +440,7 @@ CallStateName IdleState::ContinueConference()
     }
 
     m_objContext.GetUiNotifier().SendInitiating();
-    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
     StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
 
     return CallStateName::OUTGOING;
@@ -487,7 +487,7 @@ CallStateName IdleState::ContinueStartUssi()
     }
 
     m_objContext.GetUiNotifier().SendInitiating();
-    StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    StartTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
     StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
     return CallStateName::OUTGOING;
 }

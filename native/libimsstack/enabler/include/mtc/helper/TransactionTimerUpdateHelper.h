@@ -38,7 +38,7 @@ public:
     virtual void ResetNonInviteTransactionTimer();
 
 private:
-    void UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue);
+    IMS_BOOL UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue);
     IMS_BOOL MayUpdateForEpsFallbackTrigger();
     IMS_BOOL MayUpdateForTcallTimerExpiry();
     IMS_SINT32 GetPolicyForTcallTimerExpiry(

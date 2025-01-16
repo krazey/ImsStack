@@ -1161,6 +1161,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEA
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_local_ringback_tone_with_180_response_int";
 const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT[] =
+                KEY_IMS_VOICE_PREFIX "user_cancel_reason_after_response_timeout_timer_millis_int";
+const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT[] =
                 KEY_IMS_VOICE_PREFIX "mo_call_request_timeout_for_eps_fallback_trigger_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[] =

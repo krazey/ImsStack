@@ -864,10 +864,6 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
     const IMS_CHAR* pszKey;
     switch (nType)
     {
-        case TIMER_MO_100_WAIT:
-            pszKey = bNormal ? ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT
-                             : ConfigEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT;
-            break;
         case TIMER_MO_18X_WAIT:
             if (bNormal)
             {
@@ -883,6 +879,9 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
         case TIMER_MO_NOANSWER:
             pszKey = bNormal ? ConfigVoice::KEY_RINGBACK_TIMER_MILLIS_INT
                              : ConfigEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT;
+            break;
+        case TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON:
+            pszKey = ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT;
             break;
         case TIMER_MT_ALERTING:
             pszKey = ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT;

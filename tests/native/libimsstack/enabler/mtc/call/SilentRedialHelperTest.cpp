@@ -276,7 +276,7 @@ TEST_F(SilentRedialHelperTest, RedialReleaseSessionResourceIfRedialEmergency)
     EXPECT_CALL(objPreconditionManager, InitializeMobileRatInformation());
     EXPECT_CALL(objMediaManager, DestroyMediaSession());
     EXPECT_CALL(objContext, RemoveSession(Ref(objMtcSession)));
-    EXPECT_CALL(objTimerWrapper, Stop(_));
+    EXPECT_CALL(objTimerWrapper, StopAll).Times(0);
 
     const CallReasonInfo objAnyReason(
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);

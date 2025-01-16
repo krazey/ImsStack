@@ -420,7 +420,8 @@ TEST_F(IncomingStateTest, OnTimerExpiredDoesNothing)
     EXPECT_CALL(objMtcSession, GetOngoingUpdateType()).Times(0);
 
     EXPECT_EQ(CallStateName::INCOMING,
-            pIncomingState->OnTimerExpired(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+            pIncomingState->OnTimerExpired(
+                    MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
 }
 
 TEST_F(IncomingStateTest, OnTimerExpiredByPrackWaitRejectsCall)

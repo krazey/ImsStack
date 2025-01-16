@@ -464,14 +464,17 @@ TEST_F(IdleStateTest, StartSetsMoTimersAndTransitsToOutgoingState)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
-    IMS_SINT32 n100WaitTimer = 10000;
+    IMS_SINT32 nResponseTimeoutForReasonTimer = 10000;
     IMS_SINT32 n18xWaitTimer = 20000;
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(n100WaitTimer));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nResponseTimeoutForReasonTimer));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
             .WillByDefault(Return(n18xWaitTimer));
 
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
+                    nResponseTimeoutForReasonTimer));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
 
     EXPECT_EQ(CallStateName::OUTGOING,
@@ -490,14 +493,17 @@ TEST_F(IdleStateTest, StartSetsMoTimersForEmergencyCall)
     objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
-    IMS_SINT32 n100WaitTimer = 10000;
+    IMS_SINT32 nResponseTimeoutForReasonTimer = 10000;
     IMS_SINT32 n18xWaitTimer = 20000;
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT))
-            .WillByDefault(Return(n100WaitTimer));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nResponseTimeoutForReasonTimer));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigEmergency::KEY_EMERGENCY_18X_TIMER_MILLIS_INT))
             .WillByDefault(Return(n18xWaitTimer));
 
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
+                    nResponseTimeoutForReasonTimer));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
 
     pIdleState->Start(CallType::VOIP, "target", objInputMediaInfo, objInputSuppServices);
@@ -515,20 +521,23 @@ TEST_F(IdleStateTest, StartSetsMoTimersForWifiEmergencyCall)
     objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
-    IMS_SINT32 n100WaitTimer = 10000;
+    IMS_SINT32 nResponseTimeoutForReasonTimer = 10000;
     IMS_SINT32 n18xWaitTimer = 20000;
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT))
-            .WillByDefault(Return(n100WaitTimer));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nResponseTimeoutForReasonTimer));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigEmergency::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT))
             .WillByDefault(Return(n18xWaitTimer));
 
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
+                    nResponseTimeoutForReasonTimer));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
 
     pIdleState->Start(CallType::VOIP, "target", objInputMediaInfo, objInputSuppServices);
 }
 
-TEST_F(IdleStateTest, StartSetsOnly100WaitTimerAndTransitsToOutgoingState)
+TEST_F(IdleStateTest, StartSetsOnlyResponseWaitTimerAndTransitsToOutgoingState)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
@@ -539,11 +548,14 @@ TEST_F(IdleStateTest, StartSetsOnly100WaitTimerAndTransitsToOutgoingState)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
-    IMS_SINT32 n100WaitTimer = 10000;
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(n100WaitTimer));
+    IMS_SINT32 nResponseTimeoutForReasonTimer = 10000;
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nResponseTimeoutForReasonTimer));
 
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
+                    nResponseTimeoutForReasonTimer));
     EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, _)).Times(0);
@@ -711,14 +723,17 @@ TEST_F(IdleStateTest, StartUssiSetsMoTimersAndTransitsToOutgoingState)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
     ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
     ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_SUCCESS));
-    IMS_SINT32 n100WaitTimer = 10000;
+    IMS_SINT32 nResponseTimeoutForReasonTimer = 10000;
     IMS_SINT32 n18xWaitTimer = 20000;
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(n100WaitTimer));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nResponseTimeoutForReasonTimer));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
             .WillByDefault(Return(n18xWaitTimer));
 
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
+                    nResponseTimeoutForReasonTimer));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
 
     EXPECT_EQ(CallStateName::OUTGOING,
@@ -852,13 +867,16 @@ TEST_F(IdleStateTest, StartConferenceSetsMoTimersAndTransitsOutgoingState)
     MockIMessage objMessage;
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
 
-    IMS_SINT32 n100WaitTimer = 10000;
+    IMS_SINT32 nResponseTimeoutForReasonTimer = 10000;
     IMS_SINT32 n18xWaitTimer = 20000;
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(n100WaitTimer));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nResponseTimeoutForReasonTimer));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
             .WillByDefault(Return(n18xWaitTimer));
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, n100WaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
+                    nResponseTimeoutForReasonTimer));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer));
 
     EXPECT_EQ(CallStateName::OUTGOING,

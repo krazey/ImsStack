@@ -1145,6 +1145,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "initialize_p_early_media_when_no_header_bool";
         public static final String KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT =
                 KEY_PREFIX + "policy_for_local_ringback_tone_with_180_response_int";
+        public static final String KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT =
+                KEY_PREFIX + "user_cancel_reason_after_response_timeout_timer_millis_int";
         public static final String KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT =
                 KEY_PREFIX + "mo_call_request_timeout_for_eps_fallback_trigger_millis_int";
         public static final String KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT =

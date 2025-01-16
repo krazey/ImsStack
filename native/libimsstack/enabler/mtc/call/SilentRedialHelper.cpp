@@ -225,14 +225,12 @@ void SilentRedialHelper::ReleaseCallResources()
 PRIVATE
 void SilentRedialHelper::StopCallTimers()
 {
-    MtcTimerWrapper& objTimerWrapper = m_objContext.GetTimer();
     if (m_nType == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
     {
-        objTimerWrapper.Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT);
         return;
     }
 
-    objTimerWrapper.StopAll();
+    m_objContext.GetTimer().StopAll();
 }
 
 PRIVATE
