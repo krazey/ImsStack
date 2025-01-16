@@ -224,8 +224,7 @@ protected:
         const IMS_UINT32 nServiceType = -1;
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
 
         EXPECT_CALL(m_objMockIAosAppContext, GetApp())
                 .Times(AnyNumber())
@@ -236,14 +235,13 @@ protected:
                 .WillRepeatedly(Return(&m_objMockIAosNetTracker));
 
         m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
-        AosProvider::GetInstance()->SetCallTracker(
-                static_cast<IAosCallTracker*>(&m_objMockIAosCallTracker), 0);
+        AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, 0);
 
         EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
 
         EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
                 .Times(AnyNumber())
-                .WillRepeatedly(Return(static_cast<IAosRegistration*>(&m_objMockIAosRegistration)));
+                .WillRepeatedly(Return(&m_objMockIAosRegistration));
 
         EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
                 .Times(AnyNumber())
@@ -268,7 +266,7 @@ protected:
                 .WillByDefault(Return(IMS_TRUE));
 
         m_piAosService = AosProvider::GetInstance()->GetService();
-        AosProvider::GetInstance()->SetService(static_cast<IAosService*>(&m_objMockIAosService));
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService);
 
         m_pPlatformService =
                 PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_RADIO);
@@ -293,8 +291,7 @@ protected:
         }
 
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
-        AosProvider::GetInstance()->SetCallTracker(
-                static_cast<IAosCallTracker*>(m_piAosCallTracker), 0);
+        AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, 0);
         AosProvider::GetInstance()->SetService(m_piAosService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, m_pPlatformService);
@@ -739,7 +736,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
@@ -777,7 +774,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
             .Times(1);
 
@@ -816,7 +813,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(0);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(0);
 
@@ -854,7 +851,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
             .Times(1);
 
@@ -892,7 +889,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test5)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pAosHandleMtc->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandleMtc->SetListener(&m_objMockIImsAosListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(ImsAosReason::SUSPEND_NO_RAT_COVERAGE))
             .Times(1);
 
@@ -1878,7 +1875,7 @@ TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test2)
 
     EXPECT_CALL(m_objMockIAosAppContext, GetHandle(ImsAosService::MTS))
             .Times(1)
-            .WillOnce(Return(static_cast<IAosHandle*>(IMS_NULL)));
+            .WillOnce(Return(nullptr));
 
     EXPECT_CALL(
             m_objMockIAosHandle, Handle_Notify(ImsAosService::MTC, m_pAosHandleMtc->IsBlocked()))
@@ -1898,7 +1895,7 @@ TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test3)
 
     EXPECT_CALL(m_objMockIAosAppContext, GetHandle(ImsAosService::MTS))
             .Times(1)
-            .WillOnce(Return(static_cast<IAosHandle*>(&m_objMockIAosHandle)));
+            .WillOnce(Return(&m_objMockIAosHandle));
 
     EXPECT_CALL(
             m_objMockIAosHandle, Handle_Notify(ImsAosService::MTC, m_pAosHandleMtc->IsBlocked()))
