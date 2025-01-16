@@ -356,6 +356,14 @@ void MtsService::Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 n
     (void)nFailureReason;
     (void)nCauseCode;
     (void)nWaitTimeMillis;
+
+    // TODO(Mts): This notification will be replaced to IMtsMessageController::ClearAllMessages().
+    if (m_pSmsInfo != IMS_NULL)
+    {
+        delete m_pSmsInfo;
+        m_pSmsInfo = IMS_NULL;
+    }
+    m_piMtsServiceListener->OnServiceDisconnected();
 }
 
 PUBLIC

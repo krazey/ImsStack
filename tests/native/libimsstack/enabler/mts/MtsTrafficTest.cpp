@@ -62,13 +62,22 @@ TEST_F(MtsTrafficTest, Constructor)
     ASSERT_NE(pMtsTraffic, nullptr);
 }
 
-TEST_F(MtsTrafficTest, ImsRadio_OnConnectionFailed)
+TEST_F(MtsTrafficTest, ImsRadio_OnConnectionFailedWithInternalErrorReason)
 {
     EXPECT_CALL(objMockMtsTrafficListener,
-            Traffic_OnConnectionFailed(
-                    IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO, 0, 0, 0))
+            Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
+                    IImsRadio::REASON_INTERNAL_ERROR, 0, 0))
             .Times(1);
-    pMtsTraffic->ImsRadio_OnConnectionFailed(0, 0, 0);
+    pMtsTraffic->ImsRadio_OnConnectionFailed(IImsRadio::REASON_INTERNAL_ERROR, 0, 0);
+}
+
+TEST_F(MtsTrafficTest, ImsRadio_OnConnectionFailedWithIgnoredReason)
+{
+    EXPECT_CALL(objMockMtsTrafficListener,
+            Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
+                    IImsRadio::REASON_RF_BUSY, 0, 0))
+            .Times(0);
+    pMtsTraffic->ImsRadio_OnConnectionFailed(IImsRadio::REASON_RF_BUSY, 0, 0);
 }
 
 TEST_F(MtsTrafficTest, ImsRadio_OnConnectionSetupPrepared)

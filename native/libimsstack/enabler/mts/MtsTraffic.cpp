@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IImsRadio.h"
 #include "IMtsTrafficListener.h"
 #include "MtsStringDef.h"
 #include "MtsTraffic.h"
@@ -47,12 +48,11 @@ void MtsTraffic::ImsRadio_OnConnectionFailed(
     IMS_TRACE_I("ImsRadio_OnConnectionFailed : TrafficType[%s], Direction[%s]",
             PS_TrafficType(m_nTrafficType), PS_TrafficDirection(m_nDirection), 0);
 
-    /*
-     * TODO(Mts): Consider of nFailureReason, nCauseCode and nWaitTimeMillis
-     *            if there are some further required actions
-     */
-    m_objMtsTrafficListener.Traffic_OnConnectionFailed(
-            m_nTrafficType, m_nDirection, nFailureReason, nCauseCode, nWaitTimeMillis);
+    if (!IsReasonToIgnore(nFailureReason))
+    {
+        m_objMtsTrafficListener.Traffic_OnConnectionFailed(
+                m_nTrafficType, m_nDirection, nFailureReason, nCauseCode, nWaitTimeMillis);
+    }
 }
 
 PUBLIC
@@ -113,4 +113,18 @@ void MtsTraffic::StartRadioGuardTimer()
 
     m_piRadioGuardTimer = TimerService::GetTimerService()->CreateTimer();
     m_piRadioGuardTimer->SetTimer(MTS_RADIO_GUARD_TIME, this);
+}
+
+PRIVATE GLOBAL IMS_BOOL MtsTraffic::IsReasonToIgnore(IN IMS_UINT32 nFailureReason)
+{
+    switch (nFailureReason)
+    {
+        case IImsRadio::REASON_ACCESS_DENIED:
+        case IImsRadio::REASON_RRC_REJECT:
+        case IImsRadio::REASON_INTERNAL_ERROR:
+            return IMS_FALSE;
+
+        default:
+            return IMS_TRUE;
+    }
 }

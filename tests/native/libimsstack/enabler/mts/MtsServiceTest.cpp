@@ -319,6 +319,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMtsServiceListener, OnServiceDisconnected()).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -328,7 +329,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
 
     pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
     pMtsService->Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
-            IImsRadio::REASON_RF_BUSY, 400, 2000);
+            IImsRadio::REASON_ACCESS_DENIED, 400, 2000);
 }
 
 TEST_F(MtsServiceTest, SendNormalMoSmsAndInvalidTrafficTypeIsAllowed)

@@ -43,6 +43,9 @@ public:
     void StartRadioGuardTimer() override;
 
 private:
+    static IMS_BOOL IsReasonToIgnore(IN IMS_UINT32 nFailureReason);
+
+private:
     IMS_UINT32 m_nDirection;
     IMS_UINT32 m_nTrafficType;
     IMtsTrafficListener& m_objMtsTrafficListener;
