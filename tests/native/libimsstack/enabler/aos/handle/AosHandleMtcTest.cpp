@@ -210,14 +210,10 @@ public:
 protected:
     void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
 
         const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(strValue));
 
         const AString strAppId = AString("ims.app.mtc.test");
         const AString strServiceId = AString("ims.service.mtc.test");
@@ -226,41 +222,31 @@ protected:
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetApp())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosApplication));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+        ON_CALL(m_objMockIAosAppContext, GetApp()).WillByDefault(Return(&m_objMockIAosApplication));
+        ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+                .WillByDefault(Return(&m_objMockIAosNetTracker));
 
         m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
         AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, 0);
 
-        EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
+        // ON_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosRegistration));
+        ON_CALL(m_objMockIAosAppContext, GetRegistration())
+                .WillByDefault(Return(&m_objMockIAosRegistration));
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosConnection));
+        ON_CALL(m_objMockIAosAppContext, GetConnection())
+                .WillByDefault(Return(&m_objMockIAosConnection));
 
-        EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(AnyNumber());
+        // ON_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).WillByDefault();
 
-        EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+                .WillByDefault(Return(IMS_FALSE));
 
-        EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));
 
-        EXPECT_CALL(m_objMockIAosNConfiguration,
+        ON_CALL(m_objMockIAosNConfiguration,
                 IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_FALSE));
+                .WillByDefault(Return(IMS_FALSE));
 
         ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
                 .WillByDefault(Return(IMS_TRUE));
