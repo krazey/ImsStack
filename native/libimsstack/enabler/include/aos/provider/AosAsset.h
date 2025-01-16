@@ -39,6 +39,7 @@ public:
             bImsiBasedUriPrioritized(IMS_FALSE),
             bInitializeIpsecWithNewPcscf(IMS_FALSE),
             bKeepERegRetryOnWlan(IMS_FALSE),
+            bStopERegTimerOnEpdnConnected(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
             bPlmnBlockWithTimeoutOnFailureWithAllPcscfs(IMS_FALSE),
             bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
@@ -129,6 +130,7 @@ public:
     IMS_BOOL bImsiBasedUriPrioritized;
     IMS_BOOL bInitializeIpsecWithNewPcscf;
     IMS_BOOL bKeepERegRetryOnWlan;
+    IMS_BOOL bStopERegTimerOnEpdnConnected;
     IMS_BOOL bNoInitRegOnPcscfChange;
     IMS_BOOL bPlmnBlockWithTimeoutOnFailureWithAllPcscfs;
     IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;

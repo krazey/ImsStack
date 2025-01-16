@@ -86,6 +86,7 @@ public:
     IMS_BOOL IsImsiBasedUriPrioritized() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
     IMS_BOOL IsKeepERegRetryOnWlanRequired() const override;
+    IMS_BOOL IsStopERegTimerOnEpdnConnected() const override;
     IMS_BOOL IsNoInitRegOnPcscfChange() const override;
     IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const override;
     IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const override;

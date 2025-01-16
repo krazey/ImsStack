@@ -72,6 +72,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsImsiBasedUriPrioritized, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIpsecInitializedWithNewPcscf, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsKeepERegRetryOnWlanRequired, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsStopERegTimerOnEpdnConnected, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsNoInitRegOnPcscfChange, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfSupported, (IN IMS_SINT32 nGeolocationPidfType),
