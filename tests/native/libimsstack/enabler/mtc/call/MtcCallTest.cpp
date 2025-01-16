@@ -593,6 +593,38 @@ TEST_F(MtcCallTest, GetCallKeyReturnsKey)
     EXPECT_EQ(objCall2.GetKey(), objCall2.GetCallKey());
 }
 
+TEST_F(MtcCallTest, IsEstablishedReturnsTrueAfterEstablishedState)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+
+    EXPECT_FALSE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::IDLE);
+    EXPECT_FALSE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::OUTGOING);
+    EXPECT_FALSE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::INCOMING);
+    EXPECT_FALSE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::ALERTING);
+    EXPECT_FALSE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::TERMINATING);
+    EXPECT_FALSE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::ESTABLISHED);
+    EXPECT_TRUE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::UPDATING);
+    EXPECT_TRUE(objCall.IsEstablished());
+
+    objCall.OnStateTransition(CallStateName::TERMINATING);
+    EXPECT_TRUE(objCall.IsEstablished());
+}
+
 TEST_F(MtcCallTest, IsHeldByMeInitiallyReturnsFalse)
 {
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());

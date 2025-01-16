@@ -58,6 +58,7 @@ public:
     virtual ~MockIMtcCallContext() {}
 
     MOCK_METHOD(IMS_UINTP, GetCallKey, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEstablished, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsHeldByMe, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUssi, (), (const, override));
     MOCK_METHOD(CallInfo&, GetCallInfo, (), (override));

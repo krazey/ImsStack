@@ -139,6 +139,7 @@ public:
     }
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
+    inline IMS_BOOL IsEstablished() const override { return m_bEstablished; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
     inline IMS_BOOL IsUssi() const override { return m_objCallInfo.bUssi; }
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
@@ -335,6 +336,7 @@ private:
 
     CallKey m_nKey;
 
+    IMS_BOOL m_bEstablished;
     IMS_BOOL m_bHeldByMe;
 
     CallInfo m_objCallInfo;

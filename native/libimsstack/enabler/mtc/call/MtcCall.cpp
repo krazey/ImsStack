@@ -60,6 +60,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objContext(objContext),
         m_objService(objService),
         m_nKey(CreateCallKey()),
+        m_bEstablished(IMS_FALSE),
         m_bHeldByMe(IMS_FALSE),
         m_objCallInfo(objCallInfo),
         m_objParticipantInfo(ParticipantInfo(*this)),
@@ -1066,6 +1067,10 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
     IMS_TRACE_I(
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
+    if (eState == CallStateName::ESTABLISHED)
+    {
+        m_bEstablished = IMS_TRUE;
+    }
     GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.IsEmergency());
 }
 

@@ -56,6 +56,13 @@ public:
     virtual IMS_UINTP GetCallKey() const = 0;
 
     /**
+     * @brief Checks if the call has been established.
+     *
+     * @return true if the call has been in the ESTABLISHED state, false otherwise.
+     */
+    virtual IMS_BOOL IsEstablished() const = 0;
+
+    /**
      * @brief Checks
      *
      * @return
