@@ -206,6 +206,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_USE_TUPLE_ELEMENT_IN_GEOLOCATION_PIDF_BOO
         KEY_IMS_PREFIX "use_tuple_element_in_geolocation_pidf_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_IN_GEOLOCATION_PIDF_BOOL[] =
         KEY_IMS_PREFIX "allow_unknown_country_element_in_geolocation_pidf_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_NO_POSITION_IN_GEOLOCATION_PIDF_BOOL[] =
+        KEY_IMS_PREFIX "allow_no_position_in_geolocation_pidf";
 const IMS_CHAR CarrierConfig::Ims::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL[] =
         KEY_IMS_PREFIX "set_sdp_direction_attribute_for_removed_media_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SDP_PRECONDITION_BOOL[] =

@@ -28,8 +28,6 @@
 namespace enabler
 {
 
-Element* const Element::s_pEmptyElement = new Element{};
-
 PUBLIC VIRTUAL Element::~Element()
 {
     for (const Element* pElement : m_lstChildren)

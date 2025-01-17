@@ -111,11 +111,14 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_FORMAT_TUPLE;
         }
-
         if (!piCc->GetBoolean(
                     CarrierConfig::Ims::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_IN_GEOLOCATION_PIDF_BOOL))
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_NO_COUNTRY_IF_UNKNOWN;
+        }
+        if (piCc->GetBoolean(CarrierConfig::Ims::KEY_ALLOW_NO_POSITION_IN_GEOLOCATION_PIDF_BOOL))
+        {
+            nFeatures |= GeolocationPidfCreator::FEATURE_ALLOW_NO_POSITION;
         }
 
         pPidfCreator->SetFeatures(nFeatures);

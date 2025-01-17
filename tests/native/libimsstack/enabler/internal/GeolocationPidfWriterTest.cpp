@@ -106,6 +106,14 @@ TEST_F(GeolocationPidfWriterTest, WriteAppendedElements)
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
+TEST_F(GeolocationPidfWriterTest, WriteNullElement)
+{
+    NullElement{}.Write(*pWriter);
+
+    const AString strExpected = "";
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
+}
+
 TEST_F(GeolocationPidfWriterTest, WritePidfLoXml)
 {
     ByteArray objContent = PidfLoXml{}.Write();

@@ -140,19 +140,21 @@ private:
             IN std::initializer_list<enabler::Element*> lstChildren) const;
     enabler::Element* CreateShapeElement(IN const ILocationProperties& objLocation) const;
 
-    IMS_BOOL IsPositionAvailable(IN const ILocationProperties* piLocation) const;
+    IMS_BOOL IsPositionAvailable(IN const ILocationProperties& objLocation) const;
 
 public:
     enum
     {
         /** <tuple> element is used instead of <device> element if set. */
-        FEATURE_FORMAT_TUPLE = 0x00000001,
+        FEATURE_FORMAT_TUPLE = 1 << 0,
         /** <method> element is excluded if set. */
-        FEATURE_NO_METHOD = 0x00000002,
+        FEATURE_NO_METHOD = 1 << 1,
         /** Unknown("ZZ") <country> element is excluded if set. */
-        FEATURE_NO_COUNTRY_IF_UNKNOWN = 0x00000004,
+        FEATURE_NO_COUNTRY_IF_UNKNOWN = 1 << 2,
+        /** Creation succeeds even if position is unavailable, if set. */
+        FEATURE_ALLOW_NO_POSITION = 1 << 3,
 
-        FEATURE_ALL = 0x7FFFFFFF
+        FEATURE_ALL = ~0,
     };
 
 private:

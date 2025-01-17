@@ -347,6 +347,7 @@
     <boolean name="ims.use_reset_when_closing_sip_tcp_connection_bool" value="false"/>
     <boolean name="ims.use_tuple_element_in_geolocation_pidf_bool" value="false"/>
     <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="true"/>
+    <boolean name="ims.allow_no_position_in_geolocation_pidf_bool" value="true"/>
     <boolean name="ims.set_sdp_direction_attribute_for_removed_media_bool" value="false"/>
     <boolean name="ims.support_sdp_precondition_bool" value="true"/>
     <int name="ims.hide_mac_address_in_pani_header_int" value="1"/>
