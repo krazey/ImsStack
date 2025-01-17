@@ -482,6 +482,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOO
         KEY_IMS_EMERGENCY_PREFIX "ereg_set_tcp_only_in_roaming_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "ereg_using_first_impu_in_isim_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL[] =
+        KEY_IMS_EMERGENCY_PREFIX "keep_epdn_upon_pcscf_unavailable_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "keep_ereg_retry_on_wlan_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] =

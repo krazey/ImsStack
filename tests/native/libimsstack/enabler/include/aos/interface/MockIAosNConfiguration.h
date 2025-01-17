@@ -71,6 +71,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsDeregOn3gNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsiBasedUriPrioritized, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIpsecInitializedWithNewPcscf, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsKeepEPdnUponPcscfUnavailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsKeepERegRetryOnWlanRequired, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsNoInitRegOnPcscfChange, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));
