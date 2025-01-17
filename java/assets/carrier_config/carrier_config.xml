@@ -24,6 +24,7 @@
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="false"/>
     <boolean name="ims.require_sip_expires_header_in_register_bool" value="false"/>
     <boolean name="ims.support_sip_session_id_header_bool" value="false"/>
+    <int name="ims.registration_contact_user_info_part_int" value="0"/>
     <int name="ims.sip_device_id_type_int" value="0"/>
     <int name="ims.support_multiple_registration_int" value="1"/>
     <int-array name="ims.pcscf_discovery_method_int_array" num="1">

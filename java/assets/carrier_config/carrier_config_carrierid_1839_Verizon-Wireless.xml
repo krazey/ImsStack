@@ -32,6 +32,7 @@
     <int name="ims.location_policy_update_type_int" value="1"/>
     <int name="ims.location_acquisition_policy_int" value="131328"/>
     <int name="ims.location_validity_period_min_int" value="3"/>
+    <int name="ims.registration_contact_user_info_part_int" value="1"/>
     <int name="ims.support_multiple_registration_int" value="0"/>
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">True</string>
 

@@ -19,6 +19,7 @@
     <!-- Ims General -->
     <boolean name="ims.allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool" value="true"/>
     <boolean name="ims.request_uri_validation_required_in_mid_dialog_bool" value="false"/>
+    <int name="ims.registration_contact_user_info_part_int" value="1"/>
 
     <!-- Aos -->
     <int name="ims.isim_index_for_impu_int" value="0"/>
