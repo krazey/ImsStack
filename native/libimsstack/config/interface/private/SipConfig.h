@@ -187,7 +187,7 @@ public:
         return HasFeature(SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER);
     }
     inline IMS_SINT32 GetHideMacInPaniHeaderPolicy() const { return m_nHideMacInPaniHeader; }
-
+    inline IMS_SINT32 GetRegContactUserInfoPart() const { return m_nRegContactUserInfoPart; }
     inline IMS_SINT32 GetRegExpiration() const
     {
         return !IsRegExpirationConfigured() ? INVALID_EXPIRATION : m_nRegExpiration;
@@ -296,6 +296,7 @@ private:
         EXPIRES_REG_SUB = 0x02
     };
 
+    IMS_SINT32 m_nRegContactUserInfoPart;
     IMS_SINT32 m_nRegExpiresMask;
     IMS_SINT32 m_nRegExpiration;
     AStringArray m_objAllowMethods;

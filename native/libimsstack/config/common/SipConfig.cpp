@@ -75,6 +75,7 @@ SipConfig::SipConfig(IN IMS_SINT32 nSlotId) :
         m_objTcpTimerValues(SipConfig::TcpTimerValues()),
         m_nHideMacInPaniHeader(HIDE_MAC_IN_PANI),
         m_nSupportMultipleReg(CarrierConfig::Ims::MULTIPLE_REGISTRATION_NONE),
+        m_nRegContactUserInfoPart(CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID),
         m_nRegExpiresMask(EXPIRES_NONE),
         m_nRegExpiration(DEFAULT_EXPIRATION),
         m_bRegSubscription(IMS_TRUE),
@@ -190,6 +191,9 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
             piCc->GetInt(CarrierConfig::Ims::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT);
     m_nSupportMultipleReg = piCc->GetInt(CarrierConfig::Ims::KEY_SUPPORT_MULTIPLE_REGISTRATION_INT,
             CarrierConfig::Ims::MULTIPLE_REGISTRATION_NONE);
+    m_nRegContactUserInfoPart =
+            piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT,
+                    CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID);
 
     m_nRegExpiration = piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT);
     m_nRegExpiresMask = EXPIRES_NONE;

@@ -320,6 +320,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "require_sip_expires_header_in_register_bool";
         public static final String KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL =
                 KEY_PREFIX + "support_sip_session_id_header_bool";
+        public static final String KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT =
+                KEY_PREFIX + "registration_contact_user_info_part_int";
         public static final String KEY_SIP_DEVICE_ID_TYPE_INT =
                 KEY_PREFIX + "sip_device_id_type_int";
         public static final String KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY =

@@ -172,6 +172,12 @@ PUBLIC GLOBAL const AStringArray& SipConfigProxy::GetRegAllowMethods(
     return pSipConfig->GetRegAllowMethods();
 }
 
+PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetRegContactUserInfoPart(IN IMS_SINT32 nSlotId)
+{
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
+    return pSipConfig->GetRegContactUserInfoPart();
+}
+
 PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetRegExpires(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {

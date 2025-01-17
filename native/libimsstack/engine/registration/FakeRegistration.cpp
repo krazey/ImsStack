@@ -251,8 +251,8 @@ PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IpAddress&
     }
 
     // If not present, add a new Contact information
-    RegContact* pNewContact = new RegContact(
-            GetSlotId(), objIpAddr, nPort, this, (-1) /*pRegFlow->GetRegKey().GetFlowId()*/);
+    RegContact* pNewContact = new RegContact(GetSlotId(), objIpAddr, nPort,
+            IRegContact::USER_INFO_PART_IMPU, this, (-1) /*pRegFlow->GetRegKey().GetFlowId()*/);
 
     if (pNewContact == IMS_NULL)
     {

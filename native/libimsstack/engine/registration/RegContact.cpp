@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsUuid.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
@@ -35,12 +36,13 @@ __IMS_TRACE_TAG_REG__;
 
 PUBLIC
 RegContact::RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
-        IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId /*= (-1)*/) :
+        IN IMS_SINT32 nUserInfoPart, IN IRegCapabilityChangeListener* piListener,
+        IN IMS_SINT32 nRegId /*= (-1)*/) :
         ImsSlot(nSlotId),
         m_nState(STATE_CREATED),
         m_pAor(IMS_NULL),
         m_objIpAddr(objIpAddr),
-        m_nPolicyUserInfo(POLICY_USER_INFO_IMPU),
+        m_nUserInfoPart(nUserInfoPart),
         m_pInstanceParameter(IMS_NULL),
         m_pRegIdParameter(IMS_NULL),
         m_pPubGruu(IMS_NULL),
@@ -59,6 +61,7 @@ RegContact::RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN 
     m_objContactAddress.SetScheme(Sip::STR_SIP);
     m_objContactAddress.SetHost(objIpAddr.ToString());
     m_objContactAddress.SetPort(nPort);
+    SetUserInfoPart();
 
     if (nRegId > 0 && SipConfigProxy::IsRegIdParameterConfigured(GetSlotId()))
     {
@@ -202,18 +205,9 @@ void RegContact::SetAor(IN const SipAddress& objAor)
 
     m_pAor = new SipAddress(objAor);
 
-    if ((m_nPolicyUserInfo == POLICY_USER_INFO_IMPU) && (m_pAor != IMS_NULL))
+    if (m_nUserInfoPart == USER_INFO_PART_IMPU)
     {
-        const SipAddress::UserInfoPart* pUserInfoPart = m_pAor->GetUserInfoPart();
-
-        if (pUserInfoPart == IMS_NULL)
-        {
-            m_objContactAddress.SetUser(m_pAor->GetUser());
-        }
-        else
-        {
-            m_objContactAddress.SetUser(pUserInfoPart->GetUser());
-        }
+        SetUserInfoPart();
     }
 }
 
@@ -543,25 +537,12 @@ PRIVATE VIRTUAL void RegContact::RemoveUriParameter(
     m_objContactAddress.RemoveParameter(strName);
 }
 
-PRIVATE VIRTUAL void RegContact::SetUserInfo(IN IMS_SINT32 nPolicy /*= POLICY_USER_INFO_IMPU*/,
-        IN const AString& strUserInfo /*= AString::ConstNull()*/)
+PRIVATE VIRTUAL void RegContact::SetUserInfo(IN IMS_SINT32 nUserInfoPart)
 {
-    m_nPolicyUserInfo = nPolicy;
-
-    if (m_nPolicyUserInfo == POLICY_USER_INFO_APP)
+    if (m_nUserInfoPart != nUserInfoPart)
     {
-        m_objContactAddress.SetUser(strUserInfo);
-    }
-    else if (m_nPolicyUserInfo == POLICY_USER_INFO_IMPU)
-    {
-        if (m_pAor != IMS_NULL)
-        {
-            m_objContactAddress.SetUser(m_pAor->GetUser());
-        }
-    }
-    else
-    {
-        m_objContactAddress.SetUser(AString::ConstNull());
+        m_nUserInfoPart = nUserInfoPart;
+        SetUserInfoPart();
     }
 }
 
@@ -1119,6 +1100,35 @@ void RegContact::UpdateRegisteredCapabilities(IN const ISipHeader* piHeader)
 
     IMS_TRACE_I(
             "RegisteredCapabilities=[%s]", m_pRegisteredCapabilities->ToString().GetStr(), 0, 0);
+}
+
+PRIVATE
+void RegContact::SetUserInfoPart()
+{
+    if (m_nUserInfoPart == USER_INFO_PART_IMPU)
+    {
+        if (m_pAor != IMS_NULL)
+        {
+            const SipAddress::UserInfoPart* pUserInfoPart = m_pAor->GetUserInfoPart();
+
+            if (pUserInfoPart == IMS_NULL)
+            {
+                m_objContactAddress.SetUser(m_pAor->GetUser());
+            }
+            else
+            {
+                m_objContactAddress.SetUser(pUserInfoPart->GetUser());
+            }
+        }
+    }
+    else if (m_nUserInfoPart == USER_INFO_PART_EMPTY)
+    {
+        m_objContactAddress.SetUser(AString::ConstNull());
+    }
+    else
+    {
+        m_objContactAddress.SetUser(ImsUuid::GetUuid(ImsUuid::VERSION_1));
+    }
 }
 
 PRIVATE GLOBAL const IMS_CHAR* RegContact::StateToString(IN IMS_SINT32 nState)

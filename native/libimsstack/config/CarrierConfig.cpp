@@ -180,6 +180,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BO
         KEY_IMS_PREFIX "require_sip_expires_header_in_register_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[] =
         KEY_IMS_PREFIX "support_sip_session_id_header_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT[] =
+        KEY_IMS_PREFIX "registration_contact_user_info_part_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_SIP_DEVICE_ID_TYPE_INT[] =
         KEY_IMS_PREFIX "sip_device_id_type_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =

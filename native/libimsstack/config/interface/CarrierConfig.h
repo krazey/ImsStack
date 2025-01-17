@@ -128,6 +128,7 @@ public:
         static const IMS_CHAR KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[];
         static const IMS_CHAR KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[];
+        static const IMS_CHAR KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT[];
         static const IMS_CHAR KEY_SIP_DEVICE_ID_TYPE_INT[];
         static const IMS_CHAR KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[];
         static const IMS_CHAR KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL[];
@@ -544,6 +545,18 @@ public:
             MULTIPLE_REGISTRATION_NONE = 0,
             MULTIPLE_REGISTRATION_REG_ID_ONLY = 1,
             MULTIPLE_REGISTRATION_FULL = 2
+        };
+
+        // Rule for forming the user-info part of Contact header in REGISTER request
+        // - KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT
+        enum
+        {
+            /// Default, use time-based UUID
+            REGISTRATION_CONTACT_USER_INFO_PART_UUID = 0,
+            /// Use user-info part from IMPU
+            REGISTRATION_CONTACT_USER_INFO_PART_IMPU = 1,
+            /// No user-info part
+            REGISTRATION_CONTACT_USER_INFO_PART_EMPTY = 2,
         };
     };
 

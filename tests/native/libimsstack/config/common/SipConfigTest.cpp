@@ -23,12 +23,13 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRoundRobin;
+using ::testing::Unused;
 
 namespace android
 {
-static const IMS_SINT32 TEST_CARRIER_CONFIG_INT = 1000;
 
 class SipConfigTest : public ::testing::Test
 {
@@ -49,7 +50,11 @@ protected:
         ON_CALL(m_pConfigService->GetMockCarrierConfig(), GetBoolean(_, _))
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_pConfigService->GetMockCarrierConfig(), GetInt(_, _))
-                .WillByDefault(Return(TEST_CARRIER_CONFIG_INT));
+                .WillByDefault(Invoke(
+                        [](Unused, IMS_SINT32 nDefaultValue)
+                        {
+                            return nDefaultValue;
+                        }));
     }
 
     virtual void TearDown() override
@@ -169,12 +174,22 @@ TEST_F(SipConfigTest, GetTimerValue)
     // default T2 value
     EXPECT_EQ(objSipConfig.GetTimerValueT2(), SipConfigV::DEFAULT_TIMER_T2);
 
+    IMS_SINT32 nT1 = 3000;
+    IMS_SINT32 nT2 = 6000;
+
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T1_MILLIS_INT, _))
+            .WillByDefault(Return(nT1));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T2_MILLIS_INT, _))
+            .WillByDefault(Return(nT2));
+
     objSipConfig.Init();
 
     // T1 value
-    EXPECT_EQ(objSipConfig.GetTimerValueT1(), TEST_CARRIER_CONFIG_INT);
+    EXPECT_EQ(objSipConfig.GetTimerValueT1(), nT1);
     // T2 value
-    EXPECT_EQ(objSipConfig.GetTimerValueT2(), TEST_CARRIER_CONFIG_INT);
+    EXPECT_EQ(objSipConfig.GetTimerValueT2(), nT2);
 }
 
 TEST_F(SipConfigTest, Update)
@@ -258,6 +273,8 @@ TEST_F(SipConfigTest, Update)
     EXPECT_TRUE(objSipConfig.IsSessionIdHeaderSupported());
     EXPECT_EQ(objSipConfig.GetHideMacInPaniHeaderPolicy(), ISipConfig::HIDE_MAC_IN_PANI);
     EXPECT_FALSE(objSipConfig.IsLocalTimezoneParameterSupportedInPaniHeader());
+    EXPECT_EQ(objSipConfig.GetRegContactUserInfoPart(),
+            CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID);
     EXPECT_EQ(objSipConfig.GetRegExpiration(), -1);
     EXPECT_FALSE(objSipConfig.IsRegExpirationConfigured());
     EXPECT_TRUE(objSipConfig.IsRegSubscriptionConfigured());

@@ -18,6 +18,8 @@
 
 #include "IpAddress.h"
 
+#include "CarrierConfig.h"
+
 #include "SipAddress.h"
 
 class IRegContactListener;
@@ -207,15 +209,14 @@ public:
     virtual void SetPort(IN IMS_SINT32 nPort) = 0;
 
     /**
-     * @brief Sets the user-info field for this contact.
+     * @brief Sets the rule for user-info part of Contact header for this contact.
      *
-     * @param nPolicy policy to be applied\n
-     *                #POLICY_USER_INFO_IMPU\n
-     *                #POLICY_USER_INFO_APP
-     * @param strUserInfo the user-info field string
+     * @param nUserInfoPart The user-info part to be applied\n
+     *                      #USER_INFO_PART_UUID\n
+     *                      #USER_INFO_PART_IMPU\n
+     *                      #USER_INFO_PART_EMPTY
      */
-    virtual void SetUserInfo(IN IMS_SINT32 nPolicy = POLICY_USER_INFO_IMPU,
-            IN const AString& strUserInfo = AString::ConstNull()) = 0;
+    virtual void SetUserInfo(IN IMS_SINT32 nUserInfoPart) = 0;
 
     /**
      * @brief Adds the extra capability(feature) parameter for this contact.
@@ -283,15 +284,15 @@ public:
     virtual void RecalculateCallerCapabilities() = 0;
 
 public:
-    /// Policy for user-info field
+    /// Rule for user-info part of Contact header
     enum
     {
-        /// Default policy; it is derived from IMPU
-        POLICY_USER_INFO_IMPU = 0,
-        /// Set by the application explicitly
-        POLICY_USER_INFO_APP,
-        /// No user-info in Contact
-        POLICY_USER_INFO_NONE
+        /// Default, use time-based UUID
+        USER_INFO_PART_UUID = CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID,
+        /// Use user-info part from IMPU
+        USER_INFO_PART_IMPU = CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_IMPU,
+        /// No user-info part
+        USER_INFO_PART_EMPTY = CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_EMPTY
     };
 };
 

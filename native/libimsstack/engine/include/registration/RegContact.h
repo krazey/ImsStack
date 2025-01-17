@@ -29,7 +29,8 @@ class RegContact final : public ImsSlot, public IRegContact
 {
 public:
     RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
-            IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId = (-1));
+            IN IMS_SINT32 nUserInfoPart, IN IRegCapabilityChangeListener* piListener,
+            IN IMS_SINT32 nRegId = (-1));
     virtual ~RegContact();
 
     RegContact(IN const RegContact&) = delete;
@@ -105,8 +106,7 @@ private:
         m_bAllCapabilitiesByConfig = (bCapsByApp) ? IMS_FALSE : IMS_TRUE;
     }
     inline void SetPort(IN IMS_SINT32 nPort) override { m_objContactAddress.SetPort(nPort); }
-    void SetUserInfo(IN IMS_SINT32 nPolicy = POLICY_USER_INFO_IMPU,
-            IN const AString& strUserInfo = AString::ConstNull()) override;
+    void SetUserInfo(IN IMS_SINT32 nUserInfoPart) override;
     IMS_BOOL AddExtraCapability(IN const AString& strName, IN const AString& strValue) override;
     void RemoveExtraCapability(IN const AString& strName, IN const AString& strValue) override;
     IMS_BOOL AddService(IN const AString& strAppId, IN const AString& strServiceId) override;
@@ -125,6 +125,7 @@ private:
     void SetState(IN IMS_SINT32 nState);
     void UpdateGruu(IN const ISipHeader* piHeader);
     void UpdateRegisteredCapabilities(IN const ISipHeader* piHeader);
+    void SetUserInfoPart();
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -155,7 +156,7 @@ private:
     SipAddress* m_pAor;
     // URI for Contact header
     IpAddress m_objIpAddr;
-    IMS_SINT32 m_nPolicyUserInfo;
+    IMS_SINT32 m_nUserInfoPart;
     SipAddress m_objContactAddress;
 
     // Header parameter: +sip.instance

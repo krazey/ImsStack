@@ -167,6 +167,13 @@ public:
     static const AStringArray& GetRegAllowMethods(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
+     * @brief Gets the rule of user-info part of Contact header for IMS registration.
+     *
+     * @param nSlotId The current slot id
+     * @return The rule of user-info part of Contact header.
+     */
+    static IMS_SINT32 GetRegContactUserInfoPart(IN IMS_SINT32 nSlotId);
+    /**
      * @brief Gets the expires value for IMS registration.
      *
      * SipProfile is preferred than a default SipConfig.

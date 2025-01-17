@@ -624,8 +624,9 @@ PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN const IpAddress& obj
     }
 
     // If not present, add a new Contact information
-    RegContact* pNewContact = new RegContact(
-            GetSlotId(), objIpAddr, nPort, this, m_pRegFlow->GetRegKey().GetFlowId());
+    RegContact* pNewContact = new RegContact(GetSlotId(), objIpAddr, nPort,
+            SipConfigProxy::GetRegContactUserInfoPart(GetSlotId()), this,
+            m_pRegFlow->GetRegKey().GetFlowId());
 
     if (pNewContact == IMS_NULL)
     {

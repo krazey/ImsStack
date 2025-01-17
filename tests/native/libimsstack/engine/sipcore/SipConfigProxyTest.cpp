@@ -54,6 +54,8 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     const AStringArray& regAllowMethods = SipConfigProxy::GetRegAllowMethods(IMS_SLOT_0);
     EXPECT_TRUE(regAllowMethods.IsEmpty());
 
+    EXPECT_EQ(SipConfigProxy::GetRegContactUserInfoPart(IMS_SLOT_0),
+            CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID);
     EXPECT_EQ(SipConfigProxy::GetRegExpires(IMS_SLOT_0), SipConfig::INVALID_EXPIRATION);
     EXPECT_EQ(SipConfigProxy::GetRegSubExpires(IMS_SLOT_0), SipConfig::INVALID_EXPIRATION);
     EXPECT_EQ(SipConfigProxy::GetRegUaString(IMS_SLOT_0), AString::ConstNull());
