@@ -385,7 +385,6 @@
     <boolean name="ims.required_cdmaless_feature_tag_bool" value="false"/>
     <boolean name="ims.required_init_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
     <boolean name="ims.sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
-    <boolean name="ims.support_contact_user_info_bool" value="true"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="ims.support_verstat_based_on_network_for_reg_bool" value="false"/>
     <boolean name="ims.support_verstat_for_reg_bool" value="false"/>

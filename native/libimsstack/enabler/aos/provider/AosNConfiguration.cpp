@@ -415,11 +415,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReleaseEPdnUponECallEndInFakeMode()
     return m_objAsset.bReleaseEPdnUponECallEndInFakeMode;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUserInfoInContactSupported() const
-{
-    return m_objAsset.bSupportContactUserInfo;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsCallEndOnRegHeld() const
 {
     return m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld;
@@ -1422,8 +1417,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa = piCc->GetBoolean(
             CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL);
-    m_objAsset.bSupportContactUserInfo =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
     m_objAsset.bSupportEmergencyReregOnIpcanChange =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportRegWithFeatureTagUnavailable =

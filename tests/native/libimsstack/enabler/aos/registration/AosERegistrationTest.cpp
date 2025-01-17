@@ -329,8 +329,6 @@ protected:
                 .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_UDP));
         ON_CALL(m_objMockIAosNConfiguration, IsContactUriValidationChecked())
                 .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(m_objMockIAosNConfiguration, IsUserInfoInContactSupported())
-                .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
                 .WillByDefault(Return(IMS_FALSE));

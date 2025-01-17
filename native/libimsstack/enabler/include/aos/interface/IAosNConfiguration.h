@@ -497,13 +497,6 @@ public:
     virtual IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const = 0;
 
     /**
-     * @brief Flag indicating whether the User Info is included or not in contact
-     *
-     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
-     */
-    virtual IMS_BOOL IsUserInfoInContactSupported() const = 0;
-
-    /**
      * @brief Flag indicating the initial registration is tried on not
      *        right after IMS call is ended while registration is held bacuase re-registration is
      *        failed during active call.

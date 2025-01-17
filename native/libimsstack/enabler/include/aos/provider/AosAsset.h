@@ -53,7 +53,6 @@ public:
             bReregWithChangedCountryOnWifi(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
-            bSupportContactUserInfo(IMS_TRUE),
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatBasedOnNetworkForReg(IMS_FALSE),
@@ -143,7 +142,6 @@ public:
     IMS_BOOL bReregWithChangedCountryOnWifi;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
-    IMS_BOOL bSupportContactUserInfo;
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatBasedOnNetworkForReg;
