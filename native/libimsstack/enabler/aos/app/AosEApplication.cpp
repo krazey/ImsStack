@@ -39,6 +39,7 @@ __IMS_TRACE_TAG_AOS__;
 PUBLIC
 AosEApplication::AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
         AosApplication(piAppContext, strAppId),
+        m_bKeepEPdnWhenNoPcscf(IMS_FALSE),
         m_bRegBlockInCbm(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosEApplication = %" PFLS_u "/%" PFLS_x, APPID,
@@ -61,7 +62,7 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
     switch (nCmdType)
     {
         case ImsAosControl::REGISTER_START:
-            SetRegBlockInCbm(IMS_FALSE);
+            InitEmergencyVariable();
             if (IsNotReady())
             {
                 return IMS_FALSE;
@@ -112,9 +113,25 @@ PUBLIC VIRTUAL void AosEApplication::GetProperty(
     strValue = AString::ConstNull();
 }
 
+PROTECTED void AosEApplication::InitEmergencyVariable()
+{
+    SetKeepEPdnWhenNoPcscf(IMS_FALSE);
+    SetRegBlockInCbm(IMS_FALSE);
+}
+
+PROTECTED void AosEApplication::SetKeepEPdnWhenNoPcscf(IN IMS_BOOL bEnable)
+{
+    m_bKeepEPdnWhenNoPcscf = bEnable;
+}
+
 PROTECTED void AosEApplication::SetRegBlockInCbm(IN IMS_BOOL bBlock)
 {
     m_bRegBlockInCbm = bBlock;
+}
+
+PROTECTED IMS_BOOL AosEApplication::IsKeepEPdnWhenNoPcscf() const
+{
+    return m_bKeepEPdnWhenNoPcscf;
 }
 
 PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
@@ -122,8 +139,15 @@ PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
     return m_bRegBlockInCbm;
 }
 
-PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd() const
+PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
 {
+    if (GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable() && IsKeepEPdnWhenNoPcscf())
+    {
+        A_IMS_TRACE_I(APPID, "Need to keep emergency pdn until data is disconnected.", 0, 0, 0);
+        SetKeepEPdnWhenNoPcscf(IMS_FALSE);
+        return IMS_FALSE;
+    }
+
     // FAKE MODE
     if (m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE &&
             GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndInFakeMode())
@@ -351,9 +375,17 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnecting(
     ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
-PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnected(IN IMS_UINT32 /* nReason */)
+PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnected(IN IMS_UINT32 nReason)
 {
-    ProcessCleanAll(AosReason::REG_FAILURE);
+    if (nReason == IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE)
+    {
+        SetKeepEPdnWhenNoPcscf(IMS_TRUE);
+        ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+    }
+    else
+    {
+        ProcessCleanAll(AosReason::REG_FAILURE);
+    }
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated_StateDisconnecting(

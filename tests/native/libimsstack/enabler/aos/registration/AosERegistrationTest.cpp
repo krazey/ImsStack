@@ -554,13 +554,43 @@ TEST_F(AosERegistrationTest, RequestFakeModeCmdWithSamePcscfReason_HandleFakeMod
 
 TEST_F(AosERegistrationTest, RequestFakeModeCmdWithNextPcscfReason_HandleFakeMode)
 {
-    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosPcscf, RemoveCurrentPcscf()).Times(1);
+
+    m_pAosERegistration->RequestCmd(
+            IAosRegistration::CMD_FAKE_MODE, IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
+
+    EXPECT_TRUE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_TRUE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, ReportFailureWithGeneral_HandleFakeMode)
+{
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, RemoveCurrentPcscf());
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
-            .Times(1);
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosERegistration->RequestCmd(
+            IAosRegistration::CMD_FAKE_MODE, IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, ReportFailureWithNoPcscf_HandleFakeModeAndNoPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, RemoveCurrentPcscf());
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE));
 
     m_pAosERegistration->RequestCmd(
             IAosRegistration::CMD_FAKE_MODE, IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
