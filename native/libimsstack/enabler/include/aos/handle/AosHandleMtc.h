@@ -80,8 +80,8 @@ protected:
     // IAosHandle
     void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
 
-private:
     void UpdateGGsmaRcsTelephonyFeatureTag();
+
     IMS_UINT32 GetVoiceBlockReasonForIpcan();
     IMS_UINT32 GetVideoBlockReasonForIpcan();
 

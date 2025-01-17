@@ -802,7 +802,7 @@ PROTECTED VIRTUAL void AosHandleMtc::Request(IN IMS_UINT32 nType, IN IMS_UINT32 
     }
 }
 
-PRIVATE
+PROTECTED
 void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
 {
     /* VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6230394
@@ -846,21 +846,21 @@ void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
     m_objFeatureTagList.PrintFeatureTagList();
 }
 
-PRIVATE
+PROTECTED
 IMS_UINT32 AosHandleMtc::GetVoiceBlockReasonForIpcan()
 {
     return (m_nNetworkType == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
                                                     : BLOCK_VOLTE_CAPABILITY;
 }
 
-PRIVATE
+PROTECTED
 IMS_UINT32 AosHandleMtc::GetVideoBlockReasonForIpcan()
 {
     return (m_nNetworkType == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
                                                     : BLOCK_VILTE_CAPABILITY;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosHandleMtc::IsCsFeatureTagRequired() const
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
@@ -886,7 +886,7 @@ IMS_BOOL AosHandleMtc::IsCsFeatureTagRequired() const
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosHandleMtc::IsInvalidMobileNetwork() const
 {
     if (!IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
@@ -902,7 +902,7 @@ IMS_BOOL AosHandleMtc::IsInvalidMobileNetwork() const
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosHandleMtc::IsPlmnBlockCondition() const
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
@@ -923,7 +923,7 @@ IMS_BOOL AosHandleMtc::IsPlmnBlockCondition() const
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosHandleMtc::ProcessHoldingVopsState(IN IMS_UINT32 nState)
 {
     if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
@@ -948,7 +948,7 @@ IMS_BOOL AosHandleMtc::ProcessHoldingVopsState(IN IMS_UINT32 nState)
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosHandleMtc::ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice)
 {
     if (nBarringFactorForVoice == 0)
@@ -973,7 +973,7 @@ IMS_BOOL AosHandleMtc::ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVo
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 void AosHandleMtc::ProcessVolteHysTimerExpired()
 {
     A_IMS_TRACE_D(APPPROFILE, "ProcessVolteHysTimerExpired", 0, 0, 0);
@@ -996,7 +996,7 @@ void AosHandleMtc::ProcessVolteHysTimerExpired()
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosHandleMtc::StartVolteHysTimer(IN IMS_UINT32 nDuration)
 {
     if (nDuration == 0)
@@ -1015,7 +1015,7 @@ IMS_BOOL AosHandleMtc::StartVolteHysTimer(IN IMS_UINT32 nDuration)
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AosHandleMtc::StopVolteHysTimer()
 {
     if (m_piVolteHysTimer == IMS_NULL)
@@ -1026,13 +1026,13 @@ void AosHandleMtc::StopVolteHysTimer()
     AosUtil::GetInstance()->StopTimer(m_piVolteHysTimer, "TIMER_VOLTE_HYS");
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosHandleMtc::IsVolteHysTimerRunning() const
 {
     return (m_piVolteHysTimer != IMS_NULL);
 }
 
-PRIVATE VIRTUAL void AosHandleMtc::NConfiguration_NotifyConfigChanged()
+PROTECTED VIRTUAL void AosHandleMtc::NConfiguration_NotifyConfigChanged()
 {
     AosHandle::NConfiguration_NotifyConfigChanged();
 
@@ -1060,7 +1060,7 @@ PRIVATE VIRTUAL void AosHandleMtc::NConfiguration_NotifyConfigChanged()
     }
 }
 
-PRIVATE VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo)
+PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo)
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
     {
@@ -1134,7 +1134,7 @@ PRIVATE VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& obj
     }
 }
 
-PRIVATE VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged()
+PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged()
 {
     if (!IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
     {
@@ -1153,7 +1153,7 @@ PRIVATE VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged()
     }
 }
 
-PRIVATE VIRTUAL void AosHandleMtc::Timer_TimerExpired(IN ITimer* piTimer)
+PROTECTED VIRTUAL void AosHandleMtc::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
