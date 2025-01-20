@@ -181,10 +181,9 @@ public class SscServiceImpl implements IUtInterface {
         httpConnectionGov.close(mSlotId);
     }
 
-    private void handleInvalidRequest(int tId, int requestType) {
+    private void handleInvalidRequest(int tId, int requestType, int reasonInfo) {
         if (mUtListener != null) {
-            ImsReasonInfo ri = new ImsReasonInfo(ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED,
-                    ImsReasonInfo.CODE_UNSPECIFIED, null);
+            ImsReasonInfo ri = new ImsReasonInfo(reasonInfo, ImsReasonInfo.CODE_UNSPECIFIED, null);
             if (requestType == REQUEST_TYPE_QUERY) {
                 postAndRunTask(() -> mUtListener.utConfigurationQueryFailed(tId, ri));
             } else if (requestType == REQUEST_TYPE_UPDATE) {
@@ -234,7 +233,8 @@ public class SscServiceImpl implements IUtInterface {
 
         if (!isServerBasedService(ssType, condition)) {
             ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -262,14 +262,16 @@ public class SscServiceImpl implements IUtInterface {
             int serviceClass) {
         if (!isServerBasedService(ESsType.CF, condition)) {
             ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
         if (condition == SscConstant.CONDITION_CFA || condition == SscConstant.CONDITION_CFAC) {
             if (!SscConfig.isCfQueryAllAndCfAllConditionalSupported(mSlotId)) {
                 ImsLog.d(mSlotId, "isCfQueryAllAndCfAllConditionalSupported is false");
-                handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+                handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                        ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
                 return;
             }
         }
@@ -290,8 +292,16 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void queryCallWaiting(int tId) {
         if (!isServerBasedService(ESsType.CW, SscConstant.CONDITION_INVALID)) {
+            if (isTerminalBasedService(ESsType.CW, SscConstant.CONDITION_INVALID)) {
+                ImsLog.d(mSlotId, "Terminal based service request");
+                handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                        ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+                return;
+            }
+
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -311,8 +321,16 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void queryCLIR(int tId) {
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+                ImsLog.d(mSlotId, "Terminal based service request");
+                handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                        ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+                return;
+            }
+
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -333,7 +351,8 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCLIP(int tId) {
         if (!isServerBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -353,8 +372,16 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void queryCOLR(int tId) {
         if (!isServerBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+            if (isTerminalBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+                ImsLog.d(mSlotId, "Terminal based service request");
+                handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                        ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+                return;
+            }
+
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -375,7 +402,8 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCOLP(int tId) {
         if (!isServerBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -419,13 +447,15 @@ public class SscServiceImpl implements IUtInterface {
 
         if (!isServerBasedService(ssType, condition)) {
             ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
         if (action != SscConstant.STATUS_ENABLE && action != SscConstant.STATUS_DISABLE) {
             ImsLog.e(mSlotId, "Invalid action : " + action);
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -448,7 +478,8 @@ public class SscServiceImpl implements IUtInterface {
             int serviceClass, int timeSeconds) {
         if (!isServerBasedService(ESsType.CF, condition)) {
             ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -475,7 +506,8 @@ public class SscServiceImpl implements IUtInterface {
                 break;
             default:
                 ImsLog.e(mSlotId, "Invalid action");
-                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                        ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
                 return;
         }
 
@@ -483,7 +515,8 @@ public class SscServiceImpl implements IUtInterface {
             if (timeSeconds < SscConstant.CFNR_TIMER_MIN
                     || timeSeconds > SscConstant.CFNR_TIMER_MAX) {
                 ImsLog.e(mSlotId, "Invalid timer : " + timeSeconds);
-                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                        ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
                 return;
             }
 
@@ -527,7 +560,16 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void updateCallWaiting(int tId, boolean enable, int serviceClass) {
         if (!isServerBasedService(ESsType.CW, SscConstant.CONDITION_INVALID)) {
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            if (isTerminalBasedService(ESsType.CW, SscConstant.CONDITION_INVALID)) {
+                ImsLog.d(mSlotId, "Terminal based service request");
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                        ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+                return;
+            }
+
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -547,8 +589,16 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void updateCLIR(int tId, int clirMode) {
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+                ImsLog.d(mSlotId, "Terminal based service request");
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                        ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+                return;
+            }
+
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -569,7 +619,8 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCLIP(int tId, boolean enable) {
         if (!isServerBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -589,8 +640,16 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void updateCOLR(int tId, int presentation) {
         if (!isServerBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+            if (isTerminalBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+                ImsLog.d(mSlotId, "Terminal based service request");
+                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                        ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+                return;
+            }
+
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -611,7 +670,8 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCOLP(int tId, boolean enable) {
         if (!isServerBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE,
+                    ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
             return;
         }
 
@@ -743,6 +803,16 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         return SscConfig.isServerBasedService(mSlotId, carrierConfigServiceType);
+    }
+
+    private boolean isTerminalBasedService(ESsType ssType, int condition) {
+        int carrierConfigServiceType =
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ssType, condition);
+        if (carrierConfigServiceType == SscConfig.SERVICE_TYPE_INVALID) {
+            return false;
+        }
+
+        return SscConfig.isTerminalBasedService(mSlotId, carrierConfigServiceType);
     }
 
     private final class SscRequestHandler extends Handler {

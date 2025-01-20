@@ -569,6 +569,27 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testQueryCallWaiting_terminalBasedService() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {0});
+        int tId = 1;
+
+        mSscServiceImpl.queryCallWaiting(tId);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mMockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+    }
+
+    @Test
     public void testQueryClir_success() {
         int tId = 1;
 
@@ -619,6 +640,27 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testQueryClir_terminalBasedService() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {10});
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mMockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
     @Test
@@ -725,6 +767,27 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testQueryColr__terminalBasedService() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {11});
+        int tId = 1;
+
+        mSscServiceImpl.queryCOLR(tId);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mMockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
     @Test
@@ -1231,6 +1294,27 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testUpdateCallWaiting__terminalBasedService() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {0});
+        int tId = 1;
+
+        mSscServiceImpl.updateCallWaiting(tId, true, SscServiceClassUtil.SERVICE_CLASS_VOICE);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mMockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+    }
+
+    @Test
     public void testUpdateClir_success() {
         int tId = 1;
 
@@ -1272,6 +1356,27 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testUpdateClir_terminalBasedService() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {10});
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mMockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
     @Test
@@ -1360,6 +1465,27 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testUpdateColr_terminalBasedService() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {11});
+        int tId = 1;
+
+        mSscServiceImpl.updateCOLR(tId, SscConstant.TIR_PROVISIONED);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        verifyNoMoreInteractions(mMockSscTransaction);
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
     @Test
