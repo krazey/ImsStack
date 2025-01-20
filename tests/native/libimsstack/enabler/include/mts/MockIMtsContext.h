@@ -30,7 +30,7 @@ public:
     virtual ~MockIMtsContext() {}
 
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
-    MOCK_METHOD(IMtsService&, GetService, (), (override));
+    MOCK_METHOD(IMtsService*, GetService, (), (override));
     MOCK_METHOD(IMtsMessageController&, GetMessageController, (), (override));
     MOCK_METHOD(const IMtsDynamicLoader&, GetDynamicLoader, (), (const, override));
 };

@@ -114,7 +114,7 @@ protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
-        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMockMtsService));
+        ON_CALL(objContext, GetService).WillByDefault(Return(&objMockMtsService));
         pMtsMessageController = new TestMtsMessageController(objContext);
 
         pMtsDynamicLoader = new MtsDynamicLoader(objContext);

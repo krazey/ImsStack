@@ -20,7 +20,6 @@
 #include "IMtsApp.h"
 #include "IMtsContext.h"
 #include "ImsApp.h"
-#include "MtsService.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
 
@@ -42,7 +41,7 @@ public:
 
     // IMtsContext
     inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
-    inline IMtsService& GetService() override { return m_objMtsService; }
+    inline IMtsService* GetService() override { return m_piMtsService; }
     inline IMtsMessageController& GetMessageController() override
     {
         return m_objMtsMessageController;
@@ -54,7 +53,7 @@ public:
 
 private:
     IMS_SINT32 m_nSlotId;
-    MtsService m_objMtsService;
+    IMtsService* m_piMtsService;
     MtsMessageController m_objMtsMessageController;
     MtsDynamicLoader m_objMtsDynamicLoader;
 };

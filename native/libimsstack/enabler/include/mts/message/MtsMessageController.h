@@ -26,6 +26,7 @@
 #include "message/IMtsMessageController.h"
 #include <functional>
 
+class ICoreService;
 class IMessage;
 class IMtsContext;
 class IMtsMessage;
