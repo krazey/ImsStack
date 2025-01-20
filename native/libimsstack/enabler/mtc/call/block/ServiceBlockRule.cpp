@@ -62,6 +62,6 @@ PRIVATE CallReasonInfo ServiceBlockRule::GetBlockReason() const
     }
     else
     {
-        return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE);
+        return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_488);
     }
 }
