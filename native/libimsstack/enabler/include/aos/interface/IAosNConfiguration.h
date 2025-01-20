@@ -373,6 +373,14 @@ public:
     virtual IMS_BOOL IsKeepERegRetryOnWlanRequired() const = 0;
 
     /**
+     * @brief Flag indicating whether to stop emergency registration timer on E-PDN connection.
+     *
+     * @return IMS_BOOL Return whether to stop on emergency registration timer on E-PDN connection
+     *         or not.
+     */
+    virtual IMS_BOOL IsStopERegTimerOnEpdnConnected() const = 0;
+
+    /**
      * @brief Returns whether UE doesn't send initial registration due to pcscf change
      *
      *        If this is set as TRUE, UE doesn't send initial registration due to pcscf change.

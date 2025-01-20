@@ -331,6 +331,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepERegRetryOnWlanRequired() const
     return m_objAsset.bKeepERegRetryOnWlan;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsStopERegTimerOnEpdnConnected() const
+{
+    return m_objAsset.bStopERegTimerOnEpdnConnected;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsNoInitRegOnPcscfChange() const
 {
     return m_objAsset.bNoInitRegOnPcscfChange;
@@ -1389,6 +1394,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
     m_objAsset.bKeepERegRetryOnWlan =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
+    m_objAsset.bStopERegTimerOnEpdnConnected = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL);
     m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable = piCc->GetBoolean(
