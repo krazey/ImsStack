@@ -19,7 +19,10 @@
 #include "IPageMessage.h"
 #include "ImsTypeDef.h"
 #include "IuMtsService.h"
+#include "JniEnablerConnector.h"
 #include "MockICoreService.h"
+#include "MockIJniEnabler.h"
+#include "MockIJniMtsServiceThread.h"
 #include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
 #include "MockIMtsContext.h"
@@ -92,7 +95,10 @@ public:
 
     TestMtsMessageController* pMtsMessageController;
 
+    JniEnablerConnector* pConnector;
     MockICoreService objMockCoreService;
+    MockIJniEnabler objMockJniEnabler;
+    MockIJniMtsServiceThread objJniMtsServiceThread;
     MockILocationInfo objMockILocationInfo;
     MockILocationProperties objMockILocationProperties;
     MockIMessage objMockMessage;
@@ -119,12 +125,19 @@ protected:
 
         pMtsDynamicLoader = new MtsDynamicLoader(objContext);
         ON_CALL(objContext, GetDynamicLoader).WillByDefault(ReturnRef(*pMtsDynamicLoader));
+        ON_CALL(objMockMtsService, GetJniServiceThread)
+                .WillByDefault(Return(&objJniMtsServiceThread));
+
+        pConnector = &JniEnablerConnector::GetInstance();
+        pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTS_SERVICE, &objMockJniEnabler);
+        ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objJniMtsServiceThread));
     }
 
     virtual void TearDown() override
     {
         delete pMtsDynamicLoader;
         delete pMtsMessageController;
+        delete pConnector;
     }
 
     void SetUpTestLocationProperties()
@@ -198,8 +211,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsWithoutEmergencyFlag)
             .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
 
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -242,8 +255,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsWithEmergencyFlag)
             .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
 
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -259,8 +272,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsWithoutTargetAddress)
     pContent->Append((IMS_BYTE)0x03);                     // message reference
     pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -273,8 +286,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsWithoutRPDU)
 
     ByteArray* pContent = new ByteArray(ByteArray::ConstNull());
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -293,8 +306,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsWhenMoServiceBlocked)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -317,8 +330,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToGetICoreService)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -344,8 +357,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToGetUri)
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -373,8 +386,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToCreatePageMessage)
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(nullptr));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -403,8 +416,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToGetNextRequest)
     ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(nullptr));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -434,8 +447,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToAddHeader)
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_FAILURE));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -466,8 +479,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToSendPageMessage)
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_FAILURE));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -506,8 +519,8 @@ TEST_F(MtsMessageControllerTest, ProcessMoSmsAndPageMessageDeliveryFailed)
             .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -566,14 +579,15 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpAck));
     ON_CALL(objMockSipMessage, GetHeader(_, _, _)).WillByDefault(Return(strInReplyTo));
 
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -629,15 +643,15 @@ TEST_F(MtsMessageControllerTest, NormalMoSmsAndInReplyToMismatched)
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpAck));
     ON_CALL(objMockSipMessage, GetHeader(_, _, _)).WillByDefault(Return(strInReplyTo));
 
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
-
     EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_488, _)).Times(1);
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -694,13 +708,14 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAckWithout202Accepted)
     ON_CALL(objMockSipMessage, GetHeader(_, _, _)).WillByDefault(Return(strCallId));
 
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(0);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
 }
@@ -733,13 +748,12 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithSMMAAndFailToFormDestination)
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
-
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -787,7 +801,6 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithGeoLocationInformation)
     EXPECT_CALL(objMockMessage, AddHeader(AString(SipHeaderName::GEOLOCATION_ROUTING), _))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
-
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
@@ -835,11 +848,12 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -889,11 +903,12 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAckFailed)
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -943,11 +958,12 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck3gpp2)
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP2, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP2, _, SLOT_ID))
+            .Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP2, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP2, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP2, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -960,7 +976,8 @@ TEST_F(MtsMessageControllerTest, ProcessMtSmsWhenMtServiceBlocked)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_480, _)).Times(1);
     EXPECT_CALL(objMockPageMessage, Destroy()).Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
@@ -975,7 +992,8 @@ TEST_F(MtsMessageControllerTest, ProcessMtSmsAndFailToGetICoreService)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_480, _)).Times(1);
     EXPECT_CALL(objMockPageMessage, Destroy()).Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
@@ -998,7 +1016,8 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageIfIMessageIsNull)
             .WillByDefault(Return(nullptr));
 
     EXPECT_CALL(objMockPageMessage, Reject(400, _)).Times(1);
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -1021,7 +1040,8 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfNoToHeader
     ON_CALL(objMockMessage, GetHeaders(_)).WillByDefault(Return(objHeaders));
 
     EXPECT_CALL(objMockPageMessage, Reject(400, _)).Times(1);
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -1047,7 +1067,8 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfNoMessageB
     ON_CALL(objMockMessage, GetBodyParts()).WillByDefault(Return(objMessageBodies));
 
     EXPECT_CALL(objMockPageMessage, Reject(400, _)).Times(1);
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -1076,7 +1097,8 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfInvalidSms
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
 
     EXPECT_CALL(objMockPageMessage, Reject(415, _)).Times(1);
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -1109,7 +1131,8 @@ TEST_F(MtsMessageControllerTest, ReceivedTooLargeRpdu)
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(0);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -1137,7 +1160,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
 
-    EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMoStatus(_, _, _, SLOT_ID)).Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(IMS_NULL);
@@ -1169,11 +1192,10 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDelivered)
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
-
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
 
-    EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMoStatus(_, _, _, SLOT_ID)).Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
@@ -1207,7 +1229,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, Destroy()).WillByDefault(Return());
 
-    EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMoStatus(_, _, _, SLOT_ID)).Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(IMS_NULL);
@@ -1241,14 +1263,13 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsUserFailure)
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
-
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
-    EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_GENERIC, _, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMoStatus(MO_ERROR_GENERIC, _, _, SLOT_ID)).Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
@@ -1282,7 +1303,6 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
-
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
@@ -1292,7 +1312,7 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
             GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT, _))
             .WillByDefault(Return(MO_ERROR_FALLBACK));
 
-    EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_FALLBACK, _, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMoStatus(MO_ERROR_FALLBACK, _, _, SLOT_ID)).Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
@@ -1406,8 +1426,8 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
             .WillOnce(Return(SipStatusCode::SC_407))
             .WillOnce(Return(SipStatusCode::SC_407))
             .WillOnce(Return(SipStatusCode::SC_202));
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -1419,7 +1439,8 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
 
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(1);
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
@@ -1473,8 +1494,8 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxDuration)
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_407));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -1531,8 +1552,8 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxCount)
     ON_CALL(objMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_407));
 
-    EXPECT_CALL(objMockMtsService,
-            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(1);
     pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
@@ -1600,9 +1621,10 @@ TEST_F(MtsMessageControllerTest, ProcessPendingRpDataFromNetwork)
     EXPECT_CALL(objMockMessageBodyPart, GetContent())
             .WillOnce(ReturnRef(objFirstRpData))
             .WillRepeatedly(ReturnRef(objSecondRpData));
-    EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(2);
-    EXPECT_CALL(
-            objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
+    EXPECT_CALL(objJniMtsServiceThread, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _, SLOT_ID))
+            .Times(2);
+    EXPECT_CALL(objJniMtsServiceThread,
+            ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID, SLOT_ID))
             .Times(2);
 
     pMtsMessageController->ProcessMtSms(&objMockPageMessage);

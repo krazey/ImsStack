@@ -24,9 +24,12 @@
 #include "ImsServiceConfig.h"
 #include "ImsServiceConfigTypeDef.h"
 #include "IuMtsService.h"
+#include "JniEnablerConnector.h"
 #include "MockICarrierConfig.h"
 #include "MockIImsAos.h"
 #include "MockIImsAosInfo.h"
+#include "MockIJniEnabler.h"
+#include "MockIJniMtsServiceThread.h"
 #include "MockIMtsContext.h"
 #include "MockIMtsMessageController.h"
 #include "MockIReference.h"
@@ -56,9 +59,12 @@ const IMS_UINTP FAKE_ADDRESS = 1;
 class MtsServiceTest : public ::testing::Test
 {
 public:
+    JniEnablerConnector* pConnector;
     MockIImsAos objMockIImsAos;
     MockIImsAos objMockIImsEmergencyAos;
     MockIImsAosInfo objMockIImsAosInfo;
+    MockIJniEnabler objMockJniEnabler;
+    MockIJniMtsServiceThread objJniMtsServiceThread;
     MockIMtsContext objContext;
     MockIMtsMessageController objMessageController;
     MockICoreService objEmergencyCoreService;
@@ -100,6 +106,10 @@ protected:
 
         ON_CALL(objMockIImsAos, GetAosInfo()).WillByDefault(Return(&objMockIImsAosInfo));
         ON_CALL(objMockIImsEmergencyAos, GetAosInfo()).WillByDefault(Return(&objMockIImsAosInfo));
+
+        pConnector = &JniEnablerConnector::GetInstance();
+        pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTS_SERVICE, &objMockJniEnabler);
+        ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objJniMtsServiceThread));
     }
 
     virtual void TearDown() override
@@ -109,6 +119,7 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         delete pMtsService;
+        delete pConnector;
     }
 };
 
@@ -125,17 +136,6 @@ TEST_F(MtsServiceTest, CoreServicePageMessageReceived)
     EXPECT_CALL(objMessageController, ProcessMtSms(piMessage)).Times(1);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
-
-    ByteArray objRpData((IMS_BYTE)0x01);  // message type indicator(RP-MT-DATA)
-    objRpData.Append((IMS_BYTE)0x03);     // message reference
-    objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
-
-    AString strContent;
-    strContent.Attach(
-            reinterpret_cast<const IMS_CHAR*>(objRpData.GetData()), objRpData.GetLength());
-    ByteArray objContent = strContent.ToBase64();
-
-    pMtsService->ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, objContent);
 }
 
 TEST_F(MtsServiceTest, CoreServicePageMessageReceivedWithInvalidParameter)
@@ -291,6 +291,9 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(
+            objJniMtsServiceThread, ReportMoStatus(MO_ERROR_RETRY, eSmsFormat, SEQ_ID_1, SLOT_ID))
+            .Times(1);
 
     pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
 }

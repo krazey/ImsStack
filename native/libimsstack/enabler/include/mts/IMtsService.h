@@ -23,6 +23,7 @@
 #include "MtsDef.h"
 
 class ICoreService;
+class IJniMtsServiceThread;
 class IMtsServiceState;
 
 class IMtsService : public INativeEnabler
@@ -47,10 +48,12 @@ public:
      */
     virtual IMtsServiceState* GetIMtsServiceState() = 0;
 
-    // TODO: b/381001673 - MtsMessageController calls JNI directly.
-    virtual void ReportMoStatus(
-            IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId) = 0;
-    virtual void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) = 0;
+    /**
+     * @brief Gets the IJniMtsServiceThread object.
+     *
+     * @return The IJniMtsServiceThread object.
+     */
+    virtual IJniMtsServiceThread* GetJniServiceThread() const = 0;
 
     /**
      * @brief Requests the IMS registration recovery procedure.

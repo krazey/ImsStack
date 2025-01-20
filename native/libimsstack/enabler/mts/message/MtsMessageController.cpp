@@ -29,6 +29,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "ICoreService.h"
+#include "IJniMtsServiceThread.h"
 #include "IMessage.h"
 #include "ISipMessage.h"
 #include "ISipHeader.h"
@@ -460,7 +461,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
     if (RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_TRUE) == IMS_SUCCESS)
     {
         IMS_TRACE_I("ReceiveMessage : SMS is received successfully", 0, 0, 0);
-        ReportMtSms(eSmsFormat, objContent.GetLength(), objContent.GetData());
+        ReportMtSms(eSmsFormat, objContent);
     }
 }
 
@@ -610,20 +611,29 @@ PRIVATE void MtsMessageController::ReportMoStatus(
             PS_MoStatus(nReason), nReason, PS_SmsFormatType(eSmsFormat), nSeqId);
     IMS_TRACE_I("ReportMoStatus :  %s", acLog, 0, 0);
 
-    m_objContext.GetService().ReportMoStatus(nReason, eSmsFormat, nSeqId);
+    IJniMtsServiceThread* piServiceThread = m_objContext.GetService().GetJniServiceThread();
+    if (piServiceThread)
+    {
+        piServiceThread->ReportMoStatus(nReason, eSmsFormat, nSeqId, m_objContext.GetSlotId());
+    }
 }
 
 PRIVATE void MtsMessageController::ReportMtSms(
-        IN SmsFormatType eSmsFormat, IN IMS_UINT32 nContentLength, IN const IMS_BYTE* pbyContent)
+        IN SmsFormatType eSmsFormat, IN const ByteArray& objContent)
 {
     IMS_TRACE_I("ReportMtSMS : eSmsFormat[%s], Length[%d]", PS_SmsFormatType(eSmsFormat),
-            nContentLength, 0);
+            objContent.GetLength(), 0);
 
     AString strContent = AString::ConstNull();
-    strContent.Attach(reinterpret_cast<const IMS_CHAR*>(pbyContent), nContentLength);
-    ByteArray objContent = strContent.ToBase64();
+    strContent.Attach(
+            reinterpret_cast<const IMS_CHAR*>(objContent.GetData()), objContent.GetLength());
+    ByteArray objBase64Content = strContent.ToBase64();
 
-    m_objContext.GetService().ReportMtSms(eSmsFormat, objContent);
+    IJniMtsServiceThread* piServiceThread = m_objContext.GetService().GetJniServiceThread();
+    if (piServiceThread)
+    {
+        piServiceThread->ReportMtSms(eSmsFormat, objBase64Content, m_objContext.GetSlotId());
+    }
 }
 
 PRIVATE
@@ -895,7 +905,7 @@ void MtsMessageController::Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessag
     const ByteArray& objContent = ProcessReceivedMessage(piPageMessage, piMtsMessage);
     if (RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_FALSE) == IMS_SUCCESS)
     {
-        ReportMtSms(eSmsFormat, objContent.GetLength(), objContent.GetData());
+        ReportMtSms(eSmsFormat, objContent);
     }
 }
 

@@ -96,6 +96,19 @@ ICoreService* MtsService::GetICoreService(IN IMS_BOOL bEmergency) const
     return bEmergency ? m_piEmergencyCoreService : m_piCoreService;
 }
 
+PUBLIC VIRTUAL IJniMtsServiceThread* MtsService::GetJniServiceThread() const
+{
+    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTS_SERVICE);
+    if (piJniEnabler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtsServiceThread is null", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    return reinterpret_cast<IJniMtsServiceThread*>(piJniEnabler->GetJniThread());
+}
+
 PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
         IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency)
 {
@@ -133,31 +146,6 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
         }
         m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
         StartRadioTraffic(piMtsTraffic);
-    }
-}
-
-PUBLIC
-void MtsService::ReportMoStatus(
-        IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId)
-{
-    IMS_TRACE_I("ReportMoStatus", 0, 0, 0);
-
-    IJniMtsServiceThread* piJniThread = GetJniThread();
-    if (piJniThread)
-    {
-        piJniThread->ReportMoStatus(nReason, eSmsFormat, nSeqId, m_objContext.GetSlotId());
-    }
-}
-
-PUBLIC
-void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent)
-{
-    IMS_TRACE_I("ReportMtSms", 0, 0, 0);
-
-    IJniMtsServiceThread* piJniThread = GetJniThread();
-    if (piJniThread)
-    {
-        piJniThread->ReportMtSms(eSmsFormat, objContent, m_objContext.GetSlotId());
     }
 }
 
@@ -638,20 +626,6 @@ IMtsTraffic* MtsService::GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nD
 }
 
 PRIVATE
-IJniMtsServiceThread* MtsService::GetJniThread()
-{
-    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
-            m_objContext.GetSlotId(), EnablerType::MTS_SERVICE);
-    if (piJniEnabler == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "JniMtsServiceThread is null", 0, 0, 0);
-        return IMS_NULL;
-    }
-
-    return reinterpret_cast<IJniMtsServiceThread*>(piJniEnabler->GetJniThread());
-}
-
-PRIVATE
 void MtsService::StartRadioTraffic(IN IMtsTraffic* piMtsTraffic)
 {
     IMS_UINT32 nDirection = piMtsTraffic->GetDirection();
@@ -668,7 +642,14 @@ void MtsService::StartRadioTraffic(IN IMtsTraffic* piMtsTraffic)
     else
     {
         IMS_TRACE_E(0, "RadioTraffic was not allowed", 0, 0, 0);
-        ReportMoStatus(MO_ERROR_RETRY, m_pSmsInfo->eSmsFormat, m_pSmsInfo->nSeqId);
+
+        IJniMtsServiceThread* piServiceThread = GetJniServiceThread();
+        if (piServiceThread)
+        {
+            piServiceThread->ReportMoStatus(MO_ERROR_RETRY, m_pSmsInfo->eSmsFormat,
+                    m_pSmsInfo->nSeqId, m_objContext.GetSlotId());
+        }
+
         delete m_pSmsInfo;
         m_pSmsInfo = IMS_NULL;
     }

@@ -70,9 +70,7 @@ public:
     // IMtsService
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
     inline IMtsServiceState* GetIMtsServiceState() override { return m_piMtsServiceState; }
-    void ReportMoStatus(
-            IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId) override;
-    void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) override;
+    IJniMtsServiceThread* GetJniServiceThread() const override;
     void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
     void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) override;
     inline void NotifyJniEnablerSet() override {}
