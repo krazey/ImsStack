@@ -33,6 +33,8 @@ public:
     virtual IMS_SINT32 GetRatType() const;
     virtual IMS_SINT32 GetMobileRatType() const;
     virtual void OnServiceConnected(IN IMS_UINT32 eIpcan);
+    // This API must be used test purpose only.
+    virtual void SetTestRatChanged(IN IMS_SINT32 eRatType);
 
     void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo) override;
 

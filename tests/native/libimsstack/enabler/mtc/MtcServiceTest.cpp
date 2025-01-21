@@ -18,6 +18,7 @@
 #include "IConfiguration.h"
 #include "IIpcan.h"
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "IPageMessage.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
@@ -785,13 +786,26 @@ TEST_F(MtcServiceTest, ProcessTestCommandChangesInternalAosState)
     const IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
     const IMS_UINT32 nIpCanType = IIpcan::CATEGORY_MOBILE;
     EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpCanType)).Times(1);
-    pNormalMtcService->ProcessTestCommand(0 /* TEST_COMMAND_AOS_CONNECTED */, nFeature, nIpCanType);
+    pNormalMtcService->ProcessTestCommand(0 /* TestCommand::AOS_CONNECTED */, nFeature, nIpCanType);
 
     const IMS_UINT32 nReason = ImsAosReason::NONE;
     EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason)).Times(1);
-    pNormalMtcService->ProcessTestCommand(1 /* TEST_COMMAND_AOS_DISCONNECTED */, nReason, 0);
+    pNormalMtcService->ProcessTestCommand(1 /* TestCommand::AOS_DISCONNECTED */, nReason, 0);
+}
 
-    pNormalMtcService->ProcessTestCommand(2 /* Not defined */, 0, 0);
+TEST_F(MtcServiceTest, ProcessTestCommandChangesRatType)
+{
+    const IMS_SINT32 eRatTypeNr = INetworkWatcher::RADIOTECH_TYPE_NR;
+    const IMS_SINT32 eRatTypeLte = INetworkWatcher::RADIOTECH_TYPE_LTE;
+    EXPECT_CALL(*pNetworkWatcher, SetTestRatChanged(eRatTypeNr)).Times(1);
+    pNormalMtcService->ProcessTestCommand(2 /* TestCommand::RAT_CHANGED */, eRatTypeNr, 0);
+
+    const IMS_UINT32 nReason = ImsAosReason::NONE;
+    EXPECT_CALL(*pNetworkWatcher, SetTestRatChanged(eRatTypeLte)).Times(1);
+    pNormalMtcService->ProcessTestCommand(2 /* TestCommand::RAT_CHANGED */, eRatTypeLte, 0);
+
+    // To cover the default case.
+    pNormalMtcService->ProcessTestCommand(3 /* Not defined */, 0, 0);
 }
 
 TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)

@@ -23,6 +23,7 @@
 #include "helper/MtcNetworkWatcher.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 
 namespace android
@@ -104,6 +105,34 @@ TEST_F(MtcNetworkWatcherTest, NetworkWatcher_NotifyStatusInvokesNotifying)
     EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_UNKNOWN));
 
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
+}
+
+TEST_F(MtcNetworkWatcherTest, SetTestRatChangedInvokesNotifying)
+{
+    MockIMtcNetworkWatcherListener objNetworkWatcherListener;
+    pNetworkWatcher->AddListener(objNetworkWatcherListener);
+    pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_MOBILE);
+
+    for (IMS_SINT32 i = INetworkWatcher::RADIOTECH_TYPE_INVALID;
+            i <= INetworkWatcher::RADIOTECH_TYPE_MAX; i++)
+    {
+        EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(i));
+        pNetworkWatcher->SetTestRatChanged(i);
+    }
+}
+
+TEST_F(MtcNetworkWatcherTest, SetTestRatChangedDoesNotInvokeNotifyingIfIpcanIsWlan)
+{
+    MockIMtcNetworkWatcherListener objNetworkWatcherListener;
+    pNetworkWatcher->AddListener(objNetworkWatcherListener);
+    pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_WLAN);
+
+    for (IMS_SINT32 i = INetworkWatcher::RADIOTECH_TYPE_INVALID;
+            i <= INetworkWatcher::RADIOTECH_TYPE_MAX; i++)
+    {
+        EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(_)).Times(0);
+        pNetworkWatcher->SetTestRatChanged(i);
+    }
 }
 
 }  // namespace android
