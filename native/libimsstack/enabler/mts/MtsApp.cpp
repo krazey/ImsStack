@@ -32,7 +32,7 @@ PUBLIC
 MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTS_APP_NAME),
         m_nSlotId(nSlotId),
-        m_objMtsService(MtsService(*this)),
+        m_piMtsService(IMS_NULL),
         m_objMtsMessageController(MtsMessageController(*this)),
         m_objMtsDynamicLoader(MtsDynamicLoader(*this))
 {
@@ -45,18 +45,24 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
 PUBLIC MtsApp::~MtsApp()
 {
     IMS_TRACE_I("~MtsApp [slot_%d]", m_nSlotId, 0, 0);
+
+    if (m_piMtsService != IMS_NULL)
+    {
+        delete m_piMtsService;
+        m_piMtsService = IMS_NULL;
+    }
 }
 
 PUBLIC VIRTUAL void MtsApp::Start()
 {
     IMS_TRACE_I("SMS Start [slot_%d]", m_nSlotId, 0, 0);
 
-    // Do nothing
+    m_piMtsService = new MtsService(*this);
 }
 
 PUBLIC VIRTUAL void MtsApp::Stop()
 {
     IMS_TRACE_I("SMS Stop [slot_%d]", m_nSlotId, 0, 0);
 
-    m_objMtsService.GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
+    m_piMtsService->GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
 }
