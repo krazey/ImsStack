@@ -26,11 +26,13 @@
 #include "ImsService.h"
 #include "ImsTypeDef.h"
 #include "helper/SrvccStateManager.h"
+#include "helper/SsacTimerHandler.h"
 
 class IJniMtcServiceThread;
 class IMtcAosConnector;
 class IMtcAosStateListener;
 class IMtcContext;
+class ISsacTimerHandler;
 class MtcAosEventHandler;
 class MtcNetworkWatcher;
 class MtcRoutingRejectHandler;
@@ -83,6 +85,7 @@ public:
     SuppStatus GetTbcwStatus() const override { return m_eTbcwStatus; }
     void SetTerminalBasedTir(IN IMS_BOOL bEnabled) override;
     SuppStatus GetTirStatus() const override { return m_eTirStatus; }
+    ISsacTimerHandler& GetSsacTimerHandler() override { return m_objSsacTimerHandler; }
 
     inline void NotifyJniEnablerSet() override {}
 
@@ -132,6 +135,7 @@ protected:
     SrvccStateManager* m_pSrvccStateManager;
     MtcNetworkWatcher* m_pNetworkWatcher;
     MtcRoutingRejectHandler* m_pRoutingRejectHandler;
+    SsacTimerHandler m_objSsacTimerHandler;
     SuppStatus m_eTbcwStatus;
     SuppStatus m_eTirStatus;
 

@@ -17,9 +17,9 @@
 #ifndef MOCK_I_MTC_SERVICE_H_
 #define MOCK_I_MTC_SERVICE_H_
 
-#include <gmock/gmock.h>
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
+#include <gmock/gmock.h>
 
 class AString;
 class ICoreService;
@@ -28,6 +28,7 @@ class IMtcAosConnector;
 class IMtcAosStateListener;
 class IMtcNetworkWatcherListener;
 class ISrvccStateListener;
+class ISsacTimerHandler;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
@@ -69,6 +70,7 @@ public:
     MOCK_METHOD(SuppStatus, GetTbcwStatus, (), (const, override));
     MOCK_METHOD(void, SetTerminalBasedTir, (IN IMS_BOOL), (override));
     MOCK_METHOD(SuppStatus, GetTirStatus, (), (const, override));
+    MOCK_METHOD(ISsacTimerHandler&, GetSsacTimerHandler, (), (override));
 
     // IEnablerService
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));

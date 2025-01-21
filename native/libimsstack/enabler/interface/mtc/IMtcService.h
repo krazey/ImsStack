@@ -27,6 +27,7 @@ class IMtcAosConnector;
 class IMtcAosStateListener;
 class IMtcNetworkWatcherListener;
 class ISrvccStateListener;
+class ISsacTimerHandler;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
@@ -263,6 +264,13 @@ public:
      * Please refer to a comment in ag/30608488.
      */
     virtual SuppStatus GetTirStatus() const = 0;
+
+    /**
+     * @brief Gets the ISsacTimerHandler object.
+     *
+     * @return The ISsacTimerHandler object.
+     */
+    virtual ISsacTimerHandler& GetSsacTimerHandler() = 0;
 };
 
 enum class ServiceStatus

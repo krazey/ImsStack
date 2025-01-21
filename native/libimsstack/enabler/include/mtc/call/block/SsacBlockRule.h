@@ -39,9 +39,7 @@ private:
     CallType m_eCallType;
     IImsRadio* m_pImsRadio;
 
-    IMS_BOOL IsSsacTimerRunning(IN CallType eCallType) const;
     IMS_BOOL IsNeedToBar(IN CallType eCallType) const;
-    void StartBarringTimer(IN CallType eCallType) const;
 };
 
 #endif

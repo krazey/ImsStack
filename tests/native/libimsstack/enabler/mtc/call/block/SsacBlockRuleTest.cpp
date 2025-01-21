@@ -22,10 +22,10 @@
 #include "TestSystemTimeService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/block/SsacBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
-#include "helper/MockIPassiveTimerHolder.h"
+#include "call/block/SsacBlockRule.h"
 #include "helper/IPassiveTimerHolder.h"
+#include "helper/MockISsacTimerHandler.h"
 #include <gmock/gmock.h>
 
 using ::testing::_;
@@ -37,13 +37,13 @@ class SsacBlockRuleTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objContext;
-    MockIPassiveTimerHolder objPassiveTimerHolder;
     CallInfo objCallInfo;
     TestImsRadioService objImsRadioService;
     TestSystemTimeService objSystemTimeService;
     MockIMtcService objService;
     MockIMtcBlockRuleCheckListener objBlockRuleCheckListener;
     SsacInfo objSsacInfo;
+    MockISsacTimerHandler objSsacTimerHandler;
 
 protected:
     virtual void SetUp() override
@@ -54,18 +54,16 @@ protected:
                 PlatformContext::SERVICE_SYSTEM_TIME, &objSystemTimeService);
 
         objSsacInfo.nBarringFactorForVoice = 100;
-        objSsacInfo.nBarringTimeSecForVoice = 0;
         objSsacInfo.nBarringFactorForVideo = 100;
-        objSsacInfo.nBarringTimeSecForVideo = 0;
         ON_CALL(objImsRadioService.GetMockImsRadio(), GetSsacInfo())
                 .WillByDefault(ReturnRef(objSsacInfo));
 
         objCallInfo.ePeerType = PeerType::MO;
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
-        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimerHolder));
 
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(objService, GetSsacTimerHandler).WillByDefault(ReturnRef(objSsacTimerHandler));
     }
 
     virtual void TearDown() override
@@ -76,9 +74,13 @@ protected:
 
     void SetSsacBarred(IN IMS_BOOL bVoiceBarred, IN IMS_BOOL bVideoBarred)
     {
-        ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
+        ON_CALL(objSsacTimerHandler, IsSsacTimerRunning(CallType::VOIP))
                 .WillByDefault(Return(bVoiceBarred));
-        ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING))
+        ON_CALL(objSsacTimerHandler, IsSsacTimerRunning(CallType::RTT))
+                .WillByDefault(Return(bVoiceBarred));
+        ON_CALL(objSsacTimerHandler, IsSsacTimerRunning(CallType::VT))
+                .WillByDefault(Return(bVideoBarred));
+        ON_CALL(objSsacTimerHandler, IsSsacTimerRunning(CallType::VIDEO_RTT))
                 .WillByDefault(Return(bVideoBarred));
     }
 };
@@ -138,29 +140,11 @@ TEST_F(SsacBlockRuleTest, CheckReturnsUnBlockedForVoipCallWhenVideoSsacTimerIsRu
     EXPECT_EQ(Result(Result::Status::UNBLOCKED), objRule.Check(objBlockRuleCheckListener));
 }
 
-TEST_F(SsacBlockRuleTest, CheckReturnsBlockedForVideoCallWhenVoiceSsacTimerIsRunning)
-{
-    SetSsacBarred(IMS_TRUE, IMS_FALSE);
-
-    SsacBlockRule objRule(objContext, CallType::VT);
-    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),
-            objRule.Check(objBlockRuleCheckListener));
-}
-
 TEST_F(SsacBlockRuleTest, CheckReturnsBlockedForVideoCallWhenVideoSsacTimerIsRunning)
 {
     SetSsacBarred(IMS_FALSE, IMS_TRUE);
 
     SsacBlockRule objRule(objContext, CallType::VT);
-    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),
-            objRule.Check(objBlockRuleCheckListener));
-}
-
-TEST_F(SsacBlockRuleTest, CheckReturnsBlockedForVideoRttCallWhenVoiceSsacTimerIsRunning)
-{
-    SetSsacBarred(IMS_TRUE, IMS_FALSE);
-
-    SsacBlockRule objRule(objContext, CallType::VIDEO_RTT);
     EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),
             objRule.Check(objBlockRuleCheckListener));
 }
@@ -179,12 +163,12 @@ TEST_F(SsacBlockRuleTest, CheckReturnsBlockedWithStartingTimer)
     SetSsacBarred(IMS_FALSE, IMS_FALSE);
 
     objSsacInfo.nBarringFactorForVoice = 90;
-    objSsacInfo.nBarringTimeSecForVoice = 10;
 
     EXPECT_CALL(objSystemTimeService.GetMockSystemTime(), GetRandom(_))
-            .Times(2)
-            .WillOnce(Return(99))
-            .WillOnce(Return(10));
+            .Times(1)
+            .WillOnce(Return(99));
+
+    EXPECT_CALL(objSsacTimerHandler, StartBarringTimer(CallType::VOIP));
 
     SsacBlockRule objRule(objContext, CallType::VOIP);
     EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),
@@ -196,7 +180,6 @@ TEST_F(SsacBlockRuleTest, CheckReturnsUnblockedWhenRandomValueIsSmallerThanFacto
     SetSsacBarred(IMS_FALSE, IMS_FALSE);
 
     objSsacInfo.nBarringFactorForVoice = 90;
-    objSsacInfo.nBarringTimeSecForVoice = 10;
 
     EXPECT_CALL(objSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(1)
@@ -211,28 +194,10 @@ TEST_F(SsacBlockRuleTest, CheckReturnsBlockedWhenFactorIsZero)
     SetSsacBarred(IMS_FALSE, IMS_FALSE);
 
     objSsacInfo.nBarringFactorForVoice = 0;
-    objSsacInfo.nBarringTimeSecForVoice = 10;
-
-    EXPECT_CALL(objSystemTimeService.GetMockSystemTime(), GetRandom(_))
-            .Times(2)
-            .WillOnce(Return(0))
-            .WillOnce(Return(50));
-
-    SsacBlockRule objRule(objContext, CallType::VOIP);
-    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),
-            objRule.Check(objBlockRuleCheckListener));
-}
-
-TEST_F(SsacBlockRuleTest, CheckReturnsBlockedWhenTimeIsZeroAndFactorIsZero)
-{
-    SetSsacBarred(IMS_FALSE, IMS_FALSE);
-
-    objSsacInfo.nBarringFactorForVoice = 0;
-    objSsacInfo.nBarringTimeSecForVoice = 0;
 
     EXPECT_CALL(objSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(1)
-            .WillOnce(Return(70));
+            .WillOnce(Return(0));
 
     SsacBlockRule objRule(objContext, CallType::VOIP);
     EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),

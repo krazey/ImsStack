@@ -50,6 +50,7 @@
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIMtcAosStateListener.h"
 #include "helper/MockIMtcNetworkWatcherListener.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockISrvccStateListener.h"
 #include "helper/MockMtcAosEventHandler.h"
 #include "helper/MockMtcNetworkWatcher.h"
@@ -129,6 +130,7 @@ public:
     MockIMtcImsEventReceiver objEventReceiver;
     TestConnector objConnector;
     MockMtcNetworkWatcher* pNetworkWatcher;
+    MockIPassiveTimerHolder objPassiveTimerHolder;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -142,7 +144,6 @@ protected:
 
         ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(SLOT_ID));
 
-        ON_CALL(objMockContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
         pMockEmergencyManager = new MockIMtcEmergencyServiceManager();
         ON_CALL(objMockContext, GetEmergencyServiceManager)
                 .WillByDefault(ReturnRef(*pMockEmergencyManager));
@@ -160,12 +161,19 @@ protected:
                                 KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL))
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(objMockContext, GetImsEventReceiver).WillByDefault(ReturnRef(objEventReceiver));
+        ON_CALL(objMockContext, GetPassiveTimerHolder)
+                .WillByDefault(ReturnRef(objPassiveTimerHolder));
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
         pNormalMtcService = CreateNormalService();
         pEmergencyMtcService = CreateEmergencyService();
+
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(pNormalMtcService));
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::EMERGENCY))
+                .WillByDefault(Return(pEmergencyMtcService));
     }
 
     virtual void TearDown() override
@@ -173,6 +181,8 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         delete pMockEmergencyManager;
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(IMS_NULL));
         delete pNormalMtcService;
         delete pEmergencyMtcService;
         delete pConnector;

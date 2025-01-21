@@ -57,6 +57,7 @@
 #include "helper/MtcCapabilityQueryHandler.h"
 #include "helper/MtcNetworkWatcher.h"
 #include "helper/SrvccStateManager.h"
+#include "helper/SsacTimerHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -77,6 +78,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_pSrvccStateManager(IMS_NULL),
         m_pNetworkWatcher(IMS_NULL),
         m_pRoutingRejectHandler(IMS_NULL),
+        m_objSsacTimerHandler(SsacTimerHandler(m_objContext)),
         m_eTbcwStatus(SuppStatus::UNPROVISIONED),
         m_eTirStatus(SuppStatus::UNPROVISIONED)
 {
@@ -113,7 +115,6 @@ PUBLIC VIRTUAL MtcService::~MtcService()
 
     delete m_pAosEventHandler;
     delete m_pSrvccStateManager;
-    delete m_pNetworkWatcher;
 
     if (m_pRoutingRejectHandler)
     {
@@ -122,6 +123,8 @@ PUBLIC VIRTUAL MtcService::~MtcService()
         piRoutingRejectNotifier->RemoveListener(m_pRoutingRejectHandler);
         delete m_pRoutingRejectHandler;
     }
+
+    delete m_pNetworkWatcher;
 }
 
 PUBLIC VIRTUAL void MtcService::AddAosStateListener(IN IMtcAosStateListener* piListener)

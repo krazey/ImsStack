@@ -131,10 +131,17 @@ PUBLIC VIRTUAL void MtcNetworkWatcher::NetworkWatcher_NotifyStatus(
 
 PRIVATE void MtcNetworkWatcher::Notify()
 {
+    if (m_objListeners.IsEmpty())
+    {
+        return;
+    }
+
     IMS_SINT32 eCurrentRat = GetCurrentRat();
     IMS_TRACE_D("Notify serviceType=%d, old RAT=%d, new RAT=%d", m_eServiceType, m_eOldRatType,
             eCurrentRat);
-    for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
+
+    for (IMS_SINT32 nIndex = static_cast<IMS_SINT32>(m_objListeners.GetSize()) - 1; nIndex >= 0;
+            nIndex--)
     {
         m_objListeners.GetAt(nIndex)->OnRatChanged(m_eServiceType, m_eOldRatType, eCurrentRat);
     }
