@@ -809,7 +809,10 @@ PROTECTED void AosERegistration::HandleFakeMode(IN IMS_UINT32 nReason)
         if (SetFirstPcscf(IMS_FALSE) == IMS_FALSE)
         {
             Destroy();
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            ReportStateChanged(RESULT_FAILURE,
+                    GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable()
+                            ? REASON_FAILURE_NO_PCSCF_AVAILABLE
+                            : REASON_FAILURE_GENERAL);
             return;
         }
     }
