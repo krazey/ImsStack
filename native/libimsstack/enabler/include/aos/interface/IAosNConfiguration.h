@@ -366,9 +366,17 @@ public:
     virtual IMS_BOOL IsIpsecInitializedWithNewPcscf() const = 0;
 
     /**
-     * @brief Flag indicating whether keep on retrying emergency registration on WLAN.
+     * @brief Flag indicating whether to keep the emergency pdn when pcscf is unavailable by
+     *        requesting fake registration with the next pcscf.
      *
-     * @return IMS_BOOL Return whether keep on retrying emergency registration on WLAN or not.
+     * @return IMS_BOOL Return whether to keep the emergency pdn or not in this case.
+     */
+    virtual IMS_BOOL IsKeepEPdnUponPcscfUnavailable() const = 0;
+
+    /**
+     * @brief Flag indicating whether to keep on retrying emergency registration on WLAN.
+     *
+     * @return IMS_BOOL Return whether to keep on retrying emergency registration on WLAN or not.
      */
     virtual IMS_BOOL IsKeepERegRetryOnWlanRequired() const = 0;
 

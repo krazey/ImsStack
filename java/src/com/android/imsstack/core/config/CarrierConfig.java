@@ -673,6 +673,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ereg_set_tcp_only_in_roaming_bool";
         public static final String KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL =
                 KEY_PREFIX + "ereg_using_first_impu_in_isim_bool";
+        public static final String KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL =
+                KEY_PREFIX + "keep_epdn_upon_pcscf_unavailable_bool";
         public static final String KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL =
                 KEY_PREFIX + "keep_ereg_retry_on_wlan_bool";
         public static final String KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL =

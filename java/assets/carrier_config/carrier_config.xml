@@ -504,6 +504,7 @@
     <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="false"/>
     <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="false"/>
     <boolean name="imsemergency.ereg_using_first_impu_in_isim_bool" value="false"/>
+    <boolean name="imsemergency.keep_epdn_upon_pcscf_unavailable_bool" value="false"/>
     <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="false"/>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="false"/>
     <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="false"/>
