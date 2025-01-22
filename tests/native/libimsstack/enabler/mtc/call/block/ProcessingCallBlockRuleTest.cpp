@@ -81,6 +81,14 @@ protected:
     }
 };
 
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedIfEmergencyCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfIdleCallExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));
