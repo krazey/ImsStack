@@ -199,6 +199,26 @@ public class SmsRLStateMachineTest {
         assertEquals(IDLE, mSmsRLStateMachine.getState());
     }
 
+    @Test
+    public void onSipResponseForRPMessageTR1TimerResets() {
+        Runnable runnable = () -> {};
+        mSmsRLStateMachine.setTR1TimerHandler(runnable);
+        mHandler.postDelayed(runnable, 1000);
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+
+        Assert.assertNotNull(mListener);
+        Assert.assertNotNull(mSmsRLStateMachine.getTR1TimerHandler());
+        assertTrue(mHandler.hasCallbacks(runnable));
+
+        mSmsRLStateMachine.onSipResponseForRPMessage(false, ImsSmsImplBase.SEND_STATUS_ERROR);
+
+        verify(mListener, times(1)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
+                ImsSmsImplBase.SEND_STATUS_ERROR, SmsManager.RESULT_NETWORK_ERROR, 0);
+        Assert.assertNull(mSmsRLStateMachine.getTR1TimerHandler());
+        Assert.assertFalse(mHandler.hasCallbacks(runnable));
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+    }
+
     public byte[] getPdu(SmsRPdu mtRPData) {
         byte[] tpdu = mtRPData.getUserData();
         byte[] rpdu = mtRPData.getRpduByteArray();
@@ -470,6 +490,14 @@ public class SmsRLStateMachineTest {
                 String destinationAddress) {
             super(token, messageType, mtsController, context, listener, psiSmsc,
                 destinationAddress);
+        }
+
+        protected Runnable getTR1TimerHandler() {
+            return super.mTR1TimerHandler;
+        }
+
+        protected void setTR1TimerHandler(Runnable runnable) {
+            super.mTR1TimerHandler = runnable;
         }
 
         protected Runnable mTR1TimerHandler = new Runnable() {
