@@ -244,7 +244,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
             if (EpsFallbackTrigger::ShouldTriggerByReasonInfo(m_objContext, objResult.objReason))
             {
                 m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                        EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
+                        EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
                 return GetStateName();
             }
 

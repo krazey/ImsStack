@@ -756,7 +756,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
                 ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
+                EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
         return GetStateName();
     }
 

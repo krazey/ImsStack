@@ -1419,7 +1419,7 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsfbIfRequired)
 
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(
-            *pEpsfbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE));
+            *pEpsfbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE));
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
 }
 

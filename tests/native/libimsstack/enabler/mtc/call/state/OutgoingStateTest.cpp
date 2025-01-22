@@ -373,7 +373,7 @@ TEST_F(OutgoingStateTest, OnConnectionFailedTriggersEpsfbIfRequired)
 
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(
-            *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE));
+            *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE));
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 2));
 }

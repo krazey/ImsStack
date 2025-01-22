@@ -27,8 +27,10 @@ struct CallReasonInfo;
 
 enum class EpsFallbackReason
 {
+    /** EPS-FB is not triggered by network. e.g. Verizon's watchdog timer is expired. */
     NO_NETWORK_TRIGGER,
-    NO_NETWORK_RESPONSE
+    /** There's no response from the network or connection fails. */
+    NO_NETWORK_RESPONSE,
 };
 
 class EpsFallbackTrigger : public ITimerListener
