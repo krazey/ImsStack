@@ -23,6 +23,7 @@
 #include "ServiceUtil.h"
 #include "TestConfigService.h"
 #include "call/IMtcCallManager.h"
+#include "call/RttAutoUpgrader.h"
 #include "call/radio/IMtcRadioChecker.h"
 #include "conferencecall/IConferenceManager.h"
 #include "dialingplan/IMtcDialingPlan.h"
@@ -52,6 +53,7 @@ public:
     virtual ~TestMtcApp() {}
 
     IMS_SINT32 GetServiceCount() const { return m_lstServices.GetSize(); }
+    RttAutoUpgrader* GetRttAutoUpgrader() const { return m_pRttAutoUpgrader.get(); }
 };
 
 class MtcAppTest : public ::testing::Test
@@ -304,6 +306,22 @@ TEST_F(MtcAppTest, GetAosConnectorReturnsNullIfStarted)
     EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::NORMAL), nullptr);
     EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::EMERGENCY), nullptr);
     pMtcApp->Stop();
+}
+
+TEST_F(MtcAppTest, CreateAndDestroyRttAutoUpgrader)
+{
+    TestMtcApp objMtcApp;
+    EXPECT_EQ(objMtcApp.GetRttAutoUpgrader(), nullptr);
+
+    objMtcApp.CreateRttAutoUpgrader();
+    RttAutoUpgrader* pRttAutoUpgrader = objMtcApp.GetRttAutoUpgrader();
+    ASSERT_NE(pRttAutoUpgrader, nullptr);
+
+    objMtcApp.CreateRttAutoUpgrader();
+    EXPECT_EQ(objMtcApp.GetRttAutoUpgrader(), pRttAutoUpgrader);
+
+    objMtcApp.DestroyRttAutoUpgrader();
+    EXPECT_EQ(objMtcApp.GetRttAutoUpgrader(), nullptr);
 }
 
 }  // namespace android

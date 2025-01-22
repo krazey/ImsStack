@@ -216,6 +216,17 @@ TEST_F(EstablishedStateTest,
     pEstablishedState->OnEnter();
 }
 
+TEST_F(EstablishedStateTest, OnEnterInvokesCreateRttAutoUpgrader)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigEmergency::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT))
+            .WillByDefault(Return(180000));
+
+    EXPECT_CALL(objMockCallContext, CreateRttAutoUpgrader).Times(1);
+    pEstablishedState->OnEnter();
+}
+
 TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
 {
     EXPECT_CALL(objMockMediaManager, IsAudioInactive)

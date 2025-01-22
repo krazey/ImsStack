@@ -34,7 +34,6 @@ PUBLIC
 RttAutoUpgrader::RttAutoUpgrader(IN IMtcContext& objContext) :
         m_objContext(objContext),
         m_bRttEmergencyCallEstablished(IMS_TRUE),
-        m_bNeedToUpgradeToRtt(IMS_FALSE),
         m_nIncomingVoiceCallKey(IMtcCall::CALL_KEY_INVALID)
 {
     IMS_TRACE_D("+RttAutoUpgrader", 0, 0, 0);
@@ -135,18 +134,15 @@ PRIVATE void RttAutoUpgrader::DetermineIfRttUpgradeIsNeeded(IN CallKey nCallKey)
     if (bIsRttGuardTimerActive && (nRttSetting == IMS_RTT_ALWAYS_VISIBLE))
     {
         m_nIncomingVoiceCallKey = nCallKey;
-        m_bNeedToUpgradeToRtt = IMS_TRUE;
     }
 }
 
 PRIVATE void RttAutoUpgrader::UpgradeToRttIfNeeded(IN CallKey nCallKey)
 {
-    IMS_TRACE_D("UpgradeToRttIfNeeded CallKey[%d], Rtt upgrade needed[%d]", nCallKey,
-            m_bNeedToUpgradeToRtt, 0);
+    IMS_TRACE_D("UpgradeToRttIfNeeded CallKey[%d]", nCallKey, 0, 0);
 
-    if (m_bNeedToUpgradeToRtt && m_nIncomingVoiceCallKey == nCallKey)
+    if (m_nIncomingVoiceCallKey == nCallKey)
     {
-        m_bNeedToUpgradeToRtt = IMS_FALSE;
         m_nIncomingVoiceCallKey = IMtcCall::CALL_KEY_INVALID;
 
         MediaInfo objNewMediaInfo = m_objContext.GetCallManager()
