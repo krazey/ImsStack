@@ -135,10 +135,11 @@ protected:
     SuppStatus m_eTbcwStatus;
     SuppStatus m_eTirStatus;
 
-    enum
+    enum class TestCommand
     {
-        TEST_COMMAND_AOS_CONNECTED = 0,
-        TEST_COMMAND_AOS_DISCONNECTED = 1
+        AOS_CONNECTED = 0,
+        AOS_DISCONNECTED = 1,
+        RAT_CHANGED = 2,
     };
 };
 

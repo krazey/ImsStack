@@ -90,6 +90,17 @@ PUBLIC void MtcNetworkWatcher::OnServiceConnected(IN IMS_UINT32 eIpcan)
     Notify();
 }
 
+PUBLIC VIRTUAL void MtcNetworkWatcher::SetTestRatChanged(IN IMS_SINT32 eRatType)
+{
+    IMS_TRACE_D("SetTestRatChanged", eRatType, 0, 0);
+    m_eMobileRatType = eRatType;
+
+    if (m_eIpcanType != IIpcan::CATEGORY_WLAN)
+    {
+        Notify();
+    }
+}
+
 PUBLIC VIRTUAL void MtcNetworkWatcher::NetworkWatcher_NotifyStatus(
         IN INetworkWatcher* piNetWatcherInfo)
 {

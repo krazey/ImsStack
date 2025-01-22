@@ -291,11 +291,14 @@ PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
     IMS_TRACE_I("ProcessTestCommand [%d %d %d]", nCommand, nWParam, nLParam);
     switch (nCommand)
     {
-        case TEST_COMMAND_AOS_CONNECTED:
+        case static_cast<IMS_SINT32>(TestCommand::AOS_CONNECTED):
             ImsAos_Connected((IMS_UINT32)nWParam, (IMS_UINT32)nLParam);
             break;
-        case TEST_COMMAND_AOS_DISCONNECTED:
+        case static_cast<IMS_SINT32>(TestCommand::AOS_DISCONNECTED):
             ImsAos_Disconnected((IMS_UINT32)nWParam);
+            break;
+        case static_cast<IMS_SINT32>(TestCommand::RAT_CHANGED):
+            m_pNetworkWatcher->SetTestRatChanged((IMS_SINT32)nWParam);
             break;
         default:
             break;
