@@ -1173,8 +1173,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "check_ui_condition_for_incoming_resume_bool";
         public static final String KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY =
                 KEY_PREFIX + "registration_to_18x_timer_millis_int_array";
-        public static final String KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL =
-                KEY_PREFIX + "allow_sos_param_in_contact_bool";
         public static final String KEY_QOS_ACQUISITION_AFTER_W2L_HANDOVER_WAIT_TIMER_MILLIS_INT =
                 KEY_PREFIX + "qos_acquisition_after_w2l_handover_wait_timer_millis_int";
         public static final String KEY_WAIT_VIDEO_TEXT_QOS_AFTER_AUDIO_QOS_ACQUISITION_TIMER_MILLIS_INT =

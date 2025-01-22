@@ -41,7 +41,6 @@ private:
             IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
     void MayFormatContactAddress(
             IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
-    void MayRemoveSosParameter(IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
     ISipHeader* CreateContactHeader(IN const ISipMessage* pMessage) const;
 
     CallType GetCallType() const;
