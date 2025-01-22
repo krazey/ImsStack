@@ -32,6 +32,11 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::~ProcessingCallBlockRule() {}
 PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        return Result(Result::Status::UNBLOCKED);
+    }
+
     ImsList<IMtcCall*> lstCalls = m_objContext.GetOtherCalls();
 
     PeerType ePeerType = m_objContext.GetCallInfo().ePeerType;
