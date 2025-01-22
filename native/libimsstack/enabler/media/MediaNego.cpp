@@ -854,21 +854,20 @@ void MediaNego::FinalizeSdp(IN ISession* pSession)
 PUBLIC
 AUDIO_CODEC MediaNego::GetNegotiatedAudioQuality()
 {
-    if (m_pAudioNego != IMS_NULL)
+    if (m_pAudioNego == IMS_NULL || m_pAudioNego->GetRemotePort() < 0 ||
+            (m_pAudioNego->GetRemotePort() == 0 && m_pAudioNego->GetLocalPort() != 0))
     {
-        AUDIO_CODEC eAudioQuality = m_pAudioNego->GetNegotiatedCodec();
-
-        if (eAudioQuality == AUDIO_CODEC_NONE)
-        {
-            return AUDIO_CODEC_NOT_USED;
-        }
-        else
-        {
-            return eAudioQuality;
-        }
+        return AUDIO_CODEC_NOT_USED;
     }
 
-    return AUDIO_CODEC_NOT_USED;
+    AUDIO_CODEC eAudioQuality = m_pAudioNego->GetNegotiatedCodec();
+
+    if (eAudioQuality == AUDIO_CODEC_NONE)
+    {
+        return AUDIO_CODEC_NOT_USED;
+    }
+
+    return eAudioQuality;
 }
 
 PUBLIC
@@ -892,21 +891,19 @@ VIDEO_RESOLUTION MediaNego::GetNegotiatedVideoQuality()
 PUBLIC
 TEXT_CODEC MediaNego::GetNegotiatedTextQuality()
 {
-    if (m_pTextNego != IMS_NULL)
+    if (m_pTextNego == IMS_NULL || m_pTextNego->GetRemotePort() <= 0)
     {
-        TEXT_CODEC eQuality = m_pTextNego->GetNegotiatedCodec();
-
-        if (eQuality == TEXT_CODEC_NONE)
-        {
-            return TEXT_CODEC_NOT_USED;
-        }
-        else
-        {
-            return eQuality;
-        }
+        return TEXT_CODEC_NOT_USED;
     }
 
-    return TEXT_CODEC_NOT_USED;
+    TEXT_CODEC eQuality = m_pTextNego->GetNegotiatedCodec();
+
+    if (eQuality == TEXT_CODEC_NONE)
+    {
+        return TEXT_CODEC_NOT_USED;
+    }
+
+    return eQuality;
 }
 
 PUBLIC
