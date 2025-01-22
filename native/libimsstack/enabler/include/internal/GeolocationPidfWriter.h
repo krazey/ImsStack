@@ -38,8 +38,6 @@ public:
     virtual void Write(IN_OUT IXmlStreamWriter& objWriter) const;
     virtual void Append(IN Element* pElement);
 
-    static Element* const s_pEmptyElement;
-
 protected:
     explicit inline Element(IN std::initializer_list<Element*> lstChildren) :
             m_lstChildren(lstChildren)
@@ -48,6 +46,15 @@ protected:
 
 private:
     std::vector<Element*> m_lstChildren;
+};
+
+class NullElement : public Element
+{
+public:
+    inline NullElement() :
+            Element({})
+    {
+    }
 };
 
 class PidfLoXml : public Element

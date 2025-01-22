@@ -109,7 +109,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityU
         return IMS_FALSE;
     }
 
-    if (!IsPositionAvailable(piLocation))
+    if (!IsFeatureSet(FEATURE_ALLOW_NO_POSITION) && !IsPositionAvailable(*piLocation))
     {
         return IMS_FALSE;
     }
@@ -172,7 +172,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& 
         return IMS_FALSE;
     }
 
-    if (!IsPositionAvailable(piLocation))
+    if (!IsFeatureSet(FEATURE_ALLOW_NO_POSITION) && !IsPositionAvailable(*piLocation))
     {
         return IMS_FALSE;
     }
@@ -229,7 +229,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString& strEntityU
         return IMS_FALSE;
     }
 
-    if (!IsPositionAvailable(piLocation))
+    if (!IsFeatureSet(FEATURE_ALLOW_NO_POSITION) && !IsPositionAvailable(*piLocation))
     {
         return IMS_FALSE;
     }
@@ -374,6 +374,11 @@ Element* GeolocationPidfCreator::CreateLocationElement(
 PRIVATE
 Element* GeolocationPidfCreator::CreateShapeElement(IN const ILocationProperties& objLocation) const
 {
+    if (!IsPositionAvailable(objLocation))
+    {
+        return new NullElement();
+    }
+
     if (objLocation.GetShape().EqualsIgnoreCase("Circle"))
     {
         return new Circle(
@@ -385,14 +390,15 @@ Element* GeolocationPidfCreator::CreateShapeElement(IN const ILocationProperties
                 objLocation.GetAltitude(), objLocation.GetRadius(),
                 objLocation.GetVerticalAccuracy());
     }
-    return Element::s_pEmptyElement;
+    return new NullElement();
 }
 
 PRIVATE
-IMS_BOOL GeolocationPidfCreator::IsPositionAvailable(IN const ILocationProperties* piLocation) const
+IMS_BOOL GeolocationPidfCreator::IsPositionAvailable(
+        IN const ILocationProperties& objLocation) const
 {
-    const AString& strLatitude = piLocation->GetLatitude();
-    const AString& strLongitude = piLocation->GetLongitude();
+    const AString& strLatitude = objLocation.GetLatitude();
+    const AString& strLongitude = objLocation.GetLongitude();
 
     if ((strLatitude.GetLength() == 0 || strLongitude.GetLength() == 0) ||
             (strLatitude.Equals("0.0") && strLongitude.Equals("0.0")))
