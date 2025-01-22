@@ -75,8 +75,6 @@ protected:
                 GetBoolean(ConfigVt::
                                 KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
-                .WillByDefault(Return(IMS_TRUE));
 
         ImsVector<AString> lstContactAddress;
         lstContactAddress.Add("");
@@ -116,8 +114,6 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfNoContactHeader)
             GetBoolean(ConfigVt::
                             KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
 
     MockISipMessage objMessage;
     ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
@@ -526,27 +522,5 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageFormatsContactAddressInRoaming)
                     AString("<sip:nouicc_and_roaming@127.0.0.1:5060;sos>;audio;+sip.instance=\""
                             "<urn:gsma:imei:0-0-0>\""),
                     _));
-    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
-}
-
-TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesSosParameter)
-{
-    ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
-
-    MockISipMessage objMessage;
-    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
-            .WillByDefault(Return(CONTACT_SOS_PARAMETER));
-    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(IMS_TRUE));
-
-    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::UNKNOWN));
-
-    EXPECT_CALL(objMessage,
-            SetHeader(ISipHeader::CONTACT_NORMAL,
-                    AString("<sip:+1234@help.me>;audio;+sip.instance=\"<urn:gsma:imei:0-0-0>\""),
-                    _))
-            .Times(1);
-
     pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
 }

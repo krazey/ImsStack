@@ -64,7 +64,6 @@ void MtcMessageMediator::MayAdjustContactHeader(IN_OUT ISipMessage* pMessage)
     ISipHeader* pContactHeader = IMS_NULL;
     MaySetVideoTextFeatureExclusively(&pContactHeader, pMessage);
     MayFormatContactAddress(&pContactHeader, pMessage);
-    MayRemoveSosParameter(&pContactHeader, pMessage);
 
     if (pContactHeader)
     {
@@ -119,23 +118,6 @@ void MtcMessageMediator::MayFormatContactAddress(
         *pContactHeader = CreateContactHeader(pMessage);
     }
     (*pContactHeader)->GetSipAddress()->SetUri(TemplateFormatter::Format(strFormat, m_objContext));
-}
-
-PRIVATE
-void MtcMessageMediator::MayRemoveSosParameter(
-        IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage)
-{
-    if (m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigVoice::KEY_ALLOW_SOS_PARAM_IN_CONTACT_BOOL))
-    {
-        return;
-    }
-
-    if (*pContactHeader == IMS_NULL)
-    {
-        *pContactHeader = CreateContactHeader(pMessage);
-    }
-    (*pContactHeader)->GetSipAddress()->RemoveParameter("sos");
 }
 
 PRIVATE
