@@ -65,6 +65,7 @@ public:
         return ((m_nTransportExt & Sip::TRANSPORT_EXT_TCP_ONLY) != 0);
     }
     inline IMS_BOOL IsTransactionFlowControlRequired() const { return m_bTxnFlowControlRequired; }
+    void NotifyTransactionTimeout();
     IMS_BOOL SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
             IN const SipProfile* pProfile, IN IMS_BOOL bNotifyError = IMS_TRUE);
     void SetAddress(IN const SipTransportAddress& objTAddr, IN IMS_SINT32 nTaType = TA_NEAR);

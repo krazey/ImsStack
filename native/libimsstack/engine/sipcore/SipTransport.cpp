@@ -322,6 +322,25 @@ IMS_BOOL SipTransport::InitTransportOnMessageReceived(IN ::SipMessage* /*pSipMsg
 }
 
 PUBLIC
+void SipTransport::NotifyTransactionTimeout()
+{
+    if (!IsFlowControlPortConfigured() && !IsTcpConnectionOnlyRequired() && m_pSocket != IMS_NULL &&
+            m_pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT)
+    {
+        // If SIP transaction timeout occurs and a client-initiated TCP connection exists,
+        // close the TCP socket so that new SIP requests can use the newly created socket.
+        SipStreamSocket* pStreamSocket = static_cast<SipStreamSocket*>(m_pSocket);
+
+        if (pStreamSocket->IsKeepAlivePermanent() || pStreamSocket->IsKeepAliveTimerActive())
+        {
+            IMS_TRACE_I("NotifyTransactionTimeout: TCP connection is ready to close", 0, 0, 0);
+            // Allow the socket close when the transport is being destroyed.
+            pStreamSocket->SetKeepAlivePolicy(0);
+        }
+    }
+}
+
+PUBLIC
 IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
         IN const SipProfile* pProfile, IN IMS_BOOL bNotifyError /*= IMS_TRUE*/)
 {

@@ -200,6 +200,16 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::InitTxnDetails(
     return IMS_TRUE;
 }
 
+PUBLIC VIRTUAL void SipClientTransactionState::NotifyTimerExpired()
+{
+    SipTransactionState::NotifyTimerExpired();
+
+    if (m_pTransport != IMS_NULL)
+    {
+        m_pTransport->NotifyTransactionTimeout();
+    }
+}
+
 PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::Send(
         IN SipTimerValues* pTimerValues /*= IMS_NULL*/)
 {

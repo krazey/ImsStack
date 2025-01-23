@@ -35,6 +35,7 @@ public:
     IMS_SINT32 CheckMessageValidity() override;
     IMS_BOOL FormMessage() override;
     IMS_BOOL InitTxnDetails(IN const SipTransactionState* pTState) override;
+    void NotifyTimerExpired() override;
     IMS_BOOL Send(IN SipTimerValues* pTimerValues = IMS_NULL) override;
     IMS_BOOL UpdateTransportDetails() override;
 
