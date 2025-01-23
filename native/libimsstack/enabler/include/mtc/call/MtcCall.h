@@ -318,7 +318,8 @@ public:
             IN IMS_UINT32 eAosReason) override;
     void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
-    void OnRatChanged(IMS_SINT32 eRatType) override;
+    void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
+            IN IMS_SINT32 eRatType) override;
 
     inline void OnConnectionSetupPrepared() override {}
     void OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) override;

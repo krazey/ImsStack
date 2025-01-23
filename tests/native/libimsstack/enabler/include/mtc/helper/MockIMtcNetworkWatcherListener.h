@@ -25,7 +25,7 @@ class MockIMtcNetworkWatcherListener : public IMtcNetworkWatcherListener
 {
 public:
     virtual ~MockIMtcNetworkWatcherListener() = default;
-    MOCK_METHOD(void, OnRatChanged, (IN IMS_SINT32), (override));
+    MOCK_METHOD(void, OnRatChanged, (IN ServiceType, IN IMS_SINT32, IN IMS_SINT32), (override));
 };
 
 #endif

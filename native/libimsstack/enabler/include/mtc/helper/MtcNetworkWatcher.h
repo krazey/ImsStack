@@ -40,14 +40,14 @@ public:
 
 private:
     void Notify();
-    static IMS_SINT32 ConvertCellularRatType(NETRADIO_ENTYPE eRatType);
+    static IMS_SINT32 ConvertCellularRatType(IN const NETRADIO_ENTYPE eRatType);
     IMS_SINT32 GetCurrentRat() const;
 
     ServiceType m_eServiceType;
-    IMS_SINT32 m_nSlotId;
     INetworkWatcher* m_piNetWatcher;
     IMS_UINT32 m_eIpcanType;
     IMS_SINT32 m_eMobileRatType;
+    IMS_SINT32 m_eOldRatType;
 
     ImsList<IMtcNetworkWatcherListener*> m_objListeners;
 };
