@@ -24,6 +24,7 @@ import android.telephony.CarrierConfigManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.TelephonyManagerProxy;
 
 import java.util.Arrays;
@@ -1704,6 +1705,15 @@ public class CarrierConfig {
                     case "IMEISV":
                         sb.append(getImeiSv(slotId));
                         break;
+                    case "HWSKU":
+                        sb.append(Build.SKU);
+                        break;
+                    case "TYPE":
+                        sb.append("smart-phone");
+                        break;
+                    case "MCCMNC":
+                        sb.append(getMccMnc(slotId));
+                        break;
                     default:
                         sb.append(token);
                         break;
@@ -1712,6 +1722,24 @@ public class CarrierConfig {
 
             mConfig.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, sb.toString());
         }
+    }
+
+    private static String getMccMnc(int slotId) {
+        final String emptyMccMnc = "000000";
+        int subId = MSimUtils.getSubId(slotId);
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+
+        if (tmp != null) {
+            String simMccMnc = tmp.getSimOperator();
+
+            if (simMccMnc.length() == 5) {
+                return simMccMnc.substring(0, 3) + "0" + simMccMnc.substring(3);
+            } else if (simMccMnc.length() == 6) {
+                return simMccMnc;
+            }
+        }
+
+        return  emptyMccMnc;
     }
 
     private static String getImei(int slotId) {

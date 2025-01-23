@@ -134,6 +134,7 @@ public class CarrierConfigTest {
         when(tmp.getImei(eq(TestAppContext.SLOT0)))
                 .thenReturn("000000000000001", "000000000000001", null, null, null, null);
         when(tmp.getDeviceSoftwareVersion(eq(TestAppContext.SLOT0))).thenReturn("01", null, "1");
+        when(tmp.getSimOperator()).thenReturn("001001", "", "00111");
 
         try {
             PersistableBundle b = new PersistableBundle();
@@ -194,6 +195,42 @@ public class CarrierConfigTest {
             userAgent = mCarrierConfig.getString(
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
             assertNull(userAgent);
+
+            // MCCMNC: length 6
+            b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING,
+                    "#MANUFACTURE#/#HWSKU#-#BUILD# device-type/#TYPE# mno-custom/#MCCMNC#");
+
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertNotNull(userAgent);
+            assertFalse(userAgent.contains("#"));
+            assertTrue(userAgent.endsWith("device-type/smart-phone mno-custom/001001"));
+
+            // MCCMNC: empty
+            b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING,
+                    "#MANUFACTURE#/#HWSKU#-#BUILD# device-type/#TYPE# mno-custom/#MCCMNC#");
+
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertNotNull(userAgent);
+            assertFalse(userAgent.contains("#"));
+            assertTrue(userAgent.endsWith("device-type/smart-phone mno-custom/000000"));
+
+            // MCCMNC: length 5
+            b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING,
+                    "#MANUFACTURE#/#HWSKU#-#BUILD# device-type/#TYPE# mno-custom/#MCCMNC#");
+
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertNotNull(userAgent);
+            assertFalse(userAgent.contains("#"));
+            assertTrue(userAgent.endsWith("device-type/smart-phone mno-custom/001011"));
         } finally {
             testAppContext.tearDown();
             testAppContext = null;
