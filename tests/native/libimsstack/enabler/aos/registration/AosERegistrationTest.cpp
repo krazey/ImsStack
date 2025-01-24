@@ -874,6 +874,56 @@ TEST_F(AosERegistrationTest, ReturnFalseWhenFollowingNoramlRuleAndSharedCntNotUs
     EXPECT_FALSE(m_pAosERegistration->ProcessNormalDefaultFlowRecovery_Start(400));
 }
 
+TEST_F(AosERegistrationTest, SetRegstopStateWhenStartFailedWith420AndNotSupportedGibaInRoaming)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGibaSupportedForERegInRoaming())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosTransaction, StopEmergencyTraffic());
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_420);
+
+    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
+
+TEST_F(AosERegistrationTest, SetRegstopStateWhenStartFailedWith420AndNotRoaming)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGibaSupportedForERegInRoaming())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosTransaction, StopEmergencyTraffic());
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_420);
+
+    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
+
+TEST_F(AosERegistrationTest, SetRegstopStateWhenStartFailedWith420AndNotIncludedSecAgree)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGibaSupportedForERegInRoaming())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::UNSUPPORTED, _, _))
+            .WillByDefault(Return(AString("sec-agree")));
+
+    EXPECT_CALL(m_objMockIAosTransaction, StopEmergencyTraffic());
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosERegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_420);
+
+    EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
+
 TEST_F(AosERegistrationTest, SetRegisteringStateWhenStartFailedWith423)
 {
     ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
