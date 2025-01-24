@@ -486,6 +486,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "keep_ereg_retry_on_wlan_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_erereg_on_ipcan_change_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_GIBA_FOR_EREG_IN_ROAMING_BOOL[] =
+        KEY_IMS_EMERGENCY_PREFIX "support_giba_for_ereg_in_roaming_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_video_for_ereg_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[] =

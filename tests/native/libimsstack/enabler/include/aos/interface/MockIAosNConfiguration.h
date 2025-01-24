@@ -67,6 +67,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsERegWithOnlyTcpInRoaming, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsERegUsingFirstImpuInIsim, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyReregSupportedOnIpcanChange, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsGibaSupportedForERegInRoaming, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithIpcanChangedDuringImsCallHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsDeregOn3gNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsiBasedUriPrioritized, (), (const, override));

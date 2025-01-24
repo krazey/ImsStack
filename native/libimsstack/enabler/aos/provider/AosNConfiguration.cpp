@@ -196,6 +196,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyReregSupportedOnIpcanChang
     return m_objAsset.bSupportEmergencyReregOnIpcanChange;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsGibaSupportedForERegInRoaming() const
+{
+    return m_objAsset.bSupportGibaForERegInRoaming;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReregRetryWithChangedCountryOnWifi() const
 {
     return m_objAsset.bReregWithChangedCountryOnWifi;
@@ -1419,6 +1424,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
     m_objAsset.bSupportEmergencyReregOnIpcanChange =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
+    m_objAsset.bSupportGibaForERegInRoaming = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_SUPPORT_GIBA_FOR_EREG_IN_ROAMING_BOOL);
     m_objAsset.bSupportRegWithFeatureTagUnavailable =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatBasedOnNetworkForReg =

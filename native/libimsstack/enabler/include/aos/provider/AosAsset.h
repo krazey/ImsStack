@@ -55,6 +55,7 @@ public:
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
             bSupportContactUserInfo(IMS_TRUE),
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
+            bSupportGibaForERegInRoaming(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatBasedOnNetworkForReg(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
@@ -145,6 +146,7 @@ public:
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
     IMS_BOOL bSupportContactUserInfo;
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
+    IMS_BOOL bSupportGibaForERegInRoaming;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatBasedOnNetworkForReg;
     IMS_BOOL bSupportVerstatForReg;
