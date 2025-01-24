@@ -97,7 +97,7 @@ public class SmsRLStateMachine {
          * @return the result  if incoming RPDU is processed successfully
          */
         default int onRPDataFromNetwork(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPData) {
-            loge("onRPDataFromNetwork :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPDataFromNetwork :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
 
@@ -109,7 +109,7 @@ public class SmsRLStateMachine {
          * @return the result if MO RPDU is sent successfully from RelayLayer
          */
         default int onRPDataFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPData) {
-            loge("onRPDataFromTL :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPDataFromTL :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
         /**
@@ -119,7 +119,7 @@ public class SmsRLStateMachine {
          * @param moRPAck includes Encoded RPDU and other details of incoming RP-Ack
          */
         default void onRPAckFromNetwork(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPAck) {
-            loge("onRPAckFromNetwork :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPAckFromNetwork :: Invalid Event");
         }
 
         /**
@@ -130,7 +130,7 @@ public class SmsRLStateMachine {
          * @return the result if RP-Ack is sent successfully from Relay Layer
          */
         default int onRPAckFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPAck) {
-            loge("onRPAckFromTL :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPAckFromTL :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
 
@@ -141,7 +141,7 @@ public class SmsRLStateMachine {
          * @param moRPError includes Encoded RPDU and other details of incoming RP-Ack
          */
         default void onRPErrorFromNetwork(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPError) {
-            loge("onRPErrorFromNetwork :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPErrorFromNetwork :: Invalid Event");
         }
 
         /**
@@ -152,7 +152,7 @@ public class SmsRLStateMachine {
          * @return the result if MO RP-Error is sent successfully from Relay Layer
          */
         default int onRPErrorFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPError) {
-            loge("onRPErrorFromTL :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPErrorFromTL :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
 
@@ -163,7 +163,7 @@ public class SmsRLStateMachine {
          * this Sms Session
          */
         default void onTR1TimerExpired(SmsRLStateMachine smsRLStateMachine) {
-            loge("onTR1TimerExpired :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onTR1TimerExpired :: Invalid Event");
         }
 
         /**
@@ -173,7 +173,7 @@ public class SmsRLStateMachine {
          * this Sms Session
          */
         default void onTR2TimerExpired(SmsRLStateMachine smsRLStateMachine) {
-            loge("onTR2TimerExpired :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onTR2TimerExpired :: Invalid Event");
         }
 
         /**
@@ -187,7 +187,8 @@ public class SmsRLStateMachine {
          */
         default int onSipResponseForRPMessage(SmsRLStateMachine smsRLStateMachine,
                                               boolean isSuccess, int status) {
-            loge("onSipResponseForRPMessage :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState
+                    + " State: onSipResponseForRPMessage :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
     }
@@ -379,7 +380,7 @@ public class SmsRLStateMachine {
                                                     SmsManager.RESULT_NETWORK_ERROR, 0);
                 if (smsRLStateMachine.mHandler != null
                         && smsRLStateMachine.mTR1TimerHandler != null) {
-                    smsRLStateMachine.mHandler.removeCallbacksAndMessages(smsRLStateMachine
+                    smsRLStateMachine.mHandler.removeCallbacks(smsRLStateMachine
                                                                         .mTR1TimerHandler);
                     smsRLStateMachine.mTR1TimerHandler = null;
                 } else {
