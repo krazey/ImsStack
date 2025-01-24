@@ -757,25 +757,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
                 EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
-        return GetStateName();
     }
 
-    IMS_SINT32 eCode;
-    IMS_SINT32 eExtraCode;
-    if (m_objContext.GetService().IsCsfbAvailable())
-    {
-        eCode = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-        eExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-    }
-    else
-    {
-        eCode = CODE_CALL_BARRED;
-        eExtraCode = -1;
-    }
-    CallReasonInfo objReason(eCode, eExtraCode);
-    HandleCancel(GetISession(), objReason);
-    OnStartFailed(objReason);
-    return CallStateName::TERMINATING;
+    return GetStateName();
 }
 
 PRIVATE
