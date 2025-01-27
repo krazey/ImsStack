@@ -42,6 +42,7 @@ MediaSession::MediaSession(
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
+        m_eCurMediaType(MEDIA_TYPE_INVALID),
         m_bSessionConfirmed(IMS_FALSE)
 {
     IMS_TRACE_D(
@@ -325,14 +326,48 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
 PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
         IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
 {
-    IMS_TRACE_I("RequestQos() - nNegoId[%" PFLS_x "], eMediaType[%d]", nNegoId, eMediaType, 0);
+    IMS_TRACE_I("RequestQos() - nNegoId[%" PFLS_x "], eMediaType[%d] m_eCurMediaType[%d]", nNegoId,
+            eMediaType, m_eCurMediaType);
+
+    if ((eMediaType & MEDIA_TYPE_AUDIO))
+    {
+        RequestQosParam(nNegoId, MEDIA_TYPE_AUDIO);
+    }
+
+    if ((eMediaType & MEDIA_TYPE_VIDEO))
+    {
+        RequestQosParam(nNegoId, MEDIA_TYPE_VIDEO);
+    }
+    else if (m_eCurMediaType & MEDIA_TYPE_VIDEO)
+    {
+        ReleaseQosParam(MEDIA_TYPE_VIDEO);
+    }
+
+    if ((eMediaType & MEDIA_TYPE_TEXT))
+    {
+        RequestQosParam(nNegoId, MEDIA_TYPE_TEXT);
+    }
+    else if (m_eCurMediaType & MEDIA_TYPE_TEXT)
+    {
+        ReleaseQosParam(MEDIA_TYPE_TEXT);
+    }
+
+    m_eCurMediaType = eMediaType;
+    IMS_TRACE_I("RequestQos() - m_eCurMediaType[%d]", m_eCurMediaType, 0, 0);
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL void MediaSession::RequestQosParam(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    IMS_TRACE_I("RequestQosParam() - nNegoId[%" PFLS_x "], eMediaType[%d]", nNegoId, eMediaType, 0);
 
     QosRequestParam* pParam = createQosParam(nNegoId, eMediaType);
 
     if (pParam == NULL)
     {
-        IMS_TRACE_E(0, "RequestQos() - invalid param", 0, 0, 0);
-        return IMS_FALSE;
+        IMS_TRACE_E(0, "RequestQosParam() - invalid param", 0, 0, 0);
+        return;
     }
 
     // check whether qos for the remote address already requested
@@ -340,12 +375,13 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
 
     if (pQosParams != NULL)
     {
-        IMS_TRACE_D("RequestQos() - eMediaType[%d] found, port[%d]", eMediaType,
+        IMS_TRACE_D("RequestQosParam() - eMediaType[%d] found, port[%d]", eMediaType,
                 pQosParams->m_nPort, 0);
         pQosParams->AddNegoId(nNegoId);
 
         if (pQosParams->m_bResult)  // The qos already acquired
         {
+            IMS_TRACE_D("RequestQosParam() - Qos already acquired", 0, 0, 0);
             for (const auto& negoId : pQosParams->m_objListNegoId)
             {
                 m_pClientListener->MediaSession_NotifyQos(
@@ -369,8 +405,23 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
                         pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
         m_objListQosParams.Append(pParam);
     }
+}
 
-    return IMS_TRUE;
+PROTECTED VIRTUAL void MediaSession::ReleaseQosParam(IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    IMS_TRACE_I("ReleaseQosParam() - eMediaType[%d]", eMediaType, 0, 0);
+
+    for (IMS_SINT32 nIndex = 0; nIndex < m_objListQosParams.GetSize(); nIndex++)
+    {
+        QosRequestParam* qosParam = m_objListQosParams.GetAt(nIndex);
+
+        if (eMediaType == qosParam->m_eMediaType)
+        {
+            IMS_TRACE_D("ReleaseQosParam() - Found [%d]th", nIndex, 0, 0);
+            m_objListQosParams.RemoveAt(nIndex);
+            delete qosParam;
+        }
+    }
 }
 
 PUBLIC VIRTUAL void MediaSession::FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession)
@@ -1023,6 +1074,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
 {
     IMS_TRACE_D("MediaSession_SendMsgToMediaManager() : MediaType[%s], CallKey[%d] nEvent[%d]",
             IJniMedia::PrintMediaType(param->m_eMediaType), m_nCallKey, nEvent);
+
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
     if (pMediaManager != IMS_NULL)

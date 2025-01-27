@@ -128,7 +128,7 @@ public:
     /** Get the RtpConfig object */
     virtual RtpConfig* GetRtpConfig();
 
-    /** Get local port number */
+    /** Get local IP address */
     virtual IpAddress& GetLocalIpAddress();
 
     /** Get local port number */
