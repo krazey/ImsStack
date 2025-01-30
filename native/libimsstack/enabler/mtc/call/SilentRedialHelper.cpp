@@ -187,6 +187,7 @@ void SilentRedialHelper::SetRedialDetail()
             LoadRetryLimitsFromConfiguration();
             return;
         case EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT:
+        case EXTRA_CODE_REDIAL_BY_ERROR_RESPONSE:
             m_nInterval = m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT);
             LoadRetryLimitsFromConfiguration();

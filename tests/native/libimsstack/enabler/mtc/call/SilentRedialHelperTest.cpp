@@ -160,6 +160,13 @@ TEST_F(SilentRedialHelperTest, DestructorRemovesPassiveTimer)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRetryAfterType)
 {
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .WillOnce(Return(20000));
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .WillOnce(Return(3));
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "1000");
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
@@ -167,18 +174,44 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithRetryAfterType)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRequestTimeoutType)
 {
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
-            .WillByDefault(Return(2000));
-    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
-            .WillByDefault(Return(3));
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .WillOnce(Return(20000));
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .WillOnce(Return(2000));
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .WillOnce(Return(3));
 
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT);
 }
 
+TEST_F(SilentRedialHelperTest, CreateHelperWithErrorResponseType)
+{
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .WillOnce(Return(20000));
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .WillOnce(Return(2000));
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .WillOnce(Return(3));
+
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_ERROR_RESPONSE);
+    pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_ERROR_RESPONSE);
+}
+
 TEST_F(SilentRedialHelperTest, CreateHelperWithRedirectionType)
 {
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_FOR_REDIRECTION);
@@ -186,6 +219,14 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithRedirectionType)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithSdpChangeType)
 {
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
@@ -193,6 +234,14 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithSdpChangeType)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithByEpsfbType)
 {
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
@@ -200,6 +249,14 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithByEpsfbType)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRedialNormalType)
 {
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
@@ -207,6 +264,14 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithRedialNormalType)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRedialEmergencyType)
 {
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
     const CallReasonInfo objReason(
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
@@ -215,6 +280,14 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithRedialEmergencyType)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRedialByRttEmergencyRejection)
 {
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
     const CallReasonInfo objReason(
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
