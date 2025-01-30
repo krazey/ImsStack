@@ -85,6 +85,8 @@
     <int name="imsvoice.policy_of_local_numbers_int" value="2"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="30000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
+    <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
+    <int name="imsvoice.silent_redial_ultimate_failure_action_int" value="0"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="1"/>
     <string-array name="imsvoice.caller_id_service_codes_for_restriction_string_array" num="1">
         <item value="*67"/>
@@ -126,7 +128,6 @@
         <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
     </int-array>
     <int name="imswfc.country_code_int" value="0"/>
-    <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="1"/>
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="0"/>
     <boolean name="imsvt.support_early_session_bool" value="false"/>
