@@ -76,8 +76,9 @@ private:
     IMS_SINT32 m_nInterval;
     IMS_SINT32 m_nMaxCount;
     IMS_SINT32 m_nCount;
+    IMS_SINT32 m_nTotalRetryDuration;
     const AString m_strExtra;
-    ITimer* m_piTimer;
+    ITimer* m_piRetryTimer;
 
     LOCAL const IMS_UINT32 NO_LIMIT = 999;
 };

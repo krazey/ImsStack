@@ -35,7 +35,6 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/IMtcAosConnector.h"
-#include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
@@ -55,16 +54,12 @@ SilentRedialHelper::SilentRedialHelper(
         m_nInterval(INTERVAL_BY_TYPE),
         m_nMaxCount(0),
         m_nCount(0),
+        m_nTotalRetryDuration(0),
         m_strExtra(objReason.strExtraMessage),
-        m_piTimer(IMS_NULL)
+        m_piRetryTimer(IMS_NULL)
 {
     m_objContext.GetCallStateProxy().AddListener(this);
     SetRedialDetail();
-    if (m_nMaxDuration > 0)
-    {
-        m_objContext.GetPassiveTimerHolder().AddTimer(
-                IPassiveTimerHolder::Type::SILENT_REDIAL_MAX_DURATION, m_nMaxDuration, IMS_FALSE);
-    }
     IMS_TRACE_D("+SilentRedialHelper type[%d] maxCount[%d] maxDuration[%d]", m_nType, m_nMaxCount,
             m_nMaxDuration);
 }
@@ -72,14 +67,12 @@ SilentRedialHelper::SilentRedialHelper(
 PUBLIC VIRTUAL SilentRedialHelper::~SilentRedialHelper()
 {
     IMS_TRACE_D("~SilentRedialHelper[%d]", m_nCallKey, 0, 0);
-    if (m_piTimer)
+    if (m_piRetryTimer)
     {
-        m_piTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(m_piTimer);
+        m_piRetryTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piRetryTimer);
     }
     m_objContext.GetCallStateProxy().RemoveListener(this);
-    m_objContext.GetPassiveTimerHolder().RemoveTimer(
-            IPassiveTimerHolder::Type::SILENT_REDIAL_MAX_DURATION);
 }
 
 PUBLIC VIRTUAL CallReasonInfo SilentRedialHelper::Redial(
@@ -90,6 +83,8 @@ PUBLIC VIRTUAL CallReasonInfo SilentRedialHelper::Redial(
         // in case of EXTRA_CODE_REDIAL_BY_RETRY_AFTER, nIntervalInMillis must be specified.
         m_nInterval = nIntervalInMillis;
     }
+
+    m_nTotalRetryDuration += m_nInterval;
 
     IMtcSession* pSession = m_objContext.GetSession();
     IMS_ASSERT(pSession != IMS_NULL);
@@ -105,8 +100,8 @@ PUBLIC VIRTUAL CallReasonInfo SilentRedialHelper::Redial(
     IMS_TRACE_D("Redial count[%d] interval[%d]", m_nCount, m_nInterval, 0);
 
     // In case m_nInterval = 0, the operation will be done asynchronously without delay.
-    m_piTimer = TimerService::GetTimerService()->CreateTimer();
-    m_piTimer->SetTimer(m_nInterval, this);
+    m_piRetryTimer = TimerService::GetTimerService()->CreateTimer();
+    m_piRetryTimer->SetTimer(m_nInterval, this);
 
     return CallReasonInfo(CODE_NONE);
 }
@@ -127,21 +122,21 @@ PUBLIC VIRTUAL void SilentRedialHelper::OnCallStateChanged(IN CallKey nCallKey, 
 
 PUBLIC VIRTUAL void SilentRedialHelper::Timer_TimerExpired(IN ITimer* piTimer)
 {
-    if (m_piTimer == IMS_NULL)
+    if (m_piRetryTimer == IMS_NULL)
     {
         IMS_TRACE_E(0, "no timer", 0, 0, 0);
         return;
     }
 
-    if (m_piTimer != piTimer)
+    if (m_piRetryTimer != piTimer)
     {
         IMS_TRACE_E(0, "invalid timer", 0, 0, 0);
         return;
     }
 
-    m_piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
-    m_piTimer = IMS_NULL;
+    m_piRetryTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piRetryTimer);
+    m_piRetryTimer = IMS_NULL;
 
     ReStart();
 }
@@ -252,9 +247,7 @@ IMS_BOOL SilentRedialHelper::IsRedialAvailable() const
         return IMS_FALSE;
     }
 
-    return m_nMaxDuration == 0 ||
-            m_objContext.GetPassiveTimerHolder().IsActive(
-                    IPassiveTimerHolder::Type::SILENT_REDIAL_MAX_DURATION);
+    return m_nMaxDuration == 0 || m_nTotalRetryDuration < m_nMaxDuration;
 }
 
 PRIVATE

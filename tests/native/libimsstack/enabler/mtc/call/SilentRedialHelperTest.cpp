@@ -34,10 +34,8 @@
 #include "call/SilentRedialHelper.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/IPassiveTimerHolder.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
-#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
@@ -52,7 +50,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 LOCAL const CallKey ANY_CALL_KEY = 100;
-LOCAL const IMS_SINT32 MAX_DURATION = 1000;
+LOCAL const IMS_SINT32 MAX_DURATION = 10000;
+LOCAL const IMS_SINT32 INTERVAL_OVER_MAX = 11000;
 
 class SilentRedialHelperTest : public ::testing::Test
 {
@@ -91,7 +90,6 @@ public:
     MtcSupplementaryService* pSupplementaryService;
     MediaInfo objMediaInfo;
     MockMtcTimerWrapper objTimerWrapper;
-    MockIPassiveTimerHolder objPassiveTimer;
 
 protected:
     virtual void SetUp() override
@@ -110,8 +108,6 @@ protected:
         ON_CALL(objMessageUtils, GetPreviousResponse(_, _, _))
                 .WillByDefault(Return(&objPreviousResponse));
         ON_CALL(objMessageUtils, GetCauseFromReasonHeader).WillByDefault(Return(-1));
-        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
-        ON_CALL(objPassiveTimer, IsActive(_)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(objMtcCallManager, GetCallByCallKey(ANY_CALL_KEY))
                 .WillByDefault(Return(&objMtcCall));
 
@@ -137,26 +133,6 @@ protected:
         delete pSupplementaryService;
     }
 };
-
-TEST_F(SilentRedialHelperTest, ConstructorAddsPassiveTimerWithMaxDuration)
-{
-    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "1000");
-
-    EXPECT_CALL(objPassiveTimer,
-            AddTimer(IPassiveTimerHolder::Type::SILENT_REDIAL_MAX_DURATION, MAX_DURATION,
-                    IMS_FALSE));
-
-    pRedialHelper = new SilentRedialHelper(objContext, objReason);
-}
-
-TEST_F(SilentRedialHelperTest, DestructorRemovesPassiveTimer)
-{
-    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "1000");
-    pRedialHelper = new SilentRedialHelper(objContext, objReason);
-
-    EXPECT_CALL(
-            objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::SILENT_REDIAL_MAX_DURATION));
-}
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRetryAfterType)
 {
@@ -396,7 +372,10 @@ TEST_F(SilentRedialHelperTest, RedialReturnsFailureIfMaxDurationExpires)
 {
     ON_CALL(objPreviousResponse, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_488));
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT);
-    ON_CALL(objPassiveTimer, IsActive(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .WillByDefault(Return(INTERVAL_OVER_MAX));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .WillByDefault(Return(INTERVAL_OVER_MAX));
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488),
             pRedialHelper->Redial());
@@ -416,7 +395,8 @@ TEST_F(SilentRedialHelperTest, HandleFailureTriggersInitialRegistrationByConfig)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE));
 
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT);
-    ON_CALL(objPassiveTimer, IsActive(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .WillByDefault(Return(INTERVAL_OVER_MAX));
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
 
     ON_CALL(objPreviousResponse, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_488));
@@ -436,7 +416,8 @@ TEST_F(SilentRedialHelperTest, HandleFailureTriggersCsfbByConfig)
     EXPECT_CALL(objService, IsCsfbAvailable).WillOnce(Return(IMS_TRUE)).WillOnce(Return(IMS_FALSE));
 
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT);
-    ON_CALL(objPassiveTimer, IsActive(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .WillByDefault(Return(INTERVAL_OVER_MAX));
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
 
     EXPECT_EQ(
