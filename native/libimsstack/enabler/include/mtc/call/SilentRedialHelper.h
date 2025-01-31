@@ -26,6 +26,7 @@
 #include "call/ISilentRedialHelper.h"
 
 class IMtcCallContext;
+class IMtcSession;
 
 class SilentRedialHelper :
         public ISilentRedialHelper,
@@ -44,7 +45,7 @@ public:
     }
 
     // ISilentRedialHelper implementation
-    IMS_RESULT Redial(IN IMS_SINT32 nIntervalInMillis = INTERVAL_BY_TYPE) override;
+    CallReasonInfo Redial(IN IMS_SINT32 nIntervalInMillis = INTERVAL_BY_TYPE) override;
     inline IMS_UINT32 GetType() override { return m_nType; }
 
     // IMtcCallStateListener implementation
@@ -60,11 +61,13 @@ private:
     void ReStart();
     void SetRedialDetail();
     void LoadRetryLimitsFromConfiguration();
-    void ReleaseCallResources();
+    void ReleaseCallResources(IN IMtcSession& objMtcSession);
     void StopCallTimers();
     IMS_BOOL IsRedialAvailable() const;
+    CallReasonInfo HandleFailure(IN IMtcSession& objMtcSession) const;
     CallType GetCallType() const;
     const AString GetRemoteTarget() const;
+    void ControlAos(IN IMS_UINT32 eCommand) const;
 
     IMtcCallContext& m_objContext;
     CallKey m_nCallKey;

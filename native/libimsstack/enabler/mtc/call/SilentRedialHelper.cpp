@@ -16,7 +16,10 @@
 
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
+#include "IMessage.h"
+#include "ISession.h"
 #include "IMtcCallController.h"
+#include "ImsAosParameter.h"
 #include "ImsTypeDef.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
@@ -27,15 +30,18 @@
 #include "call/ParticipantInfo.h"
 #include "call/SilentRedialHelper.h"
 #include "call/state/MtcCallState.h"
+#include "call/termination/StartErrorHandler.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/IMtcAosConnector.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaUtil.h"
 #include "precondition/MtcPreconditionManager.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -76,7 +82,7 @@ PUBLIC VIRTUAL SilentRedialHelper::~SilentRedialHelper()
             IPassiveTimerHolder::Type::SILENT_REDIAL_MAX_DURATION);
 }
 
-PUBLIC VIRTUAL IMS_RESULT SilentRedialHelper::Redial(
+PUBLIC VIRTUAL CallReasonInfo SilentRedialHelper::Redial(
         IN IMS_SINT32 nIntervalInMillis /* = INTERVAL_BY_TYPE*/)
 {
     if (nIntervalInMillis != INTERVAL_BY_TYPE)
@@ -85,21 +91,24 @@ PUBLIC VIRTUAL IMS_RESULT SilentRedialHelper::Redial(
         m_nInterval = nIntervalInMillis;
     }
 
+    IMtcSession* pSession = m_objContext.GetSession();
+    IMS_ASSERT(pSession != IMS_NULL);
+
     if (IsRedialAvailable() == IMS_FALSE)
     {
-        IMS_TRACE_D("Redial stop[%d]", m_nCount, 0, 0);
-        return IMS_FAILURE;
+        return HandleFailure(*pSession);
     }
 
-    ReleaseCallResources();
+    ReleaseCallResources(*pSession);
     m_nCount += 1;
 
     IMS_TRACE_D("Redial count[%d] interval[%d]", m_nCount, m_nInterval, 0);
 
+    // In case m_nInterval = 0, the operation will be done asynchronously without delay.
     m_piTimer = TimerService::GetTimerService()->CreateTimer();
     m_piTimer->SetTimer(m_nInterval, this);
 
-    return IMS_SUCCESS;
+    return CallReasonInfo(CODE_NONE);
 }
 
 PUBLIC VIRTUAL void SilentRedialHelper::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
@@ -178,6 +187,7 @@ void SilentRedialHelper::SetRedialDetail()
             LoadRetryLimitsFromConfiguration();
             return;
         case EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT:
+        case EXTRA_CODE_REDIAL_BY_ERROR_RESPONSE:
             m_nInterval = m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT);
             LoadRetryLimitsFromConfiguration();
@@ -209,13 +219,9 @@ void SilentRedialHelper::LoadRetryLimitsFromConfiguration()
 }
 
 PRIVATE
-void SilentRedialHelper::ReleaseCallResources()
+void SilentRedialHelper::ReleaseCallResources(IN IMtcSession& objMtcSession)
 {
-    IMtcSession* pSession = m_objContext.GetSession();
-    if (pSession != IMS_NULL)
-    {
-        m_objContext.RemoveSession(*pSession);
-    }
+    m_objContext.RemoveSession(objMtcSession);
 
     m_objContext.GetPreconditionManager().InitializeMobileRatInformation();
     m_objContext.GetMediaManager().DestroyMediaSession();
@@ -252,6 +258,41 @@ IMS_BOOL SilentRedialHelper::IsRedialAvailable() const
 }
 
 PRIVATE
+CallReasonInfo SilentRedialHelper::HandleFailure(IN IMtcSession& objMtcSession) const
+{
+    IMS_SINT32 eFailureAction = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_SILENT_REDIAL_ULTIMATE_FAILURE_ACTION_INT);
+
+    IMS_TRACE_I("HandleFailure action[%d]", eFailureAction, 0, 0);
+    switch (eFailureAction)
+    {
+        case ConfigVoice::SILENT_REDIAL_FAILURE_ACTION_CSFB:
+            if (m_objContext.GetService().IsCsfbAvailable())
+            {
+                return CallReasonInfo(
+                        CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+            }
+            break;
+
+        case ConfigVoice::SILENT_REDIAL_FAILURE_ACTION_REGISTRATION:
+            ControlAos(ImsAosControl::REGISTER_REINITIATE);
+            break;
+
+        default:  // ConfigVoice::SILENT_REDIAL_FAILURE_ACTION_TERMINATE
+            break;
+    }
+
+    IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
+            &objMtcSession.GetISession(), IMessage::SESSION_START);
+    if (piResponse == IMS_NULL)
+    {
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+    }
+
+    return StartErrorHandler::GetDefaultCallReasonInfo(m_objContext, *piResponse);
+}
+
+PRIVATE
 CallType SilentRedialHelper::GetCallType() const
 {
     if (m_nType == EXTRA_CODE_REDIAL_FOR_SDP_CHANGE)
@@ -277,4 +318,14 @@ const AString SilentRedialHelper::GetRemoteTarget() const
     }
 
     return m_objContext.GetParticipantInfo().GetRemoteNumber();
+}
+
+PRIVATE
+void SilentRedialHelper::ControlAos(IN IMS_UINT32 eCommand) const
+{
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (pAosConnector)
+    {
+        pAosConnector->Control(eCommand);
+    }
 }
