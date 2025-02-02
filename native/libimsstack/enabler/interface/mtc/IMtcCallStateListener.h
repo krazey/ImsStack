@@ -47,6 +47,18 @@ public:
     virtual void OnTotalCallStateChanged(IN State eState) = 0;
 
     /**
+     * @brief Notifies the SIP session of the call is released
+     *
+     * @param nCallKey The CallKey of the call
+     * @param bEmergency IMS_TRUE if the call is emergency routing call, IMS_FALSE otherwise.
+     * @param bEstablished IMS_TRUE if the call confirmed dialog, IMS_FALSE otherwise.
+     */
+    virtual void OnCallSessionReleased(IN [[maybe_unused]] CallKey nCallKey,
+            IN [[maybe_unused]] IMS_BOOL bEmergency, IN [[maybe_unused]] IMS_BOOL bEstablished)
+    {
+    }
+
+    /**
      * @brief Is
      *
      * @return

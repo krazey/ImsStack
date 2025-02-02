@@ -21,6 +21,7 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcUiNotifier.h"
+#include <functional>
 
 class AString;
 class IMtcCallContext;
@@ -60,11 +61,13 @@ public:
     void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
     void SendCallPushCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
     void SendRatChanged(IN IMS_SINT32 eRatType) override;
+    void OnCallSessionReleased() override;
 
 private:
-    IMtcCallContext& m_objContext;
-
     IJniMtcCallThread* GetCallThread() const;
+
+    IMtcCallContext& m_objContext;
+    std::function<void()> m_objBlockedNotification;
 };
 
 #endif

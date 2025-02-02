@@ -577,7 +577,8 @@ void MtcCallState::NotifyHoldResumeState()
 PROTECTED
 ISession* MtcCallState::GetISession()
 {
-    return &m_objContext.GetSession()->GetISession();
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    return piMtcSession ? &piMtcSession->GetISession() : IMS_NULL;
 }
 
 PROTECTED

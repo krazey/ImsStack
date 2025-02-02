@@ -14,32 +14,71 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "ISession.h"
+#include "MockISession.h"
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "call/state/TerminatingState.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "helper/MockICallStateProxy.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include "media/MockIMtcMediaManager.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
+using ::testing::Mock;
+using ::testing::Return;
 using ::testing::ReturnRef;
+
+LOCAL const CallKey ANY_CALL_KEY = 0;
 
 class TerminatingStateTest : public ::testing::Test
 {
 public:
     inline TerminatingStateTest() :
             objCallContext(),
+            objStateProxy(),
+            objUiNotifier(),
             objMediaManager(),
+            objTimerWrapper(),
+            objMtcSession(),
+            objSession(),
+            objCallInfo(),
             objTerminatingState(objCallContext)
     {
     }
 
     MockIMtcCallContext objCallContext;
+    MockICallStateProxy objStateProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
+    MockIMtcUiNotifier objUiNotifier;
     MockIMtcMediaManager objMediaManager;
+    MockMtcTimerWrapper objTimerWrapper;
+    MockIMtcSession objMtcSession;
+    MockISession objSession;
+    CallInfo objCallInfo;
 
     TerminatingState objTerminatingState;
 
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objCallContext, GetCallStateProxy).WillByDefault(ReturnRef(objStateProxy));
+        ON_CALL(objCallContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(objConfigurationProxy));
+        ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimerWrapper));
+        ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATING));
+
+        ON_CALL(objCallContext, GetCallKey).WillByDefault(Return(ANY_CALL_KEY));
+        ON_CALL(objCallContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
     }
 
     virtual void TearDown() override {}
@@ -50,4 +89,83 @@ TEST_F(TerminatingStateTest, OnEnterInvokesDestroyMediaSession)
     EXPECT_CALL(objMediaManager, DestroyMediaSession);
 
     objTerminatingState.OnEnter();
+}
+
+TEST_F(TerminatingStateTest, OnEnterInvokesNotifyCallSessionReleasedIfSessionIsAlreadyTerminated)
+{
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATED));
+
+    EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_FALSE, IMS_FALSE));
+
+    objTerminatingState.OnEnter();
+}
+
+TEST_F(TerminatingStateTest,
+        OnEnterInvokesUiNotifierOnCallSessionReleasedIfSessionIsAlreadyTerminatedAndEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATED));
+
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
+
+    objTerminatingState.OnEnter();
+}
+
+TEST_F(TerminatingStateTest, OnEnterStartTimerIfEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATED));
+
+    EXPECT_CALL(objTimerWrapper, Start(_, _));
+
+    objTerminatingState.OnEnter();
+}
+
+TEST_F(TerminatingStateTest, NotifyCallSessionReleasedIsInvokedOnlyOnce)
+{
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_TERMINATED));
+
+    EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_FALSE, IMS_FALSE));
+
+    objTerminatingState.OnEnter();
+
+    EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_FALSE, IMS_FALSE))
+            .Times(0);
+    objTerminatingState.OnEnter();
+}
+
+TEST_F(TerminatingStateTest, DestructorNotifyCallSessionReleased)
+{
+    EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_FALSE, IMS_FALSE));
+}
+
+TEST_F(TerminatingStateTest, SessionStartFailedInvokesNotifyCallSessionReleased)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_TRUE, IMS_FALSE));
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
+
+    objTerminatingState.SessionStartFailed(&objSession);
+    Mock::VerifyAndClearExpectations(&objStateProxy);
+}
+
+TEST_F(TerminatingStateTest, SessionTerminatedInvokesNotifyCallSessionReleased)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_TRUE, IMS_FALSE));
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
+
+    objTerminatingState.SessionTerminated(&objSession);
+    Mock::VerifyAndClearExpectations(&objStateProxy);
+}
+
+TEST_F(TerminatingStateTest, OnTimerExpiredInvokesNotifyCallSessionReleased)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_TRUE, IMS_FALSE));
+    EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
+
+    // TIMER_E911_WAIT_SESSION_RELEASED = 12
+    objTerminatingState.OnTimerExpired(12);
+    Mock::VerifyAndClearExpectations(&objStateProxy);
 }

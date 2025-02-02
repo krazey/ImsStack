@@ -32,12 +32,14 @@
 #include "call/UpdatingInfo.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/IMtcMediaManager.h"
+#include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcUiNotifier::MtcUiNotifier(IN IMtcCallContext& objContext) :
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_objBlockedNotification(IMS_NULL)
 {
 }
 
@@ -117,6 +119,21 @@ PUBLIC
 void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendStartFailed : %s", _TRACE_CR_(objReason), 0, 0);
+
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        m_objBlockedNotification = [this, objReason]()
+        {
+            IJniMtcCallThread* piThread = GetCallThread();
+            if (piThread == IMS_NULL)
+            {
+                return;
+            }
+            piThread->OnStartFailed(objReason);
+        };
+        IMS_TRACE_I("SendStartFailed blocked", 0, 0, 0);
+        return;
+    }
 
     IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
@@ -259,6 +276,21 @@ PUBLIC
 void MtcUiNotifier::SendTerminated(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendTerminated : %s", _TRACE_CR_(objReason), 0, 0);
+
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        m_objBlockedNotification = [this, objReason]()
+        {
+            IJniMtcCallThread* piThread = GetCallThread();
+            if (piThread == IMS_NULL)
+            {
+                return;
+            }
+            piThread->OnTerminated(objReason);
+        };
+        IMS_TRACE_I("SendTerminated blocked", 0, 0, 0);
+        return;
+    }
 
     IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
@@ -418,6 +450,16 @@ PUBLIC VIRTUAL void MtcUiNotifier::SendRatChanged(IN IMS_SINT32 eRatType)
     }
 
     piThread->OnRatChanged(eRatType);
+}
+
+PUBLIC VIRTUAL void MtcUiNotifier::OnCallSessionReleased()
+{
+    IMS_TRACE_I("OnCallSessionReleased", 0, 0, 0);
+    if (m_objBlockedNotification)
+    {
+        m_objBlockedNotification();
+        m_objBlockedNotification = nullptr;
+    }
 }
 
 PRIVATE
