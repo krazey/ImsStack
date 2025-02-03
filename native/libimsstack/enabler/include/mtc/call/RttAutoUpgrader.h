@@ -52,7 +52,6 @@ private:
 
     IMtcContext& m_objContext;
     IMS_BOOL m_bRttEmergencyCallEstablished;
-    IMS_BOOL m_bNeedToUpgradeToRtt;
     CallKey m_nIncomingVoiceCallKey;
 };
 
