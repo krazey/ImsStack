@@ -91,9 +91,9 @@ public class CdmaSmsMessageHelper {
      */
     public byte[] mBearerData;
 
-    private SmsAddress mSmsAddr;
+    public SmsAddress mSmsAddr;
 
-    private static class SmsAddress {
+    public static class SmsAddress {
         /**
          * Digit Mode Indicator is a 1-bit value that indicates whether
          * the address digits are 4-bit DTMF codes or 8-bit codes.  (See
