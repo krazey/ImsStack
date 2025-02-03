@@ -108,26 +108,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
         return GetStateName();
     }
 
-    if (!IsNeedToSendLocalResourceConfirmation(piSession))
-    {
-        return GetStateName();
-    }
-
-    m_objContext.GetMediaManager().AdjustDirectionForLocalResourceConfirmation(
-            m_objContext.GetSession(piSession)->GetCallType());
-
-    if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(piSession)) == IMS_FAILURE)
-    {
-        IMS_TRACE_D("QosReserved : Fail to send early UPDATE.", 0, 0, 0);
-
-        CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
-        HandleCancel(piSession, objReason);
-        OnStartFailed(objReason);
-
-        return CallStateName::TERMINATING;
-    }
-
-    return GetStateName();
+    return MaySendPreconditionConfirmation(*piSession);
 }
 
 PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
@@ -261,7 +242,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
-    return GetStateName();
+
+    return MaySendPreconditionConfirmation(*piSession);
 }
 
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
@@ -382,32 +364,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* p
         return CallStateName::TERMINATING;
     }
 
-    if (!IsNeedToSendLocalResourceConfirmation(piSession))
-    {
-        return GetStateName();
-    }
-
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_START);
 
     if (nStatusCode == SipStatusCode::SC_183)
     {
-        IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-        if (objMediaManager.GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
-        {
-            return GetStateName();
-        }
-
-        objMediaManager.AdjustDirectionForLocalResourceConfirmation(pSession->GetCallType());
-
-        if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(piSession)) == IMS_FAILURE)
-        {
-            CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
-            HandleCancel(piSession, objReason);
-            OnStartFailed(objReason);
-
-            return CallStateName::TERMINATING;
-        }
+        return MaySendPreconditionConfirmation(*piSession);
     }
     else if (nStatusCode == SipStatusCode::SC_200)
     {
@@ -778,6 +740,39 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo
     {
         pSession->Terminate(IMS_FALSE, objReason);
     }
+}
+
+PRIVATE
+CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSession)
+{
+    IMS_TRACE_D("MaySendPreconditionConfirmation", 0, 0, 0);
+    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) !=
+            NegotiationState::STATE_NEGOTIATED)
+    {
+        IMS_TRACE_I("NegotiationState is not STATE_NEGOTIATED.", 0, 0, 0);
+        return GetStateName();
+    }
+
+    if (!IsNeedToSendLocalResourceConfirmation(&objSession))
+    {
+        return GetStateName();
+    }
+
+    m_objContext.GetMediaManager().AdjustDirectionForLocalResourceConfirmation(
+            m_objContext.GetSession(&objSession)->GetCallType());
+
+    if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(&objSession)) == IMS_FAILURE)
+    {
+        IMS_TRACE_E(0, "MaySendPreconditionConfirmation : Fail to send early UPDATE.", 0, 0, 0);
+
+        CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
+        HandleCancel(&objSession, objReason);
+        OnStartFailed(objReason);
+
+        return CallStateName::TERMINATING;
+    }
+
+    return GetStateName();
 }
 
 PRIVATE
