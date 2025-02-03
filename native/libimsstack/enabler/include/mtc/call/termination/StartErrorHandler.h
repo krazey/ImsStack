@@ -67,7 +67,7 @@ private:
     CallReasonInfo HandleTriggerEpsfb(IN const IMessage& objMessage) const;
     CallReasonInfo HandleTerminateByResponseSource(IN const IMessage& objMessage) const;
 
-    CallReasonInfo HandleRedialByNetworkContext() const;
+    CallReasonInfo RegisterAfterMayPerformCsfb() const;
 
     static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;

@@ -190,13 +190,14 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             ControlAos(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
             break;
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
-        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
             if (m_objContext.GetService().IsCsfbAvailable())
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             }
             break;
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE:
+            return RegisterAfterMayPerformCsfb();
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
             ControlAos(ImsAosControl::REGISTER_REINITIATE);
             break;
@@ -212,12 +213,10 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
                 ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
             }
             break;
-        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
+        default:  // ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL
             nReason = CODE_INTERNAL_REDIAL;
             nExtraCode = EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT;
             break;
-        default:  // MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT:
-            return HandleRedialByNetworkContext();
     }
 
     return CallReasonInfo(nReason, nExtraCode);
@@ -507,31 +506,19 @@ CallReasonInfo StartErrorHandler::HandleTerminateByResponseSource(
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
+CallReasonInfo StartErrorHandler::RegisterAfterMayPerformCsfb() const
 {
-    IMS_TRACE_I("HandleRedialByNetworkContext", 0, 0, 0);
-    if (m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigIms::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL) &&
-            !m_objContext.GetService().IsRoaming())
+    IMS_TRACE_I("RegisterAfterMayPerformCsfb", 0, 0, 0);
+
+    if (m_objContext.GetService().IsCsfbAvailable())
     {
-        ControlAos(ImsAosControl::REGISTER_REINITIATE);
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+        ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
-    if (!m_objContext.GetService().IsCsfbAvailable())
-    {
-        ControlAos(ImsAosControl::REGISTER_REINITIATE);
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
-    }
-
-    if (m_objContext.GetService().IsWlanIpCanType())
-    {
-        ControlAos(ImsAosControl::REGISTER_REINITIATE);
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
-    }
-
-    ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
-    return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+    ControlAos(ImsAosControl::REGISTER_REINITIATE);
+    return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
 }
 
 PRIVATE

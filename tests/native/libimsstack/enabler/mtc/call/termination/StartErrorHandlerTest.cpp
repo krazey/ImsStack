@@ -233,11 +233,6 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
-    SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE);
-    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
@@ -276,11 +271,6 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
-    SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE);
-    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
@@ -294,13 +284,6 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-
-    SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT);
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigIms::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext)
@@ -312,24 +295,14 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
             .WillByDefault(Return(1000));
     ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_FALSE));
 
-    SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT);
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+    SetTcallTimerConfig(
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE);
 
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigIms::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcService, IsRoaming).WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
-
-    ON_CALL(objMtcService, IsRoaming).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
-            .WillByDefault(Return(IMS_ROAMING_STATE_ON));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));

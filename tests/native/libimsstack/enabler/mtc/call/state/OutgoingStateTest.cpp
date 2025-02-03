@@ -716,7 +716,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedTriggersEpsFallbackByCallReason)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(IMS_NULL));
     SetUpStartErrorHandler(IMS_NULL, SipStatusCode::SC_INVALID, IMS_FALSE,
-            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT, IMS_FALSE);
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE,
+            IMS_FALSE);
 
     EXPECT_CALL(
             *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE));
