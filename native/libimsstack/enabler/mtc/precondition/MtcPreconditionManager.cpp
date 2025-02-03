@@ -830,10 +830,7 @@ void MtcPreconditionManager::HandleQosTimer(IN ISession* piSession, IN QosStatus
         StopQosTimer(piSession, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
 
         // video or text is not reserved
-        if (!IsNotUsingDedicatedWaitTimerByRatCondition())
-        {
-            StartQosTimer(piSession, QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE);
-        }
+        StartQosTimer(piSession, QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE);
     }
 }
 
