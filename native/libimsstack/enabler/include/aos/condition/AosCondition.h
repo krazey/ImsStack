@@ -120,6 +120,7 @@ protected:
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
+    inline void CallTracker_ECallSessionReleased(IN IMS_BOOL /* bEstablished */) override {};
 
     // IAosNetTrackerListener
     void NetTracker_StatusChanged() override;

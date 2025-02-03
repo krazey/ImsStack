@@ -54,7 +54,7 @@ protected:
     template <typename T>
     void AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
     template <typename T>
-    void RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey);
+    IMS_BOOL RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey);
 
     CallState GetConvertedState(IN IMtcCall::State eState);
     CallState GetTotalState(IN ImsMap<CallKey, CallState>& objCalls);
@@ -81,6 +81,9 @@ protected:
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     void OnTotalCallStateChanged(IN State eState) override;
+    void OnCallSessionReleased(
+            IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) override;
+    // TODO : Need to override IsSynchronousCallRequired to receive call state synchronously.
 
     // Log
     static const IMS_CHAR* TypeToString(IN IMS_UINT32 nType);

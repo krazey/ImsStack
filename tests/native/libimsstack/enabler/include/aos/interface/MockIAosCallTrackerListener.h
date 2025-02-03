@@ -28,6 +28,7 @@ class MockIAosCallTrackerListener : public IAosCallTrackerListener
 public:
     MOCK_METHOD(
             void, CallTracker_StateChanged, (IN IMS_UINT32 nType, IN CallState eState), (override));
+    MOCK_METHOD(void, CallTracker_ECallSessionReleased, (IN IMS_BOOL bEstablished), (override));
 };
 
 #endif  // MOCK_I_AOS_CALL_TRACKER_LISTENER_H_

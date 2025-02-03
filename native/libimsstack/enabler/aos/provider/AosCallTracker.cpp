@@ -215,16 +215,17 @@ void AosCallTracker::AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKe
 
 PROTECTED
 template <typename T>
-void AosCallTracker::RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey)
+IMS_BOOL AosCallTracker::RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey)
 {
     IMS_SINT32 nAt = objCalls.GetIndexOfKey(eKey);
 
     if (nAt < 0)
     {
-        return;
+        return IMS_FALSE;
     }
 
     objCalls.RemoveAt(nAt);
+    return IMS_TRUE;
 }
 
 PROTECTED
@@ -495,6 +496,39 @@ PROTECTED VIRTUAL void AosCallTracker::OnCallStateChanged(IN CallKey nCallKey, I
 }
 
 PROTECTED VIRTUAL void AosCallTracker::OnTotalCallStateChanged(IN State /* eState */) {}
+
+PROTECTED VIRTUAL void AosCallTracker::OnCallSessionReleased(
+        CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished)
+{
+    AString strLog;
+    strLog.Sprintf("CallKey=%" PFLS_x ", IsEmergency=%s, IsEstablished=%s", nCallKey,
+            _TRACE_B_(bEmergency), _TRACE_B_(bEstablished));
+    A_IMS_TRACE_I(AOSTAG, "OnCallSessionReleased :: (%s)", strLog.GetStr(), 0, 0);
+
+    if (bEmergency)
+    {
+        IMS_BOOL bCallRemoved = RemoveCall(m_objEmergencyCalls, nCallKey);
+        SetState(TYPE_EMERGENCY, GetTotalState(m_objEmergencyCalls));
+
+        if (m_eEmergencyState == CallState::IDLE)
+        {
+            if (bCallRemoved)
+            {
+                // Notify change to IDLE state here instead of OnCallStateChanged.
+                Notify(TYPE_EMERGENCY, CallState::IDLE);
+            }
+
+            for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
+            {
+                IAosCallTrackerListener* piListener = m_objListeners.GetAt(nAt);
+                if (piListener != IMS_NULL)
+                {
+                    piListener->CallTracker_ECallSessionReleased(bEstablished);
+                }
+            }
+        }
+    }
+}
 
 PROTECTED GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nType)
 {

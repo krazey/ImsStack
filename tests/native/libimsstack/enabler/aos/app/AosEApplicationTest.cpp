@@ -67,6 +67,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                       \
+    using Base::CallTracker_ECallSessionReleased; \
     using Base::CallTracker_StateChanged;         \
     using Base::ClearConnection;                  \
     using Base::ClearTimers;                      \
@@ -1208,6 +1209,39 @@ TEST_F(AosEApplicationTest, CallTracker_StateChanged)
     m_pTestAosEApplication->CallTracker_StateChanged(
             IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE);
     EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
+}
+
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallSessionReleasedIfRegistrationWasTerminated)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
+    ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    m_pTestAosEApplication->CallTracker_ECallSessionReleased(IMS_TRUE);
+}
+
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallSessionReleasedIfConfiguredToRelease)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_ALL));
+    ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    m_pTestAosEApplication->CallTracker_ECallSessionReleased(IMS_TRUE);
+}
+
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallSessionReleasedIfNotConfiguredToRelease)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
+    ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop()).Times(0);
+
+    m_pTestAosEApplication->CallTracker_ECallSessionReleased(IMS_TRUE);
 }
 
 TEST_F(AosEApplicationTest, ShouldNotifyRegistrationIfIpcanIsChangedWhileTheConfigIsTrue)
