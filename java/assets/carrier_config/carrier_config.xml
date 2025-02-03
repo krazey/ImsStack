@@ -183,6 +183,8 @@
     </string-array>
     <string-array name="imsemergency.reject_code_require_immediate_termination_string_array" num="0">
     </string-array>
+    <string-array name="imsemergency.reject_code_and_reason_require_immediate_termination_string_array" num="0">
+    </string-array>
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_provisional_to_final_response_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>

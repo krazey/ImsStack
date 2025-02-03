@@ -743,6 +743,9 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_call_current_location_discovery_supported_bool";
         public static final String KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY =
                 KEY_PREFIX + "reject_code_require_immediate_termination_string_array";
+        public static final String
+                KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY =
+                KEY_PREFIX + "reject_code_and_reason_require_immediate_termination_string_array";
         public static final String KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT =
                 KEY_PREFIX + "call_periodic_location_discovery_method_int";
         public static final String KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT =

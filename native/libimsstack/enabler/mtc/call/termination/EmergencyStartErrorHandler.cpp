@@ -93,6 +93,15 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
         return CallReasonInfo(nCallReasonInfoCode, GetExtraCode(nCallReasonInfoCode, piMessage));
     }
 
+    ReasonHeaderValue objValue =
+            m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(piMessage);
+    nCallReasonInfoCode = MtcConfigurationResolver::LookupTerminateReasonCodeAndReasonForEmergency(
+            m_objContext.GetConfigurationProxy(), nStatusCode, objValue.strText);
+    if (nCallReasonInfoCode != CODE_NONE)
+    {
+        return CallReasonInfo(nCallReasonInfoCode, objValue.nCause);
+    }
+
     if (IsRedialEmergencyWithNextPcscfRequired(piMessage))
     {
         return HandleRedialEmergencyWithNextPcscf();

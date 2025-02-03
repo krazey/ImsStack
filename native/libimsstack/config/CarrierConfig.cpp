@@ -1198,6 +1198,10 @@ const IMS_CHAR
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX "reject_code_require_immediate_termination_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[] =
+                KEY_IMS_EMERGENCY_PREFIX
+        "reject_code_and_reason_require_immediate_termination_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_TEMP_FAILURE_INT_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "reject_code_require_temp_failure_int_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE_INT_ARRAY[] =
