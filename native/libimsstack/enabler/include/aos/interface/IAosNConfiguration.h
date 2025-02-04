@@ -705,6 +705,10 @@ public:
      *       If UE doesn't support emerg-reg-retry defined in 3GPP 24.229, which is configured by
      *       CarrierConfig::Ims::KEY_EREG_RETRY_TIMER_MILLIS_INT, this configuration is
      *       discarded.
+     *       As an exception, if this value is set to -1, the emergency registration retry will not
+     *       be performed and will be treated as a failure. The subsequent action will be determined
+     *       by the CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT
+     *       setting value.
      *
      * @return IMS_SINT32 Return the retry attempt count
      */

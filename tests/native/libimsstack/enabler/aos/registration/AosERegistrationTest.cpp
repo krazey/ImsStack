@@ -1522,7 +1522,9 @@ TEST_F(AosERegistrationTest, IsRetryAllowedWhenPcscfAvailable)
 {
     m_objPcscfs.AddElement(AString("192.168.0.101"));  // Adding 2nd P-CSCF
     m_pAosERegistration->SetConsecutiveFailure(1);
-    ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::EREG_RETRY_MAX_CNT_EVERY_PCSCF_RETRY));
 
     IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
 
@@ -1533,7 +1535,9 @@ TEST_F(AosERegistrationTest, IsRetryAllowedWhenNoAvailablePcscfs)
 {
     m_objPcscfs.AddElement(AString("192.168.0.101"));  // Adding 2nd P-CSCF
     m_pAosERegistration->SetConsecutiveFailure(2);
-    ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::EREG_RETRY_MAX_CNT_EVERY_PCSCF_RETRY));
 
     IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
 
@@ -1554,6 +1558,16 @@ TEST_F(AosERegistrationTest, IsRetryAllowedWhenMaximumNumberOfRetries)
 {
     m_pAosERegistration->SetConsecutiveFailure(3);
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt()).WillByDefault(Return(2));
+
+    IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosERegistrationTest, IsRetryAllowedWhenMaximumCountIsMinusOne)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryMaxCnt())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::EREG_RETRY_MAX_CNT_NO_RETRY));
 
     IMS_BOOL bResult = m_pAosERegistration->IsRetryAllowed();
 
