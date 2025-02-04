@@ -1004,6 +1004,26 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendProgressing)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
 
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendEarlyUpdate)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(1);
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedReturnsTerminating)
 {
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
@@ -1255,14 +1275,14 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfNotAvailableToSe
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
-
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(SipStatusCode::SC_183));
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
-    EXPECT_CALL(objMessageUtils, GetResponseStatusCode(_, _, _)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
