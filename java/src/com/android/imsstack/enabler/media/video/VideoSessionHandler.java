@@ -529,7 +529,7 @@ public class VideoSessionHandler extends MediaState {
         if (remoteIpAddress != null && remotePortNumber != 0
                 && isNewRemoteAddress(remoteIpAddress, remotePortNumber)) {
             mVideoQosAgent.updateQosConnection(mRtpSocket.first, mRtpSocket.second,
-                    remoteIpAddress, remotePortNumber);
+                    remoteIpAddress, remotePortNumber, false);
             ImsLog.d("Updated QoS Connection for remoteIpAddress= " + remoteIpAddress
                     + " remotePortNumber= " + remotePortNumber);
         }

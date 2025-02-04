@@ -488,7 +488,7 @@ public class TextSessionHandler extends MediaState {
         if (remoteIpAddress != null && remotePortNumber != 0
                 && isNewRemoteAddress(remoteIpAddress, remotePortNumber)) {
             mTextQosAgent.updateQosConnection(mRtpSocket.first, mRtpSocket.second,
-                    remoteIpAddress, remotePortNumber);
+                    remoteIpAddress, remotePortNumber, false);
             ImsLog.d("Updated QoS Connection for remoteIpAddress= " + remoteIpAddress
                     + " remotePortNumber= " + remotePortNumber);
         }

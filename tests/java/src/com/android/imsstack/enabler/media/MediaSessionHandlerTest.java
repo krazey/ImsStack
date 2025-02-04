@@ -99,7 +99,7 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
         when(mMockQosAgent.createQosConnection(anyString(), anyInt()))
                 .thenReturn(mRtpSocketPair);
         doNothing().when(mMockQosAgent).destroyQosConnection(any(), any());
-        when(mMockQosAgent.updateQosConnection(any(), any(), anyString(), anyInt()))
+        when(mMockQosAgent.updateQosConnection(any(), any(), anyString(), anyInt(), anyBoolean()))
                 .thenReturn(true);
     }
 
