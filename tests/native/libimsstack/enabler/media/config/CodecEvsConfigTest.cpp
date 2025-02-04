@@ -53,6 +53,7 @@ public:
     MockICarrierConfig* m_pAudioBundle;
     MockICarrierConfig* m_pAudioSubBundle;
     IMS_SINT32 m_nEvsPayloadTypeNumber = 125;
+    AString m_strPayloadTypeNumber;
 
 protected:
     virtual void SetUp() override
@@ -78,13 +79,12 @@ protected:
 
     inline void GetReadyToCreate()
     {
-        AString strPayloadTypeNumber;
-        strPayloadTypeNumber.SetNumber(m_nEvsPayloadTypeNumber);
+        m_strPayloadTypeNumber.SetNumber(m_nEvsPayloadTypeNumber);
 
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
+        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pAudioSubBundle));
     }
 };

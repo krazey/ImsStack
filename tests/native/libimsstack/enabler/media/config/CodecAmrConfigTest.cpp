@@ -53,6 +53,7 @@ public:
     MockICarrierConfig* m_pAudioSubBundle;
     IMS_SINT32 m_nAmrWbPayloadTypeNumber = 101;
     IMS_SINT32 m_nAmrNbPayloadTypeNumber = 99;
+    AString m_strPayloadTypeNumber;
 
 protected:
     virtual void SetUp() override
@@ -81,25 +82,23 @@ protected:
 
     inline void GetReadyToCreateAmrWb()
     {
-        AString strPayloadTypeNumber;
-        strPayloadTypeNumber.SetNumber(m_nAmrWbPayloadTypeNumber);
+        m_strPayloadTypeNumber.SetNumber(m_nAmrWbPayloadTypeNumber);
 
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
+        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pAudioSubBundle));
     }
 
     inline void GetReadyToCreateAmrNb()
     {
-        AString strPayloadTypeNumber;
-        strPayloadTypeNumber.SetNumber(m_nAmrNbPayloadTypeNumber);
+        m_strPayloadTypeNumber.SetNumber(m_nAmrNbPayloadTypeNumber);
 
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
+        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pAudioSubBundle));
     }
 };
