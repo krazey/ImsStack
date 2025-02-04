@@ -752,7 +752,7 @@ TEST_F(AosEApplicationTest, ProcessRegFailed_StateConnected)
 }
 
 TEST_F(AosEApplicationTest,
-        KeepEPdnWhenProcessRegFailed_StateConnectedIfSettingKeepPdnUntilEmodeEnd)
+        KeepEPdnWhenProcessRegFailed_StateConnectedIfSettingKeepPdnUntilEModeEnd)
 {
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
 
@@ -970,7 +970,7 @@ TEST_F(AosEApplicationTest, ProcessECallTerminated)
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
 }
 
-TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfSettingKeepPdnUntilEmodeEnd)
+TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfSettingKeepPdnUntilEModeEnd)
 {
     m_pTestAosEApplication->SetKeepEPdnWhenNoPcscf(IMS_TRUE);
     ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
@@ -1242,6 +1242,18 @@ TEST_F(AosEApplicationTest, KeepEPdnWhenECallSessionReleasedIfNotConfiguredToRel
     EXPECT_CALL(m_objMockAosConnector, Stop()).Times(0);
 
     m_pTestAosEApplication->CallTracker_ECallSessionReleased(IMS_TRUE);
+}
+
+TEST_F(AosEApplicationTest,
+        KeepEPdnWhenECallSessionReleasedWithoutEstablishmentIfConfiguredToKeepPdnUntilEModeEnd)
+{
+    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pTestAosEApplication->CallTracker_ECallSessionReleased(IMS_FALSE);
+
+    EXPECT_TRUE(m_pTestAosEApplication->IsImsCall());
 }
 
 TEST_F(AosEApplicationTest, ShouldNotifyRegistrationIfIpcanIsChangedWhileTheConfigIsTrue)
