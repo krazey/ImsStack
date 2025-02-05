@@ -150,7 +150,7 @@ IMS_BOOL AudioSession::IsSameNegoId(IMS_UINTP nNegoId)
 PUBLIC
 AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-        IN AudioProfile* pNegoProfile)
+        IN AudioProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
             m_pRtpConfig == NULL)
@@ -213,6 +213,11 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             break;
         case MEDIA_DIRECTION_SEND_RECEIVE:
             nAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
+            if (!bConfirmedSession)
+            {
+                nAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+                IMS_TRACE_D("UpdateRtpConfig() - media direction[%d]", nAudioDirection, 0, 0);
+            }
             break;
         case MEDIA_DIRECTION_SEND:
         case MEDIA_DIRECTION_INACTIVE:

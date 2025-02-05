@@ -364,7 +364,8 @@ IMS_BOOL AudioController::UpdateRtpConfig(
         AudioConfig* pAudioConfig = pAudioSession->UpdateRtpConfig(nAccessNetwork,
                 pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
+                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()),
+                m_eCallState == CONFIRMED_SESSION);
 
         return IsAudioConfigChanged(pAudioConfig);
     }
