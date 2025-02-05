@@ -560,12 +560,26 @@ TEST_F(OutgoingStateTest, QosReservedSendsEarlyUpdate)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
 
-TEST_F(OutgoingStateTest, QosReserveFailedTerminatesCallIfNextActionIsRelease)
+TEST_F(OutgoingStateTest, QosReserveFailedTerminatesCallIfNextActionIsReleaseWhenCsfbIsAvailable)
 {
     EXPECT_CALL(objMtcSession,
             Terminate(_, CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)));
 
+    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED)));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pOutgoingState->QosReserveFailed(&objSession, QosLossPolicy::RELEASE));
+}
+
+TEST_F(OutgoingStateTest, QosReserveFailedTerminatesCallIfNextActionIsReleaseWhenCsfbIsNotAvailable)
+{
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)));
+
+    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)));
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pOutgoingState->QosReserveFailed(&objSession, QosLossPolicy::RELEASE));
