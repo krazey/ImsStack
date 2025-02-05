@@ -55,6 +55,7 @@ public:
     MockICarrierConfig* m_pVideoBundle;
     MockICarrierConfig* m_pVideoSubBundle;
     IMS_SINT32 m_nHevcPayloadTypeNumber = 120;
+    AString m_strPayloadTypeNumber;
 
 protected:
     virtual void SetUp() override
@@ -80,13 +81,12 @@ protected:
 
     inline void GetReadyToCreate()
     {
-        AString strPayloadTypeNumber;
-        strPayloadTypeNumber.SetNumber(m_nHevcPayloadTypeNumber);
+        m_strPayloadTypeNumber.SetNumber(m_nHevcPayloadTypeNumber);
 
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pVideoBundle));
-        ON_CALL(*m_pVideoBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
+        ON_CALL(*m_pVideoBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pVideoSubBundle));
     }
 };

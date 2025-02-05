@@ -30,6 +30,7 @@ public:
     MockICarrierConfig* m_pMockICarrierConfig;
     MockICarrierConfig* m_pMediaBundle;
     MockICarrierConfig* m_pMediaSubBundle;
+    AString m_strPayloadTypeNumber;
 
 protected:
     virtual void SetUp() override
@@ -59,13 +60,12 @@ MATCHER_P(IsSameKey, key, "")
 TEST_F(CodecConfigFactoryTest, CreateAudioPayloadConfigTest)
 {
     IMS_SINT32 nPayloadNumber = 99;
-    AString strPayloadTypeNumber;
-    strPayloadTypeNumber.SetNumber(nPayloadNumber);
+    m_strPayloadTypeNumber.SetNumber(nPayloadNumber);
 
     ON_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillByDefault(Return(m_pMediaBundle));
-    ON_CALL(*m_pMediaBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
+    ON_CALL(*m_pMediaBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
             .WillByDefault(Return(m_pMediaSubBundle));
 
     CodecConfig* pConfig = CodecConfigFactory::CreateAudioPayloadConfig(
@@ -78,13 +78,12 @@ TEST_F(CodecConfigFactoryTest, CreateAudioPayloadConfigTest)
 TEST_F(CodecConfigFactoryTest, CreateVideoPayloadConfigTest)
 {
     IMS_SINT32 nPayloadNumber = 100;
-    AString strPayloadTypeNumber;
-    strPayloadTypeNumber.SetNumber(nPayloadNumber);
+    m_strPayloadTypeNumber.SetNumber(nPayloadNumber);
 
     ON_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillByDefault(Return(m_pMediaBundle));
-    ON_CALL(*m_pMediaBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
+    ON_CALL(*m_pMediaBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
             .WillByDefault(Return(m_pMediaSubBundle));
 
     CodecConfig* pConfig = CodecConfigFactory::CreateVideoPayloadConfig(
