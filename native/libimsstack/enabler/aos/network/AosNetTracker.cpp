@@ -144,7 +144,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsNetworkIn()
     return IsRadioTechAvailable(GetAccessPolicy(), m_nNetRadioType);
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsEmergencyLteAttach()
+PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsEmergencyAttach()
 {
     return m_piNetWatcherInfo->IsEmergencyOnly();
 }

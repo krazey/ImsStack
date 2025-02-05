@@ -47,7 +47,7 @@ public:
     IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT) override;
     IMS_BOOL IsDataIn() override;
     IMS_BOOL IsNetworkIn() override;
-    IMS_BOOL IsEmergencyLteAttach() override;
+    IMS_BOOL IsEmergencyAttach() override;
     IMS_BOOL IsSuspended() override;
     IMS_BOOL IsSessionContinuitySupported() override;
     IMS_BOOL IsServiceTimerRunning() override;

@@ -860,7 +860,7 @@ PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
         return IMS_TRUE;
     }
 
-    if (m_piContext->GetNetTracker()->IsEmergencyLteAttach())
+    if (m_piContext->GetNetTracker()->IsEmergencyAttach())
     {
         return IMS_TRUE;
     }

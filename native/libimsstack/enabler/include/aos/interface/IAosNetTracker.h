@@ -28,7 +28,7 @@ public:
     virtual IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT) = 0;
     virtual IMS_BOOL IsDataIn() = 0;
     virtual IMS_BOOL IsNetworkIn() = 0;
-    virtual IMS_BOOL IsEmergencyLteAttach() = 0;
+    virtual IMS_BOOL IsEmergencyAttach() = 0;
     virtual IMS_BOOL IsSuspended() = 0;
     virtual IMS_BOOL IsSessionContinuitySupported() = 0;
     virtual IMS_BOOL IsServiceTimerRunning() = 0;

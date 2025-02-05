@@ -267,8 +267,8 @@ TEST_F(AosNetTrackerTest, IsEmergencyAttach)
             .WillOnce(Return(IMS_FALSE));
 
     m_pAosNetTracker->SetNetworkWatcher(&m_objMockINetworkWatcher);
-    EXPECT_TRUE(m_pAosNetTracker->IsEmergencyLteAttach());
-    EXPECT_FALSE(m_pAosNetTracker->IsEmergencyLteAttach());
+    EXPECT_TRUE(m_pAosNetTracker->IsEmergencyAttach());
+    EXPECT_FALSE(m_pAosNetTracker->IsEmergencyAttach());
 }
 
 TEST_F(AosNetTrackerTest, IsSuspended)
