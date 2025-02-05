@@ -246,6 +246,7 @@ protected:
     virtual void ClearErrorCount();
     virtual void ClearNetworkBindingFeatures();
     virtual void ClearIpsecBlock();
+    virtual void CloseUnsecureTcpSocket();
 
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();

@@ -322,6 +322,7 @@ PUBLIC VIRTUAL void AosApplication::NotifyEpsFallbackCallState(IN IMS_UINT32 nSt
 
     if (nState == IImsAosInfo::EPSFB_CALL_START)
     {
+        m_piRegistration->RequestCmd(IAosRegistration::CMD_CLOSE_UNSECURE_TCP_SOCKET, 0);
         CleanAll();
         Report_StateChanged(IMS_FALSE);
         m_pCondition->SetBlock(BLOCK_EPS_FALLBACK_STARTED, IMS_FALSE);

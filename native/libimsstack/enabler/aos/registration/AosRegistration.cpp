@@ -395,6 +395,10 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             m_bEps5GsOnly = (nReason == REASON_SET_ENABLE);
             break;
 
+        case CMD_CLOSE_UNSECURE_TCP_SOCKET:
+            CloseUnsecureTcpSocket();
+            break;
+
         default:
             break;
     }
@@ -2879,6 +2883,13 @@ PROTECTED VIRTUAL void AosRegistration::ClearIpsecBlock()
 {
     ClearAuthIpsecCount();
     m_nIpsecBlockReason = 0;
+}
+
+PROTECTED VIRTUAL void AosRegistration::CloseUnsecureTcpSocket()
+{
+    IpAddress objIpaPcscf(m_strPcscf);
+    SipFactory::GetTransportHelper(m_piContext->GetSlotId())
+            ->DestroyTcpSocket(m_objIpa, 0, objIpaPcscf, m_nPcscfPort);
 }
 
 PROTECTED VIRTUAL void AosRegistration::CheckPending()

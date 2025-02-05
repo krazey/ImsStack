@@ -400,6 +400,11 @@ public:
         m_pCounter->AddCount(__IMS_FUNC__);
         AosRegistration::ProcessUpdateFailed_StatusCode(nStatusCode);
     }
+    void CloseUnsecureTcpSocket() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::CloseUnsecureTcpSocket();
+    }
 
 private:
     AosCounter* m_pCounter;
@@ -988,6 +993,13 @@ TEST_F(AosRegistrationTest, IgnoreIpsecSetRequestIfInvalidReason)
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_INIT);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 0);
+}
+
+TEST_F(AosRegistrationTest, TriggerCloseUnsecureTcpSocketWhenRequestCmdWithCloseSocket)
+{
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_CLOSE_UNSECURE_TCP_SOCKET, 0);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CloseUnsecureTcpSocket"), 1);
 }
 
 TEST_F(AosRegistrationTest, RecalculateCallerCapabilitiesWhenRequestToRefreshRegInfo)
