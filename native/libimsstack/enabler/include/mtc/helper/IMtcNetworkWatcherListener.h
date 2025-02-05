@@ -19,6 +19,8 @@
 
 #include "ImsTypeDef.h"
 
+enum class ServiceType;
+
 class IMtcNetworkWatcherListener
 {
 public:
@@ -27,9 +29,12 @@ public:
     /**
      * @brief Notifies the listener that the RAT has changed.
      *
-     * @param eRatType The type of the new RAT.
+     * @param eServiceType The service type of this information.
+     * @param eOldRatType The type of the old RAT.
+     * @param eRatType The type of the new RAT. It can't be same as an old RAT.
      */
-    virtual void OnRatChanged(IN IMS_SINT32 eRatType) = 0;
+    virtual void OnRatChanged(
+            IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) = 0;
 };
 
 #endif

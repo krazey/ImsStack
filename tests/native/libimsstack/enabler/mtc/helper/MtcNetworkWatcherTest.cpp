@@ -61,6 +61,10 @@ protected:
 TEST_F(MtcNetworkWatcherTest, GetRatTypeReturnsCorrectValue)
 {
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetRatType());
+
+    pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_MOBILE);
+
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, GetMobileRatTypeReturnsCorrectValue)
@@ -72,19 +76,28 @@ TEST_F(MtcNetworkWatcherTest, OnServiceConnectedInvokesNotifying)
 {
     MockIMtcNetworkWatcherListener objNetworkWatcherListener;
     pNetworkWatcher->AddListener(objNetworkWatcherListener);
-    EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_LTE))
+    EXPECT_CALL(objNetworkWatcherListener,
+            OnRatChanged(
+                    _, INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE))
             .Times(1);
 
     pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_MOBILE);
 
-    EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_LTE))
+    EXPECT_CALL(objNetworkWatcherListener,
+            OnRatChanged(
+                    _, INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE))
             .Times(0);
     pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_MOBILE);
 
-    pNetworkWatcher->RemoveListener(objNetworkWatcherListener);
-    EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_LTE))
-            .Times(0);
+    EXPECT_CALL(objNetworkWatcherListener,
+            OnRatChanged(
+                    _, INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN))
+            .Times(1);
     pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_WLAN);
+
+    pNetworkWatcher->RemoveListener(objNetworkWatcherListener);
+    EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(_, _, _)).Times(0);
+    pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_MOBILE);
 }
 
 TEST_F(MtcNetworkWatcherTest, NetworkWatcher_NotifyStatusInvokesNotifying)
@@ -96,13 +109,17 @@ TEST_F(MtcNetworkWatcherTest, NetworkWatcher_NotifyStatusInvokesNotifying)
 
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
 
-    EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_NR));
+    EXPECT_CALL(objNetworkWatcherListener,
+            OnRatChanged(
+                    _, INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_NR));
 
     pNetworkWatcher->OnServiceConnected(IIpcan::CATEGORY_MOBILE);
 
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_GSM));
-    EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(INetworkWatcher::RADIOTECH_TYPE_UNKNOWN));
+    EXPECT_CALL(objNetworkWatcherListener,
+            OnRatChanged(_, INetworkWatcher::RADIOTECH_TYPE_NR,
+                    INetworkWatcher::RADIOTECH_TYPE_UNKNOWN));
 
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
 }
@@ -116,7 +133,7 @@ TEST_F(MtcNetworkWatcherTest, SetTestRatChangedInvokesNotifying)
     for (IMS_SINT32 i = INetworkWatcher::RADIOTECH_TYPE_INVALID;
             i <= INetworkWatcher::RADIOTECH_TYPE_MAX; i++)
     {
-        EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(i));
+        EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(_, _, i));
         pNetworkWatcher->SetTestRatChanged(i);
     }
 }
@@ -130,7 +147,7 @@ TEST_F(MtcNetworkWatcherTest, SetTestRatChangedDoesNotInvokeNotifyingIfIpcanIsWl
     for (IMS_SINT32 i = INetworkWatcher::RADIOTECH_TYPE_INVALID;
             i <= INetworkWatcher::RADIOTECH_TYPE_MAX; i++)
     {
-        EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(_)).Times(0);
+        EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(_, _, i)).Times(0);
         pNetworkWatcher->SetTestRatChanged(i);
     }
 }

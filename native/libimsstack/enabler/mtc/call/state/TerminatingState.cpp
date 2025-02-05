@@ -20,11 +20,12 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/MtcUiNotifier.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "call/state/TerminatingState.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "media/IMtcMediaManager.h"
-#include "helper/MtcTimerWrapper.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/MtcTimerWrapper.h"
+#include "media/IMtcMediaManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -50,7 +51,7 @@ PUBLIC VIRTUAL void TerminatingState::OnEnter()
     m_objContext.GetMediaManager().DestroyMediaSession();
 
     ISession* piSession = GetISession();
-    if (piSession && GetISession()->GetState() == ISession::STATE_TERMINATED)
+    if (piSession && piSession->GetState() == ISession::STATE_TERMINATED)
     {
         HandleCallSessionReleased();
     }
@@ -61,6 +62,11 @@ PUBLIC VIRTUAL void TerminatingState::OnEnter()
         m_objContext.GetTimer().Start(TIMER_E911_WAIT_SESSION_RELEASED,
                 m_objContext.GetConfigurationProxy().GetInt(
                         ConfigIms::KEY_SIP_TIMER_T1_MILLIS_INT));
+    }
+
+    if (!piSession)
+    {
+        m_objContext.GetRadioChecker().OnTerminatedBeforeCreatingSession(m_objContext.GetCallKey());
     }
 }
 

@@ -26,11 +26,11 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MtcNetworkWatcher::MtcNetworkWatcher(IN IMtcService& objService, IN IMS_SINT32 nSlotId) :
         m_eServiceType(objService.GetServiceType()),
-        m_nSlotId(nSlotId),
-        m_piNetWatcher(PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId)),
+        m_piNetWatcher(PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId)),
         m_eIpcanType(
                 objService.IsWlanIpCanType() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE),
         m_eMobileRatType(ConvertCellularRatType(m_piNetWatcher->GetNetRadioTechType())),
+        m_eOldRatType(INetworkWatcher::RADIOTECH_TYPE_UNKNOWN),
         m_objListeners(ImsList<IMtcNetworkWatcherListener*>())
 {
     m_piNetWatcher->RegisterObserver(this);
@@ -86,6 +86,7 @@ PUBLIC void MtcNetworkWatcher::OnServiceConnected(IN IMS_UINT32 eIpcan)
         return;
     }
 
+    m_eOldRatType = GetCurrentRat();
     m_eIpcanType = eIpcan;
     Notify();
 }
@@ -93,6 +94,7 @@ PUBLIC void MtcNetworkWatcher::OnServiceConnected(IN IMS_UINT32 eIpcan)
 PUBLIC VIRTUAL void MtcNetworkWatcher::SetTestRatChanged(IN IMS_SINT32 eRatType)
 {
     IMS_TRACE_D("SetTestRatChanged", eRatType, 0, 0);
+    m_eOldRatType = m_eMobileRatType;
     m_eMobileRatType = eRatType;
 
     if (m_eIpcanType != IIpcan::CATEGORY_WLAN)
@@ -116,6 +118,7 @@ PUBLIC VIRTUAL void MtcNetworkWatcher::NetworkWatcher_NotifyStatus(
         return;
     }
 
+    m_eOldRatType = m_eMobileRatType;
     m_eMobileRatType = eConvertedMobileRatType;
 
     if (m_eIpcanType == IIpcan::CATEGORY_WLAN)
@@ -129,15 +132,16 @@ PUBLIC VIRTUAL void MtcNetworkWatcher::NetworkWatcher_NotifyStatus(
 PRIVATE void MtcNetworkWatcher::Notify()
 {
     IMS_SINT32 eCurrentRat = GetCurrentRat();
-    IMS_TRACE_D("Notify slot=%d, serviceType=%d, changed RAT=%d", m_nSlotId, m_eServiceType,
+    IMS_TRACE_D("Notify serviceType=%d, old RAT=%d, new RAT=%d", m_eServiceType, m_eOldRatType,
             eCurrentRat);
     for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
     {
-        m_objListeners.GetAt(nIndex)->OnRatChanged(eCurrentRat);
+        m_objListeners.GetAt(nIndex)->OnRatChanged(m_eServiceType, m_eOldRatType, eCurrentRat);
     }
 }
 
-PRIVATE GLOBAL IMS_SINT32 MtcNetworkWatcher::ConvertCellularRatType(NETRADIO_ENTYPE eRatType)
+PRIVATE GLOBAL IMS_SINT32 MtcNetworkWatcher::ConvertCellularRatType(
+        IN const NETRADIO_ENTYPE eRatType)
 {
     switch (eRatType)
     {

@@ -21,6 +21,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
+#include "call/radio/MockIMtcRadioChecker.h"
 #include "call/state/TerminatingState.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
@@ -47,6 +48,7 @@ public:
             objMtcSession(),
             objSession(),
             objCallInfo(),
+            objMtcRadioChecker(),
             objTerminatingState(objCallContext)
     {
     }
@@ -60,6 +62,7 @@ public:
     MockIMtcSession objMtcSession;
     MockISession objSession;
     CallInfo objCallInfo;
+    MockIMtcRadioChecker objMtcRadioChecker;
 
     TerminatingState objTerminatingState;
 
@@ -79,6 +82,7 @@ protected:
 
         ON_CALL(objCallContext, GetCallKey).WillByDefault(Return(ANY_CALL_KEY));
         ON_CALL(objCallContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(objCallContext, GetRadioChecker).WillByDefault(ReturnRef(objMtcRadioChecker));
     }
 
     virtual void TearDown() override {}
@@ -168,4 +172,16 @@ TEST_F(TerminatingStateTest, OnTimerExpiredInvokesNotifyCallSessionReleased)
     // TIMER_E911_WAIT_SESSION_RELEASED = 12
     objTerminatingState.OnTimerExpired(12);
     Mock::VerifyAndClearExpectations(&objStateProxy);
+}
+
+TEST_F(TerminatingStateTest, OnEnterInvokesOnTerminatedBeforeCreatingSession)
+{
+    EXPECT_CALL(objMtcRadioChecker, OnTerminatedBeforeCreatingSession(_)).Times(0);
+
+    objTerminatingState.OnEnter();
+
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(IMS_NULL));
+    EXPECT_CALL(objMtcRadioChecker, OnTerminatedBeforeCreatingSession(_)).Times(1);
+
+    objTerminatingState.OnEnter();
 }

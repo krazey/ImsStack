@@ -46,6 +46,13 @@ public:
     virtual void RemoveTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) = 0;
 
     /**
+     * This will be called when the Call is terminated before creating a session.
+     *
+     * @param nCallKey the call key
+     */
+    virtual void OnTerminatedBeforeCreatingSession(IN CallKey nCallKey) = 0;
+
+    /**
      * Checks the radio traffic.
      *
      * @param eCallType the call type

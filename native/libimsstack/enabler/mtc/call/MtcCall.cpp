@@ -1232,7 +1232,8 @@ PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, I
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::OnRatChanged(IMS_SINT32 eRatType)
+PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServiceType,
+        IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
     IMS_TRACE_I("OnRatChanged : RAT=%d", eRatType, 0, 0);
 

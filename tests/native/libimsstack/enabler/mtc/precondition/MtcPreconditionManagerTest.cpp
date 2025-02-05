@@ -15,8 +15,8 @@
  */
 
 #include "IMessage.h"
-#include "ImsEventDef.h"
 #include "INetworkWatcher.h"
+#include "ImsEventDef.h"
 #include "MediaDef.h"
 #include "MockIMessage.h"
 #include "MockIMtcImsEventReceiver.h"

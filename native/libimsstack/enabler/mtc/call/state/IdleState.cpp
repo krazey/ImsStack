@@ -258,6 +258,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
                 m_objContext.GetUiNotifier().SendStartFailed(
                         objResult.objReason.ConvertFromInternal());
             }
+
             return CallStateName::TERMINATING;
 
         default:  // IMtcBlockChecker::Result::Status::PENDING:
