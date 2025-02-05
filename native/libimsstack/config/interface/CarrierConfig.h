@@ -649,6 +649,13 @@ public:
             IPCAN_WLAN = 2,
             IPCAN_ALL = 3
         };
+
+        // Specified Define for KEY_EREG_RETRY_MAX_CNT_INT
+        enum
+        {
+            EREG_RETRY_MAX_CNT_NO_RETRY = -1,
+            EREG_RETRY_MAX_CNT_EVERY_PCSCF_RETRY = 0
+        };
     };
 
     class ImsRtt

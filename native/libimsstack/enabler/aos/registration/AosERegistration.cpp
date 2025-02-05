@@ -891,13 +891,18 @@ PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
     }
 
     IMS_SINT32 nMaxRetryCnt = GET_N_CONFIG(m_nSlotId)->GetEmcRegRetryMaxCnt();
-    if (nMaxRetryCnt == 0)
+    switch (nMaxRetryCnt)
     {
-        AStringArray objPcscfs = m_piContext->GetPcscf()->GetPcscfs();
-        return (m_nConsecutiveFailure < objPcscfs.GetCount());
+        case CarrierConfig::ImsEmergency::EREG_RETRY_MAX_CNT_NO_RETRY:
+            return IMS_FALSE;
+        case CarrierConfig::ImsEmergency::EREG_RETRY_MAX_CNT_EVERY_PCSCF_RETRY:
+        {
+            AStringArray objPcscfs = m_piContext->GetPcscf()->GetPcscfs();
+            return (m_nConsecutiveFailure < objPcscfs.GetCount());
+        }
+        default:
+            return m_nConsecutiveFailure <= nMaxRetryCnt;
     }
-
-    return m_nConsecutiveFailure <= nMaxRetryCnt;
 }
 
 PROTECTED void AosERegistration::ProcessReRegStart()
