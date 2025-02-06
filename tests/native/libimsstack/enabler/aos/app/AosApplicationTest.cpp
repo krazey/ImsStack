@@ -1003,18 +1003,6 @@ TEST_F(AosApplicationTest, GetAndSet)
     m_pAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
     EXPECT_FALSE(m_pAosApplication->IsOn());
 
-    // TEST_F : NotifyEpsFallbackCallState
-    m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
-    m_pAosApplication->NotifyEpsFallbackCallState(IImsAosInfo::EPSFB_CALL_START);
-
-    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
-
-    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_EPS_FALLBACK_STARTED, IMS_FALSE)).Times(1);
-    m_pAosApplication->NotifyEpsFallbackCallState(IImsAosInfo::EPSFB_CALL_START);
-
-    EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_EPS_FALLBACK_STARTED, IMS_TRUE)).Times(1);
-    m_pAosApplication->NotifyEpsFallbackCallState(IImsAosInfo::EPSFB_CALL_FAILED);
-
     // TEST_F : NotifyPublishState, IsPublished
     m_pAosApplication->NotifyPublishState(IMS_TRUE);
     EXPECT_TRUE(m_pAosApplication->IsPublished());
@@ -1176,6 +1164,32 @@ TEST_F(AosApplicationTest, GetAndSet)
 
     // TEST_F : IsRegReconfigAvailable
     EXPECT_TRUE(m_pAosApplication->IsRegReconfigAvailable());
+}
+
+TEST_F(AosApplicationTest, ShouldNotSetBlockEpsfbStartWhenEmergencyTypeAndStart)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_EPS_FALLBACK_STARTED, IMS_FALSE)).Times(0);
+
+    m_pAosApplication->NotifyEpsFallbackCallState(IImsAosInfo::EPSFB_CALL_START);
+}
+
+TEST_F(AosApplicationTest,
+        ShouldSetBlockEpsfbStartAndRequestCloseTcpSocketCmdWhenNormalTypeAndStart)
+{
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_EPS_FALLBACK_STARTED, IMS_FALSE)).Times(1);
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_CLOSE_UNSECURE_TCP_SOCKET, 0));
+
+    m_pAosApplication->NotifyEpsFallbackCallState(IImsAosInfo::EPSFB_CALL_START);
+}
+
+TEST_F(AosApplicationTest, ShouldResetBlockEpsfbStartWhenNormalTypeAndFail)
+{
+    EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_EPS_FALLBACK_STARTED, IMS_TRUE)).Times(1);
+
+    m_pAosApplication->NotifyEpsFallbackCallState(IImsAosInfo::EPSFB_CALL_FAILED);
 }
 
 TEST_F(AosApplicationTest, IsPdnDisconnectRequired)
