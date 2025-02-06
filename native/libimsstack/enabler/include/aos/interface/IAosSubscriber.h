@@ -37,6 +37,11 @@ public:
 
     virtual const ISubscriberConfig* GetSubscriberConfig(IMS_SINT32 nType = NORMAL) const = 0;
 
+    virtual void CreateTemporaryPublicUserIdForGiba() = 0;
+    virtual void ClearTemporaryPublicUserIdForGiba() = 0;
+    virtual IMS_BOOL HasValidTemporaryPublicUserIdForGiba() const = 0;
+    virtual const AString& GetTemporaryPublicUserIdForGiba() const = 0;
+
     // Subscriber_StateChanged(nState)
     enum
     {

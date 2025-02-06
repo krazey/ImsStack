@@ -19,10 +19,12 @@
 #include "ITimer.h"
 
 #include "ImsActivityEx.h"
+#include "ImsIdentity.h"
 #include "IpAddress.h"
 #include "SipProfile.h"
 
 #include "IRegistrationListener.h"
+#include "IRegUserIdentityNotifier.h"
 #include "base/IMessageMediator.h"
 
 #include "interface/AosInternalMsgDef.h"
@@ -63,7 +65,8 @@ class AosRegistration :
         public IAosNetTrackerListener,
         public ITimerListener,
         public IMessageMediator,
-        public IAosTransactionListener
+        public IAosTransactionListener,
+        public IRegUserIdentityNotifier
 {
 public:
     AosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
@@ -329,6 +332,10 @@ protected:
     void Registration_Removed() override;
     void Registration_Terminated(IN IMS_SINT32 nReason) override;
 
+    /// IRegUserIdentityNotifier
+    IMS_BOOL RegUserIdentity_ReorderUserIdentities(
+            IN const AStringArray& objUserIds, OUT AStringArray& objReorderedUserIds) override;
+
     /// Timer
     virtual void ProcessOfflineRecoverTimerExpired();
     virtual void ProcessStopRetryTimerExpired();
@@ -427,6 +434,7 @@ public:
         MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION,
         MSG_REG_REINITIATE_WITH_REG_STATE,
         MSG_REG_TERMINATED_BY_NOTIFY,
+        MSG_REG_PROCESS_GIBA,
 
         MSG_SUB_REINITIATE,
         MSG_SUB_TERMINATED,
@@ -481,7 +489,8 @@ public:
         IPSEC_BLOCK_ERROR = 0x1,
         IPSEC_BLOCK_AUTHENTICATION = 0x2,
         IPSEC_BLOCK_NOT_ESTABLISHED = 0x4,
-        IPSEC_BLOCK_ROAMING = 0x8
+        IPSEC_BLOCK_ROAMING = 0x8,
+        IPSEC_BLOCK_GIBA = 0x10
     };
 
 protected:

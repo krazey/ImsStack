@@ -38,6 +38,7 @@
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
 #include "provider/AosRetryRepository.h"
+#include "provider/AosString.h"
 #include "registration/AosIpsecHelper.h"
 
 #include "registration/AosERegistration.h"
@@ -160,6 +161,11 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
             SetReinitiationRequested(IMS_FALSE);
             ProcessReinitiateWithRegState(
                     ((static_cast<IMS_SINT32>(objMsg.nWparam)) > 0) ? IMS_TRUE : IMS_FALSE);
+            break;
+
+        case MSG_REG_PROCESS_GIBA:
+            SetReinitiationRequested(IMS_FALSE);
+            ProcessGiba();
             break;
 
         default:
@@ -394,6 +400,22 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_305()
     return IMS_FALSE;
 }
 
+PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_420()
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsGibaSupportedForERegInRoaming() &&
+            m_piContext->GetNetTracker()->IsRoaming() &&
+            m_pUtil->IsParameterIncluded(m_piRegistration->GetPreviousResponse(),
+                    ISipHeader::UNSUPPORTED, AosString::STR_SEC_AGREE))
+    {
+        SetReinitiationRequested(IMS_TRUE);
+        PostMessage(MSG_REG_PROCESS_GIBA, 0, 0);
+    }
+    else
+    {
+        ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_420);
+    }
+}
+
 PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_423()
 {
     if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetERegErrCodeNotSupportedCommonPolicy(),
@@ -415,7 +437,10 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SI
 
     switch (nStatusCode)
     {
-            // 423
+        case SipStatusCode::SC_420:
+            ProcessStartFailed_420();
+            break;
+
         case SipStatusCode::SC_423:
             ProcessStartFailed_423();
             break;
@@ -724,6 +749,22 @@ PROTECTED VIRTUAL void AosERegistration::Transaction_OnConnectionFailed(
 PROTECTED VIRTUAL void AosERegistration::Transaction_OnConnectionSetupPrepared() {}
 
 PROTECTED VIRTUAL void AosERegistration::Transaction_OnTrafficPriorityChanged() {}
+
+PROTECTED void AosERegistration::ProcessGiba()
+{
+    A_IMS_TRACE_I(REGID, "ProcessGiba", 0, 0, 0);
+    Destroy();
+    m_piContext->GetSubscriber()->CreateTemporaryPublicUserIdForGiba();
+    UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_GIBA);
+
+    if (!CreateRegistration())
+    {
+        ProcessUnpredictableFailure();
+        return;
+    }
+
+    SetState(STATE_REGISTERING);
+}
 
 PROTECTED VIRTUAL void AosERegistration::ClearCbm()
 {

@@ -98,6 +98,7 @@ protected:
     void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
 
     IMS_BOOL ProcessStartFailed_305() final;
+    void ProcessStartFailed_420() final;
     void ProcessStartFailed_423() final;
 
     void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
@@ -130,6 +131,8 @@ protected:
             IN IMS_UINT32 nWaitTimeMillis) final;
     void Transaction_OnConnectionSetupPrepared() final;
     void Transaction_OnTrafficPriorityChanged() final;
+
+    void ProcessGiba();
 
     void ClearCbm();
 

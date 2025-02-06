@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsIdentity.h"
 #include "ServiceTrace.h"
 #include "ISubscriberConfig.h"
 #include "interface/IAosAppContext.h"
@@ -34,7 +35,8 @@ AosSubscriber::AosSubscriber(IN IAosAppContext* piAppContext) :
         m_piSubscriberManager(IMS_NULL),
         m_nSlotId(m_piAppContext->GetSlotId()),
         m_piListener(IMS_NULL),
-        m_eRegType(AosRegistrationType::NORMAL)
+        m_eRegType(AosRegistrationType::NORMAL),
+        m_strTempPuidForGiba(AString::ConstNull())
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
     m_piSubscriberManager = AosProvider::GetInstance()->GetSubscriberManager(m_nSlotId);
@@ -116,6 +118,26 @@ PUBLIC VIRTUAL const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(
 {
     return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->GetSubscriberConfig(nType)
                                                : IMS_NULL;
+}
+
+PROTECTED VIRTUAL void AosSubscriber::CreateTemporaryPublicUserIdForGiba()
+{
+    m_strTempPuidForGiba = AString(ImsIdentity::CreateTemporaryPublicUserId(m_nSlotId));
+}
+
+PROTECTED VIRTUAL void AosSubscriber::ClearTemporaryPublicUserIdForGiba()
+{
+    m_strTempPuidForGiba = AString::ConstNull();
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscriber::HasValidTemporaryPublicUserIdForGiba() const
+{
+    return m_strTempPuidForGiba.GetLength() != 0;
+}
+
+PROTECTED VIRTUAL const AString& AosSubscriber::GetTemporaryPublicUserIdForGiba() const
+{
+    return m_strTempPuidForGiba;
 }
 
 PROTECTED

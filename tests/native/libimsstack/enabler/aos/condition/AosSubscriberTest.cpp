@@ -38,10 +38,13 @@ using ::testing::ReturnRef;
 const IMS_SINT32 SLOT_ID = 0;
 const AString PROFILE_ID = AString("test");
 
-#define DECLARE_USING(Base) \
-    using Base::Init;       \
-    using Base::CleanUp;    \
-    using Base::AosSubscriberManager_NotifyState;
+#define DECLARE_USING(Base)                           \
+    using Base::Init;                                 \
+    using Base::CleanUp;                              \
+    using Base::AosSubscriberManager_NotifyState;     \
+    using Base::ClearTemporaryPublicUserIdForGiba;    \
+    using Base::HasValidTemporaryPublicUserIdForGiba; \
+    using Base::GetTemporaryPublicUserIdForGiba;
 
 class TestAosSubscriber : public AosSubscriber
 {
@@ -61,6 +64,11 @@ public:
     }
 
     inline void SetRegType(IN AosRegistrationType eRegType) { m_eRegType = eRegType; }
+
+    inline void SetTemporaryPublicUserId(IN AString& strTempPuid)
+    {
+        m_strTempPuidForGiba = strTempPuid;
+    }
 };
 
 class AosSubscriberTest : public ::testing::Test
@@ -75,9 +83,13 @@ public:
     NiceMock<MockIAosSubscriberListener> m_objMockListener;
     NiceMock<MockIAosNConfiguration> m_objMockIAosNConfiguration;
 
+    AString m_strTestTempPuidForGiba;
+
 protected:
     void SetUp() override
     {
+        m_strTestTempPuidForGiba = AString("sip:123456789@ims.mnc456.mcc123.3gppnetwork.org");
+
         ReplaceOriginWithMock();
 
         // MockIAosAppContext
@@ -315,6 +327,31 @@ TEST_F(AosSubscriberTest, GetSubscriberConfig_ManagerReturn)
     EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     EXPECT_EQ(m_pAosSubscriber->GetSubscriberConfig(), piSubscriberConfig);
+}
+
+TEST_F(AosSubscriberTest, SuccessfullyClearTemporaryPublicUserIdForGiba)
+{
+    // GIVEN
+    m_pAosSubscriber->SetTemporaryPublicUserId(m_strTestTempPuidForGiba);
+    EXPECT_TRUE(m_pAosSubscriber->HasValidTemporaryPublicUserIdForGiba());
+
+    // WHEN
+    m_pAosSubscriber->ClearTemporaryPublicUserIdForGiba();
+
+    // THEN
+    EXPECT_FALSE(m_pAosSubscriber->HasValidTemporaryPublicUserIdForGiba());
+}
+
+TEST_F(AosSubscriberTest, SuccessfullyGetTemporaryPublicUserIdForGiba)
+{
+    // GIVEN
+    m_pAosSubscriber->SetTemporaryPublicUserId(m_strTestTempPuidForGiba);
+
+    // WHEN
+    AString strTempPuid = m_pAosSubscriber->GetTemporaryPublicUserIdForGiba();
+
+    // THEN
+    EXPECT_TRUE(strTempPuid.GetLength() != 0);
 }
 
 TEST_F(AosSubscriberTest, Init_SubscriberManagerNull)

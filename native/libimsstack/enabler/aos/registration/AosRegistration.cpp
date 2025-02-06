@@ -1532,6 +1532,15 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
 
     m_piRegParameter = m_piRegistration->GetParameter();
 
+    const IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
+    if (GET_N_CONFIG(m_nSlotId)->IsGibaSupportedForERegInRoaming() && pSubscriber != IMS_NULL &&
+            pSubscriber->HasValidTemporaryPublicUserIdForGiba())
+    {
+        A_IMS_TRACE_D(REGID, "Temporary PUID for GIBA has been set", 0, 0, 0);
+        m_piRegistration->SetUserIdentityNotifier(this);
+        m_piRegParameter->SetAuthenticationCredentials(IMS_FALSE);
+    }
+
     AddSpecificOperation();
 
     if (UpdatePreloadedRoute() == IMS_FALSE)
@@ -2276,7 +2285,16 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
 
     if (IsFakeRegistration() == IMS_FALSE)
     {
-        objImpu = pSubscriber->GetConfiguredImpus();
+        if (GET_N_CONFIG(m_nSlotId)->IsGibaSupportedForERegInRoaming() && pSubscriber != IMS_NULL &&
+                pSubscriber->HasValidTemporaryPublicUserIdForGiba())
+        {
+            A_IMS_TRACE_D(REGID, "SetAor :: Temporary PUID for GIBA has been set", 0, 0, 0);
+            objImpu.AddElement(pSubscriber->GetTemporaryPublicUserIdForGiba());
+        }
+        else
+        {
+            objImpu = pSubscriber->GetConfiguredImpus();
+        }
     }
     else if (!GET_N_CONFIG(m_nSlotId)->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported())
     {
@@ -2806,6 +2824,17 @@ PROTECTED VIRTUAL void AosRegistration::ClearRegParameters(IN IMS_BOOL bClearPcs
     if (bClearPcscf)
     {
         ClearPcscf();
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->IsGibaSupportedForERegInRoaming())
+    {
+        IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
+        if (pSubscriber != IMS_NULL)
+        {
+            pSubscriber->ClearTemporaryPublicUserIdForGiba();
+        }
+
+        UpdateIpsecSupported(IMS_TRUE, IPSEC_BLOCK_GIBA);
     }
 }
 
@@ -5326,6 +5355,43 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Terminated(IN IMS_SINT32 nR
     ProcessRegTerminated();
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::RegUserIdentity_ReorderUserIdentities(
+        IN const AStringArray& objUserIds, OUT AStringArray& objReorderedUserIds)
+{
+    if (!GET_N_CONFIG()->IsGibaSupportedForERegInRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    const IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
+    if (pSubscriber == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (!pSubscriber->HasValidTemporaryPublicUserIdForGiba())
+    {
+        return IMS_FALSE;
+    }
+
+    A_IMS_TRACE_I(REGID, "RegUserIdentity_ReorderUserIdentities", 0, 0, 0);
+
+    /**
+     * CASE: The 200 OK for REGISTER message does not contain a P-Associated-URI header.
+     *       If the engine provides only a single temporary public user identity, replace it with
+     *       the list of configured IMPUs.
+     */
+    if (objUserIds.GetCount() == 1 &&
+            objUserIds.GetElementAt(0).Equals(pSubscriber->GetTemporaryPublicUserIdForGiba()))
+    {
+        A_IMS_TRACE_I(REGID, "RegUserIdentity_ReorderUserIdentities :: Change UserIds", 0, 0, 0);
+        objReorderedUserIds = pSubscriber->GetConfiguredImpus();
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void AosRegistration::ProcessOfflineRecoverTimerExpired()
 {
     StopTimer(TIMER_OFFLINE_RECOVER);
@@ -5995,6 +6061,12 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
             m_pUtil->RemoveFeature(FEATURE_IPSEC, m_nFeature);
         }
         ClearIpsecBlock();
+
+        IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
+        if (pSubscriber != IMS_NULL)
+        {
+            pSubscriber->ClearTemporaryPublicUserIdForGiba();
+        }
     }
 }
 

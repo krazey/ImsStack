@@ -19,6 +19,7 @@
 
     <!-- Aos -->
     <int name="ims.preferred_ims_dscp_int" value="2"/>
+    <boolean name="imsemergency.support_giba_for_ereg_in_roaming_bool" value="true"/>
 
     <!-- Mtc -->
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="210000"/>

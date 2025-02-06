@@ -336,6 +336,14 @@ public:
     virtual IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const = 0;
 
     /**
+     * @brief Flag specifying if GIBA(GPRS-IMS-Bundled authentication) is supported for emergency
+     *        registration in roaming.
+     *
+     * @return IMS_TRUE if supported, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsGibaSupportedForERegInRoaming() const = 0;
+
+    /**
      * @brief Flag specifying whether the re-registration is held when IPCAN is changed
      *        during IMS calls and performed immediately after they are released.
      *

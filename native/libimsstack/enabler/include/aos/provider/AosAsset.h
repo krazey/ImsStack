@@ -56,6 +56,7 @@ public:
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
+            bSupportGibaForERegInRoaming(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatBasedOnNetworkForReg(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
@@ -147,6 +148,7 @@ public:
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
+    IMS_BOOL bSupportGibaForERegInRoaming;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatBasedOnNetworkForReg;
     IMS_BOOL bSupportVerstatForReg;

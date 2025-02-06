@@ -37,6 +37,11 @@ public:
     const AStringArray& GetFakeImpus() const override;
     const ISubscriberConfig* GetSubscriberConfig(IN IMS_SINT32 nType = NORMAL) const override;
 
+    void CreateTemporaryPublicUserIdForGiba() override;
+    void ClearTemporaryPublicUserIdForGiba() override;
+    IMS_BOOL HasValidTemporaryPublicUserIdForGiba() const override;
+    const AString& GetTemporaryPublicUserIdForGiba() const override;
+
 protected:
     // IAosSubscriber
     IMS_BOOL Init() override;
@@ -51,8 +56,8 @@ protected:
     IAosSubscriberManager* m_piSubscriberManager;
     IMS_SINT32 m_nSlotId;
     IAosSubscriberListener* m_piListener;
-
     AosRegistrationType m_eRegType;
+    AString m_strTempPuidForGiba;
 
     AString m_strTag;
 };
