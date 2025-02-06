@@ -695,9 +695,9 @@ public final class SystemCallAgent implements SystemCallInterface {
      * @return {@code true} if the emergency is only available, {@code false} otherwise.
      */
     @Override
-    public boolean isLteEmergencyOnly() {
+    public boolean isEmergencyOnly() {
         IDcNetWatcher netWatcher = getDcNetWatcher();
-        return (netWatcher != null) ? netWatcher.isLteEmergencyOnly() : false;
+        return (netWatcher != null) ? netWatcher.isEmergencyOnly() : false;
     }
 
     /**

@@ -1836,20 +1836,20 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testSystemCallIsLteEmergencyOnly() {
+    public void testSystemCallIsEmergencyOnly() {
         setUpSystemInterface();
         setUpSystem();
         Parcel data = Parcel.obtain();
         try {
             data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.IS_LTE_EMERGENCY_ONLY);
+            data.writeInt(SystemConstants.IS_EMERGENCY_ONLY);
             data.setDataPosition(0);
             mSystemInterface.onMessage(data, null);
         } finally {
             data.recycle();
         }
 
-        verify(mSystemCall).isLteEmergencyOnly();
+        verify(mSystemCall).isEmergencyOnly();
     }
 
     @Test

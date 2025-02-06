@@ -361,7 +361,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     @Override
-    public boolean isLteEmergencyOnly() {
+    public boolean isEmergencyOnly() {
         return mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY;
     }
 

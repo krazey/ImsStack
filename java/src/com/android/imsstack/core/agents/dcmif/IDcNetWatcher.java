@@ -63,9 +63,10 @@ public interface IDcNetWatcher extends IDc {
     boolean isAirplaneMode();
 
     /**
-     * Return if LTE is attached as emergency case
+     * Return if the registration state is
+     * {@code NetworkRegistrationInfo#REGISTRATION_STATE_EMERGENCY}.
      */
-    boolean isLteEmergencyOnly();
+    boolean isEmergencyOnly();
 
     /**
      * Return whether emergency service is supported by the network

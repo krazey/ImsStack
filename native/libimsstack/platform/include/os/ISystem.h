@@ -104,7 +104,7 @@ public:
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_BOOL IsLteEmergencyOnly(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_BOOL IsEmergencyOnly(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsEmergencyAttachSupported(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsMobileDataEnabled(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetMocnPlmnInfo(IN IMS_SINT32 nSlotId) = 0;

@@ -766,13 +766,13 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
-    public void testIsLteEmergencyOnly() {
-        mSystemCallAgent.isLteEmergencyOnly();
+    public void testIsEmergencyOnly() {
+        mSystemCallAgent.isEmergencyOnly();
 
-        verify(mDcNetWatcher).isLteEmergencyOnly();
+        verify(mDcNetWatcher).isEmergencyOnly();
 
         replaceDcNetWatcher(null);
-        boolean result = mSystemCallAgent.isLteEmergencyOnly();
+        boolean result = mSystemCallAgent.isEmergencyOnly();
 
         assertFalse(result);
         verifyNoMoreInteractions(mDcNetWatcher);

@@ -801,9 +801,9 @@ IMS_BOOL System::IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_BOOL System::IsLteEmergencyOnly(IN IMS_SINT32 nSlotId)
+IMS_BOOL System::IsEmergencyOnly(IN IMS_SINT32 nSlotId)
 {
-    return (GetInt(SystemConstants::IS_LTE_EMERGENCY_ONLY, 0, nSlotId) == 1);
+    return (GetInt(SystemConstants::IS_EMERGENCY_ONLY, 0, nSlotId) == 1);
 }
 
 PUBLIC

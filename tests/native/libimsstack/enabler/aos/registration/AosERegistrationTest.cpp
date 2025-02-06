@@ -384,7 +384,7 @@ protected:
         // IAosNetTracker
         ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
                 .WillByDefault(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
-        ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
 
         // IRegContact
         ON_CALL(m_objMockIRegContact, AddHeaderParameter(_, _)).WillByDefault(Return(IMS_TRUE));
@@ -420,7 +420,7 @@ protected:
 
 TEST_F(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode)
 {
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNConfiguration, IsEmcRegOnRandomPcscf()).Times(0);
 
     m_pAosERegistration->Start();
@@ -433,7 +433,7 @@ TEST_F(AosERegistrationTest, StartWhenInFakeModeCondition_SetFakeMode)
 
 TEST_F(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetFakeMode)
 {
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP));
@@ -449,7 +449,7 @@ TEST_F(AosERegistrationTest, StartWhenEmergencyRegistrationSkipIsConfigured_SetF
 
 TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetrySupported)
 {
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis())
             .WillByDefault(Return(2000));
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryTimerMillis()).WillByDefault(Return(500));
@@ -467,7 +467,7 @@ TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetrySupported)
 
 TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetryNotSupported)
 {
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis())
             .WillByDefault(Return(2000));
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryTimerMillis()).WillByDefault(Return(0));
@@ -485,7 +485,7 @@ TEST_F(AosERegistrationTest, Start_SetNormalModeEmergRetryNotSupported)
 
 TEST_F(AosERegistrationTest, Start_SetNormalModeCreateRegistrationFailure)
 {
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis())
             .WillByDefault(Return(2000));
     ON_CALL(m_objMockIAosNConfiguration, GetEmcRegRetryTimerMillis()).WillByDefault(Return(500));
@@ -1466,7 +1466,7 @@ TEST_F(AosERegistrationTest, FakeModeConditionIfSubscriberIncompleted)
 TEST_F(AosERegistrationTest, FakeModeConditionIfEmergencyLteAttach)
 {
     // GIVEN
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyLteAttach()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
 
     // WHEN & THEN
     EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());

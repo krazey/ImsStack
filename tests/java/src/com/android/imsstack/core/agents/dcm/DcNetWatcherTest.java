@@ -764,7 +764,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        assertTrue(mDcNetWatcher.isLteEmergencyOnly());
+        assertTrue(mDcNetWatcher.isEmergencyOnly());
     }
 
     @Test
@@ -859,14 +859,14 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testIsLteEmergencyOnly() throws Exception {
+    public void testIsEmergencyOnly() throws Exception {
         replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
                 mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
-        assertFalse(mDcNetWatcher.isLteEmergencyOnly());
+        assertFalse(mDcNetWatcher.isEmergencyOnly());
 
         replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
                 mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY);
-        assertTrue(mDcNetWatcher.isLteEmergencyOnly());
+        assertTrue(mDcNetWatcher.isEmergencyOnly());
     }
 
     @Test

@@ -496,9 +496,9 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
     return PlatformContext::GetInstance()->GetSystem()->IsImsVoiceCallSupported(GetSlotId());
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsLteEmergencyOnly()
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyOnly()
 {
-    return PlatformContext::GetInstance()->GetSystem()->IsLteEmergencyOnly(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->IsEmergencyOnly(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyAttachSupported()

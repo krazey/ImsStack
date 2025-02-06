@@ -116,7 +116,7 @@ public:
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId) override;
-    IMS_BOOL IsLteEmergencyOnly(IN IMS_SINT32 nSlotId) override;
+    IMS_BOOL IsEmergencyOnly(IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsEmergencyAttachSupported(IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsMobileDataEnabled(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetMocnPlmnInfo(IN IMS_SINT32 nSlotId) override;

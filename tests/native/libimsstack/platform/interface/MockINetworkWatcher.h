@@ -48,7 +48,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetDataRoamingType, (), (override));
     MOCK_METHOD(IMS_BOOL, IsImsEmergencyCallSupported, (), (override));
     MOCK_METHOD(IMS_BOOL, IsImsVoiceCallSupported, (), (override));
-    MOCK_METHOD(IMS_BOOL, IsLteEmergencyOnly, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyOnly, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyAttachSupported, (), (override));
     MOCK_METHOD(IMS_SINT32, GetMocnPlmnInfo, (), (override));
 };

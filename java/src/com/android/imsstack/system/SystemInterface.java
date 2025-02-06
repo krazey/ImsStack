@@ -69,7 +69,7 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_PCSCF_ADDRESSES, "GET_PCSCF_ADDRESSES"),
             Map.entry(SystemConstants.GET_ROAMING_STATE, "GET_ROAMING_STATE"),
             Map.entry(SystemConstants.GET_SERVICE_STATE, "GET_SERVICE_STATE"),
-            Map.entry(SystemConstants.IS_LTE_EMERGENCY_ONLY, "IS_LTE_EMERGENCY_ONLY"),
+            Map.entry(SystemConstants.IS_EMERGENCY_ONLY, "IS_EMERGENCY_ONLY"),
             Map.entry(SystemConstants.IS_MOBILE_DATA_ENABLED, "IS_MOBILE_DATA_ENABLED"),
             Map.entry(SystemConstants.GET_MOCN_PLMN_INFO, "GET_MOCN_PLMN_INFO"),
             Map.entry(SystemConstants.GET_VOICE_SERVICE_STATE, "GET_VOICE_SERVICE_STATE"),
@@ -1089,7 +1089,7 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_PCSCF_ADDRESSES: // fall through
                 case SystemConstants.GET_ROAMING_STATE: // fall through
                 case SystemConstants.GET_SERVICE_STATE: // fall through
-                case SystemConstants.IS_LTE_EMERGENCY_ONLY: // fall through
+                case SystemConstants.IS_EMERGENCY_ONLY: // fall through
                 case SystemConstants.IS_MOBILE_DATA_ENABLED:// fall through
                 case SystemConstants.GET_MOCN_PLMN_INFO: // fall through
                 case SystemConstants.GET_VOICE_SERVICE_STATE: // fall through
@@ -1297,8 +1297,8 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_SERVICE_STATE:
                     out.writeInt(mSystemCall.getDataServiceState());
                     break;
-                case SystemConstants.IS_LTE_EMERGENCY_ONLY:
-                    out.writeInt(mSystemCall.isLteEmergencyOnly() ? 1 : 0);
+                case SystemConstants.IS_EMERGENCY_ONLY:
+                    out.writeInt(mSystemCall.isEmergencyOnly() ? 1 : 0);
                     break;
                 case SystemConstants.IS_MOBILE_DATA_ENABLED:
                     out.writeInt(mSystemCall.isMobileDataEnabled() ? 1 : 0);

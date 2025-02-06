@@ -426,11 +426,11 @@ public interface SystemCallInterface {
     boolean isNetworkRoaming();
 
     /**
-     * Checks whether the emergency is only available in the LTE network.
+     * Checks whether the emergency is only available in the network.
      *
      * @return {@code true} if the emergency is only available, {@code false} otherwise.
      */
-    boolean isLteEmergencyOnly();
+    boolean isEmergencyOnly();
 
     /**
      * Checks whether the emergency attach is supported or not.

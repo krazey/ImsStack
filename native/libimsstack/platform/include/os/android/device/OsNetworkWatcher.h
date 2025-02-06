@@ -54,7 +54,7 @@ public:
     IMS_SINT32 GetDataRoamingType() override;
     IMS_BOOL IsImsEmergencyCallSupported() override;
     IMS_BOOL IsImsVoiceCallSupported() override;
-    IMS_BOOL IsLteEmergencyOnly() override;
+    IMS_BOOL IsEmergencyOnly() override;
     IMS_BOOL IsEmergencyAttachSupported() override;
     // 2nd PLMN info for MOCN
     IMS_SINT32 GetMocnPlmnInfo() override;

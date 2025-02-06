@@ -1093,12 +1093,12 @@ TEST_F(SystemTest, IsImsEmergencyCallSupported)
     EXPECT_EQ(m_pSystem->IsImsEmergencyCallSupported(0), 0);
 }
 
-TEST_F(SystemTest, IsLteEmergencyOnly)
+TEST_F(SystemTest, IsEmergencyOnly)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->IsLteEmergencyOnly(0), 0);
+    EXPECT_EQ(m_pSystem->IsEmergencyOnly(0), 0);
 }
 
 TEST_F(SystemTest, IsEmergencyAttachSupported)

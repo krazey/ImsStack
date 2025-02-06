@@ -319,10 +319,10 @@ TEST_F(OsNetworkWatcherTest, IsImsVoiceCallSupported)
     EXPECT_EQ(m_pOsNetworkWatcher->IsImsVoiceCallSupported(), IMS_TRUE);
 }
 
-TEST_F(OsNetworkWatcherTest, IsLteEmergencyOnly)
+TEST_F(OsNetworkWatcherTest, IsEmergencyOnly)
 {
-    EXPECT_CALL(m_objMockSystem, IsLteEmergencyOnly(_)).Times(1).WillOnce(Return(IMS_FALSE));
-    EXPECT_EQ(m_pOsNetworkWatcher->IsLteEmergencyOnly(), IMS_FALSE);
+    EXPECT_CALL(m_objMockSystem, IsEmergencyOnly(_)).Times(1).WillOnce(Return(IMS_FALSE));
+    EXPECT_EQ(m_pOsNetworkWatcher->IsEmergencyOnly(), IMS_FALSE);
 }
 
 TEST_F(OsNetworkWatcherTest, IsEmergencyAttachSupported)

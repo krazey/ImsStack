@@ -28,7 +28,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsServiceIn, (IN IMS_UINT32 nType), (override));
     MOCK_METHOD(IMS_BOOL, IsDataIn, (), (override));
     MOCK_METHOD(IMS_BOOL, IsNetworkIn, (), (override));
-    MOCK_METHOD(IMS_BOOL, IsEmergencyLteAttach, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyAttach, (), (override));
     MOCK_METHOD(IMS_BOOL, IsSuspended, (), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionContinuitySupported, (), (override));
     MOCK_METHOD(IMS_BOOL, IsServiceTimerRunning, (), (override));
