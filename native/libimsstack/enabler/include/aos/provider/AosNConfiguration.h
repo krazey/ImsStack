@@ -110,6 +110,7 @@ public:
     IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
     IMS_BOOL IsVideoSupportedForEmergencyReg() const override;
     IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const override;
+    IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const override;
     IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const override;
 
     IMS_SINT32 GetSipTimerT1() override;

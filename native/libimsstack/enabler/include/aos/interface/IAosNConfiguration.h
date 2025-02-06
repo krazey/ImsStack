@@ -513,6 +513,13 @@ public:
     virtual IMS_BOOL IsRegRetryWithIpVerFallback() const = 0;
 
     /**
+     * @brief Flag specifying if emergency PDN would be released when the network is unavailable.
+     *
+     * @return IMS_TRUE if emergency PDN needs to be released, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const = 0;
+
+    /**
      * @brief Flag specifying if emergency PDN would be released upon emergency call is terminated
      *        in fake mode.
      *

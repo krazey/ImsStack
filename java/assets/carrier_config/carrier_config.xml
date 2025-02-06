@@ -510,6 +510,7 @@
     <boolean name="imsemergency.ereg_using_first_impu_in_isim_bool" value="false"/>
     <boolean name="imsemergency.keep_epdn_upon_pcscf_unavailable_bool" value="false"/>
     <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="false"/>
+    <boolean name="imsemergency.release_epdn_of_unavailable_network_bool" value="true"/>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="false"/>
     <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="false"/>
     <boolean name="imsemergency.support_giba_for_ereg_in_roaming_bool" value="false"/>
