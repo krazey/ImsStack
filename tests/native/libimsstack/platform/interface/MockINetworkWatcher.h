@@ -46,6 +46,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRoamingState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetVoiceRoamingType, (), (override));
     MOCK_METHOD(IMS_SINT32, GetDataRoamingType, (), (override));
+    MOCK_METHOD(AString, GetNetworkOperator, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsEmergencyCallSupported, (), (override));
     MOCK_METHOD(IMS_BOOL, IsImsVoiceCallSupported, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyOnly, (), (override));

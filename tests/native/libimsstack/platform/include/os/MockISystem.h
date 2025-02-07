@@ -65,6 +65,8 @@ public:
             (override));
     MOCK_METHOD(IMS_SINT32, GetNetworkCountryIso, (OUT AString & strCountry, IN IMS_SINT32 nSlotId),
             (override));
+    MOCK_METHOD(IMS_SINT32, GetNetworkOperator, (OUT AString & strOperator, IN IMS_SINT32 nSlotId),
+            (override));
     // For UICC (ISIM)
     MOCK_METHOD(AString, GetIsimState, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(AStringArray, GetIsimRecord, (IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId),

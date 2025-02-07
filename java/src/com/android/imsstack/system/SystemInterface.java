@@ -103,6 +103,7 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_SIM_MNC, "GET_SIM_MNC"),
             Map.entry(SystemConstants.GET_SIM_COUNTRY_ISO, "GET_SIM_COUNTRY_ISO"),
             Map.entry(SystemConstants.GET_NETWORK_COUNTRY_ISO, "GET_NETWORK_COUNTRY_ISO"),
+            Map.entry(SystemConstants.GET_NETWORK_OPERATOR, "GET_NETWORK_OPERATOR"),
             Map.entry(SystemConstants.GET_WIFI_STATE, "GET_WIFI_STATE"),
             Map.entry(SystemConstants.GET_WIFI_CONNECTION_STATE, "GET_WIFI_CONNECTION_STATE"),
             Map.entry(SystemConstants.GET_WIFI_BSS_ID, "GET_WIFI_BSS_ID"),
@@ -1115,6 +1116,7 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_SIM_MNC: // fall through
                 case SystemConstants.GET_SIM_COUNTRY_ISO: // fall through
                 case SystemConstants.GET_NETWORK_COUNTRY_ISO: // fall through
+                case SystemConstants.GET_NETWORK_OPERATOR: // fall through
                 case SystemConstants.GET_NETWORK_TYPE: // fall through
                 case SystemConstants.GET_VOICE_NETWORK_TYPE: // fall through
                 case SystemConstants.GET_CS_CALL_STATE: // fall through
@@ -1413,6 +1415,9 @@ public class SystemInterface implements JniSystemListener {
                     break;
                 case SystemConstants.GET_NETWORK_COUNTRY_ISO:
                     out.writeString(mSystemCall.getNetworkCountryIso());
+                    break;
+                case SystemConstants.GET_NETWORK_OPERATOR:
+                    out.writeString(mSystemCall.getNetworkOperator());
                     break;
                 case SystemConstants.GET_NETWORK_TYPE:
                     out.writeInt(mSystemCall.getNetworkType());

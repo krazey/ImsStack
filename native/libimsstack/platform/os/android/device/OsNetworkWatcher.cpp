@@ -486,6 +486,13 @@ PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetDataRoamingType()
     return PlatformContext::GetInstance()->GetSystem()->GetDataRoamingType(GetSlotId());
 }
 
+PUBLIC VIRTUAL AString OsNetworkWatcher::GetNetworkOperator() const
+{
+    AString strOperator(AString::ConstEmpty());
+    PlatformContext::GetInstance()->GetSystem()->GetNetworkOperator(strOperator, GetSlotId());
+    return strOperator;
+}
+
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsEmergencyCallSupported()
 {
     return PlatformContext::GetInstance()->GetSystem()->IsImsEmergencyCallSupported(GetSlotId());

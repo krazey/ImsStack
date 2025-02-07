@@ -54,6 +54,7 @@ public:
     virtual IMS_SINT32 GetSimMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetSimCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 GetNetworkOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId) = 0;
     // For UICC (ISIM)
     virtual AString GetIsimState(IN IMS_SINT32 nSlotId) = 0;
     virtual AStringArray GetIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) = 0;

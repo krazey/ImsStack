@@ -756,6 +756,21 @@ TEST_F(SystemTest, GetNetworkCountryIso)
     EXPECT_EQ(m_pSystem->GetNetworkCountryIso(strCountry, 0), 0);
 }
 
+TEST_F(SystemTest, GetNetworkOperator)
+{
+    AString strOperator;
+
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(1));
+    EXPECT_EQ(m_pSystem->GetNetworkOperator(strOperator, 0), 1);
+
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(0));
+    EXPECT_EQ(m_pSystem->GetNetworkOperator(strOperator, 0), 0);
+}
+
 TEST_F(SystemTest, GetIsimState)
 {
     AString strIsimState(AString::ConstNull());

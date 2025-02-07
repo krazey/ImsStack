@@ -521,6 +521,12 @@ IMS_SINT32 System::GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 n
 }
 
 PUBLIC
+IMS_SINT32 System::GetNetworkOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId)
+{
+    return GetString(SystemConstants::GET_NETWORK_OPERATOR, strOperator, nSlotId);
+}
+
+PUBLIC
 AString System::GetIsimState(IN IMS_SINT32 nSlotId)
 {
     AString strIsimState(AString::ConstNull());
