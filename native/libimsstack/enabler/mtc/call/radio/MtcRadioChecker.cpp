@@ -218,8 +218,8 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnRatChanged(IN ServiceType eServiceType,
 
         if ((eServiceType == ServiceType::NORMAL &&
                     pMtcTrafficInfo->m_eTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY) ||
-                eServiceType == ServiceType::EMERGENCY &&
-                        pMtcTrafficInfo->m_eTrafficType != IImsRadio::TRAFFIC_TYPE_EMERGENCY)
+                (eServiceType == ServiceType::EMERGENCY &&
+                        pMtcTrafficInfo->m_eTrafficType != IImsRadio::TRAFFIC_TYPE_EMERGENCY))
         {
             continue;
         }
