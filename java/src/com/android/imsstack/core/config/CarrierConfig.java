@@ -764,6 +764,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "silent_redial_with_voip_by_rtt_rejection_bool";
         public static final String KEY_NUMBER_NEED_OIR_STRING_ARRAY =
                 KEY_PREFIX + "number_need_oir_string_array";
+        public static final String KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY =
+                KEY_PREFIX + "plmn_allowing_geolocation_pidf_in_sip_invite_no_uicc_string_array";
 
         // Emergency URN policy
         public static final int NOT_USE_SERVICE_CATEGORY = 1;

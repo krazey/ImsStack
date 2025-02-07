@@ -537,6 +537,10 @@ const IMS_CHAR
                 KEY_IMS_EMERGENCY_PREFIX "call_periodic_location_discovery_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "number_need_oir_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY[] =
+                KEY_IMS_EMERGENCY_PREFIX
+        "plmn_allowing_geolocation_pidf_in_sip_invite_no_uicc_string_array";
 
 //// ImsRtt
 #define KEY_IMS_RTT_PREFIX "imsrtt."

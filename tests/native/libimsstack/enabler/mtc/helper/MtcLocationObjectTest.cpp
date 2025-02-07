@@ -45,7 +45,9 @@ using ::testing::_;
 using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SafeMatcherCast;
 using ::testing::SetArgReferee;
+using ::testing::StrEq;
 
 LOCAL const IMS_SINT32 SLOT_ID = 0;
 LOCAL const AString HOME_DOMAIN = "homedomain";
@@ -141,7 +143,7 @@ protected:
                 .WillByDefault(ReturnRef(strVerticalAccuracy));
     }
 
-    void AddGeoLocationValue(IN IMS_BOOL bGeoLocation)
+    void AddGeolocationValue(IN IMS_BOOL bGeoLocation)
     {
         pSupplementaryService->Add(SuppType::GEOLOCATION, bGeoLocation);
     }
@@ -160,11 +162,70 @@ protected:
     }
 };
 
-TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfAosConnectorIsNull)
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfNoUiccAndNotAllowedByPlmn)
 {
-    ON_CALL(objService, GetAosConnector()).WillByDefault(Return(nullptr));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::
+                             KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY,
+                    SafeMatcherCast<const IMS_CHAR*>(StrEq("00101"))))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkOperator)
+            .WillByDefault(Return(AString("00101")));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
 
     EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsTrueIfNoUiccAndPlmnIsEmpty)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::
+                             KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY,
+                    SafeMatcherCast<const IMS_CHAR*>(StrEq("00101"))))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkOperator)
+            .WillByDefault(Return(AString("")));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsTrueIfNoUiccAndAllowedByPlmn)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::
+                             KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY,
+                    SafeMatcherCast<const IMS_CHAR*>(StrEq("00101"))))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkOperator)
+            .WillByDefault(Return(AString("00101")));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNormal)
@@ -180,11 +241,11 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNorma
 
     EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 
-    AddGeoLocationValue(IMS_TRUE);
+    AddGeolocationValue(IMS_TRUE);
 
     EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 
-    AddGeoLocationValue(IMS_FALSE);
+    AddGeolocationValue(IMS_FALSE);
 
     EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -250,25 +311,6 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfBlockedByIn
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
             .WillByDefault(Return(IMS_ROAMING_STATE_ON));
 
-    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
-}
-
-TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfBlockedByAnonymousCondition)
-{
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
-                    ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
-            .WillByDefault(Return(IMS_TRUE));
-    objCallInfo.eEmergencyType = EmergencyType::NONE;
-    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
-
-    ON_CALL(objConfigurationProxy,
-            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
-                    ConfigVoice::GEOLOCATON_BLOCK_CONDITION_ANONYMOUS))
-            .WillByDefault(Return(IMS_TRUE));
-
-    ON_CALL(objAosConnector, GetRegistrationMode)
-            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
     EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
