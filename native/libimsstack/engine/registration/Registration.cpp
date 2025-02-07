@@ -2928,6 +2928,8 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
         }
         else
         {
+            IMS_BOOL bExpiresHeaderRequired = SipConfigProxy::IsExpiresHeaderInRegRequired(
+                    GetSlotId(), m_pStateTracker->GetSipProfile());
             AString strContact;
 
             for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
@@ -2936,11 +2938,14 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
 
                 strContact = pContact->ToString();
 
-                // Adds a 'expires' parameter
-                strContact.Append(TextParser::CHAR_SEMICOLON);
-                strContact.Append(Sip::STR_EXPIRES);
-                strContact.Append(TextParser::CHAR_EQUAL);
-                strContact.Append('0');
+                if (!bExpiresHeaderRequired)
+                {
+                    // Adds a 'expires' parameter
+                    strContact.Append(TextParser::CHAR_SEMICOLON);
+                    strContact.Append(Sip::STR_EXPIRES);
+                    strContact.Append(TextParser::CHAR_EQUAL);
+                    strContact.Append('0');
+                }
 
                 if (piSipMsg->AddHeader(ISipHeader::CONTACT_NORMAL, strContact) != IMS_SUCCESS)
                 {
@@ -2951,7 +2956,7 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
 
             // If the Contact header uses a wildcard option,
             // the Expires header field needs to be set as 0.
-            if (SetExpiresHeader(piSipMsg, 0) != IMS_SUCCESS)
+            if (bExpiresHeaderRequired && SetExpiresHeader(piSipMsg, 0) != IMS_SUCCESS)
             {
                 return IMS_FAILURE;
             }
@@ -2959,19 +2964,34 @@ IMS_RESULT Registration::SetContactNExpiresHeader(
     }
     else
     {
+        IMS_BOOL bExpiresHeaderRequired = SipConfigProxy::IsExpiresHeaderInRegRequired(
+                GetSlotId(), m_pStateTracker->GetSipProfile());
+
         for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
         {
             RegContact* pContact = m_objContacts.GetAt(i);
 
-            if (piSipMsg->AddHeader(ISipHeader::CONTACT_NORMAL, pContact->ToStringWithExpires()) !=
-                    IMS_SUCCESS)
+            if (bExpiresHeaderRequired)
             {
-                IMS_TRACE_E(0, "Adding Contact header failed", 0, 0, 0);
-                return IMS_FAILURE;
+                if (piSipMsg->AddHeader(ISipHeader::CONTACT_NORMAL, pContact->ToString()) !=
+                        IMS_SUCCESS)
+                {
+                    IMS_TRACE_E(0, "Adding Contact header failed", 0, 0, 0);
+                    return IMS_FAILURE;
+                }
+            }
+            else
+            {
+                if (piSipMsg->AddHeader(ISipHeader::CONTACT_NORMAL,
+                            pContact->ToStringWithExpires()) != IMS_SUCCESS)
+                {
+                    IMS_TRACE_E(0, "Adding Contact header failed", 0, 0, 0);
+                    return IMS_FAILURE;
+                }
             }
         }
 
-        if (SetExpiresHeader(piSipMsg, nExpires) != IMS_SUCCESS)
+        if (bExpiresHeaderRequired && SetExpiresHeader(piSipMsg, nExpires) != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
@@ -2984,13 +3004,6 @@ PRIVATE
 IMS_RESULT Registration::SetExpiresHeader(
         IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nExpires /*= (-1)*/)
 {
-    if (!SipConfigProxy::IsExpiresHeaderInRegRequired(
-                GetSlotId(), m_pStateTracker->GetSipProfile()))
-    {
-        // "expires" header parameter will be used to represent the registration expiration
-        return IMS_SUCCESS;
-    }
-
     if (nExpires != (-1))
     {
         AString strExpires;
