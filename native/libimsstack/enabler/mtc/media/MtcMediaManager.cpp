@@ -502,7 +502,7 @@ PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedDirection(
 
     MEDIA_DIRECTION eDir =
             m_piMediaSession->GetNegotiatedDirection(GetMediaNegoId(piSession), eContent);
-    IMS_TRACE_D("GetNegotiatedDirection : %d", eDir, 0, 0);
+    IMS_TRACE_D("GetNegotiatedDirection : media type[%d], direction[%d]", eMediaType, eDir, 0);
 
     return eDir;
 }
@@ -514,7 +514,7 @@ PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedQuality(
     IMS_SINT32 eQuality =
             m_piMediaSession->GetNegotiatedQuality(GetMediaNegoId(piSession), eContent);
 
-    IMS_TRACE_D("GetNegotiatedQuality : %d", eQuality, 0, 0);
+    IMS_TRACE_D("GetNegotiatedQuality : media type[%d], quality[%d]", eMediaType, eQuality, 0);
 
     return eQuality;
 }
