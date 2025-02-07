@@ -66,6 +66,7 @@ public:
     IMS_SINT32 GetSimMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetSimCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetNetworkOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId) override;
 
     // For UICC (ISIM)
     AString GetIsimState(IN IMS_SINT32 nSlotId) override;

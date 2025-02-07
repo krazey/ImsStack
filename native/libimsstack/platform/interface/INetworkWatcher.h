@@ -119,7 +119,7 @@ public:
     virtual NETSERVICE_ENTYPE GetNetVoiceServiceType() = 0;
     virtual NETDOMAIN_ENTYPE GetNetDomainType() = 0;
 
-    // 20120227 jungwpn82.kang@ - for direct access network type
+    // Returns the data network type directly from TelephonyManager.
     virtual IMS_SINT32 GetNetworkType() = 0;
 
     virtual IMS_SINT32 GetRoamingState() = 0;
@@ -127,6 +127,8 @@ public:
     virtual IMS_SINT32 GetVoiceRoamingType() = 0;
 
     virtual IMS_SINT32 GetDataRoamingType() = 0;
+
+    virtual AString GetNetworkOperator() const = 0;
 
     virtual IMS_BOOL IsImsEmergencyCallSupported() = 0;
 

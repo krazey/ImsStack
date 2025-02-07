@@ -52,6 +52,7 @@ public:
     IMS_SINT32 GetRoamingState() override;
     IMS_SINT32 GetVoiceRoamingType() override;
     IMS_SINT32 GetDataRoamingType() override;
+    AString GetNetworkOperator() const override;
     IMS_BOOL IsImsEmergencyCallSupported() override;
     IMS_BOOL IsImsVoiceCallSupported() override;
     IMS_BOOL IsEmergencyOnly() override;

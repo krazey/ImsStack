@@ -477,6 +477,20 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testGetNetworkOperator() {
+        mSystemCallAgent.getNetworkOperator();
+
+        verify(mTelephonyInterface).getNetworkOperator();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String operator = mSystemCallAgent.getNetworkOperator();
+
+        assertEquals("", operator);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
     public void testIsEmergencyNumber() {
         String number = "911";
         mSystemCallAgent.isEmergencyNumber(number);

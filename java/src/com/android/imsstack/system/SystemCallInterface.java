@@ -186,6 +186,12 @@ public interface SystemCallInterface {
     String getSimCountryIso();
 
     /**
+     * Returns the MCC+MNC (Mobile Country Code + Mobile Network Code) of the current registered
+     * operator. 5 or 6 decimal digits.
+     */
+    String getNetworkOperator();
+
+    /**
      * Returns the ISO-3166-1 alpha-2 country code equivalent of the MCC (Mobile Country Code) of
      * the current registered operator or the cell nearby, if available.
      */
