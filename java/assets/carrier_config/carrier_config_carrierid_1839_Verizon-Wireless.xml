@@ -157,6 +157,7 @@
     </pbundle>
     <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="true"/>
     <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="true"/>
+    <boolean name="imsemergency.release_epdn_of_unavailable_network_bool" value="false"/>
     <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="false"/>
     <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="true"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>

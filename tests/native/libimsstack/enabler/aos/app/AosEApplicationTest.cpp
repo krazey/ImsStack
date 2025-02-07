@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <TestPhoneInfoService.h>
 
 #include "AString.h"
 #include "AStringArray.h"
@@ -66,43 +67,45 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)                       \
-    using Base::CallTracker_ECallSessionReleased; \
-    using Base::CallTracker_StateChanged;         \
-    using Base::ClearConnection;                  \
-    using Base::ClearTimers;                      \
-    using Base::Condition_RequestCommand;         \
-    using Base::GetAppState;                      \
-    using Base::GetState;                         \
-    using Base::IsImsCall;                        \
-    using Base::IsKeepEPdnWhenNoPcscf;            \
-    using Base::IsRegBlockInCbm;                  \
-    using Base::IsTimerRunning;                   \
-    using Base::ProcessAppActivatedTimerExpired;  \
-    using Base::ProcessAppConnectedTimerExpired;  \
-    using Base::ProcessAppTerminatedTimerExpired; \
-    using Base::ProcessConnectionUpdated;         \
-    using Base::ProcessECallStarted;              \
-    using Base::ProcessECallTerminated;           \
-    using Base::ProcessMessage;                   \
-    using Base::ProcessReconfigTimerExpired;      \
-    using Base::ProcessRegBlockedTimerExpired;    \
-    using Base::ProcessRegStart;                  \
-    using Base::SetAppState;                      \
-    using Base::SetImsCall;                       \
-    using Base::SetKeepEPdnWhenNoPcscf;           \
-    using Base::SetRegBlockInCbm;                 \
-    using Base::StateConnected_Connection;        \
-    using Base::StateConnected_Registration;      \
-    using Base::StateConnecting_Connection;       \
-    using Base::StateConnecting_Registration;     \
-    using Base::StateDisconnecting_Connection;    \
-    using Base::StateNotReady_Condition;          \
-    using Base::StateReady_Condition;             \
-    using Base::StateReady_Connection;            \
-    using Base::StateUpdating_Registration;       \
-    using Base::StartTimer;                       \
-    using Base::StopTimer;                        \
+#define DECLARE_USING(Base)                         \
+    using Base::CallTracker_ECallSessionReleased;   \
+    using Base::CallTracker_StateChanged;           \
+    using Base::ClearConnection;                    \
+    using Base::ClearTimers;                        \
+    using Base::Condition_RequestCommand;           \
+    using Base::GetAppState;                        \
+    using Base::GetState;                           \
+    using Base::IsECallConnectedNetworkUnavailable; \
+    using Base::IsImsCall;                          \
+    using Base::IsKeepEPdnWhenNoPcscf;              \
+    using Base::IsRegBlockInCbm;                    \
+    using Base::IsTimerRunning;                     \
+    using Base::NetTracker_StatusChanged;           \
+    using Base::ProcessAppActivatedTimerExpired;    \
+    using Base::ProcessAppConnectedTimerExpired;    \
+    using Base::ProcessAppTerminatedTimerExpired;   \
+    using Base::ProcessConnectionUpdated;           \
+    using Base::ProcessECallStarted;                \
+    using Base::ProcessECallTerminated;             \
+    using Base::ProcessMessage;                     \
+    using Base::ProcessReconfigTimerExpired;        \
+    using Base::ProcessRegBlockedTimerExpired;      \
+    using Base::ProcessRegStart;                    \
+    using Base::SetAppState;                        \
+    using Base::SetImsCall;                         \
+    using Base::SetKeepEPdnWhenNoPcscf;             \
+    using Base::SetRegBlockInCbm;                   \
+    using Base::StateConnected_Connection;          \
+    using Base::StateConnected_Registration;        \
+    using Base::StateConnecting_Connection;         \
+    using Base::StateConnecting_Registration;       \
+    using Base::StateDisconnecting_Connection;      \
+    using Base::StateNotReady_Condition;            \
+    using Base::StateReady_Condition;               \
+    using Base::StateReady_Connection;              \
+    using Base::StateUpdating_Registration;         \
+    using Base::StartTimer;                         \
+    using Base::StopTimer;                          \
     using Base::UpdateConnectedServices;
 
 const IMS_SINT32 SLOT_ID = 0;
@@ -233,6 +236,7 @@ public:
     TestAosCondition* m_pTestAosCondition;
     TestThreadService m_objThreadService;
     TestTimerService m_objTimerService;
+    TestPhoneInfoService m_objPhoneInfoService;
     AosStaticProfile* m_pAosStaticProfile;
     IAosNConfiguration* m_piAosNConfiguration;
 
@@ -269,6 +273,8 @@ protected:
             ImsServiceName objService = objServiceName.GetAt(i);
             m_pAosStaticProfile->AddService(objService.GetAppId(), objService.GetServiceId());
         }
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
 
         EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
                 .Times(AnyNumber())
@@ -403,6 +409,8 @@ protected:
         {
             delete m_pAosStaticProfile;
         }
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 };
 
@@ -934,6 +942,39 @@ TEST_F(AosEApplicationTest, ProcessRegBlockedTimerExpired)
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_REG_BLOCKED));
 }
 
+TEST_F(AosEApplicationTest, IsECallConnectedNetworkUnavailableShouldReturnTrueIfIwlanIsNotAvailable)
+{
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    ON_CALL(m_objPhoneInfoService.GetMockWifiWatcher(), GetState())
+            .WillByDefault(Return(IWifiWatcher::STATE_DISCONNECTED));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnOfUnavailableNetwork())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pTestAosEApplication->IsECallConnectedNetworkUnavailable());
+}
+
+TEST_F(AosEApplicationTest, IsECallConnectedNetworkUnavailableShouldReturnTrueIfWwanIsNotAvailable)
+{
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnOfUnavailableNetwork())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pTestAosEApplication->IsECallConnectedNetworkUnavailable());
+}
+
+TEST_F(AosEApplicationTest, IsECallConnectedNetworkUnavailableShouldReturnFalseIfAvailable)
+{
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    ON_CALL(m_objPhoneInfoService.GetMockWifiWatcher(), GetState())
+            .WillByDefault(Return(IWifiWatcher::STATE_CONNECTED));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnOfUnavailableNetwork())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_FALSE(m_pTestAosEApplication->IsECallConnectedNetworkUnavailable());
+}
+
 TEST_F(AosEApplicationTest, ProcessECallStarted)
 {
     m_pTestAosEApplication->SetImsCall(IMS_FALSE);
@@ -953,21 +994,60 @@ TEST_F(AosEApplicationTest, ResetRegBlockInCbmWhenECallStarted)
     EXPECT_FALSE(m_pTestAosEApplication->IsRegBlockInCbm());
 }
 
-TEST_F(AosEApplicationTest, ProcessECallTerminated)
+TEST_F(AosEApplicationTest, DoNotStartAppTerminatedTimerAgainIfAlreadyRunningWhenECallTerminated)
 {
-    // TIMER_APP_TERMINATED is running
     m_pTestAosEApplication->SetImsCall(IMS_TRUE);
+    m_pTestAosEApplication->StartTimer(TIMER_APP_TERMINATED, 1000);
+
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
     m_pTestAosEApplication->ProcessECallTerminated();
+
     EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
     m_pTestAosEApplication->StopTimer(TIMER_APP_TERMINATED);
+}
 
-    // registration is terminated
-    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
-    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
-    EXPECT_CALL(m_objMockIAosRegistration, IsTerminated()).WillOnce(Return(IMS_TRUE));
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedIfRegistrationIsTerminated)
+{
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
+    ON_CALL(m_objPhoneInfoService.GetMockWifiWatcher(), GetState())
+            .WillByDefault(Return(IWifiWatcher::STATE_CONNECTED));
+    ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
     m_pTestAosEApplication->ProcessECallTerminated();
-    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedIfNetworkIsUnavailable)
+{
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_WLAN));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnOfUnavailableNetwork())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    m_pTestAosEApplication->ProcessECallTerminated();
+}
+
+TEST_F(AosEApplicationTest, AddNetTrackerListenerWhenECallTerminatedIfNetworkIsAvailable)
+{
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objMockIAosRegistration, IsTerminated()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_WLAN));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnOfUnavailableNetwork())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, SetListener(_));
+
+    m_pTestAosEApplication->ProcessECallTerminated();
 }
 
 TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfSettingKeepPdnUntilEModeEnd)
@@ -1254,6 +1334,23 @@ TEST_F(AosEApplicationTest,
     m_pTestAosEApplication->CallTracker_ECallSessionReleased(IMS_FALSE);
 
     EXPECT_TRUE(m_pTestAosEApplication->IsImsCall());
+}
+
+TEST_F(AosEApplicationTest, ShouldClearConnectionIfCallIsNotExistWhenNetworkChangedToNotAvailable)
+{
+    m_pTestAosEApplication->SetImsCall(IMS_FALSE);
+    m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_WLAN));
+    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnOfUnavailableNetwork())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+    ON_CALL(m_objMockAosConnector, IsReady()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    m_pTestAosEApplication->NetTracker_StatusChanged();
 }
 
 TEST_F(AosEApplicationTest, ShouldNotifyRegistrationIfIpcanIsChangedWhileTheConfigIsTrue)

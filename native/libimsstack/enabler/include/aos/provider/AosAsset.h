@@ -46,6 +46,7 @@ public:
             bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
             bRegRetryWithIpVerFallback(IMS_FALSE),
+            bReleaseEPdnOfUnavailableNetwork(IMS_TRUE),
             bReleaseEPdnUponECallEndInFakeMode(IMS_TRUE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequiredCdmalessFeatureTag(IMS_FALSE),
@@ -138,6 +139,7 @@ public:
     IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
     IMS_BOOL bRegContactValidation;
     IMS_BOOL bRegRetryWithIpVerFallback;
+    IMS_BOOL bReleaseEPdnOfUnavailableNetwork;
     IMS_BOOL bReleaseEPdnUponECallEndInFakeMode;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequiredCdmalessFeatureTag;

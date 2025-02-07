@@ -24,6 +24,7 @@
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosConnection.h"
 #include "interface/IAosNConfiguration.h"
+#include "interface/IAosNetTracker.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosRegStateManager.h"
 #include "condition/AosCondition.h"
@@ -181,6 +182,11 @@ PROTECTED VIRTUAL void AosEApplication::ClearConnection()
 
 PROTECTED VIRTUAL void AosEApplication::ProcessCleanAll(IN IMS_UINT32 nReason /* = 0 */)
 {
+    if (m_piNetTracker != IMS_NULL)
+    {
+        m_piNetTracker->RemoveListener(this);
+        m_piNetTracker = IMS_NULL;
+    }
     CleanAll(nReason);
     Report_StateChanged(IMS_FALSE);
     ProcessStateStart();
@@ -556,6 +562,36 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsRegWaitingRequired()
     return (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0);
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsECallConnectedNetworkUnavailable()
+{
+    IMS_BOOL bUnavailable = IMS_FALSE;
+    if (!GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnOfUnavailableNetwork())
+    {
+        A_IMS_TRACE_I(APPID, "Unavailable network check is not necessary", 0, 0, 0);
+        return bUnavailable;
+    }
+
+    if (m_bEpdgEnabled)
+    {
+        bUnavailable = !IsWifiConnected();
+        A_IMS_TRACE_I(APPID, "WiFi is %s", bUnavailable ? "not available" : "available", 0, 0);
+    }
+    else
+    {
+        INetworkWatcher* piNw =
+                PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
+        if (piNw != IMS_NULL)
+        {
+            if (piNw->GetNetRadioTechType() == NW_REPORT_RADIO_NOSRV)
+            {
+                bUnavailable = IMS_TRUE;
+            }
+        }
+        A_IMS_TRACE_I(APPID, "Cellular is %s", bUnavailable ? "not available" : "available", 0, 0);
+    }
+    return bUnavailable;
+}
+
 PROTECTED VIRTUAL void AosEApplication::ProcessRegStateCheck()
 {
     StopTimer(TIMER_REG_BLOCKED);
@@ -624,6 +660,17 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         else
         {
             ProcessCleanAll();
+        }
+    }
+    else
+    {
+        if (IsECallConnectedNetworkUnavailable())
+        {
+            ProcessCleanAll();
+        }
+        else
+        {
+            SetNetTrackerListener();
         }
     }
 }
@@ -735,6 +782,15 @@ PROTECTED VIRTUAL void AosEApplication::RegStateManager_RegStateChanged(IN IMS_U
             StopTimer(TIMER_REG_BLOCKED);
             m_pConnector->Start();
         }
+    }
+}
+
+PROTECTED VIRTUAL void AosEApplication::NetTracker_StatusChanged()
+{
+    if (m_pConnector->IsReady() && !IsImsCall() && IsECallConnectedNetworkUnavailable())
+    {
+        A_IMS_TRACE_I(APPID, "Network is Unavailable", 0, 0, 0);
+        ProcessCleanAll();
     }
 }
 

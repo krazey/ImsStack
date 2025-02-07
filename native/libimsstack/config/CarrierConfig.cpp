@@ -488,6 +488,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE
         KEY_IMS_EMERGENCY_PREFIX "keep_epdn_upon_pcscf_unavailable_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "keep_ereg_retry_on_wlan_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_OF_UNAVAILABLE_NETWORK_BOOL[] =
+        KEY_IMS_EMERGENCY_PREFIX "release_epdn_of_unavailable_network_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "stop_ereg_timer_on_epdn_connected_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] =

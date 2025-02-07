@@ -81,6 +81,7 @@ protected:
     virtual IMS_BOOL IsWifiConnected();
     virtual IMS_BOOL IsWlanEmergencyBlocked();
     virtual IMS_BOOL IsRegWaitingRequired();
+    virtual IMS_BOOL IsECallConnectedNetworkUnavailable();
     virtual void ProcessRegStateCheck();
     virtual void ProcessECallStarted();
     virtual void ProcessECallTerminated();
@@ -95,6 +96,9 @@ protected:
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
     void CallTracker_ECallSessionReleased(IN IMS_BOOL bEstablished) override;
+
+    // IAosNetTrackerListener
+    void NetTracker_StatusChanged() override;
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
