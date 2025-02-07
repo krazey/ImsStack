@@ -60,6 +60,11 @@ public:
     }
 
 private:
+    inline IMS_BOOL IsWaitingEpsFallback() const
+    {
+        return m_bWaitingEpsFallbackForNoResponse || m_bWaitingEpsFallbackForNoTrigger;
+    }
+
     IMS_BOOL IsEpsFallbackTriggeredByNetwork() const;
 
     IMtcCallContext& m_objContext;

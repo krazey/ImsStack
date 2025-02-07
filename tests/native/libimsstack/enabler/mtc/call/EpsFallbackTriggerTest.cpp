@@ -459,3 +459,18 @@ TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerSetsTimer)
     EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
     EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
 }
+
+TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackDoesNothingIfAlreadyTriggeredByNoNetworkResponse)
+{
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(1);
+
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_FALSE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_FALSE);
+}
+TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackDoesNothingIfAlreadyTriggeredByNoNetworkTrigger)
+{
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(1);
+
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_FALSE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_FALSE);
+}

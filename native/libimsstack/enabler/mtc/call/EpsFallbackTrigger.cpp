@@ -189,6 +189,12 @@ PUBLIC
 void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason, IN IMS_BOOL bStartTimer)
 {
     IMS_TRACE_D("TriggerEpsFallback Reason[%d], Timer[%s]", eReason, _TRACE_B_(bStartTimer), 0);
+    if (IsWaitingEpsFallback())
+    {
+        IMS_TRACE_D("TriggerEpsFallback : Already triggered", 0, 0, 0);
+        return;
+    }
+
     IMS_UINT32 eRadioReason;
     if (eReason == EpsFallbackReason::NO_NETWORK_RESPONSE)
     {
