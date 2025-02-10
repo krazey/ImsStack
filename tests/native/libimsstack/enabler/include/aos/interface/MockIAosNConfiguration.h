@@ -176,6 +176,7 @@ public:
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSupportedRats, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSupportedRoamingRats, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSmsOverImsSupportedRats, (), (override));
+    MOCK_METHOD(ImsVector<IMS_SINT32>&, GetEmergencyOverImsSupportedRats, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetExtraRegErrCode, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetExtraReregErrCode, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetExtraRegErrWaitTime, (), (override));

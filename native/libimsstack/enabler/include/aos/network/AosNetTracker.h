@@ -138,6 +138,7 @@ protected:
     void SetDataConnected(IN IMS_BOOL bConnected);
     void SetEpdgEnabled(IN IMS_BOOL bEnabled);
     void SetWifiConnected(IN IMS_BOOL bConnected);
+    void UpdateWifiObserver();
 
     // Timer
     void ProcessInTimerExpired();

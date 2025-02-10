@@ -97,7 +97,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsSupported());
     EXPECT_EQ(0, m_pAosNConfiguration->GetSmsOverImsSupportedRats().GetSize());
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyCallbackModeSupported());
-    // KEY_EMERGENCY_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
+    EXPECT_EQ(0, m_pAosNConfiguration->GetEmergencyOverImsSupportedRats().GetSize());
     EXPECT_EQ(10000, m_pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
@@ -434,7 +434,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsSupported());
     EXPECT_EQ(2, m_pAosNConfiguration->GetSmsOverImsSupportedRats().GetSize());
     EXPECT_TRUE(m_pAosNConfiguration->IsEmergencyCallbackModeSupported());
-    // KEY_EMERGENCY_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
+    EXPECT_EQ(1, m_pAosNConfiguration->GetEmergencyOverImsSupportedRats().GetSize());
     EXPECT_EQ(1000, m_pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
@@ -496,7 +496,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsSupported());
     EXPECT_EQ(2, m_pAosNConfiguration->GetSmsOverImsSupportedRats().GetSize());
     EXPECT_TRUE(m_pAosNConfiguration->IsEmergencyCallbackModeSupported());
-    // KEY_EMERGENCY_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
+    EXPECT_EQ(1, m_pAosNConfiguration->GetEmergencyOverImsSupportedRats().GetSize());
     EXPECT_EQ(1000, m_pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 

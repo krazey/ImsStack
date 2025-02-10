@@ -378,8 +378,14 @@ PROTECTED VIRTUAL void AosNetTracker::NConfiguration_NotifyConfigChanged()
 
     if (m_piAosNConfig != IMS_NULL)
     {
+        IMS_BOOL bWlanEnabled = IsWlanEnabled();
         InitConfig();
         Notify();
+
+        if (IsWlanEnabled() != bWlanEnabled)
+        {
+            UpdateWifiObserver();
+        }
     }
 }
 
@@ -462,10 +468,19 @@ void AosNetTracker::InitConfig()
                     CNXID, "InitConfig :: m_nCnxPolicyInRoaming(%X)", m_nCnxPolicyInRoaming, 0, 0);
             IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
         }
+        else
+        {
+            IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
+        }
     }
     else if (IsCnxTypeEqual(NetworkPolicy::APN_EMERGENCY))
     {
-        m_nCnxPolicy = 0xFFFFFFFF;
+        m_nCnxPolicy = 0xFFFFFFFF & (~NW_REPORT_RADIO_WLAN);
+        ImsVector<IMS_SINT32>& objRats = m_piAosNConfig->GetEmergencyOverImsSupportedRats();
+        if (objRats.Contains(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN))
+        {
+            m_nCnxPolicy |= NW_REPORT_RADIO_WLAN;
+        }
     }
     else if (IsCnxTypeEqual(NetworkPolicy::APN_WIFI))
     {
@@ -558,28 +573,16 @@ void AosNetTracker::InitObject()
 
     if (IsCnxTypeEqual(NetworkPolicy::APN_IMS) || IsCnxTypeEqual(NetworkPolicy::APN_EMERGENCY))
     {
-        m_piConnection->SetListener(this);
-
-        if (IsWlanEnabled())
+        if (IsCnxTypeEqual(NetworkPolicy::APN_IMS))
         {
-            A_IMS_TRACE_I(CNXID, "InitObject :: wlan is enabled", 0, 0, 0);
-
-            m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
-            if (m_piWifiWatcher != IMS_NULL)
-            {
-                m_piWifiWatcher->RegisterObserver(this);
-            }
-
-            IMS_EVENT_SendEventForSlotId(IMS_EVENT_WIFI_SERVICE, IMS_WIFI_ON, 0, m_nSlotId);
+            m_piConnection->SetListener(this);
         }
+        UpdateWifiObserver();
     }
-    else
+    else if (IsCnxTypeEqual(NetworkPolicy::APN_WIFI))
     {
-        if (IsCnxTypeEqual(NetworkPolicy::APN_WIFI))
-        {
-            A_IMS_TRACE_I(CNXID, "InitObject :: apn is wifi", 0, 0, 0);
-            IMS_EVENT_SendEventForSlotId(IMS_EVENT_WIFI_SERVICE, IMS_WIFI_ON, 0, m_nSlotId);
-        }
+        A_IMS_TRACE_I(CNXID, "InitObject :: apn is wifi", 0, 0, 0);
+        IMS_EVENT_SendEventForSlotId(IMS_EVENT_WIFI_SERVICE, IMS_WIFI_ON, 0, m_nSlotId);
     }
 }
 
@@ -906,6 +909,35 @@ void AosNetTracker::SetWifiConnected(IN IMS_BOOL bConnected)
     }
 
     m_bIsWifiConnected = bConnected;
+}
+
+PRIVATE
+void AosNetTracker::UpdateWifiObserver()
+{
+    IMS_SINT32 nCnxType = m_piConnection->GetConnectionType();
+    if ((nCnxType != NetworkPolicy::APN_IMS) && (nCnxType != NetworkPolicy::APN_EMERGENCY))
+    {
+        return;
+    }
+
+    m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
+    if (m_piWifiWatcher == IMS_NULL)
+    {
+        A_IMS_TRACE_I(CNXID, "can not get WifiWatcher", 0, 0, 0);
+        return;
+    }
+
+    if (IsWlanEnabled())
+    {
+        A_IMS_TRACE_I(CNXID, "register WiFi status observer", 0, 0, 0);
+        m_piWifiWatcher->RegisterObserver(this);
+        IMS_EVENT_SendEventForSlotId(IMS_EVENT_WIFI_SERVICE, IMS_WIFI_ON, 0, m_nSlotId);
+    }
+    else
+    {
+        A_IMS_TRACE_I(CNXID, "remove WiFi status observer", 0, 0, 0);
+        m_piWifiWatcher->RemoveObserver(this);
+    }
 }
 
 PRIVATE

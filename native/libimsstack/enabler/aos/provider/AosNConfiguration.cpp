@@ -853,6 +853,11 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSmsOverImsSupportedR
     return m_objCarrierConfig.objSmsOverImsSupportedRats;
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetEmergencyOverImsSupportedRats()
+{
+    return m_objCarrierConfig.objEmergencyOverImsSupportedRats;
+}
+
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrCode()
 {
     return m_objExtraRegErr.objExtraRegErrCode;
