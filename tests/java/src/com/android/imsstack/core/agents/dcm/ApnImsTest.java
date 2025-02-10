@@ -50,7 +50,6 @@ import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
-import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.system.ISystem;
 
 import org.junit.After;
@@ -71,7 +70,6 @@ public class ApnImsTest {
     @Mock private IApn.Listener mMockApnListener;
     @Mock private IDcApn mMockIDcApn;
     @Mock private IDcSettings mMockIDcSettings;
-    @Mock private IAosInfo mMockIAosInfo;
     @Mock private ISystem mMockISystem;
     @Mock private ImsTrafficInterface mMockImsTrafficInterface;
     @Mock private SubsInfoInterface mMockSubsInfoInterface;
