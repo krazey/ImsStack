@@ -647,20 +647,12 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         return;
     }
 
-    if (IsReleaseEmergencyPdnUponEmergencyCallEnd())
+    IMS_SINT32 nDelayTime = IsReleaseEmergencyPdnUponEmergencyCallEnd()
+            ? GET_N_CONFIG(m_nSlotId)->GetSipTimerT1()
+            : GET_N_CONFIG(m_nSlotId)->GetWaitTimeMillisForReleaseEPdnAfterECallEnd();
+    if (nDelayTime > 0)
     {
-        IMS_SINT32 nDelayTime =
-                GET_N_CONFIG(m_nSlotId)->GetWaitTimeMillisForReleaseEPdnAfterECallEnd();
-        nDelayTime = (nDelayTime == -1) ? GET_N_CONFIG(m_nSlotId)->GetSipTimerT1() : nDelayTime;
-        A_IMS_TRACE_I(APPID, "ProcessECallTerminated :: waitTime(%d)", nDelayTime, 0, 0);
-        if (nDelayTime > 0)
-        {
-            StartTimer(TIMER_APP_TERMINATED, nDelayTime);
-        }
-        else
-        {
-            ProcessCleanAll();
-        }
+        StartTimer(TIMER_APP_TERMINATED, nDelayTime);
     }
     else
     {

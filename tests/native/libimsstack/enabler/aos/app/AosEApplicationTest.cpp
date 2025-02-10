@@ -348,12 +348,9 @@ protected:
         AosProvider::GetInstance()->SetNConfiguration(
                 static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration), SLOT_ID);
 
-        EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_TRUE));
-        EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_TRUE));
+        ON_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(m_objMockIAosNConfiguration, GetSipTimerT1()).WillByDefault(Return(2000));
 
         m_objThreadService.SetThread(&m_objMockThread);
         PlatformContext::GetInstance()->SetService(
@@ -1069,8 +1066,6 @@ TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedInFakeModeIfConfigured
             .WillByDefault(Return(IAosRegistration::MODE_FAKE));
     ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndInFakeMode())
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(2000));
 
     // WHEN
     m_pTestAosEApplication->ProcessECallTerminated();
@@ -1103,8 +1098,6 @@ TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfWlanConfigured
     m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
             .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_WLAN));
-    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(2000));
 
     // WHEN
     m_pTestAosEApplication->ProcessECallTerminated();
@@ -1122,8 +1115,6 @@ TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnWlanIfAllIpcanConfig
     m_pTestAosEApplication->SetEpdgEnabled(IMS_TRUE);
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
             .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_ALL));
-    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(2000));
 
     // WHEN
     m_pTestAosEApplication->ProcessECallTerminated();
@@ -1169,8 +1160,6 @@ TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnCellularIfCellularCo
     m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
             .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_CELLULAR));
-    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(2000));
 
     // WHEN
     m_pTestAosEApplication->ProcessECallTerminated();
@@ -1188,8 +1177,6 @@ TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedOnCellularIfAllIpcanCo
     m_pTestAosEApplication->SetEpdgEnabled(IMS_FALSE);
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
             .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_ALL));
-    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(2000));
 
     // WHEN
     m_pTestAosEApplication->ProcessECallTerminated();
@@ -1229,28 +1216,27 @@ TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfNoIpcanConfig
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
 }
 
-TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedIfConfiguredToReleaseAndDelayIsZero)
+TEST_F(AosEApplicationTest, ShouldNotStartAppTerminatedTimerWhenECallTerminatedIfWaitTimeIsZero)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
-            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_ALL));
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
     ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
             .WillByDefault(Return(0));
 
-    EXPECT_CALL(m_objMockAosConnector, Stop());
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
 
     m_pTestAosEApplication->ProcessECallTerminated();
 }
 
-TEST_F(AosEApplicationTest, StartAppTerminatedTimerWithT1WhenECallTerminated)
+TEST_F(AosEApplicationTest, StartAppTerminatedTimerWithConfiguredValueWhenECallTerminated)
 {
-    IMS_SINT32 T1 = 4000;
+    IMS_SINT32 nTime = 240000;
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
-            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_ALL));
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
     ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(-1));
-    ON_CALL(m_objMockIAosNConfiguration, GetSipTimerT1()).WillByDefault(Return(T1));
+            .WillByDefault(Return(nTime));
 
-    EXPECT_CALL(m_objMockITimer, SetTimer(T1, _));
+    EXPECT_CALL(m_objMockITimer, SetTimer(nTime, _));
 
     m_pTestAosEApplication->ProcessECallTerminated();
 }

@@ -62,7 +62,7 @@ public:
             nIpcanReleaseEmergencyPdnUponEmergencyCallEnd(CarrierConfig::ImsEmergency::IPCAN_NONE),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
-            nWaitTimeMillisForReleaseEPdnAfterECallEnd(-1),
+            nWaitTimeMillisForReleaseEPdnAfterECallEnd(0),
             nRegistrationPrivateHeader(0),
             objCarrierNrAvailabilities(ImsVector<IMS_SINT32>()),
             objPcscfDiscoveryMethod(ImsVector<IMS_SINT32>()),

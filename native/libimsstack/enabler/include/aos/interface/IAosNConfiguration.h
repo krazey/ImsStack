@@ -795,7 +795,14 @@ public:
      *
      *        Emergency PDN can be released after a specific time when the emergency call ends.
      *        This returns the delay time from the end of the call to the start of the emergency
-     *        PDN release. If this is set to -1, it will wait for T1 time.
+     *        PDN release.
+     *        If this is set to zero, do not request to release emergency PDN after a specific time.
+     *
+     *        If it is configured to release emergency PDN just after the emergency call ends
+     *        by following configurations, they will take precedence over setting of this.
+     *        #KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT
+     *        #KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL
+     *
      * @return IMS_SINT32 Return the wait time in millisecond before releasing an emergency PDN.
      */
     virtual IMS_SINT32 GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const = 0;

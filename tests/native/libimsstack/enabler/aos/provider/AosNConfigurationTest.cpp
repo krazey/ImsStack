@@ -115,7 +115,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(-1, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
 
