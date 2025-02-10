@@ -30,6 +30,7 @@
 #include "media/IMediaQosEventListener.h"
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaManager.h"
+#include "media/MtcMediaStringUtils.h"
 #include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
@@ -81,7 +82,9 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
         IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/,
         IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType /*= MEDIA_PROTOCOL_ANY*/)
 {
-    IMS_TRACE_D("MediaSession_Notify : Report[%d] Media[%d]", eReportType, eMediaType, 0);
+    IMS_TRACE_D("MediaSession_Notify : Report[%s] Media[%s]",
+            MtcMediaStringUtils::ConvertReportType(eReportType),
+            MtcMediaStringUtils::ConvertContentType(eMediaType), 0);
     IMS_UINT32 eReportedMediaType = MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType);
 
     switch (eReportType)
@@ -120,8 +123,10 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 eReportType,
         IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
 {
-    IMS_TRACE_D("MediaSession_NotifyFailures : Report[%d] Error[%d] Media[%d]", eReportType, eError,
-            eMediaType);
+    IMS_TRACE_D("MediaSession_NotifyFailures : Report[%s] Error[%s] Media[%s]",
+            MtcMediaStringUtils::ConvertReportType(eReportType),
+            MtcMediaStringUtils::ConvertErrorType(eError),
+            MtcMediaStringUtils::ConvertContentType(eMediaType));
 
     if (eError != RtpError::NO_ERROR)
     {
@@ -132,8 +137,8 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 e
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId,
         IN IMS_BOOL bSuccess, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
 {
-    IMS_TRACE_D("MediaSession_NotifyQos : NegoId[%" PFLS_x "] Result[%d] Media[%d]", nNegoId,
-            bSuccess, eMediaType);
+    IMS_TRACE_D("MediaSession_NotifyQos : NegoId[%" PFLS_x "] Result[%d] Media[%s]", nNegoId,
+            bSuccess, MtcMediaStringUtils::ConvertContentType(eMediaType));
 
     if (m_pQosListener != IMS_NULL)
     {
@@ -167,22 +172,25 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaDirection(
     {
         m_pOldMediaInfo->eAudioDirection = m_pMediaInfo->eAudioDirection;
         m_pMediaInfo->eAudioDirection = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : audio [%d]->[%d]", m_pOldMediaInfo->eAudioDirection,
-                m_pMediaInfo->eAudioDirection, 0);
+        IMS_TRACE_D("UpdateMediaDirection : audio [%s]->[%s]",
+                MtcMediaStringUtils::ConvertDirection(m_pOldMediaInfo->eAudioDirection),
+                MtcMediaStringUtils::ConvertDirection(m_pMediaInfo->eAudioDirection), 0);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
         m_pOldMediaInfo->eVideoDirection = m_pMediaInfo->eVideoDirection;
         m_pMediaInfo->eVideoDirection = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : video [%d]->[%d]", m_pOldMediaInfo->eVideoDirection,
-                m_pMediaInfo->eVideoDirection, 0);
+        IMS_TRACE_D("UpdateMediaDirection : video [%s]->[%s]",
+                MtcMediaStringUtils::ConvertDirection(m_pOldMediaInfo->eVideoDirection),
+                MtcMediaStringUtils::ConvertDirection(m_pMediaInfo->eVideoDirection), 0);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
         m_pOldMediaInfo->eTextDirection = m_pMediaInfo->eTextDirection;
         m_pMediaInfo->eTextDirection = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : text [%d]->[%d]", m_pOldMediaInfo->eTextDirection,
-                m_pMediaInfo->eTextDirection, 0);
+        IMS_TRACE_D("UpdateMediaDirection : text [%s]->[%s]",
+                MtcMediaStringUtils::ConvertDirection(m_pOldMediaInfo->eTextDirection),
+                MtcMediaStringUtils::ConvertDirection(m_pMediaInfo->eTextDirection), 0);
     }
 }
 
@@ -285,7 +293,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
         return IMS_FAILURE;
     }
 
-    IMS_TRACE_D("FormSdp : CallType[%d]", eCallType, 0, 0);
+    IMS_TRACE_D("FormSdp : CallType[%s]", MtcMediaStringUtils::ConvertCallType(eCallType), 0, 0);
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromCallType(eCallType);
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 
@@ -317,7 +325,7 @@ PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSe
     m_piMediaSession->NegotiateSdp(
             nNegoId, piSession, &eAudioDirection, &eVideoDirection, &eTextDirection, eErrorReason);
 
-    IMS_TRACE_D("NegotiateSdp : %d", eErrorReason, 0, 0);
+    IMS_TRACE_D("NegotiateSdp : [%s]", MtcMediaStringUtils::ConvertNegoType(eErrorReason), 0, 0);
 
     if (eErrorReason != NegotiationResult::NO_ERROR)
     {
@@ -392,7 +400,8 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
         IMS_TRACE_D("UpdatePemType : no update for P-Early-Media value.", 0, 0, 0);
     }
 
-    IMS_TRACE_D("UpdatePemType : %d", GetPemType(piSession), 0, 0);
+    IMS_TRACE_D("UpdatePemType : [%s]", MtcMediaStringUtils::ConvertPemType(GetPemType(piSession)),
+            0, 0);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::Run(
@@ -441,7 +450,8 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
 PUBLIC VIRTUAL void MtcMediaManager::SetRtpPort(
         IN ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_UINT32 nPort)
 {
-    IMS_TRACE_D("SetRtpPort : MediaType[%d] Port[%d]", eMediaType, nPort, 0);
+    IMS_TRACE_D("SetRtpPort : MediaType[%s] Port[%d]",
+            MtcMediaStringUtils::ConvertContentType(eMediaType), nPort, 0);
 
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType);
     m_piMediaSession->SetOptions(
@@ -484,7 +494,7 @@ PUBLIC VIRTUAL NegotiationState MtcMediaManager::GetNegotiationState(IN ISession
     }
 
     NegotiationState eState = m_piMediaSession->GetNegoState(GetMediaNegoId(piSession));
-    IMS_TRACE_D("GetNegotiationState : %d", eState, 0, 0);
+    IMS_TRACE_D("GetNegotiationState : [%s]", MtcMediaStringUtils::ConvertNegoState(eState), 0, 0);
 
     return eState;
 }
@@ -502,7 +512,9 @@ PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedDirection(
 
     MEDIA_DIRECTION eDir =
             m_piMediaSession->GetNegotiatedDirection(GetMediaNegoId(piSession), eContent);
-    IMS_TRACE_D("GetNegotiatedDirection : media type[%d], direction[%d]", eMediaType, eDir, 0);
+    IMS_TRACE_D("GetNegotiatedDirection : media type[%s], direction[%s]",
+            MtcMediaStringUtils::ConvertContentType(eMediaType),
+            MtcMediaStringUtils::ConvertDirection(eDir), 0);
 
     return eDir;
 }
@@ -514,7 +526,9 @@ PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedQuality(
     IMS_SINT32 eQuality =
             m_piMediaSession->GetNegotiatedQuality(GetMediaNegoId(piSession), eContent);
 
-    IMS_TRACE_D("GetNegotiatedQuality : media type[%d], quality[%d]", eMediaType, eQuality, 0);
+    IMS_TRACE_D("GetNegotiatedQuality : media type[%s], quality[%s]",
+            MtcMediaStringUtils::ConvertContentType(eMediaType),
+            MtcMediaStringUtils::ConvertQuality(eQuality), 0);
 
     return eQuality;
 }
@@ -530,7 +544,8 @@ PUBLIC VIRTUAL CallType MtcMediaManager::GetNegotiatedCallType(IN ISession* piSe
     MEDIA_CONTENT_TYPE eContents =
             m_piMediaSession->GetNegotiatedMediaType(GetMediaNegoId(piSession));
 
-    IMS_TRACE_D("GetNegotiatedCallType : %d", eContents, 0, 0);
+    IMS_TRACE_D("GetNegotiatedCallType : [%s]", MtcMediaStringUtils::ConvertContentType(eContents),
+            0, 0);
 
     return MtcMediaUtil::GetCallTypeFromMediaContents(eContents);
 }
@@ -855,7 +870,8 @@ PRIVATE
 void MtcMediaManager::RequestToRegisterQosCallback(
         IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents)
 {
-    IMS_TRACE_D("RequestToRegisterQosCallback [%d]", eContents, 0, 0);
+    IMS_TRACE_D("RequestToRegisterQosCallback [%s]",
+            MtcMediaStringUtils::ConvertContentType(eContents), 0, 0);
 
     if (eContents & MEDIA_TYPE_AUDIO)
     {
