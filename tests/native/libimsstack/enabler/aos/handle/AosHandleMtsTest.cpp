@@ -39,8 +39,16 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)       \
-    using Base::IsFeatureBlocked; \
+#define DECLARE_USING(Base)                        \
+    using Base::Handle_Notify;                     \
+    using Base::Init;                              \
+    using Base::InitializeServiceBlock;            \
+    using Base::InitializeServiceFeature;          \
+    using Base::InitializeSupportedRats;           \
+    using Base::IsFeatureBlocked;                  \
+    using Base::IsHandleBlocked;                   \
+    using Base::IsSupportedNetworkTypeForCellular; \
+    using Base::ProcessCapabilitiesChanged;        \
     using Base::Request;
 
 class TestAosHandleMts : public AosHandleMts
@@ -52,6 +60,11 @@ public:
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
             AosHandleMts(piAppContext, strAppId, strServiceId, nServiceType)
     {
+    }
+
+    IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock) const
+    {
+        return AosHandle::IsHandleBlocked(nBlock);
     }
 };
 
@@ -126,31 +139,11 @@ protected:
 
     IMS_UINT32 GetSupportedRats() { return m_pAosHandleMts->m_nSupportedRats; }
 
-    void InitializeSupportedRats() { m_pAosHandleMts->InitializeSupportedRats(); }
-
-    void Init() { m_pAosHandleMts->Init(); }
-
     void SetBlocked(IN IMS_BOOL bBlocked) { m_pAosHandleMts->m_bBlocked = bBlocked; }
 
     IMS_BOOL IsBlocked() { return m_pAosHandleMts->AosHandle::IsBlocked(); }
 
     IImsAosInfo* GetAosInfo() { return m_pAosHandleMts->m_piInfo; }
-
-    void InitializeServiceBlock() { m_pAosHandleMts->InitializeServiceBlock(); }
-
-    IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock)
-    {
-        return m_pAosHandleMts->AosHandle::IsHandleBlocked(nBlock);
-    }
-
-    IMS_BOOL IsHandleBlocked() { return m_pAosHandleMts->IsHandleBlocked(); }
-
-    void ProcessCapabilitiesChanged(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
-    {
-        m_pAosHandleMts->ProcessCapabilitiesChanged(objCapabilities);
-    }
-
-    void InitializeServiceFeature() { m_pAosHandleMts->InitializeServiceFeature(); }
 
     void AddBlock(IN IMS_UINT32 nBlock)
     {
@@ -160,16 +153,6 @@ protected:
     void ClearBlocks() { m_pAosHandleMts->m_nBlocks = AosHandle::BLOCK_NONE; }
 
     void SetMtcBlocked(IN IMS_BOOL bBlocked) { m_pAosHandleMts->m_bMtcBlocked = bBlocked; }
-
-    IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
-    {
-        return m_pAosHandleMts->IsSupportedNetworkTypeForCellular(nType);
-    }
-
-    void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
-    {
-        m_pAosHandleMts->Handle_Notify(nType, bBlocked);
-    }
 
     void SetNetworkType(IN IMS_UINT32 nNetworkType)
     {
@@ -261,7 +244,7 @@ TEST_F(AosHandleMtsTest, InitializeSupportedRats_Test)
             .Times(1)
             .WillOnce(ReturnRef(objTestRats));
 
-    InitializeSupportedRats();
+    m_pAosHandleMts->InitializeSupportedRats();
 
     EXPECT_EQ(GetSupportedRats(),
             (NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_WCDMA | NW_REPORT_RADIO_HSPA |
@@ -284,7 +267,7 @@ TEST_F(AosHandleMtsTest, Init_Test)
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
-    Init();
+    m_pAosHandleMts->Init();
 
     EXPECT_EQ(GetSupportedRats(), (NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_NR));
     EXPECT_FALSE(IsBlocked());
@@ -294,7 +277,7 @@ TEST_F(AosHandleMtsTest, Init_Test)
 TEST_F(AosHandleMtsTest, ShouldNotBlockIfSmsCapabilityIsNotBlockedWhenInitializeServiceBlock)
 {
     // WHEN
-    InitializeServiceBlock();
+    m_pAosHandleMts->InitializeServiceBlock();
 
     // THEN
     EXPECT_FALSE(IsBlocked());
@@ -306,7 +289,7 @@ TEST_F(AosHandleMtsTest, ShouldBlockIfSmsCapabilityIsBlockedWhenInitializeServic
     AddBlock(AosHandle::BLOCK_SMS_CAPABILITY);
 
     // WHEN
-    InitializeServiceBlock();
+    m_pAosHandleMts->InitializeServiceBlock();
 
     // THEN
     EXPECT_TRUE(IsBlocked());
@@ -315,7 +298,7 @@ TEST_F(AosHandleMtsTest, ShouldBlockIfSmsCapabilityIsBlockedWhenInitializeServic
 TEST_F(AosHandleMtsTest, FeatureIsAddedIfHandleIsNotBlockedWhenInitializeServiceFeature)
 {
     // WHEN
-    InitializeServiceFeature();
+    m_pAosHandleMts->InitializeServiceFeature();
 
     // THEN
     EXPECT_TRUE(m_pAosHandleMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
@@ -327,7 +310,7 @@ TEST_F(AosHandleMtsTest, FeatureIsNotAddedIfHandleIsBlockedWhenInitializeService
     SetBlocked(IMS_TRUE);
 
     // WHEN
-    InitializeServiceFeature();
+    m_pAosHandleMts->InitializeServiceFeature();
 
     // THEN
     EXPECT_FALSE(m_pAosHandleMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
@@ -340,10 +323,10 @@ TEST_F(AosHandleMtsTest, ShouldSetBlockIfSmsCapabilityIsRemovedWhenRatIs3G)
     SetNetworkType(NW_REPORT_RADIO_WCDMA);
 
     // WHEN
-    ProcessCapabilitiesChanged(objNewCapabilities);
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
 
     // THEN
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, ShouldResetBlockIfSmsCapabilityIsAddedWhenRatIsLte)
@@ -351,16 +334,16 @@ TEST_F(AosHandleMtsTest, ShouldResetBlockIfSmsCapabilityIsAddedWhenRatIsLte)
     // GIVEN
     ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
     SetNetworkType(NW_REPORT_RADIO_LTE);
-    ProcessCapabilitiesChanged(objNewCapabilities);
-    EXPECT_TRUE(IsHandleBlocked());
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlocked());
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::SMS));
 
     // WHEN
-    ProcessCapabilitiesChanged(objNewCapabilities);
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
 
     // THEN
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, DoNothingIfEmergencyServiceWhenCapabilityChanged)
@@ -389,7 +372,7 @@ TEST_F(AosHandleMtsTest, DoNothingIfEmergencyServiceWhenCapabilityChanged)
             static_cast<IMS_UINT32>(AosCapability::SMS));
 
     // WHEN
-    ProcessCapabilitiesChanged(objNewCapabilities);
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
 
     // THEN
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
@@ -404,10 +387,10 @@ TEST_F(AosHandleMtsTest, DoNothingIfSmsCapabilityIsNotChanged)
     SetNetworkType(NW_REPORT_RADIO_LTE);
 
     // WHEN
-    ProcessCapabilitiesChanged(objNewCapabilities);
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
 
     // THEN
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, DoNothingIfCurrentRatIsNotSupported)
@@ -417,10 +400,10 @@ TEST_F(AosHandleMtsTest, DoNothingIfCurrentRatIsNotSupported)
     SetNetworkType(NW_REPORT_RADIO_GSM);
 
     // WHEN
-    ProcessCapabilitiesChanged(objNewCapabilities);
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
 
     // THEN
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, ShouldSetBlockIfRatIsChangedToTheOneHasNoCapability)
@@ -435,7 +418,7 @@ TEST_F(AosHandleMtsTest, ShouldSetBlockIfRatIsChangedToTheOneHasNoCapability)
     NetTracker_StatusChanged();
 
     // THEN
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, ShouldResetBlockIfRatIsChangedToTheOneHasCapability)
@@ -451,7 +434,7 @@ TEST_F(AosHandleMtsTest, ShouldResetBlockIfRatIsChangedToTheOneHasCapability)
     NetTracker_StatusChanged();
 
     // THEN
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, DoNothingWhenNetworkIsChangedIfWifiTestMode)
@@ -477,7 +460,7 @@ TEST_F(AosHandleMtsTest, HandleIsBlockedIfSmsCapabilityIsBlocked)
     AddBlock(AosHandle::BLOCK_SMS_CAPABILITY);
 
     // WHEN & THEN
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, HandleIsBlockedIfMtcHandleIsBlocked)
@@ -486,13 +469,13 @@ TEST_F(AosHandleMtsTest, HandleIsBlockedIfMtcHandleIsBlocked)
     SetMtcBlocked(IMS_TRUE);
 
     // WHEN & THEN
-    EXPECT_TRUE(IsHandleBlocked());
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, HandleIsNotBlockedIfSmsCapabilityAndMtcHandleAreNotBlocked)
 {
     // WHEN & THEN
-    EXPECT_FALSE(IsHandleBlocked());
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked());
 }
 
 TEST_F(AosHandleMtsTest, SmsIsBlockedIfSmsCapabilityBlocked)
@@ -532,22 +515,22 @@ TEST_F(AosHandleMtsTest, IsSupportedNetworkTypeForCellular_Test)
             .Times(1)
             .WillOnce(ReturnRef(objRats));
 
-    InitializeSupportedRats();
+    m_pAosHandleMts->InitializeSupportedRats();
 
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_AMPS));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_CDMA));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_EDGE));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_AMPS));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_EHRPD));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_EVDODO));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GPS));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GSM));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_HDR));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_HSPA));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WCDMA));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_AMPS));
+    EXPECT_FALSE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_CDMA));
+    EXPECT_TRUE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_EDGE));
+    EXPECT_FALSE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_AMPS));
+    EXPECT_FALSE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_EHRPD));
+    EXPECT_FALSE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_EVDODO));
+    EXPECT_FALSE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GPS));
+    EXPECT_TRUE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GSM));
+    EXPECT_FALSE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_HDR));
+    EXPECT_TRUE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_HSPA));
+    EXPECT_TRUE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
+    EXPECT_TRUE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WCDMA));
+    EXPECT_TRUE(m_pAosHandleMts->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
 }
 
 TEST_F(AosHandleMtsTest, Handle_Notify_Test1)
@@ -557,10 +540,10 @@ TEST_F(AosHandleMtsTest, Handle_Notify_Test1)
 
     EXPECT_FALSE(IsBlocked());
 
-    Handle_Notify(ImsAosService::SIP_CONTROLLER, IMS_FALSE);
+    m_pAosHandleMts->Handle_Notify(ImsAosService::SIP_CONTROLLER, IMS_FALSE);
     EXPECT_FALSE(IsBlocked());
 
-    Handle_Notify(ImsAosService::SIP_CONTROLLER, IMS_TRUE);
+    m_pAosHandleMts->Handle_Notify(ImsAosService::SIP_CONTROLLER, IMS_TRUE);
     EXPECT_FALSE(IsBlocked());
 }
 
@@ -571,11 +554,11 @@ TEST_F(AosHandleMtsTest, Handle_Notify_Test2)
 
     EXPECT_FALSE(IsBlocked());
 
-    Handle_Notify(ImsAosService::MTC, IMS_FALSE);
+    m_pAosHandleMts->Handle_Notify(ImsAosService::MTC, IMS_FALSE);
     EXPECT_FALSE(IsBlocked());
 
     SetBlocked(IMS_TRUE);
-    Handle_Notify(ImsAosService::MTC, IMS_TRUE);
+    m_pAosHandleMts->Handle_Notify(ImsAosService::MTC, IMS_TRUE);
     EXPECT_TRUE(IsBlocked());
 }
 
@@ -584,10 +567,10 @@ TEST_F(AosHandleMtsTest, Handle_Notify_Test3)
     // Test3: type = Mtc, mts not blocked, mtc blocked then unblocked
     // Expectation: mts blocked if mtc blocked
 
-    Handle_Notify(ImsAosService::MTC, IMS_TRUE);
+    m_pAosHandleMts->Handle_Notify(ImsAosService::MTC, IMS_TRUE);
     EXPECT_TRUE(IsBlocked());
 
-    Handle_Notify(ImsAosService::MTC, IMS_FALSE);
+    m_pAosHandleMts->Handle_Notify(ImsAosService::MTC, IMS_FALSE);
     EXPECT_FALSE(IsBlocked());
 }
 
@@ -604,7 +587,7 @@ TEST_F(AosHandleMtsTest,
     m_pAosHandleMts->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_ADD);
 
     // THEN
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
 }
 
 TEST_F(AosHandleMtsTest,
@@ -621,5 +604,5 @@ TEST_F(AosHandleMtsTest,
     m_pAosHandleMts->Request(IAosHandle::TYPE_LIMITED_MODE, IAosHandle::STATE_REMOVE);
 
     // THEN
-    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked(AosHandle::BLOCK_LIMITED_SMS));
 }
