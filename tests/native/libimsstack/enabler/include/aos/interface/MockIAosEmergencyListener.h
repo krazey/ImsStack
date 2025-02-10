@@ -25,7 +25,8 @@ class MockIAosEmergencyListener : public IAosEmergencyListener
 {
 public:
     MOCK_METHOD(void, CallbackModeChanged,
-            (IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration),
+            (IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
+                    IN IMS_ULONG nDuration),
             (override));
 };
 

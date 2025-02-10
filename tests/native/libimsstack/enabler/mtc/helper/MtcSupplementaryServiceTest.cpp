@@ -19,34 +19,35 @@
 #include "ISipHeader.h"
 #include "ImsList.h"
 #include "ImsMap.h"
+#include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
+#include "MockISipMessage.h"
 #include "MtcDef.h"
 #include "SipHeaderName.h"
 #include "call/MockIMtcCallContext.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockIMessage.h"
 #include "helper/MtcSupplementaryService.h"
-#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-static const IMS_CHAR SESSION_ID[] = "f81d4fae7dec11d0a76500a0c91e6bf6";
+LOCAL const IMS_CHAR SESSION_ID[] = "f81d4fae7dec11d0a76500a0c91e6bf6";
 
-static const AString CNV_HEADER_PASSED =
+LOCAL const AString CNV_HEADER_PASSED =
         "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
-static const AString CNV_HEADER_FAILED =
+LOCAL const AString CNV_HEADER_FAILED =
         "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Failed>";
-static const AString CNV_HEADER_PASSED_POTENTIAL_SPAM =
+LOCAL const AString CNV_HEADER_PASSED_POTENTIAL_SPAM =
         "potential spam <sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
-static const AString CNV_HEADER_NO_TN_VALIDATION =
+LOCAL const AString CNV_HEADER_NO_TN_VALIDATION =
         "<sip:01030993879@fakeims.google.com;verstat=No-TN-Validation>";
-static const AString CNV_HEADER_NONE = "<sip:01030993879@fakeims.google.com>";
+LOCAL const AString CNV_HEADER_NONE = "<sip:01030993879@fakeims.google.com>";
 
 namespace android
 {
@@ -54,8 +55,7 @@ namespace android
 class MtcSupplementaryServiceTest : public ::testing::Test
 {
 public:
-    MockIMtcConfigurationManager* pMockIMtcConfigurationManager;
-    MtcConfigurationProxy* pMtcConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pMtcSupplementaryService;
     MockISipMessage objMockISipMessage;
     MockIMessage objMockIMessage;
@@ -67,10 +67,8 @@ protected:
     {
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pMockIMtcConfigurationManager = new MockIMtcConfigurationManager();
-        pMtcConfigurationProxy = new MtcConfigurationProxy(
-                static_cast<IMtcConfigurationManager*>(pMockIMtcConfigurationManager));
-        pMtcSupplementaryService = new MtcSupplementaryService(objContext, *pMtcConfigurationProxy);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
+        pMtcSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
 
         EXPECT_CALL(objMockIMessage, GetMessage())
                 .Times(AnyNumber())
@@ -79,10 +77,9 @@ protected:
 
     virtual void TearDown() override
     {
-        if (pMtcConfigurationProxy)
+        if (pConfigurationProxy)
         {
-            // pMockIMtcConfigurationManager will be deleted by below.
-            delete pMtcConfigurationProxy;
+            delete pConfigurationProxy;
         }
 
         if (pMtcSupplementaryService)
@@ -164,56 +161,81 @@ TEST_F(MtcSupplementaryServiceTest, UpdateTip)
             AString("01030993879,testDisplay"));
 }
 
-TEST_F(MtcSupplementaryServiceTest, UpdateCallerId)
+TEST_F(MtcSupplementaryServiceTest, UpdateCallerIdDoesNotCheckPrivacyHeaderIfFromIsAnonymous)
 {
-    ImsList<AString> objPrivacyHeadersHaveId;
-    objPrivacyHeadersHaveId.Append(AString("id"));
-    ImsList<AString> objPrivacyHeadersEmpty;
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::PRIVACY, AString::ConstNull()))
-            .Times(AnyNumber())
-            .WillOnce(Return(objPrivacyHeadersHaveId))
-            .WillRepeatedly(Return(objPrivacyHeadersEmpty));
+    ImsList<AString> objHeadersAnonymous;
+    objHeadersAnonymous.Append(AString("\"Anonymous\" <sip:Anonymous@fakeims.google.com>"));
+
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillOnce(Return(objHeadersAnonymous));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::PRIVACY, _)).Times(0);
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
+}
 
-    ImsMap<SuppType, SuppService*> objOutSuppService1 = pMtcSupplementaryService->GetServices();
+TEST_F(MtcSupplementaryServiceTest, UpdateCallerIdChecksPrivacyHeaderIfFromIsNotAnonymous)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString("\"testDisplay\" <sip:01030993879@fakeims.google.com>"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillOnce(Return(objHeaders));
+
+    ImsList<AString> objPrivacyHeadersHaveId;
+    objPrivacyHeadersHaveId.Append(AString("id"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::PRIVACY, AString::ConstNull()))
+            .WillOnce(Return(objPrivacyHeadersHaveId));
+
+    pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
             static_cast<IMS_SINT32>(OipType::RESTRICTED));
+}
 
-    // config-From, config-no fallback -> IDENTITY
-    // config-From, config-no fallback, no From header -> NONE
-    // config-From, config-no fallback, anonymouns -> RESTRICTED
-    // config-From, config-no fallback, unavailable, unavailable_none -> NONE
-    // config-From, config-no fallback, unavailable, unavailable_restriected -> RESTRICTED
-    EXPECT_CALL(*pMockIMtcConfigurationManager, IsEnableOipHeaderPolicyFallBack())
+TEST_F(MtcSupplementaryServiceTest, UpdateCallerIdUsingFromOnly)
+{
+    // config-From, config-no fallback -> IDENTITY -> (No Privacy) IDENTITY
+    // config-From, config-no fallback, no From header -> INVALID -> (No Privacy) NONE
+    // config-From, config-no fallback, anonymous -> RESTRICTED
+    // config-From, config-no fallback, unavailable, unavailable_config: RESTRICTED
+    // config-From, config-no fallback, unavailable, unavailable_config: -> UNAVAILABLE
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL))
             .Times(5)
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(*pMockIMtcConfigurationManager, IsOipSourceFromHeader())
+    EXPECT_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(*pMockIMtcConfigurationManager, GetOipTypeForUnavailable())
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT))
             .Times(2)
-            .WillOnce(Return(0))
-            .WillOnce(Return(1));
+            .WillOnce(Return(static_cast<IMS_SINT32>(OipType::RESTRICTED)))
+            .WillOnce(Return(static_cast<IMS_SINT32>(OipType::UNAVAILABLE)));
 
     ImsList<AString> objHeaders;
     objHeaders.Append(AString("\"testDisplay\" <sip:01030993879@fakeims.google.com>"));
     ImsList<AString> objHeadersEmpty;
     ImsList<AString> objHeadersAnonymous;
     objHeadersAnonymous.Append(AString("\"Anonymous\" <sip:Anonymous@fakeims.google.com>"));
-    ImsList<AString> objHeadersunavailable;
-    objHeadersunavailable.Append(AString("\"unavailable\" <sip:unavailable@fakeims.google.com>"));
+    ImsList<AString> objHeadersUnavailable;
+    objHeadersUnavailable.Append(AString("\"unavailable\" <sip:unavailable@fakeims.google.com>"));
+
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::PRIVACY, _))
+            .Times(2)
+            .WillRepeatedly(Return(objHeadersEmpty));
 
     EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
             .Times(5)
             .WillOnce(Return(objHeaders))
             .WillOnce(Return(objHeadersEmpty))
             .WillOnce(Return(objHeadersAnonymous))
-            .WillOnce(Return(objHeadersunavailable))
-            .WillOnce(Return(objHeadersunavailable));
+            .WillOnce(Return(objHeadersUnavailable))
+            .WillOnce(Return(objHeadersUnavailable));
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
@@ -229,26 +251,45 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallerId)
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
-            static_cast<IMS_SINT32>(OipType::NONE));
+            static_cast<IMS_SINT32>(OipType::RESTRICTED));
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
-            static_cast<IMS_SINT32>(OipType::RESTRICTED));
+            static_cast<IMS_SINT32>(OipType::UNAVAILABLE));
+}
 
+TEST_F(MtcSupplementaryServiceTest, UpdateCallerIdUsingPaidByFallback)
+{
     // config-From, config-fallback, no From header -> IDENTITY
     // config-From, config-fallback, no From header, no Paid header -> NONE
     // config-From, config-fallback, no From header, anonymouns -> RESTRICTED
-    // config-From, config-fallback, no From header, unavailable, unavailable_none -> NONE
-    // config-From, config-fallback, no From header, unavailable, unavailable_restriected
+    // config-From, config-fallback, no From header, unavailable, unavailable_config: RESTRICTED
+    // config-From, config-fallback, no From header, unavailable, unavailable_config: -> UNAVAILABLE
     // -> RESTRICTED
-    EXPECT_CALL(*pMockIMtcConfigurationManager, IsEnableOipHeaderPolicyFallBack())
+    EXPECT_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL))
             .Times(5)
             .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(*pMockIMtcConfigurationManager, GetOipTypeForUnavailable())
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT))
             .Times(2)
-            .WillOnce(Return(0))
-            .WillOnce(Return(1));
+            .WillOnce(Return(static_cast<IMS_SINT32>(OipType::RESTRICTED)))
+            .WillOnce(Return(static_cast<IMS_SINT32>(OipType::UNAVAILABLE)));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString("\"testDisplay\" <sip:01030993879@fakeims.google.com>"));
+    ImsList<AString> objHeadersEmpty;
+    ImsList<AString> objHeadersAnonymous;
+    objHeadersAnonymous.Append(AString("\"Anonymous\" <sip:Anonymous@fakeims.google.com>"));
+    ImsList<AString> objHeadersUnavailable;
+    objHeadersUnavailable.Append(AString("\"unavailable\" <sip:unavailable@fakeims.google.com>"));
+
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::PRIVACY, _))
+            .Times(2)
+            .WillRepeatedly(Return(objHeadersEmpty));
 
     EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
             .Times(5)
@@ -260,8 +301,8 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallerId)
             .WillOnce(Return(objHeaders))
             .WillOnce(Return(objHeadersEmpty))
             .WillOnce(Return(objHeadersAnonymous))
-            .WillOnce(Return(objHeadersunavailable))
-            .WillOnce(Return(objHeadersunavailable));
+            .WillOnce(Return(objHeadersUnavailable))
+            .WillOnce(Return(objHeadersUnavailable));
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
@@ -277,11 +318,49 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallerId)
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
-            static_cast<IMS_SINT32>(OipType::NONE));
+            static_cast<IMS_SINT32>(OipType::RESTRICTED));
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
-            static_cast<IMS_SINT32>(OipType::RESTRICTED));
+            static_cast<IMS_SINT32>(OipType::UNAVAILABLE));
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateCallerIdWithDisplayName)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT))
+            .WillByDefault(Return(static_cast<IMS_SINT32>(OipType::UNAVAILABLE)));
+
+    ImsList<AString> objFromHeaders;
+    objFromHeaders.Append(AString("\"Coin line/payphone\" <sip:anonymous@anonymous.invalid>"));
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objFromHeaders));
+    pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
+            static_cast<IMS_SINT32>(OipType::PAYPHONE));
+
+    objFromHeaders.Clear();
+    objFromHeaders.Append(
+            AString("\"Interaction with other service\" <sip:anonymous@anonymous.invalid>"));
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objFromHeaders));
+    pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
+            static_cast<IMS_SINT32>(OipType::UNAVAILABLE));
+
+    objFromHeaders.Clear();
+    objFromHeaders.Append(AString("\"Unavailable\" <sip:anonymous@anonymous.invalid>"));
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
+            .WillByDefault(Return(objFromHeaders));
+    pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
+            static_cast<IMS_SINT32>(OipType::UNAVAILABLE));
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCnap)
@@ -291,14 +370,15 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCnap)
     // config-From, config-fallback, no From
     // config-Paid, config-fallback, no Paid
 
-    EXPECT_CALL(*pMockIMtcConfigurationManager, IsEnableOipHeaderPolicyFallBack())
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL))
             .Times(4)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_TRUE));
 
-    EXPECT_CALL(*pMockIMtcConfigurationManager, IsOipSourceFromHeader())
+    EXPECT_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
             .Times(4)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))

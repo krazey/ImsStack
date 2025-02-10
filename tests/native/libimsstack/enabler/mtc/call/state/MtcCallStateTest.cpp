@@ -15,10 +15,17 @@
  */
 
 #include "IIpcan.h"
+#include "IReference.h"
+#include "ISipClientConnection.h"
+#include "ISipConnection.h"
+#include "ISipServerConnection.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "MediaDef.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipClientConnection.h"
+#include "MockISipServerConnection.h"
 #include "MtcDef.h"
 #include "aos/ImsAosReason.h"
 #include "call/IMtcCall.h"
@@ -29,20 +36,13 @@
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallState.h"
 #include "conferencecall/ConferenceDef.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IReference.h"
-#include "core/MockISession.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "sipcore/ISipClientConnection.h"
-#include "sipcore/ISipConnection.h"
-#include "sipcore/ISipServerConnection.h"
-#include "sipcore/MockISipClientConnection.h"
-#include "sipcore/MockISipServerConnection.h"
 #include <gtest/gtest.h>
 
 LOCAL CallStateName INITIAL_CALL_STATE = CallStateName::IDLE;
@@ -59,10 +59,9 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockISession objISession;
-    MockIMtcConfigurationManager* pConfigurationManager;
     MockIMtcMediaManager objMediaManager;
     MockEpsFallbackTrigger* pEpsFbTrigger;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MediaInfo objMediaInfo;
     CallReasonInfo* pReason;
 
@@ -76,8 +75,7 @@ protected:
         ON_CALL(objContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         pReason = new CallReasonInfo(CODE_UNSPECIFIED);
@@ -534,7 +532,9 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfSrvccStarted)
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::STARTED));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    nAnyAosReason))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
@@ -547,7 +547,9 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfEpsFallbackOngoing)
 {
     IMS_UINT32 nAnyAosReason = 1;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    nAnyAosReason))
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
@@ -571,7 +573,9 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsNotTerm
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    nAnyAosReason))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
@@ -586,7 +590,9 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsTermina
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    nAnyAosReason))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,

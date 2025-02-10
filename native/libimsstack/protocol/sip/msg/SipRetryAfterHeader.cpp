@@ -54,22 +54,16 @@ SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams)
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipRetryAfterHeader::EncodeHdr(
-        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipRetryAfterHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    const SIP_UINT16 MAX_RETRY_AFTER_LEN = 11;
-    SIP_CHAR szLen[MAX_RETRY_AFTER_LEN];
-    SipPf_Sprintf(szLen, "%u", m_nDeltaSec);
-
-    SipPf_Strcpy(*ppCurrPos, szLen);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipPf_Sprintf(*ppCurrPos, "%u", m_nDeltaSec);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
     if (m_pszComment != SIP_NULL)
     {
-        SIP_ENC_LPAREN(*ppCurrPos);
-        SipPf_Strcpy(*ppCurrPos, m_pszComment);
-        SipEnc_UpdateCurrPos(ppCurrPos);
-        SIP_ENC_RPAREN(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, LPARAN);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszComment);
+        SipMsgUtil::Encode(*ppCurrPos, RPARAN);
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
@@ -77,10 +71,10 @@ SIP_BOOL SipRetryAfterHeader::EncodeHdr(
 
 SIP_VOID SipRetryAfterHeader::SetComment(const SIP_CHAR* pszComment)
 {
-    SetCharVar(pszComment, m_pszComment);
+    SipMsgUtil::SetValue(pszComment, m_pszComment);
 }
 
-SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRetryAfterHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -102,7 +96,8 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDe
         return SIP_FALSE;
     }
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if ((pCommentEnd == SIP_NULL) || ((pTempPre + 1) > pCommentEnd))
         {
@@ -129,36 +124,35 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDe
     {
         if ((pCommentStart + SIP_ONE) == pCommentEnd)
         {
-            SetCharVar("", m_pszComment);
+            SipMsgUtil::SetValue("", m_pszComment);
         }
         else
         {
-            m_pszComment = SipCreateString(pCommentStart + SIP_ONE, pCommentEnd - SIP_ONE);
+            m_pszComment =
+                    SipAbnfUtil::CreateString(pCommentStart + SIP_ONE, pCommentEnd - SIP_ONE);
         }
 
         if (m_pszComment == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pEndPt = pCommentStart - 1;
     }
 
-    pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
+    pEndPt = SipAbnfUtil::SkipWhiteSpaceFromRight(pStartPt, pEndPt);
     /*Now decode the delta sec value*/
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (SipPf_Atoi_Unsigned(pszValue, m_nDeltaSec) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:Retry After value is not valid",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Retry-After value is not valid", SIP_ZERO, SIP_ZERO);
         delete[] pszValue;
         return SIP_FALSE;
     }

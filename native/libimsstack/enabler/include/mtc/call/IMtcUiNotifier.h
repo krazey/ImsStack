@@ -65,6 +65,14 @@ public:
     virtual void SendStartFailed(IN const CallReasonInfo& objReason) = 0;
 
     /**
+     * @brief Notifies that the call setup is initiating.
+     *
+     * This method is called after sending an INVITE request, indicating that the call setup process
+     * has started.
+     */
+    virtual void SendInitiating() = 0;
+
+    /**
      * @brief Notifies that the call setup is progressing.
      */
     virtual void SendProgressing() = 0;

@@ -22,9 +22,9 @@
 #include "config/TextConfiguration.h"
 #include "text/TextDef.h"
 #include "text/TextProfileUtil.h"
-#include "text/TextProfileExtractor.h"
+#include "text/TextSdpParser.h"
 #include "text/TextSdpGenerator.h"
-#include "text/TextSdpNegotiator.h"
+#include "text/TextProfileNegotiator.h"
 
 /**
  * @brief The class to negotiate and form the SDP attribute belong to the m=text line
@@ -85,7 +85,7 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    std::unique_ptr<TextProfileExtractor> m_pProfileExtractor;
+    std::unique_ptr<TextSdpParser> m_pSdpParser;
 };
 
 #endif

@@ -97,17 +97,17 @@ public:
      */
     virtual IMS_SINT32 GetPortRtcp() const;
     /**
-     * @brief Get the rtcp interval in live state
+     * @brief Get the rtcp interval in active state
      *
-     * @return IMS_SINT32 Return the rtcp interval
+     * @return IMS_SINT32 Return the rtcp interval. The timer for this interval runs in seconds.
      */
-    virtual IMS_SINT32 GetRtcpLiveInterval() const;
+    virtual IMS_SINT32 GetRtcpIntervalOnActive() const;
     /**
      * @brief Get the rtcp interval in hold state
      *
-     * @return IMS_SINT32 Return the rtcp interval
+     * @return IMS_SINT32 Return the rtcp interval. The timer for this interval runs in seconds.
      */
-    virtual IMS_SINT32 GetRtcpInterval() const;
+    virtual IMS_SINT32 GetRtcpIntervalOnHold() const;
     /**
      * @brief Get the as bandwidth kbps
      *
@@ -135,7 +135,7 @@ public:
     /**
      * @brief Get the rtcp inactivity timer in milli seconds unit
      *
-     * @return IMS_SINT32  Return the rtp inactivitity timer
+     * @return IMS_SINT32 Return the rtcp inactivitity timer
      */
     virtual IMS_SINT32 GetRtcpInactivityTimerMillis() const;
 
@@ -166,14 +166,14 @@ public:
 
     /*
         Bandwidth_option_value
-        BW_OPTION_SOURCE_VALUE : Use Source Profile's AS/RS/RR Value
-        BW_OPTION_NEGOTIATED_VALUE : Use Negotiated AS/RS/RR Value
-                                    (compare source profile and dest profile)
+        BW_OPTION_LOCAL_VALUE : Use Local Profile's AS/RS/RR Value
+        BW_OPTION_REMOTE_VALUE : Use Remote Profile's AS/RS/RR Value (If sdp negotiationsucceeds,
+                the value of remote profile is used as negotiated profile.)
     */
     enum
     {
-        BW_OPTION_SOURCE_VALUE = 0,
-        BW_OPTION_NEGOTIATED_VALUE = 1
+        BW_OPTION_LOCAL_VALUE = 0,
+        BW_OPTION_REMOTE_VALUE = 1
     };
 
     /** check SDPOfferCapNegForAVPF option
@@ -193,8 +193,8 @@ public:
     static const IMS_SINT32 DEFAULT_RTP_PORT = 50010;
     static const IMS_SINT32 DEFAULT_RTP_PORT_END = 50060;
     static const IMS_SINT32 DEFAULT_RTCP_PORT = 50011;
-    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_LIVE = 5;
-    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL = 5;
+    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_ACTIVE = 5;
+    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_HOLD = 5;
     static const IMS_SINT32 DEFAULT_AS = 41;
     static const IMS_SINT32 DEFAULT_RS = 600;
     static const IMS_SINT32 DEFAULT_RR = 2000;
@@ -206,8 +206,8 @@ protected:
     IMS_SINT32 m_nPortRtp;
     IMS_SINT32 m_nPortRtpEnd;
     IMS_SINT32 m_nPortRtcp;
-    IMS_SINT32 m_nRtcpLiveInterval;
-    IMS_SINT32 m_nRtcpInterval;
+    IMS_SINT32 m_nRtcpIntervalOnActive;
+    IMS_SINT32 m_nRtcpIntervalOnHold;
     IMS_SINT32 m_nAsBandwidthKbps;
     IMS_SINT32 m_nRsBandwidthBps;
     IMS_SINT32 m_nRrBandwidthBps;

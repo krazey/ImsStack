@@ -148,7 +148,7 @@ public class NativeStateAgent implements NativeStateInterface {
     }
 
     private void notifyNativeServiceReady() {
-        ImsLog.i(mSlotId, "NativeState#notifyNativeServiceReady");
+        ImsLog.i(this, mSlotId, "notifyNativeServiceReady");
         for (Listener l : mListeners) {
             l.onNativeServiceReady();
         }
@@ -156,7 +156,7 @@ public class NativeStateAgent implements NativeStateInterface {
 
     private void setServiceReady(boolean serviceReady) {
         if (mServiceReady != serviceReady) {
-            ImsLog.i(mSlotId, "NativeState#setServiceReady: "
+            ImsLog.i(this, mSlotId, "setServiceReady: "
                     + mServiceReady + " >> " + serviceReady);
             mServiceReady = serviceReady;
         }

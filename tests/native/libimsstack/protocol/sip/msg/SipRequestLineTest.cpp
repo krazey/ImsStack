@@ -42,7 +42,7 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode("sip:user@host", 13));
 
     pRequestLine->SetReqUri(pSipAddrSpec);
     pSipAddrSpec->SipDelete();
@@ -50,7 +50,7 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode("sip:user@host", 13));
 
     /* Calling SetReqUri again to verify already set uri is deleted and assigned new uri */
     pRequestLine->SetReqUri(pSipAddrSpec);
@@ -71,7 +71,7 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     pCopyRequestLine->SipDelete();
 }
 
-TEST_F(SipRequestLineTest, EncodeRequestLine)
+TEST_F(SipRequestLineTest, Encode)
 {
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
@@ -83,53 +83,53 @@ TEST_F(SipRequestLineTest, EncodeRequestLine)
     ASSERT_TRUE(pRequestLine != nullptr);
 
     /* Empty request line, fail */
-    EXPECT_EQ(SIP_FALSE, pRequestLine->EncodeRequestLine(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Encode(&pBuff));
 
     /* Only method set and no addrspec and sip version, fail */
     pRequestLine->SetMethod("INVITE");
-    EXPECT_EQ(SIP_FALSE, pRequestLine->EncodeRequestLine(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Encode(&pBuff));
 
     SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
     /* method and addrspec present and no sip version, fail */
     pRequestLine->SetReqUri(pSipAddrSpec);
-    EXPECT_EQ(SIP_FALSE, pRequestLine->EncodeRequestLine(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Encode(&pBuff));
 
     pRequestLine->SipDelete();
 
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode("sip:user@host", 13));
 
     pRequestLine = new SipRequestLine("INVITE", pSipAddrSpec, SIP_SIPVER);
     ASSERT_TRUE(pRequestLine != nullptr);
 
     /* method, addrspec and sip version present, success */
-    EXPECT_EQ(SIP_TRUE, pRequestLine->EncodeRequestLine(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pRequestLine->Encode(&pBuff));
     EXPECT_STREQ("INVITE sip:user@host SIP/2.0", &(aBuffer[0]));
 
     pRequestLine->SipDelete();
 }
 
-TEST_F(SipRequestLineTest, DecodeRequestLine)
+TEST_F(SipRequestLineTest, Decode)
 {
     SipRequestLine* pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pRequestLine->DecodeRequestLine("", 0));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Decode("", 0));
 
-    EXPECT_EQ(SIP_FALSE, pRequestLine->DecodeRequestLine("MESSAGE", 7));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Decode("MESSAGE", 7));
 
-    EXPECT_EQ(SIP_FALSE, pRequestLine->DecodeRequestLine("MESSAGE sip:abcd", 16));
+    EXPECT_EQ(SIP_FALSE, pRequestLine->Decode("MESSAGE sip:abcd", 16));
 
     pRequestLine->SipDelete();
 
     pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pRequestLine->DecodeRequestLine("MESSAGE sip:abcd SIP/2.0", 24));
+    EXPECT_EQ(SIP_TRUE, pRequestLine->Decode("MESSAGE sip:abcd SIP/2.0", 24));
 
     pRequestLine->SipDelete();
 }

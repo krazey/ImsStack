@@ -634,12 +634,12 @@ public final class ImsMmTelFeatureWrapper {
         }
     }
 
-    private static void logi(String s) {
-        Log.i(Log.TAG, "ImsMmTelFeatureWrapper: " + s);
+    private void logi(String s) {
+        Log.i(this, s);
     }
 
-    private static void loge(String s) {
-        Log.e(Log.TAG, "ImsMmTelFeatureWrapper: " + s);
+    private void loge(String s) {
+        Log.e(this, s);
     }
 
     public class MmTelFeatureListener extends MmTelFeature.Listener {

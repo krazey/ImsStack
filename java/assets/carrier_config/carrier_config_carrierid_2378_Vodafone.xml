@@ -16,15 +16,15 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
 
     <!-- Aos -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
 
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_oir_network_default_operation_int" value="1"/>
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_oir_network_default_operation_int" value="1"/>
 
     <!-- USSD over IMS -->
     <int name="carrier_ussd_method_int" value="1"/>
@@ -117,8 +117,8 @@
     </pbundle>
 
     <!-- Audio -->
-    <boolean name="audio_bw_nego_option_bool" value="true"/>
-    <int name="audio_rtp_dscp_int" value="46"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
+    <int name="imsvoice.audio_rtp_dscp_int" value="46"/>
     <int-array name="imsvoice.audio_port_rtp_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
@@ -133,7 +133,7 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <int name="audio_telephone_event_duration_millis_int" value="200"/>
+    <int name="imsvoice.audio_telephone_event_duration_millis_int" value="200"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
 
     <!-- Video -->
@@ -145,9 +145,9 @@
     <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
     <int name="imsvt.video_send_periodic_sps_pps_int" value="1"/>
-    <boolean name="video_drop_p_frame_bool" value="true"/>
-    <int name="video_cvo_value_int" value="4"/>
-    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
+    <boolean name="imsvt.video_drop_p_frame_bool" value="true"/>
+    <int name="imsvt.video_cvo_value_int" value="4"/>
+    <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
     <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <boolean name="imsvt.video_avpf_trr_bool" value="true"/>
     <boolean name="imsvt.video_avpf_nack_bool" value="true"/>

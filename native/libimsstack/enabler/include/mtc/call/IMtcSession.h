@@ -52,7 +52,7 @@ public:
      *
      * @return
      */
-    virtual IMS_RESULT SendPrack(IN IMS_BOOL bAllowReOffer) = 0;
+    virtual IMS_RESULT SendPrack(IN IMS_BOOL bSdpOfferRequired) = 0;
 
     /**
      * @brief Responds
@@ -133,6 +133,16 @@ public:
      * @return
      */
     virtual IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Marks the session as terminated or start-failed.
+     *
+     * This method is called to update the session's state when it is no longer active,
+     * specifically in the following cases:
+     * - ISessionListener#SessionTerminated() is invoked.
+     * - ISessionListener#SessionStartFailed() is invoked.
+     */
+    virtual void SetSessionTerminatedOrStartFailed() = 0;
 
     /**
      * @brief Sets the current CallType with the input param.

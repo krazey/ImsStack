@@ -31,6 +31,7 @@ enum class UpdateType
     REFRESH,
     SRVCC_RECOVERED_CANCEL,
     SRVCC_RECOVERED_FAILURE,
+    LOCATION,
 };
 
 enum class PemType
@@ -154,6 +155,9 @@ enum class OipType
     NONE = 0,
     IDENTITY = 1,
     RESTRICTED = 2,
+    UNKNOWN = 3,
+    PAYPHONE = 4,
+    UNAVAILABLE = 5,
 };
 
 enum class CdivCause

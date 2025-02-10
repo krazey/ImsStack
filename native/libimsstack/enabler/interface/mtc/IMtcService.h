@@ -19,7 +19,6 @@
 
 #include "INativeEnabler.h"
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
 
 class AString;
 class ICoreService;
@@ -104,11 +103,31 @@ public:
     virtual IMS_BOOL IsEpsCombinedAttach() const = 0;
 
     /**
+     * @brief Checks if the UE is currently in a roaming network.
+     *
+     * @return True if it's in a roaming network.
+     */
+    virtual IMS_BOOL IsRoaming() const = 0;
+
+    /**
      * @brief Checks if the UE is currently registered through an ePDG.
      *
      * @return True if it's in ePDG.
      */
     virtual IMS_BOOL IsWlanIpCanType() const = 0;
+
+    /**
+     * @brief Checks if CSFB is available based on the UE's network status and carrier
+     *        configuration.
+     *
+     * This method evaluates the UE's network conditions, including NR, EPS Attach Type, Roaming,
+     * and WiFi status, against the CSFB block conditions specified in the carrier configuration
+     * {@link ConfigVoice#KEY_CSFB_BLOCK_CONDITION_INT_ARRAY}.
+     *
+     * @return True if CSFB is available based on the network status and carrier configuration;
+     *         False otherwise.
+     */
+    virtual IMS_BOOL IsCsfbAvailable() const = 0;
 
     /**
      * @brief Gets
@@ -170,7 +189,7 @@ public:
      * @brief Opens
      *
      */
-    virtual void OpenEmergencyService(IN IuMtcService::EmergencyCallRoutingPdn ePdn) = 0;
+    virtual void OpenEmergencyService(IN ServiceType eServiceType) = 0;
 
     /**
      * @brief Stops

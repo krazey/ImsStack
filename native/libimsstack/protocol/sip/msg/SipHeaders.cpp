@@ -18,126 +18,123 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
-
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::ALLOW
-        SipEventHeader::GetNewObj,                       //    SipHeaderBase::ALLOW_EVENTS
-        SipAuthBase::GetNewObj,                          //    SipHeaderBase::AUTHORIZATION
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CALL_ID
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_WILD
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_ANY
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CONTENT_DISPOSITION
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CONTENT_ENCODING
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::CONTENT_LENGTH
-        SipContentTypeHeader::GetNewObj,                 //    SipHeaderBase::CONTENT_TYPE //10
-        SipCSeqHeader::GetNewObj,                        //    SipHeaderBase::CSEQ
-        SipEventHeader::GetNewObj,                       //    SipHeaderBase::EVENT
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::EXPIRES_DATE
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::EXPIRES_SEC
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::EXPIRES_ANY
-        SipAcceptHeader::GetNewObj,                      //    SipHeaderBase::ACCEPT
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MIN_EXPIRES //added
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::FROM
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MAX_FORWARDS
-        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::MIME_VERSION,//20
-        SipPrivacyHeader::GetNewObj,                     //    SipHeaderBase::PRIVACY,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_PREFERRED_IDENTITY,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_ASSERTED_IDENTITY,
-        SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MIN_SE,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::PATH,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_ASSOCIATED_URI,
-        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::P_CALLED_PARTY_ID,
-        SipPVisitedNetworkIdHeader::GetNewObj,           //    SipHeaderBase::P_VISITED_NETWORK_ID,
-        SipPChargingFunctionAddressesHeader::GetNewObj,  //    SipHeaderBase::P_CHRG_FUN_ADDR,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::P_ACCESS_NETWORK_INFO,//30
-        SipPChargingVectorHeader::GetNewObj,         //    SipHeaderBase::P_CHARGING_VECTOR,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::SERVICE_ROUTE,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::HISTORY_INFO,
-        SipRequestDispositionHeader::GetNewObj,      //    SipHeaderBase::REQUEST_DISPOSITION,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::ACCEPT_CONTACT,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::REJECT_CONTACT,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::JOIN,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SIP_IF_MATCH,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SIP_ETAG,
-        SipAuthBase::GetNewObj,                      //    SipHeaderBase::PROXY_AUTHENTICATE,//40
-        SipAuthBase::GetNewObj,                      //    SipHeaderBase::PROXY_AUTHORIZATION,
-        SipRAcKHeader::GetNewObj,                    //    SipHeaderBase::RACK,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::RECORD_ROUTE,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::REFERRED_BY,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::REFER_TO,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::REPLACES,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::REQUIRE,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::ROUTE,
-        SipIntegerHeader::GetNewObj,                 //    SipHeaderBase::RSEQ,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SECURITY_CLIENT,//50
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SECURITY_VERIFY,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SECURITY_SERVER,
-        SipIntegerHeader::GetNewObj,                 //    SipHeaderBase::SESSION_EXPIRES,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SUBSCRIPTION_STATE,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SUPPORTED,
-        SipTimeStampHeader::GetNewObj,               //    SipHeaderBase::TIMESTAMP,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::TO,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::UNSUPPORTED,
-        SipViaHeader::GetNewObj,                     //    SipHeaderBase::VIA,
-        SipWarningHeader::GetNewObj,                 //    SipHeaderBase::WARNING,//60
-        SipAuthBase::GetNewObj,                      //    SipHeaderBase::WWW_AUTHENTICATE,
-        SipUnknownHeader::GetNewObj,                 //    SipHeaderBase::UNKNOWN,
-        SipRetryAfterHeader::GetNewObj,              //    SipHeaderBase::RETRY_AFTER_DATE,
-        SipRetryAfterHeader::GetNewObj,              //    SipHeaderBase::RETRY_AFTER_SEC,
-        SipRetryAfterHeader::GetNewObj,              //    SipHeaderBase::RETRY_AFTER_ANY,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::P_EARLY_MEDIA,
-        SipResourcePriorityHeader::GetNewObj,        //    SipHeaderBase::RESOURCE_PRIORITY,
-        SipAcceptResourcePriorityHeader::GetNewObj,  //    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY,
-        SipDateHeader::GetNewObj,                    //    SipHeaderBase::DATE,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::ACCEPT_ENCODING,//70
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::ACCEPT_LANGUAGE,
-        SipInfoBase::GetNewObj,                      //    SipHeaderBase::ALERT_INFO,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::ANSWER_MODE,
-        SipAuthInfoHeader::GetNewObj,                //    SipHeaderBase::AUTHENTICATION_INFO,
-        SipInfoBase::GetNewObj,                      //    SipHeaderBase::CALL_INFO,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::CONTENT_LANGUAGE,
-        SipInfoBase::GetNewObj,                      //    SipHeaderBase::ERROR_INFO,
-        SipIntegerHeader::GetNewObj,                 //    SipHeaderBase::FLOW_TIMER,
-        SipIdentityHeader::GetNewObj,                //    SipHeaderBase::IDENTITY,
-        SipInfoBase::GetNewObj,                      //    SipHeaderBase::IDENTITY_INFO,//80
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::IN_REPLY_TO,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::ORGANIZATION,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::P_ANSWER_STATE,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::PERMISSION_MISSING,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::P_MEDIA_AUTHORIZATION,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::P_PROFILE_KEY,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::P_REFUSED_URI_LIST,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::PRIORITY,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::PRIV_ANSWER_MODE,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::PROXY_REQUIRE,//90
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::P_SERVED_USER,
-        SipInfoBase::GetNewObj,                      //    SipHeaderBase::P_USER_DATABASE,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::REASON,
-        SipReferSubHeader::GetNewObj,                //    SipHeaderBase::REFER_SUB,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::REPLY_TO,
-        SIP_NULL,                                    //    SipHeaderBase::RESPONSE_KEY,
-        SipUserAgentHeader::GetNewObj,               //    SipHeaderBase::SERVER,
-                                                     //    Server header same as user agent syntax
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SUBJECT,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SUPPRESS_IF_MATCH,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::TARGET_DIALOG,//100
-        SipTriggerConsentHeader::GetNewObj,          //    SipHeaderBase::TRIGGER_CONSENT,
-        SipUserAgentHeader::GetNewObj,               //    SipHeaderBase::USER_AGENT,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::FEATURE_CAPS,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::GEOLOCATION,
-        SipIntegerHeader::GetNewObj,                 //    SipHeaderBase::GEOLOCATION_ERROR,
-        SipGeolocationRoutingHeader::GetNewObj,      //    SipHeaderBase::GEOLOCATION_ROUTING,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::INFO_PACKAGE,//110
-        SipIntegerHeader::GetNewObj,                 //    SipHeaderBase::MAX_BREADTH,
-        SipPAssertedServiceHeader::GetNewObj,        //    SipHeaderBase::P_ASSERTED_SERVICE,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::POLICY_CONTACT,
-        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::POLICY_ID,
-        SipPPreferredServiceHeader::GetNewObj,       //    SipHeaderBase::P_PREFERRED_SERVICE,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::RECV_INFO,
-        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SESSION_ID
-        SIP_NULL                                     //    SipHeaderBase::TYPE_END //120
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::ALLOW
+        SipEventHeader::GetNewObj,               // SipHeaderBase::ALLOW_EVENTS
+        SipAuthBase::GetNewObj,                  // SipHeaderBase::AUTHORIZATION
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::CALL_ID
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::CONTACT
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::CONTACT_WILD
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::CONTACT_ANY
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::CONTENT_DISPOSITION
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::CONTENT_ENCODING
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::CONTENT_LENGTH
+        SipContentTypeHeader::GetNewObj,         // SipHeaderBase::CONTENT_TYPE
+        SipCSeqHeader::GetNewObj,                // SipHeaderBase::CSEQ
+        SipEventHeader::GetNewObj,               // SipHeaderBase::EVENT
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::EXPIRES_DATE
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::EXPIRES_SEC
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::EXPIRES_ANY
+        SipContentTypeHeader::GetNewObj,         // SipHeaderBase::ACCEPT
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::MIN_EXPIRES
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::FROM
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::MAX_FORWARDS
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::MIME_VERSION
+        SipPrivacyHeader::GetNewObj,             // SipHeaderBase::PRIVACY
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::P_PREFERRED_IDENTITY
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::P_ASSERTED_IDENTITY
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::MIN_SE
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::PATH
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::P_ASSOCIATED_URI
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::P_CALLED_PARTY_ID
+        SipPVisitedNetworkIdHeader::GetNewObj,   // SipHeaderBase::P_VISITED_NETWORK_ID
+        SipPChargingVectorHeader::GetNewObj,     // SipHeaderBase::P_CHRG_FUN_ADDR
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::P_ACCESS_NETWORK_INFO
+        SipPChargingVectorHeader::GetNewObj,     // SipHeaderBase::P_CHARGING_VECTOR
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::SERVICE_ROUTE
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::HISTORY_INFO
+        SipRequestDispositionHeader::GetNewObj,  // SipHeaderBase::REQUEST_DISPOSITION
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::ACCEPT_CONTACT
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::REJECT_CONTACT
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::JOIN
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SIP_IF_MATCH
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SIP_ETAG
+        SipAuthBase::GetNewObj,                  // SipHeaderBase::PROXY_AUTHENTICATE
+        SipAuthBase::GetNewObj,                  // SipHeaderBase::PROXY_AUTHORIZATION
+        SipRAcKHeader::GetNewObj,                // SipHeaderBase::RACK
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::RECORD_ROUTE
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::REFERRED_BY
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::REFER_TO
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::REPLACES
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::REQUIRE
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::ROUTE
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::RSEQ
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SECURITY_CLIENT
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SECURITY_VERIFY
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SECURITY_SERVER
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::SESSION_EXPIRES
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SUBSCRIPTION_STATE
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SUPPORTED
+        SipTimeStampHeader::GetNewObj,           // SipHeaderBase::TIMESTAMP
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::TO
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::UNSUPPORTED
+        SipViaHeader::GetNewObj,                 // SipHeaderBase::VIA
+        SipWarningHeader::GetNewObj,             // SipHeaderBase::WARNING
+        SipAuthBase::GetNewObj,                  // SipHeaderBase::WWW_AUTHENTICATE
+        SipUnknownHeader::GetNewObj,             // SipHeaderBase::UNKNOWN
+        SipRetryAfterHeader::GetNewObj,          // SipHeaderBase::RETRY_AFTER_DATE
+        SipRetryAfterHeader::GetNewObj,          // SipHeaderBase::RETRY_AFTER_SEC
+        SipRetryAfterHeader::GetNewObj,          // SipHeaderBase::RETRY_AFTER_ANY
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::P_EARLY_MEDIA
+        SipResourcePriorityHeader::GetNewObj,    // SipHeaderBase::RESOURCE_PRIORITY
+        SipResourcePriorityHeader::GetNewObj,    // SipHeaderBase::ACCEPT_RESOURCE_PRIORITY
+        SipDateHeader::GetNewObj,                // SipHeaderBase::DATE
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::ACCEPT_ENCODING
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::ACCEPT_LANGUAGE
+        SipInfoBase::GetNewObj,                  // SipHeaderBase::ALERT_INFO
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::ANSWER_MODE
+        SipAuthInfoHeader::GetNewObj,            // SipHeaderBase::AUTHENTICATION_INFO
+        SipInfoBase::GetNewObj,                  // SipHeaderBase::CALL_INFO
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::CONTENT_LANGUAGE
+        SipInfoBase::GetNewObj,                  // SipHeaderBase::ERROR_INFO
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::FLOW_TIMER
+        SipIdentityHeader::GetNewObj,            // SipHeaderBase::IDENTITY
+        SipInfoBase::GetNewObj,                  // SipHeaderBase::IDENTITY_INFO
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::IN_REPLY_TO
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::ORGANIZATION
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::P_ANSWER_STATE
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::PERMISSION_MISSING
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::P_MEDIA_AUTHORIZATION
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::P_PROFILE_KEY
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::P_REFUSED_URI_LIST
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::PRIORITY,
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::PRIV_ANSWER_MODE
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::PROXY_REQUIRE
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::P_SERVED_USER
+        SipInfoBase::GetNewObj,                  // SipHeaderBase::P_USER_DATABASE
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::REASON
+        SipReferSubHeader::GetNewObj,            // SipHeaderBase::REFER_SUB
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::REPLY_TO
+        SIP_NULL,                                // SipHeaderBase::RESPONSE_KEY
+        SipUserAgentHeader::GetNewObj,           // SipHeaderBase::SERVER
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SUBJECT
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SUPPRESS_IF_MATCH
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::TARGET_DIALOG
+        SipTriggerConsentHeader::GetNewObj,      // SipHeaderBase::TRIGGER_CONSENT
+        SipUserAgentHeader::GetNewObj,           // SipHeaderBase::USER_AGENT
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::FEATURE_CAPS
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::GEOLOCATION
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::GEOLOCATION_ERROR
+        SipGeolocationRoutingHeader::GetNewObj,  // SipHeaderBase::GEOLOCATION_ROUTING
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::INFO_PACKAGE
+        SipIntegerHeader::GetNewObj,             // SipHeaderBase::MAX_BREADTH,
+        SipPPreferredServiceHeader::GetNewObj,   // SipHeaderBase::P_ASSERTED_SERVICE
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::POLICY_CONTACT
+        SipNameAddrHeader::GetNewObj,            // SipHeaderBase::POLICY_ID
+        SipPPreferredServiceHeader::GetNewObj,   // SipHeaderBase::P_PREFERRED_SERVICE
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::RECV_INFO
+        SipHeaderBase::GetNewObj,                // SipHeaderBase::SESSION_ID
+        SIP_NULL                                 // SipHeaderBase::TYPE_END
 };
 
 SipHeaders::SipHeaders() :
@@ -147,7 +144,7 @@ SipHeaders::SipHeaders() :
 
 SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
 {
-    eHdrType = CheckAndGetHdrEnumType(eHdrType);
+    eHdrType = SipMsgUtil::CheckAndGetHeaderType(eHdrType);
     if ((eHdrType >= SIP_ZERO) && eHdrType < SipHeaderBase::TYPE_END)
     {
         return gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
@@ -270,7 +267,7 @@ SIP_VOID SipHeaders::SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader)
 
 SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHeader /* = SIP_NULL */)
 {
-    eHdrType = CheckAndGetHdrEnumType(eHdrType);
+    eHdrType = SipMsgUtil::CheckAndGetHeaderType(eHdrType);
     if (SipHeaderBase::IsHeaderTypeValid(eHdrType) == SIP_FALSE)
     {
         return SIP_NULL;
@@ -386,7 +383,7 @@ SIP_BOOL SipHeaders::EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOp
         }
 
         SipEncodeHdrName(arMandatoryHeaders[nIndex], ppCurrPos, nMsgOptions);
-        if (pHeaderObj->EncodeHdr(ppCurrPos) == SIP_FALSE)
+        if (pHeaderObj->Encode(ppCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Mandatory header %d encode fail",
                     arMandatoryHeaders[nIndex], SIP_ZERO);
@@ -394,7 +391,7 @@ SIP_BOOL SipHeaders::EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOp
             return SIP_FALSE;
         }
         pHeaderObj->SipDelete();
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -406,19 +403,19 @@ SIP_BOOL SipHeaders::EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOpti
     if (pTemp != SIP_NULL)
     {
         SipEncodeHdrName(SipHeaderBase::CONTENT_TYPE, ppCurrPos, nMsgOptions);
-        if (pTemp->EncodeHdr(ppCurrPos) == SIP_FALSE)
+        if (pTemp->Encode(ppCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content type encode fail", SIP_ZERO, SIP_ZERO);
             pTemp->SipDelete();
             return SIP_FALSE;
         }
         pTemp->SipDelete();
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
+SIP_BOOL SipHeaders::Encode(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 {
     if (EncodeMandatoryHdrs(ppCurrPos, nMsgOptions) == SIP_FALSE)
     {
@@ -443,14 +440,14 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
         {
             SipEncodeHdrName(nHdr, ppCurrPos, nMsgOptions);
 
-            if (pHeaderObj->EncodeHdr(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
+            if (pHeaderObj->Encode(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode %d header Fail", nHdr, SIP_ZERO);
                 pHeaderObj->SipDelete();
                 return SIP_FALSE;
             }
             pHeaderObj->SipDelete();
-            SIP_ENC_CRLF(*ppCurrPos);
+            SipMsgUtil::EncodeCrlf(*ppCurrPos);
         }
         nHdr++;
     }
@@ -465,7 +462,7 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 
     if (pHeaderObj != SIP_NULL)
     {
-        if (pHeaderObj->EncodeHdr(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
+        if (pHeaderObj->Encode(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODENCODER, "Encode Unknown header Fail", SIP_ZERO, SIP_ZERO);
@@ -474,7 +471,7 @@ SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
         }
 
         pHeaderObj->SipDelete();
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -490,7 +487,7 @@ SIP_BOOL SipHeaders::IsListHdr(SIP_INT32 eHdrType)
     return SipHeaderBase::IsMultiValueHeader(eHdrType);
 }
 
-SIP_BOOL SipHeaders::DecodeHdrs(
+SIP_BOOL SipHeaders::Decode(
         const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName, SIP_CHAR** ppHdrBody)
 {
     if (pStartPt == SIP_NULL || nDecLen == SIP_ZERO)
@@ -502,33 +499,33 @@ SIP_BOOL SipHeaders::DecodeHdrs(
     /*Skip The LWS form the back*/
     /*Update the End point*/
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
+    pEndPt = SipAbnfUtil::SkipWhiteSpaceFromRight(pStartPt, pEndPt);
 
     const SIP_CHAR* pTempPos = SIP_NULL;
 
     /*Get the position previous to ":"*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "colon not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     const SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
-    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempNext, pEndPt);
 
     /*skip the WSP form back*/
-    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipAbnfUtil::SkipRightWhiteSpace(pStartPt, pTempPos);
 
     /*Create  the header name*/
-    *ppHdrName = SipCreateString(pStartPt, pTempPos);
+    *ppHdrName = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (*ppHdrName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*this will return the type of header on passing name*/
-    SIP_INT32 eHdrType = SipGetHdrType(*ppHdrName);
+    SIP_INT32 eHdrType = SipMsgUtil::GetHeaderType(*ppHdrName);
 
     SipHeaderBase* pHeader = GetHeader(eHdrType);
 
@@ -536,7 +533,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Single value header %d appears more than once",
                 eHdrType, SIP_ZERO);
-        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        *ppHdrBody = SipAbnfUtil::CreateString(pTempNext, pEndPt);
         return SIP_FALSE;
     }
 
@@ -560,22 +557,22 @@ SIP_BOOL SipHeaders::DecodeHdrs(
         SipUnknownHeader* pUnknown = new SipUnknownHeader();
         if (pUnknown == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         pUnknown->SetHeaderName(*ppHdrName);
-        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        *ppHdrBody = SipAbnfUtil::CreateString(pTempNext, pEndPt);
         if (*ppHdrBody == SIP_NULL)
         {
             pUnknown->SipDelete();
             if (pTempNext > pEndPt)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Unknown Hdr Contain Invalid Value",
+                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Unknown header contains invalid Value",
                         SIP_ZERO, SIP_ZERO);
                 return SIP_TRUE;
             }
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -584,7 +581,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
         if ((static_cast<SipHeaderList*>(pHeader))->AddHeader(pUnknown) == SIP_FALSE)
         {
             pUnknown->SipDelete();
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pUnknown->SipDelete();
@@ -597,12 +594,11 @@ SIP_BOOL SipHeaders::DecodeHdrs(
         /*Update the length for decoding*/
         nDecLen = pEndPt - pStartPt + SIP_ONE;
 
-        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        *ppHdrBody = SipAbnfUtil::CreateString(pTempNext, pEndPt);
 
-        /*Call the Decoder function*/
-        if (pHeader->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+        if (pHeader->Decode(pStartPt, nDecLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode header %d fail", eHdrType, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode header %d failed", eHdrType, SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -625,12 +621,9 @@ SIP_BOOL SipHeaders::SipEncodeHdrName(
         return SIP_TRUE;
     }
 
-    SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
-    SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
-
-    SIP_ENC_COLON(*ppMsgBuffCurrPos);
-
-    SIP_ENC_SP(*ppMsgBuffCurrPos);
+    SipAbnfUtil::Append(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, SPACE);
 
     return SIP_TRUE;
 }
@@ -642,79 +635,20 @@ SIP_BOOL SipHeaders::SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgB
         return SIP_FALSE;
     }
 
-    switch (eHdrType)
+    SIP_CHAR cCompactName = SipMsgUtil::GetCompactHeaderName(eHdrType);
+
+    if (cCompactName != SIP_NULL_CHAR)
     {
-        case SipHeaderBase::VIA:
-            SIP_ENC_SHORT_VIA(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::TO:
-            SIP_ENC_SHORT_TO(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::FROM:
-            SIP_ENC_SHORT_FROM(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CALL_ID:
-            SIP_ENC_SHORT_CALLID(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTACT:
-        case SipHeaderBase::CONTACT_WILD:
-        case SipHeaderBase::CONTACT_ANY:
-            SIP_ENC_SHORT_CONTACT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTENT_TYPE:
-            SIP_ENC_SHORT_CONTENT_TYPE(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTENT_LENGTH:
-            SIP_ENC_SHORT_CONTENT_LENGTH(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::ACCEPT_CONTACT:
-            SIP_ENC_SHORT_ACCEPT_CONTACT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::SESSION_EXPIRES:
-            SIP_ENC_SHORT_SESSION_EXPIRES(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::SUPPORTED:
-            SIP_ENC_SHORT_SUPPORTED(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REQUEST_DISPOSITION:
-            SIP_ENC_SHORT_REQUEST_DISPOSITION(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REFERRED_BY:
-            SIP_ENC_SHORT_REFERRED_BY(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REFER_TO:
-            SIP_ENC_SHORT_REFER_TO(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::CONTENT_ENCODING:
-            SIP_ENC_SHORT_CONTENT_ENCODING(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::SUBJECT:
-            SIP_ENC_SHORT_SUBJECT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::REJECT_CONTACT:
-            SIP_ENC_SHORT_REJECT_CONTACT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::EVENT:
-            SIP_ENC_SHORT_EVENT(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::ALLOW_EVENTS:
-            SIP_ENC_SHORT_ALLOW_EVENTS(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::IDENTITY:
-            SIP_ENC_SHORT_IDENTITY(*ppMsgBuffCurrPos);
-            break;
-        case SipHeaderBase::IDENTITY_INFO:
-            SIP_ENC_SHORT_IDENTITY_INFO(*ppMsgBuffCurrPos);
-            break;
-        default:
-            SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
-            SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
-            break;
+        *(*ppMsgBuffCurrPos) = cCompactName;
+    }
+    else
+    {
+        SipPf_Strcpy(*ppMsgBuffCurrPos, SipMsgUtil::GetHeaderName(eHdrType));
     }
 
-    SIP_ENC_COLON(*ppMsgBuffCurrPos);
-
-    SIP_ENC_SP(*ppMsgBuffCurrPos);
+    SipAbnfUtil::UpdateCurrentPosition(*ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, COLON);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, SPACE);
 
     return SIP_TRUE;
 }

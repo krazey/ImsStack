@@ -60,6 +60,7 @@ AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
         m_piNConfig(IMS_NULL),
         m_nIsimIndexForImpu(DEFAULT_ISIM_INDEX_FOR_IMPU),
         m_bSupportLimitedAdminSmsMode(IMS_FALSE),
+        m_bPrioritizeImsiBasedUri(IMS_FALSE),
         m_objImsIdentityPriority(ImsVector<IMS_SINT32>())
 {
     m_strTag.Sprintf("%d", m_nSlotId);
@@ -180,6 +181,11 @@ PUBLIC
 const AStringArray& AosSubscriberManager::GetConfiguredImpus() const
 {
     return m_objPuids;
+}
+
+const AStringArray& AosSubscriberManager::GetOrderedImpus() const
+{
+    return (!m_objOrderedPuids.IsEmpty()) ? m_objOrderedPuids : m_objPuids;
 }
 
 PUBLIC
@@ -315,6 +321,8 @@ PROTECTED
 void AosSubscriberManager::ClearAll()
 {
     m_objPuids.RemoveAllElements();
+    m_objOrderedPuids.RemoveAllElements();
+
     SetProvisioned(IMS_FALSE);
 }
 
@@ -473,101 +481,60 @@ IMS_BOOL AosSubscriberManager::CheckIsimValues()
         return IMS_FALSE;
     }
 
-    A_IMS_TRACE_I(AOSTAG, "CheckIsimValues", 0, 0, 0);
+    if (m_bPrioritizeImsiBasedUri)
+    {
+        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: Prioritize IMSI-based URI", 0, 0, 0);
+        return UpdateSubscriberInfoWithTempImpu(m_objPuids, IMS_TRUE);
+    }
 
     const AStringArray& objImpus = m_piSubscriberConfig->GetPublicUserIds();
     const AString& strImpi = m_piSubscriberConfig->GetPrivateUserId();
     const AString& strHomeDomainName = m_piSubscriberConfig->GetHomeDomainName();
 
-    const IMS_BOOL bSupportImsiFallack =
-            IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
-    IMS_BOOL bUseTempValues = IMS_FALSE;
-
-    if (objImpus.IsEmpty())
+    const IMS_BOOL bValidIsimValues = IsValidImpu(objImpus) && (strImpi.GetLength() > 0) &&
+            (strHomeDomainName.GetLength() > 0);
+    if (bValidIsimValues)
     {
-        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: IMPU is empty", 0, 0, 0);
-        if (bSupportImsiFallack)
-        {
-            bUseTempValues = IMS_TRUE;
-        }
-        else
-        {
-            return IMS_FALSE;
-        }
+        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: Valid", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI))
+    {
+        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: Invalid, using support IMSI fallback", 0, 0, 0);
+        return UpdateSubscriberInfoWithTempImpu(m_objPuids, IMS_TRUE);
     }
     else
     {
-        SipAddress objSipAddress;
-        IMS_BOOL bImpuValid = IMS_FALSE;
-
-        for (IMS_SINT32 nAt = 0; nAt < objImpus.GetCount(); ++nAt)
-        {
-            const AString& strImpu = objImpus.GetElementAt(nAt);
-
-            if (strImpu.GetLength() > 0)
-            {
-                if (objSipAddress.Create(strImpu))
-                {
-                    if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips() ||
-                            objSipAddress.IsSchemeTel())
-                    {
-                        bImpuValid = IMS_TRUE;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!bImpuValid)
-        {
-            A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: IMPU is invalid", 0, 0, 0);
-            if (bSupportImsiFallack)
-            {
-                bUseTempValues = IMS_TRUE;
-            }
-            else
-            {
-                return IMS_FALSE;
-            }
-        }
+        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: Invalid", 0, 0, 0);
+        return IMS_FALSE;
     }
+}
 
-    if (strImpi.GetLength() == 0)
+PROTECTED
+IMS_BOOL AosSubscriberManager::IsValidImpu(const AStringArray& objImpus)
+{
+    SipAddress objSipAddress;
+    for (IMS_SINT32 nAt = 0; nAt < objImpus.GetCount(); ++nAt)
     {
-        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: IMPI is invalid", 0, 0, 0);
-        if (bSupportImsiFallack)
+        const AString& strImpu = objImpus.GetElementAt(nAt);
+        if (strImpu.GetLength() == 0)
         {
-            bUseTempValues = IMS_TRUE;
+            continue;
         }
-        else
+
+        if (!objSipAddress.Create(strImpu))
         {
-            return IMS_FALSE;
+            continue;
+        }
+
+        if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips() ||
+                objSipAddress.IsSchemeTel())
+        {
+            return IMS_TRUE;
         }
     }
-
-    if (strHomeDomainName.GetLength() == 0)
-    {
-        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: HomeDomainName is invalid", 0, 0, 0);
-        if (bSupportImsiFallack)
-        {
-            bUseTempValues = IMS_TRUE;
-        }
-        else
-        {
-            return IMS_FALSE;
-        }
-    }
-
-    if (bUseTempValues)
-    {
-        A_IMS_TRACE_I(AOSTAG, "CheckIsimValues :: Support ISIM_IMSI fallback", 0, 0, 0);
-        if (!UpdateSubscriberInfoWithTempImpu(m_objPuids, IMS_TRUE))
-        {
-            return IMS_FALSE;
-        }
-    }
-
-    return IMS_TRUE;
+    return IMS_FALSE;
 }
 
 PROTECTED
@@ -635,8 +602,18 @@ IMS_BOOL AosSubscriberManager::UpdateImpuFromIsim(OUT AStringArray& objImpus)
         return (objImpus.GetCount() > 0) ? IMS_TRUE : IMS_FALSE;
     }
 
-    AString strImpu = m_piSubscriberConfig->GetPublicUserIds().GetElementAt(
-            (objValidImpus.GetCount() == 1) ? 0 : GetIsimAt());
+    // Stores ordered IMPU lists.
+    AStringArray objPublicUserIds = m_piSubscriberConfig->GetPublicUserIds();
+    for (int i = 0; i < objPublicUserIds.GetCount(); i++)
+    {
+        if (objPublicUserIds.GetElementAt(i).GetLength() > 0)
+        {
+            m_objOrderedPuids.AddElement(objPublicUserIds.GetElementAt(i));
+        }
+    }
+
+    AString strImpu =
+            objPublicUserIds.GetElementAt((objValidImpus.GetCount() == 1) ? 0 : GetIsimAt());
 
     if (strImpu.GetLength() == 0)
     {
@@ -987,7 +964,8 @@ IMS_BOOL AosSubscriberManager::CheckAndTryUsimFallback()
 PROTECTED
 IMS_BOOL AosSubscriberManager::CheckAndTryIsimImsiFallback()
 {
-    if (!IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI))
+    if (!IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI) &&
+            !m_bPrioritizeImsiBasedUri)
     {
         return IMS_FALSE;
     }
@@ -1012,11 +990,12 @@ IMS_BOOL AosSubscriberManager::UpdateNConfiguration()
     IMS_BOOL bIsUpdated = IMS_FALSE;
 
     A_IMS_TRACE_I(AOSTAG,
-            "UpdateNConfiguration :: Current - ImsIdentityPriority(%s), IsimIndexForImpu(%d), "
-            "SupportlimitedAdminSmsMode(%s)",
-            IdentityPriorityToString(), m_nIsimIndexForImpu,
-            _TRACE_B_(m_bSupportLimitedAdminSmsMode));
-
+            "UpdateNConfiguration :: Current - ImsIdentityPriority(%s), IsimIndexForImpu(%d)",
+            IdentityPriorityToString(), m_nIsimIndexForImpu, 0);
+    A_IMS_TRACE_I(AOSTAG,
+            "UpdateNConfiguration :: Current - SupportlimitedAdminSmsMode(%s), "
+            "m_bPrioritizeImsiBasedUri(%s)",
+            _TRACE_B_(m_bSupportLimitedAdminSmsMode), _TRACE_B_(m_bPrioritizeImsiBasedUri), 0);
     if (m_piNConfig == IMS_NULL)
     {
         A_IMS_TRACE_I(
@@ -1026,6 +1005,7 @@ IMS_BOOL AosSubscriberManager::UpdateNConfiguration()
 
     IMS_UINT32 nIsimIndexForImpu = m_piNConfig->GetIsimIndexForImpu();
     IMS_BOOL bSupportLimitedAdminSmsMode = m_piNConfig->IsSupportLimitedAdminSmsMode();
+    IMS_BOOL bPrioritizeImsiBasedUri = m_piNConfig->IsImsiBasedUriPrioritized();
     ImsVector<IMS_SINT32> objImsIdentityPriority = m_piNConfig->GetImsIdentityPriority();
 
     if (m_nIsimIndexForImpu != nIsimIndexForImpu)
@@ -1037,6 +1017,12 @@ IMS_BOOL AosSubscriberManager::UpdateNConfiguration()
     if (m_bSupportLimitedAdminSmsMode != bSupportLimitedAdminSmsMode)
     {
         m_bSupportLimitedAdminSmsMode = bSupportLimitedAdminSmsMode;
+        bIsUpdated = IMS_TRUE;
+    }
+
+    if (m_bPrioritizeImsiBasedUri != bPrioritizeImsiBasedUri)
+    {
+        m_bPrioritizeImsiBasedUri = bPrioritizeImsiBasedUri;
         bIsUpdated = IMS_TRUE;
     }
 
@@ -1061,10 +1047,12 @@ IMS_BOOL AosSubscriberManager::UpdateNConfiguration()
     if (bIsUpdated)
     {
         A_IMS_TRACE_I(AOSTAG,
-                "UpdateNConfiguration :: Updated - ImsIdentityPriority(%s), IsimIndexForImpu(%d), "
-                "SupportlimitedAdminSmsMode(%s)",
-                IdentityPriorityToString(), m_nIsimIndexForImpu,
-                _TRACE_B_(m_bSupportLimitedAdminSmsMode));
+                "UpdateNConfiguration :: Updated - ImsIdentityPriority(%s), IsimIndexForImpu(%d)",
+                IdentityPriorityToString(), m_nIsimIndexForImpu, 0);
+        A_IMS_TRACE_I(AOSTAG,
+                "UpdateNConfiguration :: Updated - SupportlimitedAdminSmsMode(%s), "
+                "m_bPrioritizeImsiBasedUri(%s)",
+                _TRACE_B_(m_bSupportLimitedAdminSmsMode), _TRACE_B_(m_bPrioritizeImsiBasedUri), 0);
     }
     else
     {

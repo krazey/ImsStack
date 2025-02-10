@@ -15,10 +15,10 @@
  */
 
 #include "AString.h"
+#include "IMessage.h"
 #include "ISession.h"
 #include "call/IMtcCallContext.h"
 #include "call/termination/TerminationHandler.h"
-#include "core/IMessage.h"
 #include "utility/IMessageUtils.h"
 
 LOCAL const AString REASON_TEXT_CALL_PULLED_VZW = "call has been pulled by another device";

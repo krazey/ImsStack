@@ -824,6 +824,24 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnCallInitiating() {
+        MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
+        mImsCallSession.getCallListenerProxy().onCallInitiating(mockMtcCall, mMockCallInfo,
+                mMockMediaInfo);
+        verify(mMockImsCallSessionCallback, never()).invokeInitiating(any(
+                    ImsCallSessionImplBase.class), any(ImsCallProfile.class));
+
+        int state = mImsCallSession.getState();
+        mImsCallSession.getCallListenerProxy().onCallInitiating(mMockMtcCall, mMockCallInfo,
+                mMockMediaInfo);
+
+        assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.INITIATED);
+        assertEquals(state, mImsCallSession.getState());
+        verify(mMockImsCallSessionCallback).invokeInitiating(any(
+                ImsCallSessionImplBase.class), any(ImsCallProfile.class));
+    }
+
+    @Test
     public void testOnCallProgressing() {
         SuppInfo suppInfo = new SuppInfo();
         suppInfo.addService_bool(SuppInfo.TYPE_CW, false);
@@ -1302,6 +1320,16 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mCallDetails.clear(mCallDetails.CLOSE_PENDING);
         mImsCallSession.getCallListenerProxy().onCallQualityChanged(mMockMtcCall, null);
         verify(mMockImsCallSessionCallback).invokeCallQualityChanged(null);
+    }
+
+    @Test
+    public void testOnNotifyIncomingDtmfReceived() {
+        char digit = '5';
+        int dtmfDigit = 5;
+        mImsCallSession.getCallListenerProxy().onNotifyIncomingDtmfReceived(
+                mMockMtcCall, dtmfDigit);
+        verify(mMockImsCallSessionCallback).invokeDtmfReceived(
+                any(ImsCallSessionImplBase.class), eq(digit));
     }
 
     private TestImsCallSessionImpl createImsCallSession(String callId) {

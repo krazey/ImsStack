@@ -136,25 +136,25 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
 
     if (pTxnKey->GetMsgType() == SipMessage::REQ_TYPE)
     {
-        if ((SipPf_Strcmp(ACK_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS) ||
-                (SipPf_Strcmp(INVITE_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS))
+        if ((SipPf_Strcmp(SipMsgUtil::METHOD_ACK, pTxnKey->GetMethod()) == SIP_EQUALS) ||
+                (SipPf_Strcmp(SipMsgUtil::METHOD_INVITE, pTxnKey->GetMethod()) == SIP_EQUALS))
         {
-            pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
+            pTxnKey->SetTxnType(SipTxn::INVITE_SERVER);
         }
         else
         {
-            pTxnKey->SetTxnType(SipTxn::NON_INV_SER_TXN);
+            pTxnKey->SetTxnType(SipTxn::NON_INVITE_SERVER);
         }
     }
     else
     {
-        if (SipPf_Strcmp(INVITE_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS)
+        if (SipPf_Strcmp(SipMsgUtil::METHOD_INVITE, pTxnKey->GetMethod()) == SIP_EQUALS)
         {
-            pTxnKey->SetTxnType(SipTxn::INV_CLI_TXN);
+            pTxnKey->SetTxnType(SipTxn::INVITE_CLIENT);
         }
         else
         {
-            pTxnKey->SetTxnType(SipTxn::NON_INV_CLI_TXN);
+            pTxnKey->SetTxnType(SipTxn::NON_INVITE_CLIENT);
         }
     }
 
@@ -182,7 +182,7 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
 
             /* In case of retransmitted 2xx for INVITE, return as valid sip message */
             if ((pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE) &&
-                    SIP_SUCCESSFUL_RESP(nStatusCode))
+                    SipMsgUtil::IsSuccessfulResponse(nStatusCode))
             {
                 *peTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
             }
@@ -317,7 +317,7 @@ SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnK
     SIP_UINT16 nError = 0;
     SipTxnKey* pInviteTxnKey = new SipTxnKey(pAckTxnKey, &nError);
 
-    pInviteTxnKey->SetMethod(INVITE_METHOD);
+    pInviteTxnKey->SetMethod(SipMsgUtil::METHOD_INVITE);
     pInviteTxnKey->RemoveRule(SipTxnKey::RULE_COMPARE_VIA_BRANCH);
 
     SipTxn* pTxn = SIP_NULL;

@@ -29,7 +29,7 @@ SipUtil::SipUtil() :
     m_pLoggerUtil = new SipDefLoggerUtil();
     m_pTimerUtil = new SipDefTimerUtil();
     m_pNetworkUtil = new SipDefNetworkUtil();
-    SIPHdrAccess::Init();
+    SipMsgUtil::Init();
 }
 
 SipUtil::~SipUtil()

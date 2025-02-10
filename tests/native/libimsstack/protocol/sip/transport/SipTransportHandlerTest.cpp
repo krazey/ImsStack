@@ -56,7 +56,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        SIPHdrAccess::Init();
+        SipMsgUtil::Init();
 
         pTranspInfo = SIP_NULL;
         pMessage = SIP_NULL;
@@ -75,7 +75,7 @@ protected:
 
         pMessage = new SipMessage();
         ASSERT_TRUE(pMessage != nullptr);
-        EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+        EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
         pTranspHandler = new SipTransportHandler();
         ASSERT_TRUE(pTranspHandler != nullptr);
@@ -104,22 +104,22 @@ protected:
             if ((eMethodType == SipMessage::METHOD_INVITE) ||
                     (eMethodType == SipMessage::METHOD_ACK))
             {
-                eTxnType = SipTxn::INV_SER_TXN;
+                eTxnType = SipTxn::INVITE_SERVER;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_SER_TXN;
+                eTxnType = SipTxn::NON_INVITE_SERVER;
             }
         }
         else
         {
             if (eMethodType == SipMessage::METHOD_INVITE)
             {
-                eTxnType = SipTxn::INV_CLI_TXN;
+                eTxnType = SipTxn::INVITE_CLIENT;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_CLI_TXN;
+                eTxnType = SipTxn::NON_INVITE_CLIENT;
             }
         }
 
@@ -162,7 +162,7 @@ Content-Length: 0\r\n\
     SipMessage* pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     /* pTranspParam null, fail */
     EXPECT_EQ(SIP_FALSE,
@@ -405,7 +405,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -469,7 +469,7 @@ Content-Length: 0\r\n\
     // clang-format on
     SipStackCallback_SetCallbacks(stCallbacks);
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     /* TXN exists but no transport info, fail */
@@ -488,7 +488,7 @@ Content-Length: 0\r\n\
 
     pTxn->SipDelete();
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     pTranspParam = new SipTransportParameter();
@@ -554,7 +554,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -577,7 +577,7 @@ Content-Length: 0\r\n\
     // clang-format on
     SipStackCallback_SetCallbacks(stCallbacks);
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     pTranspParam = new SipTransportParameter();
@@ -616,7 +616,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -639,7 +639,7 @@ Content-Length: 0\r\n\
     // clang-format on
     SipStackCallback_SetCallbacks(stCallbacks);
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     pTranspParam = new SipTransportParameter();
@@ -683,7 +683,7 @@ Content-Length: 0\r\n\
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -743,7 +743,7 @@ Content-Length: 0\r\n\
     // clang-format on
     SipStackCallback_SetCallbacks(stCallbacks);
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pTranspHandler->IsInviteTxnPresentForAckTxn(pTxnKey));

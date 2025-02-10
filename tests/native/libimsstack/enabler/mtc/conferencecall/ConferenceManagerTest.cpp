@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../../../engine/interface/core/MockICoreService.h"
+#include "MockICoreService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"

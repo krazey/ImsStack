@@ -17,11 +17,16 @@
 #ifndef VIDEO_SDP_GENERATOR_H_
 #define VIDEO_SDP_GENERATOR_H_
 
-#include "SdpGenerator.h"
+#include "MediaSdpGenerator.h"
+#include "video/VideoProfile.h"
 
 class SdpAvCodec;
 
-class VideoSdpGenerator : public SdpGenerator
+/**
+ * This class is to generate a video Sdp by adding video attributes from video profile to the
+ * MediaDescriptor and the SessionDescriptor
+ */
+class VideoSdpGenerator : public MediaSdpGenerator
 {
 public:
     VideoSdpGenerator();
@@ -30,7 +35,7 @@ public:
     IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MediaBaseProfile* pBaseProfile) override;
 
-private:
+protected:
     void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
     void CheckRtcpFbWildCard(IN VideoProfile* pProfile, OUT IMS_BOOL& bTrrSupportedAll,
             OUT IMS_BOOL& bNackSupportedAll, OUT IMS_BOOL& bPliSupportedAll,
@@ -81,6 +86,16 @@ private:
      */
     IMS_BOOL GetWidthHeightFromResolutionId(
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
+
+    AString GenerateAvcFmtp(IN VideoProfile::AvcFmtp* pAvcFmtp);
+    void AddProfileLevelIdToFmtp(IN VideoProfile::AvcFmtp* pFmtp, OUT AString& strFmtp);
+    void AddPacketizationModeToFmtp(IN VideoProfile::VideoFmtp* pFmtp, OUT AString& strFmtp);
+    void AddSpropParameterSetsToFmtp(IN VideoProfile::VideoFmtp* pFmtp, OUT AString& strFmtp);
+
+    AString GenerateHevcFmtp(IN VideoProfile::HevcFmtp* pHevcFmtp);
+    void AddProfileIdToFmtp(IN VideoProfile::HevcFmtp* pFmtp, OUT AString& strFmtp);
+    void AddLevelIdToFmtp(IN VideoProfile::HevcFmtp* pFmtp, OUT AString& strFmtp);
+    void AddSpropParamsToFmtp(IN VideoProfile::HevcFmtp* pFmtp, OUT AString& strFmtp);
 };
 
 #endif

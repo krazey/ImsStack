@@ -367,7 +367,7 @@ public class SystemServiceProxyImplTest {
 
     @Test
     @SmallTest
-    public void testConnectivityManagerProxy_registerDefaultNetworkCallback() {
+    public void testConnectivityManagerProxy_registerSystemDefaultNetworkCallback() {
         ConnectivityManager connectivityManager =
                 mContext.getSystemService(ConnectivityManager.class);
         ConnectivityManagerProxy cmp =
@@ -375,14 +375,16 @@ public class SystemServiceProxyImplTest {
         NetworkCallback callback = mock(NetworkCallback.class);
         Handler handler = mock(Handler.class);
 
-        cmp.registerDefaultNetworkCallback(callback, handler);
-        verify(connectivityManager).registerDefaultNetworkCallback(eq(callback), eq(handler));
+        cmp.registerSystemDefaultNetworkCallback(callback, handler);
+        verify(connectivityManager).registerSystemDefaultNetworkCallback(eq(callback), eq(handler));
 
         // Expected that the ConnectivityManager is null.
         mContextFixture.setSystemService(Context.CONNECTIVITY_SERVICE, null);
-        assertThrows(IllegalStateException.class, () -> {
-            cmp.registerDefaultNetworkCallback(callback, handler);
-        });
+        assertThrows(
+                IllegalStateException.class,
+                () -> {
+                    cmp.registerSystemDefaultNetworkCallback(callback, handler);
+                });
     }
 
     @Test

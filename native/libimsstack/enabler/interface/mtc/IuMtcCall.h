@@ -32,8 +32,6 @@ public:
     static const IMS_SINT32 EVENT_ECT_U2I = EVENT_U2I + 60;
     static const IMS_SINT32 EVENT_ECT_I2U = EVENT_I2U + 60;
 
-    static const IMS_SINT32 EVENT_MEDIA_I2U = EVENT_I2U + 90;
-
     static const IMS_SINT32 MAXIMUM = (EVENT_I2U + 99);
 
     // UI to IMS events
@@ -71,22 +69,23 @@ public:
     // IMS to UI events
     static const IMS_SINT32 STARTED = (EVENT_I2U + 1);
     static const IMS_SINT32 START_FAILED = (EVENT_I2U + 2);
-    static const IMS_SINT32 PROGRESSING = (EVENT_I2U + 3);
-    static const IMS_SINT32 HELD = (EVENT_I2U + 4);
-    static const IMS_SINT32 HOLD_FAILED = (EVENT_I2U + 5);
-    static const IMS_SINT32 HELD_BY = (EVENT_I2U + 6);
-    static const IMS_SINT32 RESUMED = (EVENT_I2U + 7);
-    static const IMS_SINT32 RESUME_FAILED = (EVENT_I2U + 8);
-    static const IMS_SINT32 RESUMED_BY = (EVENT_I2U + 9);
-    static const IMS_SINT32 TERMINATED = (EVENT_I2U + 10);
-    static const IMS_SINT32 INCOMING_UPDATE = (EVENT_I2U + 11);
-    static const IMS_SINT32 UPDATED = (EVENT_I2U + 12);
-    static const IMS_SINT32 UPDATE_FAILED = (EVENT_I2U + 13);
-    static const IMS_SINT32 UPDATED_BY = (EVENT_I2U + 14);
-    static const IMS_SINT32 NOTIFY_INFO = (EVENT_I2U + 15);
-    static const IMS_SINT32 INCOMING_RESUME = (EVENT_I2U + 16);
-    static const IMS_SINT32 SET_PROPERTY = (EVENT_I2U + 17);
-    static const IMS_SINT32 INCOMING_CALL_RECEIVED = (EVENT_I2U + 18);
+    static const IMS_SINT32 INITIATING = (EVENT_I2U + 3);
+    static const IMS_SINT32 PROGRESSING = (EVENT_I2U + 4);
+    static const IMS_SINT32 HELD = (EVENT_I2U + 5);
+    static const IMS_SINT32 HOLD_FAILED = (EVENT_I2U + 6);
+    static const IMS_SINT32 HELD_BY = (EVENT_I2U + 7);
+    static const IMS_SINT32 RESUMED = (EVENT_I2U + 8);
+    static const IMS_SINT32 RESUME_FAILED = (EVENT_I2U + 9);
+    static const IMS_SINT32 RESUMED_BY = (EVENT_I2U + 10);
+    static const IMS_SINT32 TERMINATED = (EVENT_I2U + 11);
+    static const IMS_SINT32 INCOMING_UPDATE = (EVENT_I2U + 12);
+    static const IMS_SINT32 UPDATED = (EVENT_I2U + 13);
+    static const IMS_SINT32 UPDATE_FAILED = (EVENT_I2U + 14);
+    static const IMS_SINT32 UPDATED_BY = (EVENT_I2U + 15);
+    static const IMS_SINT32 NOTIFY_INFO = (EVENT_I2U + 16);
+    static const IMS_SINT32 INCOMING_RESUME = (EVENT_I2U + 17);
+    static const IMS_SINT32 SET_PROPERTY = (EVENT_I2U + 18);
+    static const IMS_SINT32 INCOMING_CALL_RECEIVED = (EVENT_I2U + 19);
 
     static const IMS_SINT32 CONF_EXPANDED = (EVENT_CONF_I2U + 1);
     static const IMS_SINT32 CONF_EXPANDFAILED = (EVENT_CONF_I2U + 2);
@@ -102,8 +101,6 @@ public:
     static const IMS_SINT32 ECT_COMPLETED = (EVENT_ECT_I2U + 1);
     static const IMS_SINT32 REPLACED_BY = (EVENT_ECT_I2U + 2);
     static const IMS_SINT32 CALL_PUSH_COMPLETED = (EVENT_ECT_I2U + 3);
-
-    static const IMS_SINT32 CODEC_INFO_UPDATED = (EVENT_MEDIA_I2U + 1);
 };
 
 #endif

@@ -87,8 +87,6 @@ public class TimerAgent implements TimerInterface {
 
     @Override
     public void cleanup() {
-        ImsLog.d("");
-
         if (mWakeLock != null) {
             mWakeLock.clear();
             mWakeLock = null;
@@ -103,13 +101,13 @@ public class TimerAgent implements TimerInterface {
         long tid = getTimerId();
 
         if (tid == INVALID_TID) {
-            ImsLog.e("startTimer: Invalid timer id.");
+            loge(this, "start - Invalid timer id.");
             return INVALID_TID;
         }
 
         int requestCode = addActiveTimer(tid);
 
-        ImsLog.i("startTimer: tid=" + tid + ", duration=" + duration + ", reqCode=" + requestCode);
+        logi(this, "start - tid=" + tid + ", duration=" + duration + ", reqCode=" + requestCode);
 
         if (!setTimer(tid, duration, requestCode, false)) {
             removeActiveTimer(tid);
@@ -131,10 +129,10 @@ public class TimerAgent implements TimerInterface {
 
         int requestCode = removeActiveTimer(tid);
 
-        ImsLog.d("stopTimer: tid=" + tid + ", reqCode=" + requestCode);
+        logd(this, "stop - tid=" + tid + ", reqCode=" + requestCode);
 
         if (requestCode == MapIntLong.INVALID_KEY) {
-            ImsLog.i("timer is not set or already expired; tid=" + tid);
+            logi(this, "stop - already expired; tid=" + tid);
             return;
         }
 
@@ -150,7 +148,7 @@ public class TimerAgent implements TimerInterface {
      */
     public boolean startNativeTimer(long tid, long duration) {
         if (tid == 0) {
-            ImsLog.e("startNativeTimer: Invalid timer id.");
+            loge(this, "startNative - Invalid timer id.");
             return false;
         }
 
@@ -158,7 +156,7 @@ public class TimerAgent implements TimerInterface {
 
         int requestCode = addActiveTimer(tid);
 
-        ImsLog.i("startNativeTimer: tid=" + tid
+        logi(this, "startNative - tid=" + tid
                 + ", duration=" + duration + ", reqCode=" + requestCode);
 
         return setTimer(tid, duration, requestCode, true);
@@ -172,13 +170,13 @@ public class TimerAgent implements TimerInterface {
     public void stopNativeTimer(long tid) {
         int requestCode = removeActiveTimer(tid);
 
-        ImsLog.i("stopNativeTimer: tid=" + tid + ", reqCode=" + requestCode);
+        logi(this, "stopNative - tid=" + tid + ", reqCode=" + requestCode);
 
         // If the timer is present, remove it from the list
         checkAndRemoveLongTimer(tid);
 
         if (requestCode == MapIntLong.INVALID_KEY) {
-            ImsLog.i("stopNativeTimer: timer is not set or already expired; tid=" + tid);
+            logi(this, "stopNative - already expired; tid=" + tid);
             return;
         }
 
@@ -210,7 +208,7 @@ public class TimerAgent implements TimerInterface {
             AlarmManager am = AppContext.getInstance().getSystemService(AlarmManager.class);
 
             if (am == null) {
-                ImsLog.e("AlarmManager is null");
+                loge(this, "AlarmManager is null");
                 return false;
             }
 
@@ -234,7 +232,7 @@ public class TimerAgent implements TimerInterface {
         AlarmManager am = AppContext.getInstance().getSystemService(AlarmManager.class);
 
         if (am == null) {
-            ImsLog.e("AlarmManager is null");
+            loge(this, "AlarmManager is null");
             return;
         }
 
@@ -254,7 +252,7 @@ public class TimerAgent implements TimerInterface {
             }
         }
 
-        ImsLog.e("getTimerId: there is no available timer id.");
+        loge(this, "getTimerId - no available timer id.");
         return INVALID_TID;
     }
 
@@ -315,7 +313,7 @@ public class TimerAgent implements TimerInterface {
         }
 
         if (DBG_IMS_ALARM) {
-            ImsLog.d("addImsAlarm: " + alarm + ", count=" + mImsAlarms.size());
+            logd(this, "add=" + alarm + ", count=" + mImsAlarms.size());
         }
     }
 
@@ -339,7 +337,7 @@ public class TimerAgent implements TimerInterface {
         }
 
         if (DBG_IMS_ALARM) {
-            ImsLog.d("removeImsAlarm: " + alarm + ", count=" + mImsAlarms.size());
+            logd(this, "remove=" + alarm + ", count=" + mImsAlarms.size());
         }
     }
 
@@ -396,7 +394,7 @@ public class TimerAgent implements TimerInterface {
                 notifyTimerExpired(tid);
             }, 0L);
         } else {
-            ImsLog.d("Not active timer: tid=" + tid);
+            logd(this, "Not active timer: tid=" + tid);
         }
     }
 
@@ -410,7 +408,7 @@ public class TimerAgent implements TimerInterface {
         if (listener != null) {
             listener.onTimerExpired(tid);
         } else {
-            ImsLog.d("No listener for tid=" + tid);
+            logd(this, "No listener for tid=" + tid);
         }
     }
 
@@ -435,6 +433,18 @@ public class TimerAgent implements TimerInterface {
         return (duration < ImsAlarm.MAX_INTERVAL);
     }
 
+    private static void logd(Object o, String s) {
+        ImsLog.d(o, "Timer: " + s);
+    }
+
+    private static void loge(Object o, String s) {
+        ImsLog.e(o, "Timer: " + s);
+    }
+
+    private static void logi(Object o, String s) {
+        ImsLog.i(o, "Timer: " + s);
+    }
+
     private final class TimerBroadcastReceiver extends BroadcastReceiver {
         public void register() {
             IntentFilter filter = new IntentFilter();
@@ -453,7 +463,7 @@ public class TimerAgent implements TimerInterface {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             final long tid = intent.getLongExtra(EXTRA_PARAM_TID, INVALID_TID);
-            ImsLog.i(ImsLog.lastSubString(action, ".") + " :: tid = " + tid);
+            logi(this, ImsLog.lastSubString(action, ".") + ": tid = " + tid);
 
             if (ACTION_ALARM_NATIVE_TIMER.equals(action)) {
                 processNativeTimerExpired(tid);
@@ -473,7 +483,7 @@ public class TimerAgent implements TimerInterface {
             if (msg.obj instanceof Runnable) {
                 notifyAlarm((Runnable) msg.obj);
             } else {
-                ImsLog.d("TimerHandler: Unknown message; msg=" + msg.what);
+                logd(this, "Unknown message - " + msg.what);
             }
         }
 
@@ -481,7 +491,7 @@ public class TimerAgent implements TimerInterface {
             try {
                 r.run();
             } catch (Throwable t) {
-                ImsLog.e("TimerHandler#notifyAlarm: task=" + r);
+                loge(this, "notifyAlarm - task=" + r);
                 t.printStackTrace();
             }
         }
@@ -503,7 +513,7 @@ public class TimerAgent implements TimerInterface {
 
         @Override
         public void run() {
-            ImsLog.d("ImsAlarmExpired: " + this);
+            logd(this, "expired=" + this);
 
             if (mNativeTimer) {
                 processNativeTimerExpired(mTid);
@@ -533,7 +543,7 @@ public class TimerAgent implements TimerInterface {
 
         @Override
         public String toString() {
-            return "ImsAlarm={ tid=" + mTid
+            return "{ ImsAlarm: tid=" + mTid
                     + ", reqCode=" + mRequestCode
                     + ", native=" + mNativeTimer + " }";
         }

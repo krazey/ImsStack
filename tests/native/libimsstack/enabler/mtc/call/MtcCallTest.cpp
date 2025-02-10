@@ -15,16 +15,25 @@
  */
 
 #include "CallReasonInfo.h"
+#include "ISipHeader.h"
+#include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
+#include "MockIReference.h"
+#include "MockISession.h"
+#include "MockISipClientConnection.h"
+#include "MockISipConnection.h"
+#include "MockISipMessage.h"
+#include "MockISipServerConnection.h"
 #include "MtcDef.h"
+#include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
-#include "call/MockIMtcCallManager.h"
 #include "call/MockCallConnectionIdManager.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MtcCall.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/NullCall.h"
@@ -33,11 +42,8 @@
 #include "call/state/MockMtcCallStateMachine.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/MockIConferenceManager.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockIMessage.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "ect/MockIEctManager.h"
 #include "emergency/CurrentLocationDiscoveryController.h"
@@ -50,15 +56,8 @@
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipClientConnection.h"
-#include "sipcore/MockISipConnection.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipServerConnection.h"
-#include "sipcore/SipStatusCode.h"
 #include "ussi/UssiConstants.h"
 #include "utility/MessageUtils.h"
 #include "utility/MockIMessageUtils.h"
@@ -85,10 +84,8 @@ public:
     MockIMtcContext objContext;
     CallInfo objCallInfo;
     MockICallStateProxy objCallStateProxy;
-    MockIInterfaceHolderListener objInterfaceHolderListener;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MessageUtils objMessageUtils;
 
@@ -98,15 +95,14 @@ protected:
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         ON_CALL(objCallStateProxy, UpdateCallState(_, _, _, _, _)).WillByDefault(Return());
 
-        pSessionInterfaceHolder = new MockSessionInterfaceHolder(objInterfaceHolderListener);
+        pSessionInterfaceHolder = new MockSessionInterfaceHolder();
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
-                .WillByDefault(Return(pSessionInterfaceHolder));
+                .WillByDefault(ReturnRef(*pSessionInterfaceHolder));
         ON_CALL(objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
@@ -794,7 +790,7 @@ TEST_F(MtcCallTest, CreateSessionCreatesMtcSession)
 
 TEST_F(MtcCallTest, CreateSessionGetsISessionFromInterfaceFactory)
 {
-    EXPECT_CALL(*pSessionInterfaceHolder, GetISession(_, _, _));
+    EXPECT_CALL(*pSessionInterfaceHolder, GetISession(_, _, _, _));
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
@@ -813,7 +809,7 @@ TEST_F(MtcCallTest, CreateBlockCheckerReturnsNotNull)
 TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCallInfo)
 {
     objCallInfo.eInitialCallType = CallType::VT;
-    objCallInfo.bEmergency = !objCallInfo.bEmergency;
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
     objCallInfo.bOffline = !objCallInfo.bOffline;
     objCallInfo.bUssi = !objCallInfo.bUssi;
     objCallInfo.bConference = !objCallInfo.bConference;
@@ -823,7 +819,7 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCallInfo)
 
     EXPECT_EQ(objService.GetServiceType(), objJniCallInfo.eServiceType);
     EXPECT_EQ(objCall.GetCallType(), objJniCallInfo.eCallType);
-    EXPECT_EQ(objCallInfo.bEmergency, objJniCallInfo.bEmergency);
+    EXPECT_EQ(objCallInfo.eEmergencyType, objJniCallInfo.eEmergencyType);
     EXPECT_EQ(objCallInfo.bOffline, objJniCallInfo.bOffline);
     EXPECT_EQ(objCallInfo.bUssi, objJniCallInfo.bUssi);
     EXPECT_EQ(objCallInfo.bConference, objJniCallInfo.bConference);
@@ -831,8 +827,8 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsMatchingWithCallInfo)
 
 TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeFalse)
 {
-    ON_CALL(*pConfigurationManager, GetConferenceSubscribeType)
-            .WillByDefault(Return(-1));  // Subscription is not required
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT));
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
@@ -842,8 +838,8 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeFalse)
 
 TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfInDialog)
 {
-    ON_CALL(*pConfigurationManager, GetConferenceSubscribeType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
@@ -853,9 +849,8 @@ TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfInDialog)
 
 TEST_F(MtcCallTest, CreateJniCallInfoReturnsConferenceSubscribeTrueIfOutDialog)
 {
-    ON_CALL(*pConfigurationManager, GetConferenceSubscribeType)
-            .WillByDefault(
-                    Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG));
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
     JniCallInfo objJniCallInfo = objCall.CreateJniCallInfo();
@@ -1239,15 +1234,15 @@ TEST_F(MtcCallTest, GetEmergencyServiceManagerCallsMtcContext)
     objCall.GetEmergencyServiceManager();
 }
 
-TEST_F(MtcCallTest, GetAsyncRunnerCallsMtcContext)
+TEST_F(MtcCallTest, RunAsyncOperationCallsMtcContext)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
     std::function<void()> objAnyOperation;
 
-    EXPECT_CALL(objContext, GetAsyncRunner(_)).Times(1);
+    EXPECT_CALL(objContext, RunAsyncOperation(this, _)).Times(1);
 
-    objCall.GetAsyncRunner(objAnyOperation);
+    objCall.RunAsyncOperation(this, objAnyOperation);
 }
 
 TEST_F(MtcCallTest, GetMessageUtilsCallsMtcContext)
@@ -1376,8 +1371,8 @@ TEST_F(MtcCallTest, SessionReferenceReceivedFailsIfReferenceIsNull)
     MockISession objSession;
     EXPECT_CALL(objSession, Terminate).Times(1);
 
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession)).Times(1);
-    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, _)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objSession)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession)).Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, SessionReferenceReceived(_, _)).Times(0);
@@ -1687,8 +1682,8 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfSessionIsNull)
     MockISession objForkedSession;
     EXPECT_CALL(objForkedSession, Terminate).Times(1);
 
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objForkedSession)).Times(1);
-    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objForkedSession, _)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objForkedSession)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objForkedSession)).Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, HandleIncoming(_)).Times(0);
@@ -1704,8 +1699,8 @@ TEST_F(MtcCallTest, SessionForkedResponseReceivedFailsIfForkedSessionIsNull)
     MockISession objSession;
     EXPECT_CALL(objSession, Reject()).Times(1);
 
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objSession)).Times(1);
-    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, _)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objSession)).Times(1);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession)).Times(1);
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, HandleIncoming(_)).Times(0);
@@ -2020,7 +2015,7 @@ TEST_F(MtcCallTest, OnStateTransitionUpdatesCallStateProxy)
 
     EXPECT_CALL(objCallStateProxy,
             UpdateCallState(
-                    objCall.GetKey(), eState, objCall.GetCallType(), objCallInfo.bEmergency, _))
+                    objCall.GetKey(), eState, objCall.GetCallType(), objCallInfo.IsEmergency(), _))
             .Times(1);
 
     objCall.OnStateTransition(eState);

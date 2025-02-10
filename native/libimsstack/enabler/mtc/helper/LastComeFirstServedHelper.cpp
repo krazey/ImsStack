@@ -15,16 +15,17 @@
  */
 
 #include "CallReasonInfo.h"
+#include "CarrierConfig.h"
+#include "IMessage.h"
 #include "IMtcContext.h"
 #include "INetworkWatcher.h"
+#include "ISession.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCallManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessage.h"
-#include "core/ISession.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "precondition/IMtcPreconditionManager.h"
@@ -47,7 +48,7 @@ PUBLIC VIRTUAL LastComeFirstServedHelper::~LastComeFirstServedHelper()
 PUBLIC GLOBAL IMS_BOOL LastComeFirstServedHelper::IsSupported(
         IN const MtcConfigurationProxy& objConfigurationProxy)
 {
-    return objConfigurationProxy.GetInt(Feature::PRE_ALERTING_TIMER) > 0;
+    return objConfigurationProxy.GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT) > 0;
 }
 
 PUBLIC VIRTUAL void LastComeFirstServedHelper::OnCallReceived(IN CallKey nIncomingCallKey)
@@ -90,7 +91,7 @@ PRIVATE
 IMS_BOOL LastComeFirstServedHelper::IsNormalCall(IN CallKey nKey) const
 {
     CallInfo& objCallInfo = GetCallContext(nKey).GetCallInfo();
-    return (!objCallInfo.bEmergency && !objCallInfo.bUssi);
+    return (!objCallInfo.IsEmergency() && !objCallInfo.bUssi);
 }
 
 PRIVATE
@@ -126,8 +127,8 @@ PRIVATE
 void LastComeFirstServedHelper::StartPreAlertingGuardTimer() const
 {
     IMS_TRACE_D("StartPreAlertingGuardTimer", 0, 0, 0);
-    IMS_SINT32 nPreAlertingTime =
-            m_objContext.GetConfigurationProxy().GetInt(Feature::PRE_ALERTING_TIMER);
+    IMS_SINT32 nPreAlertingTime = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT);
     m_objContext.GetPassiveTimerHolder().AddTimer(
             IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, nPreAlertingTime, IMS_TRUE);
 }

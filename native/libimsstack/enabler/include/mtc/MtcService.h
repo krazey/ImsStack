@@ -58,7 +58,9 @@ public:
     inline IMS_BOOL IsEmergency() const override { return m_eType == ServiceType::EMERGENCY; }
     IMS_BOOL IsNr() const override;
     IMS_BOOL IsEpsCombinedAttach() const override;
+    IMS_BOOL IsRoaming() const override;
     IMS_BOOL IsWlanIpCanType() const override;
+    IMS_BOOL IsCsfbAvailable() const override;
     inline ServiceStatus GetOldStatus() const override { return m_eOldStatus; }
     inline ServiceStatus GetStatus() const override { return m_eStatus; }
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }
@@ -68,7 +70,7 @@ public:
 
     void UpdateSrvccState(IN SrvccState eState) override;
     void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) override;
-    void OpenEmergencyService(IN IuMtcService::EmergencyCallRoutingPdn ePdn) override;
+    void OpenEmergencyService(IN ServiceType eServiceType) override;
     void StopEmergencyService() override;
     void ProcessTestCommand(
             IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam) override;

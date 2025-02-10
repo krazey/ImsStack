@@ -75,7 +75,7 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
         }
 
         if (piCc->GetBoolean(
-                    CarrierConfig::Assets::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL))
+                    CarrierConfig::Ims::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL))
         {
             m_bUseResetWhenClosingSipTcpConnection = IMS_TRUE;
             objSocketOption.nValue = 0;
@@ -107,30 +107,32 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
     {
         IMS_SINT32 nFeatures = 0;
 
-        if (piCc->GetBoolean(
-                    CarrierConfig::Assets::KEY_USE_TUPLE_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
+        if (piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_TUPLE_ELEMENT_IN_GEOLOCATION_PIDF_BOOL))
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_FORMAT_TUPLE;
         }
 
-        if (!piCc->GetBoolean(CarrierConfig::Assets::
-                            KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
+        if (!piCc->GetBoolean(
+                    CarrierConfig::Ims::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_IN_GEOLOCATION_PIDF_BOOL))
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_NO_COUNTRY_IF_UNKNOWN;
         }
 
         pPidfCreator->SetFeatures(nFeatures);
+
+        pPidfCreator->SetRetransmissionAllowed(piCc->GetString(
+                CarrierConfig::Ims::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING));
     }
 
     IMS_SINT32 nSdpFeatures = SdpProfile::FEATURE_NONE;
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_SDP_PRECONDITION_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_SDP_PRECONDITION_BOOL))
     {
         nSdpFeatures |= SdpProfile::FEATURE_A_PRECONDITION_SUPPORTED;
     }
 
     if (piCc->GetBoolean(
-                CarrierConfig::Assets::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL))
+                CarrierConfig::Ims::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL))
     {
         nSdpFeatures |= SdpProfile::FEATURE_A_DIRECTION_REQUIRED_FOR_REMOVED_MEDIA;
     }

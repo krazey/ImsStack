@@ -47,6 +47,11 @@ PROTECTED VIRTUAL void AosHandleEmergencyMtc::InitializeServiceFeature()
 
     m_objFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
 
+    if (GET_N_CONFIG(m_nSlotId)->IsVideoSupportedForEmergencyReg())
+    {
+        m_objFeatureTagList.AddFeature(ImsAosFeature::VIDEO);
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->IsRttSupported())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::TEXT);

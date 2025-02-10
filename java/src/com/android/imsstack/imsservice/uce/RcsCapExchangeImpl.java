@@ -21,10 +21,10 @@ import android.net.Uri;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
 
-import com.android.imsstack.enabler.uce.impl.RcsCapEventListenerCallBack;
-import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallBack;
-import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallBack;
-import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallBack;
+import com.android.imsstack.enabler.uce.impl.RcsCapEventListenerCallback;
+import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallback;
+import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallback;
+import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallback;
 import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.enabler.uce.interf.UceManager;
 import com.android.imsstack.util.ImsLog;
@@ -40,9 +40,9 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
     private final Executor mCapExchangeExecutor;
     private final IUceApi mUceApi;
     private final Context mContext;
-    private final RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
-    private final RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
-    private final RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+    private final RcsCapPublishResponseCallback mRcsCapPublishResponseCallback;
+    private final RcsCapSubscribeResponseCallback mRcsCapSubscribeResponseCallback;
+    private final RcsCapOptionsResponseCallback mRcsCapOptionsResponseCallback;
 
     /**
      * Create a new RcsCapabilityExchangeImplBase instance.
@@ -63,16 +63,16 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
         mContext = context;
         mCapExchangeExecutor = executor;
         mUceApi = UceManager.create(mContext, mSlotId);
-        RcsCapEventListenerCallBack event =
-                new RcsCapEventListenerCallBack(
+        RcsCapEventListenerCallback event =
+                new RcsCapEventListenerCallback(
                         mCapabilityExchangeEventListener, messageExecutor, mCapExchangeExecutor);
 
         if (mUceApi != null) {
             mUceApi.setListener(event);
         }
-        mRcsCapPublishResponseCallBack = new RcsCapPublishResponseCallBack(messageExecutor);
-        mRcsCapSubscribeResponseCallBack = new RcsCapSubscribeResponseCallBack(messageExecutor);
-        mRcsCapOptionsResponseCallBack = new RcsCapOptionsResponseCallBack(messageExecutor);
+        mRcsCapPublishResponseCallback = new RcsCapPublishResponseCallback(messageExecutor);
+        mRcsCapSubscribeResponseCallback = new RcsCapSubscribeResponseCallback(messageExecutor);
+        mRcsCapOptionsResponseCallback = new RcsCapOptionsResponseCallback(messageExecutor);
     }
 
     @VisibleForTesting
@@ -81,25 +81,25 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
             int slotId,
             Context context,
             IUceApi uceApi,
-            RcsCapSubscribeResponseCallBack capSubscribeResponseCallBack,
-            RcsCapOptionsResponseCallBack optionsResponse,
-            RcsCapPublishResponseCallBack rcsCapPublishResponseCallBack,
+            RcsCapSubscribeResponseCallback capSubscribeResponseCallback,
+            RcsCapOptionsResponseCallback optionsResponse,
+            RcsCapPublishResponseCallback rcsCapPublishResponseCallback,
             Executor capExchangeExecutor,
-            Executor callBackExecutor) {
+            Executor callbackExecutor) {
         mCapabilityExchangeEventListener = listener;
         mSlotId = slotId;
         mContext = context;
         mUceApi = uceApi;
         mCapExchangeExecutor = capExchangeExecutor;
-        RcsCapEventListenerCallBack event =
-                new RcsCapEventListenerCallBack(
-                        mCapabilityExchangeEventListener, callBackExecutor, capExchangeExecutor);
+        RcsCapEventListenerCallback event =
+                new RcsCapEventListenerCallback(
+                        mCapabilityExchangeEventListener, callbackExecutor, capExchangeExecutor);
         if (mUceApi != null) {
             mUceApi.setListener(event);
         }
-        mRcsCapPublishResponseCallBack = rcsCapPublishResponseCallBack;
-        mRcsCapSubscribeResponseCallBack = capSubscribeResponseCallBack;
-        mRcsCapOptionsResponseCallBack = optionsResponse;
+        mRcsCapPublishResponseCallback = rcsCapPublishResponseCallback;
+        mRcsCapSubscribeResponseCallback = capSubscribeResponseCallback;
+        mRcsCapOptionsResponseCallback = optionsResponse;
     }
 
     /**
@@ -127,8 +127,8 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
         if (mUceApi != null) {
             postAndRunTask(
                     () -> {
-                        mRcsCapSubscribeResponseCallBack.setCallBack(subscribeCallback);
-                        mUceApi.subscribeCapabilities(uris, mRcsCapSubscribeResponseCallBack);
+                        mRcsCapSubscribeResponseCallback.setCallback(subscribeCallback);
+                        mUceApi.subscribeCapabilities(uris, mRcsCapSubscribeResponseCallback);
                         ImsLog.d("subscribeForCapabilities request");
                     });
         } else {
@@ -151,8 +151,8 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
         if (mUceApi != null) {
             postAndRunTask(
                     () -> {
-                        mRcsCapPublishResponseCallBack.setCallBack(publishCallback);
-                        mUceApi.publishCapabilities(pidfXml, mRcsCapPublishResponseCallBack);
+                        mRcsCapPublishResponseCallback.setCallback(publishCallback);
+                        mUceApi.publishCapabilities(pidfXml, mRcsCapPublishResponseCallback);
                         ImsLog.d("publishCapabilities request with pidfxml");
                     });
         } else {
@@ -177,9 +177,9 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
         if (mUceApi != null) {
             postAndRunTask(
                     () -> {
-                        mRcsCapOptionsResponseCallBack.setCallBack(optionsCallback);
+                        mRcsCapOptionsResponseCallback.setCallback(optionsCallback);
                         mUceApi.sendOptionsCapabilityRequest(
-                                contactUri, myCapabilities, mRcsCapOptionsResponseCallBack);
+                                contactUri, myCapabilities, mRcsCapOptionsResponseCallback);
                         ImsLog.d("sendOptionsCapabilityRequest request");
                     });
         } else {

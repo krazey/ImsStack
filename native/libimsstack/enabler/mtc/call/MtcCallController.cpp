@@ -31,6 +31,7 @@
 #include "ect/IEctManager.h"
 #include "helper/OperationAsyncRunner.h"
 #include "ussi/UssiConstants.h"
+#include <memory>
 
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext& objContext) :
@@ -42,6 +43,7 @@ MtcCallController::MtcCallController(IN IMtcContext& objContext) :
 
 PUBLIC VIRTUAL MtcCallController::~MtcCallController()
 {
+    m_objContext.ReleaseAsyncOperation(this);
     delete m_pRedialHelper;
 }
 
@@ -58,10 +60,23 @@ void MtcCallController::Attach(IN CallKey nCallKey)
 }
 
 PUBLIC
+void MtcCallController::Detach(IN CallKey nCallKey)
+{
+    m_objContext.RunAsyncOperation(this,
+            [&, nCallKey]()
+            {
+                m_objCallManager.RemoveCall(nCallKey);
+            });
+}
+
+PUBLIC
 void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* piSession)
 {
     CallInfo objCallInfo;
-    objCallInfo.bEmergency = pService->IsEmergency();
+    if (pService->IsEmergency())
+    {
+        objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    }
     m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)->HandleIncoming(piSession);
 }
 
@@ -121,7 +136,7 @@ void MtcCallController::RejectResume(IN CallKey nCallKey, IN const CallReasonInf
 PUBLIC
 void MtcCallController::Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
-    m_objContext.GetAsyncRunner(
+    m_objContext.RunAsyncOperation(this,
             [&, nCallKey, objReason]()
             {
                 m_objCallManager.GetCallByCallKey(nCallKey)->Terminate(objReason);

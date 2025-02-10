@@ -25,7 +25,15 @@ public interface ISscAuthAgent {
     void setCipherSuite(String cipherSuite);
     String getETag();
     void setETag(String tag);
-    String getNafFqdnFromRealm();
+
+    /**
+     * Returns Network Application Function(NAF) fully qualified domain name (FQDN) from
+     * {@link CarrierConfig.ImsSs#KEY_UT_NAF_FQDN_STRING} or from realm in the network response.
+     *
+     * @return A URI string of NAF FQDN from {@link CarrierConfig.ImsSs#KEY_UT_NAF_FQDN_STRING}. If
+     * it's empty, NAF FQDN is extracted from realm of the network response.
+     */
+    String getNafFqdn();
 
     void parse(String wwwAuthenticate);
 

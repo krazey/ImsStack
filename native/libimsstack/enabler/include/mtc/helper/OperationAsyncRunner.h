@@ -21,23 +21,22 @@
 #include "ImsTypeDef.h"
 #include <functional>
 
-class OperationAsyncRunner : public ImsMessage::IMessageCallback
+class OperationAsyncRunner final : public ImsMessage::IMessageCallback
 {
 public:
-    OperationAsyncRunner(IN IMS_SINT32 nSlotId, IN std::function<void()> objOperation);
-
-private:
+    explicit OperationAsyncRunner(IN IMS_SINT32 nSlotId);
     ~OperationAsyncRunner();
-
-public:
     OperationAsyncRunner(IN const OperationAsyncRunner&) = delete;
     OperationAsyncRunner& operator=(IN const OperationAsyncRunner&) = delete;
 
+    void SetOperation(
+            IN std::function<void()> objOperation, std::function<void()> objRemoveCallback);
     void MessageCallback_OnMessage(IN ImsMessage& objMsg) override;
 
 private:
     IMS_SINT32 m_nSlotId;
     std::function<void()> m_objOperation;
+    std::function<void()> m_objRemoveCallback;
 };
 
 #endif

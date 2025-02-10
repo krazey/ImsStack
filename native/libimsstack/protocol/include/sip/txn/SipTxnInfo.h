@@ -36,13 +36,13 @@ public:
     SipTransportInfo* m_pTranspInfo;
 
     /* Recv Txn handling : transaction status */
-    SIP_INT32 eTxnStatus;
+    SIP_INT32 m_eTxnStatus;
 
     /* Recv/Send Txn handling : transaction termination status */
-    SIP_BOOL bTxnTerminated;
+    SIP_BOOL m_bTxnTerminated;
 
     /* Recv/Send Txn handling : transaction creation status */
-    SIP_BOOL bTxnCreated;
+    SIP_BOOL m_bTxnCreated;
 };
 
 #endif  //__SIP_TXN_INFO_H__

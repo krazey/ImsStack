@@ -353,7 +353,7 @@ public class SscUtilsTest {
     @Test
     public void getNumberFromUri_replaceZeroWithCountrycode() {
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
                 .thenReturn("+81");
 
         String number = mSscUtils.getNumberFromUri(SLOT_0,
@@ -365,7 +365,7 @@ public class SscUtilsTest {
     @Test
     public void getNumberFromUri_replaceCountryCodeWithZero() {
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
                 .thenReturn("+81");
 
         String number = mSscUtils.getNumberFromUri(SLOT_0, "tel:+81234567890");
@@ -393,7 +393,7 @@ public class SscUtilsTest {
     public void getUriFromNumer_invalidCfTargetUriType() {
         final int invalidUriType = -1;
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(invalidUriType);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -406,7 +406,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_telWithLocalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -419,7 +419,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_sipWithLocalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_SIP);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -432,7 +432,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_telWithInternationalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -445,7 +445,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_sipWithInternationalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_SIP);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -458,7 +458,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_telWithContextFromConfig() {
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING))
                 .thenReturn("contextFromConfig.com");
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "1234567890");
@@ -471,7 +471,7 @@ public class SscUtilsTest {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
                 .thenReturn("+81");
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "01234567890");
@@ -484,7 +484,7 @@ public class SscUtilsTest {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
                 .thenReturn("+81");
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "+81234567890");

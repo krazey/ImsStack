@@ -19,7 +19,7 @@
 #include "call/ParticipantInfo.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/UriFormatter.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "helper/MtcSupplementaryService.h"
@@ -44,8 +44,7 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcDialingPlan objDialingPlan;
     CallInfo objCallInfo;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
 
 protected:
     virtual void SetUp() override
@@ -53,8 +52,7 @@ protected:
         ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
     }
 
@@ -69,7 +67,8 @@ TEST_F(UriFormatterTest, GetReferToForInvite)
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
-    ON_CALL(*pConfigurationManager, IsConferenceReferToUriSourcePaid)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP)).WillByDefault(Return(ANY_SIP_URI));
@@ -164,9 +163,10 @@ TEST_F(UriFormatterTest, GetReferToForByeReuseUri)
 {
     // Invited URI by configuration.
     AString strUri;
-    ON_CALL(*pConfigurationManager, GetConferenceDropReferToUriSourceType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::
-                            CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT))
+            .WillByDefault(Return(
+                    ConfigVoice::CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE));
 
     ConfUser* pConfUser = new ConfUser();
     pConfUser->strUserEntity = "sip:anyUri";
@@ -179,8 +179,9 @@ TEST_F(UriFormatterTest, GetReferToForByeInvalidAnonymous)
 {
     // invalid anonymous -> Invited URI
     AString strUri;
-    ON_CALL(*pConfigurationManager, GetConferenceDropReferToUriSourceType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::
                             CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE));
 
     ConfUser* pConfUser = new ConfUser();

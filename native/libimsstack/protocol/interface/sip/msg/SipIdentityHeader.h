@@ -21,19 +21,13 @@
 class SipIdentityHeader : public SipHeaderBase
 {
 public:
-    /*constructor*/
     SipIdentityHeader();
     SipIdentityHeader(const SipIdentityHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest);
     SIP_VOID SetInfo(const SIP_CHAR* pszInfo);
@@ -46,6 +40,8 @@ public:
         return ((m_pSignedIdentityDigest == SIP_NULL) || (m_pInfo == SIP_NULL)) ? SIP_FALSE
                                                                                 : SIP_TRUE;
     }
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipIdentityHeader();

@@ -16,8 +16,9 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="sms_over_ims_available_without_voice_capa_bool" value="false"/>
-    <boolean name="use_awt_when_init_reg_with_next_pcscf_bool" value="true"/>
+    <int name="ims.isim_index_for_impu_int" value="0"/>
+    <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
+    <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
 
     <!-- MEDIA -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
@@ -83,14 +84,14 @@
         </pbundle>
     </pbundle>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
-        <int-array name="hevc_payload_type_int_array" num="1">
+        <int-array name="imsvt.hevc_payload_type_int_array" num="1">
             <item value="125"/>
         </int-array>
         <int-array name="imsvt.h264_payload_type_int_array" num="1">
             <item value="119"/>
         </int-array>
     </pbundle>
-    <pbundle name="hevc_payload_description_bundle">
+    <pbundle name="imsvt.hevc_payload_description_bundle">
         <pbundle name="125">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="30"/>
@@ -98,9 +99,9 @@
                 <item value="480"/>
                 <item value="640"/>
             </int-array>
-            <string name="hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
-            <int name="hevc_profile_int" value="1"/>
-            <int name="hevc_level_int" value="93"/>
+            <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
+            <int name="imsvt.hevc_profile_int" value="1"/>
+            <int name="imsvt.hevc_level_int" value="93"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvt.h264_payload_description_bundle">
@@ -114,23 +115,23 @@
             </int-array>
         </pbundle>
     </pbundle>
+    <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
 
-    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
-
-    <int name="video_cvo_value_int" value="4"/>
-    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
-    <boolean name="video_avpf_enable_bool" value="true"/>
+    <int name="imsvt.video_cvo_value_int" value="4"/>
+    <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
+    <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>
 
     <!-- Media common configuration -->
-    <int name="audio_maxred_int" value="220"/>
-    <int name="audio_ptime_millis_int" value="20"/>
-    <int name="audio_maxptime_millis_int" value="240"/>
-    <boolean name="audio_bw_nego_option_bool" value="true"/>
-    <boolean name="audio_evs_support_bool" value="true"/>
-    <boolean name="sdp_reoffer_full_capability_bool" value="false"/>
-    <boolean name="media_session_level_bandwidth_bool" value="true"/>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int name="imsvoice.audio_ptime_millis_int" value="20"/>
+    <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
+    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
+    <boolean name="imsvoice.media_session_level_bandwidth_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
     <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
@@ -142,11 +143,9 @@
         <item value="2"/>
     </int-array>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
-
-    <!-- Ut/Xcap Assets -->
-    <boolean name="ut_oir_tir_always_temporary_mode_bool" value="false"/>
+    <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="false"/>
 
     <!-- MTC -->
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
@@ -154,14 +153,45 @@
     <int name="imsvoice.session_refresher_type_int" value="0"/>
     <int name="imsvoice.session_refresh_method_int" value="2"/>
     <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
-    <boolean name="add_replace_header_for_conference_bool" value="true"/>
-
+    <boolean name="imsvoice.add_replace_header_for_conference_bool" value="true"/>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">
+        <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB  -->
+        <item value="403:7"/> <!-- HANDLE_FORBIDDEN_BY_POLICY  -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="488:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+        <item value="500:3,12"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TERMINATE_BY_RESPONSE_SOURCE -->
+        <item value="503:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="600:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
     <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsvt.video_qos_precondition_supported_bool" value="true"/>
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
     <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="8000"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="2"/>
-    <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="true"/>
+    <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="true"/>
     <string name="imsvoice.conference_factory_uri_string">sip:mmtel@conf-factory.test.3gpp.com</string>
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
+        <item value="1"/> <!-- EMERGENCY_LTE-->
+        <item value="1"/> <!-- EMERGENCY_WIFI -->
+        <item value="0"/> <!-- NORMAL_LTE -->
+        <item value="0"/> <!-- NORMAL_WIFI -->
+    </int-array>
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
+        <item value="0"/> <!-- INVITE -->
+    </int-array>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
 </carrier_config>

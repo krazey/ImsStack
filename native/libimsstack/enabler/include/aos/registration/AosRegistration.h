@@ -89,6 +89,7 @@ public:
     AosRegistrationType GetRegType() override;
     IMS_SINT32 GetImsRegType() override;
 
+    IMS_BOOL IsInCallbackMode() override;
     IMS_BOOL IsRegistered() override;
     IMS_BOOL IsRefreshing() override;
     IMS_BOOL IsRetryTimer() override;
@@ -151,6 +152,9 @@ protected:
 
     /// Log
     AString FeatureToString();
+
+    /// For Test Only
+    inline IMS_UINT32 GetPdnReactivateWaitTime() { return m_nPdnReactivateWaitTime; }
 
     /// ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
@@ -394,11 +398,11 @@ private:
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
     void UpdateCallingNumberVerification();
+    void UpdateModeToHandles();
     void NotifyTechnologyChangeFailed();
 
     IMS_BOOL IsErrorCodeExisted(
             IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
-    IMS_BOOL IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const;
     IMS_BOOL IsPdnReactivationRequired();
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);
     IMS_BOOL IsNeedToSetLimitedMode();

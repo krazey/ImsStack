@@ -17,5 +17,12 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Aos -->
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
+    <pbundle name="ims.sub_err_code_for_terminated_bundle">
+        <int name="ims.sub_err_code_for_terminated_with_retry_max_cnt_int" value="1"/>
+        <int-array name="ims.sub_err_code_for_terminated_int_array" num="1">
+            <item value="489"/>
+        </int-array>
+    </pbundle>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 </carrier_config>

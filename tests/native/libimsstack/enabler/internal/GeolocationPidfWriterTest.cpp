@@ -70,7 +70,6 @@ TEST_F(GeolocationPidfWriterTest, WriteNestedElements)
     ByteArray objContent = PidfLoXml{
         new Tuple{"id", {
             new Method{"method"},
-            new UsageRules{},
         }},
         new Geopriv{},
     }.Write();
@@ -79,7 +78,28 @@ TEST_F(GeolocationPidfWriterTest, WriteNestedElements)
     const AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                 "<tuple id=\"id\">"
                                 "<gp:method>method</gp:method>"
-                                "<gp:usage-rules/>"
+                                "</tuple>"
+                                "<gp:geopriv>"
+                                "</gp:geopriv>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
+TEST_F(GeolocationPidfWriterTest, WriteAppendedElements)
+{
+    PidfLoXml objElement{};
+    // clang-format off
+    objElement.Append(
+        new Tuple{"id", {
+            new Method{"method"},
+        }}
+    );
+    objElement.Append(new Geopriv{});
+    // clang-format on
+    ByteArray objContent = objElement.Write();
+
+    const AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                "<tuple id=\"id\">"
+                                "<gp:method>method</gp:method>"
                                 "</tuple>"
                                 "<gp:geopriv>"
                                 "</gp:geopriv>";
@@ -165,6 +185,17 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithCon)
     AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
 
+TEST_F(GeolocationPidfWriterTest, WritePresenceWithGbp)
+{
+    Presence{Presence::Namespace::GBP, "uri", {}}.Write(*pWriter);
+
+    const AString strExpected = "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                                "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+                                "entity=\"uri\">"
+                                "</presence>";
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
+}
+
 TEST_F(GeolocationPidfWriterTest, WritePresenceWithAll)
 {
     Presence{Presence::Namespace::ALL, "uri", {}}.Write(*pWriter);
@@ -175,7 +206,9 @@ TEST_F(GeolocationPidfWriterTest, WritePresenceWithAll)
                                 "xmlns:gml=\"http://www.opengis.net/gml\" "
                                 "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
                                 "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-                                "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"uri\">"
+                                "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+                                "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+                                "entity=\"uri\">"
                                 "</presence>";
     AssertXmlStringEquality(GetResultString(pWriter), strExpected);
 }
@@ -251,8 +284,24 @@ TEST_F(GeolocationPidfWriterTest, WriteUsageRules)
 {
     UsageRules{}.Write(*pWriter);
 
-    const AString strExpected = "<gp:usage-rules/>";
+    const AString strExpected = "<gp:usage-rules>"
+                                "</gp:usage-rules>";
     AssertXmlStringEquality(GetResultString(pWriter), strExpected);
+}
+
+TEST_F(GeolocationPidfWriterTest, WriteRetransmissionAllowed)
+{
+    RetransmissionAllowed{"true"}.Write(*pWriter);
+
+    const AString strExpected = "<gbp:retransmission-allowed>true</gbp:retransmission-allowed>";
+    AssertXmlStringEquality(GetResultString(pWriter), strExpected);
+}
+
+TEST_F(GeolocationPidfWriterTest, WriteRetransmissionAllowedEmpty)
+{
+    RetransmissionAllowed{""}.Write(*pWriter);
+
+    AssertXmlStringEquality(GetResultString(pWriter), "");
 }
 
 TEST_F(GeolocationPidfWriterTest, WriteMethod)

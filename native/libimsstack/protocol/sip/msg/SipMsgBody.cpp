@@ -20,8 +20,6 @@
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
-extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
-
 SipMIMEHdrs::SipMIMEHdrs() :
         m_pContentType(SIP_NULL),
         m_pContentEncoding(SIP_NULL),
@@ -185,7 +183,7 @@ SipHeaderBase* SipMIMEHdrs::GetNewMIMEHdrObj(SIP_INT32 eHdrType)
             {
                 m_pContentType->SipDelete();
             }
-            m_pContentType = new SipContentTypeHeader();
+            m_pContentType = new SipContentTypeHeader(SipHeaderBase::CONTENT_TYPE);
             return m_pContentType;
 
         case SipHeaderBase::CONTENT_ENCODING:
@@ -213,7 +211,7 @@ SipHeaderBase* SipMIMEHdrs::GetNewMIMEHdrObj(SIP_INT32 eHdrType)
     }
 }
 
-SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipMIMEHdrs::Encode(SIP_CHAR** ppCurrPos)
 {
     SIP_INT32 nHdr = SipMIMEHdrs::CONTENT_TYPE;
 
@@ -228,14 +226,15 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
                         pTemp->GetHdrType(), ppCurrPos, SipConfiguration::MSG_OPT_ENCODE_NONE);
             }
 
-            if (pTemp->EncodeHdr(ppCurrPos) == SIP_FALSE)
+            if (pTemp->Encode(ppCurrPos) == SIP_FALSE)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeHdr Failed", SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode mime header %d failed",
+                        pTemp->GetHdrType(), SIP_ZERO);
                 pTemp->SipDelete();
                 return SIP_FALSE;
             }
             pTemp->SipDelete();
-            SIP_ENC_CRLF(*ppCurrPos);
+            SipMsgUtil::EncodeCrlf(*ppCurrPos);
         }
         nHdr++;
     }
@@ -243,7 +242,7 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipMIMEHdrs::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == 0)
     {
@@ -255,38 +254,35 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*Get the position previous to ":"*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: colon not found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, " colon not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     const SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
-    pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
+    pTempNext = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempNext, pEndPt);
 
     /*skip the WSP form back*/
-    pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
+    pTempPos = SipAbnfUtil::SkipRightWhiteSpace(pStartPt, pTempPos);
 
     /*Create  the header name*/
-    SIP_CHAR* pszHdrName = SipCreateString(pStartPt, pTempPos);
+    SIP_CHAR* pszHdrName = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (pszHdrName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: Memory Allocation failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*this will return the type of header on passing name*/
-    SIP_INT32 eHdrType = SipGetMimeHdrType(pszHdrName);
+    SIP_INT32 eHdrType = SipMsgUtil::GetMimeHeaderType(pszHdrName);
 
     /*Free the header name*/
     /*Get the header object*/
     SipHeaderBase* pHeader = GetNewMIMEHdrObj(eHdrType);
     if (pHeader == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: GetNewMIMEHdrObj failed", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "GetNewMIMEHdrObj failed", SIP_ZERO, SIP_ZERO);
         delete[] pszHdrName;
         return SIP_FALSE;
     }
@@ -296,8 +292,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         SipUnknownHeader* pUnknown = new SipUnknownHeader();
         if (pUnknown == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEHdrs: Memory Allocation failed",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             delete[] pszHdrName;
             return SIP_FALSE;
         }
@@ -305,10 +300,10 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         pUnknown->SetHeaderName(pszHdrName);
         delete[] pszHdrName;
 
-        SIP_CHAR* pszHdrValue = SipCreateString(pTempNext, pEndPt);
+        SIP_CHAR* pszHdrValue = SipAbnfUtil::CreateString(pTempNext, pEndPt);
         if (pszHdrValue == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             pUnknown->SipDelete();
             return SIP_FALSE;
         }
@@ -325,7 +320,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         if (m_pUnKnownHdrList->AddHeader(pUnknown) == SIP_FALSE)
         {
             pUnknown->SipDelete();
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pUnknown->SipDelete();
@@ -337,10 +332,11 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         pStartPt = pTempNext;
         /*Update the length for decoding*/
         nDecLen = pEndPt - pStartPt + SIP_ONE;
-        /*Call the Decoder function*/
-        if (pHeader->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+
+        if (pHeader->Decode(pStartPt, nDecLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode header %d failed",
+                    pHeader->GetHdrType(), SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -423,7 +419,7 @@ SIP_BOOL SipMsgBody::EncodeSingleMsgBody(SIP_CHAR** ppCurrPos)
     if (m_pBuffer == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "EncodeMsgBody Failed - No body", SIP_ZERO, SIP_ZERO);
+                ESIPTRACE_MODENCODER, "EncodeMsgBody failed - No body", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     SIP_CHAR* pBody = *ppCurrPos;
@@ -448,7 +444,8 @@ SIP_BOOL SipMsgBody::EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos)
     SipContentTypeHeader* pContentType = static_cast<SipContentTypeHeader*>(GetContentType());
     if (pContentType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content Type Not Present", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Content type header not present", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -456,7 +453,7 @@ SIP_BOOL SipMsgBody::EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos)
 
     if (m_pBodyList->EncodeBody(ppCurrPos, pszBoundary) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Msg Body Enc Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode message body failed", SIP_ZERO, SIP_ZERO);
         if (pszBoundary != SIP_NULL)
         {
             delete[] pszBoundary;
@@ -478,19 +475,19 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
     /*Encode the  MIME headers*/
     if (IsMimeEncoding() == SIP_TRUE)
     {
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
 
         if (m_pMIMEHdrs != SIP_NULL)
         {
-            if (m_pMIMEHdrs->EncodeMIMEHdrs(ppCurrPos) == SIP_FALSE)
+            if (m_pMIMEHdrs->Encode(ppCurrPos) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(
-                        ESIPTRACE_MODENCODER, "EncodeBody Failed - No body", SIP_ZERO, SIP_ZERO);
+                        ESIPTRACE_MODENCODER, "EncodeBody failed, no body", SIP_ZERO, SIP_ZERO);
             }
         }
 
         /*Put the second CRLF*/
-        SIP_ENC_CRLF(*ppCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppCurrPos);
     }
 
     return (GetBodyType() == SipMsgBody::SINGLE_BODY) ? EncodeSingleMsgBody(ppCurrPos)
@@ -504,8 +501,7 @@ SIP_BOOL SipMsgBody::DecodeSingleMsgBody(const SIP_CHAR* pStartPt, const SIP_CHA
 
     if (pData == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeSingleMsgBody:Memory Allocation failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -523,8 +519,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
 {
     if (pStartPt == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeMIMEMsgBody: Illegal argument", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Illegal argument", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -539,8 +534,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
     m_pMIMEHdrs = new SipMIMEHdrs();
     if (m_pMIMEHdrs == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEMsgBody:Memory Allocation failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -551,13 +545,13 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
         SIP_UINT32 nDecLen = SIP_ZERO;
         const SIP_CHAR* pTempPos = SIP_NULL;
         // Fail condition to be added
-        SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd);
+        SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd);
         nDecLen = pTempPos - pStartPt + SIP_ONE;
 
-        if (m_pMIMEHdrs->DecodeMIMEHdrs(pStartPt, nDecLen) == SIP_FALSE)
+        if (m_pMIMEHdrs->Decode(pStartPt, nDecLen) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEMsgBody:Hdr Decoding failed",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "MIME Headers decoding failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pStartPt = pTempPos + SIP_THREE;
@@ -565,8 +559,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
     /*Check for Header end completion*/
     if (bHdrEnd != SIP_TRUE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeMIMEMsgBody:Incomplete Message", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Incomplete message", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -577,18 +570,17 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
             m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
     if (pContentType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeMIMEMsgBody: Body in not valid", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Body in not valid", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     const SIP_CHAR* pszMType = pContentType->GetMediaType();
     if (pszMType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wronge Content Type", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Wrong content type", SIP_ZERO, SIP_ZERO);
         pContentType->SipDelete();
         return SIP_FALSE;
     }
-    SIP_BOOL bSingleBody = (SIP_BOOL)SipPf_Stricmp(pszMType, MULTIPART);
+    SIP_BOOL bSingleBody = (SIP_BOOL)SipPf_Stricmp(pszMType, SipMsgUtil::MULTIPART);
 
     /*Case of mime body*/
     if (bSingleBody == SIP_FALSE)
@@ -597,7 +589,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
         if (pszBoundary == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "No boundary in Content Type Hdr", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODDECODER, "No boundary in Content-Type Header", SIP_ZERO, SIP_ZERO);
             pContentType->SipDelete();
             return SIP_FALSE;
         }
@@ -605,8 +597,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
         m_pBodyList = new SipMsgBodyList();
         if (m_pBodyList == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEMsgBody: Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             pContentType->SipDelete();
             delete[] pszBoundary;
             return SIP_FALSE;
@@ -615,7 +606,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
 
         if (m_pBodyList->DecodeMIMEBody(pStartPt, pEndPt, pszBoundary) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEBody: failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeMIMEBody failed", SIP_ZERO, SIP_ZERO);
             pContentType->SipDelete();
             delete[] pszBoundary;
             return SIP_FALSE;
@@ -739,7 +730,7 @@ SIP_BOOL SipMsgBody::IsMessageBodySDP()
         return SIP_FALSE;
     }
     const SIP_CHAR* pszSubMType = pHdr->GetSubMediaType();
-    SIP_INT16 nResult = SipPf_Stricmp(pszSubMType, SDP);
+    SIP_INT16 nResult = SipPf_Stricmp(pszSubMType, SipMsgUtil::SDP);
     pHdr->SipDelete();
     return (nResult == SIP_ZERO) ? SIP_TRUE : SIP_FALSE;
 }
@@ -809,9 +800,9 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
     SIP_UINT32 nNumBodies = m_objBodyList.GetSize();
 
     /*Encoding Of Boundary*/
-    SIP_ENC_DASH(*ppMsgBuffCurrPos);
-    SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
-    SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+    SipAbnfUtil::Append(*ppMsgBuffCurrPos, pszBoundary);
 
     /*Get the message bodies and encode them*/
     for (SIP_UINT32 nCount = SIP_ZERO; nCount < nNumBodies; nCount++)
@@ -820,27 +811,28 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR*
         if (pMsgbody == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODENCODER, "EncodeBody Failed - No body", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODENCODER, "EncodeBody failed, no body", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (pMsgbody->EncodeBody(ppMsgBuffCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODENCODER, "Encode message Body Failed", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODENCODER, "Encode message body failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         /*Put the Closing Boundary*/
-        SIP_ENC_CRLF(*ppMsgBuffCurrPos);
-        SIP_ENC_DASH(*ppMsgBuffCurrPos);
-        SipPf_Strcpy(*ppMsgBuffCurrPos, pszBoundary);
-        SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
+        SipMsgUtil::EncodeCrlf(*ppMsgBuffCurrPos);
+        SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+        SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+        SipAbnfUtil::Append(*ppMsgBuffCurrPos, pszBoundary);
     }
 
     /*End boundary*/
-    SIP_ENC_DASH(*ppMsgBuffCurrPos);
-    SIP_ENC_CRLF(*ppMsgBuffCurrPos);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+    SipMsgUtil::Encode(*ppMsgBuffCurrPos, HYPHEN);
+    SipMsgUtil::EncodeCrlf(*ppMsgBuffCurrPos);
 
     return SIP_TRUE;
 }
@@ -907,22 +899,19 @@ SIP_BOOL SipMsgBodyList::DecodeSingleBody(const SIP_CHAR* pStartPt, const SIP_CH
     SipMsgBody* pMsgBody = new SipMsgBody();
     if (pMsgBody == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipMsgBodyList::DecodeSingleBody:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (pMsgBody->DecodeSingleMsgBody(pStartPt, pEndPt) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipMsgBodyList::DecodeSingleBody:Body Decoding failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Body decoding failed", SIP_ZERO, SIP_ZERO);
         pMsgBody->SipDelete();
         return SIP_FALSE;
     }
     if (m_objBodyList.Add(pMsgBody) < 0)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipMsgBodyList::DecodeSingleBody:Body Decoding failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Body decoding failed", SIP_ZERO, SIP_ZERO);
         pMsgBody->SipDelete();
         return SIP_FALSE;
     }
@@ -936,13 +925,12 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
     /*Boundary check*/
     if (pszBoundary == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipMsgBodyList::DecodeMIMEBody: Boundary unavailable", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Boundary unavailable", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Remove CRLF before boundary*/
-    pStartPt = SkipConsecutiveCRLFs(pStartPt);
+    pStartPt = SipAbnfUtil::SkipConsecutiveCrlf(pStartPt);
 
     /*Get the boundrary (Find start of Transport -padding)*/
     /*Update start pt aftr  "--" */
@@ -952,28 +940,25 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
     SIP_CHAR* pszTempBoundary = SIP_NULL;
     const SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_TRUE)
+    if (SipAbnfUtil::FindCrlf(pStartPt, pEndPt, pTempPos) == SIP_TRUE)
     {
-        pszTempBoundary = SipCreateString(pStartPt, pTempPos);
+        pszTempBoundary = SipAbnfUtil::CreateString(pStartPt, pTempPos);
         if (pszTempBoundary == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipMsgBodyList::DecodeMIMEBody:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
     else
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipMsgBodyList::DecodeMIMEBody:Boundary Invalid",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Boundary invalid", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_UINT32 nBoundaryLen = pTempPos - pStartPt;
     if (SipPf_Stricmp(pszBoundary, pszTempBoundary) != SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipMsgBodyList::DecodeMIMEBody:Boundary Not Matching", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Boundary not matching", SIP_ZERO, SIP_ZERO);
         delete[] pszTempBoundary;
         return SIP_FALSE;
     }
@@ -982,7 +967,7 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
     /*Update the start point till the start of boundary*/
     pStartPt = pStartPt + nBoundaryLen + SIP_ONE;
     /*Update the Start point to the Start Of headers*/
-    pStartPt = SipSkipFwLWS(pStartPt, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
 
     SIP_BOOL bBodyEnd = SIP_FALSE;
     while ((pStartPt <= pEndPt) && (bBodyEnd == SIP_FALSE))
@@ -990,23 +975,21 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
         SipMsgBody* pMsgBody = new SipMsgBody();
         if (pMsgBody == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipMsgBodyList::DecodeMIMEBody:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        const SIP_CHAR* pTempEnd = SipFindBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
+        const SIP_CHAR* pTempEnd =
+                SipMsgUtil::FindMsgBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
 
         if (pMsgBody->DecodeMIMEMsgBody(pStartPt, pTempEnd) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipMsgBodyList::DecodeMIMEBody:Body Decoding failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Body decoding failed", SIP_ZERO, SIP_ZERO);
             pMsgBody->SipDelete();
             return SIP_FALSE;
         }
         if (m_objBodyList.Add(pMsgBody) < 0)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipMsgBodyList::DecodeMIMEBody:Body Decoding failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Body decoding failed", SIP_ZERO, SIP_ZERO);
             pMsgBody->SipDelete();
             return SIP_FALSE;
         }

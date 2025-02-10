@@ -283,12 +283,12 @@ public final class ImsServiceConnector {
         proxy.waitForReady();
     }
 
-    private static void logi(String s) {
-        Log.i(Log.TAG, "ImsServiceConnector: " + s);
+    private void logi(String s) {
+        Log.i(this, s);
     }
 
-    private static void loge(String s) {
-        Log.e(Log.TAG, "ImsServiceConnector: " + s);
+    private void loge(String s) {
+        Log.e(this, s);
     }
 
     private class ImsServiceConnection implements ServiceConnection {

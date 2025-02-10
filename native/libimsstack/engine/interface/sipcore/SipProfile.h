@@ -49,6 +49,7 @@ public:
             m_nTimerValueT2(NOT_PROVISIONED),
             m_strTagPrefix(AString::ConstNull()),
             m_strUaString(AString::ConstNull()),
+            m_nHideMacInPaniHeader(NOT_PROVISIONED),
             m_nRegExpires(NOT_PROVISIONED),
             m_objRegAllowMethods(AStringArray::ConstNull()),
             m_strRegUaString(AString::ConstNull()),
@@ -69,6 +70,7 @@ public:
             m_nTimerValueT2(other.m_nTimerValueT2),
             m_strTagPrefix(other.m_strTagPrefix),
             m_strUaString(other.m_strUaString),
+            m_nHideMacInPaniHeader(other.m_nHideMacInPaniHeader),
             m_nRegExpires(other.m_nRegExpires),
             m_objRegAllowMethods(other.m_objRegAllowMethods),
             m_strRegUaString(other.m_strRegUaString),
@@ -128,7 +130,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
@@ -195,6 +196,17 @@ public:
      * @return The allowed SIP methods.
      */
     inline const AStringArray& GetRegAllowMethods() const { return m_objRegAllowMethods; }
+
+    /**
+     * @brief Gets the policy whether MAC address should be hidden in PANI header on Wi-Fi.
+     *
+     * @return The policy that specifies whether hiding MAC address in PANI header is allowed or not
+     *         Possible values are:
+     *         #ISipConfig#SHOW_MAC_IN_PANI\n
+     *         #ISipConfig#HIDE_MAC_IN_PANI\n
+     *         #ISipConfig#HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL
+     */
+    inline IMS_SINT32 GetHideMacInPaniHeaderPolicy() const { return m_nHideMacInPaniHeader; }
 
     /**
      * @brief Gets the expires value for IMS registration.
@@ -272,7 +284,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
@@ -347,6 +358,17 @@ public:
     inline void SetRegAllowMethods(IN const AStringArray& objAllowMethods)
     {
         m_objRegAllowMethods = objAllowMethods;
+    }
+
+    /**
+     * @brief Sets the policy whether MAC address should be hidden in PANI header on Wi-Fi.
+     *
+     * @param nPolicy The policy that specifies whether hiding MAC address in PANI header
+     *                is allowed or not.
+     */
+    inline void SetHideMacInPaniHeaderPolicy(IN IMS_SINT32 nPolicy)
+    {
+        m_nHideMacInPaniHeader = nPolicy;
     }
 
     /**
@@ -660,16 +682,6 @@ public:
     }
 
     /**
-     * @brief Checks if the MAC address should be hidden in PANI header on Wi-Fi.
-     *
-     * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
-     */
-    inline IMS_BOOL IsMacAddressHiddenInPaniHeader() const
-    {
-        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER);
-    }
-
-    /**
      * @brief Checks if the "local-time-zone" parameter is supported in PANI header.
      *
      * @return IMS_TRUE if it's supported, IMS_FALSE otherwise.
@@ -747,7 +759,8 @@ private:
     AString m_strTagPrefix;
     // UA string : sw_version + service_version
     AString m_strUaString;
-
+    // Policy that specifies whether hiding MAC address in PANI header is allowed or not.
+    IMS_SINT32 m_nHideMacInPaniHeader;
     // Expires for Registration
     IMS_SINT32 m_nRegExpires;
     // SIP methods which sets in Allow header in Registration

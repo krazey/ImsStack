@@ -44,10 +44,6 @@ public:
             IN IMS_UINT32 nWidth, IN IMS_UINT32 nHeight);
     static VIDEO_PROFILE_AVC GetAvcProfileFromProfileLevelId(IN const AString& strProfileLevelId);
     static IMS_UINT32 GetAvcLevelFromProfileLevelId(IN const AString& strProfileLevelId);
-    static IMS_BOOL MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig,
-            IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
-            OUT VideoProfile* pNegotiatedProfile);
 };
 
 #endif

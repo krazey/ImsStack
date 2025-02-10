@@ -281,12 +281,12 @@ public final class ImsRegistrationWrapper {
         });
     }
 
-    private static void logi(String s) {
-        Log.i(Log.TAG, "ImsRegistrationWrapper: " + s);
+    private void logi(String s) {
+        Log.i(this, s);
     }
 
-    private static void loge(String s) {
-        Log.e(Log.TAG, "ImsRegistrationWrapper: " + s);
+    private void loge(String s) {
+        Log.e(this, s);
     }
 
     public class RegistrationCallback extends IImsRegistrationCallback.Stub {

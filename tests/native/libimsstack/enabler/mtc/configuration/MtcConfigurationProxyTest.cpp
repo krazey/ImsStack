@@ -14,545 +14,213 @@
  * limitations under the License.
  */
 
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "CarrierConfig.h"
+#include "MockICarrierConfig.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
+
+LOCAL const IMS_CHAR VALID_KEY_BOOL[] = "valid_key_bool";
+LOCAL const IMS_CHAR INVALID_KEY_BOOL[] = "invalid_key_bool";
+LOCAL const IMS_CHAR VALID_KEY_INT[] = "valid_key_int";
+LOCAL const IMS_CHAR INVALID_KEY_INT[] = "invalid_key_int";
+LOCAL const IMS_CHAR VALID_KEY_STRING[] = "valid_key_string";
+LOCAL const IMS_CHAR INVALID_KEY_STRING[] = "invalid_key_string";
+LOCAL const IMS_CHAR VALID_KEY_INT_ARRAY[] = "valid_key_int_array";
+LOCAL const IMS_CHAR INVALID_KEY_INT_ARRAY[] = "invalid_key_int_array";
+LOCAL const IMS_CHAR VALID_KEY_STRING_ARRAY[] = "valid_key_string_array";
+LOCAL const IMS_CHAR INVALID_KEY_STRING_ARRAY[] = "invalid_key_string_array";
+
+LOCAL const IMS_BOOL VALID_BOOL_VALUE = IMS_TRUE;
+LOCAL const IMS_BOOL INVALID_BOOL_VALUE = IMS_FALSE;
+LOCAL const IMS_SINT32 VALID_INT_VALUE = 1;
+LOCAL const IMS_SINT32 INVALID_INT_VALUE = -1;
+LOCAL const IMS_SINT32 VALID_INT_VALUE2 = 2;
+LOCAL const AString VALID_STRING_VALUE = "valid_string_value";
+LOCAL const AString INVALID_STRING_VALUE = "invalid_string_value";
+LOCAL const AString VALID_STRING_VALUE2 = "valid_string_value2";
 
 class MtcConfigurationProxyTest : public ::testing::Test
 {
 public:
-    MockIMtcConfigurationManager* pConfigManager;
-    MtcConfigurationProxy* pConfig;
+    inline MtcConfigurationProxyTest() :
+            pProxy(IMS_NULL),
+            objConfigService(),
+            piCc(IMS_NULL),
+            objIntArray(),
+            objStringArray()
+    {
+    }
+
+    MtcConfigurationProxy* pProxy;
+    TestConfigService objConfigService;
+    MockICarrierConfig* piCc;
+    ImsVector<IMS_SINT32> objIntArray;
+    ImsVector<AString> objStringArray;
+    ImsVector<IMS_SINT32> objEmptyIntArray;
+    ImsVector<AString> objEmptyStringArray;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigManager = new MockIMtcConfigurationManager();
-        pConfig = new MtcConfigurationProxy(pConfigManager);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+        piCc = &objConfigService.GetMockCarrierConfig();
+        pProxy = new MtcConfigurationProxy();
+
+        ON_CALL(*piCc, GetBoolean(VALID_KEY_BOOL, _)).WillByDefault(Return(VALID_BOOL_VALUE));
+        ON_CALL(*piCc, GetBoolean(INVALID_KEY_BOOL, _)).WillByDefault(Return(INVALID_BOOL_VALUE));
+
+        ON_CALL(*piCc, GetInt(VALID_KEY_INT, _)).WillByDefault(Return(VALID_INT_VALUE));
+        ON_CALL(*piCc, GetInt(INVALID_KEY_INT, _)).WillByDefault(Return(INVALID_INT_VALUE));
+
+        ON_CALL(*piCc, GetString(VALID_KEY_STRING, _)).WillByDefault(Return(VALID_STRING_VALUE));
+        ON_CALL(*piCc, GetString(INVALID_KEY_STRING, _))
+                .WillByDefault(Return(INVALID_STRING_VALUE));
+
+        objIntArray.Push(VALID_INT_VALUE);
+        objIntArray.Push(VALID_INT_VALUE2);
+        ON_CALL(*piCc, GetIntArray(VALID_KEY_INT_ARRAY)).WillByDefault(Return(objIntArray));
+        ON_CALL(*piCc, GetIntArray(VALID_KEY_STRING_ARRAY)).WillByDefault(Return(objEmptyIntArray));
+
+        objStringArray.Push(VALID_STRING_VALUE);
+        objStringArray.Push(VALID_STRING_VALUE2);
+        ON_CALL(*piCc, GetStringArray(VALID_KEY_STRING_ARRAY))
+                .WillByDefault(Return(objStringArray));
+        ON_CALL(*piCc, GetStringArray(VALID_KEY_INT_ARRAY))
+                .WillByDefault(Return(objEmptyStringArray));
     }
 
-    virtual void TearDown() override { delete pConfig; }
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+        delete pProxy;
+    }
 };
 
-TEST_F(MtcConfigurationProxyTest, Init)
+TEST_F(MtcConfigurationProxyTest, GetBooleanReturnsValidValue)
 {
-    EXPECT_CALL(*pConfigManager, Init).Times(1);
-
-    pConfig->Init();
+    EXPECT_EQ(pProxy->GetBoolean(VALID_KEY_BOOL), VALID_BOOL_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
+TEST_F(MtcConfigurationProxyTest, GetBooleanReturnsDefaultValueIfKeyIsInvalid)
 {
-    const IMS_BOOL bValue = IMS_TRUE;
-
-    EXPECT_CALL(*pConfigManager, IsSupportSipSessionIdHeader).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER));
-
-    EXPECT_CALL(*pConfigManager, IsIncludeCallerIdServiceCodesInSipInvite).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE));
-
-    EXPECT_CALL(*pConfigManager, IsMultiendpointSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::MULTIENDPOINT_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsSessionTimerSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SESSION_TIMER_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsPrackSupportedFor18x).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::PRACK_SUPPORTED_FOR_18X));
-
-    EXPECT_CALL(*pConfigManager, IsVoiceQosPreconditionSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsVoiceOnDefaultBearerSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::VOICE_ON_DEFAULT_BEARER_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsOipSourceFromHeader).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::OIP_SOURCE_FROM_HEADER));
-
-    EXPECT_CALL(*pConfigManager, IsSupportConferenceReferSubscribe).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_CONFERENCE_REFER_SUBSCRIBE));
-
-    EXPECT_CALL(*pConfigManager, IsEnableConferenceSubscribeByParticipant).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT));
-
-    EXPECT_CALL(*pConfigManager, IsEnableSendReinviteOnRatChange).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ENABLE_SEND_REINVITE_ON_RAT_CHANGE));
-
-    EXPECT_CALL(*pConfigManager, IsAllowMultipleCallIncludingVideoCall).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL));
-
-    EXPECT_CALL(*pConfigManager, IsRejectOfferlessInvite).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::REJECT_OFFERLESS_INVITE));
-
-    EXPECT_CALL(*pConfigManager, IsVideoOnDefaultBearerSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::VIDEO_ON_DEFAULT_BEARER_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsVideoQosPreconditionSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::VIDEO_QOS_PRECONDITION_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsSupportEarlySession).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_EARLY_SESSION));
-
-    EXPECT_CALL(*pConfigManager, IsTextOnDefaultBearerSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::TEXT_ON_DEFAULT_BEARER_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsTextQosPreconditionSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::TEXT_QOS_PRECONDITION_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsEmergencyCallOverEmergencyPdn).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::EMERGENCY_CALL_OVER_EMERGENCY_PDN));
-
-    EXPECT_CALL(*pConfigManager, IsRetryEmergencyOnImsPdnBool).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::RETRY_EMERGENCY_ON_IMS_PDN_BOOL));
-
-    EXPECT_CALL(*pConfigManager, IsEmergencyQosPreconditionSupported).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::EMERGENCY_QOS_PRECONDITION_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsEmergencyCallOverEmergencyPdnOnCellular)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR));
-
-    EXPECT_CALL(*pConfigManager,
-            IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(Feature::
-                            EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL));
-
-    EXPECT_CALL(*pConfigManager, IsCheckConferenceEventPackageVersion).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::CHECK_CONFERENCE_EVENT_PACKAGE_VERSION));
-
-    EXPECT_CALL(*pConfigManager, IsConferenceReferToUriSourcePaid).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::CONFERENCE_REFER_TO_URI_SOURCE_PAID));
-
-    EXPECT_CALL(*pConfigManager, IsEnableFakeQosCallFlowOnWifi).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI));
-
-    EXPECT_CALL(*pConfigManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS));
-
-    EXPECT_CALL(*pConfigManager, IsEnableOipHeaderPolicyFallBack).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK));
-
-    EXPECT_CALL(*pConfigManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(
-            bValue, pConfig->Is(Feature::RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF));
-
-    EXPECT_CALL(*pConfigManager, IsCheckAvchangeFeatureForCallConvertingCapability)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY));
-
-    EXPECT_CALL(*pConfigManager, IsSupportRegistrationRecoveryForFailureOfSessionRefresh)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(Feature::SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH));
-
-    EXPECT_CALL(*pConfigManager, IsUseMcidSupplementaryService).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::USE_MCID_SUPPLEMENTARY_SERVICE));
-
-    EXPECT_CALL(*pConfigManager, IsUseMmcSupplementaryService).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::USE_MMC_SUPPLEMENTARY_SERVICE));
-
-    EXPECT_CALL(*pConfigManager, IsUseLtePreferredStatusForServiceCapability)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY));
-
-    EXPECT_CALL(*pConfigManager, IsAllowIncomingHoldRequestDuringConferenceCall)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL));
-
-    EXPECT_CALL(*pConfigManager, IsIgnore180After183Response).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::IGNORE_180_AFTER_183_RESPONSE));
-
-    EXPECT_CALL(*pConfigManager, IsAddReplaceHeaderForConference).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ADD_REPLACE_HEADER_FOR_CONFERENCE));
-
-    EXPECT_CALL(*pConfigManager, IsUseEmergencyNumberTranslationInRoamingStatus)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS));
-
-    EXPECT_CALL(*pConfigManager, IsIgnorePrackDeliveryFailure).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::IGNORE_PRACK_DELIVERY_FAILURE));
-
-    EXPECT_CALL(*pConfigManager, IsSupportVideoCallOnlyInVopsOffStatus).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS));
-
-    EXPECT_CALL(*pConfigManager, IsBlockWifiEmergencyCallIfNotProvisioned).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED));
-
-    EXPECT_CALL(*pConfigManager, IsSupportCanidInfo).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_CANID_INFO));
-
-    EXPECT_CALL(*pConfigManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(
-            bValue, pConfig->Is(Feature::USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE));
-
-    EXPECT_CALL(
-            *pConfigManager, IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(Feature::
-                            USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION));
-
-    EXPECT_CALL(*pConfigManager, IsEnableRegistrationRecoveryWhenCallRejectedByServerError)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(Feature::ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR));
-
-    EXPECT_CALL(*pConfigManager, IsEnableRegistrationRecoveryWhenCallRetryUnavailable)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(
-            bValue, pConfig->Is(Feature::ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE));
-
-    EXPECT_CALL(*pConfigManager, IsRejectVowifiVoiceCallWhenVowifiSettingOff)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF));
-
-    EXPECT_CALL(*pConfigManager, IsCheckServerOutageReasonForVxlteCall).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL));
-
-    EXPECT_CALL(*pConfigManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(
-                    Feature::SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE));
-
-    EXPECT_CALL(*pConfigManager, IsMaintainMultipleEarlySessionsByForking).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING));
-
-    EXPECT_CALL(*pConfigManager, IsStopRingbackTimerBy183WithSdpBody).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY));
-
-    EXPECT_CALL(*pConfigManager, IsInitializePemWhenNoHeader).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::INITIALIZE_PEM_WHEN_NO_HEADER));
-
-    EXPECT_CALL(*pConfigManager, IsReleaseEmergencyPdnWithEmergencyCallFail)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL));
-
-    EXPECT_CALL(*pConfigManager, IsRequiredCdmalessFeatureTag).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::REQUIRED_CDMALESS_FEATURE_TAG));
-
-    EXPECT_CALL(*pConfigManager, IsEmergencyCallCurrentLocationDiscoverySupported)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED));
-
-    EXPECT_CALL(*pConfigManager, IsCheckUiConditionForIncomingResume).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::CHECK_UI_CONDITION_FOR_INCOMING_RESUME));
+    EXPECT_EQ(pProxy->GetBoolean(INVALID_KEY_BOOL), INVALID_BOOL_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, IsWithStringArgReturnsFromConfigManager)
+TEST_F(MtcConfigurationProxyTest, GetBooleanReturnsCachingValueIfExitsts)
 {
-    const IMS_BOOL bValue = IMS_TRUE;
-    const AString strArg = "some_arg";
+    pProxy->PutCache(INVALID_KEY_BOOL, VALID_BOOL_VALUE);
+    EXPECT_EQ(pProxy->GetBoolean(INVALID_KEY_BOOL), VALID_BOOL_VALUE);
 
-    EXPECT_CALL(*pConfigManager, IsPidfShortCode(strArg)).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::PIDF_SHORT_CODE, strArg));
-
-    EXPECT_CALL(*pConfigManager, IsCarrierSpecificSipHeader(strArg)).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::CARRIER_SPECIFIC_SIP_HEADER, strArg));
+    pProxy->OnRegistrationRefreshed();
+    EXPECT_EQ(pProxy->GetBoolean(INVALID_KEY_BOOL), INVALID_BOOL_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, IsWithIntArgReturnsFromConfigManager)
+TEST_F(MtcConfigurationProxyTest, GetIntReturnsValidValue)
 {
-    const IMS_BOOL bValue = IMS_TRUE;
-    const IMS_SINT32 nArg = 1;
-
-    EXPECT_CALL(*pConfigManager, IsSupportGeolocationPidfInSipInvite(nArg))
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsSrvccType(nArg)).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SRVCC_TYPE, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsAudioInactivityCallEndReason(nArg)).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::AUDIO_INACTIVITY_CALL_END_REASON, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsShortCallCode(nArg)).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::SHORT_CALL_CODE, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsRejectCodeForCsfb(nArg)).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::REJECT_CODE_FOR_CSFB, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsCallMaintainingOnRegistrationSuspended(nArg))
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(nArg))
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(Feature::REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsVilteToVolteRetryFailureResponseCode(nArg))
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE, nArg));
-
-    EXPECT_CALL(*pConfigManager, IsRegistrationDisconnectReasonToIgnore(nArg))
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::REGISTRATION_DISCONNECT_REASON_TO_IGNORE, nArg));
-
-    EXPECT_CALL(*pConfigManager,
-            IsMessageTypeSupportGeolocationPidf(static_cast<MessageTypeForGeolocationPidf>(nArg)))
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF, nArg));
+    EXPECT_EQ(pProxy->GetInt(VALID_KEY_INT), VALID_INT_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
+TEST_F(MtcConfigurationProxyTest, GetIntReturnsDefaultValueIfKeyIsInvalid)
 {
-    const IMS_SINT32 nValue = 1;
-
-    EXPECT_CALL(*pConfigManager, GetRequestUriType).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::REQUEST_URI_TYPE));
-
-    EXPECT_CALL(*pConfigManager, GetSessionPrivacyType).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::SESSION_PRIVACY_TYPE));
-
-    EXPECT_CALL(*pConfigManager, GetConferenceSubscribeType).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE));
-
-    EXPECT_CALL(*pConfigManager, GetDedicatedBearerWaitTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::DEDICATED_BEARER_WAIT_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetRingingTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::RINGING_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetRingbackTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::RINGBACK_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetMoCallRequestTimeout).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::MO_CALL_REQUEST_TIMEOUT));
-
-    EXPECT_CALL(*pConfigManager, Get18xTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::TIMER_18X));
-
-    EXPECT_CALL(*pConfigManager, GetConferenceSipFlowOrder).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONFERENCE_SIP_FLOW_ORDER));
-
-    EXPECT_CALL(*pConfigManager, GetConferenceInvitingReferType).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONFERENCE_INVITING_REFER_TYPE));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyQosPreconditionMechanismWhileCallModification)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue,
-            pConfig->GetInt(Feature::POLICY_QOS_PRECONDITION_MECHANISM_WHILE_CALL_MODIFICATION));
-
-    EXPECT_CALL(*pConfigManager, GetIncomingCallRejectCodeForUserDecline).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE));
-
-    EXPECT_CALL(*pConfigManager, GetIncomingCallRejectCodeForNoAnswer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER));
-
-    EXPECT_CALL(*pConfigManager, GetPrackUpdateResponseWaitTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::PRACK_UPDATE_RESPONSE_WAIT_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetSessionRefreshTriggerInterval).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::SESSION_REFRESH_TRIGGER_INTERVAL));
-
-    EXPECT_CALL(*pConfigManager, GetRegistrationRestorationModeOn504ForInvite)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyOnAudioQosDeactivation).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_ON_AUDIO_QOS_DEACTIVATION));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForMediaTypeRestrictionOnCellular)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForMediaTypeRestrictionOnCellularInRoaming)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue,
-            pConfig->GetInt(Feature::POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyOfLocalNumbers).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_OF_LOCAL_NUMBERS));
-
-    EXPECT_CALL(*pConfigManager, GetSilentRedialInterval).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::SILENT_REDIAL_INTERVAL));
-
-    EXPECT_CALL(*pConfigManager, GetCallTypeAfterAudioAndVideoCallMerged).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED));
-
-    EXPECT_CALL(*pConfigManager, GetSilentRedialMaxRetryCount).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::SILENT_REDIAL_MAX_RETRY_COUNT));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyFor403ResponseForInvite).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_403_RESPONSE_FOR_INVITE));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForCheckingQosWhileCallUpgrading)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING));
-
-    EXPECT_CALL(*pConfigManager, GetCallMaxCount).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_MAX_COUNT));
-
-    EXPECT_CALL(*pConfigManager, GetConvertRemoteResponseTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONVERT_REMOTE_RESPONSE_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetConvertUserResponseTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyOnVideoQosDeactivation).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_ON_VIDEO_QOS_DEACTIVATION));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForTextWithVideo).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO));
-
-    EXPECT_CALL(*pConfigManager, GetMinimumBatteryLevelForLimitVideoCall).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyOnTextQosDeactivation).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_ON_TEXT_QOS_DEACTIVATION));
-
-    EXPECT_CALL(*pConfigManager, GetEmergencyTCallTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::EMERGENCY_T_CALL_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetEmergencyRingbackTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::EMERGENCY_RINGBACK_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetEmergency18xTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::EMERGENCY_18X_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForEmergencyUrnEscvMapping).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING));
-
-    EXPECT_CALL(*pConfigManager, GetConferenceDropReferToUriSourceType).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE));
-
-    EXPECT_CALL(*pConfigManager, GetMediaTypeForOfferlessInvite).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_INVITE));
-
-    EXPECT_CALL(*pConfigManager, GetMediaTypeForOfferlessReinvite).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_REINVITE));
-
-    EXPECT_CALL(*pConfigManager, GetOipTypeForUnavailable).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::OIP_TYPE_FOR_UNAVAILABLE));
-
-    EXPECT_CALL(*pConfigManager, GetEmergencyRttGuardTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::EMERGENCY_RTT_GUARD_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetPreAlertingTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::PRE_ALERTING_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForTcallTimerExpiryOfVolteCall).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForTcallTimerExpiryOfVolteEmergencyCall)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue,
-            pConfig->GetInt(Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForTcallTimerExpiryOfVowifiCall).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL));
-
-    EXPECT_CALL(*pConfigManager, GetWifiEmergency18xTimer).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::WIFI_EMERGENCY_18X_TIMER));
-
-    EXPECT_CALL(*pConfigManager, GetMaximumWaitTimerForGeolocationPidfInfo)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO));
-
-    EXPECT_CALL(*pConfigManager, GetPolicyForLocalRingbackToneWith180Response)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE));
-
-    EXPECT_CALL(*pConfigManager, GetEpsFallbackWatchdogTime).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::EPS_FALLBACK_WATCHDOG_TIME));
-
-    EXPECT_CALL(*pConfigManager, GetSendUdpKeepAliveIntervalTime).WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME));
-
-    EXPECT_CALL(*pConfigManager, GetCallRejectCodeForNotAcceptableCallType)
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE));
+    EXPECT_EQ(pProxy->GetInt(INVALID_KEY_INT), INVALID_INT_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, GetIntWith3BoolArgReturnsFromConfigManager)
+TEST_F(MtcConfigurationProxyTest, GetIntReturnsCachingValueIfExitsts)
 {
-    const IMS_SINT32 nValue = 1;
-    const IMS_BOOL bArg1 = IMS_FALSE;
-    const IMS_BOOL bArg2 = IMS_TRUE;
-    const IMS_BOOL bArg3 = IMS_TRUE;
+    pProxy->PutCache(INVALID_KEY_INT, VALID_INT_VALUE);
+    EXPECT_EQ(pProxy->GetInt(INVALID_KEY_INT), VALID_INT_VALUE);
 
-    EXPECT_CALL(*pConfigManager, GetInformationLevelOfGeolocationPidf(bArg1, bArg2, bArg3))
-            .WillOnce(Return(nValue));
-    EXPECT_EQ(nValue,
-            pConfig->GetInt(Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, bArg1, bArg2, bArg3));
+    pProxy->OnRegistrationRefreshed();
+    EXPECT_EQ(pProxy->GetInt(INVALID_KEY_INT), INVALID_INT_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, GetStrWithIntArgReturnsFromConfigManager)
+TEST_F(MtcConfigurationProxyTest, GetStringReturnsValidValue)
 {
-    const AString strValue = "some_value";
-    const IMS_SINT32 nArg = 1;
-
-    EXPECT_CALL(*pConfigManager, GetConferenceFactoryUri).WillOnce(Return(strValue));
-    EXPECT_EQ(strValue, pConfig->GetStr(Feature::CONFERENCE_FACTORY_URI, nArg));
-
-    EXPECT_CALL(*pConfigManager, GetCallTerminateReasonHeader(static_cast<TerminateType>(nArg)))
-            .WillOnce(Return(strValue));
-    EXPECT_EQ(strValue, pConfig->GetStr(Feature::CALL_TERMINATE_REASON_HEADER, nArg));
-
-    EXPECT_CALL(*pConfigManager, GetCallRejectReasonPhrase(static_cast<RejectType>(nArg)))
-            .WillOnce(Return(strValue));
-    EXPECT_EQ(strValue, pConfig->GetStr(Feature::CALL_REJECT_REASON_PHRASE, nArg));
+    EXPECT_EQ(pProxy->GetString(VALID_KEY_STRING), VALID_STRING_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, ReturnsDefaultValueForInvalidFeature)
+TEST_F(MtcConfigurationProxyTest, GetStringReturnsDefaultValueIfKeyIsInvalid)
 {
-    const IMS_BOOL bDefaultValue = IMS_FALSE;
-    const IMS_SINT32 nDefaultValue = 0;
-    const AString strDefaultValue = AString::ConstNull();
-
-    EXPECT_EQ(bDefaultValue, pConfig->Is(Feature::CONFERENCE_FACTORY_URI));
-    EXPECT_EQ(bDefaultValue, pConfig->Is(Feature::CONFERENCE_FACTORY_URI, ""));
-    EXPECT_EQ(bDefaultValue, pConfig->Is(Feature::CONFERENCE_FACTORY_URI, 0));
-    EXPECT_EQ(nDefaultValue, pConfig->GetInt(Feature::SUPPORT_EARLY_SESSION));
-    EXPECT_EQ(nDefaultValue,
-            pConfig->GetInt(Feature::SUPPORT_EARLY_SESSION, IMS_FALSE, IMS_FALSE, IMS_FALSE));
-    EXPECT_EQ(strDefaultValue, pConfig->GetStr(Feature::SUPPORT_EARLY_SESSION, 0));
+    EXPECT_EQ(pProxy->GetString(INVALID_KEY_STRING), INVALID_STRING_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, GetBooleanCacheIfExists)
+TEST_F(MtcConfigurationProxyTest, GetStringReturnsCachingValueIfExitsts)
 {
-    const Feature eFeature = Feature::SUPPORT_SIP_SESSION_ID_HEADER;
-    const IMS_BOOL bValue = IMS_TRUE;
-    pConfig->PutConfigCache(eFeature, bValue);
+    pProxy->PutCache(INVALID_KEY_STRING, VALID_STRING_VALUE.GetStr());
+    EXPECT_EQ(pProxy->GetString(INVALID_KEY_STRING), VALID_STRING_VALUE);
 
-    EXPECT_EQ(bValue, pConfig->Is(eFeature));
+    pProxy->OnRegistrationRefreshed();
+    EXPECT_EQ(pProxy->GetString(INVALID_KEY_STRING), INVALID_STRING_VALUE);
 }
 
-TEST_F(MtcConfigurationProxyTest, GetIntegerCacheIfExists)
+TEST_F(MtcConfigurationProxyTest, GetIntArrayReturnsValue)
 {
-    const Feature eFeature = Feature::SUPPORT_SIP_SESSION_ID_HEADER;
-    const IMS_SINT32 nValue = 1;
-    pConfig->PutConfigCache(eFeature, nValue);
-
-    EXPECT_EQ(nValue, pConfig->GetInt(eFeature));
+    EXPECT_EQ(pProxy->GetIntArray(VALID_KEY_INT_ARRAY), objIntArray);
 }
 
-TEST_F(MtcConfigurationProxyTest, GetStringCacheIfExists)
+TEST_F(MtcConfigurationProxyTest, GetIntArrayReturnsDefaultValueIfKeyIsInvalid)
 {
-    const Feature eFeature = Feature::SUPPORT_SIP_SESSION_ID_HEADER;
-    const AString strValue("some_str");
-    pConfig->PutConfigCache(eFeature, strValue);
-
-    EXPECT_EQ(strValue, pConfig->GetStr(eFeature, 0));
+    ImsVector<IMS_SINT32> objArray = pProxy->GetIntArray(INVALID_KEY_INT_ARRAY);
+    EXPECT_EQ(objArray.GetSize(), 0);
 }
 
-TEST_F(MtcConfigurationProxyTest, OnRegistrationRefreshedResetsCache)
+TEST_F(MtcConfigurationProxyTest, GetStringArrayReturnsValue)
 {
-    const Feature eFeature = Feature::REQUEST_URI_TYPE;
-    const IMS_SINT32 nValue = 2;
-    ON_CALL(*pConfigManager, GetRequestUriType).WillByDefault(Return(nValue));
+    EXPECT_EQ(pProxy->GetStringArray(VALID_KEY_STRING_ARRAY), objStringArray);
+}
 
-    const IMS_SINT32 nCachedValue = 1;
-    pConfig->PutConfigCache(eFeature, nCachedValue);
+TEST_F(MtcConfigurationProxyTest, GetStringArrayReturnsDefaultValueIfKeyIsInvalid)
+{
+    ImsVector<AString> objArray = pProxy->GetStringArray(INVALID_KEY_STRING_ARRAY);
+    EXPECT_EQ(objArray.GetSize(), 0);
+}
 
-    pConfig->OnRegistrationRefreshed();
-    EXPECT_EQ(nValue, pConfig->GetInt(eFeature));
+TEST_F(MtcConfigurationProxyTest, ContainsIntValueReturnsTrue)
+{
+    EXPECT_TRUE(pProxy->Contains(VALID_KEY_INT_ARRAY, VALID_INT_VALUE));
+    EXPECT_TRUE(pProxy->Contains(VALID_KEY_INT_ARRAY, VALID_INT_VALUE2));
+}
+
+TEST_F(MtcConfigurationProxyTest, ContainsIntValueReturnsFalse)
+{
+    EXPECT_FALSE(pProxy->Contains(VALID_KEY_STRING_ARRAY, INVALID_INT_VALUE));
+}
+
+TEST_F(MtcConfigurationProxyTest, ContainsStringValueReturnsTrue)
+{
+    EXPECT_TRUE(pProxy->Contains(VALID_KEY_STRING_ARRAY, VALID_STRING_VALUE.GetStr()));
+    EXPECT_TRUE(pProxy->Contains(VALID_KEY_STRING_ARRAY, VALID_STRING_VALUE.GetStr()));
+}
+
+TEST_F(MtcConfigurationProxyTest, ContainsStringValueReturnsFalse)
+{
+    EXPECT_FALSE(pProxy->Contains(VALID_KEY_INT_ARRAY, INVALID_STRING_VALUE.GetStr()));
+}
+
+TEST_F(MtcConfigurationProxyTest, GetIntFromArrayReturnsValue)
+{
+    EXPECT_EQ(pProxy->GetIntFromArray(VALID_KEY_INT_ARRAY, 0), VALID_INT_VALUE);
+    EXPECT_EQ(pProxy->GetIntFromArray(VALID_KEY_INT_ARRAY, 1), VALID_INT_VALUE2);
+}
+
+TEST_F(MtcConfigurationProxyTest, GetIntFromArrayAssertOnInvalidIndex)
+{
+    EXPECT_DEATH(pProxy->GetIntFromArray(VALID_KEY_INT_ARRAY, 2), "");
+}
+
+TEST_F(MtcConfigurationProxyTest, GetStringFromArrayReturnsValue)
+{
+    EXPECT_EQ(pProxy->GetStringFromArray(VALID_KEY_STRING_ARRAY, 0), VALID_STRING_VALUE);
+    EXPECT_EQ(pProxy->GetStringFromArray(VALID_KEY_STRING_ARRAY, 1), VALID_STRING_VALUE2);
+}
+
+TEST_F(MtcConfigurationProxyTest, GetStringFromArrayAssertOnInvalidIndex)
+{
+    EXPECT_DEATH(pProxy->GetStringFromArray(VALID_KEY_STRING_ARRAY, 2), "");
 }

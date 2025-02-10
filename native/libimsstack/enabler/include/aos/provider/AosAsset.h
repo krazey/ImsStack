@@ -25,16 +25,21 @@ struct AosAsset
 {
 public:
     AosAsset() :
+            bBlockPcscfOnRegFailure(IMS_TRUE),
             bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
             bEmcRegOnRandomPcscf(IMS_FALSE),
             bERegWithOnlyTcpInRoaming(IMS_FALSE),
+            bERegUsingFirstImpuInIsim(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
+            bImsiBasedUriPrioritized(IMS_FALSE),
             bInitializeIpsecWithNewPcscf(IMS_FALSE),
+            bKeepERegRetryOnWlan(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
+            bPlmnBlockWithTimeoutOnFailureWithAllPcscfs(IMS_FALSE),
             bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
             bRegRetryWithIpVerFallback(IMS_FALSE),
@@ -50,8 +55,9 @@ public:
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
-            bUseAwtWhenInitRegWithNextPcscf(IMS_FALSE),
+            bSupportVideoForEmergencyReg(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
+            bUseRetryRuleForEReg(IMS_FALSE),
             bUseSecurityServerPortInInitReg(IMS_FALSE),
             bUseSecurityServerPortInRegContactOfInitReg(IMS_FALSE),
             bUseWfcCountryCodeAvailabilityCheck(IMS_FALSE),
@@ -67,6 +73,7 @@ public:
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
             nRegActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
+            nRegDefaultWaitTime(0),
             nRegOutOfServicePolicy(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT),
             nRegPcscfUpdatePolicy(CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_DEFAULT),
             nRegRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
@@ -82,6 +89,7 @@ public:
             nRoamingPreferredEmcReg(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
             nSipMessageThresholdForTransportChange(200),
+            nSubRetry503Policy(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP),
             nUsatRegEventDownloadPolicy(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD),
             nVolteHysTimeSec(0),
             objRegErrCodeForPcscfDiscovery(ImsVector<IMS_SINT32>()),
@@ -94,6 +102,7 @@ public:
             objSubErrorCodeForInitRegWithNextPcscf(ImsVector<IMS_SINT32>()),
             objSubErrorCodeForStoppingByExpirationTime(ImsVector<IMS_SINT32>()),
             objSupportedRoamingRats(ImsVector<IMS_SINT32>()),
+            objUnavailableFeaturesInLimitedReg(ImsVector<IMS_SINT32>()),
             objVowifiSubErrorCodeForInitReg(ImsVector<IMS_SINT32>())
     {
     }
@@ -102,16 +111,21 @@ public:
     AosAsset& operator=(IN const AosAsset&) = delete;
 
 public:
+    IMS_BOOL bBlockPcscfOnRegFailure;
     IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
     IMS_BOOL bEmcRegOnRandomPcscf;
     IMS_BOOL bERegWithOnlyTcpInRoaming;
+    IMS_BOOL bERegUsingFirstImpuInIsim;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
+    IMS_BOOL bImsiBasedUriPrioritized;
     IMS_BOOL bInitializeIpsecWithNewPcscf;
+    IMS_BOOL bKeepERegRetryOnWlan;
     IMS_BOOL bNoInitRegOnPcscfChange;
+    IMS_BOOL bPlmnBlockWithTimeoutOnFailureWithAllPcscfs;
     IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
     IMS_BOOL bRegContactValidation;
     IMS_BOOL bRegRetryWithIpVerFallback;
@@ -127,8 +141,9 @@ public:
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatForReg;
-    IMS_BOOL bUseAwtWhenInitRegWithNextPcscf;
+    IMS_BOOL bSupportVideoForEmergencyReg;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
+    IMS_BOOL bUseRetryRuleForEReg;
     IMS_BOOL bUseSecurityServerPortInInitReg;
     IMS_BOOL bUseSecurityServerPortInRegContactOfInitReg;
     IMS_BOOL bUseWfcCountryCodeAvailabilityCheck;
@@ -142,6 +157,7 @@ public:
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
     IMS_SINT32 nRegActualWaitTimePolicy;
+    IMS_SINT32 nRegDefaultWaitTime;
     IMS_SINT32 nRegOutOfServicePolicy;
     IMS_SINT32 nRegPcscfUpdatePolicy;
     IMS_SINT32 nRegRetry305Policy;
@@ -156,6 +172,7 @@ public:
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nRoamingPreferredEmcReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
+    IMS_SINT32 nSubRetry503Policy;
     IMS_SINT32 nUsatRegEventDownloadPolicy;
     IMS_SINT32 nVolteHysTimeSec;
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
@@ -168,6 +185,7 @@ public:
     ImsVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
     ImsVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
     ImsVector<IMS_SINT32> objSupportedRoamingRats;
+    ImsVector<IMS_SINT32> objUnavailableFeaturesInLimitedReg;
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
 };
 #endif  // AOS_ASSET_H_

@@ -16,13 +16,15 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
+
     <!-- Aos -->
-    <int name="imswfc.registration_private_header_int" value="2"/>
     <int-array name="ims.registration_permanent_error_code_int_array" num="2">
         <item value="403"/>
         <item value="404"/>
     </int-array>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
+    <int name="imswfc.registration_private_header_int" value="2"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
@@ -32,13 +34,10 @@
     <int name="imsss.ut_as_server_port_int" value="7077"/>
 
     <!-- Ut/Xcap -->
-    <!--<string  name="imsss.ut_as_server_fqdn_string"
-                value="xcap.ims.mncXXX.mccYYY.pub.3gppnetwork.org"/> -->
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_oir_network_default_operation_int" value="1"/>
-    <boolean name="ut_omit_namespace_of_document_element_bool" value="true"/>
-    <boolean name="ut_omit_namespace_cp_bool" value="true"/>
-    <boolean name="ut_insert_new_rule_bool" value="true"/>
+    <int name="imsss.ut_oir_network_default_operation_int" value="1"/>
+    <boolean name="imsss.ut_omit_namespace_of_document_element_bool" value="true"/>
+    <boolean name="imsss.ut_omit_namespace_cp_bool" value="true"/>
+    <boolean name="imsss.ut_insert_new_rule_bool" value="true"/>
 
     <!-- Do not retry SMS in CS on failure -->
     <boolean name="imssms.sms_csfb_retry_on_failure_bool" value="false"/>
@@ -118,13 +117,13 @@
             </int-array>
         </pbundle>
     </pbundle>
-    <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
 
     <!-- Audio -->
-    <boolean name="audio_evs_support_bool" value="true"/>
-    <boolean name="audio_bw_nego_option_bool" value="true"/>
-    <int name="audio_rtp_dscp_int" value="46"/>
-    <int-array name="audio_rtp_port_range_int_array" num="2">
+    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
+    <int name="imsvoice.audio_rtp_dscp_int" value="46"/>
+    <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
@@ -138,11 +137,11 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <int name="audio_telephone_event_duration_millis_int" value="200"/>
+    <int name="imsvoice.audio_telephone_event_duration_millis_int" value="200"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
 
     <!-- Video -->
-    <int-array name="video_rtp_port_range_int_array" num="2">
+    <int-array name="imsvt.video_rtp_port_range_int_array" num="2">
         <item value="1230"/>
         <item value="1236"/>
     </int-array>
@@ -150,10 +149,10 @@
     <int name="imsvt.video_rs_bandwidth_bps_int" value="2000"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
     <int name="imsvt.video_send_periodic_sps_pps_int" value="1"/>
-    <boolean name="video_drop_p_frame_bool" value="true"/>
-    <int name="video_cvo_value_int" value="4"/>
-    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
-    <boolean name="video_avpf_enable_bool" value="true"/>
+    <boolean name="imsvt.video_drop_p_frame_bool" value="true"/>
+    <int name="imsvt.video_cvo_value_int" value="4"/>
+    <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
+    <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="7"/>
     <int-array name="imsvt.video_codec_bitrate_int_array" num="1">
         <item value="384"/>

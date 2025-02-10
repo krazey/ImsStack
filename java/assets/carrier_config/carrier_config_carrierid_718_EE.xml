@@ -17,12 +17,12 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Aos -->
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Mtc Assets -->
-    <int name="geolocation_policy_for_location_based_call_int" value="13"/>
+    <int name="ims.geolocation_policy_for_location_based_call_int" value="13"/>
 
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
+    <!-- Ut/Xcap -->
+    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
 
 </carrier_config>

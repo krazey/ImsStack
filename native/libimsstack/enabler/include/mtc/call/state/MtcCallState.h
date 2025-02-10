@@ -167,6 +167,8 @@ public:
         TIMER_E911_WIFI_OPEN,
         TIMER_E911_LTE_START,
         TIMER_E911_WIFI_START,
+
+        TIMER_DELAY_UPDATE_AFTER_CONNECTED,
     };
 
 protected:
@@ -181,7 +183,7 @@ protected:
     ISession* GetISession();
 
     void InitMediaSession();
-    IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
+    IMS_SINT32 HandleReceivedSdp(IN ISession* piSession, IN IMessage* piMessage);
 
     IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
@@ -203,8 +205,6 @@ protected:
     static void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
             IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
 
-    IMS_BOOL IsCallEndNeededByAudioInactivity(
-            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;

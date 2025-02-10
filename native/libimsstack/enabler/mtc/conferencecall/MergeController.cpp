@@ -65,8 +65,7 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
 
     IMS_UINT32 nStartIndex = AddUserToParticipantList(objUsers, IMS_TRUE);
     if (ConferenceConfigurationHelper::GetReferTypeForInvite(
-                m_objContext.GetConfigurationProxy()) ==
-            CarrierConfig::ImsVoice::CONFERENCE_INVITE_COPYCONTROL)
+                m_objContext.GetConfigurationProxy()) == ConfigVoice::CONFERENCE_INVITE_COPYCONTROL)
     {
         return ProcessMergeWithoutRefer(objUsers);
     }
@@ -188,7 +187,7 @@ PROTECTED VIRTUAL void MergeController::OnIndividualCallTerminated(IN IMS_UINTP 
     if (m_pSubscription == IMS_NULL &&
             ConferenceConfigurationHelper::GetReferTypeForInvite(
                     m_objContext.GetConfigurationProxy()) ==
-                    CarrierConfig::ImsVoice::CONFERENCE_INVITE_COPYCONTROL)
+                    ConfigVoice::CONFERENCE_INVITE_COPYCONTROL)
     {
         UpdateUserStateByCallTerminated(nCallKey);
     }
@@ -389,7 +388,7 @@ void MergeController::UpdateStartCallType(IN const ImsList<ConfUser*> objUsers)
     if (bVoip && bVt)
     {
         m_eStartCallType = static_cast<CallType>(m_objContext.GetConfigurationProxy().GetInt(
-                Feature::CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED));
+                ConfigVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT));
     }
     else if (bVt)
     {

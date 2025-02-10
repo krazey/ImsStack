@@ -126,6 +126,7 @@ public:
     static const IMS_UINT32 GET_TTY_MODE = CATEGORY_BASE + 203;
     static const IMS_UINT32 GET_RTT_MODE = CATEGORY_BASE + 204;
     static const IMS_UINT32 GET_CS_CALL_STATE_IN_OTHER_SLOT = CATEGORY_BASE + 205;
+    static const IMS_UINT32 IS_CROSS_SIM_REDIALING_AVAILABLE = CATEGORY_BASE + 206;
 
     ////
     // Network-related information (mobile)

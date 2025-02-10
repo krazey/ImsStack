@@ -17,16 +17,18 @@
 #ifndef AUDIO_CONTROLLER_H_
 #define AUDIO_CONTROLLER_H_
 
+#include <AudioConfig.h>
+
 #include "MediaDef.h"
 #include "IMediaSessionListener.h"
 #include "config/AudioConfiguration.h"
-#include "audio/AudioMediaSession.h"
+#include "audio/AudioSession.h"
 #include "audio/AudioNego.h"
 
 class AudioController
 {
 public:
-    enum AudioUpdateCondition
+    enum AudioCallSessionState
     {
         EARLY_SESSION = 0,
         READY_TO_CONFIRM,   // session just become confirm
@@ -34,14 +36,14 @@ public:
     };
 
     AudioController();
-    ~AudioController();
+    virtual ~AudioController();
 
     /**
      * @brief Set the update condition for next transition
      *
      * @param bConfirmed it is IMS_TRUE when the session changed to confirmed session
      */
-    void SetConfirmSession(IN IMS_BOOL bConfirmed);
+    void SetCallSessionState(IN IMS_BOOL bConfirmed);
 
     /**
      * @brief Send dtmf digit to ImsMedia module
@@ -53,22 +55,23 @@ public:
     IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode);
 
     /**
-     * @brief Create a AudioMediaSession instance with given parameters
+     * @brief Create a AudioSession instance with given parameters
      *
      * @param pListener A listener to IMediaSession
      * @param nNegoId The identification to represent the dialog of the session and it will be the
-     * id for the AudioMediaSession instance
+     * id for the AudioSession instance
      * @param pConfig The configuration instance
+     * @param eServiceType The service type for this call - default, emergency
      * @return IMS_BOOL Returns IMS_TRUE when the session created successfully, IMS_FALSE when it is
      * failed with invalid arguments
      */
-    IMS_BOOL CreateSession(
-            IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId, AudioConfiguration* pConfig);
+    IMS_BOOL CreateSession(IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId,
+            AudioConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType);
 
     /**
-     * @brief Send openSession message from the given id of the AudioMediaSession instance
+     * @brief Send openSession message from the given id of the AudioSession instance
      *
-     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nNegoId The identification of the target AudioSession instance
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
@@ -77,7 +80,7 @@ public:
     /**
      * @brief Update session and send modifySesion of confirmConfig based on the update condition
      *
-     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nNegoId The identification of the target AudioSession instance
      * @param nAccessNetwork AccessNetwork information
      * @param pNego The negotiated profile to get the negotiated parameter
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
@@ -89,7 +92,7 @@ public:
     /**
      * @brief Send AddConfig message
      *
-     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nNegoId The identification of the target AudioSession instance
      * @param nAccessNetwork AccessNetwork information
      * @param pNego The negotiated profile to get the negotiated parameter
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
@@ -100,7 +103,7 @@ public:
     /**
      * @brief Send confirmConfig message to java
      *
-     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nNegoId The identification of the target AudioSession instance
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
@@ -109,7 +112,7 @@ public:
     /**
      * @brief Send modifySession message to java
      *
-     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nNegoId The identification of the target AudioSession instance
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
@@ -118,7 +121,7 @@ public:
     /**
      * @brief Send SetMediaQuality message to java without any following session changing method
      *
-     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nNegoId The identification of the target AudioSession instance
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
@@ -127,7 +130,7 @@ public:
     /**
      * @brief Send deleteConfig message to java
      *
-     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nNegoId The identification of the target AudioSession instance
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
@@ -182,7 +185,7 @@ public:
     IMS_BOOL UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioNego* pNego);
 
     /**
-     * @brief Get the size of AudioMediaSession list
+     * @brief Get the size of AudioSession list
      *
      * @return IMS_UINT32 the size of list
      */
@@ -237,16 +240,20 @@ public:
     IMS_BOOL NotifyAnbrReceived(
             IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
 
+protected:
+    virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);
+
 private:
-    AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = UNDEFINED_NEGO_ID);
+    AudioSession* FindAudioSession(IN IMS_UINTP nNegoId = UNDEFINED_NEGO_ID);
     void ClearSession();
 
-    ImsList<AudioMediaSession*> m_listAudioSession;
-    IMS_SINT32 m_nAudioSessionState;
-    IMS_UINT32 m_eUpdateCondition;
+    ImsList<AudioSession*> m_listAudioSession;
+    IMS_UINT32 m_eMediaState;
+    IMS_UINT32 m_eCallState;
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
     IMS_UINTP m_nCurrentActiveNegoId;
+    AudioConfig* m_pAudioConfig;
 };
 
 #endif

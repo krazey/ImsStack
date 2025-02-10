@@ -42,6 +42,14 @@ public:
      */
     virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
 
+    /**
+     * @brief Removes the call matching the given call key. Does nothing if the call doesn't exist.
+     * Mtc must guarantee that the target MtcCall is in TERMINATING state when it's removed.
+     *
+     * @param nCallKey Key of the MtcCall to be removed.
+     */
+    virtual void RemoveCall(IN CallKey nCallKey) = 0;
+
     // Returns a call matching the given call key.
     // Returns new `UnknownCall` instance if the call doesn't exist.
 

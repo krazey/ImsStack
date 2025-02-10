@@ -76,7 +76,7 @@ TEST_F(JniMtcUtilsTest, WtiteAndReadCallInfo)
     CallType eAnyType = CallType::VOIP;
     JniCallInfo objAnyJniCallInfo;
     objAnyJniCallInfo.eCallType = eAnyType;
-    objAnyJniCallInfo.bEmergency = IMS_TRUE;
+    objAnyJniCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     objAnyJniCallInfo.bOffline = IMS_TRUE;
     objAnyJniCallInfo.bUssi = IMS_TRUE;
 

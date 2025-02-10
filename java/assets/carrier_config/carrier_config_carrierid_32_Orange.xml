@@ -17,11 +17,11 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Aos -->
-    <boolean name="support_reg_with_feature_tag_unavailable_bool" value="true"/>
+    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
 
     <!-- Mtc Assets -->
-    <int name="geolocation_policy_for_location_based_call_int" value="9"/>
-    <int-array name="location_based_number_list_int_array" num="11">
+    <int name="ims.geolocation_policy_for_location_based_call_int" value="9"/>
+    <int-array name="imsvoice.location_based_number_list_int_array" num="11">
         <item value="112"/>
         <item value="15"/>
         <item value="17"/>
@@ -35,17 +35,15 @@
         <item value="116117"/>
     </int-array>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
     </int-array>
-
-    <!-- Ut/Xcap Assets -->
-    <int-array name="ut_sm_cause_temporary_block_int_array" value="1"/>
+    <int-array name="imsss.ut_sm_cause_temporary_block_int_array" value="1">
         <item value="0"/>
     </int-array>
-    <int-array name="ut_http_temporary_error_code_int_array" value="1"/>
+    <int-array name="imsss.ut_http_temporary_error_code_int_array" value="1">
         <item value="403"/>
     </int-array>
-    <int name="ut_temporary_block_timer_min_int" value="240"/>
+    <int name="imsss.ut_temporary_block_timer_min_int" value="240"/>
 
 </carrier_config>

@@ -72,9 +72,9 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
         doReturn(mMockCarrierConfig).when(mMockConfigInterface).getCarrierConfig();
         doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
         doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
 
         doReturn(SLOT_ID).when(mMockContext).getSlotId();
         doReturn(mMockIServiceStateTracker).when(mMockContext).getServiceStateTracker();
@@ -267,9 +267,9 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
     @Test
     public void testMtcECallStateListenerOnCallTerminated2() {
         doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
         doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
         MtcECallStateTracker testMtcECallStateTracker = new MtcECallStateTracker(
                 mMockContext, mMockICallStateTracker);
         testMtcECallStateTracker.setECallListener();

@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "IMediaManager.h"
 #include "IMessage.h"
 #include "IReference.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
+#include "ISipKeepAliveHelper.h"
 #include "ImsTypeDef.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
+#include "SipFactory.h"
+#include "SipMethod.h"
 #include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcSession.h"
@@ -39,9 +43,6 @@
 #include "helper/UdpKeepAliveSender.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
-#include "sipcore/ISipKeepAliveHelper.h"
-#include "sipcore/SipFactory.h"
-#include "sipcore/SipMethod.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiData.h"
 #include <functional>
@@ -451,7 +452,7 @@ PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession(IN ISession* piSession)
 
 PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession()
 {
-    ISession* piSession = GetSipInterfaceFactory().GetISessionHolder()->GetISession(
+    ISession* piSession = GetSipInterfaceFactory().GetISessionHolder().GetISession(m_nKey,
             GetService().GetICoreService(), GetParticipantInfo().GetLocalUri(),
             GetParticipantInfo().GetRemoteUri());
 
@@ -469,7 +470,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     JniCallInfo objJniCallInfo;
     objJniCallInfo.eServiceType = GetService().GetServiceType();
     objJniCallInfo.eCallType = GetCallType();
-    objJniCallInfo.bEmergency = m_objCallInfo.bEmergency;
+    objJniCallInfo.eEmergencyType = m_objCallInfo.eEmergencyType;
     objJniCallInfo.bOffline = m_objCallInfo.bOffline;
     objJniCallInfo.bUssi = m_objCallInfo.bUssi;
     objJniCallInfo.bConference = m_objCallInfo.bConference;
@@ -477,7 +478,9 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     objJniCallInfo.bConferenceEnabled = IMS_FALSE;
     // TODO: check host or participant
     objJniCallInfo.bConferenceSubscriptionRequired =
-            m_objContext.GetConfigurationProxy().GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE) > -1;
+            m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT) !=
+            ConfigVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT;
     objJniCallInfo.bRttCapable = GetSession() ? GetSession()->IsRttCapable() : IMS_FALSE;
     objJniCallInfo.bVideoCapable = GetSession() ? GetSession()->IsVideoCapable() : IMS_FALSE;
 
@@ -595,8 +598,8 @@ PUBLIC VIRTUAL void MtcCall::SessionReferenceReceived(
         if (piSession != IMS_NULL)
         {
             piSession->Terminate();
-            GetSipInterfaceFactory().GetISessionHolder()->AddISession(piSession);
-            GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piSession);
+            GetSipInterfaceFactory().GetISessionHolder().AddISession(m_nKey, piSession);
+            GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(piSession);
         }
         if (piReference != IMS_NULL)
         {
@@ -652,6 +655,12 @@ PUBLIC VIRTUAL void MtcCall::SessionStartFailed(IN ISession* piSession)
         return;
     }
 
+    IMtcSession* piMtcSession = GetSession(piSession);
+    if (piMtcSession)
+    {
+        piMtcSession->SetSessionTerminatedOrStartFailed();
+    }
+
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
@@ -667,6 +676,12 @@ PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
     {
         OnInternalFailure();
         return;
+    }
+
+    IMtcSession* piMtcSession = GetSession(piSession);
+    if (piMtcSession)
+    {
+        piMtcSession->SetSessionTerminatedOrStartFailed();
     }
 
     if (IsUssi())
@@ -833,14 +848,14 @@ PUBLIC VIRTUAL void MtcCall::SessionForkedResponseReceived(
         if (piSession != IMS_NULL)
         {
             piSession->Reject();
-            GetSipInterfaceFactory().GetISessionHolder()->AddISession(piSession);
-            GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piSession);
+            GetSipInterfaceFactory().GetISessionHolder().AddISession(m_nKey, piSession);
+            GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(piSession);
         }
         if (piForkedSession != IMS_NULL)
         {
             piForkedSession->Terminate();
-            GetSipInterfaceFactory().GetISessionHolder()->AddISession(piForkedSession);
-            GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piForkedSession);
+            GetSipInterfaceFactory().GetISessionHolder().AddISession(m_nKey, piForkedSession);
+            GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(piForkedSession);
         }
         OnInternalFailure();
         return;
@@ -1078,7 +1093,7 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
     IMS_TRACE_I(
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
-    GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.bEmergency);
+    GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.IsEmergency());
 }
 
 PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(

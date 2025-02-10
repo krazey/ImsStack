@@ -23,22 +23,16 @@ class SipContentTypeHeader : public SipHeaderBase
 private:
     /*Media type*/
     SIP_CHAR* m_pszMType;
-
     SIP_CHAR* m_pszMSubType;
 
 public:
-    /*constructor*/
-    SipContentTypeHeader();
+    explicit SipContentTypeHeader(SIP_INT32 eHdrType);
     SipContentTypeHeader(const SipContentTypeHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetMediaType(const SIP_CHAR* pszMType);
     SIP_VOID SetSubMediaType(const SIP_CHAR* pszMSubType);
@@ -52,6 +46,8 @@ public:
 
     SIP_CHAR* StripDQUOTE(const SIP_CHAR* pszStr);
     SIP_BOOL IsValidHeader() const override;
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipContentTypeHeader();

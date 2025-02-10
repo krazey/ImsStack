@@ -16,13 +16,16 @@
 
 #include "ISipHeader.h"
 #include "ImsList.h"
+#include "MockIMessage.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
-#include "core/MockIMessage.h"
-#include "sipcore/MockISipMessage.h"
+#include "media/MockIMtcMediaManager.h"
 #include "utility/MessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -44,6 +47,9 @@ public:
     MockIMessage objMessageSupportsExtension;
     MockIMtcCallContext objContext;
     MessageUtils objMessageUtils;
+    MockIMtcSession objMtcSession;
+    MockISession objSession;
+    MockIMtcMediaManager objMediaManager;
 
 protected:
     virtual void SetUp() override
@@ -89,6 +95,14 @@ protected:
         ON_CALL(objMessageSupportsExtension, GetMessage)
                 .WillByDefault(Return(&objSipMessageSupportsExtension));
     }
+
+    void SetUpMediaNegoState(IN NegotiationState eNegoState)
+    {
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMediaManager, GetNegotiationState(_)).WillByDefault(Return(eNegoState));
+    }
 };
 
 TEST_F(PreconditionExtensionTest, Clone)
@@ -109,31 +123,50 @@ TEST_F(PreconditionExtensionTest, GetOptionTag)
 
 TEST_F(PreconditionExtensionTest, FormatRequestForSomeMessageDoesNothingIfRemoteNotAvailable)
 {
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+    EXPECT_CALL(objMediaManager, GetNegotiationState(_)).Times(0);
 
-    pExtension->FormatRequest(RequestType::PRACK, objMessage);
-    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
-    pExtension->FormatRequest(RequestType::ACK, objMessage);
     pExtension->FormatRequest(RequestType::UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::PRACK, objMessage);
+    pExtension->FormatRequest(RequestType::ACK, objMessage);
     pExtension->FormatRequest(RequestType::CANCEL_UPDATE, objMessage);
     pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
 }
 
-TEST_F(PreconditionExtensionTest, FormatRequestForSomeMessageDoesNothingIfRemoteAvailable)
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForSomeMessageDoesNothingIfRemoteAvailableAndNegoStateIsIdle)
 {
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_IDLE);
 
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMessage, GetMessage).Times(0);
 
+    pExtension->FormatRequest(RequestType::UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
     pExtension->FormatRequest(RequestType::PRACK, objMessage);
     pExtension->FormatRequest(RequestType::ACK, objMessage);
+    pExtension->FormatRequest(RequestType::CANCEL_UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
+}
+
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForSomeMessageDoesNothingIfRemoteAvailableAndNegoStateIsOfferSent)
+{
+    // Set remote availability true
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+
+    EXPECT_CALL(objMessage, GetMessage).Times(0);
+
     pExtension->FormatRequest(RequestType::CANCEL_UPDATE, objMessage);
     pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
 }
 
 TEST_F(PreconditionExtensionTest, FormatRequestForStartMessageSetsSupportedHeader)
 {
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
     EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
             .Times(1);
 
@@ -144,6 +177,7 @@ TEST_F(PreconditionExtensionTest, FormatRequestForUpdateMessageSetsSupportedHead
 {
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
 
     EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
             .Times(1);
@@ -159,6 +193,7 @@ TEST_F(PreconditionExtensionTest, FormatRequestForEarlyUpdateMessageSetsRequireH
 
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
 
     EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, pExtension->GetOptionTag(), _))
             .Times(1);
@@ -175,12 +210,41 @@ TEST_F(PreconditionExtensionTest, FormatRequestForEarlyUpdateMessageSetsSupporte
 
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
 
     EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
             .Times(1);
     EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, _, _)).Times(0);
 
     pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
+}
+
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForPrackMessageSetsRequireHeaderIfRemoteAvailableAndNegoStateIsOfferSent)
+{
+    // Set remote availability true
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, pExtension->GetOptionTag(), _))
+            .Times(1);
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, _, _)).Times(0);
+
+    pExtension->FormatRequest(RequestType::PRACK, objMessage);
+}
+
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForAckMessageSetsSetsRequireHeaderIfRemoteAvailableAndNegoStateIsOfferSent)
+{
+    // Set remote availability true
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, pExtension->GetOptionTag(), _))
+            .Times(1);
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, _, _)).Times(0);
+
+    pExtension->FormatRequest(RequestType::ACK, objMessage);
 }
 
 TEST_F(PreconditionExtensionTest, FormatResponseDoesNothingIfRemoteNotAvailable)

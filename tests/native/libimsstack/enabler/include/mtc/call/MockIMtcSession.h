@@ -37,7 +37,7 @@ public:
     MOCK_METHOD(IMS_RESULT, Start, (), (override));
     MOCK_METHOD(IMS_RESULT, SendProvisionalResponse,
             (IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable), (override));
-    MOCK_METHOD(IMS_RESULT, SendPrack, (IN IMS_BOOL bAllowReOffer), (override));
+    MOCK_METHOD(IMS_RESULT, SendPrack, (IN IMS_BOOL bSdpOfferRequired), (override));
     MOCK_METHOD(IMS_RESULT, RespondToPrack, (IN IMS_SINT32 eStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, SendEarlyUpdate, (IN UpdateType eUpdateType), (override));
     MOCK_METHOD(IMS_RESULT, RespondToEarlyUpdate, (IN IMS_SINT32 eStatusCode), (override));
@@ -51,6 +51,7 @@ public:
     MOCK_METHOD(IMS_RESULT, CancelUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(IMS_RESULT, Terminate, (IMS_BOOL bUseBye, IN const CallReasonInfo& objReason),
             (override));
+    MOCK_METHOD(void, SetSessionTerminatedOrStartFailed, (), (override));
     MOCK_METHOD(
             void, HandleRequest, (IN RequestType eType, IN const IMessage& objRequest), (override));
     MOCK_METHOD(void, HandleResponse, (IN ResponseType eType, IN const IMessage& objResponse),

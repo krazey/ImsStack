@@ -18,41 +18,59 @@
 #define MTC_CONFIGURATION_PROXY_H_
 
 #include "AString.h"
+#include "CarrierConfig.h"
 #include "ImsTypeDef.h"
+#include "ImsVector.h"
+#include "configuration/ConfigCache.h"
 #include "configuration/ConfigDef.h"
-#include "configuration/IMtcConfigurationManager.h"
 #include <memory>
+#include <optional>
+#include <variant>
 
 class ConfigCache;
-class IMtcConfigurationManager;
+class ICarrierConfig;
+
+using ConfigAssets = CarrierConfig::Assets;
+using ConfigEmergency = CarrierConfig::ImsEmergency;
+using ConfigIms = CarrierConfig::Ims;
+using ConfigRtt = CarrierConfig::ImsRtt;
+using ConfigVoice = CarrierConfig::ImsVoice;
+using ConfigVt = CarrierConfig::ImsVt;
+using ConfigWfc = CarrierConfig::ImsWfc;
 
 class MtcConfigurationProxy
 {
 public:
-    explicit MtcConfigurationProxy(IN IMtcConfigurationManager* pManager);
+    explicit MtcConfigurationProxy();
     virtual ~MtcConfigurationProxy();
     MtcConfigurationProxy(IN const MtcConfigurationProxy&) = delete;
     MtcConfigurationProxy& operator=(IN const MtcConfigurationProxy&) = delete;
 
-    void Init();
+    virtual IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) const;
+    virtual IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) const;
+    virtual AString GetString(IN const IMS_CHAR* pszKey) const;
+    virtual ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey) const;
+    virtual ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey) const;
 
-    IMS_BOOL Is(IN Feature eFeature) const;
-    IMS_BOOL Is(IN Feature eFeature, IN const AString& strAdditionalInfo) const;
-    IMS_BOOL Is(IN Feature eFeature, IN IMS_SINT32 nAdditionalInfo) const;
-    IMS_SINT32 GetInt(IN Feature eFeature) const;
-    IMS_SINT32 GetInt(IN Feature eFeature, IN IMS_BOOL bParam1, IN IMS_BOOL bParam2,
-            IN IMS_BOOL bParam3) const;
-    const AString GetStr(IN Feature eFeature, IN IMS_SINT32 nAdditionalInfo) const;
+    virtual IMS_SINT32 GetIntFromArray(IN const IMS_CHAR* pszKey, IN const IMS_UINT32 nIndex) const;
+    virtual AString GetStringFromArray(IN const IMS_CHAR* pszKey, IN const IMS_UINT32 nIndex) const;
 
-    virtual void PutConfigCache(IN Feature eFeature, IN IMS_SINT32 nValue);
-    virtual void PutConfigCache(IN Feature eFeature, IN IMS_BOOL bValue);
-    virtual void PutConfigCache(IN Feature eFeature, IN const AString& strValue);
+    virtual IMS_BOOL Contains(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nValue) const;
+    virtual IMS_BOOL Contains(IN const IMS_CHAR* pszKey, IN const IMS_CHAR* pszValue) const;
+
+    virtual void PutCache(IN const IMS_CHAR* pszKey, IN IMS_BOOL bValue);
+    virtual void PutCache(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nValue);
+    virtual void PutCache(IN const IMS_CHAR* pszKey, IN const IMS_CHAR* pszValue);
 
     virtual void OnRegistrationRefreshed();
 
 private:
-    std::unique_ptr<IMtcConfigurationManager> m_pManager;
-    ConfigCache* m_pCache;
+    std::optional<ConfigValue> GetCachedValue(const IMS_CHAR* pszKey) const;
+    void PutCache(IN const IMS_CHAR* pszKey, IN const ConfigValue& objValue);
+    IMS_BOOL ValidateSuffix(const IMS_CHAR* pszKey, const IMS_CHAR* pszSuffix) const;
+
+    std::unique_ptr<ConfigCache> m_pCache;
+    ICarrierConfig* m_piCc;
 };
 
 #endif

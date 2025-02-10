@@ -66,7 +66,7 @@ public:
     }
     inline IMS_BOOL IsTransactionFlowControlRequired() const { return m_bTxnFlowControlRequired; }
     IMS_BOOL SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-            IN IMS_BOOL bNotifyError = IMS_TRUE);
+            IN const SipProfile* pProfile, IN IMS_BOOL bNotifyError = IMS_TRUE);
     void SetAddress(IN const SipTransportAddress& objTAddr, IN IMS_SINT32 nTaType = TA_NEAR);
     inline void SetExplicitTargetProtocol(IN IMS_BOOL bExplicitTargetProtocol)
     {

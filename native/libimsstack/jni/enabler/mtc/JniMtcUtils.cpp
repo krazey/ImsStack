@@ -43,12 +43,17 @@ PUBLIC GLOBAL ServiceType JniMtcUtils::ReadServiceType(IN const android::Parcel&
     return static_cast<ServiceType>(objParcel.readInt32());
 }
 
+PUBLIC GLOBAL EmergencyType JniMtcUtils::ReadEmergencyType(IN const android::Parcel& objParcel)
+{
+    return static_cast<EmergencyType>(objParcel.readInt32());
+}
+
 PUBLIC GLOBAL JniCallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
 {
     JniCallInfo objCallInfo;
 
     objCallInfo.eCallType = ReadCallType(objParcel);
-    objCallInfo.bEmergency = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
+    objCallInfo.eEmergencyType = ReadEmergencyType(objParcel);
     objCallInfo.bOffline = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
     objCallInfo.bUssi = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
 
@@ -116,8 +121,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
 {
     objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eServiceType));
     objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eCallType));
-    IMS_SINT32 bEmergency = (objCallInfo.bEmergency) ? 1 : 0;
-    objParcel.writeInt32(bEmergency);
+    objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eEmergencyType));
     IMS_SINT32 bOffline = (objCallInfo.bOffline) ? 1 : 0;
     objParcel.writeInt32(bOffline);
     IMS_SINT32 bUssi = (objCallInfo.bUssi) ? 1 : 0;

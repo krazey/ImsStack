@@ -408,7 +408,9 @@ public abstract class Apn extends Handler implements IApn {
 
         NetworkRequest nr = null;
         if (mType.getType() == DcConstants.TYPE_IMS) {
-            nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
+            if (!mDcSettings.isImsPdnRequestWithoutMmtelRequired()) {
+                nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
+            }
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
         } else if (mType.getType() == DcConstants.TYPE_INTERNET) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();

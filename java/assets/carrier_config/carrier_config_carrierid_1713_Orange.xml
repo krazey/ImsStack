@@ -17,13 +17,17 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Mtc Assets -->
-    <int name="geolocation_policy_for_location_based_call_int" value="9"/>
-    <int-array name="location_based_number_list_int_array" num="5">
+    <int name="ims.geolocation_policy_for_location_based_call_int" value="9"/>
+    <int-array name="imsvoice.location_based_number_list_int_array" num="5">
          <item value="112"/>
          <item value="150"/>
          <item value="155"/>
          <item value="158"/>
          <item value="159"/>
     </int-array>
+
+    <!-- Mts -->
+    <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
+    <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="4"/>
 
 </carrier_config>

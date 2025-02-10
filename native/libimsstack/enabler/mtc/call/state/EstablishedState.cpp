@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "IMessage.h"
+#include "ISipClientConnection.h"
 #include "ISipServerConnection.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
@@ -34,13 +37,12 @@
 #include "conferencecall/IConferenceManager.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "emergency/CurrentLocationDiscoveryController.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "sipcore/ISipClientConnection.h"
-#include "sipcore/SipStatusCode.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
 #include "utility/IMessageUtils.h"
@@ -54,16 +56,27 @@ EstablishedState::EstablishedState(IN IMtcCallContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL EstablishedState::~EstablishedState() {}
+PUBLIC VIRTUAL EstablishedState::~EstablishedState()
+{
+    m_objContext.ReleaseAsyncOperation(this);
+}
 
 PUBLIC VIRTUAL void EstablishedState::OnEnter()
 {
-    if (IsRefreshInProgress())
+    if (CurrentLocationDiscoveryController::IsPeriodicLocationDiscoveryRequired(
+                m_objContext.GetCallInfo().IsEmergency(),
+                m_objContext.GetConfigurationProxy().GetInt(
+                        ConfigEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT)))
     {
-        m_objContext.GetAsyncRunner(
+        m_objContext.GetCurrentLocationDiscoveryController().StartPeriodicLocationDiscovery();
+    }
+
+    if (ShouldPendOperation())
+    {
+        m_objContext.RunAsyncOperation(this,
                 [&]()
                 {
-                    return m_objContext.RunPendingOperationIfPossible();
+                    m_objContext.RunPendingOperationIfPossible();
                 });
     }
     else
@@ -76,7 +89,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("Hold", 0, 0, 0);
 
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [objMediaInfo](IMtcCallState* pState) mutable
@@ -106,7 +119,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
 PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("Resume", 0, 0, 0);
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [objMediaInfo](IMtcCallState* pState) mutable
@@ -129,7 +142,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
         IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("Update", 0, 0, 0);
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [eCallType, objMediaInfo](IMtcCallState* pState) mutable
@@ -187,9 +200,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     // TODO, conference
 
-    IMS_RESULT eResult = IMS_SUCCESS;
     CallStateName eStateName = CallStateName::UPDATING;
-
+    CallReasonInfo objResultReason(CODE_NONE);
     if (m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
         auto pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
@@ -198,25 +210,25 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
         if (objResult.eStatus == IMtcBlockChecker::Result::Status::UNBLOCKED)
         {
-            eResult = HandleReceivedUpdate(eStateName);
+            objResultReason = HandleReceivedUpdate(eStateName);
         }
         else
         {
-            // Restore the CallType that was changed by MtcSession#HandleRequest.
-            pSession->SetCallType(pSession->GetPreviousCallType());
-            pSession->Reject(objResult.objReason);
-            m_objContext.GetMediaManager().FinalizeSdp(piSession);
-            eStateName = CallStateName::ESTABLISHED;
+            objResultReason = objResult.objReason;
         }
     }
     else
     {
-        eResult = HandleReceivedUpdateWithoutOffer(eStateName);
+        objResultReason = HandleReceivedUpdateWithoutOffer(eStateName);
     }
 
-    if (eResult != IMS_SUCCESS)
+    if (objResultReason.nCode != CODE_NONE)
     {
-        // TODO
+        // Restore the CallType that was changed by MtcSession#HandleRequest.
+        pSession->SetCallType(pSession->GetPreviousCallType());
+        pSession->Reject(objResultReason);
+        m_objContext.GetMediaManager().FinalizeSdp(piSession);
+        eStateName = CallStateName::ESTABLISHED;
     }
 
     if (eStateName == CallStateName::ESTABLISHED)
@@ -341,10 +353,10 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Refresh_NotifyCompleted(
         IN ISipClientConnection* /*piScc*/)
 {
     IMS_TRACE_D("Refresh_NotifyCompleted", 0, 0, 0);
-    m_objContext.GetAsyncRunner(
+    m_objContext.RunAsyncOperation(this,
             [&]()
             {
-                return m_objContext.RunPendingOperationIfPossible();
+                m_objContext.RunPendingOperationIfPossible();
             });
 
     return GetStateName();
@@ -356,7 +368,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(
     IMS_TRACE_I(
             "OnReceivingMediaDataFailed : Media[%d] Protocol[%d]", eMediaType, eProtocolType, 0);
 
-    if (IsCallEndNeededByAudioInactivity(eMediaType, eProtocolType))
+    if (eMediaType == MEDIATYPE_AUDIO)
     {
         CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
         HandleTerminate(objReason);
@@ -446,12 +458,13 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
 {
     IMS_TRACE_I("OnIpcanChanged", 0, 0, 0);
 
-    if (!m_objContext.GetConfigurationProxy().Is(Feature::ENABLE_SEND_REINVITE_ON_RAT_CHANGE))
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL))
     {
         return GetStateName();
     }
 
-    if (IsRefreshInProgress())
+    if (ShouldPendOperation())
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [eIpcan](IMtcCallState* pState)
@@ -466,6 +479,26 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
     return CallStateName::UPDATING;
 }
 
+PUBLIC VIRTUAL CallStateName EstablishedState::OnTimerExpired(IN IMS_SINT32 nType)
+{
+    IMS_TRACE_D("OnTimerExpired : %d", nType, 0, 0);
+
+    switch (nType)
+    {
+        case TIMER_DELAY_UPDATE_AFTER_CONNECTED:
+            m_objContext.RunAsyncOperation(this,
+                    [&]()
+                    {
+                        m_objContext.RunPendingOperationIfPossible();
+                    });
+            break;
+        default:
+            break;
+    }
+
+    return GetStateName();
+}
+
 PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateType eType)
 {
     IMtcSession* piMtcSession = m_objContext.GetSession();
@@ -474,7 +507,7 @@ PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateTyp
         return GetStateName();
     }
 
-    // TODO: check IsRefreshInProgress in MtcCallState#OnSrvccStateUpdated?
+    // TODO: check ShouldPendOperation in MtcCallState#OnSrvccStateUpdated?
     // Handling in UpdatingState is also needed.
     HandleUpdate(eType, m_objContext.GetSession()->GetCallType(),
             m_objContext.GetMediaManager().GetMediaInfo());
@@ -508,21 +541,22 @@ IMS_RESULT EstablishedState::HandleUpdate(
     {
         m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
                 m_objContext.GetConfigurationProxy().GetInt(
-                        Feature::CONVERT_REMOTE_RESPONSE_TIMER));
+                        ConfigVt::KEY_CONVERT_REMOTE_RESPONSE_TIMER_MILLIS_INT));
     }
 
     return IMS_SUCCESS;
 }
 
 PRIVATE
-IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
+CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 {
     IMS_TRACE_D("HandleReceivedUpdate", 0, 0, 0);
     IMtcSession* pMtcSession = m_objContext.GetSession();
     ISession& objSession = pMtcSession->GetISession();
-    if (m_objContext.GetMediaManager().NegotiateSdp(&objSession) == IMS_FAILURE)
+    NegotiationResult eNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
+    if (eNegoResult != NegotiationResult::NO_ERROR)
     {
-        // TODO
+        return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult);
     }
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
@@ -547,7 +581,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
             // Once the incoming upgrade is notified to the user, this timer will re-start.
             m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
                     m_objContext.GetConfigurationProxy().GetInt(
-                            Feature::CONVERT_USER_RESPONSE_TIMER));
+                            ConfigVt::KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT));
         }
         else
         {
@@ -555,18 +589,19 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
                     m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession));
         }
 
-        return IMS_SUCCESS;
+        return CallReasonInfo(CODE_NONE);
     }
 
     if (m_objContext.GetUpdatingInfo().IsResumedBy() &&
-            m_objContext.GetConfigurationProxy().Is(
-                    Feature::CHECK_UI_CONDITION_FOR_INCOMING_RESUME))
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL))
     {
         m_objContext.GetUiNotifier().SendIncomingResume();
         m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
-                m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
+                m_objContext.GetConfigurationProxy().GetInt(
+                        ConfigVt::KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT));
 
-        return IMS_SUCCESS;
+        return CallReasonInfo(CODE_NONE);
     }
 
     IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
@@ -584,11 +619,11 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
         // TODO
     }
 
-    return IMS_SUCCESS;
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName)
+CallReasonInfo EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName)
 {
     IMS_TRACE_D("HandleReceivedUpdateWithoutOffer", 0, 0, 0);
     eStateName = CallStateName::UPDATING;
@@ -611,7 +646,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName&
         // TODO
     }
 
-    return IMS_SUCCESS;
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
@@ -677,10 +712,11 @@ CallStateName EstablishedState::Downgrade(IN CallType eCallType)
 }
 
 PRIVATE
-IMS_BOOL EstablishedState::IsRefreshInProgress() const
+IMS_BOOL EstablishedState::ShouldPendOperation() const
 {
     IMtcSession* piMtcSession = m_objContext.GetSession();
-    return piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress();
+    return (piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress()) ||
+            m_objContext.GetTimer().IsActive(TIMER_DELAY_UPDATE_AFTER_CONNECTED);
 }
 
 PRIVATE

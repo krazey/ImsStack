@@ -179,12 +179,12 @@ public interface IAosInfo {
      * Called to notify the update of emergency callback mode.
      * Native Listener : IAosEmergencyListener.
      *
-     * @param type {@code type} is callback mode entry {@link EmcCallbackModeType}
-     * @param state {@code state} is type of {@link EmcCallbackModeState}.
+     * @param type {@code type} is callback mode entry {@link EmergencyCallbackModeType}
+     * @param state {@code state} is type of {@link EmergencyCallbackModeState}.
      * @param duration is the number of seconds remaining in the emergency callback mode.
      */
-    void notifyEmcCallbackModeChanged(
-            EmcCallbackModeType type, EmcCallbackModeState state, long duration);
+    void notifyEmergencyCallbackModeChanged(
+            EmergencyCallbackModeType type, EmergencyCallbackModeState state, long duration);
 
     /**
      * Represents the preferred voice network for roaming.
@@ -289,14 +289,14 @@ public interface IAosInfo {
     /**
      * Represents the type of emergency callback mode.
      */
-    enum EmcCallbackModeType {
+    enum EmergencyCallbackModeType {
 
         CALL(1),
         SMS(2);
 
         private final int mValue;
 
-        EmcCallbackModeType(int value) {
+        EmergencyCallbackModeType(int value) {
             mValue = value;
         }
 
@@ -313,15 +313,15 @@ public interface IAosInfo {
     /**
      * Represents the state of the emergency callback mode.
      */
-    enum EmcCallbackModeState {
+    enum EmergencyCallbackModeState {
 
         STOP(0),
         START(1),
-        STOP_BY_EMC(2);
+        STOP_BY_EMERGENCY(2);
 
         private final int mValue;
 
-        EmcCallbackModeState(int value) {
+        EmergencyCallbackModeState(int value) {
             mValue = value;
         }
 

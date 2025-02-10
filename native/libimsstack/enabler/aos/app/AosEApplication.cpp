@@ -18,7 +18,7 @@
 #include "ImsEventDef.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosCallTracker.h"
@@ -38,7 +38,8 @@ __IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosEApplication::AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
-        AosApplication(piAppContext, strAppId)
+        AosApplication(piAppContext, strAppId),
+        m_bRegBlockInCbm(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosEApplication = %" PFLS_u "/%" PFLS_x, APPID,
             sizeof(AosEApplication), this);
@@ -60,6 +61,7 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
     switch (nCmdType)
     {
         case ImsAosControl::REGISTER_START:
+            SetRegBlockInCbm(IMS_FALSE);
             if (IsNotReady())
             {
                 return IMS_FALSE;
@@ -91,6 +93,11 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
             AosApplication::RequestCmd(nCmdType);
             break;
 
+        case CMD_ECALL_INIT:  // FALL-THROUGH
+        case CMD_ESMS_INIT:
+            SetRegBlockInCbm(IMS_FALSE);
+            break;
+
         default:
             bResult = IMS_FALSE;
             break;
@@ -103,6 +110,16 @@ PUBLIC VIRTUAL void AosEApplication::GetProperty(
         IN IMS_UINT32 /* nType */, OUT IMS_UINT32& /* nValue */, OUT AString& strValue)
 {
     strValue = AString::ConstNull();
+}
+
+PROTECTED void AosEApplication::SetRegBlockInCbm(IN IMS_BOOL bBlock)
+{
+    m_bRegBlockInCbm = bBlock;
+}
+
+PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
+{
+    return m_bRegBlockInCbm;
 }
 
 PROTECTED VIRTUAL void AosEApplication::ClearConnection()
@@ -140,6 +157,11 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
             break;
 
         case MSG_IPCAN_CHANGED:
+            if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+            {
+                StopTimer(TIMER_APP_CONNECTED);
+            }
+
             if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
             {
                 ProcessIpcanChanged(objMsg);
@@ -174,6 +196,11 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
 
     if (m_pConnector->IsReady())
     {
+        if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+        {
+            StopTimer(TIMER_APP_CONNECTED);
+        }
+
         SetAppState(STATE_CONNECTING);
         m_piRegistration->Start();
     }
@@ -181,7 +208,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
     {
         SetAppState(STATE_READY);
 
-        if (nIpcanType == AoSRegType::TYPE_IPCAN_WLAN)
+        if (nIpcanType == AosRegType::TYPE_IPCAN_WLAN)
         {
             A_IMS_TRACE_I(APPID, "ProcessRegStart :: nIpcanType(%d) , emergency over WLAN",
                     nIpcanType, 0, 0);
@@ -235,12 +262,37 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& obj
     switch (nType)
     {
         case CONNECTION_ACTIVATED:
-            m_piRegistration->Start();
-            SetAppState(STATE_CONNECTING);
+            if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+            {
+                StopTimer(TIMER_APP_CONNECTED);
+            }
+            if (!IsRegBlockInCbm())
+            {
+                if (m_piRegistration->IsInCallbackMode())
+                {
+                    SetRegBlockInCbm(IMS_TRUE);
+                }
+                m_piRegistration->Start();
+                SetAppState(STATE_CONNECTING);
+            }
+            else
+            {
+                if (!m_piRegistration->IsInCallbackMode())
+                {
+                    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+                }
+            }
             break;
 
         case CONNECTION_DEACTIVATED:
-            ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+            if (m_piRegistration->IsInCallbackMode())
+            {
+                m_pConnector->Start();
+            }
+            else
+            {
+                ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+            }
             break;
 
         default:
@@ -284,7 +336,18 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated_StateDisconnect
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionDeactivated(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    if (m_piRegistration->IsInCallbackMode())
+    {
+        CleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+        if (!IsEmergencyBlocked())
+        {
+            SetAppState(STATE_READY);
+        }
+    }
+    else
+    {
+        ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    }
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 nReason)
@@ -302,14 +365,26 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
     switch (nReason)
     {
         case AosConnector::REASON_IP_CHANGED:
-            ProcessCleanAll(AosReason::IP_CHANGED);
+            if (m_piRegistration->IsInCallbackMode())
+            {
+                CleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+                if (!IsRegBlockInCbm())
+                {
+                    SetAppState(STATE_CONNECTING);
+                    m_piRegistration->Start();
+                    Report_StateChanged(IMS_FALSE);
+                    SetRegBlockInCbm(IMS_TRUE);
+                    return;
+                }
+            }
+            else
+            {
+                ProcessCleanAll(AosReason::IP_CHANGED);
+            }
             break;
 
         case AosConnector::REASON_IPCAN_CAT_CHANGED:
-            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
-            {
-                PostMessage(MSG_IPCAN_CHANGED, 0, 0);
-            }
+            PostMessage(MSG_IPCAN_CHANGED, 0, 0);
             break;
 
         default:
@@ -442,6 +517,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStateCheck()
 PROTECTED VIRTUAL void AosEApplication::ProcessECallStarted()
 {
     SetImsCall(IMS_TRUE);
+    SetRegBlockInCbm(IMS_FALSE);
 
     if (m_piAppActivatedTimer != IMS_NULL)
     {
@@ -473,6 +549,13 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
             m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
     {
         StartTimer(TIMER_APP_TERMINATED, EPDN_RELEASE_DELAY_TIME_MILLIS);
+        return;
+    }
+
+    IMS_SINT32 delayTime = GET_N_CONFIG(m_nSlotId)->GetWaitTimeSecForReleaseEPdnAfterECallEnd();
+    if (delayTime > 0)
+    {
+        StartTimer(TIMER_APP_TERMINATED, delayTime * 1000);
         return;
     }
 

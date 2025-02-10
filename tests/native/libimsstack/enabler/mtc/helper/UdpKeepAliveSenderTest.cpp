@@ -15,14 +15,14 @@
  */
 
 #include "MockIMtcService.h"
+#include "MockISipKeepAliveHelper.h"
 #include "PlatformContext.h"
 #include "TestTimerService.h"
 #include "call/MockIMtcCallContext.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "sipcore/MockISipKeepAliveHelper.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -40,8 +40,7 @@ class UdpKeepAliveSenderTest : public ::testing::Test
 {
 public:
     inline UdpKeepAliveSenderTest() :
-            pConfigurationManager(IMS_NULL),
-            pConfigurationProxy(IMS_NULL),
+            pConfigurationProxy(),
             objTimerService(),
             objTimer(objTimerService.GetMockTimer()),
             pSender(IMS_NULL)
@@ -50,8 +49,7 @@ public:
 
     MockIMtcCallContext objContext;
     MockIMtcService objService;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     TestTimerService objTimerService;
     MockITimer& objTimer;
     MockIMtcAosConnector objAosConnector;
@@ -66,10 +64,10 @@ protected:
                 PlatformContext::SERVICE_TIMER, &objTimerService);
 
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
-        ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
+        ON_CALL(*pConfigurationProxy,
+                GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
                 .WillByDefault(Return(ANY_KEEP_ALIVE_INTERVAL));
 
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
@@ -92,13 +90,19 @@ protected:
 
 TEST_F(UdpKeepAliveSenderTest, IsRequiredChecksConfiguration)
 {
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(-1));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(-1));
     EXPECT_FALSE(UdpKeepAliveSender::IsRequired(*pConfigurationProxy));
 
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(0));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(0));
     EXPECT_FALSE(UdpKeepAliveSender::IsRequired(*pConfigurationProxy));
 
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     EXPECT_TRUE(UdpKeepAliveSender::IsRequired(*pConfigurationProxy));
 }
 

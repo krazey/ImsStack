@@ -248,6 +248,13 @@ public:
     virtual void AdjustDirectionForAutoAnswer();
 
     /**
+     * @brief Adjusts media direction for local resource confirmation.
+     *
+     * @param eCallType Call type to set the media directions in the SDP offer.
+     */
+    virtual void AdjustDirectionForLocalResourceConfirmation(IN CallType eCallType);
+
+    /**
      * @brief Sets
      *
      * @param eState

@@ -15,14 +15,14 @@
  */
 
 #include "AString.h"
+#include "IMessage.h"
+#include "ISession.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "MockIMessage.h"
+#include "MockISession.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/TerminationHandler.h"
-#include "core/IMessage.h"
-#include "core/ISession.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>

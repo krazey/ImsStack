@@ -27,7 +27,6 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class LogTest {
-    private static final String TAG = LogTest.class.getSimpleName();
     private static final String LOG_MESSAGE = "LogMessage";
     private static final String TEST = "Test";
     private static final String DELIMITER = ".";
@@ -57,12 +56,12 @@ public class LogTest {
         }
 
         // Checks the logs in the logcat.
-        Log.d(TAG, LOG_MESSAGE + ": d");
-        Log.e(TAG, LOG_MESSAGE + ": e");
-        Log.e(TAG, LOG_MESSAGE + ": e w/ exception", throwable);
-        Log.i(TAG, LOG_MESSAGE + ": i");
-        Log.v(TAG, LOG_MESSAGE + ": v");
-        Log.w(TAG, LOG_MESSAGE + ": w");
+        Log.d(this, LOG_MESSAGE + ": d");
+        Log.e(this, LOG_MESSAGE + ": e");
+        Log.e(this, LOG_MESSAGE + ": e w/ exception", throwable);
+        Log.i(this, LOG_MESSAGE + ": i");
+        Log.v(this, LOG_MESSAGE + ": v");
+        Log.w(this, LOG_MESSAGE + ": w");
     }
 
     @Test
@@ -71,11 +70,11 @@ public class LogTest {
         // When the debug is not enabled.
         Log.setDebuggable();
         Log.setImsDebug(false);
-        Log.dc(TAG, LOG_MESSAGE);
+        Log.dc(this, LOG_MESSAGE);
 
         // When sImsDebug is true.
         Log.setImsDebug(true);
-        Log.dc(TAG, LOG_MESSAGE + ": dc");
+        Log.dc(this, LOG_MESSAGE + ": dc");
     }
 
     @Test
@@ -84,11 +83,11 @@ public class LogTest {
         // When the debug is not enabled.
         Log.setDebuggable();
         Log.setImsDebug(false);
-        Log.vc(TAG, LOG_MESSAGE);
+        Log.vc(this, LOG_MESSAGE);
 
         // When sImsDebug is true.
         Log.setImsDebug(true);
-        Log.vc(TAG, LOG_MESSAGE + ": vc");
+        Log.vc(this, LOG_MESSAGE + ": vc");
     }
 
     @Test

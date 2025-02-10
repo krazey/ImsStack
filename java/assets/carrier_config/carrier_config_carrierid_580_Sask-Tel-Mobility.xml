@@ -16,7 +16,7 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="ims_dereg_on_3g_network_bool" value="true"/>
+    <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
 
       <!-- MTC -->
       <int name="ims.request_uri_type_int" value="1"/>
@@ -28,5 +28,5 @@
       <string name="imsvoice.conference_factory_uri_string">sip:conference@ibc.sasktel.com</string>
       <int name="imsvoice.conference_subscribe_type_int" value="0"/>
       <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
-      <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+      <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
 </carrier_config>

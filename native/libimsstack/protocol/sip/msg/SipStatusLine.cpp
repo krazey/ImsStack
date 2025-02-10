@@ -20,25 +20,25 @@
 #include "msg/SipStatusLine.h"
 #include "platform/SipString.h"
 
-SipStatusLine::SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszRsnPhrase) :
+SipStatusLine::SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszReasonPhrase) :
         m_pszSipVersion(SipPf_Strdup(SIP_SIPVER)),
         m_pszStatusCode(SipPf_Strdup(pszStatusCode)),
-        m_pszRsnPhrase(SipPf_Strdup(pszRsnPhrase))
+        m_pszReasonPhrase(SipPf_Strdup(pszReasonPhrase))
 {
 }
 
 SipStatusLine::SipStatusLine(const SIP_CHAR* pszSipVersion, const SIP_CHAR* pszStatusCode,
-        const SIP_CHAR* pszRsnPhrase) :
+        const SIP_CHAR* pszReasonPhrase) :
         m_pszSipVersion(SipPf_Strdup(pszSipVersion)),
         m_pszStatusCode(SipPf_Strdup(pszStatusCode)),
-        m_pszRsnPhrase(SipPf_Strdup(pszRsnPhrase))
+        m_pszReasonPhrase(SipPf_Strdup(pszReasonPhrase))
 {
 }
 
 SipStatusLine::SipStatusLine(const SipStatusLine& objHeader) :
         m_pszSipVersion(SipPf_Strdup(objHeader.m_pszSipVersion)),
         m_pszStatusCode(SipPf_Strdup(objHeader.m_pszStatusCode)),
-        m_pszRsnPhrase(SipPf_Strdup(objHeader.m_pszRsnPhrase))
+        m_pszReasonPhrase(SipPf_Strdup(objHeader.m_pszReasonPhrase))
 {
 }
 
@@ -52,13 +52,13 @@ SipStatusLine::~SipStatusLine()
     {
         delete[] m_pszStatusCode;
     }
-    if (m_pszRsnPhrase != SIP_NULL)
+    if (m_pszReasonPhrase != SIP_NULL)
     {
-        delete[] m_pszRsnPhrase;
+        delete[] m_pszReasonPhrase;
     }
 }
 
-SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipStatusLine::Encode(SIP_CHAR** ppCurrPos)
 {
     /*check for existence of version, status code and reason phrase*/
     if (m_pszStatusCode == SIP_NULL)
@@ -66,7 +66,7 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Status code missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    if (m_pszRsnPhrase == SIP_NULL)
+    if (m_pszReasonPhrase == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Reason Phrase missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -77,42 +77,28 @@ SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
         return SIP_FALSE;
     }
 
-    /* Encode Sip Version*/
-    SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
-    /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
-
-    /* Put a space */
-    SIP_ENC_SP(*ppCurrPos);
-
-    /*Encode Status Code*/
-    SipPf_Strcpy(*ppCurrPos, m_pszStatusCode);
-    /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
-
-    /* Put a space */
-    SIP_ENC_SP(*ppCurrPos);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszRsnPhrase);
-    /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszSipVersion);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszStatusCode);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszReasonPhrase);
 
     return SIP_TRUE;
 }
 
 SIP_VOID SipStatusLine::SetStatusCode(const SIP_CHAR* pszStatusCode)
 {
-    SetCharVar(pszStatusCode, m_pszStatusCode);
+    SipMsgUtil::SetValue(pszStatusCode, m_pszStatusCode);
 }
 
 SIP_VOID SipStatusLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
-    SetCharVar(pszVer, m_pszSipVersion);
+    SipMsgUtil::SetValue(pszVer, m_pszSipVersion);
 }
 
-SIP_VOID SipStatusLine::SetRsnPhrase(const SIP_CHAR* pszRsnPhrase)
+SIP_VOID SipStatusLine::SetReasonPhrase(const SIP_CHAR* pszReasonPhrase)
 {
-    SetCharVar(pszRsnPhrase, m_pszRsnPhrase);
+    SipMsgUtil::SetValue(pszReasonPhrase, m_pszReasonPhrase);
 }
 
 SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16* pnStatusCode) const
@@ -127,26 +113,24 @@ SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16* pnStatusCode) const
 
 SIP_UINT16 SipStatusLine::GetStatusCodeAsInt() const
 {
-    return (m_pszStatusCode != SIP_NULL) ? SipPf_Atoi(m_pszStatusCode) : SIP_SC_INVALID;
+    return (m_pszStatusCode != SIP_NULL) ? SipPf_Atoi(m_pszStatusCode) : SipMsgUtil::SIP_SC_INVALID;
 }
 
-SIP_BOOL SipStatusLine::DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipStatusLine::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempLoc = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipStatusLine::DecodeStatusLine: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszSipVersion = SipCreateString(pStartPt, pTempLoc);
+    m_pszSipVersion = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (m_pszSipVersion == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -154,28 +138,25 @@ SIP_BOOL SipStatusLine::DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nD
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*Find the endpoint of status code*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipStatusLine::DecodeStatusLine: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszStatusCode = SipCreateString(pStartPt, pTempLoc);
+    m_pszStatusCode = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (m_pszStatusCode == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Update the start point to the start of reason phrase*/
     pStartPt = pTempLoc + SIP_TWO;
-    m_pszRsnPhrase = SipCreateString(pStartPt, pEndPt);
-    if (m_pszRsnPhrase == SIP_NULL)
+    m_pszReasonPhrase = SipAbnfUtil::CreateString(pStartPt, pEndPt);
+    if (m_pszReasonPhrase == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: No Reason phrase present in response line",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No reason phrase present in response line",
                 SIP_ZERO, SIP_ZERO);
     }
 

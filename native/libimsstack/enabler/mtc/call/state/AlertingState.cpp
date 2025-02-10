@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "IMessage.h"
 #include "ISession.h"
+#include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -28,13 +30,13 @@
 #include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/UdpKeepAliveSender.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "sipcore/ISipHeader.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
 #include "utility/IMessageUtils.h"
@@ -187,7 +189,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     pSession->HandleRequest(RequestType::ACK, *piMessage);
 
     // TODO: need to check NegotiationState::STATE_OFFER_SENT?
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         // TODO TerminateAndToTerminating() ?
         CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
@@ -200,6 +202,13 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_FALSE);
     m_objContext.GetUiNotifier().SendStarted();
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
+
+    IMS_SINT32 nDelayTime = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT);
+    if (nDelayTime > 0)
+    {
+        m_objContext.GetTimer().Start(TIMER_DELAY_UPDATE_AFTER_CONNECTED, nDelayTime);
+    }
 
     return CallStateName::ESTABLISHED;
 }
@@ -229,7 +238,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     UpdateType eUpdateType = pSession->GetOngoingUpdateType();
     pSession->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
@@ -270,7 +279,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -296,7 +305,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionPrackReceived(IN ISession* pi
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
         // According to RFC 6337, UE must send re-offer.
@@ -318,12 +327,21 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionRprDeliveryFailed(IN ISession
             CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK));
 }
 
-PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
     if (IsNeedToIgnoreStartFailure())
     {
         return GetStateName();
+    }
+
+    if (piSession->GetState() == ISession::STATE_ESTABLISHED)
+    {
+        // This condition occurs when no ACK is received within the 200 OK retransmission timer
+        // period. In such cases, the UE should send a BYE to notify the remote party that the
+        // call is terminated.
+        const CallReasonInfo objReasonInfo(CODE_SIP_SERVER_ERROR);
+        return Terminate(objReasonInfo);
     }
 
     m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));

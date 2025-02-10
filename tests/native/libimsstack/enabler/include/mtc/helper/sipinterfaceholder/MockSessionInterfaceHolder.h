@@ -17,6 +17,7 @@
 #ifndef MOCK_SESSION_INTERFACE_HOLDER_H_
 #define MOCK_SESSION_INTERFACE_HOLDER_H_
 
+#include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include <gmock/gmock.h>
 
@@ -27,8 +28,8 @@ class IInterfaceHolderListener;
 class MockSessionInterfaceHolder : public SessionInterfaceHolder
 {
 public:
-    explicit MockSessionInterfaceHolder(IN IInterfaceHolderListener& objListener) :
-            SessionInterfaceHolder(objListener)
+    explicit MockSessionInterfaceHolder() :
+            SessionInterfaceHolder()
     {
     }
     ~MockSessionInterfaceHolder() {}
@@ -56,12 +57,18 @@ public:
     MOCK_METHOD(
             void, SessionTransactionReceived, (IN ISession*, IN ISipServerConnection*), (override));
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer* piTimer), (override));
+    MOCK_METHOD(void, AddListener, (IN IInterfaceHolderListener * pListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IInterfaceHolderListener * pListener), (override));
     MOCK_METHOD(ISession*, GetISession,
-            (IN ICoreService* pICoreService, IN const AString& strFrom, IN const AString& strTo),
+            (IN CallKey nKey, IN ICoreService* pICoreService, IN const AString& strFrom,
+                    IN const AString& strTo),
             (override));
-    MOCK_METHOD(void, AddISession, (IN ISession* piSession), (override));
-    MOCK_METHOD(
-            void, ReleaseISession, (IN ISession* piSession, IN IMS_BOOL bTerminated), (override));
+    MOCK_METHOD(void, AddISession, (IN CallKey nKey, IN ISession* piSession), (override));
+    MOCK_METHOD(void, ReleaseISession, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, ReleaseISession,
+            (IN ISession * piSession, IN IMS_BOOL bEnforceDestroy,
+                    IN IMS_BOOL bSessionTerminatedOrStartFailed),
+            (override));
     MOCK_METHOD(IMS_BOOL, IsReadyToDestroy, (IN ISession* piSession), ());
     MOCK_METHOD(void, ClearISessions, (), ());
     MOCK_METHOD(IMS_RESULT, StartTimer, (IN ISession* piSession, IN IMS_SINT32 nDuration), ());

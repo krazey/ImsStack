@@ -36,6 +36,8 @@ public:
 
     MOCK_METHOD(void, SetListener, (IN IAosBlockListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosBlockListener* piListener), (override));
+    MOCK_METHOD(void, SetSilentListener, (IN IAosBlockSilentListener * piListener), (override));
+    MOCK_METHOD(void, RemoveSilentListener, (IN IAosBlockSilentListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, SetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
             (override));
     MOCK_METHOD(IMS_BOOL, ResetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),

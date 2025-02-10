@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "AosReason.h"
+#include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ImsEventDef.h"
@@ -56,65 +57,66 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                        \
-    using Base::SetState;                          \
-    using Base::GetState;                          \
-    using Base::RemoveBlock;                       \
-    using Base::SetSuspendedReason;                \
-    using Base::SetHandleState;                    \
-    using Base::Init;                              \
+    using Base::AddBlock;                          \
+    using Base::BackupAllBlocks;                   \
+    using Base::CheckSuspended;                    \
     using Base::CleanUp;                           \
-    using Base::IsHandleBlocked;                   \
-    using Base::SetReason;                         \
     using Base::ClearSuspendedReason;              \
+    using Base::GetAosFeature;                     \
     using Base::GetAppState;                       \
     using Base::GetImsAosReason;                   \
     using Base::GetImsAosReasonForSuspend;         \
-    using Base::IsEpdgEnabled;                     \
-    using Base::IsEqualNetworkType;                \
-    using Base::IsCapabilityExisted;               \
-    using Base::IsCapabilityExistedForNetworkType; \
-    using Base::IsNetworkTypeMatchedToRat;         \
-    using Base::GetNetworkType;                    \
-    using Base::GetMobileNetworkType;              \
     using Base::GetMobileChangingNetworkType;      \
-    using Base::GetAosFeature;                     \
-    using Base::ReevaluateBlocks;                  \
-    using Base::UpdateIpcan;                       \
-    using Base::PreProcessBlock;                   \
-    using Base::ProcessBlock;                      \
-    using Base::ProcessFeatureBlock;               \
-    using Base::ProcessCheckBlock;                 \
-    using Base::ProcessUnavailableFeature;         \
-    using Base::ProcessUnavailableFeatureChanged;  \
-    using Base::BackupAllBlocks;                   \
+    using Base::GetMobileNetworkType;              \
+    using Base::GetNetworkType;                    \
+    using Base::GetState;                          \
     using Base::HoldBlockForInvalidNetwork;        \
+    using Base::Init;                              \
+    using Base::InitializeFeatureTags;             \
+    using Base::InitializeHoldingBlocksPolicy;     \
+    using Base::Is3G;                              \
     using Base::IsBlockForMobile;                  \
     using Base::IsBlockForWifi;                    \
-    using Base::InitializeHoldingBlocksPolicy;     \
-    using Base::InitializeFeatureTags;             \
-    using Base::ProcessImsSuspended;               \
-    using Base::ProcessImsResumed;                 \
-    using Base::CheckSuspended;                    \
-    using Base::ResetSuspendedReason;              \
-    using Base::ReportRegState;                    \
-    using Base::ProcessCapabilitiesChanged;        \
-    using Base::ProcessNetworkChanged;             \
-    using Base::ProcessVopsStateChanged;           \
-    using Base::ProcessPsRoamingStateChanged;      \
+    using Base::IsCapabilityExisted;               \
+    using Base::IsCapabilityExistedForNetworkType; \
+    using Base::IsEmergencyService;                \
+    using Base::IsEpdgEnabled;                     \
+    using Base::IsEqualNetworkType;                \
+    using Base::IsHandleBlocked;                   \
+    using Base::IsNetworkTypeMatchedToRat;         \
+    using Base::IsRoaming;                         \
+    using Base::IsFeatureUnavailableInLimitedReg;  \
     using Base::IsSupportedNetworkType;            \
     using Base::IsSupportedNetworkTypeForCellular; \
-    using Base::StateToString;                     \
     using Base::MsgToString;                       \
+    using Base::PreProcessBlock;                   \
+    using Base::ProcessBlock;                      \
+    using Base::ProcessCapabilitiesChanged;        \
+    using Base::ProcessCheckBlock;                 \
+    using Base::ProcessFeatureBlock;               \
+    using Base::ProcessImsResumed;                 \
+    using Base::ProcessImsSuspended;               \
+    using Base::ProcessNetworkChanged;             \
+    using Base::ProcessPsRoamingStateChanged;      \
+    using Base::ProcessUnavailableFeature;         \
+    using Base::ProcessUnavailableFeatureChanged;  \
+    using Base::ProcessVopsStateChanged;           \
     using Base::RadioTypeToString;                 \
-    using Base::ServiceTypeToString;               \
+    using Base::ReevaluateBlocks;                  \
     using Base::ReevaluateUnavailableFeature;      \
-    using Base::Is3G;                              \
-    using Base::IsEmergencyService;                \
-    using Base::IsRoaming;                         \
-    using Base::StateConnecting;                   \
+    using Base::RemoveBlock;                       \
+    using Base::ReportRegState;                    \
+    using Base::ResetSuspendedReason;              \
+    using Base::ServiceTypeToString;               \
+    using Base::SetHandleState;                    \
+    using Base::SetReason;                         \
+    using Base::SetState;                          \
+    using Base::SetSuspendedReason;                \
     using Base::StateConnected;                    \
+    using Base::StateConnecting;                   \
     using Base::StateDisconnecting;                \
-    using Base::AddBlock;
+    using Base::StateToString;                     \
+    using Base::UpdateIpcan;
 
 class TestAosHandle : public AosHandle
 {
@@ -876,6 +878,8 @@ TEST_F(AosHandleTest, ShouldNotifyECallInitiationWhenMtcRequestedEmergencyRegist
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ECALL_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::REGISTER_START, _));
 
     // WHEN
     m_pAosHandle->Control(ImsAosControl::REGISTER_START);
@@ -892,6 +896,8 @@ TEST_F(AosHandleTest, ShouldNotifyESmsInitiationWhenMtsRequestedEmergencyRegiste
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ESMS_INIT, _));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::REGISTER_START_WITH_WLAN, _));
 
     // WHEN
     m_pAosHandle->Control(ImsAosControl::REGISTER_START_WITH_WLAN);
@@ -1727,9 +1733,29 @@ TEST_F(AosHandleTest, GetAosFeature_Test)
     EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_NONE), ImsAosFeature::NONE);
 }
 
-TEST_F(AosHandleTest, ShouldReturnTextFeatureIfTheBlockReasonForTextCapabilityIsGiven)
+TEST_F(AosHandleTest, ShouldReturnTextFeatureForTextCapabilityBlockReason)
 {
     EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_TEXT_CAPABILITY), ImsAosFeature::TEXT);
+}
+
+TEST_F(AosHandleTest, ShouldReturnMmtelFeatureForLimitedMmtelBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_MMTEL), ImsAosFeature::MMTEL);
+}
+
+TEST_F(AosHandleTest, ShouldReturnVideoFeatureForLimitedVideoBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_VIDEO), ImsAosFeature::VIDEO);
+}
+
+TEST_F(AosHandleTest, ShouldReturnTextFeatureForLimitedTextBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_TEXT), ImsAosFeature::TEXT);
+}
+
+TEST_F(AosHandleTest, ShouldReturnSmsFeatureForLimitedSmsBlockReason)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_LIMITED_SMS), ImsAosFeature::SMSIP);
 }
 
 TEST_F(AosHandleTest, BackupAllBlocks_Test1)
@@ -4531,6 +4557,32 @@ TEST_F(AosHandleTest, SetCapabilityToTheGivenValue)
 
     // THEN
     EXPECT_TRUE(IsEqualCapabilities(m_pAosHandle->GetCapabilities(), objNewCapabilities));
+}
+
+TEST_F(AosHandleTest, ShouldReturnTrueIfTheUnavailableFeatureListContainsTheGivenFeature)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandle->IsFeatureUnavailableInLimitedReg(
+            CarrierConfig::Assets::REG_FEATURE_VIDEO));
+}
+
+TEST_F(AosHandleTest, ShouldReturnFalseIfTheUnavailableFeatureListNotContainTheGivenFeature)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objUnavailableFeatures;
+    objUnavailableFeatures.Add(CarrierConfig::Assets::REG_FEATURE_VIDEO);
+    ON_CALL(m_objMockIAosNConfiguration, GetUnavailableFeaturesInLimitedReg())
+            .WillByDefault(ReturnRef(objUnavailableFeatures));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandle->IsFeatureUnavailableInLimitedReg(
+            CarrierConfig::Assets::REG_FEATURE_MMTEL));
 }
 
 TEST_F(AosHandleTest, ProcessNetworkChanged_Test)

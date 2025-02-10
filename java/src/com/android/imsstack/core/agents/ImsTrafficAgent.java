@@ -83,17 +83,17 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
             }
 
             if (isEmergency(slotId)) {
-                ImsLog.d(slotId, "emergency is ongoing");
+                ImsLog.d(this, slotId, "emergency is ongoing");
                 return true;
             }
 
             if (isEmergencyInOtherSlot(slotId)) {
-                ImsLog.d(slotId, "emergency is ongoing in other slot");
+                ImsLog.d(this, slotId, "emergency is ongoing in other slot");
                 return false;
             }
 
             if (isWlan(slotId) || isWlanInOtherSlot(slotId)) {
-                ImsLog.d(slotId, "wlan is enabled");
+                ImsLog.d(this, slotId, "wlan is enabled");
                 return true;
             }
 
@@ -102,7 +102,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
             }
 
             if (hasHighPriorityInOtherSlot(getPriorityType(trafficType), slotId)) {
-                ImsLog.d(slotId, "priority is low");
+                ImsLog.d(this, slotId, "priority is low");
                 return false;
             }
         }
@@ -112,7 +112,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
 
     @Override
     public void setTrafficPriority(int priorityType, int slotId) {
-        ImsLog.d(slotId, "type=" + PRIORITY_TYPE_TO_STRING.get(priorityType));
+        ImsLog.d(this, slotId, "type=" + PRIORITY_TYPE_TO_STRING.get(priorityType));
 
         synchronized (mTraffics) {
             Traffic traffic = mTraffics.get(slotId);
@@ -125,7 +125,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
 
     @Override
     public void setSimultaneousCallingSupported(boolean supported, int slotId) {
-        ImsLog.d(slotId, "setSimultaneousCallingSupported=" + supported);
+        ImsLog.d(this, slotId, "setSimultaneousCallingSupported=" + supported);
 
         synchronized (mTraffics) {
             Traffic traffic = mTraffics.get(slotId);
@@ -137,7 +137,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
 
     @Override
     public void setWlan(boolean enabled, int slotId) {
-        ImsLog.d(slotId, "enable=" + enabled);
+        ImsLog.d(this, slotId, "setWlan: enable=" + enabled);
 
         synchronized (mTraffics) {
             Traffic traffic = mTraffics.get(slotId);

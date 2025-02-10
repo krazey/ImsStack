@@ -291,7 +291,8 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
     {
         IMS_TRACE_I("FindAndUpdate : subscription by participant case [%d]",
                 m_objNotMatchedUsers.GetSize(), 0, 0);
-        for (IMS_SINT32 index = (m_objNotMatchedUsers.GetSize() - 1); index >= 0; index--)
+        for (IMS_SINT32 index = static_cast<IMS_SINT32>(m_objNotMatchedUsers.GetSize()) - 1;
+                index >= 0; index--)
         {
             ConferenceInfo::User* pNotMatchedUser = m_objNotMatchedUsers.GetAt(index);
             RemoveFromNotMatchedUserList(pNotMatchedUser);

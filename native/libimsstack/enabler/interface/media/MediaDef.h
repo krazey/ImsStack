@@ -85,17 +85,34 @@ typedef enum
 /** Media Transport Type Definition for checking RTP-RTCP Timeout */
 typedef enum
 {
-    // No Check
+    /** No Check */
     MEDIA_PROTOCOL_NONE = 0,
-    // RTP or RTCP any
+    /** RTP or RTCP any */
     MEDIA_PROTOCOL_ANY = 1,
-    // RTP only
+    /** RTP only */
     MEDIA_PROTOCOL_RTP = 2,
-    // RTCP only
+    /** RTCP only */
     MEDIA_PROTOCOL_RTCP = 3,
-    // Maintain Previous Setting
+    /** Maintain Previous Setting */
     MEDIA_PROTOCOL_NO_CHANGE = 4,
+    // RTP and RTCP both
+    MEDIA_PROTOCOL_BOTH = 5,
 } MEDIA_TRANSPORT_PROTOCOL;
+
+/** Media Inactivity Call End Reason for checking RTP-RTCP Timeout */
+typedef enum
+{
+    /**  RTCP inactivity occurred when call is on HOLD. */
+    RTCP_INACTIVITY_ON_HOLD = 0,
+    /**  RTCP inactivity occurred when call is connected. */
+    RTCP_INACTIVITY_ON_CONNECTED = 1,
+    /**  RTP inactivity occurred when call is connected. */
+    RTP_INACTIVITY_ON_CONNECTED = 2,
+    /**  E911 RTCP inactivity occurred when call is connected. */
+    E911_RTCP_INACTIVITY_ON_CONNECTED = 3,
+    /**  E911 RTP inactivity occurred when call is connected. */
+    E911_RTP_INACTIVITY_ON_CONNECTED = 4,
+} MEDIA_INACTIVITY_CALL_END_REASON;
 
 typedef enum
 {

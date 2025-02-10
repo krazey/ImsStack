@@ -96,7 +96,7 @@ IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN const ImsList<IMtcCal
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
-        if (lstCalls.GetAt(nIndex)->GetCallContext().GetCallInfo().bEmergency)
+        if (lstCalls.GetAt(nIndex)->GetCallContext().GetCallInfo().IsEmergency())
         {
             IMS_TRACE_I("IsEmergencyCallExists : Emergency call exists", 0, 0, 0);
             return IMS_TRUE;

@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 #include "AString.h"
 #include "AStringArray.h"
@@ -475,6 +475,7 @@ protected:
         {
             CleanUpAosApplication();
             delete m_pAosApplication;
+            m_pAosApplication = IMS_NULL;
         }
     }
 
@@ -532,6 +533,10 @@ protected:
         }
 
         m_pAosApplication->ClearTimers();
+        m_pAosApplication->StopTimer(TIMER_RECONFIG_GUARD);
+        m_pAosApplication->StopTimer(TIMER_PDN_BLOCKED);
+        m_pAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
+        m_pAosApplication->StopTimer(TIMER_RAT_BLOCK);
     }
 };
 
@@ -1388,10 +1393,10 @@ TEST_F(AosApplicationTest, ProcessMessage)
     m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
     m_pAosApplication->SetRegRecoveryHeld(IMS_FALSE);
-    objMessage.nWparam = AoSRegRecoveryType::PCSCF_CHANGE;
+    objMessage.nWparam = AosRegRecoveryType::PCSCF_CHANGE;
     m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTING);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
-    objMessage.nWparam = AoSRegRecoveryType::KEEP_DATA_CONNECTION;
+    objMessage.nWparam = AosRegRecoveryType::KEEP_DATA_CONNECTION;
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
     objMessage.nWparam = 0;
     m_pAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
@@ -2354,7 +2359,7 @@ TEST_F(AosApplicationTest, Process)
             .WillRepeatedly(Return(IMS_FALSE));
     m_pAosApplication->ProcessImsEstablishmentTimerExpired();
     EXPECT_CALL(m_objMockIAosRegistration,
-            GetProperty(IAosRegistration::PROPERTY_PDN_REACIVATE_WAIT_TIME, _, _))
+            GetProperty(IAosRegistration::PROPERTY_REG_FAILURE_COUNT, _, _))
             .WillOnce(DoAll(SetArgReferee<1>(60), Return(0)))
             .WillOnce(DoAll(SetArgReferee<1>(0), Return(0)));
     m_pAosApplication->ProcessImsEstablishmentTimerExpired();
@@ -2418,14 +2423,14 @@ TEST_F(AosApplicationTest, Process)
     EXPECT_TRUE(m_pAosApplication->IsRegRecoveryHeld());
     // pending feature on, not held - recover reason PCSCF_CHANGE
     m_pAosApplication->SetImsCall(IMS_FALSE);
-    m_pAosApplication->SetRecoverReason(AoSRegRecoveryType::PCSCF_CHANGE);
+    m_pAosApplication->SetRecoverReason(AosRegRecoveryType::PCSCF_CHANGE);
     EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
     // pending feature on, not held - recover reason other
     m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
     m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
-    m_pAosApplication->SetRecoverReason(AoSRegRecoveryType::UNKNOWN);
+    m_pAosApplication->SetRecoverReason(AosRegRecoveryType::UNKNOWN);
     EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
@@ -2544,7 +2549,7 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenTypeR
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK));
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, AosReasonCode::RAT_BLOCK)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, AosReasonCode::PLMN_BLOCK)).Times(1);
 
     // WHEN
     m_pAosApplication->ProcessPdnDisconnect();

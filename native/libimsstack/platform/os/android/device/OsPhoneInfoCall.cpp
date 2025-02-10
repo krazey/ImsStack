@@ -67,3 +67,8 @@ PUBLIC VIRTUAL IMS_SINT32 OsPhoneInfoCall::GetCsCallStateInOtherSlot() const
 {
     return PlatformContext::GetInstance()->GetSystem()->GetCsCallStateInOtherSlot(GetSlotId());
 }
+
+PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsCrossSimRedialingAvailable() const
+{
+    return PlatformContext::GetInstance()->GetSystem()->IsCrossSimRedialingAvailable(GetSlotId());
+}

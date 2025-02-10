@@ -21,15 +21,12 @@
 class SipReferSubHeader : public SipHeaderBase
 {
 public:
-    /*constructor*/
     SipReferSubHeader();
     SipReferSubHeader(const SipReferSubHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*virtual methods*/
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipReferSubHeader();

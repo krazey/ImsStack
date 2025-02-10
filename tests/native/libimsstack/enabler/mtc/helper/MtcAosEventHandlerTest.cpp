@@ -20,7 +20,6 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/MockIMtcAosStateListener.h"
@@ -45,7 +44,6 @@ public:
 
     MockIMtcContext objContext;
     MockIMtcService objMtcService;
-    MockIMtcConfigurationManager* pConfigManager;
     MockMtcConfigurationProxy* pConfigProxy;
     MockIJniMtcServiceThread objJniThread;
 
@@ -54,8 +52,7 @@ protected:
     {
         ON_CALL(objMtcService, GetJniServiceThread).WillByDefault(Return(&objJniThread));
 
-        pConfigManager = new MockIMtcConfigurationManager();
-        pConfigProxy = new MockMtcConfigurationProxy(pConfigManager);
+        pConfigProxy = new MockMtcConfigurationProxy();
         pEventHandler = new MtcAosEventHandler(objMtcService, *pConfigProxy);
     }
 

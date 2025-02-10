@@ -276,7 +276,8 @@ PUBLIC VIRTUAL IMS_RESULT SipTransactionState::RetransmitMessage()
         return IMS_FAILURE;
     }
 
-    if (!m_pTransport->SendToNetwork(objBuffer.GetData(), objBuffer.GetLength(), IMS_FALSE))
+    if (!m_pTransport->SendToNetwork(
+                objBuffer.GetData(), objBuffer.GetLength(), GetSipProfile(), IMS_FALSE))
     {
         IMS_TRACE_E(0, "Retransmitting ACK or 2xx to INVITE request failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -340,7 +341,7 @@ IMS_BOOL SipTransactionState::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_S
         return IMS_FALSE;
     }
 
-    return m_pTransport->SendToNetwork(pBuffer, nBuffLen);
+    return m_pTransport->SendToNetwork(pBuffer, nBuffLen, GetSipProfile());
 }
 
 PUBLIC
@@ -436,7 +437,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         }
     }
 
-    pTxnContext->pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
+    pTxnContext->m_pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
 
     ISipUserData objUserData;
     objUserData.SetUserData(static_cast<SIP_VOID*>(pTxnContext));
@@ -549,7 +550,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
             m_pTxnKey = pTxnKey;
         }
 
-        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER)
         {
             // If the method is INVITE, then store the txn key in the InvTxnKey.
             // This will be used when the application calls AbortCall().
@@ -557,7 +558,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
 
             if (nStatusCode != SipStatusCode::SC_INVALID)
             {
-                m_pTxnKey->SetRespCode(static_cast<SIP_UINT16>(nStatusCode));
+                m_pTxnKey->SetResponseCode(static_cast<SIP_UINT16>(nStatusCode));
             }
         }
     }

@@ -37,19 +37,16 @@ private:
 
     SIP_INT32 m_eHostType;
 
-    SIP_BOOL DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 public:
-    /*constructor*/
     SipViaHeader();
     SipViaHeader(const SipViaHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetProtocolName(const SIP_CHAR* pszProtocolName);
     SIP_VOID SetProtocolVer(const SIP_CHAR* pszProtocolVer);
@@ -57,8 +54,6 @@ public:
     SIP_VOID SetHost(const SIP_CHAR* pszHost);
 
     inline SIP_VOID SetPortNum(SIP_UINT16 nPort) { m_nPort = nPort; }
-
-    /*Get methods*/
 
     inline const SIP_CHAR* GetProtocolName() const { return m_pszProtocolName; }
 
@@ -74,6 +69,8 @@ public:
 
     SIP_BOOL SetBranchParam(const SIP_CHAR* pszBranch);
     SIP_BOOL IsValidHeader() const override;
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipViaHeader();

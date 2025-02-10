@@ -2742,12 +2742,7 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredent
         // SIP_MESSAGE_MEDIATOR
         (void)AdjustMessage(m_piOngoingScc->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
 
-        ISipTransportHelper* piTransHelper = SipFactory::GetTransportHelper(GetSlotId());
-
-        if (piTransHelper != IMS_NULL)
-        {
-            piTransHelper->ApplyIpSecForServerSockets();
-        }
+        SipFactory::GetTransportHelper(GetSlotId())->ApplyIpSecForServerSockets();
 
         if (m_piOngoingScc->Send() != IMS_SUCCESS)
         {
@@ -2840,6 +2835,8 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredent
 
         // SIP_MESSAGE_MEDIATOR
         (void)AdjustMessage(piScc->GetMessage(), IMessageMediator::MESSAGE_RESUBMIT);
+
+        SipFactory::GetTransportHelper(GetSlotId())->ApplyIpSecForServerSockets();
 
         if (piScc->Send() != IMS_SUCCESS)
         {

@@ -20,10 +20,10 @@
 #include "BaseNego.h"
 #include "MediaDef.h"
 #include "audio/AudioDef.h"
-#include "audio/AudioProfileExtractor.h"
+#include "audio/AudioSdpParser.h"
 #include "audio/AudioProfileUtil.h"
 #include "audio/AudioSdpGenerator.h"
-#include "audio/AudioSdpNegotiator.h"
+#include "audio/AudioProfileNegotiator.h"
 #include "config/AudioConfiguration.h"
 
 /**
@@ -95,7 +95,7 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    std::unique_ptr<AudioProfileExtractor> m_pProfileExtractor;
+    std::unique_ptr<AudioSdpParser> m_pSdpParser;
 };
 
 #endif

@@ -936,7 +936,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
     }
 
     SipTxnContextData* pTxnContextData =
-            static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
+            static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData);
 
     if (pTxnContextData == IMS_NULL)
     {

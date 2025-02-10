@@ -44,6 +44,7 @@ public:
     void SetListener(IN IAosNConfigurationListener* piListener) override;
     void RemoveListener(IN IAosNConfigurationListener* piListener) override;
 
+    IMS_BOOL IsTcpRequiredForReg() const override;
     IMS_BOOL IsSubscription() const override;
     IMS_BOOL IsUnSubscription() const override;
     IMS_BOOL IsVoLteAvailable() const override;
@@ -65,9 +66,11 @@ public:
     IMS_BOOL IsRegRetryIntervalsUsedForSub() const override;
     IMS_BOOL IsSmsOverIpEnabled() const override;
     IMS_BOOL IsIpsecEnabled() const override;
+    IMS_BOOL IsRegRetryRuleForERegUsed() const override;
     IMS_BOOL IsSecurityServerPortInRegContactOfInitRegUsed() const override;
     IMS_BOOL IsSecurityServerPortInInitRegUsed() const override;
     IMS_BOOL IsOldSaOnEstablishingSaRemoved() const override;
+    IMS_BOOL IsBlockPcscfOnRegFailure() const override;
     IMS_BOOL IsCallEndAndPdnReactivationByRegTerminated() const override;
     IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const override;
     IMS_BOOL IsEmergencyPdnWithEmergencyCallEndReleased() const override;
@@ -76,10 +79,13 @@ public:
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
     IMS_BOOL IsEmcRegOnRandomPcscf() const override;
     IMS_BOOL IsERegWithOnlyTcpInRoaming() const override;
+    IMS_BOOL IsERegUsingFirstImpuInIsim() const override;
     IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
     IMS_BOOL IsDeregOn3gNetwork() const override;
+    IMS_BOOL IsImsiBasedUriPrioritized() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
+    IMS_BOOL IsKeepERegRetryOnWlanRequired() const override;
     IMS_BOOL IsNoInitRegOnPcscfChange() const override;
     IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const override;
     IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const override;
@@ -91,14 +97,15 @@ public:
     IMS_BOOL IsEmergencyCallbackModeSupported() const override;
     IMS_BOOL IsEmergencySmsOverImsSupported() const override;
     IMS_BOOL IsContactUriValidationChecked() const override;
+    IMS_BOOL IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported() const override;
     IMS_BOOL IsRegRetryWithIpVerFallback() const override;
     IMS_BOOL IsUserInfoInContactSupported() const override;
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
-    IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
     IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
+    IMS_BOOL IsVideoSupportedForEmergencyReg() const override;
 
     IMS_UINT32 GetRegistrationRetryBaseTime() override;
     IMS_UINT32 GetRegistrationRetryMaxTime() override;
@@ -115,14 +122,17 @@ public:
     IMS_SINT32 GetSipPreferredTransport() const override;
     IMS_SINT32 GetIpv4MtuSize() const override;
     IMS_SINT32 GetIpv6MtuSize() const override;
+    IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const override;
     IMS_SINT32 GetPreferredEmergencyRegistration() const override;
     IMS_SINT32 GetEmergencyRegistrationTimerMillis() const override;
     IMS_SINT32 GetImsSignallingDscp() const override;
     IMS_SINT32 GetRegistrationPrivateHeader() const override;
     IMS_SINT32 GetRegActualWaitTimePolicy() const override;
+    IMS_SINT32 GetRegDefaultWaitTime() const override;
     IMS_SINT32 GetRegOutOfServicePolicy() const override;
     IMS_SINT32 GetRoamingPreferredEmcReg() const override;
     IMS_SINT32 GetSipMessageThresholdForTransportChange() const override;
+    IMS_SINT32 GetSubRetrySip503CodePolicy() const override;
     IMS_SINT32 GetUsatRegEventDownloadPolicy() const override;
     IMS_SINT32 GetVolteHysTime() const override;
     IMS_SINT32 GetRegRetrySip305CodePolicy() const override;
@@ -184,6 +194,7 @@ public:
     ImsVector<IMS_SINT32>& GetReregErrCodeForCallEnd() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() override;
+    ImsVector<IMS_SINT32>& GetUnavailableFeaturesInLimitedReg() override;
 
 private:
     friend class AosBuildDirector;

@@ -153,16 +153,17 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsNr() const
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsEpsCombinedAttach() const
 {
-    if (IsWlanIpCanType())
-    {
-        return IMS_FALSE;
-    }
-
     return PhoneInfoService::GetPhoneInfoService()
                     ->GetNetworkWatcher(m_objContext.GetSlotId())
                     ->GetNetRadioTechType() == NW_REPORT_RADIO_LTE &&
             m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_LTE_INFO) ==
             IMS_LTE_INFO_COMBINED_ATTACHED;
+}
+
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsRoaming() const
+{
+    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
+            IMS_ROAMING_STATE_ON;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
@@ -173,6 +174,51 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
     }
 
     return m_pAosConnector->GetIpcanType() == IIpcan::CATEGORY_WLAN;
+}
+
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsCsfbAvailable() const
+{
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH) &&
+            !IsEpsCombinedAttach())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_NR) &&
+            IsNr())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_WIFI) &&
+            IsWlanIpCanType())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_ROAMING) &&
+            IsRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_HOME) &&
+            !IsRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IJniMtcServiceThread* MtcService::GetJniServiceThread() const
@@ -215,9 +261,9 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled
     }
 }
 
-PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN EmergencyCallRoutingPdn ePdn)
+PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN ServiceType eServiceType)
 {
-    m_objContext.GetEmergencyServiceManager().StartOpen(ePdn);
+    m_objContext.GetEmergencyServiceManager().StartOpen(eServiceType);
 }
 
 PUBLIC VIRTUAL void MtcService::StopEmergencyService()
@@ -336,8 +382,8 @@ void MtcService::Init()
     AttachCoreServiceInterface();
     AttachAosInterface();
 
-    if (m_objContext.GetConfigurationProxy().Is(Feature::
-                        USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION))
+    if (m_objContext.GetConfigurationProxy().GetBoolean(ConfigVoice::
+                        KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL))
     {
         m_pRoutingRejectHandler = new MtcRoutingRejectHandler(m_objContext,
                 *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(

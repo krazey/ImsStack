@@ -414,11 +414,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyEmcCallbackModeChanged(
-            EmcCallbackModeType type, EmcCallbackModeState state, long duration) {
+    public void notifyEmergencyCallbackModeChanged(
+            EmergencyCallbackModeType type, EmergencyCallbackModeState state, long duration) {
         Parcel parcel = Parcel.obtain();
 
-        parcel.writeInt(IIAosService.J2N_NOTIFY_EMC_CALLBACK_MODE_CHANGED);
+        parcel.writeInt(IIAosService.J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED);
         parcel.writeInt(type.getValue());
         parcel.writeInt(state.getValue());
         parcel.writeLong(duration);

@@ -22,16 +22,24 @@ import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
+import com.android.imsstack.its.servercontrol.ControlConnection;
+import com.android.imsstack.its.servercontrol.ServerFailureHandler;
 import com.android.imsstack.its.tests.ImsStackTestBase;
 import com.android.imsstack.its.util.SingleLatch;
 
 public class CallTestBase extends ImsStackTestBase {
     protected final SingleLatch mEventLatch = new SingleLatch(CallTestBase.class.getSimpleName());
 
+    protected ControlConnection mServerControlConnection = null;
     protected ImsRegistrationWrapper mImsRegistration = null;
     protected ImsMmTelFeatureWrapper mMmTelFeature = null;
 
     protected PersistableBundle mConfig = null;
+
+    protected void createControlConnection(ServerFailureHandler serverFailureHandler) {
+        mServerControlConnection =
+                new ControlConnection(serverFailureHandler, getPcscfAddresses().get(0));
+    }
 
     protected void performRegistration() {
         startImsStack(SLOT0, mConfig);
@@ -52,5 +60,14 @@ public class CallTestBase extends ImsStackTestBase {
         }
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
                 false);
+        mConfig.putBoolean(CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+                true);
     }
 }

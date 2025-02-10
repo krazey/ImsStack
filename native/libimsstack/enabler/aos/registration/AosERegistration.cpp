@@ -19,6 +19,7 @@
 #include "ServiceTrace.h"
 
 #include "IImsRadio.h"
+#include "IIpcan.h"
 
 #include "CarrierConfig.h"
 #include "IRegistration.h"
@@ -34,6 +35,7 @@
 #include "interface/IAosPcscf.h"
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
+#include "provider/AosRetryRepository.h"
 #include "registration/AosIpsecHelper.h"
 
 #include "registration/AosERegistration.h"
@@ -128,6 +130,16 @@ PUBLIC VIRTUAL void AosERegistration::RequestCmd(
             AosRegistration::RequestCmd(nCmdType, nReason);
             break;
     }
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosERegistration::IsInCallbackMode()
+{
+    if (m_pEModeInfo == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_pEModeInfo->IsEcbm() || m_pEModeInfo->IsScbm();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
@@ -231,7 +243,6 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::CreateRegistration()
 
 PROTECTED VIRTUAL void AosERegistration::DestroyRegistration()
 {
-    ClearCbm();
     AosRegistration::DestroyRegistration();
 }
 
@@ -240,8 +251,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
     ProcessDefaultFlowRecovery_Start();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
-        IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
+PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode)
 {
     if (m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsECall())
     {
@@ -253,6 +263,14 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
     {
         A_IMS_TRACE_I(REGID,
                 "ProcessDefaultFlowRecovery_Start :: ignore because reg is re-initiated", 0, 0, 0);
+        return;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->IsRegRetryRuleForERegUsed() &&
+            ProcessNormalDefaultFlowRecovery_Start(nStatusCode))
+    {
+        A_IMS_TRACE_I(
+                REGID, "ProcessDefaultFlowRecovery_Start :: follow  normal retry flow", 0, 0, 0);
         return;
     }
 
@@ -274,6 +292,88 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
     SetState(STATE_REGSTOP);
     SetTraffic(IMS_FALSE);
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+}
+
+PROTECTED VIRTUAL void
+AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
+        IN IMS_UINT32 nRetryAfter)
+{
+    IMS_UINT32 nAwt = 0;
+    if (AosProvider::GetInstance()
+                    ->GetRetryRepository(m_piContext->GetSlotId())
+                    ->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY))
+    {
+        if (nRetryAfter > 0)
+        {
+            nAwt = nRetryAfter;
+        }
+        else
+        {
+            const ImsVector<IMS_SINT32>& objInterval =
+                    GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
+
+            nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0) : RETRY_DEFAULT_WAIT_TIME;
+        }
+
+        StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+        SetState(STATE_REGSTOP);
+    }
+    else
+    {
+        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+        if (SetNextPcscf())
+        {
+            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+            SetState(STATE_REGSTOP);
+        }
+        else
+        {
+            // For Emergency, reports that the status has changed after trying all retries.
+            A_IMS_TRACE_I(
+                    REGID, "StartWithSpecifiedIntervalPolicy :: all pcscfs were tried", 0, 0, 0);
+            SetTraffic(IMS_FALSE);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        }
+    }
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosERegistration::ProcessStartFailed_305()
+{
+    IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetRegRetrySip305CodePolicy();
+    // It's only for CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP
+    if (nPolicy == CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
+    {
+        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+
+        if (SetNextPcscf())
+        {
+            SetState(STATE_REGSTOP);
+            if (GET_N_CONFIG(m_piContext->GetSlotId())
+                            ->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            {
+                AosProvider::GetInstance()
+                        ->GetRetryRepository(m_piContext->GetSlotId())
+                        ->ResetRetryCount(AosRetryRepository::TYPE_EMERGENCY);
+            }
+
+            if (SendRegister(IMS_TRUE))
+            {
+                SetState(STATE_REGISTERING);
+            }
+            else
+            {
+                ProcessUnpredictableFailure();
+            }
+        }
+        else
+        {
+            SetTraffic(IMS_FALSE);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        }
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
@@ -350,6 +450,26 @@ PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT3
     ProcessDefaultFlowRecovery_Update();
 }
 
+PROTECTED VIRTUAL void AosERegistration::ProcessStopRetryTimerExpired()
+{
+    StopTimer(TIMER_STOP_RETRY);
+
+    if (!IsRetryHeld())
+    {
+        return;
+    }
+
+    if (SendRegister(GetState() != STATE_REFRESHSTOP))
+    {
+        SetRetryState();
+    }
+    else
+    {
+        ProcessUnpredictableFailure();
+        return;
+    }
+}
+
 PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
 {
     StopTimer(TIMER_TRANSACTION);
@@ -362,10 +482,23 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
     m_nConsecutiveFailure++;
     ClearAuthChallengedCount();
 
-    if (IsRetryAllowed() && SetNextPcscf() && SendRegister(IMS_TRUE))
+    if (IsRetryAllowed())
     {
-        StartRegRetryTimer();
-        return;
+        if (GET_N_CONFIG(m_nSlotId)->IsEmcRegOnRandomPcscf())
+        {
+            IMS_SINT32 nNumOfPcscfs = m_piContext->GetPcscf()->GetPcscfs().GetCount();
+
+            if (nNumOfPcscfs > 1 && (m_nConsecutiveFailure % nNumOfPcscfs == 0))
+            {
+                ProcessRearrangePcscf();
+            }
+        }
+
+        if (SetNextPcscf() && SendRegister(IMS_TRUE))
+        {
+            StartRegRetryTimer();
+            return;
+        }
     }
 
     if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
@@ -575,7 +708,7 @@ PROTECTED VIRTUAL void AosERegistration::ClearCbm()
 }
 
 PROTECTED void AosERegistration::CallbackModeChanged(
-        IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration)
+        IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState, IN IMS_ULONG nDuration)
 {
     if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
     {
@@ -585,16 +718,9 @@ PROTECTED void AosERegistration::CallbackModeChanged(
     A_IMS_TRACE_I(REGID, "CallbackModeChanged eType (%d), eState(%d), nDuration(%d)", eType, eState,
             nDuration);
 
-    if (eState == EmcCallbackMode::START)
+    if (eState == EmergencyCallbackMode::START)
     {
-        if (eType == EmcCallbackModeType::CALL)
-        {
-            m_pEModeInfo->SetEcbm(IMS_TRUE);
-        }
-        else
-        {
-            m_pEModeInfo->SetScbm(IMS_TRUE);
-        }
+        SetCallbackMode(eType, IMS_TRUE);
 
         m_pEModeInfo->SetCbmDuration(nDuration);
         m_pEModeInfo->SetCbmBeginTime(IMS_SYS_GetTimeInSeconds());
@@ -607,18 +733,16 @@ PROTECTED void AosERegistration::CallbackModeChanged(
     }
     else
     {
-        if (eType == EmcCallbackModeType::CALL)
+        SetCallbackMode(eType, IMS_FALSE);
+        if (eState == EmergencyCallbackMode::STOP)
         {
-            m_pEModeInfo->SetEcbm(IMS_FALSE);
-        }
-        else
-        {
-            m_pEModeInfo->SetScbm(IMS_FALSE);
-        }
-
-        if (eState == EmcCallbackMode::STOP)
-        {
-            ProcessUnpredictableFailure();
+            if (!IsInCallbackMode())
+            {
+                ProcessUnpredictableFailure();
+                ClearCbm();
+            }
+            A_IMS_TRACE_I(REGID, "Current callback mode status:: Ecbm(%d), Scbm(%d)",
+                    m_pEModeInfo->IsEcbm(), m_pEModeInfo->IsScbm(), 0);
         }
     }
 }
@@ -708,6 +832,12 @@ PROTECTED IMS_BOOL AosERegistration::IsReinitiationRequested() const
 
 PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
 {
+    if (GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN &&
+            GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+    {
+        return IMS_TRUE;
+    }
+
     IMS_SINT32 nMaxRetryCnt = GET_N_CONFIG(m_nSlotId)->GetEmcRegRetryMaxCnt();
     if (nMaxRetryCnt == 0)
     {
@@ -822,11 +952,52 @@ PROTECTED void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRe
     ReportTryingState();
 }
 
-PROTECTED VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
+PROTECTED IMS_BOOL AosERegistration::ProcessNormalDefaultFlowRecovery_Start(
+        IN IMS_SINT32 nStatusCode)
+{
+    if (nStatusCode == SipStatusCode::SC_305)
+    {
+        // It's only for CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP in ProcessStartFailed_305()
+        if (ProcessStartFailed_305())
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+
+    // It's only for awt policy is CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL and
+    // KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL is true.
+    // If you need to follow the normal reg retry rule, update it below.
+    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
+    if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL &&
+            GET_N_CONFIG(m_nSlotId)->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+    {
+        ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(nRetryAfter);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
 {
     A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
 
     m_bReinitiationRequested = bRequest;
+}
+
+PROTECTED void AosERegistration::SetCallbackMode(
+        IN EmergencyCallbackModeType eType, IN IMS_BOOL bEnable)
+{
+    if (eType == EmergencyCallbackModeType::CALL)
+    {
+        m_pEModeInfo->SetEcbm(bEnable);
+    }
+    else
+    {
+        m_pEModeInfo->SetScbm(bEnable);
+    }
 }
 
 PROTECTED void AosERegistration::StartRegRetryTimer()

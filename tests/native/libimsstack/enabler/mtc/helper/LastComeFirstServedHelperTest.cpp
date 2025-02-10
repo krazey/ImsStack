@@ -15,20 +15,20 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IMessage.h"
 #include "ImsTypeDef.h"
+#include "MockIMessage.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "PlatformContext.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessage.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "helper/ILastComeFirstServedHelper.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "helper/MockIPassiveTimerHolder.h"
@@ -51,8 +51,7 @@ public:
     inline LastComeFirstServedHelperTest() :
             objContext(),
             objPassiveTimerHolder(),
-            pConfigurationManager(new MockIMtcConfigurationManager),
-            objConfigurationProxy(pConfigurationManager),
+            objConfigurationProxy(),
             objCallManager(),
             objLastIncomingCall(),
             objFirstIncomingCall(),
@@ -69,8 +68,7 @@ public:
 protected:
     MockIMtcContext objContext;
     MockIPassiveTimerHolder objPassiveTimerHolder;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy objConfigurationProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
     MockIMtcCallManager objCallManager;
     MockIMtcCall objLastIncomingCall;
     MockIMtcCall objFirstIncomingCall;
@@ -121,20 +119,22 @@ protected:
 TEST_F(LastComeFirstServedHelperTest, IsSupportedReturnsTrueIfPreAlertingTimerIsValid)
 {
     LastComeFirstServedHelper objLastComeFirstServedHelper(objContext);
-    ON_CALL(*pConfigurationManager, GetPreAlertingTimer()).WillByDefault(Return(VALID_TIME));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(VALID_TIME));
     EXPECT_TRUE(objLastComeFirstServedHelper.IsSupported(objConfigurationProxy));
 }
 
 TEST_F(LastComeFirstServedHelperTest, IsSupportedReturnsFalseIfPreAlertingTimerIsInvalid)
 {
     LastComeFirstServedHelper objLastComeFirstServedHelper(objContext);
-    ON_CALL(*pConfigurationManager, GetPreAlertingTimer()).WillByDefault(Return(INVALID_TIME));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(INVALID_TIME));
     EXPECT_FALSE(objLastComeFirstServedHelper.IsSupported(objConfigurationProxy));
 }
 
 TEST_F(LastComeFirstServedHelperTest, OnCallReceivedDoesNothingInEmergencyCall)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     LastComeFirstServedHelper objLastComeFirstServedHelper(objContext);
 
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
@@ -153,7 +153,8 @@ TEST_F(LastComeFirstServedHelperTest, OnCallReceivedStartsTimerIfNoPreExistingIn
     LastComeFirstServedHelper objLastComeFirstServedHelper(objContext);
 
     SetUpForNetworkInfo(IMS_TRUE);
-    ON_CALL(*pConfigurationManager, GetPreAlertingTimer()).WillByDefault(Return(VALID_TIME));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(VALID_TIME));
     EXPECT_CALL(objPassiveTimerHolder,
             AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, VALID_TIME, IMS_TRUE));
 
@@ -308,7 +309,8 @@ TEST_F(LastComeFirstServedHelperTest,
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objFirstIncomingCall, Reject(CallReasonInfo(CODE_REJECT_QOS_FAILURE)));
 
-    ON_CALL(*pConfigurationManager, GetPreAlertingTimer()).WillByDefault(Return(VALID_TIME));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(VALID_TIME));
     EXPECT_CALL(objPassiveTimerHolder,
             AddTimer(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, VALID_TIME, IMS_TRUE));
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);
@@ -345,7 +347,7 @@ TEST_F(LastComeFirstServedHelperTest,
     MockIMtcCallContext objEmergencyCallContext;
     ON_CALL(objEmergencyCall, GetCallContext()).WillByDefault(ReturnRef(objEmergencyCallContext));
     CallInfo objEmergencyCallInfo;
-    objEmergencyCallInfo.bEmergency = IMS_TRUE;
+    objEmergencyCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objEmergencyCallContext, GetCallInfo()).WillByDefault(ReturnRef(objEmergencyCallInfo));
 
     objLastComeFirstServedHelper.OnCallReceived(LAST_INCOMING_KEY);

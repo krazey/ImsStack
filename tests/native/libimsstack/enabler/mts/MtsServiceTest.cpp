@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
 #include "IConfiguration.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
+#include "IPageMessage.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ImsServiceConfig.h"
 #include "ImsServiceConfigTypeDef.h"
 #include "IuMtsService.h"
 #include "MockICarrierConfig.h"
+#include "MockIImsAos.h"
+#include "MockIImsAosInfo.h"
 #include "MockIMtsServiceListener.h"
+#include "MockIReference.h"
+#include "MtsDef.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
-#include "MtsDef.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
 #include "TestConnector.h"
 #include "TestImsRadioService.h"
 #include "TestPhoneInfoService.h"
-#include "core/MockIReference.h"
-#include "core/IPageMessage.h"
-#include "../../interface/aos/MockIImsAos.h"
-#include "../../interface/aos/MockIImsAosInfo.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -80,7 +80,7 @@ protected:
                 GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(objConfigService.GetMockCarrierConfig(),
-                GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+                GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
                 .WillByDefault(Return(IMS_FALSE));
 
         objConnector.SetCoreService(ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY),

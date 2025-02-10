@@ -37,7 +37,7 @@ public:
     inline void SetMessageReference(IN IMS_SINT32 nMrOfRp) override { m_nMrOfRp = nMrOfRp; }
     inline IMS_SINT32 GetMti() override { return m_nMti; }
     inline void SetMti(IN IMS_SINT32 nMti) override { m_nMti = nMti; }
-    inline IPageMessage* GetPageMessage() override { return m_piPageMessage; }
+    inline IPageMessage* GetPageMessage() const override { return m_piPageMessage; }
     inline void SetPageMessage(IN IPageMessage* piPageMessage) override
     {
         m_piPageMessage = piPageMessage;

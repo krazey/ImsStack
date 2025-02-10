@@ -104,4 +104,13 @@ public interface DefaultSystemCallInterface {
      * @param slotId The slot-id to be set.
      */
     void setTrafficPriority(int priorityType, int slotId);
+
+    /**
+     * Excluding the slot provided as an input parameter, the SIM state of other slots is checked
+     * to determine and return the availability of cross SIM redialing.
+     *
+     * @param slotId The slot ID where the emergency call connection failed.
+     * @return {@code true} if cross SIM redialing is available, {@code false} otherwise.
+     */
+    boolean isCrossSimRedialingAvailable(int slotId);
 }

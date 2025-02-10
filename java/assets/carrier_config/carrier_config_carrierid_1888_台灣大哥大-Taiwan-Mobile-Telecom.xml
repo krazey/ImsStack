@@ -16,7 +16,8 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
+
     <!-- Aos -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="0"/>
@@ -25,7 +26,7 @@
     <!-- Ut/Xcap AOSP -->
     <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/MyService</string>
 
     <!-- ImsMedia -->
@@ -49,13 +50,19 @@
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">
         <pbundle name="97">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
         <pbundle name="98">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
@@ -63,13 +70,19 @@
     </pbundle>
     <pbundle name="imsvoice.amrnb_payload_description_bundle">
         <pbundle name="99">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
         <pbundle name="100">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
@@ -77,12 +90,13 @@
     </pbundle>
 
     <!-- Audio -->
-    <boolean name="audio_bw_nego_option_bool" value="true"/>
-    <int name="audio_rtp_dscp_int" value="46"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
+    <int name="imsvoice.audio_rtp_dscp_int" value="46"/>
     <int-array name="imsvoice.audio_port_rtp_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
+    <boolean name="imsvoice.audio_show_codec_attribute_modeset_bool" value="true"/>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
@@ -94,6 +108,6 @@
         <item value="4"/>
     </int-array>
 
-    <int name="audio_telephone_event_duration_millis_int" value="200"/>
+    <int name="imsvoice.audio_telephone_event_duration_millis_int" value="200"/>
 
 </carrier_config>

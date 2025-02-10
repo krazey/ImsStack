@@ -42,6 +42,12 @@ PUBLIC
 MtsServiceState::~MtsServiceState()
 {
     IMS_TRACE_I("~MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
+
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    if (piCc != IMS_NULL)
+    {
+        piCc->RemoveListener(this);
+    }
 }
 
 PUBLIC
@@ -49,17 +55,17 @@ void MtsServiceState::Init(IN IImsAos* piImsAos)
 {
     IMS_TRACE_I("Init", 0, 0, 0);
 
-    m_piImsAos = piImsAos;
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
-    IMS_BOOL bSmsOverIpNetwork =
-            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
-    m_bAllowImsiBasedSipUri =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL);
+    if (piCc != IMS_NULL)
+    {
+        piCc->AddListener(this);
+        if (LoadCarrierConfig(*piCc))
+        {
+            Update();
+        }
+    }
 
-    SetSmsOverIpState(bSmsOverIpNetwork);
-
-    IMS_TRACE_I("GetSmOverIpConfigInfo : SmsOverIpNetwork[%s], AllowImsiBasedSipUri[%s]",
-            _TRACE_B_(bSmsOverIpNetwork), _TRACE_B_(m_bAllowImsiBasedSipUri), 0);
+    m_piImsAos = piImsAos;
 }
 
 PUBLIC
@@ -160,6 +166,57 @@ IMS_BOOL MtsServiceState::IsMtServiceBlocked() const
     return (m_nState == STATE_NOTREADY);
 }
 
+PROTECTED
+void MtsServiceState::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
+{
+    IMS_TRACE_D("CarrierConfig_NotifyConfigChanged: (%d)", nSlotId, 0, 0);
+
+    if (m_nSlotId != nSlotId)
+    {
+        return;
+    }
+
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
+    if (piCc == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "CarrierConfig_NotifyConfigChanged : config failed", 0, 0, 0);
+        return;
+    }
+
+    if (LoadCarrierConfig(*piCc))
+    {
+        Update();
+    }
+}
+
+PRIVATE
+IMS_BOOL MtsServiceState::LoadCarrierConfig(IN const ICarrierConfig& objCc)
+{
+    IMS_BOOL bResult = IMS_FALSE;
+
+    IMS_BOOL bSmsOverIpConf =
+            objCc.GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
+    if (m_bSmsOverIpConf != bSmsOverIpConf)
+    {
+        IMS_TRACE_I("LoadCarrierConfig : SmsOverIp - Old(%s) -> New(%s)",
+                _TRACE_B_(m_bSmsOverIpConf), _TRACE_B_(bSmsOverIpConf), 0);
+        m_bSmsOverIpConf = bSmsOverIpConf;
+        bResult = IMS_TRUE;
+    }
+
+    IMS_BOOL bAllowImsiBasedSipUri =
+            objCc.GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL);
+    if (m_bAllowImsiBasedSipUri != bAllowImsiBasedSipUri)
+    {
+        IMS_TRACE_I("LoadCarrierConfig : AllowImsiBasedSipUri - Old(%s) -> New(%s)",
+                _TRACE_B_(m_bAllowImsiBasedSipUri), _TRACE_B_(bAllowImsiBasedSipUri), 0);
+        m_bAllowImsiBasedSipUri = bAllowImsiBasedSipUri;
+        bResult = IMS_TRUE;
+    }
+
+    return bResult;
+}
+
 PRIVATE
 void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
 {
@@ -171,22 +228,6 @@ void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
     m_bImsSuspend = bState;  // if IMSAoSApp_OnImsSuspended. block mo service
 
     IMS_TRACE_I("SetImsSuspendState : IMS Suspend State is [%s]", _TRACE_B_(m_bImsSuspend), 0, 0);
-
-    Update();
-}
-
-PRIVATE
-void MtsServiceState::SetSmsOverIpState(IN IMS_BOOL bState)
-{
-    if (m_bSmsOverIpConf == bState)
-    {
-        return;
-    }
-
-    m_bSmsOverIpConf = bState;
-
-    IMS_TRACE_I("SetSmsOverIpState : Sms Over IP Network State is [%s]",
-            _TRACE_B_(m_bSmsOverIpConf), 0, 0);
 
     Update();
 }
@@ -210,7 +251,7 @@ void MtsServiceState::Update()
 
     if (m_nState != nNewState)
     {
-        IMS_TRACE_I("Update : OldState(%s), NewState(%s)", PS_ServiceState(m_nState),
+        IMS_TRACE_I("Update : OldState(%s) -> NewState(%s)", PS_ServiceState(m_nState),
                 PS_ServiceState(nNewState), 0);
         m_nState = nNewState;
     }

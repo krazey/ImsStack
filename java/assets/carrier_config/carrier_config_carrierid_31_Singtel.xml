@@ -15,6 +15,13 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap Assets -->
-    <boolean name="ut_support_cf_action_erasure_bool" value="false"/>
+    <!-- Aos -->
+    <int-array name="ims.permanent_pdn_failure_int_array" num="3">
+        <item value="27"/>
+        <item value="28"/>
+        <item value="33"/>
+    </int-array>
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_support_cf_action_erasure_bool" value="false"/>
+    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
 </carrier_config>

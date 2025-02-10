@@ -15,6 +15,7 @@
  */
 
 #include "AString.h"
+#include "CarrierConfig.h"
 #include "ICarrierConfig.h"
 #include "ICoreService.h"
 #include "IJniMtcServiceThread.h"
@@ -27,6 +28,7 @@
 #include "MtcDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
+#include "SipAddress.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialogevent/DialogInfo.h"
@@ -40,7 +42,6 @@
 #include "helper/IMtcAosConnector.h"
 #include "helper/IMtcAosStateListener.h"
 #include "registration/SipUrnHelper.h"
-#include "sipcore/SipAddress.h"
 #include <memory>
 #include <utility>
 
@@ -92,7 +93,7 @@ MultiEndpointManager::~MultiEndpointManager()
 PUBLIC GLOBAL IMS_BOOL MultiEndpointManager::IsRequired(
         IN const MtcConfigurationProxy& objConfigProxy)
 {
-    return objConfigProxy.Is(Feature::MULTIENDPOINT_SUPPORTED);
+    return objConfigProxy.GetBoolean(ConfigVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL);
 }
 
 VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::GetDialogInfo(

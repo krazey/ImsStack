@@ -20,7 +20,7 @@
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "CarrierConfig.h"
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "IAosService.h"
 #include "IImsAosInfo.h"
 #include "IImsAosMonitor.h"
@@ -209,7 +209,7 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             break;
 
         case ImsAosControl::PCSCF_NEXT:
-            PostMessage(MSG_PCSCF_RECOVER, AoSRegRecoveryType::PCSCF_CHANGE, 0);
+            PostMessage(MSG_PCSCF_RECOVER, AosRegRecoveryType::PCSCF_CHANGE, 0);
             break;
 
         case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
@@ -1133,8 +1133,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegRecovery(IN IMSMSG& objMsg)
         case STATE_UPDATING:
         {
             IMS_UINT32 nAosReason = AosReason::NONE;
-            if (nReason == AoSRegRecoveryType::PCSCF_CHANGE ||
-                    nReason == AoSRegRecoveryType::KEEP_DATA_CONNECTION)
+            if (nReason == AosRegRecoveryType::PCSCF_CHANGE ||
+                    nReason == AosRegRecoveryType::KEEP_DATA_CONNECTION)
             {
                 nAosReason = AosReason::DATA_CONNECTION_MAINTAIN;
             }
@@ -1306,7 +1306,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegRetryCount(IN IMSMSG& objMsg)
     {
         if (m_piContext->GetPcscf()->HasNextPcscf())
         {
-            PostMessage(MSG_PCSCF_RECOVER, AoSRegRecoveryType::PCSCF_CHANGE, 0);
+            PostMessage(MSG_PCSCF_RECOVER, AosRegRecoveryType::PCSCF_CHANGE, 0);
         }
         else
         {
@@ -1941,7 +1941,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionUpdated_Pcscf()
             break;
 
         case IAosPcscf::TYPE_CHANGED_DIFFERENT:
-            PostMessage(MSG_REG_RECOVER, AoSRegRecoveryType::KEEP_DATA_CONNECTION, 0);
+            PostMessage(MSG_REG_RECOVER, AosRegRecoveryType::KEEP_DATA_CONNECTION, 0);
             break;
 
         default:
@@ -2061,7 +2061,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegControlEvent(
         case IMS_REG_CONTROL_RECOVER:
             if (nReason == IMS_REG_CONTROL_KEEP_DATA_CONNECTION)
             {
-                PostMessage(MSG_REG_RECOVER, AoSRegRecoveryType::KEEP_DATA_CONNECTION, 0);
+                PostMessage(MSG_REG_RECOVER, AosRegRecoveryType::KEEP_DATA_CONNECTION, 0);
             }
             else
             {
@@ -2165,7 +2165,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK)
     {
         PerformRatBlockActions(IMS_TRUE);
-        NotifyDeregistered(AosReasonCode::RAT_BLOCK);
+
+        /*
+         * (b/379769225) Change the reason from RAT_BLOCK to PLMN_BLOCK.
+         * Original code:
+         *   NotifyDeregistered(AosReasonCode::RAT_BLOCK);
+         */
+        NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
         return;
     }
 
@@ -2366,7 +2372,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
     AString strNa;
     IMS_UINT32 nFailureCount;
     m_piRegistration->GetProperty(
-            IAosRegistration::PROPERTY_PDN_REACIVATE_WAIT_TIME, nFailureCount, strNa);
+            IAosRegistration::PROPERTY_REG_FAILURE_COUNT, nFailureCount, strNa);
 
     if (m_piContext->GetConnection()->GetState() != IAosConnection::STATE_ACTIVE)
     {
@@ -2385,7 +2391,14 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
 
 PROTECTED VIRTUAL void AosApplication::ProcessRatBlockTimerExpired()
 {
-    NotifyDeregistered(AosReasonCode::CLEAR_RAT_BLOCKS);
+    /*
+     * (b/379769225) Do not clear RAT blocks upon TIMER_RAT_BLOCK expiry
+     * This logic is left in place for potential future use.
+     *
+     * Original code:
+     *   NotifyDeregistered(AosReasonCode::CLEAR_RAT_BLOCKS);
+     */
+
     m_pConnector->Stop();
     PerformRatBlockActions(IMS_FALSE);
 }
@@ -2573,7 +2586,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::UpdateRegRecoveryHeld()
                 A_IMS_TRACE_I(APPID, "UpdateRegRecoveryHeld :: trigger reg recovery", 0, 0, 0);
                 m_pUtil->RemoveFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
 
-                if (m_nRecoverReason == AoSRegRecoveryType::PCSCF_CHANGE)
+                if (m_nRecoverReason == AosRegRecoveryType::PCSCF_CHANGE)
                 {
                     PostMessage(MSG_PCSCF_RECOVER, m_nRecoverReason, 0);
                 }
@@ -2732,8 +2745,9 @@ PROTECTED VIRTUAL void AosApplication::StopTimer(IN IMS_UINT32 nType)
 PROTECTED VIRTUAL void AosApplication::ClearTimers()
 {
     /*
-        NOT STOP TIMER : TIMER_RECONFIG_GUARD, TIMER_PDN_BLOCKED, TIMER_IMS_ESTABLISHMENT
-    */
+     * NOT STOP TIMER : TIMER_RECONFIG_GUARD, TIMER_PDN_BLOCKED, TIMER_IMS_ESTABLISHMENT,
+     *                  TIMER_RAT_BLOCK
+     */
     if (m_piMsgConditionTimer != IMS_NULL)
     {
         StopTimer(TIMER_MSG_CONDITION);
@@ -3045,8 +3059,6 @@ PROTECTED VIRTUAL void AosApplication::Connector_Activated()
 PROTECTED VIRTUAL void AosApplication::Connector_Deactivated(IN IMS_UINT32 nReason)
 {
     A_IMS_TRACE_I(APPID, "Connection_Deactivated :: reason(%d)", nReason, 0, 0);
-
-    m_pCondition->ResetBlock(BLOCK_AUTHENTICATION_FAILED);
 
     if (IsNotReady())
     {

@@ -29,7 +29,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipTimeStampHeaderTest, Encode)
 {
     SipTimeStampHeader* pHeader = reinterpret_cast<SipTimeStampHeader*>(
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
@@ -44,12 +44,12 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     AStringBuffer objValue(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetTimeVal("12.56");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("12.56", objValue.GetCharString());
     EXPECT_STREQ("12.56", &(aBuffer[0]));
@@ -61,7 +61,7 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     pHeader->SetDelay("1.30");
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     EXPECT_STREQ("12.56 1.30", objValue.GetCharString());
     EXPECT_STREQ("12.56 1.30", &(aBuffer[0]));
@@ -69,15 +69,15 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     pHeader->SipDelete();
 }
 
-TEST_F(SipTimeStampHeaderTest, DecodeHdr)
+TEST_F(SipTimeStampHeaderTest, Decode)
 {
     SipTimeStampHeader* pHeader = reinterpret_cast<SipTimeStampHeader*>(
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("12.56", 5));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("12.56", 5));
 
     EXPECT_STREQ("12.56", pHeader->GetTimeVal());
     EXPECT_EQ(nullptr, pHeader->GetDelay());
@@ -88,7 +88,7 @@ TEST_F(SipTimeStampHeaderTest, DecodeHdr)
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("12.56 1.30", 10));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("12.56 1.30", 10));
 
     EXPECT_STREQ("12.56", pHeader->GetTimeVal());
     EXPECT_STREQ("1.30", pHeader->GetDelay());

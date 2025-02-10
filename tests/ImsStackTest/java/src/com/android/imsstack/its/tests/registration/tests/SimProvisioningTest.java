@@ -54,13 +54,17 @@ public class SimProvisioningTest extends RegistrationTestBase {
         setUpBase(SLOT0);
 
         mRegistration = new TestRegistration(mImsServiceConnector.getRegistration());
-        mRegistrationHelper = new RegistrationHelper();
+        createControlConnection(mRegistration);
 
+        mRegistrationHelper = new RegistrationHelper();
         mInfoBuilder = new RegistrationInfo.Builder().setConfig(mConfig);
+
+        setDefaultRegistrationScenario();
     }
 
     @After
     public void tearDown() throws Exception {
+        mServerControlConnection.disconnect();
         tearDownBase(SLOT0);
     }
 

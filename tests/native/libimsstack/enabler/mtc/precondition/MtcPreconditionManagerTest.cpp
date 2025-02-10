@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
+#include "IMessage.h"
 #include "ImsEventDef.h"
 #include "MediaDef.h"
+#include "MockIMessage.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/UpdatingInfo.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessage.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
-#include "core/media/IMedia.h"
-#include "core/media/MockIMedia.h"
-#include "core/media/MockIMediaDescriptor.h"
+#include "media/IMedia.h"
+#include "media/MockIMedia.h"
+#include "media/MockIMediaDescriptor.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionListener.h"
 #include "precondition/MockIQosTimerListener.h"
@@ -38,8 +40,6 @@
 #include "precondition/MockQosTimer.h"
 #include "precondition/MockSdpPreconditionHelper.h"
 #include "precondition/MtcPreconditionManager.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -105,8 +105,7 @@ public:
             objCallInfo(),
             objMessageUtils(),
             objMediaManager(),
-            pConfigurationManager(new MockIMtcConfigurationManager()),
-            pConfigurationProxy(new MtcConfigurationProxy(pConfigurationManager)),
+            pConfigurationProxy(new MockMtcConfigurationProxy()),
             objSession(),
             objISession(),
             objUpdatingInfo(objCallContext),
@@ -130,8 +129,7 @@ public:
     MockIMessageUtils objMessageUtils;
     MockIMtcMediaManager objMediaManager;
     MockIMtcImsEventReceiver objImsEventReceiver;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcSession objSession;
     MockISession objISession;
     UpdatingInfo objUpdatingInfo;
@@ -182,27 +180,34 @@ protected:
 
         if (bSupported)
         {
-            ON_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported())
+            ON_CALL(*pConfigurationProxy,
+                    GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
                     .WillByDefault(Return(IMS_TRUE));
         }
         else
         {
-            ON_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported())
+            ON_CALL(*pConfigurationProxy,
+                    GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
                     .WillByDefault(Return(IMS_FALSE));
-            ON_CALL(*pConfigurationManager, IsVideoQosPreconditionSupported())
+            ON_CALL(*pConfigurationProxy,
+                    GetBoolean(ConfigVt::KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL))
                     .WillByDefault(Return(IMS_FALSE));
-            ON_CALL(*pConfigurationManager, IsTextQosPreconditionSupported())
+            ON_CALL(*pConfigurationProxy,
+                    GetBoolean(ConfigRtt::KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL))
                     .WillByDefault(Return(IMS_FALSE));
         }
     }
 
     void SetUpNothingOnDefaultBearerSupported()
     {
-        ON_CALL(*pConfigurationManager, IsVoiceOnDefaultBearerSupported())
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(*pConfigurationManager, IsVideoOnDefaultBearerSupported())
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVt::KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(*pConfigurationManager, IsTextOnDefaultBearerSupported())
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigRtt::KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
     }
 };
@@ -246,9 +251,10 @@ TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalReturnsFalseInC
 
 TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalInCaseOfEmergency)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
-    EXPECT_CALL(*pConfigurationManager, IsEmergencyQosPreconditionSupported)
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
@@ -261,12 +267,14 @@ TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalInCaseOfVideoCa
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
 
-    EXPECT_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(3)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(*pConfigurationManager, IsVideoQosPreconditionSupported)
+    EXPECT_CALL(
+            *pConfigurationProxy, GetBoolean(ConfigVt::KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
@@ -280,12 +288,14 @@ TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalInCaseOfRttCall
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::RTT));
 
-    EXPECT_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(3)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(*pConfigurationManager, IsTextQosPreconditionSupported)
+    EXPECT_CALL(
+            *pConfigurationProxy, GetBoolean(ConfigRtt::KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
@@ -299,18 +309,21 @@ TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalInCaseOfVideoRt
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
 
-    EXPECT_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(4)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(*pConfigurationManager, IsVideoQosPreconditionSupported)
+    EXPECT_CALL(
+            *pConfigurationProxy, GetBoolean(ConfigVt::KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(3)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(*pConfigurationManager, IsTextQosPreconditionSupported)
+    EXPECT_CALL(
+            *pConfigurationProxy, GetBoolean(ConfigRtt::KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
@@ -325,7 +338,8 @@ TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalInCaseOfVoiceCa
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
 
-    EXPECT_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
@@ -360,7 +374,8 @@ TEST_F(MtcPreconditionManagerTest, IsDedicatedBearerAllocatedReturnsFalseIfQosSt
 TEST_F(MtcPreconditionManagerTest,
         IsCheckingResourcesRequiredToAlertUserReturnsFalseIfSupportsAudioDefaultBearer)
 {
-    ON_CALL(*pConfigurationManager, IsVoiceOnDefaultBearerSupported())
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
 }
@@ -368,7 +383,8 @@ TEST_F(MtcPreconditionManagerTest,
 TEST_F(MtcPreconditionManagerTest,
         IsCheckingResourcesRequiredToAlertUserReturnsTrueIfSupportsAudioDefaultBearerButRoaming)
 {
-    ON_CALL(*pConfigurationManager, IsVoiceOnDefaultBearerSupported())
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
             .WillByDefault(Return(IMS_ROAMING_STATE_ON));
@@ -378,7 +394,8 @@ TEST_F(MtcPreconditionManagerTest,
 TEST_F(MtcPreconditionManagerTest,
         IsCheckingResourcesRequiredToAlertUserReturnsTrueIfNotSupportsAudioDefaultBearer)
 {
-    ON_CALL(*pConfigurationManager, IsVoiceOnDefaultBearerSupported())
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
 }
@@ -391,7 +408,8 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsFalseIfSessionIs
 TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsTrueIfDedicatedBearerIsAllocated)
 {
     SetUpMockQosInfo();
-    ON_CALL(*pConfigurationManager, IsVoiceOnDefaultBearerSupported())
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
@@ -403,7 +421,8 @@ TEST_F(MtcPreconditionManagerTest,
         IsAvailableToAlertUserReturnsFalseIfDedicatedBearerIsNotAllocated)
 {
     SetUpMockQosInfo();
-    ON_CALL(*pConfigurationManager, IsVoiceOnDefaultBearerSupported())
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
@@ -477,7 +496,7 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
     SetUpMockQosInfo();
     SetUpNothingOnDefaultBearerSupported();
-    ON_CALL(*pConfigurationManager, IsVideoQosPreconditionSupported())
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVt::KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
@@ -500,7 +519,7 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
     SetUpMockQosInfo();
     SetUpNothingOnDefaultBearerSupported();
-    ON_CALL(*pConfigurationManager, IsVideoQosPreconditionSupported())
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVt::KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .WillByDefault(Return(IMS_FALSE));
@@ -624,15 +643,18 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
     ON_CALL(*pInfo, GetTextStatus()).WillByDefault(Return(QosStatus::IDLE));
 
-    EXPECT_CALL(*pConfigurationManager, IsVoiceOnDefaultBearerSupported())
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .Times(3)
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(*pConfigurationManager, IsVideoOnDefaultBearerSupported())
+    EXPECT_CALL(
+            *pConfigurationProxy, GetBoolean(ConfigVt::KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(*pConfigurationManager, IsTextOnDefaultBearerSupported())
+    EXPECT_CALL(
+            *pConfigurationProxy, GetBoolean(ConfigRtt::KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
     EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
@@ -889,12 +911,11 @@ TEST_F(MtcPreconditionManagerTest, CreateRecordsAndFormPreconditionSdpInConfirme
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
-    EXPECT_CALL(*pConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading())
+    EXPECT_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
             .Times(2)
-            .WillOnce(Return(
-                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE))
-            .WillOnce(Return(
-                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
+            .WillOnce(Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE))
+            .WillOnce(Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
     EXPECT_CALL(objStatusTable, InitializeRecords(SdpMedia::TYPE_AUDIO)).Times(2);
     EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(1);
     EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(2);
@@ -938,7 +959,8 @@ TEST_F(MtcPreconditionManagerTest, HandleQosOnIpcanChangedIfHandoversToMobileFro
     ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
     SetUpNothingOnDefaultBearerSupported();
     SetUpSupportingPreconditionInLocal(CallType::VT, IMS_TRUE);
-    ON_CALL(*pConfigurationManager, GetDedicatedBearerWaitTimer()).WillByDefault(Return(20000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(20000));
 
     EXPECT_CALL(objTimer, StopQosTimer(QosTimerType::WAIT_AUDIO_AVAILABLE)).Times(1);
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER, 20000))
@@ -959,7 +981,8 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
     SetUpNothingOnDefaultBearerSupported();
     SetUpSupportingPreconditionInLocal(CallType::VT, IMS_TRUE);
-    ON_CALL(*pConfigurationManager, GetDedicatedBearerWaitTimer()).WillByDefault(Return(-1));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(-1));
 
     EXPECT_CALL(objTimer, StopQosTimer(QosTimerType::WAIT_AUDIO_AVAILABLE)).Times(1);
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::FORCE_AVAILABLE, 500)).Times(1);
@@ -1074,7 +1097,8 @@ TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnSdpReceived)
     ON_CALL(objIMessage, GetMethod()).WillByDefault(ReturnRef(objInviteMethod));
     ON_CALL(objISipMessage, IsMessageRpr()).WillByDefault(Return(IMS_TRUE));
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
-    ON_CALL(*pConfigurationManager, GetDedicatedBearerWaitTimer()).WillByDefault(Return(20000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(20000));
 
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::WAIT_AUDIO_AVAILABLE, 20000)).Times(1);
 
@@ -1218,18 +1242,18 @@ TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnCallEstablishedIfLocalResourc
 
 TEST_F(MtcPreconditionManagerTest, DoNothingOnCallModifiedIfQosIsNotCheckedAfterCallUpgrade)
 {
-    ON_CALL(*pConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading())
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE));
     pPreconditionManager->OnCallModified(&objISession);
 }
 
 TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnCallModifiedIfLocalResourceIsNotReserved)
 {
     SetUpMockQosInfo();
-    ON_CALL(*pConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading())
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
     SetUpSupportingPreconditionInLocal(CallType::UNKNOWN, IMS_TRUE);
 
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::GUARD_AVAILABLE, 1000)).Times(1);
@@ -1239,9 +1263,10 @@ TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnCallModifiedIfLocalResourceIs
 TEST_F(MtcPreconditionManagerTest, OnCallModifiedInitializedLocalAndRemoteQosForRemovedMedias)
 {
     SetUpMockQosInfo();
-    ON_CALL(*pConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading())
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
 
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
@@ -1537,7 +1562,8 @@ TEST_F(MtcPreconditionManagerTest,
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
     SetUpNothingOnDefaultBearerSupported();
-    ON_CALL(*pConfigurationManager, GetPolicyOnAudioQosDeactivation()).WillByDefault(Return(-1));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
+            .WillByDefault(Return(-1));
 
     EXPECT_CALL(objListener, QosReserveFailed(&objISession, _)).Times(0);
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::GUARD_AVAILABLE);
@@ -1566,12 +1592,12 @@ TEST_F(MtcPreconditionManagerTest, NotifiesQosReserveFailedToListenerOnTimerExpi
     ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::LOST));
     ON_CALL(*pInfo, GetTextStatus()).WillByDefault(Return(QosStatus::LOST));
     SetUpNothingOnDefaultBearerSupported();
-    ON_CALL(*pConfigurationManager, GetPolicyOnAudioQosDeactivation())
-            .WillByDefault(Return(CarrierConfig::ImsVoice::QOS_DEACTIVATION_POLICY_MAINTAIN_CALL));
-    ON_CALL(*pConfigurationManager, GetPolicyOnVideoQosDeactivation())
-            .WillByDefault(Return(CarrierConfig::ImsVoice::QOS_DEACTIVATION_POLICY_MODIFY_CALL));
-    ON_CALL(*pConfigurationManager, GetPolicyOnTextQosDeactivation())
-            .WillByDefault(Return(CarrierConfig::ImsVoice::QOS_DEACTIVATION_POLICY_TERMINATE_CALL));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_MAINTAIN_CALL));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_ON_VIDEO_QOS_DEACTIVATION_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_MODIFY_CALL));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigRtt::KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_TERMINATE_CALL));
 
     EXPECT_CALL(objListener, QosReserveFailed(&objISession, QosLossPolicy::RELEASE)).Times(1);
     EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::IDLE)).Times(1);

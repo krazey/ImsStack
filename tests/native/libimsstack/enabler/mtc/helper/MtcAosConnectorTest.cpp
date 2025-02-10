@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "../../interface/aos/MockIImsAos.h"
-#include "../../interface/aos/MockIImsAosInfo.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
+#include "MockIImsAos.h"
+#include "MockIImsAosInfo.h"
 #include "ServiceNetworkPolicy.h"
 #include "helper/MtcAosConnector.h"
 #include <gtest/gtest.h>

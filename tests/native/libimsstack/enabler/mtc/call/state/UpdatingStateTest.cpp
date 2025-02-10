@@ -17,10 +17,15 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "ISession.h"
+#include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "MtcDef.h"
 #include "PlatformContext.h"
 #include "SipMethod.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -30,19 +35,14 @@
 #include "call/UpdatingInfo.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/UpdatingState.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
-#include "sipcore/SipMethod.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -56,8 +56,7 @@ class UpdatingStateTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objContext;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     UpdatingInfo* pUpdatingInfo;
     UpdatingState* pUpdatingState;
     CallInfo objCallInfo;
@@ -82,8 +81,7 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         pMtcSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -243,8 +241,7 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesMtcSessionRejectIfRejectCodeIsNot20
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
-                    _))
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
 
@@ -259,8 +256,7 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
-                    _))
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
             .WillByDefault(Return(200));
 
     ON_CALL(objMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
@@ -389,11 +385,6 @@ TEST_F(UpdatingStateTest, SessionTerminatedTerminatesCall)
 
 TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedInvokesSendTerminated)
 {
-    ON_CALL(objMediaManager, IsOnHold).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
-    ON_CALL(*pConfigurationManager, IsAudioInactivityCallEndReason(_))
-            .WillByDefault(Return(IMS_TRUE));
-
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, _));
     EXPECT_CALL(objUiNotifier, SendTerminated(_));
 
@@ -476,7 +467,7 @@ TEST_F(UpdatingStateTest, OnServiceUnavailableErrorTerminatesCall)
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
+            GetInt(ConfigIms::KEY_SIP_TIMER_B_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
     MockIMtcService objMtcService;
@@ -588,10 +579,11 @@ TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerAct
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
 }
 
-TEST_F(UpdatingStateTest, SessionUpdateReceivedDoesNothingIfGlareTimerInActive)
+TEST_F(UpdatingStateTest, SessionUpdateReceivedRejectsIfGlareTimerInActive)
 {
     ON_CALL(objTimer, IsActive(MtcCallState::TIMER_GLARE_CONDITION))
             .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_SIP_REQUEST_PENDING)));
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdateReceived(&objSession));
 }
 
@@ -852,8 +844,7 @@ TEST_F(UpdatingStateTest,
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
-                    _))
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
 
@@ -872,8 +863,7 @@ TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateReceivedRejectsIfResponseFailed
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
-                    _))
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
 
@@ -1026,8 +1016,7 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNegoFailed)
 TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfResponseFailed)
 {
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
-                    _))
+            GetInt(ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT, _))
             .WillByDefault(Return(603));
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200)).WillOnce(Return(IMS_FAILURE));
@@ -1255,9 +1244,10 @@ TEST_F(UpdatingStateTest, IsPreconditionRequiredReturnsTrueIfConditionsAreMet)
     ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading)
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
 
     EXPECT_TRUE(UpdatingState::IsPreconditionRequired(*pConfigurationProxy, *pUpdatingInfo));
 }
@@ -1267,9 +1257,9 @@ TEST_F(UpdatingStateTest, IsPreconditionRequiredReturnsFalseIfConfigIsOff)
     ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading)
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
 
     EXPECT_FALSE(UpdatingState::IsPreconditionRequired(*pConfigurationProxy, *pUpdatingInfo));
 }

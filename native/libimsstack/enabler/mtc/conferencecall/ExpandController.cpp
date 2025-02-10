@@ -24,6 +24,7 @@
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ExpandController.h"
 #include "conferencecall/IConferenceReference.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -169,7 +170,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
     IMS_SINT32 nReferType = ConferenceConfigurationHelper::GetReferTypeForInvite(
             m_objContext.GetConfigurationProxy());
 
-    if (nReferType == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)  // SKT
+    if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)  // SKT
     {
         // TODO: Check if it's okay that objUsers is empty.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
@@ -180,7 +181,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
         // Terminate the exist 1-to-1 session : it is triggered by GII operation.
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     }
-    else if (nReferType == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE)  // LGU+
+    else if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE)  // LGU+
     {
         m_pOperationQueue->CreateNPutWithUsers(
                 CONTROL_OPERATION_REFER_INVITE, m_pParticipantList->GetConfUsers());
@@ -256,7 +257,7 @@ PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UIN
 
     if ((ConferenceConfigurationHelper::GetReferTypeForInvite(
                  m_objContext.GetConfigurationProxy()) ==
-                CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE) ||
+                ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE) ||
             GetState() != STATE_EXPANDING)
     {
         return;
@@ -376,7 +377,7 @@ void ExpandController::StopMedia1to1Session()
 {
     if (ConferenceConfigurationHelper::GetReferTypeForInvite(
                 m_objContext.GetConfigurationProxy()) !=
-            CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)
+            ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)
     {
         return;
     }
@@ -468,7 +469,7 @@ void ExpandController::RecoverOnReferring()
 
         if (ConferenceConfigurationHelper::GetReferTypeForInvite(
                     m_objContext.GetConfigurationProxy()) ==
-                CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)
+                ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)
         {
             Resume1to1Session();
             GetConferenceCall()->Terminate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));

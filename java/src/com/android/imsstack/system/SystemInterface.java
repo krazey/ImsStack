@@ -124,7 +124,9 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.START_IMS_TRAFFIC, "START_IMS_TRAFFIC"),
             Map.entry(SystemConstants.STOP_IMS_TRAFFIC, "STOP_IMS_TRAFFIC"),
             Map.entry(SystemConstants.TRIGGER_EPS_FALLBACK, "TRIGGER_EPS_FALLBACK"),
-            Map.entry(SystemConstants.SET_TRAFFIC_PRIORITY, "SET_TRAFFIC_PRIORITY"));
+            Map.entry(SystemConstants.SET_TRAFFIC_PRIORITY, "SET_TRAFFIC_PRIORITY"),
+            Map.entry(SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE,
+                    "IS_CROSS_SIM_REDIALING_AVAILABLE"));
 
     private static SystemInterface sSystemInterface = null;
     private long mNativeObject = 0;
@@ -468,6 +470,9 @@ public class SystemInterface implements JniSystemListener {
             case SystemConstants.SET_TRAFFIC_PRIORITY:
                 handleSystemCallForRadio(method, in, out);
                 break;
+            case SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE:
+                handleSystemCallForCrossSimRedialing(method, in, out);
+                break;
             default:
                 return false;
         }
@@ -602,6 +607,13 @@ public class SystemInterface implements JniSystemListener {
             int slotId = in.readInt();
             mDefaultSystemCall.setTrafficPriority(priorityType, slotId);
             out.writeInt(1);
+        }
+    }
+
+    private void handleSystemCallForCrossSimRedialing(int method, Parcel in, Parcel out) {
+        if (method == SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE) {
+            int slotId = in.readInt();
+            out.writeInt(mDefaultSystemCall.isCrossSimRedialingAvailable(slotId) ? 1 : 0);
         }
     }
 

@@ -17,6 +17,7 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import android.os.PowerManager;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
@@ -140,8 +141,14 @@ public class ImsCallManager {
         }
     }
 
+    /**
+     * Creates an {@link ImsCallSessionImpl} from a given ImsCallProfile.
+     *
+     * @param profile The {@link ImsCallProfile} to make the {@link ImsCallSessionImpl}.
+     * @return {@link ImsCallSessionImpl}
+     */
+    @SuppressWarnings("deprecation") // EXTRA_CALL_RAT_TYPE
     public ImsCallSessionImpl createSession(ImsCallProfile profile) {
-        boolean emergency = false;
         boolean offline = false;
         boolean ussi = false;
         @EmergencyCallRouting int emergencyRouting =
@@ -151,14 +158,16 @@ public class ImsCallManager {
 
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
-            emergency = true;
             emergencyRouting = ImsCallUtils.getEmergencyRoutingFromCallProfile(profile);
 
             // ECBM
             checkAndExitEcbm();
-            //To-Do:- Need to find the way Emergency call Over VoWiFi
-            //sessionAttributes |=  MtcCall.FLAG_WIFI_EMERGENCY;
-            //wifi = true;
+
+            if (String.valueOf(ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN).equals(
+                    ImsCallUtils.getCallExtraFromOemExtras(
+                            profile, ImsCallProfile.EXTRA_CALL_RAT_TYPE, ""))) {
+                sessionAttributes |=  MtcCall.FLAG_WIFI_EMERGENCY;
+            }
         } else if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_NORMAL) {
             if (profile.getCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING, -1)
                     == ImsCallProfile.DIALSTRING_USSD) {
@@ -198,7 +207,7 @@ public class ImsCallManager {
         if (call.isEmergencyCall()) {
             mMtcApp.openEmergencyService(call, emergencyRouting);
         } else {
-            call.open(IUMtcCall.SERVICETYPE_NORMAL, emergency, offline, ussi);
+            call.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE, offline, ussi);
         }
 
         return callSession;

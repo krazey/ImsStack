@@ -34,9 +34,9 @@ IMS_BOOL ImsService::SetState(IN IMS_UINT32 nState)
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL IMS_BOOL ImsService::DispatchMessage(IN ImsMessage& objMsg)
+PROTECTED VIRTUAL IMS_BOOL ImsService::DispatchMessage(IN ImsMessage& objMsg)
 {
-    IMS_BOOL bResult = IMS_FALSE;
+    IMS_BOOL bResult = IMS_TRUE;
 
     (void)OnPreprocess(objMsg);
 

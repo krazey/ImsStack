@@ -67,6 +67,14 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
+    public boolean isImsPdnRequestWithoutMmtelRequired() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        return config != null && config.getBoolean(
+                CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
+    }
+
+    @Override
     public int[] getImsSupportedRats() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 

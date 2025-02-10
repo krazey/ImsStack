@@ -40,6 +40,9 @@ public:
     void FormatResponse(IN ResponseType eType, IN_OUT IMessage& objResponse) override;
     void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
+
+private:
+    IMS_BOOL IsRequestIncludingOffer() const;
 };
 
 #endif

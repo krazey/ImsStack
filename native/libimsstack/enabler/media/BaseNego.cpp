@@ -20,6 +20,7 @@
 #include "BaseNego.h"
 #include "MediaNegoUtil.h"
 #include "MediaProfileFactory.h"
+#include "MediaProfileGenerator.h"
 #include "MediaProfileUtil.h"
 
 #include "audio/AudioSdpGenerator.h"
@@ -36,7 +37,8 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
         m_pConfig(IMS_NULL),
         m_pEnvironment(IMS_NULL),
         m_pSdpGenerator(IMS_NULL),
-        m_pSdpNegotiator(IMS_NULL)
+        m_pProfileNegotiator(IMS_NULL),
+        m_pProfileGenerator(IMS_NULL)
 {
     IMS_TRACE_I("+BaseNego() - slot[%d]", nSlotId, 0, 0);
 }
@@ -57,8 +59,8 @@ PUBLIC VIRTUAL BaseNego::~BaseNego()
     DestroyListOaModel();
 }
 
-PUBLIC VIRTUAL void BaseNego::CreateProfiles(IN MediaEnvironment* pEnvironment,
-        IN MEDIA_CONTENT_TYPE pType, IN MediaConfiguration* pConfig)
+PUBLIC VIRTUAL void BaseNego::CreateProfiles(
+        IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig)
 {
     if (pConfig == IMS_NULL || pEnvironment == IMS_NULL)
     {
@@ -76,8 +78,11 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(IN MediaEnvironment* pEnvironment,
 
     m_pEnvironment = pEnvironment;
     m_pConfig = pConfig;
-    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            pEnvironment, m_pConfig, GetSlotId(), pType);
+
+    if (m_pProfileGenerator != IMS_NULL)
+    {
+        m_pBaseProfile = m_pProfileGenerator->Generate(pEnvironment, m_pConfig, GetSlotId());
+    }
 }
 
 PUBLIC VIRTUAL IMS_BOOL BaseNego::FormSdp(IN NEGO_STATE eNegoState,

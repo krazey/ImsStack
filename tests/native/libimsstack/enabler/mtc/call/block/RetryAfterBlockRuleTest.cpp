@@ -61,7 +61,7 @@ protected:
 
 TEST_F(RetryAfterBlockRuleTest, CheckReturnsUnblockedIfCallIsEmergency)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     EXPECT_CALL(
             objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER))
             .Times(0);
@@ -72,7 +72,7 @@ TEST_F(RetryAfterBlockRuleTest, CheckReturnsUnblockedIfCallIsEmergency)
 
 TEST_F(RetryAfterBlockRuleTest, CheckReturnsUnblockedIfRetryAfterBlockingTimerIsNotActive)
 {
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER))
             .WillByDefault(Return(IMS_FALSE));
 
@@ -84,7 +84,7 @@ TEST_F(RetryAfterBlockRuleTest, CheckReturnsUnblockedIfActiveCallExists)
 {
     ImsList<IMtcCall*> objCalls;
     MockIMtcCall objCall;
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER))
             .WillByDefault(Return(IMS_TRUE));
     objCalls.Append(&objCall);
@@ -96,7 +96,7 @@ TEST_F(RetryAfterBlockRuleTest, CheckReturnsUnblockedIfActiveCallExists)
 
 TEST_F(RetryAfterBlockRuleTest, CheckReturnsPendingIfNotEpsCombinedAttach)
 {
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
@@ -110,10 +110,10 @@ TEST_F(RetryAfterBlockRuleTest, CheckReturnsPendingIfNotEpsCombinedAttach)
 
 TEST_F(RetryAfterBlockRuleTest, CheckReturnsBlockedIfCsfbRequired)
 {
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objPassiveTimerHolder,
             AddListener(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _))
             .Times(0);
@@ -126,10 +126,10 @@ TEST_F(RetryAfterBlockRuleTest, CheckReturnsBlockedIfCsfbRequired)
 
 TEST_F(RetryAfterBlockRuleTest, OnPassiveTimerExpiredInvokesOnBlockRuleChecked)
 {
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
     ON_CALL(objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objPassiveTimerHolder,
             AddListener(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _))
             .Times(1);

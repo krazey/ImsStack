@@ -33,6 +33,11 @@ public interface IDcSettings extends IDc {
     boolean isVopsIgnored();
 
     /**
+     * Returns whether IMS PDN request without MMTEL capability is required
+     */
+    boolean isImsPdnRequestWithoutMmtelRequired();
+
+    /**
      * Returns list of RAT technologies on which IMS is supported
      */
     int[] getImsSupportedRats();

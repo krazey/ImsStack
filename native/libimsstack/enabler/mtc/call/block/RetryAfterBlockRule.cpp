@@ -19,6 +19,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/MtcCallManager.h"
 #include "call/block/RetryAfterBlockRule.h"
+#include "call/termination/StartErrorHandler.h"
 #include "helper/IPassiveTimerHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -39,7 +40,7 @@ PUBLIC VIRTUAL RetryAfterBlockRule::~RetryAfterBlockRule()
 PUBLIC VIRTUAL RetryAfterBlockRule::Result RetryAfterBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
         return Result(Result::Status::UNBLOCKED);
     }
@@ -55,7 +56,7 @@ PUBLIC VIRTUAL RetryAfterBlockRule::Result RetryAfterBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (!m_objContext.GetService().IsEpsCombinedAttach())
+    if (!m_objContext.GetService().IsCsfbAvailable())
     {
         m_piMtcBlockRuleCheckListener = &objListener;
         m_objContext.GetPassiveTimerHolder().AddListener(

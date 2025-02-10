@@ -19,6 +19,7 @@
 #include "ImsTypeDef.h"
 
 class IAosBlockListener;
+class IAosBlockSilentListener;
 
 /// Block reason of IMS Service
 typedef enum
@@ -130,6 +131,26 @@ public:
      * @param
      */
     virtual void RemoveListener(IN IAosBlockListener* piListener) = 0;
+
+    /**
+     * @brief Sets an IAosBlockSilentListener to be notified of silent block reason updates.
+     *
+     * This method registers a listener that will be invoked when the block reason is changed
+     * with the option to suppress block reason change notifications.
+     *
+     * @param piListener The listener to be added.
+     */
+    virtual void SetSilentListener(IN IAosBlockSilentListener* piListener) = 0;
+
+    /**
+     * @brief Removes an IAosBlockSilentListener.
+     *
+     * This method unregisters a previously registered listener, so it will no longer receive
+     * notifications about silent block reason updates.
+     *
+     * @param piListener The listener to be removed.
+     */
+    virtual void RemoveSilentListener(IN IAosBlockSilentListener* piListener) = 0;
 
     /**
      * @brief

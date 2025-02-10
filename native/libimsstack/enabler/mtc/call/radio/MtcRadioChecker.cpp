@@ -25,8 +25,10 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
+#include "call/IMtcCallManager.h"
 #include "call/radio/MtcRadioChecker.h"
-#include "helper/ICallStateProxy.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -51,7 +53,7 @@ PUBLIC MtcRadioChecker::~MtcRadioChecker()
 
 PUBLIC void MtcRadioChecker::Init()
 {
-    m_objContext.GetCallStateProxy().AddListener(this);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddListener(this);
     m_objContext.GetServiceByType(ServiceType::NORMAL)->AddAosStateListener(this);
     m_objContext.GetServiceByType(ServiceType::EMERGENCY)->AddAosStateListener(this);
 }
@@ -115,18 +117,9 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnIpcanChanged(
     }
 }
 
-PUBLIC VIRTUAL void MtcRadioChecker::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
-        IN Type /* eType */, IN IMS_BOOL /* bEmergency */, IN IMS_SINT32 /* nReason */)
+PUBLIC VIRTUAL void MtcRadioChecker::OnSessionInterfaceReleased(IN CallKey nKey)
 {
-    if (eState == IMtcCall::State::TERMINATING)
-    {
-        RemoveCallKeyAndStopTrafficCheckingIfNeeded(nCallKey);
-    }
-}
-
-PUBLIC VIRTUAL void MtcRadioChecker::OnTotalCallStateChanged(IN State /* eState */)
-{
-    // do nothing
+    RemoveCallKeyAndStopTrafficCheckingIfNeeded(nKey);
 }
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficType,
@@ -194,7 +187,7 @@ PUBLIC void MtcRadioChecker::CreateCallTrafficInfoWithGivenValue(IN TrafficType 
 
 PRIVATE void MtcRadioChecker::DeInit()
 {
-    m_objContext.GetCallStateProxy().RemoveListener(this);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().RemoveListener(this);
     IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
     if (pNormalService)
     {
@@ -266,6 +259,11 @@ PRIVATE void MtcRadioChecker::AddCallKey(IN MtcTrafficInfo& pMtcTrafficInfo, IN 
 
 PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn)
 {
+    if (!IsCallTerminated(nCallKeyIn))
+    {
+        return;  // Silent redialing, no need to stop the traffic
+    }
+
     for (IMS_UINT32 nInfoIndex = 0; nInfoIndex < m_objMtcTrafficInfos.GetSize(); nInfoIndex++)
     {
         MtcTrafficInfo* pMtcTrafficInfo = m_objMtcTrafficInfos.GetAt(nInfoIndex);
@@ -377,6 +375,13 @@ PRIVATE void MtcRadioChecker::StopTrafficChecking(IN MtcTrafficInfo& objTrafficI
 
     IMS_TRACE_I("StopTrafficChecking TrafficType[%d] CallDirection[%d]",
             objTrafficInfo.m_eTrafficType, objTrafficInfo.m_eCallDirection, 0);
+}
+
+PRIVATE IMS_BOOL MtcRadioChecker::IsCallTerminated(IN CallKey nKey)
+{
+    IMtcCall* pCall = m_objContext.GetCallManager().GetCallByCallKey(nKey);
+    return pCall->GetKey() == IMtcCall::CALL_KEY_INVALID ||
+            pCall->GetState() == IMtcCall::State::TERMINATING;
 }
 
 PRIVATE void MtcTrafficInfo::ImsRadio_OnConnectionFailed(

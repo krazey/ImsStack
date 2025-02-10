@@ -1074,14 +1074,15 @@ PROTECTED VIRTUAL Session* SessionEx::CreateSession()
     return pSession;
 }
 
-PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleProvisionalResponse(IN ISipClientConnection* piScc)
+PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleProvisionalResponse(
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod)
 {
     ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Check if the message is a reliable provisional response or not
     if (!piSipMsg->IsMessageRpr())
     {
-        return Session::HandleProvisionalResponse(piScc);
+        return Session::HandleProvisionalResponse(piScc, nServiceMethod);
     }
 
     if (!CheckNCreateRprHelper(piSipMsg))
@@ -1119,19 +1120,13 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleProvisionalResponse(IN ISipClientC
     }
 
     // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-    ImsList<Message*> objResponses;
+    ImsList<Message*> objResponses = GetPreviousResponses(nServiceMethod);
 
-    if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
+    if (!objResponses.IsEmpty())
     {
-        objResponses = GetPreviousResponses(IMessage::SESSION_START);
+        PostMessage(AMSG_SESSIONEX_RPR_RECEIVED, reinterpret_cast<IMS_UINTP>(pEarlySession),
+                objResponses.GetSize() - 1);
     }
-    else
-    {
-        objResponses = GetPreviousResponses(IMessage::SESSION_UPDATE);
-    }
-
-    PostMessage(AMSG_SESSIONEX_RPR_RECEIVED, reinterpret_cast<IMS_UINTP>(pEarlySession),
-            objResponses.GetSize() - 1);
 
     if (piSipMsg->GetStatusCode() == SipStatusCode::SC_180)
     {
@@ -1327,9 +1322,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
             return IMS_FAILURE;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
-
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)
@@ -1730,10 +1723,7 @@ void SessionEx::HandleRequestToPrack(IN ISipServerConnection* piSsc)
             return;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
-
-        // SIP_MESSAGE_MEDIATOR
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)

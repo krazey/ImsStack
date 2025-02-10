@@ -16,16 +16,17 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
     <int name="imswfc.registration_private_header_int" value="1"/>
-    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="1">
         <item value="33"/>
     </int-array>

@@ -84,6 +84,8 @@ protected:
 
         // To disable all the features, set an arbitrary SIP feature
         m_pSipProfile->SetSipFeatureCaps(ISipConfig::SIP_FEATURE_CAPS_IPSEC);
+        // Sets the policy to show MAC address in PANI header.
+        m_pSipProfile->SetHideMacInPaniHeaderPolicy(ISipConfig::SHOW_MAC_IN_PANI);
 
         SetAccessNetworkInfoForDefault();
 
@@ -158,8 +160,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanIn
     AString strHeader;
     AString strExpected("IEEE-802.11;i-wlan-node-id=000000000000");
 
-    m_pSipProfile->SetSipFeatureCaps(m_pSipProfile->GetSipFeatureCaps() |
-            ISipConfig::SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER);
+    m_pSipProfile->SetHideMacInPaniHeaderPolicy(ISipConfig::HIDE_MAC_IN_PANI);
     SetAccessNetworkInfoForWifi();
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
             IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));

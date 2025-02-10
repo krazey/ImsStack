@@ -16,13 +16,14 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="2"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
-    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="2"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>
@@ -35,7 +36,7 @@
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="3"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
-    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
 
     <!-- Media -->
@@ -119,35 +120,35 @@
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle>
-    <boolean name="audio_evs_support_bool" value="true"/>
-    <boolean name="audio_bw_nego_option_bool" value="false"/>
-    <int name="audio_maxred_int" value="220"/>
-    <int name="audio_ptime_millis_int" value="20"/>
-    <int name="audio_maxptime_millis_int" value="240"/>
-    <boolean name="audio_show_codec_attribute_modeset_bool" value="true"/>
-    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int name="imsvoice.audio_ptime_millis_int" value="20"/>
+    <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_modeset_bool" value="true"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
-    <boolean name="audio_rtcpxr_enable_bool" value="true"/>
-    <boolean name="audio_rtcpxr_statistics_bool" value="true"/>
-    <boolean name="audio_rtcpxr_voip_metrics_bool" value="true"/>
-    <boolean name="audio_rtcpxr_packet_loss_rle_bool" value="false"/>
-    <boolean name="audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
+    <boolean name="imsvoice.audio_rtcpxr_enable_bool" value="true"/>
+    <boolean name="imsvoice.audio_rtcpxr_statistics_bool" value="true"/>
+    <boolean name="imsvoice.audio_rtcpxr_voip_metrics_bool" value="true"/>
+    <boolean name="imsvoice.audio_rtcpxr_packet_loss_rle_bool" value="false"/>
+    <boolean name="imsvoice.audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
     <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
         <item value="5"/>
         <item value="3"/>
     </int-array>
-    <boolean name="text_codec_empty_redundant_bool" value="true"/>
-    <int name="text_codec_redundancy_level_int" value="3"/>
+    <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
+    <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
     <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
         <item value="5"/>
         <item value="3"/>
     </int-array>
-    <int name="text_rtp_inactivity_timer_millis_int" value="-1"/>
-    <int name="text_rtcp_inactivity_timer_millis_int" value="-1"/>
+    <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
+    <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
@@ -155,12 +156,12 @@
     <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
 
-    <!-- Ut/Xcap Assets -->
-    <int-array name="ut_http_temporary_error_code_int_array" num="3">
+    <!-- Ut/Xcap -->
+    <int-array name="imsss.ut_http_temporary_error_code_int_array" num="3">
         <item value="0"/>
         <item value="404"/>
         <item value="599"/>
     </int-array>
     <!-- Timer value is not in requirement. It is from previous solution -->
-    <int name="ut_temporary_block_timer_min_int" value="5"/>
+    <int name="imsss.ut_temporary_block_timer_min_int" value="5"/>
 </carrier_config>

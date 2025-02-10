@@ -25,8 +25,11 @@
 #include "call/MtcCallController.h"
 #include "conferencecall/MockIConferenceController.h"
 #include "conferencecall/MockIConferenceManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "ect/MockIEctManager.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockIPassiveTimerHolder.h"
+#include "helper/OperationAsyncRunner.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <initializer_list>
@@ -34,8 +37,11 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Eq;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+LOCAL const IMS_SINT32 SLOT_ID = 0;
 
 class MtcCallControllerTest : public ::testing::Test
 {
@@ -46,6 +52,8 @@ public:
     MockIMtcCallManager objCallManager;
     MockIEctManager objEctManager;
     MockICallStateProxy objCallStateProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
+    MockIPassiveTimerHolder objPassiveTimer;
 
 protected:
     virtual void SetUp() override
@@ -54,6 +62,8 @@ protected:
         ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
         ON_CALL(objContext, GetEctManager).WillByDefault(ReturnRef(objEctManager));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
 
         pCallController = new MtcCallController(objContext);
     }
@@ -127,6 +137,20 @@ TEST_F(MtcCallControllerTest, AttachAttachesTargetCall)
     pCallController->Attach(nCallKey);
 
     delete pCall;
+}
+
+TEST_F(MtcCallControllerTest, DetachInvokesRemoveCallUsingAsyncRunner)
+{
+    CallKey nCallKey = 1;
+    EXPECT_CALL(objContext, RunAsyncOperation(_, _))
+            .WillOnce(Invoke(
+                    []([[maybe_unused]] void* pOwner, std::function<void()> objOperation)
+                    {
+                        objOperation();
+                    }));
+    EXPECT_CALL(objCallManager, RemoveCall(nCallKey)).Times(1);
+
+    pCallController->Detach(nCallKey);
 }
 
 TEST_F(MtcCallControllerTest, HandleIncomingCreatesCall)
@@ -264,12 +288,21 @@ TEST_F(MtcCallControllerTest, RejectResumeCallsTargetCall)
     pCallController->RejectResume(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, TerminateCallsAsyncRunner)
+TEST_F(MtcCallControllerTest, TerminateInvokesTerminateUsingAsyncRunner)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
+    MockIMtcCall objCall;
+    ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    EXPECT_CALL(objContext, GetAsyncRunner).Times(1);
+    EXPECT_CALL(objContext, RunAsyncOperation(_, _))
+            .WillOnce(Invoke(
+                    []([[maybe_unused]] void* pOwner, std::function<void()> objOperation)
+                    {
+                        objOperation();
+                    }));
+
+    EXPECT_CALL(objCall, Terminate(objReason)).Times(1);
 
     pCallController->Terminate(nCallKey, objReason);
 }

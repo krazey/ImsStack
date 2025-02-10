@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "ISession.h"
+#include "ISipHeader.h"
 #include "Ims3gpp.h"
 #include "ImsAosReason.h"
+#include "ImsVector.h"
+#include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipKeepAliveHelper.h"
+#include "MockISipMessage.h"
 #include "MtcDef.h"
 #include "PlatformContext.h"
+#include "SipStatusCode.h"
 #include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
@@ -37,29 +46,23 @@
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/OutgoingState.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MockUdpKeepAliveSender.h"
 #include "helper/MtcSupplementaryService.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipKeepAliveHelper.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
+#include <initializer_list>
 
 using ::testing::_;
 using ::testing::Return;
@@ -72,8 +75,7 @@ class OutgoingStateTest : public ::testing::Test
 public:
     OutgoingState* pOutgoingState;
     MockIMtcSession objMtcSession;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcCallContext objCallContext;
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
@@ -84,10 +86,10 @@ public:
     MockISilentRedialHelper objRedialHelper;
     CallInfo objCallInfo;
     MockMtcTimerWrapper objTimer;
+    MockIPassiveTimerHolder objPassiveTimer;
     MockIMtcUiNotifier objUiNotifier;
     MockIMessageUtils objMessageUtils;
     MockEpsFallbackTrigger* pEpsFbTrigger;
-    MockIInterfaceHolderListener objInterfaceHolderListener;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MockISipKeepAliveHelper objKeepAliveHelper;
@@ -98,6 +100,7 @@ public:
     ImsList<IMtcSession*> objSessions;
     MockIMtcCallManager objCallManager;
     TestConfigService* pConfigService;
+    ImsVector<AString> objActionSets;
 
 protected:
     virtual void SetUp() override
@@ -109,8 +112,7 @@ protected:
         objAckMethod = SipMethod::ACK;
         objInviteMethod = SipMethod::INVITE;
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -129,6 +131,7 @@ protected:
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimer));
+        ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
@@ -139,13 +142,15 @@ protected:
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objSession, IsFinalResponseReceivedForInitialInviteRequest)
+                .WillByDefault(Return(IMS_FALSE));
 
         ON_CALL(objCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
 
-        pSessionInterfaceHolder = new MockSessionInterfaceHolder(objInterfaceHolderListener);
+        pSessionInterfaceHolder = new MockSessionInterfaceHolder();
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
-                .WillByDefault(Return(pSessionInterfaceHolder));
+                .WillByDefault(ReturnRef(*pSessionInterfaceHolder));
         ON_CALL(objCallContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
@@ -185,28 +190,53 @@ protected:
         ON_CALL(objSipMessage, IsMessageRpr).WillByDefault(Return(IMS_FALSE));
     }
 
-    void SetUpStartErrorHandler(IN MockIMessage& objMessage, IN IMS_SINT32 eStatusCode,
-            IN IMS_BOOL bCsfb, IN IMS_SINT32 nPolicyOfTimerB, IN IMS_BOOL bEpsFallbackRequired,
-            IN IMS_BOOL bWiFi)
+    void SetUpStartErrorHandler(IN MockIMessage* pMessage, IN IMS_SINT32 eStatusCode,
+            IN IMS_BOOL bCsfb, IN IMS_SINT32 nPolicyOfTimerB, IN IMS_BOOL bWiFi)
     {
-        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(eStatusCode));
-        ON_CALL(*pConfigurationManager, IsRejectCodeForCsfb(eStatusCode))
-                .WillByDefault(Return(bCsfb));
+        if (pMessage)
+        {
+            ON_CALL(*pMessage, GetStatusCode).WillByDefault(Return(eStatusCode));
+        }
+
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(bWiFi));
-        ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(bCsfb));
+        ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(bCsfb));
         if (bWiFi)
         {
-            ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
+            ON_CALL(*pConfigurationProxy,
+                    GetInt(ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT))
                     .WillByDefault(Return(nPolicyOfTimerB));
         }
         else
         {
-            ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
+            ON_CALL(*pConfigurationProxy,
+                    GetInt(ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT))
                     .WillByDefault(Return(nPolicyOfTimerB));
         }
-        ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-                .WillByDefault(Return(bEpsFallbackRequired ? 2000 : -1));
-        ON_CALL(objService, IsNr).WillByDefault(Return(bEpsFallbackRequired));
+    }
+
+    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += ":";
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += ",";
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
+        ON_CALL(*pConfigurationProxy,
+                GetStringArray(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
     }
 
     MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag)
@@ -229,7 +259,9 @@ TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
     MockUdpKeepAliveSender* pKeepAliveSender = new MockUdpKeepAliveSender(
             &objKeepAliveHelper, objCallContext);  // OutgoingState deletes it
     ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 
     EXPECT_CALL(*pKeepAliveSender, Stop);
@@ -238,7 +270,8 @@ TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedIgnoredIfConfigOn)
 {
-    ON_CALL(*pConfigurationManager, IsIgnorePrackDeliveryFailure).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
 }
@@ -265,8 +298,9 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponse)
     EXPECT_CALL(objAosConnector, Control).Times(0);
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT))
+            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
 
     pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
@@ -278,8 +312,9 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponseI
     EXPECT_CALL(objAosConnector, Control).Times(0);
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT))
+            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
 
     pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
@@ -291,9 +326,9 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsHandled)
     EXPECT_CALL(objAosConnector, Control).Times(1);
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT))
+            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
 
     pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
@@ -305,9 +340,9 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsHandledInWifi)
     EXPECT_CALL(objAosConnector, Control).Times(1);
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT))
+            .WillByDefault(Return(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
 
     pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
@@ -395,28 +430,25 @@ TEST_F(OutgoingStateTest, SendUpdateBySrvccDoesNothingIfSessionIsNull)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnSrvccStateUpdated(SrvccState::FAILED));
 }
 
-TEST_F(OutgoingStateTest, HandleAosConnectedDoesNothingIfNoWatchdogTimer)
+TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback)
 {
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(6000));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objRedialHelper, Redial).Times(0);
+    EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted).Times(0);
     EXPECT_EQ(
             CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
 
-TEST_F(OutgoingStateTest, HandleAosConnectedInvokesEpsFallbackApis)
+TEST_F(OutgoingStateTest, HandleAosConnectedRedialsIfWaitingEpsFallback)
 {
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
-    EXPECT_EQ(
-            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
-
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    EXPECT_EQ(
-            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
-
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objRedialHelper, Redial).Times(1).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objRedialHelper, Redial).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
@@ -429,7 +461,9 @@ TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
     MockUdpKeepAliveSender* pKeepAliveSender = new MockUdpKeepAliveSender(
             new MockISipKeepAliveHelper(), objCallContext);  // OutgoingState deletes it
     ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 
     EXPECT_CALL(*pKeepAliveSender, Stop);
@@ -457,10 +491,8 @@ TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfPrackTransactionIsNot
             .WillByDefault(Return(nullptr));
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 
-    MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
-            .WillByDefault(Return(&objMessage));
-    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_INVALID));
+            .WillByDefault(Return(IMS_NULL));
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
 
@@ -473,6 +505,8 @@ TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfNotRequiredToSendEarl
 
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
 
@@ -487,6 +521,8 @@ TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfNotAvailableToSendEar
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
 
@@ -504,6 +540,7 @@ TEST_F(OutgoingStateTest, QosReservedSendsEarlyUpdate)
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(2);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL))
             .Times(2)
             .WillOnce(Return(IMS_FAILURE))
@@ -602,7 +639,8 @@ TEST_F(OutgoingStateTest, SessionStartedInvokesStartWatchdogIfSupportedAndSdpAns
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
@@ -638,18 +676,19 @@ TEST_F(OutgoingStateTest, SessionStartFailedKeepsOutgoingStateIfSrvccStartedAndA
 
 TEST_F(OutgoingStateTest, SessionStartFailedTriggersEpsFallbackByCallReason)
 {
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
 
-    MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
-            .WillByDefault(Return(&objMessage));
-    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_INVALID, IMS_FALSE,
-            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT,
-            IMS_TRUE, IMS_FALSE);
+            .WillByDefault(Return(IMS_NULL));
+    SetUpStartErrorHandler(IMS_NULL, SipStatusCode::SC_INVALID, IMS_FALSE,
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT, IMS_FALSE);
 
     EXPECT_CALL(
             *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE));
-
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
 }
 
@@ -657,14 +696,12 @@ TEST_F(OutgoingStateTest, SessionStartFailedInvokesRedialByCallReason)
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
 
-    MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
-            .WillByDefault(Return(&objMessage));
-    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_INVALID, IMS_FALSE,
-            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL, IMS_FALSE,
-            IMS_FALSE);
-    EXPECT_CALL(objRedialHelper, Redial).Times(1).WillOnce(Return(IMS_SUCCESS));
+            .WillByDefault(Return(IMS_NULL));
+    SetUpStartErrorHandler(IMS_NULL, SipStatusCode::SC_INVALID, IMS_FALSE,
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL, IMS_FALSE);
 
+    EXPECT_CALL(objRedialHelper, Redial).Times(1).WillOnce(Return(IMS_SUCCESS));
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->SessionStartFailed(&objSession));
 }
 
@@ -672,12 +709,10 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsNetworkResponseTimoutReasonIfSil
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
 
-    MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
-            .WillByDefault(Return(&objMessage));
-    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_INVALID, IMS_FALSE,
-            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL, IMS_FALSE,
-            IMS_FALSE);
+            .WillByDefault(Return(IMS_NULL));
+    SetUpStartErrorHandler(IMS_NULL, SipStatusCode::SC_INVALID, IMS_FALSE,
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL, IMS_FALSE);
 
     ON_CALL(objRedialHelper, Redial).WillByDefault(Return(IMS_FAILURE));
 
@@ -693,7 +728,9 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsSipNotAcceptableReasonIfSilentRe
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
-    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_488, IMS_FALSE, 0, IMS_FALSE, IMS_FALSE);
+    SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_488, IMS_FALSE, 0, IMS_FALSE);
+    SetActionConfigs(SipStatusCode::SC_488,
+            {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT});
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMediaManager, GetSupportedMediaTypesFromSdp(&objSession))
@@ -713,7 +750,9 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsSipRedirectedReasonIfSilentRedia
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
-    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_301, IMS_FALSE, 0, IMS_FALSE, IMS_FALSE);
+    SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_301, IMS_FALSE, 0, IMS_FALSE);
+    SetActionConfigs(
+            SipStatusCode::SC_301, {ConfigVoice::START_ERROR_ACTION_REDIRECTION_BY_CONTACT});
     AString strContactToRedirect("sip:contactToRedirect");
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(strContactToRedirect));
@@ -732,7 +771,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedInvokesStartFailed)
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
-    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_600, IMS_TRUE, 0, IMS_FALSE, IMS_FALSE);
+    SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_600, IMS_TRUE, 0, IMS_FALSE);
+    SetActionConfigs(SipStatusCode::SC_600, {ConfigVoice::START_ERROR_ACTION_CSFB});
 
     EXPECT_CALL(objUiNotifier,
             SendStartFailed(CallReasonInfo(
@@ -750,9 +790,12 @@ TEST_F(OutgoingStateTest,
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(_, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC));
-    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_380, IMS_FALSE, 0, IMS_FALSE, IMS_FALSE);
-    ON_CALL(*pConfigurationManager,
-            IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall)
+    SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_380, IMS_FALSE, 0, IMS_FALSE);
+    SetActionConfigs(SipStatusCode::SC_380,
+            {ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL});
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objUiNotifier,
@@ -787,8 +830,8 @@ TEST_F(OutgoingStateTest,
                 .WillByDefault(Return(&objMessage));
         ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(_, ISipHeader::CONTACT_NORMAL, _))
                 .WillByDefault(Return(EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC));
-        SetUpStartErrorHandler(objMessage, SipStatusCode::SC_380, IMS_FALSE, 0, IMS_FALSE,
-       IMS_FALSE); ON_CALL(*pConfigurationManager,
+        SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_380, IMS_FALSE, 0, IMS_FALSE);
+        ON_CALL(*pConfigurationProxy,
                 IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall)
                 .WillByDefault(Return(IMS_FALSE));
 
@@ -825,15 +868,22 @@ TEST_F(OutgoingStateTest,
 
 TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
 {
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
     ON_CALL(objService, GetSrvccState()).WillByDefault(Return(SrvccState::IDLE));
 
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+    ImsVector<AString> objArrary;
+    ON_CALL(*pConfigurationProxy,
+            GetStringArray(
+                    ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY))
+            .WillByDefault(Return(objArrary));
     ON_CALL(objService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
     ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
@@ -853,8 +903,9 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToIgnore(ImsAosReason::REG_NEW_REQUIRED))
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    ImsAosReason::REG_NEW_REQUIRED))
             .WillByDefault(Return(IMS_TRUE));
 
     MockIMessage objMessage;
@@ -862,6 +913,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
             .WillByDefault(Return(&objMessage));
 
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    SetActionConfigs(SipStatusCode::SC_503, {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
 
@@ -924,10 +976,8 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendProgressing)
 
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedReturnsTerminating)
 {
-    MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
-            .WillByDefault(Return(&objMessage));
-    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_INVALID));
+            .WillByDefault(Return(IMS_NULL));
 
     EXPECT_CALL(objMtcSession,
             Terminate(_, CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE)));
@@ -997,10 +1047,10 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(pConfigService->GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
-    ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(IMS_SUCCESS));
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
@@ -1078,7 +1128,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedInvokesSendProgressing)
 
 TEST_F(OutgoingStateTest, SessionForkedResponseReceivedDoesNothingIfSessionIsNull)
 {
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_)).Times(0);
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, _)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->SessionForkedResponseReceived(IMS_NULL, IMS_NULL));
 
@@ -1088,7 +1138,8 @@ TEST_F(OutgoingStateTest, SessionForkedResponseReceivedDoesNothingIfSessionIsNul
 
 TEST_F(OutgoingStateTest, SessionForkedResponseReceivedAddsISession)
 {
-    ON_CALL(*pConfigurationManager, IsMaintainMultipleEarlySessionsByForking)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objMtcSession,
             Terminate(IMS_TRUE, CallReasonInfo(CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED)))
@@ -1096,14 +1147,15 @@ TEST_F(OutgoingStateTest, SessionForkedResponseReceivedAddsISession)
     EXPECT_CALL(objCallContext, RemoveSession(&objSession)).Times(0);
 
     MockISession objForkedSession;
-    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(&objForkedSession));
+    EXPECT_CALL(*pSessionInterfaceHolder, AddISession(_, &objForkedSession));
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->SessionForkedResponseReceived(&objSession, &objForkedSession));
 }
 
 TEST_F(OutgoingStateTest, SessionForkedResponseReceivedTerminatesOriginalSessionByConfig)
 {
-    ON_CALL(*pConfigurationManager, IsMaintainMultipleEarlySessionsByForking)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession,
             Terminate(IMS_TRUE, CallReasonInfo(CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED)))
@@ -1117,7 +1169,8 @@ TEST_F(OutgoingStateTest, SessionForkedResponseReceivedTerminatesOriginalSession
 
 TEST_F(OutgoingStateTest, SessionForkedResponseReceivedDoesNotTerminateOriginalSessionIfNotFound)
 {
-    ON_CALL(*pConfigurationManager, IsMaintainMultipleEarlySessionsByForking)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objCallContext, GetSession(_)).WillByDefault(Return(nullptr));
@@ -1149,6 +1202,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfNoPreconditionSu
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, HandleResponse(_, _)).Times(1);
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
@@ -1162,6 +1216,8 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfNotAvailableToSe
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
     EXPECT_CALL(objMessageUtils, GetResponseStatusCode(_, _, _)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
@@ -1171,6 +1227,9 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfCodeIs183ButNotN
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to make IMessage have SDP
 
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
@@ -1181,6 +1240,48 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfCodeIs183ButNotN
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsTerminatingIfSdpOaFails)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+    SetSdpOaFailure(objMessage);
+
+    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIfNoSdpOa)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    SipMethod objPrackMethod = SipMethod::PRACK;
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objPrackMethod));
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+
+    MockIMessage objPreviousPrackMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objPreviousPrackMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objPreviousPrackMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPreviousPrackMessage, GetState()).WillByDefault(Return(IMessage::STATE_SENT));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
@@ -1199,6 +1300,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredSendsEarlyUpdateIfAvailable)
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(1);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
@@ -1219,6 +1321,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredTerminatesCallIfSendingUpdateFail
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(1);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_FAILURE));
 
     EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
@@ -1240,6 +1343,7 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIf200OkIsAlreadyRe
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(SipStatusCode::SC_200));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
@@ -1247,14 +1351,16 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIf200OkIsAlreadyRe
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedDoesNothingIfNeedToIgnoreByConfig)
 {
-    ON_CALL(*pConfigurationManager, IsIgnorePrackDeliveryFailure).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedByErrorResponseTerminatesCall)
 {
-    ON_CALL(*pConfigurationManager, IsIgnorePrackDeliveryFailure).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_PRACK, -1))
             .WillByDefault(Return(SipStatusCode::SC_488));
 
@@ -1268,7 +1374,8 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedByErrorResponseTerminatesCal
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedByNoResponseTerminatesCall)
 {
-    ON_CALL(*pConfigurationManager, IsIgnorePrackDeliveryFailure).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_PRACK, -1))
             .WillByDefault(Return(SipStatusCode::SC_INVALID));
 
@@ -1295,6 +1402,8 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStopsTimersIfNot100)
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 }
 
@@ -1313,6 +1422,9 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStops100WaitTimerIf1
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT)).Times(0);
 
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X))
+            .Times(0);
+
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 }
 
@@ -1324,7 +1436,9 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSe
     MockUdpKeepAliveSender* pKeepAliveSender = new MockUdpKeepAliveSender(
             new MockISipKeepAliveHelper(), objCallContext);  // OutgoingState deletes it
     ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     EXPECT_CALL(*pKeepAliveSender, Start).Times(1);
 
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
@@ -1427,6 +1541,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedStopsTimers)
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+
     pOutgoingState->SessionRprReceived(&objSession, 0);
 }
 
@@ -1440,7 +1556,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedStopOrStartMoNoanswerTimerByContext)
             .WillByDefault(Return(&objMessage));
 
     // config is true
-    ON_CALL(*pConfigurationManager, IsStopRingbackTimerBy183WithSdpBody)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_183));
     MockISipMessage objSipMessage;
@@ -1454,7 +1571,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedStopOrStartMoNoanswerTimerByContext)
     pOutgoingState->SessionRprReceived(&objSession, 0);
 
     // config is false
-    ON_CALL(*pConfigurationManager, IsStopRingbackTimerBy183WithSdpBody)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_NOANSWER, _));
@@ -1610,7 +1728,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor180WithSdpAns
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
@@ -1634,7 +1753,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor181WithSdpAns
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
@@ -1658,7 +1778,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor182WithSdpAns
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
@@ -1682,7 +1803,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor183WithSdpAns
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
@@ -1704,6 +1826,7 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
@@ -1728,6 +1851,7 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(0);
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
@@ -1752,10 +1876,47 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
 
+    EXPECT_CALL(objMediaManager, AdjustDirectionForLocalResourceConfirmation(_)).Times(1);
     EXPECT_CALL(objMtcSession, SendPrack(IMS_TRUE)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
     EXPECT_CALL(objUiNotifier, SendProgressing());
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendPrackIfFinalResponseIsNotReceived)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_180));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objSession, IsFinalResponseReceivedForInitialInviteRequest)
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcSession, SendPrack(_));
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedDoesNotInvokeSendPrackIfFinalResponseIsReceived)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_180));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objSession, IsFinalResponseReceivedForInitialInviteRequest)
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendPrack(_)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }

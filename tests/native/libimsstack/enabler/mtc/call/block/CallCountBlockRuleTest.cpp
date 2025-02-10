@@ -20,7 +20,7 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/block/CallCountBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -36,15 +36,13 @@ public:
     MockIMtcCallManager objCallManager;
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     CallCountBlockRule* pBlockRule;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
@@ -88,7 +86,8 @@ TEST_F(CallCountBlockRuleTest, CheckReturnsUnblockedIfNoCallExists)
     ImsList<IMtcCall*> lstCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
 
-    ON_CALL(*pConfigurationManager, GetCallMaxCount).WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CALL_MAX_COUNT_INT))
+            .WillByDefault(Return(1));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -104,7 +103,8 @@ TEST_F(CallCountBlockRuleTest, CheckReturnsUnblockedIfMaxTerminatingCallExists)
     lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::TERMINATING));  // Ongoing call
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
 
-    ON_CALL(*pConfigurationManager, GetCallMaxCount).WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CALL_MAX_COUNT_INT))
+            .WillByDefault(Return(1));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -120,7 +120,8 @@ TEST_F(CallCountBlockRuleTest, CheckReturnsBlockedIfMaxCallExists)
     lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));  // Ongoing call
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
 
-    ON_CALL(*pConfigurationManager, GetCallMaxCount).WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CALL_MAX_COUNT_INT))
+            .WillByDefault(Return(1));
 
     {
         objCallInfo.ePeerType = PeerType::MO;

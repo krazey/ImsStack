@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-#include "../../../config/interface/common/MockICoreServiceConfig.h"
-#include "../../../config/interface/common/MockIMediaConfig.h"
 #include "AStringArray.h"
 #include "ICapabilities.h"
+#include "ISipHeader.h"
 #include "ImsAosParameter.h"
+#include "IpAddress.h"
+#include "MockICapabilities.h"
+#include "MockICoreService.h"
+#include "MockICoreServiceConfig.h"
+#include "MockIMediaConfig.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtcContext.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "MockISipMessage.h"
+#include "SipAddress.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICapabilities.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIMessageBodyPart.h"
 #include "helper/MtcCapabilityQueryHandler.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipAddress.h"
-#include "util/IpAddress.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -54,8 +54,7 @@ class MtcCapabilityQueryHandlerTest : public ::testing::Test
 {
 public:
     MockIMtcContext objMockContext;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockICoreService objMockCoreService;
     MockIMessage objMockMessage;
     MockICapabilities objMockCapabilities;
@@ -70,8 +69,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(1));
@@ -113,7 +111,9 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsFailureIfGetNextResponseRetur
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithSdpBodyPartFlagIfNoMandatorySdpLine)
 {
-    ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigVoice::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
     EXPECT_CALL(objMockContext, GetSlotId).Times(0);
@@ -136,7 +136,9 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithSdpBodyPartFlagIfN
 {
     objAudioMediaCapability.RemoveAllElements();
 
-    ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigVoice::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
     EXPECT_CALL(objMockMessage, CreateBodyPart).Times(0);
@@ -160,7 +162,9 @@ TEST_F(MtcCapabilityQueryHandlerTest,
     objVideoMediaCapability.RemoveAllElements();
     objVideoMediaCapability.AddElement(VIDEO_M_LINE_INVALID);
 
-    ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigVoice::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
     EXPECT_CALL(objMockMessage, CreateBodyPart).Times(0);
@@ -183,7 +187,9 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithoutSdpBodyPartFlag
     // To pass of Video capability decode.
     objVideoMediaCapability.RemoveAllElements();
 
-    ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigVoice::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
     EXPECT_CALL(objMockMessage, CreateBodyPart).Times(1).WillOnce(Return(&objMockIMessageBodyPart));
@@ -203,9 +209,12 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithoutSdpBodyPartFlag
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfig)
 {
-    ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigVoice::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
     EXPECT_CALL(objMockCapabilities, SetMessageMediator).Times(2);
@@ -224,9 +233,12 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfig)
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfigWithoutVideo)
 {
-    ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigVoice::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));  // for line coverage.
     ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
     EXPECT_CALL(objMockCapabilities, SetMessageMediator).Times(2);

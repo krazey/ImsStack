@@ -567,8 +567,8 @@ public final class ImsCallSessionWrapper {
         }
     }
 
-    private static void loge(String s) {
-        Log.e(Log.TAG, "ImsCallSessionWrapper: " + s);
+    private void loge(String s) {
+        Log.e(this, s);
     }
 
     /**

@@ -18,13 +18,13 @@
 #define MTC_RADIO_CHECKER_H_
 
 #include "IImsRadio.h"
-#include "IMtcCallStateListener.h"
 #include "INetworkWatcher.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/radio/IMtcRadioChecker.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 
 using TrafficType = IMS_UINT32;
 using CallDirection = IMS_UINT32;
@@ -63,7 +63,7 @@ class MtcTrafficInfo;
 
 class MtcRadioChecker final :
         public IMtcRadioChecker,
-        public IMtcCallStateListener,
+        public IInterfaceHolderListener,
         public IMtcRadioConnectionListener,
         public IMtcAosStateListener
 {
@@ -83,10 +83,8 @@ public:
     inline void OnAosStateChanged(IN IMtcService&, IN MtcAosState, IN IMS_UINT32) override {}
     void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
-    // IMtcCallStateListener
-    void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
-            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
-    void OnTotalCallStateChanged(IN State eState) override;
+    // IInterfaceHolderListener
+    void OnSessionInterfaceReleased(IN CallKey nKey) override;
 
     // IMtcRadioConnectionListener
     void OnConnectionFailed(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
@@ -115,6 +113,7 @@ private:
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi, IN CallKey nCallKey);
     void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);
+    IMS_BOOL IsCallTerminated(IN CallKey nKey);
 
 private:
     IMtcContext& m_objContext;

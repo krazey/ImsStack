@@ -15,7 +15,7 @@
  */
 #include "subscribe/UceSubscribe.h"
 
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "ICoreService.h"
 #include "IJniEnabler.h"
 #include "IMessage.h"
@@ -1384,7 +1384,7 @@ IMS_BOOL UceSubscribe::Handle403FailureResponse(ISipMessage* piSIPMessage)
     {
         IMS_TRACE_D("No Reason header present", 0, 0, 0);
         IMSMSG objMsg(
-                AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
+                AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
         MessageService::PostMessage(m_strAppName, objMsg);
         return IMS_FALSE;
     }
@@ -1398,7 +1398,7 @@ IMS_BOOL UceSubscribe::Handle403FailureResponse(ISipMessage* piSIPMessage)
             return IMS_FALSE;
         }
     }
-    IMSMSG objMsg(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
+    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
     MessageService::PostMessage(m_strAppName, objMsg);
     return IMS_FALSE;
 }

@@ -154,13 +154,24 @@ public:
      *
      * @return IMS_SINT32 Return dtmf duration value
      */
-    IMS_SINT32 GetDTMFDuration() const;
+    IMS_SINT32 GetDtmfDuration() const;
     /**
      * @brief Get the audio candidate attribute
      *
      * @return const ImsVector<AString>& Return audio-candidate-attribute
      */
     const ImsVector<AString>& GetAudioCandidateAttribute() const;
+    /**
+     * @brief Get the call end reasons after the expiry of the inactivity timer
+     *
+     * RTCP_INACTIVITY_ON_HOLD = 0,
+     * RTCP_INACTIVITY_ON_CONNECTED = 1,
+     * RTP_INACTIVITY_ON_CONNECTED = 2,
+     * E911_RTCP_INACTIVITY_ON_CONNECTED = 3,
+     * E911_RTP_INACTIVITY_ON_CONNECTED = 4
+     * @return IMS_BOOL Return the result whether input value is included in array
+     */
+    virtual IMS_BOOL IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const;
 
 public:
     enum
@@ -180,7 +191,7 @@ public:
     static const IMS_SINT32 DEFAULT_PTIME = 20;
     static const IMS_SINT32 DEFAULT_MAX_PTIME = 240;
     static const IMS_SINT32 DEFAULT_MAX_RED = DEFAULT_MAX_PTIME - DEFAULT_PTIME;
-    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_SOURCE_VALUE;
+    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_LOCAL_VALUE;
     static const IMS_SINT32 DEFAULT_AUDIO_DSCP = 46;
     static const IMS_SINT32 DEFAULT_JITTER_MIN = 0;
     static const IMS_SINT32 DEFAULT_JITTER_MAX = 0;
@@ -215,6 +226,7 @@ private:
     IMS_BOOL m_bAudioRtcpxrPacketDuplicateRleEnabled;
     IMS_SINT32 m_nDtmfDuration;
     ImsVector<AString> m_objAudioCandidateAttribute;
+    ImsVector<IMS_SINT32> m_objAudioInactivityCallEndReasons;
 };
 
 #endif

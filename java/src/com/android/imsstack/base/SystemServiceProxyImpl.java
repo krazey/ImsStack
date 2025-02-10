@@ -125,7 +125,7 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
             try {
                 b = ccm != null ? ccm.getConfigForSubId(subId, keys) : new PersistableBundle();
             } catch (Exception e) {
-                Log.w(Log.TAG, "getConfigForSubId: " + e + " for " + Arrays.toString(keys));
+                Log.w(this, "getConfigForSubId: " + e + " for " + Arrays.toString(keys));
                 b = new PersistableBundle();
             }
             return b;
@@ -246,11 +246,11 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         }
 
         @Override
-        public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
-                @NonNull Handler handler) {
+        public void registerSystemDefaultNetworkCallback(
+                @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
             ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             if (cm != null) {
-                cm.registerDefaultNetworkCallback(networkCallback, handler);
+                cm.registerSystemDefaultNetworkCallback(networkCallback, handler);
             } else {
                 throw new IllegalStateException("ConnectivityManager unavailable.");
             }
@@ -451,7 +451,7 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
             try {
                 return mMmTelManager.isCrossSimCallingEnabled();
             } catch (ImsException e) {
-                Log.d(Log.TAG, "isCrossSimCallingEnabled: " + e);
+                Log.d(this, "isCrossSimCallingEnabled: " + e);
                 return false;
             }
         }
@@ -461,7 +461,7 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
             try {
                 mMmTelManager.setCrossSimCallingEnabled(isEnabled);
             } catch (ImsException e) {
-                Log.d(Log.TAG, "setCrossSimCallingEnabled: " + e);
+                Log.d(this, "setCrossSimCallingEnabled: " + e);
             }
         }
     }
@@ -490,7 +490,7 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
                 mProvisioningManager.registerFeatureProvisioningChangedCallback(
                         executor, callback);
             } catch (ImsException e) {
-                Log.d(Log.TAG, "registerFeatureProvisioningChangedCallback: " + e);
+                Log.d(this, "registerFeatureProvisioningChangedCallback: " + e);
             }
         }
 
@@ -502,7 +502,7 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
             try {
                 mProvisioningManager.unregisterFeatureProvisioningChangedCallback(callback);
             } catch (IllegalArgumentException e) {
-                Log.d(Log.TAG, "unregisterFeatureProvisioningChangedCallback: " + e);
+                Log.d(this, "unregisterFeatureProvisioningChangedCallback: " + e);
             }
         }
 

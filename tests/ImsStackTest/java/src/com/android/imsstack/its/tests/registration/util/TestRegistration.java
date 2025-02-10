@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
+import com.android.imsstack.its.servercontrol.ServerFailureHandler;
 import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
@@ -37,7 +38,7 @@ import java.util.function.Predicate;
 /**
  * Provides utilities and assertions for registration tests that use {@link ImsRegistrationWrapper}.
  */
-public class TestRegistration {
+public class TestRegistration extends ServerFailureHandler {
 
     private static final int DEFAULT_TIMEOUT_MS = 10000;
 
@@ -155,8 +156,13 @@ public class TestRegistration {
         return matcher != null ? matcher : m -> true;
     }
 
-    private static void logd(String s) {
-        Log.d(Log.TAG, "TestRegistration: " + s);
+    private static void logd(Object o, String s) {
+        Log.d(o, "TestRegistration: " + s);
+    }
+
+    @Override
+    protected void handleServerFailure() {
+        mLatch.countDownAndInit();
     }
 
     /**
@@ -180,6 +186,10 @@ public class TestRegistration {
                 mLatch.await(mWaitingTimeMillis);
             } else {
                 mLatch.awaitTimeout(mWaitingTimeMillis);
+            }
+
+            if (mFailureDetail != null) {
+                fail(mFailureDetail);
             }
         }
 
@@ -355,7 +365,7 @@ public class TestRegistration {
          */
         @Override
         public void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
-            logd("onRegistered::attributes:" + attributes.toString());
+            logd(this, "onRegistered::attributes:" + attributes.toString());
 
             mEventRecords.put(RegEvent.Type.REGISTERED, new RegEvent.EventRecord(attributes));
 
@@ -372,7 +382,7 @@ public class TestRegistration {
          */
         @Override
         public void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
-            logd("onRegistering::attributes:" + attributes.toString());
+            logd(this, "onRegistering::attributes:" + attributes.toString());
 
             mEventRecords.put(RegEvent.Type.REGISTERING, new RegEvent.EventRecord(attributes));
 
@@ -393,7 +403,7 @@ public class TestRegistration {
         @Override
         public void onDeregistered(@NonNull ImsReasonInfo info, int suggestedAction,
                 int imsRadioTech) {
-            logd("onDeregistered::info:" + info.toString() + ", suggestedAction:"
+            logd(this, "onDeregistered::info:" + info.toString() + ", suggestedAction:"
                     + suggestedAction + ", imsRadioTech:" + imsRadioTech);
 
             mEventRecords.put(RegEvent.Type.DEREGISTERED,
@@ -414,7 +424,7 @@ public class TestRegistration {
          */
         @Override
         public void onTechnologyChangeFailed(int imsTransportType, @NonNull ImsReasonInfo info) {
-            logd("onTechnologyChangeFailed::imsTransportType:" + imsTransportType
+            logd(this, "onTechnologyChangeFailed::imsTransportType:" + imsTransportType
                     + ", info:" + info.toString());
 
             mEventRecords.put(RegEvent.Type.TECHNOLOGY_CHANGE_FAILED,
@@ -438,7 +448,7 @@ public class TestRegistration {
          */
         @Override
         public void onSubscriberAssociatedUriChanged(@Nullable Uri[] uris) {
-            logd("onSubscriberAssociatedUriChanged::uris:" + Arrays.toString(uris));
+            logd(this, "onSubscriberAssociatedUriChanged::uris:" + Arrays.toString(uris));
 
             mEventRecords.put(RegEvent.Type.SUBSCRIBER_ASSOCIATED_URI_CHANGED,
                     new RegEvent.EventRecord(uris));

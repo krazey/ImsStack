@@ -154,6 +154,7 @@ PUBLIC VIRTUAL void Session::Destroy()
 {
     CleanupOnDestroy();
     ServiceMethod::Destroy();
+    GetService()->DeregisterMethod(this);
 }
 
 PUBLIC VIRTUAL void Session::SetMessageMediator(IN IMessageMediator* piMediator)
@@ -3907,7 +3908,8 @@ PROTECTED VIRTUAL SessionRefreshHelper* Session::CreateRefreshHelper()
     return new SessionRefreshHelper(GetService(), this);
 }
 
-PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientConnection* piScc)
+PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod)
 {
     IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
@@ -3916,24 +3918,18 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
         if (IsConfigurationSet(CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED))
         {
             // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-            ImsList<Message*> objResponses;
+            ImsList<Message*> objResponses = GetPreviousResponses(nServiceMethod);
 
-            if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
+            if (!objResponses.IsEmpty())
             {
-                objResponses = GetPreviousResponses(IMessage::SESSION_START);
+                IMS_TRACE_D("100 Trying is received - handled by the application", 0, 0, 0);
+                PostMessage(
+                        AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
             }
-            else
-            {
-                objResponses = GetPreviousResponses(IMessage::SESSION_UPDATE);
-            }
-
-            IMS_TRACE_D(
-                    "100 Trying is received; It will be handled by the application...", 0, 0, 0);
-            PostMessage(AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
         }
         else
         {
-            IMS_TRACE_D("100 Trying is received; Ignore it...", 0, 0, 0);
+            IMS_TRACE_D("100 Trying is received - ignored", 0, 0, 0);
         }
 
         return IMS_SUCCESS;
@@ -3966,18 +3962,12 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
     }
 
     // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-    ImsList<Message*> objResponses;
+    ImsList<Message*> objResponses = GetPreviousResponses(nServiceMethod);
 
-    if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
+    if (!objResponses.IsEmpty())
     {
-        objResponses = GetPreviousResponses(IMessage::SESSION_START);
+        PostMessage(AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
     }
-    else
-    {
-        objResponses = GetPreviousResponses(IMessage::SESSION_UPDATE);
-    }
-
-    PostMessage(AMSG_SESSION_PROVISIONAL_RESPONSE_RECEIVED, 0, objResponses.GetSize() - 1);
 
     if (nStatusCode == SipStatusCode::SC_180)
     {
@@ -4061,30 +4051,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUpdate(IN ISipServerConnect
             return IMS_FAILURE;
         }
 
-        AString strWarning;
-
-        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
-        {
-            AString strUaString =
-                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
-
-            strUaString = strUaString.Replace(" ", "");
-
-            if (strUaString.GetLength() != 0)
-            {
-                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUaString.GetStr());
-            }
-            else
-            {
-                strWarning = "304 \"Media Type Not Available\"";
-            }
-        }
-        else
-        {
-            strWarning = "304 \"Media Type Not Available\"";
-        }
-
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)
@@ -5181,9 +5148,6 @@ void Session::CleanupOnDestroy()
 
     // 'Replaces' header handling ...
     RemoveSessionFromCallControlHelper();
-
-    // Clean up the resources
-    GetService()->DeregisterMethod(this);
 }
 
 PRIVATE
@@ -5564,8 +5528,7 @@ IMS_RESULT Session::HandleRequestToInvite(IN ISipServerConnection* piSsc)
             return IMS_FAILURE;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
 
         if (!SendNUpdateResponse(IMessage::SESSION_START, piSsc))
         {
@@ -5696,30 +5659,7 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
             return IMS_FAILURE;
         }
 
-        AString strWarning;
-
-        if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
-        {
-            AString strUaString =
-                    SipConfigProxy::GetUaString(GetSlotId(), GetService()->GetSipProfile());
-
-            strUaString = strUaString.Replace(" ", "");
-
-            if (strUaString.GetLength() != 0)
-            {
-                strWarning.Sprintf("304 %s \"Media Type Not Available\"", strUaString.GetStr());
-            }
-            else
-            {
-                strWarning = "304 \"Media Type Not Available\"";
-            }
-        }
-        else
-        {
-            strWarning = "304 \"Media Type Not Available\"";
-        }
-
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)
@@ -5893,7 +5833,7 @@ IMS_RESULT Session::HandleRequestToRefer(IN ISipServerConnection* piSsc)
 
     if (!pReference->ServerConnection_NotifyRequest(piSsc))
     {
-        delete pReference;
+        pReference->Destroy();
         Ims::SetLastError(ImsError::GENERAL_ERROR);
 
         IMS_TRACE_E(0, "Handling Reference failed", 0, 0, 0);
@@ -6079,7 +6019,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
     // Handle 1xx response first...
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        IMS_RESULT nResult = HandleProvisionalResponse(piScc);
+        IMS_RESULT nResult = HandleProvisionalResponse(piScc, nServiceMethod);
 
         if ((nState == STATE_NEGOTIATING) && SipStatusCode::IsProvisional(nStatusCode) &&
                 (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))

@@ -154,6 +154,7 @@ PUBLIC VIRTUAL void Reference::Destroy()
 {
     CleanupOnDestroy();
     ServiceMethod::Destroy();
+    GetService()->DeregisterMethod(this);
 }
 
 PUBLIC
@@ -1277,8 +1278,6 @@ void Reference::CleanupOnDestroy()
     }
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
-
-    GetService()->DeregisterMethod(this);
 }
 
 PRIVATE

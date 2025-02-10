@@ -31,11 +31,14 @@ public:
     SIP_BOOL SetValueInt(const SIP_UINT32 nContLen);
     SIP_UINT32 GetValueInt() const;
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppszCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pszStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Encode(SIP_CHAR** ppszCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Decode(const SIP_CHAR* pszStartPt, SIP_UINT32 nDecLen) override;
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     virtual ~SipIntegerHeader();
+
+    static constexpr SIP_INT32 MAX_GEOLOCATION_ERROR = 999;
+    static constexpr SIP_UINT32 MAX_EXPIRES = 4294967295;
 };
 #endif  //__SIP_INTEGER_HEADER_H__

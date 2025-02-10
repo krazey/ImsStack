@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
+#include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
 #include "MtcContextRepository.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
-#include "call/TestMtcPendingOperationHolder.h"
 #include "call/ParticipantInfo.h"
+#include "call/TestMtcPendingOperationHolder.h"
 #include "call/state/IncomingState.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipMethod.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -62,8 +62,7 @@ public:
     MockIMtcMediaManager objMediaManager;
     MockIMessageUtils objMessageUtils;
     MockEpsFallbackTrigger* pEpsFbTrigger;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
     MockMtcTimerWrapper objTimer;
     MtcSupplementaryService* pSupplementaryService;
@@ -90,8 +89,7 @@ protected:
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimer));
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
         pSupplementaryService = IMS_NULL;
@@ -547,10 +545,9 @@ TEST_F(IncomingStateTest, SendUpdateBySrvccByFailed)
 TEST_F(IncomingStateTest, OnAosConnectedInvokesPreconditionManagerIpCanChanged)
 {
     IMS_UINT32 nAnyAosReason = 1;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(0));
-    EXPECT_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).Times(0);
-    EXPECT_CALL(objPreconditionManager, HandleQosOnIpcanChanged);
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objPreconditionManager, HandleQosOnIpcanChanged);
     EXPECT_EQ(CallStateName::INCOMING,
             pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
 }
@@ -562,12 +559,13 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
     MockIMtcService objService;
     ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    SetParamsForIncomingCallReceived();
 
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
-    SetParamsForIncomingCallReceived();
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(CallStateName::ALERTING,
             pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));

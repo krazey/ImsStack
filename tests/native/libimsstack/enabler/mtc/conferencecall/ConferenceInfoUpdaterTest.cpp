@@ -20,7 +20,7 @@
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/MockConferenceFactory.h"
 #include "conferencecall/MockConferenceInfo.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include <gtest/gtest.h>
 
@@ -60,8 +60,7 @@ public:
 
     MockIMtcContext objContext;
     MockConferenceFactory* pFactory;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
 
     ConferenceParticipantList objParticipantList;
     ConferenceInfoUpdater* pUpdater;
@@ -72,12 +71,13 @@ protected:
         pInfo = IMS_NULL;
         pDescription = IMS_NULL;
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
-        ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
                 .WillByDefault(Return(IMS_TRUE));
-        ON_CALL(*pConfigurationManager, IsEnableConferenceSubscribeByParticipant)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
 
         objParticipantList.SetLocalUri(LOCAL_URI);
@@ -181,7 +181,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInvalidVersionInPartialState)
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsEvenInvalidVersionIfConfigurationOff)
 {
-    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     SetUpDefaultUsers();
@@ -194,7 +195,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsEvenInvalidVersionIfConfiguratio
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithPartialState)
 {
-    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     SetUpDefaultUsers();
@@ -207,7 +209,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithPartialState)
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithFullState)
 {
-    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     SetUpDefaultUsers();
@@ -339,7 +342,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatching)
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatchingOnParticipant)
 {
-    ON_CALL(*pConfigurationManager, IsEnableConferenceSubscribeByParticipant)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;

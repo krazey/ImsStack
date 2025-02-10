@@ -17,6 +17,7 @@
 #ifndef ESTABLISHED_STATE_H_
 #define ESTABLISHED_STATE_H_
 
+#include "CallReasonInfo.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
@@ -62,18 +63,20 @@ public:
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
 
 private:
     IMS_RESULT HandleUpdate(
             IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo);
-    IMS_RESULT HandleReceivedUpdate(OUT CallStateName& eStateName);
-    IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
+    CallReasonInfo HandleReceivedUpdate(OUT CallStateName& eStateName);
+    CallReasonInfo HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
     IMS_BOOL IsConferenceCallParticipant() const;
     ImsList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
     CallStateName Downgrade(IN CallType eCallType);
-    IMS_BOOL IsRefreshInProgress() const;
+    IMS_BOOL ShouldPendOperation() const;
 
     CallStateName TerminateUssiAfterInfoTransaction();
 };

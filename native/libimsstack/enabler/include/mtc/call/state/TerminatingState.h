@@ -28,6 +28,8 @@ public:
     virtual ~TerminatingState();
     TerminatingState(IN const TerminatingState&) = delete;
     TerminatingState& operator=(IN const TerminatingState&) = delete;
+
+    void OnEnter() override;
 };
 
 #endif

@@ -19,7 +19,7 @@
 
 __IMS_TRACE_TAG_MEDIA__;
 
-#define DEFAULT_AVC_PROFILE_ID   "42C00C"
+#define DEFAULT_AVC_PROFILE_ID "42C00C"
 #define DEFAULT_AVC_IMAGE_ATTR \
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
 #define DEFAULT_AVC_FRAME_SIZE "NEED_TO_CHECK"
@@ -32,19 +32,19 @@ CodecAvcConfig::CodecAvcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_bIncludeSpropParameterSets(DEFAULT_INCLUDE_SPROP),
         m_strProfileLevelId(DEFAULT_AVC_PROFILE_ID)
 {
-    IMS_TRACE_D("+CodecAvcConfig Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecAvcConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAvcConfig::~CodecAvcConfig()
 {
-    IMS_TRACE_D("~CodecAvcConfig", 0, 0, 0);
+    IMS_TRACE_I("~CodecAvcConfig", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - piCc is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -89,7 +89,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
             DEFAULT_PACKETIZATION_MODE);
 
     m_strSpropParameterSets = piCcSubBundle->GetString(
-            CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
+            CarrierConfig::ImsVt::KEY_AVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
 
     m_bIncludeSpropParameterSets = (m_strSpropParameterSets.GetLength() > 0) ? IMS_TRUE : IMS_FALSE;
 
@@ -107,7 +107,7 @@ PUBLIC VIRTUAL void CodecAvcConfig::ToDebugString() const
 {
     CodecVideoConfig::ToDebugString();
 
-    IMS_TRACE_D("IncludeSpropParameterSets(%d), ProfileLevelId(%s)", m_bIncludeSpropParameterSets,
+    IMS_TRACE_D("IncludeSpropParameterSets[%d], ProfileLevelId[%s]", m_bIncludeSpropParameterSets,
             m_strProfileLevelId.GetStr(), 0);
 }
 

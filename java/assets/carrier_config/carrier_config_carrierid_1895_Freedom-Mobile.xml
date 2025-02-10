@@ -19,6 +19,7 @@
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>
@@ -32,7 +33,7 @@
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <string name="imsvoice.conference_factory_uri_string">sip:conf@mobilefrdm.ca</string>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
-    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
@@ -40,8 +41,10 @@
     <!-- Previous solution was using 8090, but requirements is 80 -->
     <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
-
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <!-- AUID prefix is from previous solution. No requirements -->
     <string name="imsss.xcap_auid_prefix_string">/MYSERVICE</string>
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
+        <item value="400"/>
+    </int-array>
 </carrier_config>

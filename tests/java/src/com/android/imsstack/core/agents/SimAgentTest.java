@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.core.agents;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -58,7 +59,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
@@ -68,6 +68,7 @@ public class SimAgentTest {
     private static final byte[] UST_BYTES = ImsUtils.hexStringToBytes(UST);
     private static final String IST = "E200";
     private static final byte[] IST_BYTES = ImsUtils.hexStringToBytes(IST);
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
     private static final String IMPI = "1234@test.ims.com";
     private static final String DOMAIN = "test.ims.com";
     private static final String[] IMPU_ARRAY = { "sip:1234@test.ims.com", "tel:1234" };
@@ -95,9 +96,9 @@ public class SimAgentTest {
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         when(mTelephonyManagerProxy.getSimServiceTable(eq(TelephonyManager.APPTYPE_USIM)))
-                .thenReturn(UST);
+                .thenReturn(UST_BYTES);
         when(mTelephonyManagerProxy.getSimServiceTable(eq(TelephonyManager.APPTYPE_ISIM)))
-                .thenReturn(IST);
+                .thenReturn(IST_BYTES);
         when(mTelephonyManagerProxy.getImsPrivateUserIdentity()).thenReturn(IMPI);
         when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(DOMAIN);
         when(mTelephonyManagerProxy.getImsPublicUserIdentities()).thenReturn(IMPU_LIST);
@@ -227,12 +228,12 @@ public class SimAgentTest {
         // SIM_STATE_LOADED
         mSimAgent.updateSimState();
 
-        assertTrue(Arrays.equals(UST_BYTES, mSimAgent.getUsimServiceTable()));
+        assertArrayEquals(UST_BYTES, mSimAgent.getUsimServiceTable());
 
         // SIM_STATE_ABSENT
         mSimAgent.updateSimState();
 
-        assertNull(mSimAgent.getUsimServiceTable());
+        assertArrayEquals(EMPTY_BYTE_ARRAY, mSimAgent.getUsimServiceTable());
     }
 
     @Test
@@ -252,8 +253,8 @@ public class SimAgentTest {
 
         assertEquals(IMPI, mSimAgent.getIsimImpi());
         assertEquals(DOMAIN, mSimAgent.getIsimDomain());
-        assertTrue(Arrays.equals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0])));
-        assertTrue(Arrays.equals(IST_BYTES, mSimAgent.getIsimServiceTable()));
+        assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
+        assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
 
         // ISIM_STATE_ABSENT
         mSimAgent.updateSimState();
@@ -261,7 +262,7 @@ public class SimAgentTest {
         assertNull(mSimAgent.getIsimImpi());
         assertNull(mSimAgent.getIsimDomain());
         assertTrue(mSimAgent.getIsimImpu().isEmpty());
-        assertNull(mSimAgent.getIsimServiceTable());
+        assertArrayEquals(EMPTY_BYTE_ARRAY, mSimAgent.getIsimServiceTable());
 
         // ISIM_STATE_LOADED and throw RuntimeException for IMPI/IMPU
         doThrow(new RuntimeException("IMPI not loaded."))
@@ -273,7 +274,7 @@ public class SimAgentTest {
         assertNull(mSimAgent.getIsimImpi());
         assertEquals(DOMAIN, mSimAgent.getIsimDomain());
         assertTrue(mSimAgent.getIsimImpu().isEmpty());
-        assertTrue(Arrays.equals(IST_BYTES, mSimAgent.getIsimServiceTable()));
+        assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
     }
 
     @Test

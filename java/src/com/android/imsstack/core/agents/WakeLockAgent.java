@@ -75,7 +75,7 @@ public class WakeLockAgent implements WakeLockInterface {
 
         PowerManager.WakeLock wakeLock = getWakeLock();
 
-        ImsLog.i("WakeLock#" + tag + ": " + timeoutMillis);
+        ImsLog.i(this, "WakeLock#" + tag + ": " + timeoutMillis);
 
         wakeLock.acquire(timeoutMillis);
     }

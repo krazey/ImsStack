@@ -25,33 +25,24 @@ private:
     SIP_CHAR* m_pszRPriority;
 
 public:
-    /*constructor*/
-    SipResourcePriorityHeader();
+    explicit SipResourcePriorityHeader(SIP_INT32 eHdrType);
     SipResourcePriorityHeader(const SipResourcePriorityHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetNameSpace(const SIP_CHAR* pszNameSpace);
     SIP_VOID SetRPriority(const SIP_CHAR* pszRPriority);
 
-    /*Get methods*/
     inline const SIP_CHAR* GetNameSpace() const { return m_pszNameSpace; }
 
     inline const SIP_CHAR* GetResourcePriority() const { return m_pszRPriority; }
 
-    inline SIP_BOOL IsValidHeader() const override
-    {
-        return ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL)) ? SIP_FALSE
-                                                                              : SIP_TRUE;
-    }
+    SIP_BOOL IsValidHeader() const override;
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipResourcePriorityHeader();

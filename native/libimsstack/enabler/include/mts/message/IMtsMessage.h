@@ -34,7 +34,7 @@ public:
     virtual void SetMessageReference(IN IMS_SINT32 nMrOfRp) = 0;
     virtual IMS_SINT32 GetMti() = 0;
     virtual void SetMti(IN IMS_SINT32 nMti) = 0;
-    virtual IPageMessage* GetPageMessage() = 0;
+    virtual IPageMessage* GetPageMessage() const = 0;
     virtual void SetPageMessage(IN IPageMessage* piPageMessage) = 0;
     virtual IMS_SINT32 GetSeqId() = 0;
     virtual void SetSeqId(IN IMS_SINT32 nSeqId) = 0;

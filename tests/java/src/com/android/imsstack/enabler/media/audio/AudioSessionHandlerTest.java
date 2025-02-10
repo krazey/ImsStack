@@ -58,7 +58,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     private static final int SESSION_ID = 439;
 
     // Dtmf settings
-    private static final int DTMF_DURATION = 20;
+    private static final int DTMF_DURATION = 200;
     private static final char DTMF_DIGIT = '9';
 
     // Mock Objects
@@ -401,12 +401,13 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
-    public void testSetMediaQualityThreshold() {
+    public void testSetMediaQualityThresholdwithFwkTimer() {
         // Set Media Quality Threshold
         MediaQualityThreshold threshold = MediaTestUtils.createMediaQualityThreshold();
         Parcel testParcel = Parcel.obtain();
         testParcel.writeInt(MediaConstants.REQUEST_SET_MEDIA_QUALITY);
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeBoolean(true);
         threshold.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
         mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
@@ -414,6 +415,53 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         processAllMessages();
         verify(mMockAudioSession).setMediaQualityThreshold(eq(threshold));
         testParcel.recycle();
+    }
+
+    @Test
+    public void testSetMediaQualityThresholdwithoutFwkTimer() {
+        // Set Media Quality Threshold
+        MediaQualityThreshold threshold = MediaTestUtils.createMediaQualityThreshold();
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_SET_MEDIA_QUALITY);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeInt(MediaConstants.REQUEST_SET_MEDIA_QUALITY);
+        testParcel.writeBoolean(false);
+        threshold.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockAudioSession).setMediaQualityThreshold(eq(threshold));
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testSetMediaQualityThresholdTwice() {
+        // Set Media Quality Threshold
+        MediaQualityThreshold threshold = MediaTestUtils.createMediaQualityThreshold();
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_SET_MEDIA_QUALITY);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeInt(MediaConstants.REQUEST_SET_MEDIA_QUALITY);
+        testParcel.writeBoolean(false);
+        threshold.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        testParcel.setDataPosition(0);
+        Parcel testParcel2 = Parcel.obtain();
+        testParcel2.writeInt(MediaConstants.REQUEST_SET_MEDIA_QUALITY);
+        testParcel2.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel2.writeInt(MediaConstants.REQUEST_SET_MEDIA_QUALITY);
+        testParcel2.writeBoolean(true);
+        threshold.writeToParcel(testParcel2, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        testParcel2.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+
+        mMediaListener.onMediaMessage(testParcel2);
+        processAllMessages();
+        verify(mMockAudioSession, times(2)).setMediaQualityThreshold(eq(threshold));
+        testParcel.recycle();
+        testParcel2.recycle();
     }
 
     @Test
@@ -505,5 +553,13 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
                 times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
         assertEquals(mAudioSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
         testParcel.recycle();
+    }
+
+    @Test
+    public void testOnNotifyIncomingDtmfReceived() {
+        mAudioSessionCallback.onDtmfReceived(DTMF_DIGIT, DTMF_DURATION);
+        processAllMessages();
+        verify(mMockAudioSessionCallbackHandler).onNotifyIncomingDtmfReceived(
+                eq((int) DTMF_DIGIT), eq(DTMF_DURATION));
     }
 }

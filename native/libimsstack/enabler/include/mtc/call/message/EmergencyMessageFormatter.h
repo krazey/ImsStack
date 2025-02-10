@@ -19,6 +19,7 @@
 
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/message/MessageFormatter.h"
 
@@ -35,7 +36,8 @@ public:
     EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
 public:
-    virtual IMS_RESULT FormStartMessage(IN CallType eCallType) override;
+    IMS_RESULT FormStartMessage(IN CallType eCallType) override;
+    IMS_RESULT FormUpdateMessage(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo) override;
 
 protected:
     virtual void SetAcceptHeader();
@@ -45,11 +47,15 @@ private:
     void SetPPreferredIdentityHeaderByUserId();
     void SetPPreferredIdentityHeaderByDeviceId();
     void SetRecvInfoHeader();
+    void SetPEmergencyInfoHeader();
     void SetSipInstanceFeature();
 
-    IMS_UINT32 GetAoSRegMode(IN ServiceType eServiceType);
-    IMS_RESULT GetLocalIpAddress(OUT AString& strIpAddress);
-    IMS_UINT32 GetLocalPort();
+    IMS_UINT32 GetAosRegMode(IN ServiceType eServiceType) const;
+    IMS_RESULT GetLocalIpAddress(OUT AString& strIpAddress) const;
+    IMS_UINT32 GetLocalPort() const;
+    AString GetWifiCallingAddressId() const;
+    AString GetDeviceId() const;
+    AString GetMacAddress() const;
 
 private:
     IMS_UINT32 m_eNormalAosRegMode;

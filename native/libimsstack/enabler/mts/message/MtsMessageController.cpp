@@ -17,6 +17,7 @@
 #include "ByteArray.h"
 #include "CarrierConfig.h"
 #include "Configuration.h"
+#include "Engine.h"
 #include "GeolocationHelper.h"
 #include "GeolocationPidfCreator.h"
 #include "ServiceConfig.h"
@@ -37,6 +38,7 @@
 #include "MtsStringDef.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
+#include "helper/MtsTransactionTimerUpdateHelper.h"
 #include "message/IMtsMessage.h"
 #include "message/MtsErrorHandler.h"
 #include "message/MtsMessage.h"
@@ -57,7 +59,9 @@ MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService
         m_pMtsDynamicLoader(pMtsDynamicLoader),
         m_piRetryAfterTimer(IMS_NULL),
         m_objRetryFunction(),
-        m_pRetryContent(IMS_NULL)
+        m_pRetryContent(IMS_NULL),
+        m_objTimerUpdateHelper(ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId),
+                Engine::GetConfiguration()->GetSipConfig(m_nSlotId))
 {
     IMS_TRACE_I("+MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
 
@@ -548,17 +552,21 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     }
 
     // We sends a SMS message giving it SMS data burst and the Content-Type.
+    m_objTimerUpdateHelper.SetMessageTransactionTimer(nGsmMti);
+
     if (piPageMessage->Send(*pContent,
                 m_pMtsDynamicLoader->GetMtsSipFormUtils()->FormContentTypeEnumToStr(eSmsFormat)) ==
             IMS_FAILURE)
     {
         IMS_TRACE_E(0, "Failed to send a IPageMessage", 0, 0, 0);
+        m_objTimerUpdateHelper.ResetMessageTransactionTimer(nGsmMti);
         ReportTransmissionResult(MO_ERROR_RETRY, eSmsFormat, nSeqId);
         delete piMtsMessage;
         return IMS_FAILURE;
     }
 
     IMS_TRACE_I("SendMtsMessage : SMS is sent successfully", 0, 0, 0);
+    m_objTimerUpdateHelper.ResetMessageTransactionTimer(nGsmMti);
 
     /*
      * Register itself as the listener of iPageMessage events,
@@ -635,7 +643,9 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
                 SmsFormatType::SMSFORMAT_3GPP, objContent);
         if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
         {
-            AString strCallId = GetPreviousCallId(objContent);
+            IMtsMessage* piMtsMessage =
+                    Search(m_pMtsDynamicLoader->GetMtsSmUtils()->GetRpMr(objContent));
+            AString strCallId = GetPreviousCallId(piMtsMessage);
             // Set the Call-ID in the In-Reply-To header
             if (strCallId.GetLength())
             {
@@ -648,7 +658,7 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
     {
         ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
         IMS_BOOL bSupportPidf = piCc->GetBoolean(
-                CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL);
+                CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL);
 
         if (bSupportPidf)
         {
@@ -814,6 +824,10 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
 
         case MO_ERROR_GENERIC:
             nResultCode = MO_ERROR_GENERIC;
+            break;
+
+        case MO_ERROR_FALLBACK:
+            nResultCode = MO_ERROR_FALLBACK;
             break;
 
         default:
@@ -1067,13 +1081,9 @@ ICoreService* MtsMessageController::GetICoreService(IN IMS_BOOL bEmergency) cons
 }
 
 PRIVATE
-AString MtsMessageController::GetPreviousCallId(IN const ByteArray& objContent)
+AString MtsMessageController::GetPreviousCallId(IN const IMtsMessage* piMtsMessage) const
 {
     AString strCallId;
-
-    // Get an IMtsMessage object with the message reference
-    IMtsMessage* piMtsMessage = Search(m_pMtsDynamicLoader->GetMtsSmUtils()->GetRpMr(objContent));
-
     if (piMtsMessage != IMS_NULL)
     {
         IPageMessage* piPageMessage = piMtsMessage->GetPageMessage();

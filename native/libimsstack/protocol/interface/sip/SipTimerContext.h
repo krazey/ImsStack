@@ -29,8 +29,8 @@ private:
     SipTimerContext& operator=(const SipTimerContext& objRHS);
 
 public:
-    SipTxnTimerValues* pTxnSipTxnTimers;
-    SIP_UINT32 nTimerOptions;
+    SipTxnTimerValues* m_pTxnSipTxnTimers;
+    SIP_UINT32 m_nTimerOptions;
 };
 
 #endif  //__SIP_TIMER_CONTEXT_H__

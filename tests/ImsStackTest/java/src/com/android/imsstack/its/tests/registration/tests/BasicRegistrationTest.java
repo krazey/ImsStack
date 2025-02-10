@@ -16,21 +16,29 @@
 package com.android.imsstack.its.tests.registration.tests;
 
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_NR;
 
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
 import static org.junit.Assert.assertTrue;
 
+import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.its.base.ServiceStateBuilder;
 import com.android.imsstack.its.base.SystemProxyResolver;
+import com.android.imsstack.its.servercontrol.RuleSet;
+import com.android.imsstack.its.servercontrol.ScenarioGeneratorUtils;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
 import com.android.imsstack.its.tests.registration.RegistrationInfo;
+import com.android.imsstack.its.tests.registration.util.MessageBuildUtils;
 import com.android.imsstack.its.tests.registration.util.TestRegistration;
 
 import org.junit.After;
@@ -53,186 +61,160 @@ public class BasicRegistrationTest extends RegistrationTestBase {
         setUpBase(SLOT0);
 
         mRegistration = new TestRegistration(mImsServiceConnector.getRegistration());
-        mRegistrationHelper = new RegistrationHelper();
+        createControlConnection(mRegistration);
 
+        mRegistrationHelper = new RegistrationHelper();
         mInfoBuilder = new RegistrationInfo.Builder().setConfig(mConfig);
     }
 
     @After
     public void tearDown() throws Exception {
+        mServerControlConnection.disconnect();
         tearDownBase(SLOT0);
     }
 
     @Test
     public void testTriggerRegistrationWithDefaultConfig() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG)");
-
-        /*
-          TODO: SetUpTiss : REGISTER - 200(REG)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If the REGISTER message does not contain the following headers: From, To, Call-ID,
-             Authorization, Max-Forwards, User-Agent, Contact.
-          c. If the REGISTER message does not contain a CSeq header with the following parameter:
-             "REGISTER".
-          d. If the REGISTER message doesn't contain a Contact header with the following parameters:
-             +g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel, audio, video,
-             +g.3gpp.smsip.
-         */
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addContainRule("video")
+                                .addContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
         mRegistration.expect().registered();
-
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
     }
 
     @Test
     public void testTriggerRegistrationWithCapabilityVoiceOnly() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG)");
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addNotContainRule("video")
+                                .addNotContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        /*
-          TODO: SetUpTiss : REGISTER - 200(REG)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If the REGISTER message does not contain the following headers: From, To, Call-ID,
-             Authorization, Max-Forwards, User-Agent, Contact.
-          c. If the REGISTER message does not contain a CSeq header with the following parameter:
-             "REGISTER".
-          d. If the REGISTER message doesn't contain a Contact header with the following parameters:
-             +g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel.
-          e. If the REGISTER message contain a Contact header with the following parameters:
-             video. (Note : We currently do not check for the presence of +g.3gpp.smsip).
-         */
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .setEnableCapability(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE)
+                .addConfig(config)
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build());
 
         mRegistration.expect().registered();
-
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
     }
 
     @Test
-    public void testTriggerRegistrationWithCapabilitySmsOnly() throws Exception {
+    public void testTriggerRegistrationWithCapabilityVoiceVideo() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG)");
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER(1st) : Valid Contact header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service"
+                                        + ".ims.icsi.mmtel")
+                                .addContainRule("audio")
+                                .addContainRule("video")
+                                .addNotContainRule("+g.3gpp.smsip")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        /*
-          TODO: SetUpTiss : REGISTER - 200(REG)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If the REGISTER message does not contain the following headers: From, To, Call-ID,
-             Authorization, Max-Forwards, User-Agent, Contact.
-          c. If the REGISTER message does not contain a CSeq header with the following parameter:
-             "REGISTER".
-          d. If the REGISTER message doesn't contain a Contact header with the following parameters:
-             +g.3gpp.smsip.
-          e. If the REGISTER message contain a Contact header with the following parameters:
-             +g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel, audio, video.
-         */
+        PersistableBundle config = new PersistableBundle();
+        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, false);
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder
-                .setEnableCapability(CAPABILITY_TYPE_SMS, REGISTRATION_TECH_LTE)
+                .addConfig(config)
+                .setEnableCapability(CAPABILITY_TYPE_VOICE,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setEnableCapability(CAPABILITY_TYPE_VIDEO,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
+                .setDisableCapability(CAPABILITY_TYPE_SMS,
+                        REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build());
 
         mRegistration.expect().registered();
-
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
     }
 
     @Test
     public void testTriggerRegistrationRejectedBy423() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 423(REG) - REGISTER - 200(REG)");
-
-        /*
-          TODO: SetUpTiss : REGISTER - 423(REG) - REGISTER - 200(REG)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If the REGISTER message does not contain the following headers: From, To, Call-ID,
-             Authorization, Max-Forwards, User-Agent, Contact.
-          c. If the REGISTER message does not contain a CSeq header with the following parameter:
-             "REGISTER".
-          d. If the REGISTER message doesn't contain a Contact header with the following parameters:
-             +g.3gpp.icsi-ref="urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel, audio, video,
-             +g.3gpp.smsip.
-
-          The server must send a 423 response containing Min-Expires.
-
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message with an expires value greater than
-             the Min-Expires within 10 second.
-         */
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages(
+                "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
         mRegistration.expect().registering();
 
-        logi("RegistrationTest: Receives 423(REG)");
-
         mRegistration.expect().registered();
-
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
     }
 
     @Test
     public void testTriggerSubscribeWithDefaultConfig() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB)");
-
-        /*
-          TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If it does not receive a SUBSCRIBE message within 10 second after REGISTER.
-          c. If the SUBSCRIBE message does not contain the following headers: From, To, Call-ID,
-             Max-Forwards, User-Agent, Contact.
-          d. If the SUBSCRIBE message does not contain a CSeq header with the following parameter:
-             "SUBSCRIBE".
-          e. If the SUBSCRIBE message does not include the P-Access-Network-Info header with the
-             following parameter: 3GPP-E-UTRAN.
-         */
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<200-REGISTER");
+        generator.addMessage(MessageBuildUtils.getDefaultSubscribe()
+                .addRuleSet(new RuleSet.Builder("SUBSCRIBE : Valid P-Access-Network-Info header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("P-Access-Network-Info")
+                                .addContainRule("3GPP-E-UTRAN")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
 
         mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
         mRegistration.expect().registered();
 
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
+        mRegistration.expect(1000).nothing();
     }
 
     @Test
     public void testTriggerSubscribeWithNetworkNr() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB)");
-
-        /*
-          TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB)
-          The server should return a failure under the following conditions:
-          a. If it does not receive a REGISTER message within 10 second.
-          b. If it does not receive a SUBSCRIBE message within 10 second after REGISTER.
-          c. If the SUBSCRIBE message does not contain the following headers: From, To, Call-ID,
-             Max-Forwards, User-Agent, Contact.
-          d. If the SUBSCRIBE message does not contain a CSeq header with the following parameter:
-             "SUBSCRIBE".
-          e. If the SUBSCRIBE message does not include the P-Access-Network-Info header with the
-             following parameter: 3GPP-NR.
-         */
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister().build());
+        generator.addMessages("<200-REGISTER");
+        generator.addMessage(MessageBuildUtils.getDefaultSubscribe()
+                .addRuleSet(new RuleSet.Builder("SUBSCRIBE : Valid P-Access-Network-Info header")
+                        .addRule(new RuleSet.Rule.RuleBuilder("P-Access-Network-Info")
+                                .addContainRule("3GPP-NR")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
 
         ServiceState ss = new ServiceStateBuilder()
                 .addNetworkRegistrationInfoForNrCs()
@@ -245,16 +227,14 @@ public class BasicRegistrationTest extends RegistrationTestBase {
 
         mRegistration.expect().registered();
 
-        /*
-          TODO : Assertion from TISS
-          assertTrue(expect, message);
-         */
+        mRegistration.expect(1000).nothing();
     }
 
     @Test
     public void testTriggerDeregistrationByNotifyUnregistered() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Unregistered)");
+        logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
+                + "NOTIFY(Unregistered)");
 
         /*
           TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Unregistered)
@@ -273,7 +253,7 @@ public class BasicRegistrationTest extends RegistrationTestBase {
 
         assertTrue(isRegistered);
 
-        logi("RegistrationTest: Receives NOTIFY(Unregistered)");
+        logi(this, "RegistrationTest: Receives NOTIFY(Unregistered)");
         mRegistration.expect(1000).nothing();
 
         /*
@@ -292,7 +272,8 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     @Test
     public void testTriggerDeregistrationByNotifyRejected() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Rejected)");
+        logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
+                + "NOTIFY(Rejected)");
 
         /*
           TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Rejected)
@@ -311,7 +292,7 @@ public class BasicRegistrationTest extends RegistrationTestBase {
 
         assertTrue(isRegistered);
 
-        logi("RegistrationTest: Receives NOTIFY(Rejected)");
+        logi(this, "RegistrationTest: Receives NOTIFY(Rejected)");
         mRegistration.expect(1000).nothing();
 
         /*
@@ -330,7 +311,8 @@ public class BasicRegistrationTest extends RegistrationTestBase {
     @Test
     public void testTriggerDeregistrationByNotifyDeactivated() throws Exception {
 
-        logi("RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Deactivated)");
+        logi(this, "RegistrationTest: REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - "
+                + "NOTIFY(Deactivated)");
 
         /*
           TODO: SetUpTiss : REGISTER - 200(REG) - SUBSCRIBE - 200(SUB) - NOTIFY(Deactivated)
@@ -349,7 +331,7 @@ public class BasicRegistrationTest extends RegistrationTestBase {
 
         assertTrue(isRegistered);
 
-        logi("RegistrationTest: Receives NOTIFY(Deactivated)");
+        logi(this, "RegistrationTest: Receives NOTIFY(Deactivated)");
         mRegistration.expect(1000).nothing();
 
         /*

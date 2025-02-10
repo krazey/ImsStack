@@ -109,6 +109,13 @@ public:
     virtual IMS_SINT32 GetImsRegType() = 0;
 
     /**
+     * @brief Check whether UE is in CBM(ECBM or SCBM) or not
+     *
+     * @return IMS_BOOL Return whether IMS is in Callback Mode or not.
+     */
+    virtual IMS_BOOL IsInCallbackMode() = 0;
+
+    /**
      * @brief Check whether IMS is registered or not.
      *
      * @return IMS_BOOL Return whether IMS is registered or not.
@@ -173,10 +180,6 @@ public:
         CMD_SCSCF_RESTORATION,
         CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT,
         CMD_CLEAR_TRIED_PCSCFS,
-        CMD_SCBM_STARTED,
-        CMD_SCBM_TERMINATED,
-        CMD_SCBM_TERMINATED_ECALL,
-        CMD_SCBM_TERMINATED_ESMS,
         CMD_ECALL_INIT,
         CMD_ECALL_DONE,
         CMD_ESMS_INIT,

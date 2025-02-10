@@ -45,11 +45,11 @@ public:
     /* Type of Transaction is defined */
     enum
     {
-        INV_CLI_TXN = 0,
-        INV_SER_TXN,
-        NON_INV_CLI_TXN,
-        NON_INV_SER_TXN,
-        INVALID_TXN
+        INVITE_CLIENT = 0,
+        INVITE_SERVER,
+        NON_INVITE_CLIENT,
+        NON_INVITE_SERVER,
+        INVALID
     };
 
     enum
@@ -112,11 +112,11 @@ public:
     enum
     {
         INV_CLI_SEND_INV_REQ_EVT = 0,
-        INV_CLI_TIMERA_B_TIME_OUT_EVT,
-        INV_CLI_TIMERD_TIME_OUT_EVT,
+        INV_CLI_TIMER_A_B_TIME_OUT_EVT,
+        INV_CLI_TIMER_D_TIME_OUT_EVT,
         INV_CLI_RECV_1XX_RESP_EVT,
         INV_CLI_RECV_2XX_RESP_EVT,
-        INV_CLI_RECV_3XX_6XX_RESP_EVT,
+        INV_CLI_RECV_FAILURE_RESP_EVT,
         INV_CLI_TRANSP_ERROR_EVT,
         INV_CLI_INVALID_EVT
     };
@@ -136,8 +136,8 @@ public:
     {
         INV_SER_RECV_INV_REQ_EVT = 0,
         INV_SER_SEND_NON_100_PROV_RESP_EVT,
-        INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT,
-        INV_SER_SEND_2XX_SUCCESS_RESP_EVT,
+        INV_SER_SEND_FAILURE_RESP_EVT,
+        INV_SER_SEND_2XX_RESP_EVT,
         INV_SER_TRANSP_ERROR_EVT,
         INV_SER_RECV_ACK_REQ_EVT,
         INV_SER_TIMER_G_H_TIME_OUT_EVT,
@@ -161,7 +161,7 @@ public:
         NON_INV_CLI_SEND_NON_INV_REQ_EVT = 0,
         NON_INV_CLI_TIMER_E_F_TIME_OUT_EVT,
         NON_INV_CLI_RECV_1XX_RESP_EVT,
-        NON_INV_CLI_RECV_2XX_6XX_RESP_EVT,
+        NON_INV_CLI_RECV_FINAL_RESP_EVT,
         NON_INV_CLI_TRANSP_ERROR_EVT,
         NON_INV_CLI_TIMER_K_TIME_OUT_EVT,
         NON_INV_CLI_INVALID_EVT
@@ -183,7 +183,7 @@ public:
     {
         NON_INV_SER_RECV_NON_INV_REQ_EVT = 0,
         NON_INV_SER_SEND_1XX_RESP_EVT,
-        NON_INV_SER_SEND_2XX_6XX_RESP_EVT,
+        NON_INV_SER_SEND_FINAL_RESP_EVT,
         NON_INV_SER_TRANSP_ERROR_EVT,
         NON_INV_SER_TIMER_J_TIME_OUT_EVT,
         NON_INV_SER_INVALID_EVT
@@ -223,7 +223,7 @@ private:
     SIP_UINT16 m_nTxnState;
 
     /* Counter for Number of Retransmissions */
-    SIP_UINT16 m_nReTxCount;
+    SIP_UINT16 m_nRetransmissionCount;
 
     /* Transaction Related Timers */
     /* Type of Timer Started */
@@ -237,7 +237,7 @@ private:
     /* Current Value of Timer Duration */
     SIP_UINT32 m_nCurrentDuration;
 
-    SipTxnTimerValues objTxnTimerValues;
+    SipTxnTimerValues m_objTxnTimerValues;
 
 public:
     SipTxn();
@@ -265,7 +265,7 @@ public:
     SipTransportInfo* GetTranspInfo();
     inline SIP_UINT16 GetTxnState() const { return m_nTxnState; }
 
-    inline SIP_UINT16 GetReTxCount() const { return m_nReTxCount; }
+    inline SIP_UINT16 GetRetransmissionCount() const { return m_nRetransmissionCount; }
 
     inline SIP_UINT32 GetDurationExpired() const { return m_nDurationExpired; }
 
@@ -276,7 +276,7 @@ public:
     SIP_VOID* GetTimerId();
     ISipUserData* GetUserData();
     SIP_INT32 GetMsgSentProto();
-    inline const SipTxnTimerValues& GetSipTxnTimers() const { return objTxnTimerValues; }
+    inline const SipTxnTimerValues& GetSipTxnTimers() const { return m_objTxnTimerValues; }
     /* Fill Transaction Properties */
     inline SIP_VOID SetTxnState(SIP_UINT16 nTxnState) { m_nTxnState = nTxnState; }
     inline SIP_VOID SetMaxDuration(SIP_UINT32 nMaxDuration) { m_nMaxDuration = nMaxDuration; }
@@ -287,9 +287,12 @@ public:
     inline SIP_VOID SetTimerId(SIP_VOID* pvTimerId) { m_pvTimerId = pvTimerId; }
     SIP_VOID SetUserData(ISipUserData* pUserData);
     /* Increment Txn Count by one*/
-    inline SIP_VOID IncrTxnCount() { m_nReTxCount = m_nReTxCount + SIP_ONE; }
+    inline SIP_VOID IncreaseTxnCount()
+    {
+        m_nRetransmissionCount = m_nRetransmissionCount + SIP_ONE;
+    }
 
-    inline SIP_VOID IncrDurationExpired(SIP_UINT32 nDuration)
+    inline SIP_VOID IncreaseDurationExpired(SIP_UINT32 nDuration)
     {
         m_nDurationExpired = m_nDurationExpired + nDuration;
     }
@@ -298,7 +301,7 @@ public:
 
     SIP_VOID InitRetransmissionInfo();
 
-    SIP_VOID SetRespCode(SIP_UINT16 nRespCode);
+    SIP_VOID SetResponseCode(SIP_UINT16 nRespCode);
 
 private:
     virtual ~SipTxn();

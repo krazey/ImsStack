@@ -143,7 +143,7 @@ public class VideoSessionHandler extends MediaState {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("messageType = " + msg.what);
+            ImsLog.d("messageType = " + msg.what);
 
             // Till open session response is received, handling other commands has to wait
             try {
@@ -321,7 +321,7 @@ public class VideoSessionHandler extends MediaState {
 
         @Override
         public void notifyRtpReceptionStats(final RtpReceptionStats stats) {
-            ImsLog.v("notifyRtpReceptionStats: stats=" + stats);
+            ImsLog.d("notifyRtpReceptionStats: stats=" + stats);
 
             Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS,
                     stats).sendToTarget();
@@ -361,7 +361,7 @@ public class VideoSessionHandler extends MediaState {
      * @param parcel parcel received from Media Native
      */
     public void onImsMediaVideoMessage(final int requestType, Parcel parcel) {
-        ImsLog.v("requestType= " + requestType);
+        ImsLog.d("requestType= " + requestType);
 
         switch (requestType) {
             /** Requests (ImsStack -> ImsMedia) */
@@ -370,7 +370,7 @@ public class VideoSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_OPENING);
                 mLocalIpAddress = parcel.readString();
                 mLocalPortNumber = parcel.readInt();
-                ImsLog.v("localIpAddress= " + mLocalIpAddress
+                ImsLog.d("localIpAddress= " + mLocalIpAddress
                         + " localPortNumber= " + mLocalPortNumber);
 
                 Message.obtain(mVideoMessageHandler, requestType).sendToTarget();
@@ -398,7 +398,7 @@ public class VideoSessionHandler extends MediaState {
             {
                 String remoteIpAddress = parcel.readString();
                 int remotePortNumber = parcel.readInt();
-                ImsLog.v("remoteIpAddress= " + remoteIpAddress
+                ImsLog.d("remoteIpAddress= " + remoteIpAddress
                         + " remotePortNumber= " + remotePortNumber);
 
                 Message.obtain(
@@ -410,7 +410,7 @@ public class VideoSessionHandler extends MediaState {
             {
                 MediaQualityThreshold threshold =
                         MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("onVideoSetMediaQualityThreshold: " + threshold.toString());
+                ImsLog.d("onVideoSetMediaQualityThreshold: " + threshold.toString());
 
                 Message.obtain(mVideoMessageHandler, requestType, threshold).sendToTarget();
             }
@@ -656,8 +656,8 @@ public class VideoSessionHandler extends MediaState {
     }
 
     private void handleVideoDataUsageNotification(final long bytes) {
-        if (mVideoSessionCallbackHandler != null) {
-            mVideoSessionCallbackHandler.onNotifyVideoDataUsage(bytes);
+        if (mMtcMediaVideoCallProvider != null) {
+            mMtcMediaVideoCallProvider.onNotifyVideoDataUsage(bytes);
         }
     }
 

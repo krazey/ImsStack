@@ -50,7 +50,7 @@ public:
     // IMtcCallStateListener implementation
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
-    inline void OnTotalCallStateChanged(IN State) override{};
+    inline void OnTotalCallStateChanged(IN State) override {};
     // must be true. Otherwise, Context will be null when State is changed to Terminating
     inline IMS_BOOL IsSynchronousCallRequired() override { return IMS_TRUE; }
 
@@ -59,6 +59,7 @@ public:
 private:
     void ReStart();
     void SetRedialDetail();
+    void LoadRetryLimitsFromConfiguration();
     void ReleaseCallResources();
     void StopCallTimers();
     IMS_BOOL IsRedialAvailable() const;
@@ -68,9 +69,10 @@ private:
     IMtcCallContext& m_objContext;
     CallKey m_nCallKey;
     IMS_SINT32 m_nType;
+    IMS_SINT32 m_nMaxDuration;
     IMS_SINT32 m_nInterval;
-    IMS_UINT32 m_nMaxCount;
-    IMS_UINT32 m_nCount;
+    IMS_SINT32 m_nMaxCount;
+    IMS_SINT32 m_nCount;
     const AString m_strExtra;
     ITimer* m_piTimer;
 

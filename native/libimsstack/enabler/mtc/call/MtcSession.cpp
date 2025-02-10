@@ -15,6 +15,7 @@
  */
 
 #include "CallReasonInfo.h"
+#include "CarrierConfig.h"
 #include "IMessage.h"
 #include "ISession.h"
 #include "ISipHeader.h"
@@ -54,6 +55,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
+        m_bSessionTerminatedOrStartFailed(IMS_FALSE),
         m_eOngoingUpdateType(UpdateType::NONE),
         m_objCallTypeHistory({})
 {
@@ -67,7 +69,8 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
-        m_objContext.GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
+        m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddISession(
+                m_objContext.GetCallKey(), &m_objSession);
     }
 
     UpdateSessionProperty();
@@ -85,7 +88,8 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
     m_objSession.SetRefreshListener(IMS_NULL);
     delete m_pMessageSender;
 
-    m_objContext.GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(
+            &m_objSession, IMS_FALSE, m_bSessionTerminatedOrStartFailed);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
@@ -130,11 +134,14 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
             nStatusCode, bReliable, bIncludeSdp, IsCallWaiting());
 }
 
-PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bAllowReOffer)
+PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bSdpOfferRequired)
 {
-    IMS_TRACE_D("SendPrack", 0, 0, 0);
+    IMS_BOOL bAllowSdp = m_objContext.GetConfigurationProxy().GetBoolean(
+            ConfigVoice::KEY_ALLOW_SDP_IN_PRACK_BOOL);
+    IMS_TRACE_D(
+            "SendPrack offer[%s] allow[%s]", _TRACE_B_(bSdpOfferRequired), _TRACE_B_(bAllowSdp), 0);
 
-    if (SetSdpToSend(bAllowReOffer) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(bSdpOfferRequired && bAllowSdp) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -226,7 +233,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 {
     IMS_TRACE_D("Update", 0, 0, 0);
 
-    if (SetSdpToSend(IMS_TRUE) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(UpdateType::LOCATION != eUpdateType) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -238,8 +245,9 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::AcceptUpdate()
 {
-    IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(
-            m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE));
+    IMessage* piMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(piMessage) &&
+            piMessage->GetMethod().Equals(SipMethod::INVITE);
     IMS_TRACE_D("AcceptUpdate Offerless case[%s]", _TRACE_B_(bAnswerForOfferlessReInvite), 0, 0);
 
     // bAnswerForOfferlessReInvite should allow re-offer.
@@ -299,6 +307,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
             SetInConference(objRequest);
             break;
 
+        case RequestType::PRACK:
         case RequestType::EARLY_UPDATE:
             UpdateCallTypeFromMessage(objRequest, IMS_TRUE);
             break;
@@ -382,7 +391,8 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
 
     // TODO: check CallType.
     if (!m_objContext.GetCallInfo().bUssi &&
-            m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED))
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
     {
         lstExtensions.Append(new PreconditionExtension(m_objContext));
     }
@@ -393,8 +403,8 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
 PRIVATE
 void MtcSession::UpdateSessionProperty()
 {
-    IMS_SINT32 nInterval =
-            m_objContext.GetConfigurationProxy().GetInt(Feature::SESSION_REFRESH_TRIGGER_INTERVAL);
+    IMS_SINT32 nInterval = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT);
     if (nInterval > 0)
     {
         m_objSession.SetRefreshPolicy(ISession::REFRESH_POLICY_REMAIN_TIME, 0, 0, nInterval);
@@ -430,13 +440,14 @@ IMS_RESULT MtcSession::UpdateCallTypeFromMessage(
 PRIVATE
 void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
 {
-    if (m_objContext.GetConfigurationProxy().Is(
-                Feature::SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS))
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL))
     {
         m_bVideoCapable = IMS_TRUE;
     }
-    else if (m_objContext.GetConfigurationProxy().Is(
-                     Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_TTA_VOLTE_INFO))
+    else if (m_objContext.GetConfigurationProxy().Contains(
+                     ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                     MessageUtil::STR_P_TTA_VOLTE_INFO))
     {
         AString strAvchange = m_objContext.GetMessageUtils().GetHeader(
                 &objMessage, ISipHeader::UNKNOWN, MessageUtil::STR_P_TTA_VOLTE_INFO);
@@ -483,13 +494,13 @@ CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN CallType& eCallType)
 PRIVATE
 CallType MtcSession::GetCallTypeForOfferlessInvite()
 {
-    IMS_SINT32 eMediaType =
-            m_objContext.GetConfigurationProxy().GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_INVITE);
-    if (eMediaType == CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY)
+    IMS_SINT32 eMediaType = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT);
+    if (eMediaType == ConfigVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY)
     {
         return GetCallTypeByRegisteredFeature();
     }
-    else  // CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_AUDIO
+    else  // ConfigVoice::OFFERLESS_INVITE_MEDIA_TYPE_AUDIO
     {
         return CallType::VOIP;
     }
@@ -512,10 +523,10 @@ CallType MtcSession::GetCallTypeByRegisteredFeature()
     else if (bVideoFeature && bTextFeature)
     {
         // Video && RTT
-        IMS_SINT32 nPolicyForTextAndVideo =
-                m_objContext.GetConfigurationProxy().GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO);
-        if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED ||
-                nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE)
+        IMS_SINT32 nPolicyForTextAndVideo = m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT);
+        if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED ||
+                nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE)
         {
             return CallType::VT;
         }

@@ -15,8 +15,10 @@
  */
 
 #include "CallReasonInfo.h"
+#include "CarrierConfig.h"
 #include "IImsAosInfo.h"
 #include "INetworkWatcher.h"
+#include "ISession.h"
 #include "ImsTypeDef.h"
 #include "ServiceImsRadio.h"
 #include "ServiceTimer.h"
@@ -26,7 +28,6 @@
 #include "call/IMtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
 #include "helper/IMtcAosConnector.h"
 #include "precondition/IMtcPreconditionManager.h"
 
@@ -65,11 +66,22 @@ PUBLIC VIRTUAL EpsFallbackTrigger::~EpsFallbackTrigger()
     }
 }
 
-PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::IsRequired(
-        IN const MtcConfigurationProxy& objConfigProxy)
+PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(
+        IN IMtcCallContext& objContext)
 {
-    // without Watchdog timer, EPS fallback due to network no response isn't supported, either.
-    return objConfigProxy.GetInt(Feature::EPS_FALLBACK_WATCHDOG_TIME) > 0;
+    // Start only if Teps_fb_watchdog > 0 by Verizon's requirement
+    return objContext.GetService().IsNr() &&
+            objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT) > 0;
+}
+
+PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByMoRequestTimeout(
+        IN IMtcCallContext& objContext)
+{
+    return objContext.GetService().IsNr() &&
+            objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT) >=
+            0;
 }
 
 PUBLIC
@@ -84,8 +96,9 @@ void EpsFallbackTrigger::StartWatchdog()
     }
 
     m_piTimerWatchdogWait = TimerService::GetTimerService()->CreateTimer();
-    m_piTimerWatchdogWait->SetTimer(
-            m_objContext.GetConfigurationProxy().GetInt(Feature::EPS_FALLBACK_WATCHDOG_TIME), this);
+    m_piTimerWatchdogWait->SetTimer(m_objContext.GetConfigurationProxy().GetInt(
+                                            ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT),
+            this);
 }
 
 PUBLIC

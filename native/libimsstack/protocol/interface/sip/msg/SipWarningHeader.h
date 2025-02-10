@@ -30,37 +30,30 @@ private:
     /*Transport*/
     SIP_CHAR* m_pszWarnText;
 
-public:
-    /*constructor*/
-    SipWarningHeader();
+    static constexpr SIP_UINT16 MIN_WARNCODE = 100;
+    static constexpr SIP_UINT16 MAX_WARNCODE = 999;
 
+public:
+    SipWarningHeader();
     SipWarningHeader(const SipWarningHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*Sets the visited nw name*/
     inline SIP_VOID SetWarnCode(SIP_UINT32 nWarnCode) { m_nWarnCode = nWarnCode; }
-
-    /*Gets the visited nw name*/
     inline SIP_UINT32 GetWarnCode() const { return m_nWarnCode; }
 
     SIP_VOID SetWarnAgent(const SIP_CHAR* pszWarnAgent);
     SIP_VOID SetWarnText(const SIP_CHAR* pszWarnText);
 
-    /*Gets the visited nw name*/
     inline SIP_CHAR* GetWarnAgent() const { return m_pszWarnAgent; }
-
-    /*Gets the visited nw name*/
     inline const SIP_CHAR* GetWarnText() const { return m_pszWarnText; }
 
     SIP_BOOL IsValidHeader() const override;
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 private:
     ~SipWarningHeader();

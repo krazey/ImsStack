@@ -197,7 +197,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         pTxnContextData->SetTxnState(this);
     }
 
-    pTxnContext->pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
+    pTxnContext->m_pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
     ISipUserData objUserData(static_cast<SIP_VOID*>(pTxnContext));
 
     /* BSP_TODO::
@@ -300,11 +300,11 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
 
     if (m_pTxnKey != IMS_NULL)
     {
-        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER)
         {
             m_nClass = CLASS_INVITE;
         }
-        else if (m_pTxnKey->GetTxnType() == SipTxn::NON_INV_SER_TXN)
+        else if (m_pTxnKey->GetTxnType() == SipTxn::NON_INVITE_SERVER)
         {
             m_nClass = CLASS_REGULAR;
         }
@@ -314,9 +314,10 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     /* NOTE::
     If the message is an ACK request for non-2xx response to INVITE request,
     then stack drop the message by returning ignore request */
-    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN))
+    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER))
     {
-        if (objMethod.Equals(SipMethod::ACK) && (m_pTxnKey->GetRespCode() >= SipStatusCode::SC_300))
+        if (objMethod.Equals(SipMethod::ACK) &&
+                (m_pTxnKey->GetResponseCode() >= SipStatusCode::SC_300))
         {
             IMS_TRACE_I("__UAS__ :: ___ ACK (%s) TO UNSUCCESSFUL FINAL RESPONSE ___",
                     SipDebug::GetCharA1(m_pTxnKey->GetCallId(), 8, '@'), 0, 0);
@@ -325,7 +326,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
             if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
             {
                 SipMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
-                pMessageTracker->NotifyMessageReceived(objMethod, m_pTxnKey->GetRespCode(),
+                pMessageTracker->NotifyMessageReceived(objMethod, m_pTxnKey->GetResponseCode(),
                         AString(static_cast<const IMS_CHAR*>(m_pTxnKey->GetCallId())));
             }
             return SipPrivate::MESSAGE_DISCARDED;

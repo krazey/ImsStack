@@ -292,6 +292,8 @@ protected:
         // m_objRetryRandomIntervals.GetSize() = 0
         ON_CALL(m_objMockIAosConfig, GetRegRandomRetryIntervals())
                 .WillByDefault(ReturnRef(m_objRetryRandomIntervals));
+        ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
+                .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT));
         // m_objErrRegRequiredWithNextPcscf.GetSize() = 0
         ON_CALL(m_objMockIAosConfig, GetSubErrorRegRequiredWithNextPcscf())
                 .WillByDefault(ReturnRef(m_objErrRegRequiredWithNextPcscf));
@@ -1148,6 +1150,8 @@ TEST_F(AosSubscriptionTest, ShouldRequestScscfRestorationWithoutRetryAfterIfNoRe
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
+    ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
     // 503 error response without retry after
     ON_CALL(m_objMockISipMsg, GetStatusCode()).WillByDefault(Return(503));
     AString strRetryAfter = AString::ConstNull();
@@ -1171,6 +1175,8 @@ TEST_F(AosSubscriptionTest,
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
+    ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
     // 503 error response with retry after which value is 600 seconds
     ON_CALL(m_objMockISipMsg, GetStatusCode()).WillByDefault(Return(503));
     AString strRetryAfter("600");
@@ -1194,6 +1200,8 @@ TEST_F(AosSubscriptionTest,
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
+    ON_CALL(m_objMockIAosConfig, GetSubRetrySip503CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
     // 503 error response with retry after which value is 60 seconds
     ON_CALL(m_objMockISipMsg, GetStatusCode()).WillByDefault(Return(503));
     AString strRetryAfter("60");

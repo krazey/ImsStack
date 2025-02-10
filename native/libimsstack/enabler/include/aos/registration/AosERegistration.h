@@ -81,6 +81,8 @@ public:
             IN IMS_BOOL bExplicitUpdate = IMS_TRUE) final;
     void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) final;
 
+    IMS_BOOL IsInCallbackMode() final;
+
 protected:
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) final;
 
@@ -92,7 +94,10 @@ protected:
     void ProcessAuthenticationFailed() final;
 
     void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) final;
+    void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(IN IMS_UINT32 nRetryAfter);
     void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
+
+    IMS_BOOL ProcessStartFailed_305() final;
 
     void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
     void ProcessStartFailed_TxnTimeout() final;
@@ -102,6 +107,7 @@ protected:
     void ProcessUpdateFailed_TxnTimeout() final;
     void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason) final;
 
+    void ProcessStopRetryTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
 
     void SetRefreshPolicy() final;
@@ -127,7 +133,7 @@ protected:
     void ClearCbm();
 
     /// IAosEmergencyListener
-    void CallbackModeChanged(IN EmcCallbackModeType eType, IN EmcCallbackMode eState,
+    void CallbackModeChanged(IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
             IN IMS_ULONG nDuration) override;
 
     void HandleECallState(IN IMS_UINT32 nState);
@@ -144,8 +150,10 @@ protected:
     void ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered);
     void ProcessRearrangePcscf();
     void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
+    IMS_BOOL ProcessNormalDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode);
 
     void SetReinitiationRequested(IN IMS_BOOL bRequest);
+    void SetCallbackMode(IN EmergencyCallbackModeType eType, IN IMS_BOOL bEnable);
     void StartRegRetryTimer();
 
     IMS_UINT32 GetPreferredRegScheme();

@@ -769,6 +769,15 @@ IMS_BOOL AosHandle::IsRoaming() const
 }
 
 PROTECTED
+IMS_BOOL AosHandle::IsFeatureUnavailableInLimitedReg(IN IMS_UINT32 nFeature) const
+{
+    ImsVector<IMS_SINT32> objUnavailableFeatures =
+            GET_N_CONFIG(m_nSlotId)->GetUnavailableFeaturesInLimitedReg();
+
+    return objUnavailableFeatures.Contains(nFeature);
+}
+
+PROTECTED
 IMS_UINT32 AosHandle::GetNetworkType() const
 {
     return m_piAppContext->GetNetTracker()->GetNetworkType();
@@ -795,16 +804,19 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
     {
         case BLOCK_VOLTE_CAPABILITY:   // FALL-THROUGH
         case BLOCK_VOWIFI_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_VOPS:
+        case BLOCK_VOPS:               // FALL-THROUGH
+        case BLOCK_LIMITED_MMTEL:
             nFeature = ImsAosFeature::MMTEL;
             break;
 
-        case BLOCK_VILTE_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_VIWIFI_CAPABILITY:
+        case BLOCK_VILTE_CAPABILITY:   // FALL-THROUGH
+        case BLOCK_VIWIFI_CAPABILITY:  // FALL-THROUGH
+        case BLOCK_LIMITED_VIDEO:
             nFeature = ImsAosFeature::VIDEO;
             break;
 
-        case BLOCK_SMS_CAPABILITY:
+        case BLOCK_SMS_CAPABILITY:  // FALL-THROUGH
+        case BLOCK_LIMITED_SMS:
             nFeature = ImsAosFeature::SMSIP;
             break;
 
@@ -812,7 +824,8 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
             nFeature = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
             break;
 
-        case BLOCK_TEXT_CAPABILITY:
+        case BLOCK_TEXT_CAPABILITY:  // FALL-THROUGH
+        case BLOCK_LIMITED_TEXT:
             nFeature = ImsAosFeature::TEXT;
             break;
 
@@ -1148,10 +1161,12 @@ void AosHandle::NotifyEmergencyInitiated()
     if (m_nServiceType == ImsAosService::EMERGENCY_MTC)
     {
         m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
+        m_piAppContext->GetApp()->RequestCmd(IAosApplication::CMD_ECALL_INIT);
     }
     else if (m_nServiceType == ImsAosService::EMERGENCY_MTS)
     {
         m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
+        m_piAppContext->GetApp()->RequestCmd(IAosApplication::CMD_ESMS_INIT);
     }
 
     m_bEmergencyInitiated = IMS_TRUE;

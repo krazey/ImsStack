@@ -45,17 +45,6 @@ public:
      *
      */
     virtual ~MediaProfileFactory();
-    /**
-     * @brief Create a MediaBaseProfile with the MediaEnvironment and MediaConfiguration
-     *
-     * @param pEnvironment The network connection parameter
-     * @param pConfig The carrier configuration for media
-     * @param nSlotId The UICC slot id
-     * @param eType The media profile type to be created
-     * @return MediaBaseProfile* The MediaBaseProfile created
-     */
-    MediaBaseProfile* CreateProfile(IN MediaEnvironment* pEnvironment,
-            IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId, IN MEDIA_CONTENT_TYPE eType);
 
     /**
      * @brief Create each media(audio/text/video) profile
@@ -66,6 +55,7 @@ public:
      */
     MediaBaseProfile* CreateProfile(
             IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile = IMS_NULL);
+
     /**
      * @brief Delete the profile
      *
@@ -120,53 +110,6 @@ private:
     AudioProfile::Payload* CreateAudioPayload(IN AudioProfile::Payload* payload = IMS_NULL);
     TextProfile::Payload* CreateTextPayload(IN TextProfile::Payload* payload = IMS_NULL);
     VideoProfile::Payload* CreateVideoPayload(IN VideoProfile::Payload* payload = IMS_NULL);
-
-    AudioProfile* SetAudioProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
-            IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId);
-    VideoProfile* SetVideoProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
-    TextProfile* SetTextProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
-
-    MediaBaseProfile* CreateCodecPayloads(
-            IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
-
-    AudioProfile::Payload* CreateAmrPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreateEvsPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreateTelephoneEventPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    AudioProfile::Payload* CreatePcmPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    VideoProfile::Payload* CreateAvcPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    VideoProfile::Payload* CreateHevcPayload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-    void SetAudioCodecFmtp(IN CodecAudioConfig* pCodecConfig, IN AudioConfiguration* pAudioConfig,
-            OUT AudioProfile::AudioFmtp* pFmtp);
-    void SetVideoCodecFmtp(IN CodecVideoConfig* pCodecConfig, IN VideoConfiguration* pVideoConfig,
-            OUT VideoProfile::VideoFmtp* pFmtp);
-    void SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,
-            IN VideoConfiguration* pVideoConfig, OUT VideoProfile::Payload* pPayload);
-    TextProfile::Payload* CreateT140Payload(
-            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
-
-    IMS_SINT32 SetTransportCapa(OUT VideoProfile* pVideoProfile);
-    IMS_SINT32 SetAttributeCapa(
-            OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig);
-    IMS_SINT32 SetVideoAvpfTrr(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetVideoAvpfNack(OUT VideoProfile* pVideoProfile,
-            IN VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetVideoAvpfPli(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetVideoAvpfFir(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pVideoConfig,
-            IN IMS_SINT32 nAcap);
-    IMS_SINT32 SetVideoAvpfTmmbr(OUT VideoProfile* pVideoProfile,
-            IN VideoConfiguration* pVideoConfig, IN IMS_SINT32 nAcap);
-
-    void SetCapaNegoForAvpf(OUT VideoProfile* pVideoProfile, IN IMS_SINT32 nCapaNegoForAvpfOption,
-            IN IMS_SINT32 nTcap, IN IMS_SINT32 nAcap);
-    void SetMaxProfileFrameRate(OUT VideoProfile* pVideoProfile);
 };
 
 #endif

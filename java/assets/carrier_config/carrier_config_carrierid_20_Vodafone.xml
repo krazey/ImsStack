@@ -16,19 +16,19 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
+    <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
+    <int name="ims.reg_retry_cnt_per_pcscf_int" value="3"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
     <int name="imswfc.registration_private_header_int" value="2"/>
-    <int name="reg_retry_cnt_per_pcscf_int" value="3"/>
-    <boolean name="ims_dereg_on_3g_network_bool" value="true"/>
-    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
     <!-- Previous solution was using 80 and TCP, but VDF AU requirements support both TCP and TLS,
@@ -113,14 +113,14 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
-    <boolean name="audio_evs_support_bool" value="true"/>
-    <boolean name="audio_bw_nego_option_bool" value="true"/>
-    <int name="audio_maxred_int" value="220"/>
-    <int name="audio_ptime_millis_int" value="20"/>
-    <int name="audio_maxptime_millis_int" value="240"/>
-    <boolean name="audio_show_codec_attribute_modeset_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
-    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int name="imsvoice.audio_ptime_millis_int" value="20"/>
+    <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_modeset_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>

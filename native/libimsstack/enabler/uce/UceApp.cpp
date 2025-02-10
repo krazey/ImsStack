@@ -18,7 +18,7 @@
 
 #include "JniEnablerConnector.h"
 #include "IUceJniThread.h"
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "IImsAos.h"
@@ -130,15 +130,15 @@ IMS_BOOL UceApp::OnMessage(IN IMSMSG& objMSG)
             EnableUceService();
             break;
 
-        case AoSAppRequest::COMMAND_SET_PUBLISH_STARTED:
+        case AosAppRequest::COMMAND_SET_PUBLISH_STARTED:
             SetPublishStatusToAos(IMS_TRUE);
             break;
 
-        case AoSAppRequest::COMMAND_SET_PUBLISH_TERMINATED:
+        case AosAppRequest::COMMAND_SET_PUBLISH_TERMINATED:
             SetPublishStatusToAos(IMS_FALSE);
             break;
 
-        case AoSAppRequest::COMMAND_REGISTER_RECOVERY:
+        case AosAppRequest::COMMAND_REGISTER_RECOVERY:
         {
             if (m_RegisteredNetwork != eUCE_RAT_WIFI && m_eCurrentNetwork == eUCE_RAT_INVALID)
             {

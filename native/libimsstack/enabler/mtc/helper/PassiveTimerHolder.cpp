@@ -45,8 +45,15 @@ PUBLIC VIRTUAL PassiveTimerHolder::~PassiveTimerHolder()
 }
 
 PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eType,
-        IN IMS_UINT32 nTimeInMillis, IN IMS_BOOL bAllowReset /* = IMS_FALSE */)
+        IN IMS_SINT32 nTimeInMillis, IN IMS_BOOL bAllowReset /* = IMS_FALSE */)
 {
+    IMS_TRACE_D("AddTimer Type[%d] Duration[%d]", eType, nTimeInMillis, 0);
+
+    if (nTimeInMillis < 0)
+    {
+        return;
+    }
+
     if (IsActive(eType))
     {
         if (bAllowReset == IMS_FALSE)
@@ -58,11 +65,19 @@ PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eT
         ReleaseTimerInfo(eType);
     }
 
-    IMS_TRACE_D("AddTimer Type[%d] Duration[%d]", eType, nTimeInMillis, 0);
-
     ITimer* piTimer = TimerService::GetTimerService()->CreateTimer();
     m_objTimerInfoByType.Add(eType, new TimerInfo(piTimer));
     piTimer->SetTimer(nTimeInMillis, this);
+}
+
+PUBLIC VIRTUAL void PassiveTimerHolder::RemoveTimer(IN IPassiveTimerHolder::Type eType)
+{
+    IMS_TRACE_D("RemoveTimer Type[%d]", eType, 0, 0);
+
+    if (IsActive(eType))
+    {
+        ReleaseTimerInfo(eType);
+    }
 }
 
 PUBLIC VIRTUAL IMS_BOOL PassiveTimerHolder::IsActive(IN IPassiveTimerHolder::Type eType) const

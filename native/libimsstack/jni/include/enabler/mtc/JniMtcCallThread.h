@@ -40,6 +40,7 @@ public:
     void OnStarted(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void OnStartFailed(IN const CallReasonInfo& objReason) override;
+    void OnInitiating(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) override;
     void OnProgressing(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void OnHeld(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,

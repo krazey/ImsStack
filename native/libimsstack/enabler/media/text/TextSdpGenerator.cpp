@@ -22,7 +22,7 @@
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextSdpGenerator::TextSdpGenerator() :
-        SdpGenerator(MEDIA_TYPE_TEXT)
+        MediaSdpGenerator(MEDIA_TYPE_TEXT)
 {
     IMS_TRACE_I("+TextSdpGenerator()", 0, 0, 0);
 }
@@ -172,11 +172,11 @@ IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Pa
             return IMS_FALSE;
         }
 
-        IMS_UINT32 nCount = pRedFmtp->GetRedLevel();
+        IMS_SINT32 nCount = pRedFmtp->GetRedLevel();
         AString TempSubPT;
         TempSubPT.Sprintf("%d", pRedFmtp->GetRedPayload());
 
-        while (nCount-- > 0)
+        while (nCount > 0)
         {
             if (strFmtp.GetLength() > 0)
             {
@@ -184,6 +184,7 @@ IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Pa
             }
 
             strFmtp.Append(TempSubPT);
+            nCount--;
         }
 
         IMS_TRACE_I("GenerateFmtp() - Add fmtp, nRedundancy[%d], Red Payload[%d], Fmtp[%s]",

@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IImsAosInfo.h"
 #include "IMtcApp.h"
 #include "IMtcService.h"
+#include "INetworkConnection.h"
 #include "ISipHeader.h"
+#include "ServiceNetwork.h"
+#include "ServiceNetworkPolicy.h"
 #include "ServicePhoneInfo.h"
 #include "Sip.h"
 #include "SipParameter.h"
@@ -33,8 +37,8 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
+LOCAL const AString HEADER_P_EMERGENCY_INFO = "P-Emergency-Info";
+
 EmergencyMessageFormatter::EmergencyMessageFormatter(
         IN IMtcCallContext& objContext, IN ISession& objSession) :
         MessageFormatter(objContext, objSession),
@@ -44,15 +48,11 @@ EmergencyMessageFormatter::EmergencyMessageFormatter(
     IMS_TRACE_I("+EmergencyMessageFormatter", 0, 0, 0);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC VIRTUAL EmergencyMessageFormatter::~EmergencyMessageFormatter()
 {
     IMS_TRACE_I("~EmergencyMessageFormatter", 0, 0, 0);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallType eCallType)
 {
     if (MessageFormatter::FormStartMessage(eCallType) == IMS_FAILURE)
@@ -60,8 +60,8 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallTyp
         return IMS_FAILURE;
     }
 
-    m_eNormalAosRegMode = GetAoSRegMode(ServiceType::NORMAL);
-    m_eEmergencyAosRegMode = GetAoSRegMode(ServiceType::EMERGENCY);
+    m_eNormalAosRegMode = GetAosRegMode(ServiceType::NORMAL);
+    m_eEmergencyAosRegMode = GetAosRegMode(ServiceType::EMERGENCY);
     if ((m_eNormalAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN) ||
             (m_eEmergencyAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN))
     {
@@ -70,20 +70,35 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallTyp
 
     SetPPreferredIdentityHeader();
     SetRecvInfoHeader();
+    SetPEmergencyInfoHeader();
     SetSipInstanceFeature();
 
     return IMS_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
+PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormUpdateMessage(
+        IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo)
+{
+    if (MessageFormatter::FormUpdateMessage(eUpdateType, bIncludeAlertInfo) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (eUpdateType == UpdateType::LOCATION)
+    {
+        SetLocation();
+    }
+
+    return IMS_SUCCESS;
+}
+
 PROTECTED VIRTUAL
 void EmergencyMessageFormatter::SetAcceptHeader()
 {
     MessageFormatter::SetAcceptHeader();
 
-    if (!m_objContext.GetConfigurationProxy().Is(
-            Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED))
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigEmergency::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL))
     {
         return;
     }
@@ -93,8 +108,6 @@ void EmergencyMessageFormatter::SetAcceptHeader()
             ISipHeader::ACCEPT);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
 void EmergencyMessageFormatter::SetPPreferredIdentityHeader()
 {
@@ -115,8 +128,6 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeader()
     SetPPreferredIdentityHeaderByUserId();
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
 void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByUserId()
 {
@@ -142,8 +153,6 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByUserId()
     }
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
 void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
 {
@@ -196,8 +205,6 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
             m_piNextMessage, strValue, ISipHeader::P_PREFERRED_IDENTITY);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
 void EmergencyMessageFormatter::SetSipInstanceFeature()
 {
@@ -228,13 +235,11 @@ void EmergencyMessageFormatter::SetSipInstanceFeature()
     piFeatureCaps->AddFeature(pParameter->GetName(), pParameter->GetValue());
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
 void EmergencyMessageFormatter::SetRecvInfoHeader()
 {
-    if (!m_objContext.GetConfigurationProxy().Is(
-            Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED))
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigEmergency::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL))
     {
         return;
     }
@@ -243,10 +248,31 @@ void EmergencyMessageFormatter::SetRecvInfoHeader()
             MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY, ISipHeader::RECV_INFO);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
-IMS_UINT32 EmergencyMessageFormatter::GetAoSRegMode(IN ServiceType eServiceType)
+void EmergencyMessageFormatter::SetPEmergencyInfoHeader()
+{
+    if (!m_objContext.GetService().IsWlanIpCanType())
+    {
+        return;
+    }
+
+    AString strPei = m_objContext.GetConfigurationProxy().GetString(
+            ConfigEmergency::KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING);
+    if (strPei.GetLength() <= 0)
+    {
+        return;
+    }
+
+    strPei.Replace("#AID#", GetWifiCallingAddressId());
+    strPei.Replace("#IMEI#", GetDeviceId());
+    strPei.Replace("#MAC#", GetMacAddress());
+
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            m_piNextMessage, strPei, ISipHeader::UNKNOWN, HEADER_P_EMERGENCY_INFO);
+}
+
+PRIVATE
+IMS_UINT32 EmergencyMessageFormatter::GetAosRegMode(IN ServiceType eServiceType) const
 {
     IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(eServiceType);
     if (pAosConnector == IMS_NULL)
@@ -257,10 +283,8 @@ IMS_UINT32 EmergencyMessageFormatter::GetAoSRegMode(IN ServiceType eServiceType)
     return pAosConnector->GetRegistrationMode();
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
-IMS_RESULT EmergencyMessageFormatter::GetLocalIpAddress(OUT AString& strIpAddress)
+IMS_RESULT EmergencyMessageFormatter::GetLocalIpAddress(OUT AString& strIpAddress) const
 {
     // TODO: emerency??
     IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
@@ -278,10 +302,8 @@ IMS_RESULT EmergencyMessageFormatter::GetLocalIpAddress(OUT AString& strIpAddres
     return IMS_SUCCESS;
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
-IMS_UINT32 EmergencyMessageFormatter::GetLocalPort()
+IMS_UINT32 EmergencyMessageFormatter::GetLocalPort() const
 {
     IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
@@ -290,4 +312,36 @@ IMS_UINT32 EmergencyMessageFormatter::GetLocalPort()
     }
 
     return pAosConnector->GetLocalPort();
+}
+
+PRIVATE
+AString EmergencyMessageFormatter::GetWifiCallingAddressId() const
+{
+    return PhoneInfoService::GetPhoneInfoService()
+            ->GetCallInfo(m_objContext.GetSlotId())
+            ->GetWifiCallingAddressId();
+}
+
+PRIVATE
+AString EmergencyMessageFormatter::GetDeviceId() const
+{
+    AString strDeviceId;
+    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(
+            m_objContext.GetSlotId(), strDeviceId);
+    return strDeviceId;
+}
+
+PRIVATE
+AString EmergencyMessageFormatter::GetMacAddress() const
+{
+    AString strMacAddress;
+
+    INetworkConnection* pNetworkConnection = NetworkService::GetNetworkService()->FindConnection(
+            NetworkPolicy::APN_WIFI, m_objContext.GetSlotId());
+    if (pNetworkConnection != IMS_NULL)
+    {
+        pNetworkConnection->GetExtraInfo("mac_address", strMacAddress);
+    }
+
+    return strMacAddress;
 }

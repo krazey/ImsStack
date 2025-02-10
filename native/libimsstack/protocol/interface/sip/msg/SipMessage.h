@@ -118,14 +118,14 @@ public:
     SipMessage();
     explicit SipMessage(SIP_INT32 eSipMsgType);
     SipMessage(const SipMessage& objSipMsg);
-    SIP_BOOL EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
+    SIP_BOOL Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
             SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions);
 
     SIP_BOOL DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
 
-    SIP_BOOL DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
+    SIP_BOOL Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
 
-    SIP_BOOL DecMultiPartBody(
+    SIP_BOOL DecodeMultiPartBody(
             const SIP_CHAR* pBuffStart, const SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen);
 
     inline SipMsgBodyList* GetMsgBodyList()
@@ -204,5 +204,7 @@ public:
 
 private:
     ~SipMessage();
+
+    static constexpr SIP_UINT32 MAX_METHOD_LEN = 32;
 };
 #endif  //__SIP_MESSAGE_H__

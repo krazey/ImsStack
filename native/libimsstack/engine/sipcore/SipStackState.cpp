@@ -109,7 +109,7 @@ IMS_BOOL SipStackState::AbortTransaction(IN ::SipTxnKey* pKey, IN SipTransaction
             pTxnContextData->SetTxnState(pTxnState);
         }
 
-        pTxnContext->pTxnContextData = reinterpret_cast<SIP_VOID*>(pTxnContextData);
+        pTxnContext->m_pTxnContextData = reinterpret_cast<SIP_VOID*>(pTxnContextData);
     }
 
     // Release the stack transaction structure & stop retransmissions.

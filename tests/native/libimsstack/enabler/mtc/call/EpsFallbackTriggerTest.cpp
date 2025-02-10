@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "IImsAosInfo.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "MtcDef.h"
 #include "PlatformContext.h"
 #include "TestImsRadioService.h"
@@ -26,9 +27,8 @@
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockISession.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
@@ -42,7 +42,6 @@ class EpsFallbackTriggerTest : public ::testing::Test
 {
 public:
     inline EpsFallbackTriggerTest() :
-            pConfigurationManager(IMS_NULL),
             pConfigurationProxy(IMS_NULL),
             objTimerService(),
             objTimer(objTimerService.GetMockTimer()),
@@ -53,8 +52,7 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     TestImsRadioService objImsRadioService;
     TestTimerService objTimerService;
     MockITimer& objTimer;
@@ -72,8 +70,7 @@ protected:
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         pEpsFbTrigger = new EpsFallbackTrigger(objContext);
@@ -89,22 +86,69 @@ protected:
     }
 };
 
-TEST_F(EpsFallbackTriggerTest, IsRequiredChecksWatchdogTimeConfiguration)
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfNotInNr)
 {
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
-    EXPECT_FALSE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+}
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(0));
-    EXPECT_FALSE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfConfigIsZeroOrBelow)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
-    EXPECT_TRUE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(0));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(-1));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfConfigIsGreaterThanZero)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfNotInNr)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfConfigIsNegative)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(-1));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfConfigIsPositive)
+{
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
 }
 
 TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(nAnyWatchdogTime));
 
     EXPECT_CALL(objTimer, SetTimer(nAnyWatchdogTime, pEpsFbTrigger));
@@ -114,7 +158,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)
 TEST_F(EpsFallbackTriggerTest, StartWatchdogResetsExistingTimer)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(nAnyWatchdogTime));
     pEpsFbTrigger->StartWatchdog();
 
@@ -128,7 +172,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogResetsExistingTimer)
 TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbackIfQosAndNotInNr)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(nAnyWatchdogTime));
     pEpsFbTrigger->StartWatchdog();
 
@@ -151,7 +195,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
 TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbackIfQosAndInNr)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(nAnyWatchdogTime));
     pEpsFbTrigger->StartWatchdog();
 
@@ -174,7 +218,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
 TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbackIfNoQosAndNotInNr)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(nAnyWatchdogTime));
     pEpsFbTrigger->StartWatchdog();
 
@@ -197,7 +241,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
 TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredTriggersEpsFallbackIfNoQosAndInNr)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(nAnyWatchdogTime));
     pEpsFbTrigger->StartWatchdog();
 
@@ -299,7 +343,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkResponseSetsStatus
 
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkResponseSetsTimer)
 {
-    EXPECT_CALL(objTimer, SetTimer(12000, pEpsFbTrigger));
+    EXPECT_CALL(objTimer, SetTimer(20000, pEpsFbTrigger));
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
     EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
     EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
@@ -323,7 +367,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerSetsStatus)
 
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerSetsTimer)
 {
-    EXPECT_CALL(objTimer, SetTimer(12000, pEpsFbTrigger));
+    EXPECT_CALL(objTimer, SetTimer(20000, pEpsFbTrigger));
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
     EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
     EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());

@@ -69,6 +69,8 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_SIP_SERVER_ERROR = 354;
     public static final int CODE_SIP_USER_REJECTED = 361;
     public static final int CODE_SIP_GLOBAL_ERROR = 362;
+    public static final int CODE_EMERGENCY_TEMP_FAILURE = 363;
+    public static final int CODE_EMERGENCY_PERM_FAILURE = 364;
     public static final int CODE_SIP_METHOD_NOT_ALLOWED = 366;
     public static final int CODE_SIP_PROXY_AUTHENTICATION_REQUIRED = 367;
     public static final int CODE_SIP_REQUEST_ENTITY_TOO_LARGE = 368;

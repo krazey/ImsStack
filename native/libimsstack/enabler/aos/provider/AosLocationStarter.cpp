@@ -55,6 +55,7 @@ PUBLIC VIRTUAL AosLocationStarter::~AosLocationStarter()
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_WFC_SETTING_CHANGED, this, m_nSlotId);
 
     m_piAppContext->GetBlock()->RemoveListener(this);
+    m_piAppContext->GetBlock()->RemoveSilentListener(this);
 
     ILocationInfo* piLocation = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(m_nSlotId);
     if (piLocation != IMS_NULL)
@@ -90,6 +91,7 @@ PUBLIC VIRTUAL void AosLocationStarter::Init(IN IAosAppContext* piContext,
     InitFeatures(nPolicy);
 
     m_piAppContext->GetBlock()->SetListener(this);
+    m_piAppContext->GetBlock()->SetSilentListener(this);
 
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_WFC_SETTING_CHANGED, this, m_nSlotId);
 }
@@ -198,6 +200,12 @@ PROTECTED VIRTUAL void AosLocationStarter::Block_Changed(IN IMS_UINT32 nType, IN
     {
         HandleStartConditionChanged();
     }
+}
+
+PROTECTED VIRTUAL void AosLocationStarter::Block_SilentChanged(
+        IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
+{
+    Block_Changed(nType, nParam);
 }
 
 PROTECTED VIRTUAL void AosLocationStarter::OnFeatureEnabled(IN IMS_UINT32 nFeature)

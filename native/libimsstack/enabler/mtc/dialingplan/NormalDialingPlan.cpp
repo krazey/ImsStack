@@ -139,7 +139,8 @@ PRIVATE GLOBAL void NormalDialingPlan::FormTelUriAsGlobal(
         IN IMtcContext& objContext, IN_OUT AString& strNumber)
 {
     AString strCountryCode;
-    strCountryCode.SetNumber(objContext.GetConfigurationProxy().GetInt(Feature::COUNTRY_CODE));
+    strCountryCode.SetNumber(
+            objContext.GetConfigurationProxy().GetInt(ConfigWfc::KEY_COUNTRY_CODE_INT));
     if (strCountryCode.Equals("0"))
     {
         return;
@@ -167,9 +168,11 @@ PRIVATE GLOBAL void NormalDialingPlan::FormTelUriAsLocal(IN IMtcContext& objCont
         return;
     }
 
+    AccessNetworkInfo objAni;
     strNumber.Append(";phone-context=");
-    strNumber.Append(objIdentityProxy.GetPhoneContext(
-            ConvertDialingPolicy(GetLocalNumberPolicy(objContext)), objContext.GetSlotId()));
+    strNumber.Append(
+            objIdentityProxy.GetPhoneContext(ConvertDialingPolicy(GetLocalNumberPolicy(objContext)),
+                    objContext.GetSlotId(), &GetAccessNetworkInfo(objContext, objAni)));
 }
 
 PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsVisualSeparator(IN IMS_CHAR ch)
@@ -284,11 +287,12 @@ PRIVATE GLOBAL AccessNetworkInfo& NormalDialingPlan::GetAccessNetworkInfo(
 
 PRIVATE GLOBAL NormalDialingPlan::Scheme NormalDialingPlan::GetScheme(IN IMtcContext& objContext)
 {
-    IMS_SINT32 nValue = objContext.GetConfigurationProxy().GetInt(Feature::REQUEST_URI_TYPE);
+    IMS_SINT32 nValue =
+            objContext.GetConfigurationProxy().GetInt(ConfigIms::KEY_REQUEST_URI_TYPE_INT);
     IMS_TRACE_D("GetScheme config=[%d]", nValue, 0, 0);
     switch (nValue)
     {
-        case CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL:
+        case ConfigIms::REQUEST_URI_FORMAT_TEL:
             return Scheme::TEL;
         default:
             return Scheme::SIP;
@@ -316,7 +320,8 @@ PRIVATE GLOBAL NormalDialingPlan::LocalNumberPolicy NormalDialingPlan::GetLocalN
     // For policy to consist of phone-context URI parameter;
     // Refer to ImsIdentity::DIALING_POLICY_XXX
 
-    IMS_SINT32 nValue = objContext.GetConfigurationProxy().GetInt(Feature::POLICY_OF_LOCAL_NUMBERS);
+    IMS_SINT32 nValue =
+            objContext.GetConfigurationProxy().GetInt(ConfigVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT);
     IMS_TRACE_D("GetLocalNumberPolicy config=[%d]", nValue, 0, 0);
     switch (nValue)
     {

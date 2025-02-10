@@ -35,12 +35,12 @@ import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.its.tests.call.TestCall;
 import com.android.imsstack.its.util.SingleLatch;
 
-import java.util.concurrent.Executors;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.Executors;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -69,7 +69,7 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
 
     @Test
     public void testTriggerSetTestMode() throws Exception {
-        logi("start testTriggerSetTestMode");
+        logi(this, "start testTriggerSetTestMode");
         mTestMode = 1;
 
         ImsMediaCallback callback = new ImsMediaCallback();
@@ -98,7 +98,7 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
         call.startVoiceCall();
 
         assertEquals(callback.getMediaManager().getTestMode(), 1);
-        logi("end testTriggerSetTestMode");
+        logi(this, "end testTriggerSetTestMode");
     }
 
     /**
@@ -109,40 +109,40 @@ public class ImsMediaPreconditionTest extends ImsStackTestBase {
         private ImsMediaManager mImsMediaManager;
 
         public boolean setMediaManager(ImsMediaManager imsMediaManager) {
-            logi("ImsMediaPrecondition - setMediaManager");
+            logi(this, "ImsMediaPrecondition - setMediaManager");
             mImsMediaManager = imsMediaManager;
             if (mImsMediaManager == null) {
-                logi("return false");
+                logi(this, "return false");
                 return false;
             }
             return true;
         }
 
         public ImsMediaManager getMediaManager() {
-            logi("ImsMediaPrecondition - getMediaManager");
+            logi(this, "ImsMediaPrecondition - getMediaManager");
             return mImsMediaManager;
         }
 
         public void release() {
-            logi("ImsMediaPrecondition release");
+            logi(this, "ImsMediaPrecondition release");
             mImsMediaManager.release();
         }
 
         @Override
         public void onConnected() {
-            logi("ImsMediaPrecondition - connected");
+            logi(this, "ImsMediaPrecondition - connected");
             if (mImsMediaManager == null) {
-                logi("ImsMediaManager is null");
+                logi(this, "ImsMediaManager is null");
                 return;
             }
 
             mImsMediaManager.setTestMode(mTestMode);
-            logi("ImsMediaPrecondition - setTestMode - " + mTestMode);
+            logi(this, "ImsMediaPrecondition - setTestMode - " + mTestMode);
         }
 
         @Override
         public void onDisconnected() {
-            logi("ImsMediaPrecondition - disconnected");
+            logi(this, "ImsMediaPrecondition - disconnected");
         }
     }
 }

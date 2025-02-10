@@ -28,21 +28,20 @@
     </int-array>
 
     <!-- Aos -->
-    <boolean name="ereg_set_tcp_only_in_roaming_bool" value="true"/>
-    <int name="reg_actual_wait_time_policy_int" value="3"/>
-    <int name="reg_retry_cnt_reset_policy_int" value="2"/>
-    <int name="rereg_retry_305_policy_int" value="0"/>
-
+    <int name="ims.reg_actual_wait_time_policy_int" value="3"/>
+    <int name="ims.reg_retry_cnt_reset_policy_int" value="2"/>
+    <int name="ims.rereg_retry_305_policy_int" value="0"/>
+    <int name="ims.sub_retry_503_policy_int" value="0"/>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <pbundle name="extra_reg_err_bundle">
-        <boolean name="extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="true"/>
-        <int name="extra_reg_err_final_type_int" value="5"/>
-        <int name="extra_reg_err_max_cnt_int" value="5"/>
-        <int-array name="extra_reg_err_code_int_array" num="2">
+    <pbundle name="ims.extra_reg_err_bundle">
+        <boolean name="ims.extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="true"/>
+        <int name="ims.extra_reg_err_final_type_int" value="5"/>
+        <int name="ims.extra_reg_err_max_cnt_int" value="5"/>
+        <int-array name="ims.extra_reg_err_code_int_array" num="2">
             <item value="0"/>
             <item value="2"/>
         </int-array>
-        <int-array name="extra_reg_err_code_for_update_int_array" num="8">
+        <int-array name="ims.extra_reg_err_code_for_update_int_array" num="8">
             <item value="0"/>
             <item value="305"/>
             <item value="403"/>
@@ -54,18 +53,162 @@
         </int-array>
     </pbundle>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <pbundle name="reg_retry_interval_bundle">
-        <int-array name="reg_retry_interval_sec_int_array" num="1">
+    <pbundle name="ims.reg_retry_interval_bundle">
+        <int-array name="ims.reg_retry_interval_sec_int_array" num="1">
             <item value="10"/>
         </int-array>
     </pbundle>
+    <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
+    <pbundle name="ims.sub_err_code_for_init_reg_bundle">
+        <int name="ims.sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
+        <int-array name="ims.sub_err_code_for_init_reg_int_array" num="7">
+            <item value="0"/>
+            <item value="403"/>
+            <item value="404"/>
+            <item value="408"/>
+            <item value="500"/>
+            <item value="503"/>
+            <item value="504"/>
+        </int-array>
+    </pbundle>
+    <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="true"/>
+    <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="true"/>
+    <int name="imsemergency.emergency_registration_timer_millis_int" value="0"/>
+
+    <!-- Mtc public -->
+    <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
+    <int name="ims.sip_timer_t4_millis_int" value="17000"/>
+    <int name="ims.sip_timer_b_millis_int" value="10000"/>
+    <int name="ims.sip_timer_c_millis_int" value="180000"/>
+    <int name="ims.sip_timer_d_millis_int" value="128000"/>
+    <int name="ims.sip_timer_h_millis_int" value="30000"/>
+    <int name="imsvoice.session_refresh_method_int" value="1"/>
+    <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
+    <int name="imsvoice.minimum_session_expires_timer_sec_int" value="90"/>
+
+    <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
+    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
+    <int name="imsvoice.ringing_timer_millis_int" value="80000"/>
+    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
+    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
+    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="10000"/>
+    <boolean name="imsvt.video_qos_precondition_supported_bool" value="true"/>
+    <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
 
     <!-- Mtc -->
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="5"/> <!-- MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF -->
+    <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
+    <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="500"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
+    <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
+    <int name="imsvoice.silent_redial_max_duration_millis_int" value="45000"/>
+    <int name="imsvoice.silent_redial_max_retry_count_int" value="5"/>
+    <int name="imsvoice.oip_type_for_unavailable_int" value="5"/>
+    <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="60">
+        <item value="300:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="301:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="302:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="305:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
+        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB -->
+        <item value="400:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="401:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="402:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="403:3,7"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, HANDLE_FORBIDDEN_BY_POLICY -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="405:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="406:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="407:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="408:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="410:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="412:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="414:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="415:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="416:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="417:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="420:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="423:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="424:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="428:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="429:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="430:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="433:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="436:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="437:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="438:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="439:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="440:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="469:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="470:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="481:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="482:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="483:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="484:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="485:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="487:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="489:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="491:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="493:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="494:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="499:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="500:3,12"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TERMINATE_BY_RESPONSE_SOURCE -->
+        <item value="501:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="502:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="503:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="505:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="513:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="580:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="600:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="604:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:3,2"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
+
+    <int-array name="imsemergency.reject_code_require_perm_failure_int_array" num="35">
+        <item value="400"/>
+        <item value="401"/>
+        <item value="402"/>
+        <item value="403"/>
+        <item value="404"/>
+        <item value="405"/>
+        <item value="406"/>
+        <item value="407"/>
+        <item value="408"/>
+        <item value="410"/>
+        <item value="413"/>
+        <item value="414"/>
+        <item value="415"/>
+        <item value="416"/>
+        <item value="420"/>
+        <item value="421"/>
+        <item value="423"/>
+        <item value="480"/>
+        <item value="481"/>
+        <item value="482"/>
+        <item value="483"/>
+        <item value="484"/>
+        <item value="485"/>
+        <item value="486"/>
+        <item value="487"/>
+        <item value="488"/>
+        <item value="491"/>
+        <item value="493"/>
+        <item value="500"/>
+        <item value="501"/>
+        <item value="502"/>
+        <item value="503"/>
+        <item value="504"/>
+        <item value="505"/>
+        <item value="513"/>
+    </int-array>
 
     <!-- Mts -->
-    <int-array name="sms_generic_error_codes_int_array" num="7">
+    <int-array name="imssms.sms_generic_error_codes_int_array" num="7">
         <item value="0"/>
         <item value="403"/>
         <item value="404"/>
@@ -74,15 +217,15 @@
         <item value="503"/>
         <item value="504"/>
     </int-array>
-    <int name="sms_policy_for_expiry_timer_f_int" value="12"/>
-    <int name="sms_policy_for_403_response_int" value="12"/>
-    <int name="sms_policy_for_404_response_int" value="12"/>
-    <int name="sms_policy_for_408_response_int" value="12"/>
-    <int name="sms_policy_for_500_response_int" value="12"/>
-    <int name="sms_policy_for_503_response_int" value="12"/>
-    <int name="sms_policy_for_504_response_int" value="12"/>
-    <int name="sms_retry_after_max_time_sec_int" value="45"/>
-    <int name="sms_retry_after_max_count_int" value="5"/>
+    <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="12"/>
+    <int name="imssms.sms_reg_policy_for_403_response_int" value="12"/>
+    <int name="imssms.sms_reg_policy_for_404_response_int" value="12"/>
+    <int name="imssms.sms_reg_policy_for_408_response_int" value="12"/>
+    <int name="imssms.sms_reg_policy_for_500_response_int" value="12"/>
+    <int name="imssms.sms_reg_policy_for_503_response_int" value="12"/>
+    <int name="imssms.sms_reg_policy_for_504_response_int" value="12"/>
+    <int name="imssms.sms_retry_after_max_time_sec_int" value="45"/>
+    <int name="imssms.sms_retry_after_max_count_int" value="5"/>
     <boolean name="sms_report_generic_error_when_retry_after_not_possible_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
@@ -91,13 +234,11 @@
     <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/mtasxdms</string>
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
     </int-array>
-
-    <!-- Ut/Xcap Assets -->
-    <boolean name="ut_support_cf_action_erasure_bool" value="false"/>
-    <string name="ut_target_address_country_code_replace_to_zero_string">+81</string>
-    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="300"/>
+    <boolean name="imsss.ut_support_cf_action_erasure_bool" value="false"/>
+    <string name="imsss.ut_target_address_country_code_replace_to_zero_string">+81</string>
+    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="300"/>
 </carrier_config>

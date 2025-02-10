@@ -77,7 +77,7 @@ public class SingleLatch {
                 completed = mLatch.await(millis, TimeUnit.MILLISECONDS);
             }
         } catch (InterruptedException e) {
-            Log.d(Log.TAG, "await interrupted: " + e.toString());
+            Log.d(this, "await interrupted: " + e.toString());
         }
 
         if (!completed) {
@@ -99,7 +99,7 @@ public class SingleLatch {
                 completed = mLatch.await(millis, TimeUnit.MILLISECONDS);
             }
         } catch (InterruptedException e) {
-            Log.d(Log.TAG, "await interrupted: " + e.toString());
+            Log.d(this, "await interrupted: " + e.toString());
         }
 
         if (completed) {
@@ -137,7 +137,7 @@ public class SingleLatch {
                 mLatch.await(millis, TimeUnit.MILLISECONDS);
             }
         } catch (InterruptedException e) {
-            Log.d(Log.TAG, "sleep interrupted: " + e.toString());
+            Log.d(this, "sleep interrupted: " + e.toString());
         }
 
         init();

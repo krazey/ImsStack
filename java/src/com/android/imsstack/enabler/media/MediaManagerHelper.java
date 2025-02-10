@@ -74,7 +74,7 @@ public class MediaManagerHelper {
     private void createImsMediaManagerInstance(){
 
         if (sImsMediaManager == null) {
-            ImsLog.v("ImsMediaManager instance created");
+            ImsLog.d("ImsMediaManager instance created");
             sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
             sExecutor = Executors.newSingleThreadExecutor();
             setImsMediaConnected(false);

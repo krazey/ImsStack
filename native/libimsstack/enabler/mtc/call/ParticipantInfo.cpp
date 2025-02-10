@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IImsAosInfo.h"
 #include "IMessage.h"
@@ -165,7 +166,8 @@ PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& o
 {
     AString strNumber;
 
-    if (!m_objContext.GetConfigurationProxy().Is(Feature::OIP_SOURCE_FROM_HEADER))
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
     {
         // Examine PAID first
         strNumber = m_objContext.GetMessageUtils().GetUserPart(

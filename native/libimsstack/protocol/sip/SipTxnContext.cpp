@@ -17,16 +17,16 @@
 #include "SipTxnContext.h"
 
 SipTxnContext::SipTxnContext() :
-        pSipTimerContext(new SipTimerContext()),
-        pTxnContextData(SIP_NULL)
+        m_pSipTimerContext(new SipTimerContext()),
+        m_pTxnContextData(SIP_NULL)
 {
 }
 
 SipTxnContext::~SipTxnContext()
 {
-    if (pSipTimerContext != SIP_NULL)
+    if (m_pSipTimerContext != SIP_NULL)
     {
-        delete pSipTimerContext;
-        pSipTimerContext = SIP_NULL;
+        delete m_pSipTimerContext;
+        m_pSipTimerContext = SIP_NULL;
     }
 }

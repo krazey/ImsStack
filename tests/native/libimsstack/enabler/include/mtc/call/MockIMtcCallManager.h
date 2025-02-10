@@ -32,6 +32,7 @@ public:
 
     MOCK_METHOD(IMtcCall*, CreateCall, (IN ServiceType eServiceType, IN CallInfo& objCallInfo),
             (override));
+    MOCK_METHOD(void, RemoveCall, (IN CallKey nCallKey), (override));
     MOCK_METHOD(IMtcCall*, GetCallByCallKey, (IN CallKey nCallKey), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCalls, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCallsExcluding, (IN CallKey nExcludingCallKey), (override));

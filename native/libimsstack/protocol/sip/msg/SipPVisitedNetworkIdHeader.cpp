@@ -31,7 +31,7 @@ SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader(
 
 SipPVisitedNetworkIdHeader::~SipPVisitedNetworkIdHeader() {}
 
-SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPVisitedNetworkIdHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Case of nothing is present*/
     if (nDecLen == SIP_ZERO)
@@ -45,12 +45,13 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODDECODER, "Header parameter decoding failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Update the End point for Previous Decoding*/
@@ -70,11 +71,10 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UIN
         pEndPt = pEndPt - SIP_ONE;
     }
     //-----------------------------------------------------------------------------
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         if (pszValue != SIP_NULL)
         {
             delete[] pszValue;

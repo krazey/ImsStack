@@ -62,7 +62,7 @@ public:
     static const IMS_SINT32 DEFAULT_I_FRAME_INTERVAL = 1;
     static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE = 90000;
-    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_SOURCE_VALUE;
+    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_LOCAL_VALUE;
     static const IMS_SINT32 DEFAULT_VIDEO_LOWEST_BITRATE = 0;
 
 public:

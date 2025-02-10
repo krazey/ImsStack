@@ -17,11 +17,11 @@
 #ifndef MESSAGE_FORMATTER_H_
 #define MESSAGE_FORMATTER_H_
 
+#include "IReasonHeaderSetter.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "configuration/ConfigDef.h"
-#include "core/IReasonHeaderSetter.h"
 
 class AString;
 class ICoreService;
@@ -101,6 +101,7 @@ private:
     void SetCarrierSpecificHeaders();
     void SetCallComposerElements();
     void SetReplacesHeader();
+    void SetHeadersForReject(IN const CallReasonInfo& objReason);
 
     IMS_SINT32 GetRejectStatusCode(IN const CallReasonInfo& objReason);
     void GetRejectPhrase(IN const CallReasonInfo& objReason, OUT AString& strPhrase);
@@ -108,6 +109,7 @@ private:
     void GetTerminateReason(IN const CallReasonInfo& objReason, OUT AString& strReason);
     AString GetTerminateReason(IN TerminateType eType);
     AString GetRejectPhrase(IN RejectType eType);
+    AString GetRejectPhraseForLocalCallBusy(IN IMS_SINT32 nExtraCode);
 
     IMS_RESULT InitVariables(IN FormType eFormType);
     IMS_RESULT SetNextMessage();

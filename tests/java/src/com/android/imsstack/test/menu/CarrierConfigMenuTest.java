@@ -85,15 +85,15 @@ public class CarrierConfigMenuTest {
     private static final String TEST_CONFIG_STRING_ARRAY =
             CarrierConfig.ImsVt.KEY_VIDEO_CODEC_FRAME_SIZE_STRING_ARRAY;
     private static final String TEST_ASSETS_CONFIG_BOOLEAN =
-            CarrierConfig.Assets.KEY_SUPPORT_SDP_PRECONDITION_BOOL;
+            CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL;
     private static final String TEST_ASSETS_CONFIG_INT =
-            CarrierConfig.Assets.KEY_SIP_TIMER_100_TRYING_MILLIS_INT;
+            CarrierConfig.Ims.KEY_SIP_TIMER_100_TRYING_MILLIS_INT;
     private static final String TEST_ASSETS_CONFIG_STRING =
-            CarrierConfig.Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING;
+            CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING;
     private static final String TEST_ASSETS_CONFIG_INT_ARRAY =
             CarrierConfig.Assets.KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY;
     private static final String TEST_ASSETS_CONFIG_STRING_ARRAY =
-            CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY;
+            CarrierConfig.ImsVoice.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY;
     private static final String TEST_CONFIG_PAYLOAD_TYPE = "100";
     private static final String TEST_CONFIG_BUNDLE =
             CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE;

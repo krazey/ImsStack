@@ -126,10 +126,10 @@ public:
             IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart) override;
     IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
     IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) override;
-    CallType GetCallType(
-            IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView) override;
-    CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp, IN IMS_BOOL bPeerView,
-            IN IMS_BOOL bCheckPort = IMS_TRUE) override;  // TODO: change name of bPeerView
+    CallType GetCallType(IN const IMessage* piMessage, IN ISession* piSession,
+            IN IMS_BOOL bCheckRemote) override;
+    CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bActiveMediaOnly,
+            IN IMS_BOOL bCheckRemote, IN IMS_BOOL bIgnorePort0 = IMS_TRUE) override;
     IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode) override;
     IMS_UINT32 GetNumberOfPreviousResponses(
             IN const ISession* piSession, IN IMS_SINT32 eServiceMethod) const override;

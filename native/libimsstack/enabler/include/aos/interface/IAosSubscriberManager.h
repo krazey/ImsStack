@@ -35,6 +35,7 @@ public:
     virtual void RemoveListenerForMonitor(IN IAosSubscriberManagerListener* piListener) = 0;
 
     virtual const AStringArray& GetConfiguredImpus() const = 0;
+    virtual const AStringArray& GetOrderedImpus() const = 0;
     virtual const AStringArray& GetConfiguredImpusForFake() const = 0;
     virtual const AStringArray& GetFakeImpus() const = 0;
 

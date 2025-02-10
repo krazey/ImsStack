@@ -20,8 +20,6 @@
 #include "SipDatatypes.h"
 #include "SipMap.h"
 #include "SipRefBase.h"
-#include "msg/SipAcceptHeader.h"
-#include "msg/SipAcceptResourcePriorityHeader.h"
 #include "msg/SipAuthBase.h"
 #include "msg/SipAuthInfoHeader.h"
 #include "msg/SipContentTypeHeader.h"
@@ -35,8 +33,6 @@
 #include "msg/SipInfoBase.h"
 #include "msg/SipIntegerHeader.h"
 #include "msg/SipMsgBody.h"
-#include "msg/SipPAssertedServiceHeader.h"
-#include "msg/SipPChargingFunctionAddressesHeader.h"
 #include "msg/SipPChargingVectorHeader.h"
 #include "msg/SipPPreferredServiceHeader.h"
 #include "msg/SipPrivacyHeader.h"
@@ -64,9 +60,9 @@ public:
     SipHeaders();
     virtual ~SipHeaders();
     SIP_BOOL CopyHdrs(SipHeaders* pHdrs);
-    SIP_BOOL EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL DecodeHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
             SIP_CHAR** ppHdrBody);
 
     SipHeaderBase* GetHdrObj(SIP_INT32 eHdrType);

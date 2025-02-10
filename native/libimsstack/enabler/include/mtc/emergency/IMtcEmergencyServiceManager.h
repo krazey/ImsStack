@@ -18,12 +18,10 @@
 #define INTERFACE_MTC_EMERGENCY_SERVICE_MANAGER_H_
 
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
-
-using EmergencyCallRoutingPdn = IuMtcService::EmergencyCallRoutingPdn;
 
 /**
- * This class controls the emergency service before starting emergency calls for various PDN types.
+ * This class controls the emergency service before starting emergency calls for various service
+ * types.
  * And notifies the service state to the Java layer.
  */
 class IMtcEmergencyServiceManager
@@ -32,11 +30,11 @@ public:
     virtual ~IMtcEmergencyServiceManager(){};
 
     /**
-     * Starts the process for an emergency service opening using the given PDN type.
+     * Starts the process for an emergency service opening using the given service type.
      *
-     * @param ePdn PDN type to routing emergency call.
+     * @param eServiceType Service type to open.
      */
-    virtual void StartOpen(IN EmergencyCallRoutingPdn ePdn) = 0;
+    virtual void StartOpen(IN ServiceType eServiceType) = 0;
 
     /**
      * Stops the ongoing process and releases the resources.
@@ -65,11 +63,11 @@ public:
     virtual void Close() = 0;
 
     /**
-     * Returns PDN type of the controller using.
+     * Returns service type of the controller using.
      *
-     * @return EmergencyCallRoutingPdn PDN type.
+     * @return ServiceType Service type.
      */
-    virtual EmergencyCallRoutingPdn GetRoutingPdnType() const = 0;
+    virtual ServiceType GetServiceType() const = 0;
 };
 
 #endif

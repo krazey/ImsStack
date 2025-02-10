@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.telephony.ServiceState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
@@ -206,7 +207,7 @@ public class ImsCallManagerTest {
         verify(mMockMtcCall).isEmergencyCall();
         verify(mMockMtcApp).openEmergencyService(
                 mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
-        verify(mMockMtcCall, never()).open(anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
+        verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcCall);
 
@@ -217,7 +218,7 @@ public class ImsCallManagerTest {
         when(mMockMtcCall.isEmergencyCall()).thenReturn(false);
         result = mImsCallManager.createSession(profile);
         verify(mMockMtcCall).isEmergencyCall();
-        verify(mMockMtcCall).open(anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
+        verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
         verify(mMockMtcApp, never()).openEmergencyService(
                 mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
         Assert.assertNotNull(result);
@@ -234,18 +235,19 @@ public class ImsCallManagerTest {
         Assert.assertNotNull(result);
 
         // Verify Emergency call with call attribute video and Rtt
+        Bundle extras = new Bundle();
         ImsStreamMediaProfile mMediaProfile = new ImsStreamMediaProfile(
                 ImsStreamMediaProfile.RTT_MODE_FULL);
         callAttributes |= MtcCall.FLAG_RTT;
         profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_EMERGENCY,
-                ImsCallProfile.CALL_TYPE_VT, null, mMediaProfile);
+                ImsCallProfile.CALL_TYPE_VT, extras, mMediaProfile);
         result = mImsCallManager.createSession(profile);
         verify(mMockMtcApp).createMtcCallAndAttach(callAttributes);
         Assert.assertNotNull(result);
 
         // Verify Emergency call with call attribute voice and Rtt
         profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_EMERGENCY,
-                ImsCallProfile.CALL_TYPE_VOICE, null, mMediaProfile);
+                ImsCallProfile.CALL_TYPE_VOICE, extras, mMediaProfile);
         callAttributes &= ~MtcCall.FLAG_VIDEO_CALL;
         result = mImsCallManager.createSession(profile);
         verify(mMockMtcApp).createMtcCallAndAttach(callAttributes);
@@ -262,7 +264,6 @@ public class ImsCallManagerTest {
         // case2 Normal call voice
         reset(mMockCallContext);
         reset(mMockMtcCall);
-        Bundle extras = new Bundle();
         extras.putInt(ImsCallProfile.EXTRA_DIALSTRING, ImsCallProfile.DIALSTRING_USSD);
         int normalCallAttributes = MtcCall.FLAG_MO;
         when(mMockMtcApp.createMtcCallAndAttach(normalCallAttributes)).thenReturn(mMockMtcCall);
@@ -274,7 +275,7 @@ public class ImsCallManagerTest {
         verify(mMockMtcApp).createMtcCallAndAttach(normalCallAttributes);
         verify(mMockCallContext).getSrvccStateTracker();
         verify(mMockMtcCall).isEmergencyCall();
-        verify(mMockMtcCall).open(anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
+        verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
         verify(mMockMtcApp, never()).openEmergencyService(
                 mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
         Assert.assertNotNull(result);
@@ -301,6 +302,25 @@ public class ImsCallManagerTest {
         verify(mMockMtcApp).createMtcCallAndAttach(normalCallAttributes);
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcApp);
+    }
+
+    @Test
+    public void createSessionEmergencyCallOverWiFiTest() {
+        ImsCallProfile profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_EMERGENCY,
+                ImsCallProfile.CALL_TYPE_VOICE);
+        Bundle extras = new Bundle();
+        extras.putString(ImsCallProfile.EXTRA_CALL_RAT_TYPE,
+                String.valueOf(ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN));
+        profile.mCallExtras.putBundle(ImsCallProfile.EXTRA_OEM_EXTRAS, extras);
+
+        int callAttributes =
+                MtcCall.FLAG_MO | MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_WIFI_EMERGENCY;
+        when(mMockMtcApp.createMtcCallAndAttach(callAttributes)).thenReturn(mMockMtcCall);
+        when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
+
+        ImsCallSessionImpl result = mImsCallManager.createSession(profile);
+        verify(mMockMtcApp).createMtcCallAndAttach(callAttributes);
+        Assert.assertNotNull(result);
     }
 
     @Test

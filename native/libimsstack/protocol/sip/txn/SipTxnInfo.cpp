@@ -20,9 +20,9 @@ SipTxnInfo::SipTxnInfo() :
         m_pSendSipMsg(SIP_NULL),
         m_pUserData(SIP_NULL),
         m_pTranspInfo(SIP_NULL),
-        eTxnStatus(SipTxn::STATUS_INVALID),
-        bTxnTerminated(SIP_FALSE),
-        bTxnCreated(SIP_FALSE)
+        m_eTxnStatus(SipTxn::STATUS_INVALID),
+        m_bTxnTerminated(SIP_FALSE),
+        m_bTxnCreated(SIP_FALSE)
 {
 }
 

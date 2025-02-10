@@ -249,89 +249,96 @@ public final class SscConfig {
         return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY);
     }
 
-    // Asset
     static int[] getSmCauseTempBlock(int slotId) {
-        return getIntArray(slotId, CarrierConfig.Assets.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY);
+        return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY);
     }
 
     static int[] getHttpTempBlockErrorCodes(int slotId) {
-        return getIntArray(slotId, CarrierConfig.Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY);
+        return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY);
     }
 
     static int getMaxRetryCount(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_MAX_RETRY_COUNT_INT);
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_MAX_RETRY_COUNT_INT);
     }
 
     static int getTimerForTempBlock(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT) * 60
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT) * 60
                 * 1000;
     }
 
     static boolean isCfActionErasureSupported(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL);
+    }
+
+    static boolean isCfnrTimerSupported(int slotId) {
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SUPPORT_CFNR_TIMER_BOOL);
     }
 
     static boolean isCfQueryAllAndCfAllConditionalSupported(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL);
     }
 
     static int getOirNetworkDefaultOperation(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT);
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT);
     }
 
     static boolean isOirTirAlwaysTemporaryMode(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL);
     }
 
     static int getTimerForTempBlockWithAnyReason(int slotId) {
         return getInt(slotId,
-                CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT) * 1000;
+                CarrierConfig.ImsSs.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT) * 1000;
     }
 
     static String getPhoneContextForTargetAddress(int slotId) {
-        return getString(slotId, CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING);
+        return getString(slotId, CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING);
     }
 
     static String getCountryCodeToReplaceCountryCodeWithZero(int slotId) {
         return getString(slotId,
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING);
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING);
     }
 
     static String getCountryCodeToReplaceZeroWithCountryCode(int slotId) {
         return getString(slotId,
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING);
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING);
     }
 
     static boolean isOmitNamespaceOfDocumentElement(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL);
     }
 
     static boolean isOmitNamespaceSs(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_SS_BOOL);
     }
 
     static boolean isOmitNamespaceCp(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_CP_BOOL);
     }
 
     static int getXcapApnInactivityTimer(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT) * 1000;
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT) * 1000;
     }
 
     static boolean isErrorPhraseDisplayedWith409(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL);
     }
 
     static boolean insertNewRule(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL);
     }
 
     static int getUriTypeForCfTargetNumber(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT);
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT);
+    }
+
+    static String getNafFqdn(int slotId) {
+        return getString(slotId, CarrierConfig.ImsSs.KEY_UT_NAF_FQDN_STRING);
     }
 
     // Specific APIs

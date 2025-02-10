@@ -70,7 +70,7 @@ protected:
     void CreateNegoProfile()
     {
         m_pTextNego = new FakeTextNego(DEFAULT_SLOT_ID);
-        m_pTextNego->CreateProfiles(m_pEnvironment, MEDIA_TYPE_TEXT, m_pConfig);
+        m_pTextNego->CreateProfiles(m_pEnvironment, m_pConfig);
     }
 
     void CreateEnvironment()

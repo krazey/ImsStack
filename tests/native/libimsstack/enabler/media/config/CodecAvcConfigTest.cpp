@@ -189,7 +189,7 @@ TEST_F(CodecAvcConfigTest, GetSpropParameterSets)
 {
     AString strSpropParameterSets("Z0LAFtoHgUaagQEBA8UKqA==,aM4NiA==");
     ON_CALL(*m_pVideoSubBundle,
-            GetString(CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING,
+            GetString(CarrierConfig::ImsVt::KEY_AVC_SPROP_PARAMETER_SETS_STRING,
                     AString::ConstNull()))
             .WillByDefault(Return(strSpropParameterSets));
 

@@ -32,7 +32,7 @@ SipTxnKey::SipTxnKey() :
         m_pszFromTag(SIP_NULL),
         m_pszCallId(SIP_NULL),
         m_nRespCode(SIP_ZERO),
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
 }
@@ -50,7 +50,7 @@ SipTxnKey::SipTxnKey(SipTxnKey* pTxnKey, SIP_UINT16* pnError) :
         m_pszFromTag(SIP_NULL),
         m_pszCallId(SIP_NULL),
         m_nRespCode(SIP_ZERO),
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
     Init(pTxnKey, pnError);
@@ -69,7 +69,7 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
         m_pszFromTag(SIP_NULL),
         m_pszCallId(SIP_NULL),
         m_nRespCode(SIP_ZERO),
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
     m_eMsgType = pSipMsg->GetMsgType();
@@ -329,7 +329,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 
     SIP_BOOL bACKFor2xxSent = SIP_FALSE;
 
-    if (SipPf_Strcmp(ACK_METHOD, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
+    if (SipPf_Strcmp(SipMsgUtil::METHOD_ACK, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
     {
         if (SipPf_Strcmp(m_pszMethod, pGeneratedKey->m_pszMethod) != SIP_EQUALS)
         {
@@ -341,16 +341,17 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
     else
     {
         // 487 retransmission case
-        if (SipPf_Strcmp(m_pszMethod, CANCEL_METHOD) == SIP_EQUALS)
+        if (SipPf_Strcmp(m_pszMethod, SipMsgUtil::METHOD_CANCEL) == SIP_EQUALS)
         {
             return SIP_NOT_MATCH;
         }
 
         // Successful response & received ACK request : always new one
         // Test equipment issue: same transaction key - cseq / via-branch / from-tag / to-tag
-        if (pGeneratedKey->m_eTxnType == SipTxn::INV_SER_TXN && m_eTxnType == SipTxn::INV_SER_TXN)
+        if (pGeneratedKey->m_eTxnType == SipTxn::INVITE_SERVER &&
+                m_eTxnType == SipTxn::INVITE_SERVER)
         {
-            if (SIP_SUCCESSFUL_RESP(m_nRespCode))
+            if (SipMsgUtil::IsSuccessfulResponse(m_nRespCode))
             {
                 bACKFor2xxSent = SIP_TRUE;
             }
@@ -422,7 +423,7 @@ SIP_INT32 SipTxnKey::CompareKeysForRPR(SipTxnKey* pGeneratedKey)
         return SIP_NOT_MATCH;
     }
 
-    if (SipPf_Strcmp(m_pszMethod, INVITE_METHOD) != SIP_EQUALS)
+    if (SipPf_Strcmp(m_pszMethod, SipMsgUtil::METHOD_INVITE) != SIP_EQUALS)
     {
         // Check if this condition is required or not...
         return SIP_NOT_MATCH;
@@ -515,6 +516,6 @@ SIP_VOID SipTxnKey::Clear()
     m_nViaHostPort = SIP_ZERO;
     m_nCseqNum = SIP_ZERO;
     m_nRespCode = SIP_ZERO;
-    m_eTxnType = SipTxn::INVALID_TXN;
+    m_eTxnType = SipTxn::INVALID;
     m_nRules = RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH;
 }

@@ -15,7 +15,7 @@
  */
 #include "publish/UcePublishManager.h"
 
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "ICoreService.h"
 #include "IJniEnabler.h"
 #include "IMessage.h"
@@ -1638,14 +1638,14 @@ void UcePublishManager::SetPublishStateToAoS(IN IMS_UINT32 nState)
 {
     if (nState == PUBLISH_STARTED && m_bSetPublishStarted == IMS_FALSE)
     {
-        IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, 0);
+        IMSMSG objMsg(AosAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, 0);
         MessageService::PostMessage(m_strAppName, objMsg);
         m_bSetPublishStarted = IMS_TRUE;
         IMS_TRACE_D("SetPublishStateToAoS:send Publish Started Msg to UceApp", 0, 0, 0);
     }
     else if (nState == PUBLISH_STOPPED && m_bSetPublishStarted == IMS_TRUE)
     {
-        IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_TERMINATED, 0, 0);
+        IMSMSG objMsg(AosAppRequest::COMMAND_SET_PUBLISH_TERMINATED, 0, 0);
         MessageService::PostMessage(m_strAppName, objMsg);
         m_bSetPublishStarted = IMS_FALSE;
         IMS_TRACE_D("SetPublishStateToAoS:send Publish Terminated Msg to UceApp", 0, 0, 0);
@@ -1716,7 +1716,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
     {
         IMS_TRACE_D("No Reason header present.Send Register Recovery message to the App", 0, 0, 0);
         IMSMSG objMsg(
-                AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
+                AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
         MessageService::PostMessage(m_strAppName, objMsg);
         return IMS_TRUE;
     }
@@ -1730,7 +1730,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
             return IMS_TRUE;
         }
     }
-    IMSMSG objMsg(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
+    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
     MessageService::PostMessage(m_strAppName, objMsg);
     IMS_TRACE_D("Send Register Recovery message to the App", 0, 0, 0);
     return IMS_TRUE;

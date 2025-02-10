@@ -23,66 +23,66 @@
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsConferenceSubscriptionRequired(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE) !=
-            CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT;
+    return objProxy.GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT) !=
+            ConfigVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsReferSubscriptionRequired(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.Is(Feature::SUPPORT_CONFERENCE_REFER_SUBSCRIBE);
+    return objProxy.GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL);
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsSubscriptionOutDialog(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE) ==
-            CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG;
+    return objProxy.GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT) ==
+            ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsPackageVersionCheckRequired(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.Is(Feature::CHECK_CONFERENCE_EVENT_PACKAGE_VERSION);
+    return objProxy.GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL);
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsSubscriptionFirst(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.GetInt(Feature::CONFERENCE_SIP_FLOW_ORDER) ==
-            CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER;
+    return objProxy.GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT) ==
+            ConfigVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsSubscriptionNotifyRequiredForRefer(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.GetInt(Feature::CONFERENCE_SIP_FLOW_ORDER) ==
-            CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER;
+    return objProxy.GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT) ==
+            ConfigVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsPaidPreferred(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.Is(Feature::CONFERENCE_REFER_TO_URI_SOURCE_PAID);
+    return objProxy.GetBoolean(ConfigVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL);
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsReUseReferToUri(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.GetInt(Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE) ==
-            CarrierConfig::ImsVoice::CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE;
+    return objProxy.GetInt(ConfigVoice::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT) ==
+            ConfigVoice::CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsReferToExHeaderUsed(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.Is(Feature::ADD_REPLACE_HEADER_FOR_CONFERENCE);
+    return objProxy.GetBoolean(ConfigVoice::KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL);
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsSubscriptionForParticipantRequired(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.Is(Feature::ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT);
+    return objProxy.GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL);
 }
 
 PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationHelper::GetWaitTimeNotifyTerminated(
@@ -96,5 +96,5 @@ PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationHelper::GetWaitTimeNotifyTermina
 PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationHelper::GetReferTypeForInvite(
         IN MtcConfigurationProxy& objProxy)
 {
-    return objProxy.GetInt(Feature::CONFERENCE_INVITING_REFER_TYPE);
+    return objProxy.GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT);
 }

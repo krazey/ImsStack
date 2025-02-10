@@ -67,8 +67,8 @@ PUBLIC VIRTUAL CallTypeBlockRule::Result CallTypeBlockRule::Check(
 PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByTextVideoCall()
 {
     IMS_SINT32 nPolicyForTextAndVideo =
-            m_objConfiguration.GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO);
-    if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED)
+            m_objConfiguration.GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT);
+    if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_ALLOWED)
     {
         return IMS_TRUE;
     }
@@ -78,7 +78,7 @@ PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByTextVideoCall()
     {
         eTargetCallToCheck = m_objContext.GetSession()->GetCallType();
     }
-    else if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED)
+    else if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED)
     {
         // not supporting text and video media description simultaneously irrespective of port
         // eg. VZW
@@ -103,7 +103,8 @@ PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByTextVideoCall()
 
 PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByVideoMultipleCall()
 {
-    if (m_objConfiguration.Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL))
+    if (m_objConfiguration.GetBoolean(
+                ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
     {
         return IMS_TRUE;
     }

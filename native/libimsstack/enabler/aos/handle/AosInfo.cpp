@@ -228,36 +228,12 @@ PRIVATE VIRTUAL void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialize
     if (bIsInitialized)
     {
         m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
+        m_piContext->GetApp()->RequestCmd(IAosApplication::CMD_ECALL_INIT);
     }
     else
     {
         m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_DONE);
     }
-}
-
-PRIVATE VIRTUAL void AosInfo::NotifyScbmState(IN IMS_UINT32 nState)
-{
-    IMS_UINT32 nCommand = 0;
-
-    switch (nState)
-    {
-        case SCBM_STARTED:
-            nCommand = IAosRegistration::CMD_SCBM_STARTED;
-            break;
-        case SCBM_TERMINATED:
-            nCommand = IAosRegistration::CMD_SCBM_TERMINATED;
-            break;
-        case SCBM_TERMINATED_BY_ECALL:
-            nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ECALL;
-            break;
-        case SCBM_TERMINATED_BY_ESMS:
-            nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ESMS;
-            break;
-        default:
-            return;
-    }
-
-    m_piContext->GetRegistration()->RequestCmd(nCommand);
 }
 
 PRIVATE VIRTUAL void AosInfo::NotifyPublishState(IN IMS_BOOL bIsStarted)
@@ -270,6 +246,7 @@ PRIVATE VIRTUAL void AosInfo::NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized
     if (bIsInitialized)
     {
         m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
+        m_piContext->GetApp()->RequestCmd(IAosApplication::CMD_ESMS_INIT);
     }
     else
     {

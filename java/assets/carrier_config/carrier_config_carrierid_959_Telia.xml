@@ -15,9 +15,10 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_uri_type_for_cf_target_number_int" value="1"/>
-    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
+    <int name="imsss.ut_uri_type_for_cf_target_number_int" value="1"/>
+    <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">

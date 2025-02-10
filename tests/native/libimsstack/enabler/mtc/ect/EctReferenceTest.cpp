@@ -15,21 +15,23 @@
  */
 
 #include "IMtcService.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockIReference.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
 #include "MtcDef.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/ParticipantInfo.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "ect/EctReference.h"
 #include "ect/MockIEctReferenceListener.h"
@@ -37,8 +39,6 @@
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -61,8 +61,7 @@ public:
     MockIMtcService objMtcService;
     MockICoreService objCoreService;
     MockIEctReferenceListener objMockListener;
-    MtcConfigurationProxy* pConfigurationProxy;
-    MockIMtcConfigurationManager* pMockConfigurationManager;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcSipInterfaceFactory objMockInterfaceFactory;
     MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
     MockIInterfaceHolderListener objMockHolderListener;
@@ -91,8 +90,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pMockConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -165,7 +163,8 @@ protected:
         ON_CALL(objMockTargetContext, GetParticipantInfo)
                 .WillByDefault(ReturnRef(*pParticipantInfo));
 
-        ON_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
 
         ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP)).WillByDefault(Return(strUri));

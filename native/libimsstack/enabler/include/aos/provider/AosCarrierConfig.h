@@ -40,6 +40,7 @@ public:
             bCarrierVolteRoamingAvailable(IMS_TRUE),
             bSmsOverImsSupported(IMS_TRUE),
             bEmergencyCallbackModeSupported(IMS_FALSE),
+            bTcpRequiredForReg(IMS_FALSE),
             bUnsubscribeRegistrationEventPackage(IMS_FALSE),
             bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
             bSupportLimitedAdminSmsMode(IMS_FALSE),
@@ -58,6 +59,7 @@ public:
             nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
             nRegistrationPreferredAccesstypeFeatureTag(
                     CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
+            nWaitTimeSecForReleaseEPdnAfterECallEnd(0),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
             nRegistrationPrivateHeader(0),
@@ -105,6 +107,7 @@ public:
     IMS_BOOL bEmergencyCallbackModeSupported;
 
     /// carrier_config - ims
+    IMS_BOOL bTcpRequiredForReg;
     IMS_BOOL bUnsubscribeRegistrationEventPackage;
     /// carrier_config - imsemergency.
     IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
@@ -131,6 +134,7 @@ public:
     IMS_SINT32 nPreferredImsDscp;
     IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
     /// carrier_config - imsemergency.
+    IMS_SINT32 nWaitTimeSecForReleaseEPdnAfterECallEnd;
     IMS_SINT32 nPreferredEmergencyRegistration;
     /// carrier_config - imswfc.
     IMS_SINT32 nRegistrationPrivateHeader;

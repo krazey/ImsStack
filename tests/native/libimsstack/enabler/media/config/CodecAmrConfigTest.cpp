@@ -167,8 +167,8 @@ TEST_F(CodecAmrConfigTest, GetConfigShowModeSetList)
     IMS_BOOL bMockShowModeSet = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(
-                    CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL,
+                    IMS_FALSE))
             .WillByDefault(Return(bMockShowModeSet));
 
     GetReadyToCreateAmrWb();

@@ -106,7 +106,7 @@ TEST_F(SsacBlockRuleTest, CheckNotChecksSsacWhenMt)
 TEST_F(SsacBlockRuleTest, CheckNotChecksSsacWhenEmergency)
 {
     SetSsacBarred(IMS_TRUE, IMS_TRUE);
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     SsacBlockRule objRule(objContext, CallType::VOIP);
     EXPECT_EQ(Result(Result::Status::UNBLOCKED), objRule.Check(objBlockRuleCheckListener));
@@ -223,13 +223,18 @@ TEST_F(SsacBlockRuleTest, CheckReturnsBlockedWhenFactorIsZero)
             objRule.Check(objBlockRuleCheckListener));
 }
 
-TEST_F(SsacBlockRuleTest, CheckReturnsUnblockedWhenTimeIsZeroAndFactorIsNotZero)
+TEST_F(SsacBlockRuleTest, CheckReturnsBlockedWhenTimeIsZeroAndFactorIsZero)
 {
     SetSsacBarred(IMS_FALSE, IMS_FALSE);
 
-    objSsacInfo.nBarringFactorForVoice = 99;
+    objSsacInfo.nBarringFactorForVoice = 0;
     objSsacInfo.nBarringTimeSecForVoice = 0;
 
+    EXPECT_CALL(objSystemTimeService.GetMockSystemTime(), GetRandom(_))
+            .Times(1)
+            .WillOnce(Return(70));
+
     SsacBlockRule objRule(objContext, CallType::VOIP);
-    EXPECT_EQ(Result(Result::Status::UNBLOCKED), objRule.Check(objBlockRuleCheckListener));
+    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),
+            objRule.Check(objBlockRuleCheckListener));
 }

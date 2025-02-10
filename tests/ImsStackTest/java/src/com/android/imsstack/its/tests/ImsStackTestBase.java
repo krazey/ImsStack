@@ -80,6 +80,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -90,7 +91,6 @@ public class ImsStackTestBase {
         void init(int slotId, int simApplicationState);
     }
 
-    protected static final String LOG_TAG = "ImsStackTest";
     protected static final int APN_EMERGENCY = NetworkCapabilities.NET_CAPABILITY_EIMS;
     protected static final int APN_IMS = NetworkCapabilities.NET_CAPABILITY_IMS;
     protected static final int APN_DEFAULT = NetworkCapabilities.NET_CAPABILITY_INTERNET;
@@ -159,11 +159,27 @@ public class ImsStackTestBase {
                     try {
                         sPcscfAddresses.add(InetAddresses.parseNumericAddress(address));
                     } catch (IllegalArgumentException e) {
-                        Log.e(Log.TAG, "Invalid InetAddress format: " + e.toString());
+                        Log.e(ImsStackTestBase.class,
+                                "Invalid InetAddress format: " + e.toString());
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Retrieves the P-CSCF addresses.
+     *
+     * @return An unmodifiable list of InetAddresses representing the P-CSCF addresses.
+     * @throws IllegalStateException if the P-CSCF addresses have not been initialized.
+     */
+    @NonNull
+    public static List<InetAddress> getPcscfAddresses() {
+        if (sPcscfAddresses.isEmpty()) {
+            throw new IllegalStateException("P-CSCF addresses have not been initialized.");
+        }
+
+        return Collections.unmodifiableList(sPcscfAddresses);
     }
 
     /**
@@ -468,10 +484,10 @@ public class ImsStackTestBase {
                         CarrierConfig.TEST_CARRIER_CONFIG_FILE,
                         Context.MODE_APPEND)) {
                     config.writeToStream(os);
-                    Log.d(Log.TAG, "writeTestConfig: Ok");
+                    Log.d(this, "writeTestConfig: Ok");
                     return;
                 } catch (IOException e) {
-                    Log.d(Log.TAG, "writeTestConfig: " + e.toString());
+                    Log.d(this, "writeTestConfig: " + e.toString());
                 }
 
                 fail("Initializing the test configuration failed.");
@@ -592,15 +608,15 @@ public class ImsStackTestBase {
         // in a specific test.
     }
 
-    protected static void logd(String s) {
-        Log.d(LOG_TAG, s);
+    protected static void logd(Object o, String s) {
+        Log.d(o, s);
     }
 
-    protected static void loge(String s) {
-        Log.e(LOG_TAG, s);
+    protected static void loge(Object o, String s) {
+        Log.e(o, s);
     }
 
-    protected static void logi(String s) {
-        Log.i(LOG_TAG, s);
+    protected static void logi(Object o, String s) {
+        Log.i(o, s);
     }
 }

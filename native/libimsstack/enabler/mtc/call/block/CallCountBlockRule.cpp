@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
@@ -42,7 +43,7 @@ PUBLIC VIRTUAL CallCountBlockRule::Result CallCountBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    const IMS_SINT32 nMaxCallCount = m_objConfiguration.GetInt(Feature::CALL_MAX_COUNT);
+    const IMS_SINT32 nMaxCallCount = m_objConfiguration.GetInt(ConfigVoice::KEY_CALL_MAX_COUNT_INT);
     if (GetActiveCallCount() > nMaxCallCount)
     {
         IMS_TRACE_I("Check : Max call count[%d] reached", nMaxCallCount, 0, 0);

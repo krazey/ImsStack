@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
+#include "ByteArray.h"
+#include "CarrierConfig.h"
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIPublication.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
+#include "MockISipMessageBodyPart.h"
+#include "MockISipServerConnection.h"
+#include "RetryTaskHelper.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/state/MockIMtcCallState.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockISession.h"
 #include "emergency/CurrentLocationDiscoveryController.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
-#include "sipcore/MockISipServerConnection.h"
-#include "util/ByteArray.h"
 #include "utility/MessageUtil.h"
 #include <gtest/gtest.h>
 
@@ -43,8 +45,7 @@ LOCAL const AString STR_REQUEST_FOR_LOCATION_INFORMATION("requestForLocationInfo
 class CurrentLocationDiscoveryControllerTest : public ::testing::Test
 {
 protected:
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcCallContext objContext;
     MockIMtcSession objMtcSession;
     MockISession objISession;
@@ -59,15 +60,16 @@ protected:
 
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
         ON_CALL(objISession, CreatePublication).WillByDefault(Return(&objIPublication));
         ON_CALL(objSipServerConnection, GetMessage).WillByDefault(Return(&objISipMessage));
-        ON_CALL(*pConfigurationManager, IsEmergencyCallCurrentLocationDiscoverySupported)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigEmergency::
+                                KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL))
                 .WillByDefault(Return(IMS_TRUE));
 
         objBodyParts.Append(&objISipMessageBodyPart);
@@ -76,7 +78,7 @@ protected:
         objContent = ByteArray(STR_REQUEST_FOR_LOCATION_INFORMATION);
         ON_CALL(objISipMessageBodyPart, GetContent).WillByDefault(ReturnRef(objContent));
 
-        objCallInfo.bEmergency = IMS_TRUE;
+        objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         lstHeaders.Append(MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY);
@@ -116,7 +118,9 @@ TEST_F(CurrentLocationDiscoveryControllerTest, Send469WhenFeatureNotSupported)
 {
     CurrentLocationDiscoveryController objController(objContext);
 
-    ON_CALL(*pConfigurationManager, IsEmergencyCallCurrentLocationDiscoverySupported)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigEmergency::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objSipServerConnection, InitResponse(SipStatusCode::SC_469)).Times(1);
 
@@ -127,7 +131,7 @@ TEST_F(CurrentLocationDiscoveryControllerTest, Send469ForNonEmergencyCall)
 {
     CurrentLocationDiscoveryController objController(objContext);
 
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
     EXPECT_CALL(objSipServerConnection, InitResponse(SipStatusCode::SC_469)).Times(1);
 
     objController.OnCurrentLocationDiscoveryInfoReceived(objSipServerConnection);
@@ -163,4 +167,25 @@ TEST_F(CurrentLocationDiscoveryControllerTest, SendPublish)
     EXPECT_CALL(objIPublication, Publish(_, _)).Times(1);
 
     objController.OnCurrentLocationDiscoveryInfoReceived(objSipServerConnection);
+}
+
+TEST_F(CurrentLocationDiscoveryControllerTest, StartPeriodicLocationDiscoveryStartsRetryTaskHelper)
+{
+    CurrentLocationDiscoveryController objController(objContext);
+    EXPECT_CALL(*pConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT))
+            .Times(1)
+            .WillRepeatedly(Return(30));
+
+    objController.StartPeriodicLocationDiscovery();
+    objController.StartPeriodicLocationDiscovery();
+}
+
+TEST_F(CurrentLocationDiscoveryControllerTest, ExecuteCmdSendsLocationUpdate)
+{
+    CurrentLocationDiscoveryController objController(objContext);
+
+    EXPECT_CALL(objMtcSession, Update(UpdateType::LOCATION, IMS_FALSE, SipMethod::UPDATE)).Times(1);
+
+    objController.ExecuteCmd();
 }

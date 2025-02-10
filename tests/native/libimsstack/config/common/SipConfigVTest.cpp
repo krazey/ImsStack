@@ -101,7 +101,7 @@ TEST_F(SipConfigVTest, Refresh)
 TEST_F(SipConfigVTest, GetSessionHeaders)
 {
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
-            GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL, _))
+            GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL, _))
             .WillByDefault(ReturnRoundRobin({IMS_FALSE, IMS_TRUE}));
 
     SipConfigV objSipConfigV(IMS_SLOT_0);

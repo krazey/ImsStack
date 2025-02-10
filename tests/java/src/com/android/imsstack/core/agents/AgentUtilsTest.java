@@ -46,6 +46,9 @@ public class AgentUtilsTest {
 
         AgentFactory.getInstance().setAgent(SimInterface.class, mSim1, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, mSim2, SLOT1);
+
+        when(mSim1.getSimCardState()).thenReturn(Sim.STATE_PRESENT);
+        when(mSim2.getSimCardState()).thenReturn(Sim.STATE_PRESENT);
     }
 
     @After
@@ -70,6 +73,21 @@ public class AgentUtilsTest {
         when(mSim2.getSimState()).thenReturn(Sim.STATE_LOADED);
 
         assertFalse(AgentUtils.isAllSimAbsent());
+
+        when(mSim1.getSimCardState()).thenReturn(Sim.STATE_ABSENT);
+        when(mSim2.getSimCardState()).thenReturn(Sim.STATE_ABSENT);
+        when(mSim1.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim2.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+
+        assertTrue(AgentUtils.isAllSimAbsent());
+
+        // Initial state.
+        when(mSim1.getSimCardState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim2.getSimCardState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim1.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim2.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+
+        assertTrue(AgentUtils.isAllSimAbsent());
 
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT1);
@@ -104,6 +122,21 @@ public class AgentUtilsTest {
         when(mSim2.getSimState()).thenReturn(Sim.STATE_LOADED);
 
         assertFalse(AgentUtils.isAllSimAbsentOrLocked());
+
+        when(mSim1.getSimCardState()).thenReturn(Sim.STATE_ABSENT);
+        when(mSim2.getSimCardState()).thenReturn(Sim.STATE_ABSENT);
+        when(mSim1.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim2.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+
+        assertTrue(AgentUtils.isAllSimAbsentOrLocked());
+
+        // Initial state.
+        when(mSim1.getSimCardState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim2.getSimCardState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim1.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+        when(mSim2.getSimState()).thenReturn(Sim.STATE_UNKNOWN);
+
+        assertTrue(AgentUtils.isAllSimAbsentOrLocked());
 
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT1);

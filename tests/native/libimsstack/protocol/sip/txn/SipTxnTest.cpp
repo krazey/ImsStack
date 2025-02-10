@@ -132,7 +132,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
 
         static const SipStackCallbacks stTestCallbacks = {
                 &MockTxn_FetchTransaction,
@@ -165,7 +165,7 @@ CSeq: 1 REGISTER\r\n\
     }
 };
 
-TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
+TEST_F(SipTxnTest, InvokeFsm_NonInviteClient)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -179,7 +179,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     /* Calling NonInvCli Fsm in idle state with send NonInvReq event
        timer E will be started and txn will move to trying state */
     SipTxn* pTxn =
-            new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+            new SipTxn(SipTxn::NON_INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
@@ -201,7 +201,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     /* Calling NonInvCli Fsm in trying state with 2xx_6xx recv event
        timer K will be started and txn will move to completed state */
     EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_2XX_6XX_RESP_EVT, pTxnFsmData, &nError));
+            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_FINAL_RESP_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::NON_INV_CLI_COMPLETED_ST, pTxn->GetTxnState());
 
     /* Invoking timeout callback for Timer K */
@@ -225,7 +225,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
-    pTxn = new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    pTxn = new SipTxn(SipTxn::NON_INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
 
     EXPECT_EQ(SIP_TRUE,
             pTxn->InvokeFsm(SipTxn::NON_INV_CLI_SEND_NON_INV_REQ_EVT, pTxnFsmData, &nError));
@@ -245,7 +245,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     pTxnKey->SipDelete();
 }
 
-TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
+TEST_F(SipTxnTest, InvokeFsm_InviteClient)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -255,7 +255,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    SipTxn* pTxn =
+            new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
 
     /* Calling Inv cli fsm with send invite event in UDP timer A will start */
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_SEND_INV_REQ_EVT, pTxnFsmData, &nError));
@@ -283,7 +284,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
 
     /* Calling Inv cli fsm with 3xx_6xx event timer D will start */
     EXPECT_EQ(
-            SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_RECV_3XX_6XX_RESP_EVT, pTxnFsmData, &nError));
+            SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::INV_CLI_COMPLETED_ST, pTxn->GetTxnState());
 
     /* Invoking timeout callback for Timer D */
@@ -301,7 +302,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
 
     /* Calling Inv cli fsm with send invite event in UDP timer B will start */
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_SEND_INV_REQ_EVT, pTxnFsmData, &nError));
@@ -323,7 +324,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     delete pSipTxnTimerContext;
 }
 
-TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
+TEST_F(SipTxnTest, InvokeFsm_InviteServer)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -334,7 +335,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
 
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    SipTxn* pTxn =
+            new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     /* Calling Inv ser fsm with recv invite event state will be moved to proceeding state*/
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_INV_REQ_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::INV_SER_PROCEEDING_ST, pTxn->GetTxnState());
@@ -360,8 +362,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
 
     /* Calling Inv ser fsm send 2xx resp event and timer H will be started
         state will be moved to completed state */
-    EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_SEND_2XX_RESP_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
     pTxn->SetMaxDuration(140000);
 
@@ -406,7 +407,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     delete pSipTxnTimerContext;
 }
 
-TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
+TEST_F(SipTxnTest, InvokeFsm_NonInviteServer)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -418,7 +419,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
 
     SipTxn* pTxn =
-            new SipTxn(SipTxn::NON_INV_SER_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+            new SipTxn(SipTxn::NON_INVITE_SERVER, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     /* Calling Non Inv ser fsm with recv non invite event state will be moved to trying state*/
     EXPECT_EQ(SIP_TRUE,
             pTxn->InvokeFsm(SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT, pTxnFsmData, &nError));
@@ -434,7 +435,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     /* Calling Non Inv ser fsm with recv 2xx resp event in trying state
        in UDP timer J will start */
     EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT, pTxnFsmData, &nError));
+            pTxn->InvokeFsm(SipTxn::NON_INV_SER_SEND_FINAL_RESP_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::NON_INV_SER_COMPLETED_ST, pTxn->GetTxnState());
 
     /* Invoking timeout callback for Timer J */
@@ -497,8 +498,8 @@ P-Access-Network-Info: 3GPP-UTRAN;utran-cell-id-3gpp=B20E\r\n\
 User-Agent: pixel\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pInSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
-    SipTxn* pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, SIP_NULL, pInSipMsg, SIP_NULL, &nError);
+    EXPECT_EQ(SIP_TRUE, pInSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
+    SipTxn* pTxn = new SipTxn(SipTxn::NON_INVITE_SERVER, SIP_NULL, pInSipMsg, SIP_NULL, &nError);
 
     pMsg = "SIP/2.0 406 Not Acceptable\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
@@ -508,7 +509,7 @@ Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pRespSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
     EXPECT_EQ(SIP_TRUE, pTxn->PrepareACK(pRespSipMsg, SIP_TRUE, &pOutMsg));
 
     pInSipMsg->SipDelete();
@@ -535,27 +536,27 @@ TEST_F(SipTxnTest, IsTxnTerminated)
 {
     SIP_UINT16 nError = 0;
 
-    SipTxn* pTxn = new SipTxn(SipTxn::NON_INV_CLI_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::NON_INVITE_CLIENT, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::NON_INV_CLI_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::NON_INVITE_SERVER, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::INVALID_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVALID, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     EXPECT_EQ(SIP_FALSE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
@@ -567,9 +568,9 @@ TEST_F(SipTxnTest, InvalidTxn)
     SipMessage* pInSipMsg = new SipMessage();
     pInSipMsg->SetMessageType(SipMessage::TYPE_INVALID);
     SipTxnKey* pTxnKey = new SipTxnKey(pInSipMsg, &nError);
-    EXPECT_EQ(SipTxn::INVALID_TXN, pTxnKey->GetTxnType());
+    EXPECT_EQ(SipTxn::INVALID, pTxnKey->GetTxnType());
 
-    SipTxn* pTxn = new SipTxn(SipTxn::INVALID_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVALID, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
     EXPECT_EQ(SIP_FALSE, pTxn->InvokeFsm(SipTxn::NON_INV_CLI_INVALID_EVT, SIP_NULL, &nError));
 
@@ -603,7 +604,7 @@ TEST_F(SipTxnTest, AbortTxn)
     /* Calling NonInvCli Fsm in idle state with send NonInvReq event
        timer E will be started and txn will move to trying state */
     SipTxn* pTxn =
-            new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+            new SipTxn(SipTxn::NON_INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam =
             new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
@@ -618,7 +619,7 @@ TEST_F(SipTxnTest, AbortTxn)
 
     /* Aborting txn without SipUtil */
     EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_2XX_6XX_RESP_EVT, pTxnFsmData, &nError));
+            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_FINAL_RESP_EVT, pTxnFsmData, &nError));
     SipUtil_Destruct();
     EXPECT_EQ(SIP_FALSE, pTxn->StartTxnTimer(SipTxn::TIMER_TYPE_INVALID, 1000, &nError));
     EXPECT_EQ(SIP_FALSE, pTxn->StopTxnTimer());

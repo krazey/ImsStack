@@ -42,7 +42,7 @@ TEST_F(SipBadHeaderTest, CopyConstructor)
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipBadHeaderTest, EncodeHdr)
+TEST_F(SipBadHeaderTest, Encode)
 {
     SipBadHeader* pHeader = new SipBadHeader();
     ASSERT_TRUE(pHeader != nullptr);
@@ -54,7 +54,7 @@ TEST_F(SipBadHeaderTest, EncodeHdr)
             0,
     };
     SIP_CHAR* pBuff = &(aBuffer[0]);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     AStringBuffer objBuffer(512);
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
@@ -62,12 +62,12 @@ TEST_F(SipBadHeaderTest, EncodeHdr)
     pHeader->SipDelete();
 }
 
-TEST_F(SipBadHeaderTest, DecodeHdr)
+TEST_F(SipBadHeaderTest, Decode)
 {
     SipBadHeader* pHeader = new SipBadHeader();
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(SIP_NULL, 0));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pHeader->SipDelete();

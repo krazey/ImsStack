@@ -64,7 +64,7 @@ SIP_BOOL SipNetworkUtil::SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
     }
 
     SipTxnContextData* pTxnContextData =
-            static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
+            static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData);
 
     if (pTxnContextData == IMS_NULL)
     {
@@ -665,7 +665,7 @@ GLOBAL SipAddrSpec* DecodeAddrSpec(IN const AString& strAddress)
 
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
 
-    if (pAddrSpec->DecodeAddrSpec(strAddrSpec.GetStr(), strAddrSpec.GetLength()) == SIP_FALSE)
+    if (pAddrSpec->Decode(strAddrSpec.GetStr(), strAddrSpec.GetLength()) == SIP_FALSE)
     {
         pAddrSpec->SipDelete();
         return IMS_NULL;
@@ -681,7 +681,7 @@ GLOBAL SipHeaderBase* DecodeHeader(
 
     if (nType == SipHeaderBase::UNKNOWN && (strName.GetLength() != 0))
     {
-        SIP_INT32 nUnknownType = SipGetHdrType(strName.GetStr());
+        SIP_INT32 nUnknownType = SipMsgUtil::GetHeaderType(strName.GetStr());
 
         if (nUnknownType != SipHeaderBase::TYPE_INVALID)
         {
@@ -731,7 +731,7 @@ GLOBAL SipHeaderBase* DecodeHeader(
             return IMS_NULL;
         }
 
-        if (pHeader->DecodeHdr(pszTmpBody, nBodyLen) == SIP_FALSE)
+        if (pHeader->Decode(pszTmpBody, nBodyLen) == SIP_FALSE)
         {
             IMS_MEM_Free(pszTmpBody);
             FreeHeaderEx(pHeader);
@@ -764,7 +764,7 @@ GLOBAL IMS_BOOL DecodeMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen
             return IMS_FALSE;
         }
     }
-    else if (pMessage->DecCompleteMsg(pszSipBuffer, nBuffLen) == SIP_FALSE)
+    else if (pMessage->Decode(pszSipBuffer, nBuffLen) == SIP_FALSE)
     {
         pMessage->SipDelete();
         pMessage = IMS_NULL;
@@ -839,7 +839,8 @@ GLOBAL IMS_BOOL DecodeMessageBody(IN ::SipMessage* pMessage)
         IMS_CHAR* pszCompBodyEnd = pszCompBodyStart + objBodyPart.GetLength() - 1;
         IMS_UINT32 nCompLength = objBodyPart.GetLength();
 
-        if (pMessage->DecMultiPartBody(pszCompBodyStart, pszCompBodyEnd, nCompLength) == SIP_FALSE)
+        if (pMessage->DecodeMultiPartBody(pszCompBodyStart, pszCompBodyEnd, nCompLength) ==
+                SIP_FALSE)
         {
             IMS_TRACE_E(0, "Decoding uncompressed body part failed", 0, 0, 0);
             return IMS_FALSE;
@@ -915,7 +916,7 @@ GLOBAL IMS_BOOL EncodeMessage(IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions,
         nMsgOptions |= SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     }
 
-    if (pMessage->EncodeMsg(reinterpret_cast<SIP_CHAR**>(&pBuffer),
+    if (pMessage->Encode(reinterpret_cast<SIP_CHAR**>(&pBuffer),
                 reinterpret_cast<SIP_UINT32*>(&nBuffLen), nMsgOptions) == SIP_FALSE)
     {
         IMS_TRACE_D("EncodeMessage is failed", 0, 0, 0);
@@ -955,7 +956,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
 
             if (pRequestLine != SIP_NULL)
             {
-                bStatus = pRequestLine->EncodeRequestLine(&pszBuffer);
+                bStatus = pRequestLine->Encode(&pszBuffer);
                 pRequestLine->SipDelete();
             }
         }
@@ -965,7 +966,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
 
             if (pStatusLine != SIP_NULL)
             {
-                bStatus = pStatusLine->EncodeStatusLine(&pszBuffer);
+                bStatus = pStatusLine->Encode(&pszBuffer);
                 pStatusLine->SipDelete();
             }
         }
@@ -977,10 +978,10 @@ GLOBAL IMS_BOOL EncodePartialMessage(
         }
 
         // Put CRLF at the end of Start-Line
-        SIP_ENC_CRLF(pszBuffer);
+        SipMsgUtil::EncodeCrlf(pszBuffer);
     }
 
-    SIP_CHAR aMsgBody[SIP_MAX_MSG_SIZE] = {
+    SIP_CHAR aMsgBody[SipMsgUtil::MAX_MSG_SIZE] = {
             0,
     };
     SIP_CHAR* pMsgBody = &(aMsgBody[0]);
@@ -1065,7 +1066,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
                 // Multiple message bodies
                 else
                 {
-                    pContentType = new SipContentTypeHeader();
+                    pContentType = new SipContentTypeHeader(SipHeaderBase::CONTENT_TYPE);
                     pContentType->SetMediaType(Sip::STR_MULTIPART);
                     pContentType->SetSubMediaType(Sip::STR_MIXED);
 
@@ -1085,7 +1086,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
             pContentLength->SipDelete();
         }
 
-        if (pMessage->GetMsgHdrs()->EncodeHdrs(&pszBuffer, SipConfiguration::MSG_OPT_ENCODE_NONE) ==
+        if (pMessage->GetMsgHdrs()->Encode(&pszBuffer, SipConfiguration::MSG_OPT_ENCODE_NONE) ==
                 SIP_FALSE)
         {
             IMS_TRACE_D("Encoding headers failed", 0, 0, 0);
@@ -1093,7 +1094,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
         }
     }
 
-    SIP_ENC_CRLF(pszBuffer);
+    SipMsgUtil::EncodeCrlf(pszBuffer);
 
     if ((nOptions & OPT_BODY_PART) == OPT_BODY_PART)
     {
@@ -1148,7 +1149,7 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
 {
     if (strName.GetLength() != 0)
     {
-        nType = SipGetHdrType(strName.GetStr());
+        nType = SipMsgUtil::GetHeaderType(strName.GetStr());
     }
 
     return (nType == ISipHeader::UNKNOWN);
@@ -1171,11 +1172,11 @@ GLOBAL ImsList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 
         SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
 
-        IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
+        IMS_UINT32 nValueCount = pNameVal->m_objValueList.GetSize();
 
         for (IMS_UINT32 j = 0; j < nValueCount; ++j)
         {
-            IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
+            IMS_CHAR* pszValue = pNameVal->m_objValueList.GetAt(j);
 
             if (pszValue != IMS_NULL)
             {
@@ -1227,17 +1228,17 @@ GLOBAL ImsList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
             return objParams;
         }
 
-        if (pNameVal->m_valueList.IsEmpty())
+        if (pNameVal->m_objValueList.IsEmpty())
         {
             objParams.Append(pParameter);
             continue;
         }
 
-        IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
+        IMS_UINT32 nValueCount = pNameVal->m_objValueList.GetSize();
 
         for (IMS_UINT32 j = 0; j < nValueCount; ++j)
         {
-            IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
+            IMS_CHAR* pszValue = pNameVal->m_objValueList.GetAt(j);
 
             if (pszValue != IMS_NULL)
             {
@@ -2810,7 +2811,7 @@ GLOBAL SipStatusCode GetStatusCodeEx(IN ::SipMessage* pMessage)
     }
 
     IMS_SINT32 nStatusCode = SipStatusCode::SC_INVALID;
-    const IMS_CHAR* pszReasonPhrase = pStatusLine->GetRsnPhrase();
+    const IMS_CHAR* pszReasonPhrase = pStatusLine->GetReasonPhrase();
     const IMS_CHAR* pszStatusCode = pStatusLine->GetStatusCode();
 
     if (pszStatusCode != IMS_NULL)
@@ -2938,7 +2939,7 @@ GLOBAL AString GetViaBranchParameter(IN ::SipMessage* pMessage)
 
 GLOBAL IMS_SINT32 GetHdrEnumType(IN IMS_SINT32 nType)
 {
-    return CheckAndGetHdrEnumType(nType);
+    return SipMsgUtil::CheckAndGetHeaderType(nType);
 }
 
 GLOBAL IMS_BOOL HasParameter(IN SipHeaderBase* pHeader, IN const AString& strName)
@@ -3665,7 +3666,7 @@ GLOBAL IMS_BOOL SetRequestLine(
 {
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
 
-    pAddrSpec->DecodeAddrSpec(strUri.GetStr(), strUri.GetLength());
+    pAddrSpec->Decode(strUri.GetStr(), strUri.GetLength());
 
     SipRequestLine* pReqLine = new SipRequestLine(strMethod.GetStr(), pAddrSpec, SIP_SIPVER);
 
@@ -4018,7 +4019,7 @@ GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN ::SipTxnKey* pTxnKey)
     AString strViaBranch(TxnKey_GetViaBranch(pTxnKey));
 
     return new sipcore::SipTxnKey(
-            objMethod, pTxnKey->GetRespCode(), strViaBranch, pTxnKey->GetCSeqNum());
+            objMethod, pTxnKey->GetResponseCode(), strViaBranch, pTxnKey->GetCSeqNum());
 }
 
 GLOBAL IMS_BOOL CompareTxnKeys(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey2)
@@ -4158,12 +4159,12 @@ GLOBAL void DestroyTxnContext(IN SipTxnContext* pContext)
     if (pContext != IMS_NULL)
     {
         SipTxnContextData* pTxnContextData =
-                static_cast<SipTxnContextData*>(pContext->pTxnContextData);
+                static_cast<SipTxnContextData*>(pContext->m_pTxnContextData);
 
         if (pTxnContextData != IMS_NULL)
         {
             delete pTxnContextData;
-            pContext->pTxnContextData = IMS_NULL;
+            pContext->m_pTxnContextData = IMS_NULL;
         }
 
         SipContextUtils::GetInstance()->Sip_DestroyTxnContext(pContext);
@@ -4262,12 +4263,12 @@ GLOBAL void InvokeTimerCallback(
 
 GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext)
 {
-    if ((pTv == IMS_NULL) || (pTxnContext->pSipTimerContext == IMS_NULL))
+    if ((pTv == IMS_NULL) || (pTxnContext->m_pSipTimerContext == IMS_NULL))
     {
         return;
     }
 
-    SipTxnTimerValues* pTxnTimerValues = pTxnContext->pSipTimerContext->pTxnSipTxnTimers;
+    SipTxnTimerValues* pTxnTimerValues = pTxnContext->m_pSipTimerContext->m_pTxnSipTxnTimers;
 
     if (pTxnTimerValues == IMS_NULL)
     {
@@ -4335,8 +4336,8 @@ GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnCo
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_K, pTv->GetValue(SipTimerValues::TIMER_K));
     }
 
-    pTxnContext->pSipTimerContext->nTimerOptions = nTxnTimerOptions;
-    pTxnContext->pSipTimerContext->pTxnSipTxnTimers = pTxnTimerValues;
+    pTxnContext->m_pSipTimerContext->m_nTimerOptions = nTxnTimerOptions;
+    pTxnContext->m_pSipTimerContext->m_pTxnSipTxnTimers = pTxnTimerValues;
 }
 
 GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
@@ -4484,14 +4485,14 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
 
     for (IMS_UINT32 i = 0; i < nListCount; ++i)
     {
-        SipNameValue* pNmVl = pSipUri->GetHdrParam(i);
+        SipNameValue* pNameValue = pSipUri->GetHdrParam(i);
 
-        if (pNmVl == IMS_NULL)
+        if (pNameValue == IMS_NULL)
         {
             continue;
         }
 
-        if (pNmVl->m_valueList.IsEmpty())
+        if (pNameValue->m_objValueList.IsEmpty())
         {
             pSipUri->SipDelete();
             return IMS_FALSE;
@@ -4501,9 +4502,9 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
 
         if (pHeader != IMS_NULL)
         {
-            pHeader->SetName(pNmVl->m_pszName);
+            pHeader->SetName(pNameValue->m_pszName);
 
-            IMS_CHAR* pszHdrVal = pNmVl->m_valueList.GetAt(0);
+            IMS_CHAR* pszHdrVal = pNameValue->m_objValueList.GetAt(0);
 
             AString strHdrValue(pszHdrVal);
 

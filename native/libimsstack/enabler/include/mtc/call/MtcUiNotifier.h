@@ -40,6 +40,7 @@ public:
     void SendIncomingCallRejected(IN const CallReasonInfo& objReason) override;
     void SendStarted() override;
     void SendStartFailed(IN const CallReasonInfo& objReason) override;
+    void SendInitiating() override;
     void SendProgressing() override;
     void SendHeld() override;
     void SendHoldFailed(IN const CallReasonInfo& objReason) override;

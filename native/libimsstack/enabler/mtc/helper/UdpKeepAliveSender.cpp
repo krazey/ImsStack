@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-// #include "IImsAosInfo.h"
+#include "CarrierConfig.h"
 #include "IMtcService.h"
+#include "ISipKeepAliveHelper.h"
 #include "ImsTypeDef.h"
+#include "IpAddress.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
@@ -24,8 +26,6 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "sipcore/ISipKeepAliveHelper.h"
-#include "util/IpAddress.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -34,7 +34,7 @@ UdpKeepAliveSender::UdpKeepAliveSender(
         IN ISipKeepAliveHelper* pKeepAliveHelper, IN IMtcCallContext& objContext) :
         m_pKeepAliveHelper(pKeepAliveHelper),
         m_nIntervalInMillis(objContext.GetConfigurationProxy().GetInt(
-                Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME)),
+                ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT)),
         m_piTimer(IMS_NULL)
 {
     SetTransportInfo(objContext.GetService().GetAosConnector());
@@ -50,7 +50,7 @@ PUBLIC VIRTUAL UdpKeepAliveSender::~UdpKeepAliveSender()
 PUBLIC GLOBAL IMS_BOOL UdpKeepAliveSender::IsRequired(
         IN const MtcConfigurationProxy& objConfigProxy)
 {
-    return objConfigProxy.GetInt(Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME) > 0;
+    return objConfigProxy.GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT) > 0;
 }
 
 PUBLIC VIRTUAL void UdpKeepAliveSender::Timer_TimerExpired(IN ITimer* piTimer)

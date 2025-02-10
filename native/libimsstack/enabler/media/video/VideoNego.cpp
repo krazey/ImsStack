@@ -26,18 +26,18 @@
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "video/VideoNego.h"
-#include "video/VideoNegoAvc.h"
-#include "video/VideoNegoHevc.h"
+#include "video/VideoProfileGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         BaseNego(nSlotId, MEDIA_TYPE_VIDEO),
-        m_pProfileExtractor(std::make_unique<VideoProfileExtractor>())
+        m_pSdpParser(std::make_unique<VideoSdpParser>())
 {
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<VideoSdpGenerator>();
-    m_pSdpNegotiator = std::make_shared<VideoSdpNegotiator>();
+    m_pProfileNegotiator = std::make_shared<VideoProfileNegotiator>();
+    m_pProfileGenerator = std::make_shared<VideoProfileGenerator>();
 }
 
 PUBLIC
@@ -67,7 +67,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
 {
     // Handling exception case
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pSdpNegotiator == IMS_NULL)
+            m_pProfileNegotiator == IMS_NULL)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -81,8 +81,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
     // Make a destination profile from SDP
     objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_VIDEO);
 
-    if (m_pProfileExtractor->Extract(
-                pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) != IMS_TRUE)
+    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
+            IMS_TRUE)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -91,7 +91,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
     objOaModel.pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_VIDEO);
 
-    if (std::static_pointer_cast<VideoSdpNegotiator>(m_pSdpNegotiator)
+    if (std::static_pointer_cast<VideoProfileNegotiator>(m_pProfileNegotiator)
                     ->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
                             GetNegotiatedProfile(&objOaModel), m_pConfig) != IMS_TRUE)
     {
@@ -107,8 +107,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
 PUBLIC
 VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
 {
-    return (m_pSdpNegotiator != IMS_NULL)
-            ? std::static_pointer_cast<VideoSdpNegotiator>(m_pSdpNegotiator)
+    return (m_pProfileNegotiator != IMS_NULL)
+            ? std::static_pointer_cast<VideoProfileNegotiator>(m_pProfileNegotiator)
                       ->GetNegotiatedResolution(GetNegotiatedPayload())
             : VIDEO_RESOLUTION_INVALID;
 }
@@ -148,7 +148,7 @@ PROTECTED IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescript
 {
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_listOaModel.GetSize() == 0 ||
-            m_pSdpGenerator == IMS_NULL || m_pSdpNegotiator == IMS_NULL)
+            m_pSdpGenerator == IMS_NULL || m_pProfileNegotiator == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -185,7 +185,7 @@ PROTECTED IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescript
     else
     {
         MEDIA_DIRECTION eTempDirection =
-                std::static_pointer_cast<VideoSdpNegotiator>(m_pSdpNegotiator)
+                std::static_pointer_cast<VideoProfileNegotiator>(m_pProfileNegotiator)
                         ->UpdateDirectionToMine(pNewOaModel->pPeerProfile->GetDirection(),
                                 pNewOaModel->pLocalProfile->GetDirection(), IMS_FALSE);
         pNewOaModel->pNegotiatedProfile->SetDirection(eTempDirection);
@@ -345,7 +345,7 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateOffer(
 {
     // Handling exception case
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pSdpNegotiator == IMS_NULL)
+            m_pProfileNegotiator == IMS_NULL)
     {
         return MEDIA_DIRECTION_INVALID;
     }
@@ -360,8 +360,8 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateOffer(
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_VIDEO);
 
-    if (m_pProfileExtractor->Extract(
-                pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) != IMS_TRUE)
+    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
@@ -371,7 +371,7 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateOffer(
     pNewOaModel->pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_VIDEO);
 
-    if (std::static_pointer_cast<VideoSdpNegotiator>(m_pSdpNegotiator)
+    if (std::static_pointer_cast<VideoProfileNegotiator>(m_pProfileNegotiator)
                     ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
                             GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
     {
@@ -393,7 +393,8 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_pSdpNegotiator == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
+            m_pProfileNegotiator == IMS_NULL)
     {
         return MEDIA_DIRECTION_INVALID;
     }
@@ -413,8 +414,8 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
 
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_VIDEO);
-    if (m_pProfileExtractor->Extract(
-                pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) != IMS_TRUE)
+    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
@@ -425,7 +426,7 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
     pNewOaModel->pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_VIDEO);
 
-    if (std::static_pointer_cast<VideoSdpNegotiator>(m_pSdpNegotiator)
+    if (std::static_pointer_cast<VideoProfileNegotiator>(m_pProfileNegotiator)
                     ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
                             IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
     {

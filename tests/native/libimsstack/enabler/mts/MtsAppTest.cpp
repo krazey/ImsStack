@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IMtsService.h"
 #include "IMtsServiceState.h"
 #include "MtsApp.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

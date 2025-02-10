@@ -53,19 +53,18 @@ SIP_BOOL SipGeolocationRoutingHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL 
     return m_pGeoLocationRoutingList->Encode(objBuffer);
 }
 
-SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(
-        SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipGeolocationRoutingHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "GeoLocation route missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing geolocation-route", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return m_pGeoLocationRoutingList->Encode(ppCurrPos);
 }
 
-SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipGeolocationRoutingHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -76,7 +75,7 @@ SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UI
     m_pGeoLocationRoutingList = new SipNameValue();
     if (m_pGeoLocationRoutingList == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

@@ -34,6 +34,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsWifiCallingProvisioned, (), (override));
     MOCK_METHOD(AString, GetWifiCallingAddressId, (), (override));
     MOCK_METHOD(IMS_SINT32, GetCsCallStateInOtherSlot, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCrossSimRedialingAvailable, (), (const, override));
 };
 
 #endif

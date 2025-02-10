@@ -23,12 +23,13 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 AudioController::AudioController() :
-        m_listAudioSession(ImsList<AudioMediaSession*>()),
-        m_nAudioSessionState(AudioMediaSession::STATE_NONE),
-        m_eUpdateCondition(EARLY_SESSION),
+        m_listAudioSession(ImsList<AudioSession*>()),
+        m_eMediaState(AudioSession::STATE_NONE),
+        m_eCallState(EARLY_SESSION),
         m_objLocalAddr(IpAddress::IPv6NONE),
         m_nPort(0),
-        m_nCurrentActiveNegoId(UNDEFINED_NEGO_ID)
+        m_nCurrentActiveNegoId(UNDEFINED_NEGO_ID),
+        m_pAudioConfig(IMS_NULL)
 {
     m_listAudioSession.Clear();
 }
@@ -36,9 +37,9 @@ AudioController::AudioController() :
 PUBLIC
 AudioController::~AudioController()
 {
-    IMS_TRACE_I("~AudioController() - state[%d]", m_nAudioSessionState, 0, 0);
+    IMS_TRACE_I("~AudioController() - state[%d]", m_eMediaState, 0, 0);
 
-    if (m_nAudioSessionState != AudioMediaSession::STATE_NONE)
+    if (m_eMediaState != AudioSession::STATE_NONE)
     {
         CloseSession();
     }
@@ -47,15 +48,15 @@ AudioController::~AudioController()
 }
 
 PUBLIC
-void AudioController::SetConfirmSession(IN IMS_BOOL bConfirmed)
+void AudioController::SetCallSessionState(IN IMS_BOOL bConfirmed)
 {
     if (bConfirmed)
     {
-        m_eUpdateCondition = READY_TO_CONFIRM;
+        m_eCallState = CONFIRMED_SESSION;
     }
     else
     {
-        m_eUpdateCondition = EARLY_SESSION;
+        m_eCallState = EARLY_SESSION;
     }
 }
 
@@ -66,9 +67,9 @@ IMS_BOOL AudioController::SendDtmf(IN IMS_CHAR cDtmfCode)
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
-        AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
+        AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioMediaSession::STATE_LIVE)
+        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioSession::STATE_LIVE)
         {
             pAudioSession->SendDtmf(cDtmfCode);
         }
@@ -78,11 +79,11 @@ IMS_BOOL AudioController::SendDtmf(IN IMS_CHAR cDtmfCode)
 }
 
 PUBLIC
-IMS_BOOL AudioController::CreateSession(
-        IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId, AudioConfiguration* pConfig)
+IMS_BOOL AudioController::CreateSession(IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId,
+        AudioConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType)
 {
-    IMS_TRACE_D("CreateSession() - nNegoId[%" PFLS_x "], audio list size[%d]", nNegoId,
-            m_listAudioSession.GetSize(), 0);
+    IMS_TRACE_D("CreateSession() - NegoId[%" PFLS_x "], audio list size[%d] ServiceType[%d]",
+            nNegoId, m_listAudioSession.GetSize(), eServiceType);
 
     if (pListener == IMS_NULL || pConfig == IMS_NULL)
     {
@@ -90,10 +91,11 @@ IMS_BOOL AudioController::CreateSession(
         return IMS_FALSE;
     }
 
-    AudioMediaSession* pAudioSession = new AudioMediaSession();
+    AudioSession* pAudioSession = new AudioSession();
+    pAudioSession->SetServiceType(eServiceType);
     pAudioSession->SetNegoId(nNegoId);
     pAudioSession->SetMediaSessionListener(pListener);
-    pAudioSession->SetConfig(pConfig);
+    pAudioSession->SetConfiguration(pConfig);
     m_listAudioSession.Append(pAudioSession);
     return IMS_TRUE;
 }
@@ -109,10 +111,10 @@ IMS_BOOL AudioController::UpdateSession(
 
     IMS_BOOL bAnbrResult = UpdateAnbrEnabledConfig(
             nNegoId, pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported());
-    IMS_TRACE_D("UpdateSession() - res: %d, anbr enable: %d", bAnbrResult,
+    IMS_TRACE_D("UpdateSession() - res[%d], anbr enabled[%d]", bAnbrResult,
             pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported(), 0);
 
-    if (m_eUpdateCondition == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
+    if (m_eCallState == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
     {
         UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
         UpdateQualityThreshold(nNegoId, pNego);
@@ -120,14 +122,20 @@ IMS_BOOL AudioController::UpdateSession(
     }
     else
     {
-        IMS_BOOL bResult = UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
-        UpdateQualityThreshold(nNegoId, pNego);
-        SetMediaQuality(nNegoId);
+        IMS_BOOL bResult = IMS_TRUE;
+        IMS_BOOL bNeedModify = UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
+        IMS_BOOL bNeedSetQuality = UpdateQualityThreshold(nNegoId, pNego);
 
-        if (bResult)
+        if (bNeedModify)
         {
-            return ModifySession(nNegoId);
+            bResult = ModifySession(nNegoId);
         }
+        if (bNeedSetQuality && bResult)
+        {
+            SetMediaQuality(nNegoId);
+        }
+
+        return bNeedModify && bResult;
     }
 
     return IMS_FALSE;
@@ -143,15 +151,15 @@ IMS_BOOL AudioController::OpenSession(IN IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
 
-    if (pAudioSession != IMS_NULL && m_nAudioSessionState == AudioMediaSession::STATE_NONE)
+    if (pAudioSession != IMS_NULL && m_eMediaState == AudioSession::STATE_NONE)
     {
-        pAudioSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
+        pAudioSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
 
         if (pAudioSession->Open() == IMS_TRUE)
         {
-            m_nAudioSessionState = AudioMediaSession::STATE_IDLE;
+            m_eMediaState = AudioSession::STATE_IDLE;
             return IMS_TRUE;
         }
     }
@@ -171,15 +179,15 @@ IMS_BOOL AudioController::AddSession(
         return IMS_FALSE;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
     IMS_BOOL bResult = IMS_FALSE;
 
-    if (pAudioSession != IMS_NULL && m_nAudioSessionState != AudioMediaSession::STATE_NONE)
+    if (pAudioSession != IMS_NULL && m_eMediaState != AudioSession::STATE_NONE)
     {
         if (UpdateRtpConfig(nNegoId, nAccessNetwork, pNego) == IMS_TRUE)
         {
             UpdateQualityThreshold(nNegoId, pNego);
-            pAudioSession->SetMediaQuality();
+            pAudioSession->SetMediaQuality(m_eCallState);
             bResult = pAudioSession->Add();
         }
     }
@@ -194,7 +202,7 @@ IMS_BOOL AudioController::AddSession(
             {
                 if (pAudioSession->IsSameNegoId(nNegoId) == IMS_FALSE)
                 {
-                    pAudioSession->SetState(AudioMediaSession::STATE_PAUSED);
+                    pAudioSession->SetState(AudioSession::STATE_PAUSED);
                 }
             }
         }
@@ -214,14 +222,12 @@ IMS_BOOL AudioController::ConfirmSession(IN IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
 
     if (pAudioSession == NULL)
     {
         return IMS_FALSE;
     }
-
-    pAudioSession->SetMediaQuality();
 
     if (pAudioSession->Confirm() == IMS_TRUE)
     {
@@ -247,7 +253,9 @@ IMS_BOOL AudioController::ConfirmSession(IN IMS_UINTP nNegoId)
             }
         }
 
-        m_eUpdateCondition = CONFIRMED_SESSION;
+        m_eCallState = CONFIRMED_SESSION;
+        pAudioSession->SetMediaQuality(m_eCallState);
+
         return IMS_TRUE;
     }
 
@@ -260,7 +268,7 @@ IMS_BOOL AudioController::ModifySession(IN IMS_UINTP nNegoId)
     IMS_TRACE_D("ModifySession() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
             m_listAudioSession.GetSize(), 0);
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
 
     if (pAudioSession != NULL)
     {
@@ -275,11 +283,11 @@ IMS_BOOL AudioController::SetMediaQuality(IN IMS_UINTP nNegoId)
 {
     IMS_TRACE_D("SetMediaQuality() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId, 0, 0);
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
 
     if (pAudioSession != NULL)
     {
-        return pAudioSession->SetMediaQuality();
+        return pAudioSession->SetMediaQuality(m_eCallState);
     }
 
     return IMS_FALSE;
@@ -298,7 +306,7 @@ IMS_BOOL AudioController::DeleteSession(IN IMS_UINTP nNegoId)
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
-        AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
+        AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
         if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId) == IMS_TRUE)
         {
@@ -315,14 +323,14 @@ IMS_BOOL AudioController::DeleteSession(IN IMS_UINTP nNegoId)
 PUBLIC
 IMS_BOOL AudioController::CloseSession()
 {
-    IMS_TRACE_I("CloseSession() - state[%d]", m_nAudioSessionState, 0, 0);
-    AudioMediaSession* pAudioSession = FindAudioSession();
+    IMS_TRACE_I("CloseSession() - state[%d]", m_eMediaState, 0, 0);
+    AudioSession* pAudioSession = FindAudioSession();
 
     if (pAudioSession != IMS_NULL)
     {
         if (pAudioSession->Close() == IMS_TRUE)
         {
-            m_nAudioSessionState = AudioMediaSession::STATE_NONE;
+            m_eMediaState = AudioSession::STATE_NONE;
             ClearSession();
             return IMS_TRUE;
         }
@@ -344,14 +352,16 @@ IMS_BOOL AudioController::UpdateRtpConfig(
         return IMS_FALSE;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->UpdateRtpConfig(nAccessNetwork,
+        AudioConfig* pAudioConfig = pAudioSession->UpdateRtpConfig(nAccessNetwork,
                 pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
+
+        return IsAudioConfigChanged(pAudioConfig);
     }
 
     IMS_TRACE_E(0, "UpdateRtpConfig() - invalid param", 0, 0, 0);
@@ -370,7 +380,7 @@ IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_B
         return IMS_FALSE;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
 
     if (pAudioSession != IMS_NULL)
     {
@@ -389,9 +399,9 @@ IMS_BOOL AudioController::NotifyAnbrReceived(
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
-        AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
+        AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioMediaSession::STATE_LIVE)
+        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioSession::STATE_LIVE)
         {
             return pAudioSession->NotifyAnbrReceived(anbrMediaType, anbrDirection, anbrBitrate);
         }
@@ -407,12 +417,18 @@ IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
-        AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
+        AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioMediaSession::STATE_LIVE)
+        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioSession::STATE_LIVE)
         {
             pAudioSession->UpdateAccessNetwork(accessNetwork);
-            return pAudioSession->Modify();
+            IMS_BOOL bResult = pAudioSession->Modify();
+            if (bResult)
+            {
+                pAudioSession->SetMediaQuality(m_eCallState);
+            }
+
+            return bResult;
         }
     }
 
@@ -438,7 +454,7 @@ IMS_BOOL AudioController::UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioN
 {
     IMS_TRACE_I("UpdateQualityThreshold() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
 
     if (pAudioSession != IMS_NULL && pNego != IMS_NULL)
     {
@@ -452,7 +468,8 @@ IMS_BOOL AudioController::UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioN
         }
 
         return pAudioSession->UpdateMediaQualityThreshold(
-                !MEDIA_DIRECTION_IS_AUDIO_HOLD(pAudioSession->GetDirection()), bEnableRtcp);
+                !MEDIA_DIRECTION_IS_AUDIO_HOLD(pAudioSession->GetDirection()), m_eCallState,
+                bEnableRtcp);
     }
 
     return IMS_FALSE;
@@ -471,9 +488,9 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
-        AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
+        AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession == IMS_NULL || pAudioSession->GetState() < AudioMediaSession::STATE_LIVE)
+        if (pAudioSession == IMS_NULL || pAudioSession->GetState() < AudioSession::STATE_LIVE)
         {
             continue;
         }
@@ -490,7 +507,7 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
             }
         }
 
-        IMS_TRACE_I("UpdateMediaDirection() - bRestore[%d], PrevDirection[%d], eTempDirection[%d]",
+        IMS_TRACE_I("UpdateMediaDirection() - Restore[%d], PrevDirection[%d], TempDirection[%d]",
                 bRestore, pAudioSession->GetPrevDirection(), eTempDirection);
 
         pAudioSession->SetDirection(eTempDirection);
@@ -516,7 +533,7 @@ PUBLIC void AudioController::SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UI
         nNegoId = m_nCurrentActiveNegoId;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
     if (pAudioSession != IMS_NULL)
     {
         pAudioSession->SetNetworkToneTimer(nTimer);
@@ -526,15 +543,12 @@ PUBLIC void AudioController::SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UI
 PUBLIC IMS_SINT32 AudioController::GetInactivityTimer(
         IN InactivitytimerType eType, IN IMS_UINTP nNegoId)
 {
-    IMS_TRACE_I("GetInactivityTimer() - Type[%d], nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]",
-            eType, nNegoId, m_nCurrentActiveNegoId);
-
     if (nNegoId == UNDEFINED_NEGO_ID)
     {
         nNegoId = m_nCurrentActiveNegoId;
     }
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
     if (pAudioSession != IMS_NULL)
     {
         return pAudioSession->GetInactivityTimer(eType);
@@ -544,7 +558,7 @@ PUBLIC IMS_SINT32 AudioController::GetInactivityTimer(
 }
 
 PRIVATE
-AudioMediaSession* AudioController::FindAudioSession(IN IMS_UINTP nNegoId)
+AudioSession* AudioController::FindAudioSession(IN IMS_UINTP nNegoId)
 {
     if (m_listAudioSession.IsEmpty() == IMS_TRUE)
     {
@@ -558,7 +572,7 @@ AudioMediaSession* AudioController::FindAudioSession(IN IMS_UINTP nNegoId)
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
-        AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
+        AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
         if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId) == IMS_TRUE)
         {
@@ -576,7 +590,7 @@ void AudioController::ClearSession()
 
     while (m_listAudioSession.GetSize() > 0)
     {
-        AudioMediaSession* pAudioSession = m_listAudioSession.GetValueAt(0);
+        AudioSession* pAudioSession = m_listAudioSession.GetValueAt(0);
 
         if (pAudioSession != IMS_NULL)
         {
@@ -587,4 +601,24 @@ void AudioController::ClearSession()
     }
 
     m_listAudioSession.Clear();
+}
+
+PROTECTED
+IMS_BOOL AudioController::IsAudioConfigChanged(IN AudioConfig* pAudioConfig)
+{
+    if (pAudioConfig == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_pAudioConfig == IMS_NULL || *m_pAudioConfig != *pAudioConfig)
+    {
+        IMS_TRACE_D("IsAudioConfigChanged() - RtpConfig changed", 0, 0, 0);
+        m_pAudioConfig = pAudioConfig;
+        return IMS_TRUE;
+    }
+
+    IMS_TRACE_D("IsAudioConfigChanged() - Same RtpConfig", 0, 0, 0);
+
+    return IMS_FALSE;
 }

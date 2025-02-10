@@ -25,6 +25,6 @@
     <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
         <item value="send [x=640,y=480] recv [x=640,y=480]"/>
     </string-array>
-    <boolean name="video_avpf_enable_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_enable_bool" value="false"/>
     <int name="imsvt.video_avpf_feature_int" value="0"/>
 </carrier_config>

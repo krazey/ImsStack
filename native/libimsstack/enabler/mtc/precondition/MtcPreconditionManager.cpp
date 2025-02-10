@@ -104,10 +104,10 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
         bSupport = IMS_FALSE;
         return bSupport;
     }
-    else if (m_objContext.GetCallInfo().bEmergency)
+    else if (m_objContext.GetCallInfo().IsEmergency())
     {
-        bSupport = m_objContext.GetConfigurationProxy().Is(
-                Feature::EMERGENCY_QOS_PRECONDITION_SUPPORTED);
+        bSupport = m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigEmergency::KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL);
         IMS_TRACE_D("IsPreconditionSupportedInLocal Emergency Call[%s]", _TRACE_B_(bSupport), 0, 0);
         return bSupport;
     }
@@ -358,16 +358,15 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallModified(IN ISession* piSessio
     IMS_TRACE_D("OnCallModified", 0, 0, 0);
 
     IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-            Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING);
-    if (nPolicy == CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE)
+            ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT);
+    if (nPolicy == ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE)
     {
         if (!IsLocalResourceReserved(piSession, IMS_FALSE))
         {
             StartQosTimer(piSession, QosTimerType::GUARD_AVAILABLE);
         }
     }
-    else if (nPolicy ==
-            CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING)
+    else if (nPolicy == ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING)
     {
         // To change Local status from QosStatus::LOST to QosStatus::IDLE for removed medias
         InitializeStatusForLostQos(piSession, IMS_TRUE);
@@ -440,7 +439,7 @@ PRIVATE
 void MtcPreconditionManager::DestroyAllQosInfo()
 {
     IMS_TRACE_D("DestroyAllQosInfo", 0, 0, 0);
-    for (IMS_UINT32 index = m_objQosInfos.GetSize(); index > 0; index--)
+    for (IMS_UINT32 index = static_cast<IMS_SINT32>(m_objQosInfos.GetSize()); index > 0; index--)
     {
         QosInfo* pInfo = m_objQosInfos.GetValueAt(index - 1);
         m_objQosInfos.RemoveAt(index - 1);
@@ -703,16 +702,16 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
     if (IsConfirmedDialog(piSession))
     {
         IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING);
+                ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT);
         IMS_TRACE_D("CreateStatusRecords call upgrade policy[%d]", nPolicy, 0, 0);
 
-        if (nPolicy == CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE)
+        if (nPolicy == ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE)
         {
             SetQosStatus(piSession, QosStatus::AVAILABLE, eMediaType);
             bLocalReserved = IsLocalResourceReservedByMediaType(piSession, eMediaType);
         }
 
-        if (nPolicy == CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE)
+        if (nPolicy == ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE)
         {
             bLocalReserved = IMS_TRUE;
         }
@@ -872,15 +871,18 @@ IMS_BOOL MtcPreconditionManager::IsDefaultBearerAllowed(IN IMS_UINT32 eMediaType
     {
         // IR.92 2.4.3.1: A roaming UE is disallowed from sending media over the default bearer.
         return !IsRoaming() &&
-                m_objContext.GetConfigurationProxy().Is(Feature::VOICE_ON_DEFAULT_BEARER_SUPPORTED);
+                m_objContext.GetConfigurationProxy().GetBoolean(
+                        ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
-        return m_objContext.GetConfigurationProxy().Is(Feature::VIDEO_ON_DEFAULT_BEARER_SUPPORTED);
+        return m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVt::KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
-        return m_objContext.GetConfigurationProxy().Is(Feature::TEXT_ON_DEFAULT_BEARER_SUPPORTED);
+        return m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigRtt::KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL);
     }
 
     return IMS_FALSE;
@@ -978,18 +980,18 @@ IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal(IN IMS_UINT32 eM
     IMS_BOOL bSupport = IMS_FALSE;
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        bSupport =
-                m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED);
+        bSupport = m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
-        bSupport =
-                m_objContext.GetConfigurationProxy().Is(Feature::VIDEO_QOS_PRECONDITION_SUPPORTED);
+        bSupport = m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVt::KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
-        bSupport =
-                m_objContext.GetConfigurationProxy().Is(Feature::TEXT_QOS_PRECONDITION_SUPPORTED);
+        bSupport = m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigRtt::KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL);
     }
 
     IMS_TRACE_D(
@@ -1080,7 +1082,7 @@ IMS_SINT32 MtcPreconditionManager::GetQosTime(IN QosTimerType eType) const
             return TIME_FORCE_AVAILABLE;
         default:  // WAIT_AUDIO_AVAILABLE, WAIT_AVAILABLE_AFTER_HANDOVER
             return m_objContext.GetConfigurationProxy().GetInt(
-                    Feature::DEDICATED_BEARER_WAIT_TIMER);
+                    ConfigVoice::KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT);
     }
 }
 
@@ -1176,26 +1178,26 @@ QosLossPolicy MtcPreconditionManager::GetQosLossPolicy(IN IMS_UINT32 eMediaType)
     if (eMediaType == MEDIATYPE_AUDIO)
     {
         nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                Feature::POLICY_ON_AUDIO_QOS_DEACTIVATION);
+                ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
         nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                Feature::POLICY_ON_VIDEO_QOS_DEACTIVATION);
+                ConfigVt::KEY_POLICY_ON_VIDEO_QOS_DEACTIVATION_INT);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
         nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                Feature::POLICY_ON_TEXT_QOS_DEACTIVATION);
+                ConfigRtt::KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT);
     }
 
     switch (nPolicy)
     {
-        case CarrierConfig::ImsVoice::QOS_DEACTIVATION_POLICY_TERMINATE_CALL:
+        case ConfigVoice::QOS_DEACTIVATION_POLICY_TERMINATE_CALL:
             return QosLossPolicy::RELEASE;
-        case CarrierConfig::ImsVoice::QOS_DEACTIVATION_POLICY_MAINTAIN_CALL:
+        case ConfigVoice::QOS_DEACTIVATION_POLICY_MAINTAIN_CALL:
             return QosLossPolicy::MAINTAIN;
-        case CarrierConfig::ImsVoice::QOS_DEACTIVATION_POLICY_MODIFY_CALL:
+        case ConfigVoice::QOS_DEACTIVATION_POLICY_MODIFY_CALL:
             return QosLossPolicy::MODIFY;
         default:
             break;

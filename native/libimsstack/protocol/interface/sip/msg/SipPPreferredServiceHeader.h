@@ -21,17 +21,16 @@
 class SipPPreferredServiceHeader : public SipHeaderBase
 {
 public:
-    /*constructor*/
-    SipPPreferredServiceHeader();
+    explicit SipPPreferredServiceHeader(SIP_INT32 eHdrType);
     SipPPreferredServiceHeader(const SipPPreferredServiceHeader& objHeader);
+
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
-    /*virtual methods*/
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
-
 private:
     ~SipPPreferredServiceHeader();
+
+    static constexpr SIP_UINT32 MAX_LET_DIG = 27;
 };
 #endif  //__SIP_P_PREFEERED_SERVICE_HEADER_H__

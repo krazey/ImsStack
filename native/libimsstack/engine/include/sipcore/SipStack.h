@@ -333,7 +333,7 @@ inline const IMS_CHAR* TxnKey_GetMethod(IN ::SipTxnKey* pTxnKey)
 }
 inline IMS_SINT32 TxnKey_GetStatusCode(IN ::SipTxnKey* pTxnKey)
 {
-    return pTxnKey->GetRespCode();
+    return pTxnKey->GetResponseCode();
 }
 
 GLOBAL sipcore::SipTxnKey* CreateTxnKey(IN ::SipMessage* pMessage);

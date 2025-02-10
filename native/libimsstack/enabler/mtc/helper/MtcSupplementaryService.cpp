@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "IuMtcService.h"
@@ -40,6 +41,9 @@ LOCAL const IMS_CHAR STR_VERSTAT[] = "verstat";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_PASSED[] = "TN-Validation-Passed";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_FAILED[] = "TN-Validation-Failed";
 LOCAL const IMS_CHAR STR_VERSTAT_POTENTIAL_SPAM[] = "Potential Spam";
+LOCAL const IMS_CHAR STR_COIN_LINE_OR_PAYPHONE[] = "Coin line/payphone";
+LOCAL const IMS_CHAR STR_INTERACTION_WITH_OTHER_SERVICE[] = "Interaction with other service";
+LOCAL const IMS_CHAR STR_UNAVAILABLE[] = "Unavailable";
 
 PUBLIC
 MtcSupplementaryService::MtcSupplementaryService(IN IMtcCallContext& objContext,
@@ -141,22 +145,24 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCallerId(IN IMessage* piMessage)
 {
-    AString strPrivacy = m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
-    if (strPrivacy.EqualsIgnoreCase("id"))
-    {
-        // 3GPP 24.607 requires to check absence of PAID as well in this case.
-        Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(OipType::RESTRICTED));
-        IMS_TRACE_I("UpdateCallerId Privacy header value is id", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    IMS_BOOL bPolicyFallBack =
-            m_objConfigurationProxy.Is(Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK);
-    IMS_BOOL bOipSourceFromHeader = m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER);
+    IMS_BOOL bPolicyFallBack = m_objConfigurationProxy.GetBoolean(
+            ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL);
+    IMS_BOOL bOipSourceFromHeader =
+            m_objConfigurationProxy.GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL);
     OipType eOipType = GetOipTypeByHeader(piMessage, bOipSourceFromHeader, bPolicyFallBack);
-    if (eOipType == OipType::INVALID)
+    if (eOipType == OipType::INVALID || eOipType == OipType::IDENTITY)
     {
-        eOipType = OipType::NONE;
+        AString strPrivacy =
+                m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
+        if (strPrivacy.EqualsIgnoreCase("id"))
+        {
+            eOipType = OipType::RESTRICTED;
+            IMS_TRACE_I("UpdateCallerId Privacy header value is id", 0, 0, 0);
+        }
+        else if (eOipType == OipType::INVALID)
+        {
+            eOipType = OipType::NONE;
+        }
     }
 
     IMS_TRACE_I("UpdateCallerId FromHeader[%s] OIP-Type[%d]", _TRACE_B_(bOipSourceFromHeader),
@@ -169,9 +175,10 @@ PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCnap(IN IMessage* piMessage)
 {
     AString strCnap;
-    IMS_BOOL bPolicyFallBack =
-            m_objConfigurationProxy.Is(Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK);
-    IMS_BOOL bOipSourceFromHeader = m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER);
+    IMS_BOOL bPolicyFallBack = m_objConfigurationProxy.GetBoolean(
+            ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL);
+    IMS_BOOL bOipSourceFromHeader =
+            m_objConfigurationProxy.GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL);
 
     GetCnapByHeader(piMessage, bOipSourceFromHeader, strCnap, bPolicyFallBack);
 
@@ -194,7 +201,8 @@ IMS_BOOL MtcSupplementaryService::UpdateCnapEx(IN IMessage* /*piMessage*/)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateMmc(IN IMessage* /*piMessage*/)
 {
-    IMS_BOOL bUseMMC = m_objConfigurationProxy.Is(Feature::USE_MMC_SUPPLEMENTARY_SERVICE);
+    IMS_BOOL bUseMMC =
+            m_objConfigurationProxy.GetBoolean(ConfigVoice::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL);
 
     if (bUseMMC)
     {
@@ -282,7 +290,8 @@ IMS_BOOL MtcSupplementaryService::UpdateAnswerHold(IN IMessage* /*piMessage*/)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateMcid(IN IMessage* /*piMessage*/)
 {
-    IMS_BOOL bUseMCID = m_objConfigurationProxy.Is(Feature::USE_MCID_SUPPLEMENTARY_SERVICE);
+    IMS_BOOL bUseMCID = m_objConfigurationProxy.GetBoolean(
+            ConfigVoice::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL);
 
     if (bUseMCID)
     {
@@ -624,24 +633,25 @@ OipType MtcSupplementaryService::GetOipTypeByHeader(
     {
         // only PAID can be multiple.
         SipAddress objAddr(objHeaders.GetAt(i));
-        if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
+        const AString& strDisplayName = objAddr.GetDisplayName();
+        if (strDisplayName.EqualsIgnoreCase(STR_COIN_LINE_OR_PAYPHONE))
+        {
+            eOipType = OipType::PAYPHONE;
+            break;
+        }
+
+        if (strDisplayName.EqualsIgnoreCase(STR_INTERACTION_WITH_OTHER_SERVICE) ||
+                strDisplayName.EqualsIgnoreCase(STR_UNAVAILABLE))
+        {
+            eOipType = static_cast<OipType>(
+                    m_objConfigurationProxy.GetInt(ConfigVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT));
+            break;
+        }
+
+        if (strDisplayName.EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
                 objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS))
         {
             eOipType = OipType::RESTRICTED;
-            break;
-        }
-        else if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE) ||
-                objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE))
-        {
-            // TODO: CarrierConfig.h : 0 - NONE, 1 - RESTRICTED
-            if (m_objConfigurationProxy.GetInt(Feature::OIP_TYPE_FOR_UNAVAILABLE) == 0)
-            {
-                eOipType = OipType::NONE;
-            }
-            else
-            {
-                eOipType = OipType::RESTRICTED;
-            }
             break;
         }
 
@@ -653,6 +663,7 @@ OipType MtcSupplementaryService::GetOipTypeByHeader(
         return GetOipTypeByHeader(piMessage, !bFromHeader, IMS_FALSE);
     }
 
+    IMS_TRACE_D("GetOipTypeByHeader OIP-Type[%d]", eOipType, 0, 0);
     return eOipType;
 }
 

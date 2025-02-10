@@ -168,12 +168,12 @@ public final class ImsSmsWrapper {
         return mLastReceivedPdu;
     }
 
-    private static void logi(String s) {
-        Log.i(Log.TAG, "ImsSmsWrapper: " + s);
+    private void logi(String s) {
+        Log.i(this, s);
     }
 
-    private static void loge(String s) {
-        Log.e(Log.TAG, "ImsSmsWrapper: " + s);
+    private void loge(String s) {
+        Log.e(this, s);
     }
 
     private class IImsSmsListenerProxy extends IImsSmsListener.Stub {

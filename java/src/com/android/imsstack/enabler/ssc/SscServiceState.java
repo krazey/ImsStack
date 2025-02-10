@@ -574,7 +574,7 @@ public class SscServiceState {
                 AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
         try {
             mCrossSimDataStateListener = new SscCrossSimDataStateListener();
-            cmp.registerDefaultNetworkCallback(mCrossSimDataStateListener, mHandler);
+            cmp.registerSystemDefaultNetworkCallback(mCrossSimDataStateListener, mHandler);
         } catch (Exception e) {
             ImsLog.e(mSlotId, e.toString());
         }

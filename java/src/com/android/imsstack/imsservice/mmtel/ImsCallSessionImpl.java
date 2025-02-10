@@ -3399,14 +3399,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            // FIXME: Use the current call profile
-            // before this method call is invoked from native MTC.
-            ImsCallProfile profile = ImsCallUtils.cloneCallProfile(mCallProfile);
+            ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
+                    mCallContext, callInfo, mediaInfo);
 
             setCallInfo(profile);
 
-            // TODO : need to sync this with 100 Trying
-            //mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
+            mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
         }
 
         @Override
@@ -4583,6 +4581,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             logi("onTriggerAnbrQueryReceived");
             mCallback.invokeSendAnbrQuery(mediaType, direction, bitsPerSecond);
+        }
+
+        @Override
+        public void onNotifyIncomingDtmfReceived(MtcCall call, int numDtmfDigit) {
+            if (!call.equals(mCall)) {
+                return;
+            }
+
+            logi("onNotifyIncomingDtmfReceived");
+            mCallback.invokeDtmfReceived(
+                    ImsCallSessionImpl.this, ImsCallUtils.convertIntToDtmfDigit(numDtmfDigit));
         }
 
         private void clearTransferRequestedSessionEctDetails() {

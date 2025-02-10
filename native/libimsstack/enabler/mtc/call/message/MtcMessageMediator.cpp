@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsTrace.h"
@@ -49,8 +50,8 @@ PUBLIC IMS_RESULT MtcMessageMediator::MessageMediator_AdjustMessage(
     }
 
     if (piSipMessage->IsHeaderPresent(ISipHeader::CONTACT_NORMAL) &&
-            m_objContext.GetConfigurationProxy().Is(
-                    Feature::SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE))
+            m_objContext.GetConfigurationProxy().GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
     {
         switch (GetCallTypeOfCurrentMessage())
         {

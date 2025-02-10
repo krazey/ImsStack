@@ -59,7 +59,8 @@ protected:
 
     // Session class
     Session* CreateSession() override;
-    IMS_RESULT HandleProvisionalResponse(IN ISipClientConnection* piScc) override;
+    IMS_RESULT HandleProvisionalResponse(
+            IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod) override;
     IMS_RESULT HandleRequestToUpdate(IN ISipServerConnection* piSsc) override;
     IMS_RESULT HandleResponseToUpdate(IN ISipClientConnection* piScc) override;
     IMS_BOOL HasPendingPrack() const override;

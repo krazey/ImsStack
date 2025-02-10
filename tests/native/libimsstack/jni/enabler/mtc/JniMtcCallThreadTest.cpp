@@ -110,6 +110,18 @@ TEST_F(JniMtcCallThreadTest, OnStartFailed)
     pJniCallThread->OnStartFailed(objReason);
 }
 
+TEST_F(JniMtcCallThreadTest, OnInitiating)
+{
+    IMS_UINT32 eType = IuMtcCall::INITIATING;
+    objParcel.writeInt32(eType);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
+            .Times(1);
+
+    pJniCallThread->OnInitiating(objCallInfo, objMediaInfo);
+}
+
 TEST_F(JniMtcCallThreadTest, OnProgressing)
 {
     IMS_UINT32 eType = IuMtcCall::PROGRESSING;

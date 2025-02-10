@@ -48,7 +48,7 @@ public class ImsServiceController {
     private boolean mStarted = false;
 
     private ImsServiceController(Context context) {
-        logi("ImsServiceController");
+        logi(this, "+ISC");
 
         int simCount = DeviceConfig.getSupportedSimCount();
 
@@ -67,7 +67,7 @@ public class ImsServiceController {
         }
 
         if (!sImsServiceController.mReady) {
-            logi("ImsServiceController :: create");
+            logi(sImsServiceController, "ISC: create");
 
             sImsServiceController.mReady = true;
 
@@ -75,7 +75,7 @@ public class ImsServiceController {
             ImsServiceManager.setDefault(new ImsServiceManager(
                     appContext, sImsServiceController.mExecutor));
         } else {
-            logi("ImsServiceController :: already created");
+            logi(sImsServiceController, "ISC: already created");
         }
     }
 
@@ -90,7 +90,7 @@ public class ImsServiceController {
             sImsServiceController = new ImsServiceController(appContext);
         }
 
-        logi("ImsServiceController :: start - s" + slotId);
+        logi(sImsServiceController, "ISC: start - s" + slotId);
 
         boolean isrReconfigurationRequired = false;
 
@@ -170,24 +170,15 @@ public class ImsServiceController {
         return mExecutor;
     }
 
-    private static void log(String s) {
-        Log.d(Log.TAG, "[GII-IMPL] " + s);
-    }
-
-    private static void logi(String s) {
-        Log.i(Log.TAG, "[GII-IMPL] " + s);
-    }
-
-    private static void loge(String s) {
-        Log.e(Log.TAG, "[GII-IMPL] " + s);
+    private static void logi(Object o, String s) {
+        Log.i(o, "[GII-IMPL] " + s);
     }
 
     public RcsFeature getRcsFeature(int slotId) {
-        logi("getRcsFeature for slotId:" + slotId);
+        logi(this, "getRcsFeature: slotId=" + slotId + ", features=" + mRcsFeature.length);
         if (slotId >= 0 && slotId < mRcsFeature.length) {
             return mRcsFeature[slotId];
         }
-        loge("getRcsFeature is null for slotId:" + slotId);
         return null;
     }
 

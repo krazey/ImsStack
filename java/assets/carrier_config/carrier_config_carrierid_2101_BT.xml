@@ -17,6 +17,6 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Mtc Assets -->
-    <int name="geolocation_policy_for_location_based_call_int" value="13"/>
+    <int name="ims.geolocation_policy_for_location_based_call_int" value="13"/>
 
 </carrier_config>

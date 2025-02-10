@@ -17,12 +17,14 @@
 package com.android.imsstack.enabler.media;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
@@ -104,8 +106,9 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
     private void stubMediaConfig() {
         doNothing().when(mMockMediaConfig).updateRtpConfig(any(AudioConfig.class));
         when(mMockMediaConfig.getRtpConfig()).thenReturn(MediaTestUtils.createAudioConfig());
-        when(mMockMediaConfig.updateMediaQualityThreshold(any(MediaQualityThreshold.class)))
-                .thenReturn(true);
+        doNothing().when(mMockMediaConfig).updateMediaQualityThreshold(
+                any(MediaQualityThreshold.class), anyBoolean());
+        doNothing().when(mMockMediaConfig).updateMediaQualityThreshold(any(MediaThreshold.class));
         when(mMockMediaConfig.getMediaQualityThreshold())
                 .thenReturn(MediaTestUtils.createMediaQualityThreshold());
     }

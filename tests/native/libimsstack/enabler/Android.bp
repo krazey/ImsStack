@@ -51,6 +51,7 @@ cc_defaults {
         "libimsstack_platform_headers",
         "libimsstack_protocol_headers",
         "libpixelimsmedia_config_headers",
+        "libimsstack_test_config_headers",
         "libimsstack_test_enabler_headers",
         "libimsstack_test_engine_headers",
         "libimsstack_test_platform_headers",

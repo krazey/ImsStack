@@ -16,12 +16,12 @@
 
 #include "MtcDef.h"
 #include "SdpAttribute.h"
+#include "SdpMedia.h"
 #include "media/MockIMedia.h"
 #include "media/MockIMediaDescriptor.h"
 #include "offeranswer/SdpPrecondition.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStatusTable.h"
-#include "sdp/SdpMedia.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;

@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipKeepAliveHelper.h"
+#include "MockISipMessage.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
@@ -24,10 +32,8 @@
 #include "call/state/AlertingState.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallState.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockMtcTimerWrapper.h"
@@ -36,12 +42,6 @@
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/ISipMessage.h"
-#include "sipcore/MockISipKeepAliveHelper.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipMethod.h"
-#include "sipcore/SipStatusCode.h"
 #include "ussi/MockUssiController.h"
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiData.h"
@@ -63,8 +63,7 @@ public:
     MockIMessage objIMessage;
     MockISipMessage objISipMessage;
     MockIMtcCallContext objCallContext;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcService objService;
     MockIMtcMediaManager objMediaManager;
     MockIMtcPreconditionManager objPreconditionManager;
@@ -86,8 +85,7 @@ protected:
         ON_CALL(objISession, GetPreviousRequest(_)).WillByDefault(Return(&objIMessage));
         ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objISipMessage));
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -162,7 +160,9 @@ protected:
 
 TEST_F(AlertingStateTest, OnEnterStartsKeepAlive)
 {
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(1));
     EXPECT_CALL(*pUdpKeepAliveSender, Start);
 
     pAlertingState->OnEnter();
@@ -170,7 +170,9 @@ TEST_F(AlertingStateTest, OnEnterStartsKeepAlive)
 
 TEST_F(AlertingStateTest, OnExitStopsKeepAlive)
 {
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(1));
     EXPECT_CALL(*pUdpKeepAliveSender, Stop);
 
     pAlertingState->OnExit();
@@ -180,7 +182,8 @@ TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseReliablyAndStartAlertingTimerIf100relIsOnlyInSupprtedHeader)
 {
     IMS_SINT32 nAnyTime = 60;
-    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nAnyTime));
     MtcExtensionSet objMtcExtensionSet(
             GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_FALSE));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
@@ -195,7 +198,8 @@ TEST_F(AlertingStateTest,
 TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFails)
 {
     IMS_SINT32 nAnyTime = 60;
-    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nAnyTime));
     MtcExtensionSet objMtcExtensionSet(
             GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_FALSE, IMS_FALSE));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
@@ -213,7 +217,8 @@ TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseReliablyIf100relIsInSupprtedAndRequireHeader)
 {
     IMS_SINT32 nAnyTime = 60;
-    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nAnyTime));
     MtcExtensionSet objMtcExtensionSet(
             GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
@@ -229,8 +234,10 @@ TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseWithReliableParamAsTrueIfConfigurationOn)
 {
     IMS_SINT32 nAnyTime = 60;
-    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
-    ON_CALL(*pConfigurationManager, IsPrackSupportedFor18x).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_PRACK_SUPPORTED_FOR_18X_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     MtcExtensionSet objMtcExtensionSet(
             GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_FALSE));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
@@ -287,7 +294,9 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
 
 TEST_F(AlertingStateTest, AcceptStopsKeepAlive)
 {
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(1));
     pAlertingState->OnEnter();
     CallType eAcceptCallType = CallType::VOIP;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
@@ -366,6 +375,17 @@ TEST_F(AlertingStateTest, QosReserveFailedDoesNothingIfNextActionIsModify)
 
     EXPECT_EQ(CallStateName::ALERTING,
             pAlertingState->QosReserveFailed(&objISession, QosLossPolicy::MODIFY));
+}
+
+TEST_F(AlertingStateTest, SessionStartedStartsTimerForDelayingUpdate)
+{
+    IMS_SINT32 nAnyTime = 60;
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nAnyTime));
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED, nAnyTime));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->SessionStarted(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionStartedTransitsStateToEstablished)
@@ -601,9 +621,18 @@ TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
 TEST_F(AlertingStateTest, SessionStartFailedNotifiesStartFailed)
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
+    const IMS_SINT32 objNonEstablishedStates[] = {ISession::STATE_CREATED,
+            ISession::STATE_INITIATED, ISession::STATE_NEGOTIATING, ISession::STATE_ESTABLISHING,
+            ISession::STATE_RENEGOTIATING, ISession::STATE_REESTABLISHING,
+            ISession::STATE_TERMINATING, ISession::STATE_TERMINATED};
 
-    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
+    for (const auto& state : objNonEstablishedStates)
+    {
+        ON_CALL(objISession, GetState).WillByDefault(Return(state));
+        EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
+
+        EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
+    }
 }
 
 TEST_F(AlertingStateTest, SessionStartFailedDoesNotNotifyStartFailedIfSrvccStarted)
@@ -616,6 +645,18 @@ TEST_F(AlertingStateTest, SessionStartFailedDoesNotNotifyStartFailedIfSrvccStart
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionStartFailed(&objISession));
+}
+
+TEST_F(AlertingStateTest, SessionStartFailedInvokesTerminateIfEstablishedState)
+{
+    ON_CALL(objISession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+
+    const CallReasonInfo objReason(CODE_SIP_SERVER_ERROR);
+
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objReason));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReason));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
 }
 
 TEST_F(AlertingStateTest, OnMediaFailed)

@@ -16,7 +16,7 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <!-- Aos -->
     <!-- USIM -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
@@ -29,5 +29,5 @@
     <int name="imsss.ut_as_server_port_int" value="8080"/>
 
     <!-- Media -->
-    <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
 </carrier_config>

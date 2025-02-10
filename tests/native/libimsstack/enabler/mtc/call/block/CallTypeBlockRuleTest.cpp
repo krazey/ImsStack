@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "MockISession.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -23,9 +24,8 @@
 #include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockISession.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -43,8 +43,7 @@ public:
     CallInfo objCallInfo;
     ImsList<IMtcCall*> lstCalls;
     ImsList<IMtcCall*> lstOtherCalls;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMessageUtils objMessageUtils;
     MockIMtcSession objMtcSession;
     UpdatingInfo* pUpdatingInfo;
@@ -55,8 +54,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         pUpdatingInfo = new UpdatingInfo(objContext);
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
@@ -109,8 +107,8 @@ protected:
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoRttIfNotAllowed)
 {
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
 
     CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VIDEO_RTT));
 
@@ -135,8 +133,8 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoRttIfNotAllowed)
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoPortZeroAndTextIfConfigIsNotAllowed)
 {
     ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
 
     CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VIDEO_RTT));
 
@@ -153,9 +151,10 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoPortZeroAndTextIfConfigIsN
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedVideoPortZeroAndTextIfConfigIsNotAllowedIfActive)
 {
     ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VIDEO_RTT));
@@ -170,9 +169,10 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedVideoPortZeroAndTextIfConfigI
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfAllowed)
 {
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objContext, GetOtherCalls).Times(0);
@@ -192,9 +192,10 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfAllowed)
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfNoOtherCallExists)
 {
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     // no other call
@@ -218,9 +219,10 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoCallIfVoipExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
@@ -258,9 +260,10 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedForVoipCallIfVoipExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     {
@@ -282,9 +285,10 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVtExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VT));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     {
@@ -310,9 +314,10 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVideoRttExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VIDEO_RTT));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     {

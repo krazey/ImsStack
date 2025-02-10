@@ -19,15 +19,13 @@
 #include "offeranswer/SdpMediaFormatParameter.h"
 #include "offeranswer/SdpRtcpFeedback.h"
 
-#include "video/VideoNegoAvc.h"
-#include "video/VideoNegoHevc.h"
 #include "video/VideoProfileUtil.h"
 #include "video/VideoSdpGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoSdpGenerator::VideoSdpGenerator() :
-        SdpGenerator(MEDIA_TYPE_VIDEO)
+        MediaSdpGenerator(MEDIA_TYPE_VIDEO)
 {
     IMS_TRACE_I("+VideoSdpGenerator()", 0, 0, 0);
 }
@@ -61,7 +59,7 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GeneratePayload(
         OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
 {
@@ -126,7 +124,7 @@ void VideoSdpGenerator::GeneratePayload(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::CheckRtcpFbWildCard(IN VideoProfile* pProfile,
         OUT IMS_BOOL& bTrrSupportedAll, OUT IMS_BOOL& bNackSupportedAll,
         OUT IMS_BOOL& bPliSupportedAll, OUT IMS_BOOL& bFirSupportedAll,
@@ -176,7 +174,7 @@ void VideoSdpGenerator::CheckRtcpFbWildCard(IN VideoProfile* pProfile,
             bFirSupportedAll, bTmmbrSupportedAll);
 }
 
-PRIVATE IMS_BOOL VideoSdpGenerator::GenerateFmtp(
+PROTECTED IMS_BOOL VideoSdpGenerator::GenerateFmtp(
         OUT AString& strFmtp, IN VideoProfile::Payload* pPayload)
 {
     if (pPayload == IMS_NULL)
@@ -193,7 +191,7 @@ PRIVATE IMS_BOOL VideoSdpGenerator::GenerateFmtp(
             return IMS_FALSE;
         }
 
-        strFmtp = VideoNegoAvc::SetSdpFmtpFromAvcFmtp(pAvcFmtp);
+        strFmtp = GenerateAvcFmtp(pAvcFmtp);
     }
     else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
@@ -204,7 +202,7 @@ PRIVATE IMS_BOOL VideoSdpGenerator::GenerateFmtp(
             return IMS_FALSE;
         }
 
-        strFmtp = VideoNegoHevc::SetSdpFmtpFromHevcFmtp(pHevcFmtp);
+        strFmtp = GenerateHevcFmtp(pHevcFmtp);
     }
     else
     {
@@ -215,7 +213,7 @@ PRIVATE IMS_BOOL VideoSdpGenerator::GenerateFmtp(
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL VideoSdpGenerator::GenerateCompletedFmtpRtpMap(IN const AString& strRtpMap,
         IN const AString& strPayloadNum, IN const AString& strFmtp, OUT SdpAvCodec* pFormat)
 {
@@ -233,7 +231,7 @@ IMS_BOOL VideoSdpGenerator::GenerateCompletedFmtpRtpMap(IN const AString& strRtp
     return pFormat->SetParameters(strCompletedRtpMap, strCompletedFmtp);
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateImageAttribute(
         OUT IMediaDescriptor* pDescriptor, IN VideoProfile::Payload* pPayload)
 {
@@ -257,7 +255,7 @@ void VideoSdpGenerator::GenerateImageAttribute(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateFrameSize(
         OUT IMediaDescriptor* pDescriptor, IN VideoProfile::Payload* pPayload)
 {
@@ -280,7 +278,7 @@ void VideoSdpGenerator::GenerateFrameSize(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateRtcpFb(IN VideoProfile* pProfile, IN IMS_BOOL bTrrSupportedAll,
         IN IMS_BOOL bNackSupportedAll, IN IMS_BOOL bPliSupportedAll, IN IMS_BOOL bFirSupportedAll,
         IN IMS_BOOL bTmmbrSupportedAll, OUT SdpAvCodec* pFormat, IN IMS_UINT32 nPayloadIndex)
@@ -309,7 +307,7 @@ void VideoSdpGenerator::GenerateRtcpFb(IN VideoProfile* pProfile, IN IMS_BOOL bT
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateRtcpFbTrrInt(OUT SdpAvCodec* pFormat,
         IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
         IN IMS_UINT32 nPayloadIndex)
@@ -347,7 +345,7 @@ void VideoSdpGenerator::GenerateRtcpFbTrrInt(OUT SdpAvCodec* pFormat,
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateRtcpFbNack(OUT SdpAvCodec* pFormat,
         IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
         IN IMS_UINT32 nPayloadIndex)
@@ -379,7 +377,7 @@ void VideoSdpGenerator::GenerateRtcpFbNack(OUT SdpAvCodec* pFormat,
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateRtcpFbPli(OUT SdpAvCodec* pFormat,
         IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
         IN IMS_UINT32 nPayloadIndex)
@@ -412,7 +410,7 @@ void VideoSdpGenerator::GenerateRtcpFbPli(OUT SdpAvCodec* pFormat,
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateRtcpFbFir(OUT SdpAvCodec* pFormat,
         IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
         IN IMS_UINT32 nPayloadIndex)
@@ -445,7 +443,7 @@ void VideoSdpGenerator::GenerateRtcpFbFir(OUT SdpAvCodec* pFormat,
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateRtcpFbTmmbr(OUT SdpAvCodec* pFormat,
         IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
         IN IMS_UINT32 nPayloadIndex)
@@ -478,7 +476,7 @@ void VideoSdpGenerator::GenerateRtcpFbTmmbr(OUT SdpAvCodec* pFormat,
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateFrameRate(
         OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
 {
@@ -493,7 +491,7 @@ void VideoSdpGenerator::GenerateFrameRate(
     IMS_TRACE_D("GenerateFrameRate() - framerate[%d]", nFrameRate, 0, 0);
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateCvo(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
@@ -513,7 +511,7 @@ void VideoSdpGenerator::GenerateCvo(OUT IMediaDescriptor* pDescriptor, IN VideoP
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateCapaNegoAttribute(
         OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
 {
@@ -548,7 +546,7 @@ void VideoSdpGenerator::GenerateCapaNegoAttribute(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateAcfg(
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
 {
@@ -569,7 +567,7 @@ void VideoSdpGenerator::GenerateAcfg(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateTcap(
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
 {
@@ -591,7 +589,7 @@ void VideoSdpGenerator::GenerateTcap(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GenerateAcap(
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
 {
@@ -616,7 +614,7 @@ void VideoSdpGenerator::GenerateAcap(
     }
 }
 
-PRIVATE
+PROTECTED
 void VideoSdpGenerator::GeneratePcfg(
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
 {
@@ -638,7 +636,7 @@ void VideoSdpGenerator::GeneratePcfg(
     }
 }
 
-PRIVATE IMS_BOOL VideoSdpGenerator::MakeImageAttributeLine(
+PROTECTED IMS_BOOL VideoSdpGenerator::MakeImageAttributeLine(
         IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId, OUT AString& strImageAttr)
 {
     IMS_UINT32 nWidth, nHeight;
@@ -654,7 +652,7 @@ PRIVATE IMS_BOOL VideoSdpGenerator::MakeImageAttributeLine(
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL VideoSdpGenerator::MakeFrameSizeLine(
+PROTECTED IMS_BOOL VideoSdpGenerator::MakeFrameSizeLine(
         IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId, OUT AString& strFrameSize)
 {
     IMS_UINT32 nWidth, nHeight;
@@ -669,7 +667,7 @@ PRIVATE IMS_BOOL VideoSdpGenerator::MakeFrameSizeLine(
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL VideoSdpGenerator::GetWidthHeightFromResolutionId(
+PROTECTED IMS_BOOL VideoSdpGenerator::GetWidthHeightFromResolutionId(
         IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight)
 {
     IMS_TRACE_D("GetWidthHeightFromResolutionId() resolution ID [%d]", eResolutionId, 0, 0);
@@ -748,4 +746,181 @@ PRIVATE IMS_BOOL VideoSdpGenerator::GetWidthHeightFromResolutionId(
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED AString VideoSdpGenerator::GenerateAvcFmtp(IN VideoProfile::AvcFmtp* pAvcFmtp)
+{
+    IMS_TRACE_I("GenerateAvcFmtp()", 0, 0, 0);
+
+    AString strFmtp = AString::ConstNull();
+
+    if (pAvcFmtp == IMS_NULL)
+    {
+        return strFmtp;
+    }
+
+    AddProfileLevelIdToFmtp(pAvcFmtp, strFmtp);
+    AddPacketizationModeToFmtp(pAvcFmtp, strFmtp);
+    AddSpropParameterSetsToFmtp(pAvcFmtp, strFmtp);
+
+    return strFmtp;
+}
+
+PROTECTED void VideoSdpGenerator::AddProfileLevelIdToFmtp(
+        IN VideoProfile::AvcFmtp* pFmtp, OUT AString& fmtp)
+{
+    if (pFmtp != IMS_NULL)
+    {
+        IMS_TRACE_I("AddProfileLevelIdToFmtp() profile-level-id=%s, visible=%d",
+                pFmtp->GetProfileLevelId().GetStr(), pFmtp->IsProfileLevelIdVisible(), 0);
+
+        if (pFmtp->IsProfileLevelIdVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+            AString strTemp;
+            strTemp.Sprintf("profile-level-id=%s", pFmtp->GetProfileLevelId().GetStr());
+            fmtp.Append(strTemp);
+        }
+    }
+}
+
+PROTECTED void VideoSdpGenerator::AddPacketizationModeToFmtp(
+        IN VideoProfile::VideoFmtp* pFmtp, OUT AString& fmtp)
+{
+    if (pFmtp != IMS_NULL)
+    {
+        IMS_TRACE_I("AddPacketizationModeToFmtp() packetization-mode=%d, visible=%d",
+                pFmtp->GetPacketizationMode(), pFmtp->IsPacketizationModeVisible(), 0);
+
+        if (pFmtp->IsPacketizationModeVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+            AString strTemp;
+            strTemp.Sprintf("packetization-mode=%d", pFmtp->GetPacketizationMode());
+            fmtp.Append(strTemp);
+        }
+    }
+}
+
+PROTECTED void VideoSdpGenerator::AddSpropParameterSetsToFmtp(
+        IN VideoProfile::VideoFmtp* pFmtp, OUT AString& fmtp)
+{
+    if (pFmtp != IMS_NULL)
+    {
+        IMS_TRACE_I("AddProfileLevelIdToFmtp() sprop-parameter-sets=%s, visible=%d",
+                pFmtp->GetSpropParam().GetStr(), pFmtp->IsSpropParamVisible(), 0);
+
+        if (pFmtp->IsSpropParamVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+            AString strTemp;
+            strTemp.Sprintf("sprop-parameter-sets=%s", pFmtp->GetSpropParam().GetStr());
+            fmtp.Append(strTemp);
+        }
+    }
+}
+
+PROTECTED AString VideoSdpGenerator::GenerateHevcFmtp(IN VideoProfile::HevcFmtp* pHevcFmtp)
+{
+    IMS_TRACE_I("GenerateHevcFmtp()", 0, 0, 0);
+
+    AString strFmtp = AString::ConstNull();
+
+    if (pHevcFmtp == IMS_NULL)
+    {
+        return strFmtp;
+    }
+
+    AddProfileIdToFmtp(pHevcFmtp, strFmtp);
+    AddLevelIdToFmtp(pHevcFmtp, strFmtp);
+    AddSpropParamsToFmtp(pHevcFmtp, strFmtp);
+
+    return strFmtp;
+}
+
+PROTECTED void VideoSdpGenerator::AddProfileIdToFmtp(
+        IN VideoProfile::HevcFmtp* pFmtp, OUT AString& fmtp)
+{
+    if (pFmtp != IMS_NULL)
+    {
+        IMS_TRACE_I("AddProfileIdToFmtp() profile-id=%d, visible=%d", pFmtp->GetProfile(),
+                pFmtp->IsProfileVisible(), 0);
+
+        if (pFmtp->IsProfileVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+            AString strTemp;
+            strTemp.Sprintf("profile-id=%d", pFmtp->GetProfile());
+            fmtp.Append(strTemp);
+        }
+    }
+}
+
+PROTECTED void VideoSdpGenerator::AddLevelIdToFmtp(
+        IN VideoProfile::HevcFmtp* pFmtp, OUT AString& fmtp)
+{
+    if (pFmtp != IMS_NULL)
+    {
+        IMS_TRACE_I("AddLevelIdToFmtp() level-id=%d, visible=%d", pFmtp->GetLevel(),
+                pFmtp->IsLevelVisible(), 0);
+
+        if (pFmtp->IsLevelVisible() == IMS_TRUE)
+        {
+            AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+            AString strTemp;
+            strTemp.Sprintf("level-id=%d", pFmtp->GetLevel());
+            fmtp.Append(strTemp);
+        }
+    }
+}
+
+PROTECTED void VideoSdpGenerator::AddSpropParamsToFmtp(
+        IN VideoProfile::HevcFmtp* pFmtp, OUT AString& fmtp)
+{
+    if (pFmtp != IMS_NULL)
+    {
+        IMS_TRACE_I("AddSpropParamsToFmtp() sprop parameter=%s, visible=%d",
+                pFmtp->GetSpropParam().GetStr(), pFmtp->IsSpropParamVisible(), 0);
+
+        if (pFmtp->IsSpropParamVisible() == IMS_TRUE)
+        {
+            ImsList<AString> objSplitComma = pFmtp->GetSpropParam().Split(',');
+
+            if (objSplitComma.GetSize() == 3)
+            {
+                AString strVps = AString::ConstNull();
+                AString strSps = AString::ConstNull();
+                AString strPps = AString::ConstNull();
+
+                strVps = objSplitComma.GetAt(0);
+                strSps = objSplitComma.GetAt(1);
+                strPps = objSplitComma.GetAt(2);
+
+                if (strVps.GetLength() > 0 || strSps.GetLength() > 0 || strPps.GetLength() > 0)
+                {
+                    AString strTemp;
+
+                    AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+                    strTemp.Sprintf("sprop-vps=%s", strVps.GetStr());
+                    fmtp.Append(strTemp);
+
+                    AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+                    strTemp.Sprintf("sprop-sps=%s", strSps.GetStr());
+                    fmtp.Append(strTemp);
+
+                    AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
+
+                    strTemp.Sprintf("sprop-pps=%s", strPps.GetStr());
+                    fmtp.Append(strTemp);
+                }
+            }
+        }
+    }
 }

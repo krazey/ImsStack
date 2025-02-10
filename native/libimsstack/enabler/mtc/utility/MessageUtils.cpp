@@ -60,12 +60,17 @@ PUBLIC IMessage* MessageUtils::GetPreviousResponse(IN const ISession* piSession,
     ImsList<IMessage*> lstResponses = piSession->GetPreviousResponses(eServiceMethod);
     IMS_UINT32 nResponseSize = lstResponses.GetSize();
 
-    if (nResponseIndex < 0)
+    if (nResponseSize == 0)
     {
-        nResponseIndex = nResponseSize - 1;
+        return IMS_NULL;
     }
 
-    if ((IMS_UINT32)(nResponseIndex) >= nResponseSize)
+    if (nResponseIndex < 0)
+    {
+        nResponseIndex = static_cast<IMS_SINT32>(nResponseSize - 1);
+    }
+
+    if (static_cast<IMS_UINT32>(nResponseIndex) >= nResponseSize)
     {
         return IMS_NULL;
     }
@@ -1119,18 +1124,18 @@ PUBLIC IMS_BOOL MessageUtils::IsTextFeatureIncluded(IN const IMessage* piMessage
 }
 
 PUBLIC CallType MessageUtils::GetCallType(
-        IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView)
+        IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bCheckRemote)
 {
     if (HasSdp(piMessage))
     {
-        return GetCallTypeFromSdp(piSession, IMS_FALSE, bPeerView);
+        return GetCallTypeFromSdp(piSession, IMS_FALSE, bCheckRemote);
     }
     return CallType::UNKNOWN;
     // return CheckSessionTypeByAcceptContact(piMessage, piSession); // TODO: operator specific
 }
 
-PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp,
-        IN IMS_BOOL bPeerView, IN IMS_BOOL bCheckPort /*= IMS_TRUE*/)
+PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession,
+        IN IMS_BOOL bActiveMediaOnly, IN IMS_BOOL bCheckRemote, IN IMS_BOOL bIgnorePort0)
 {
     IMS_BOOL bAudio = IMS_FALSE;
     IMS_BOOL bVideo = IMS_FALSE;
@@ -1147,7 +1152,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
     {
         IMedia* piMedia = lstIMedia.GetAt(nIndex);
         IMediaDescriptor* pDescriptor = IMS_NULL;
-        if (bPeerView)
+        if (bCheckRemote)
         {
             if (piMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
             {
@@ -1168,7 +1173,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
         }
 
         const SdpMedia* pSdpMedia = IMS_NULL;
-        if (bPeerView)
+        if (bCheckRemote)
         {
             pSdpMedia = pDescriptor->GetMediaDescriptionEx();
         }
@@ -1181,7 +1186,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
             continue;
         }
 
-        if (bCheckPort && pSdpMedia->GetPort() == 0)
+        if (bIgnorePort0 && pSdpMedia->GetPort() == 0)
         {
             continue;
         }
@@ -1193,7 +1198,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
         else if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO)
         {
             IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
-            if (!bNegoSdp || piMedia->GetState() != IMedia::STATE_DELETED)
+            if (!bActiveMediaOnly || piMedia->GetState() != IMedia::STATE_DELETED)
             {
                 bVideo = IMS_TRUE;
             }
@@ -1201,7 +1206,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
         else if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
         {
             IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
-            if (!bNegoSdp || piMedia->GetState() != IMedia::STATE_DELETED)
+            if (!bActiveMediaOnly || piMedia->GetState() != IMedia::STATE_DELETED)
             {
                 bText = IMS_TRUE;
             }

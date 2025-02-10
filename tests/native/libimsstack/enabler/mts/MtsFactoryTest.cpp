@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
 #include "ImsIdentity.h"
 #include "ImsTypeDef.h"
@@ -23,6 +22,7 @@
 #include "MtsFactory.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -48,7 +48,7 @@ protected:
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
 
         ON_CALL(objConfigService.GetMockCarrierConfig(),
-                GetInt(CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT, _))
+                GetInt(CarrierConfig::ImsSms::KEY_SMS_REQUEST_URI_TYPE_INT, _))
                 .WillByDefault(Return(URI_SCHEME_SIP));
         ON_CALL(objConfigService.GetMockCarrierConfig(),
                 GetInt(CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT, _))

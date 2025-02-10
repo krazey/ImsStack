@@ -15,11 +15,8 @@
  */
 #include <gtest/gtest.h>
 
-#include "msg/SipMsgUtil.h"
 #include "msg/SipRequestDispositionHeader.h"
 #include "platform/SipString.h"
-
-extern SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN];
 
 namespace android
 {
@@ -39,7 +36,7 @@ TEST_F(SipRequestDispositionHeaderTest, CopyConstructor)
             SipRequestDispositionHeader::GetNewObj(SipHeaderBase::REQUEST_DISPOSITION, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("proxy", 5));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("proxy", 5));
 
     SipRequestDispositionHeader* pCopyHeader = reinterpret_cast<SipRequestDispositionHeader*>(
             SipRequestDispositionHeader::GetNewObj(SipHeaderBase::REQUEST_DISPOSITION, pHeader));
@@ -51,30 +48,31 @@ TEST_F(SipRequestDispositionHeaderTest, CopyConstructor)
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipRequestDispositionHeaderTest, DecodeHdr)
+TEST_F(SipRequestDispositionHeaderTest, Decode)
 {
     SipRequestDispositionHeader* pHeader = reinterpret_cast<SipRequestDispositionHeader*>(
             SipRequestDispositionHeader::GetNewObj(SipHeaderBase::REQUEST_DISPOSITION, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty headers, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
     /* invalid value, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("InvalidValue", 12));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("InvalidValue", 12));
     pHeader->SipDelete();
 
     /* Check all possible valid values, success */
-    for (SIP_UINT16 nCnt = 0; nCnt < SIP_DIRECTIVE_SIZE; nCnt++)
+    const SIP_CHAR* pDirectiveStr;
+
+    for (SIP_UINT16 nCnt = 0; nCnt < SipRequestDispositionHeader::GetDirectiveSize(); nCnt++)
     {
         pHeader = reinterpret_cast<SipRequestDispositionHeader*>(
                 SipRequestDispositionHeader::GetNewObj(
                         SipHeaderBase::REQUEST_DISPOSITION, nullptr));
         ASSERT_TRUE(pHeader != nullptr);
 
-        EXPECT_EQ(SIP_TRUE,
-                pHeader->DecodeHdr(
-                        gaszDirectivesArray[nCnt], SipPf_Strlen(gaszDirectivesArray[nCnt])));
+        pDirectiveStr = SipRequestDispositionHeader::GetDirectiveString(nCnt);
+        EXPECT_EQ(SIP_TRUE, pHeader->Decode(pDirectiveStr, SipPf_Strlen(pDirectiveStr)));
         pHeader->SipDelete();
     }
 }

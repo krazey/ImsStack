@@ -144,7 +144,8 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
     if (pAudioNego != IMS_NULL)
     {
         m_objAudioController.CreateSession(this, nMediaNego,
-                MediaConfigUtil::GetAudioConfig(m_nSlotId, m_pEnvironment->eServiceType));
+                MediaConfigUtil::GetAudioConfig(m_nSlotId, m_pEnvironment->eServiceType),
+                m_pEnvironment->eServiceType);
     }
 
     VideoNego* pVideoNego = pMediaNego->GetVideoNego();
@@ -289,10 +290,12 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
         }
 
         // audio
+        /*
         if (pMediaNego->GetAudioNego() != IMS_NULL)
         {
-            m_objAudioController.AddSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
+            m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
         }
+        */
 
         // video
         if (pMediaNego->GetVideoNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(*nVideoDirection))
@@ -762,7 +765,8 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             }
             break;
         case SET_CONFIRMED_SESSION:
-            m_objAudioController.SetConfirmSession(param1);
+            m_objAudioController.SetCallSessionState(param1);
+            m_objVideoController.SetCallSessionState(param1);
             m_bSessionConfirmed = (param1 > 0);
             break;
         case SET_DIRECTION:
@@ -1177,62 +1181,8 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
         break;
         case IJniMedia::NOTIFY_MEDIA_INACTIVITY:
         {
-            ImsMediaMsgParamBase* pTempParam = reinterpret_cast<ImsMediaMsgParamBase*>(nParam);
-
-            if (pTempParam != IMS_NULL)
-            {
-                if (pTempParam->m_eMediaType == MEDIA_TYPE_AUDIO)
-                {
-                    ImsMediaNotifyQualityStatusParam* pParam =
-                            reinterpret_cast<ImsMediaNotifyQualityStatusParam*>(nParam);
-                    IMS_SINT32 nLocalNetworkToneTimer = m_objAudioController.GetInactivityTimer(
-                            NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID);
-                    IMS_SINT32 nLocalRtpTimer = m_objAudioController.GetInactivityTimer(
-                            RTP_INACTIVITY, UNDEFINED_NEGO_ID);
-                    IMS_SINT32 nLocalRtcpTimer = m_objAudioController.GetInactivityTimer(
-                            RTCP_INACTIVITY, UNDEFINED_NEGO_ID);
-
-                    IMS_TRACE_I("OnNotify() - LocalNetworkToneTimer[%d], LocalRtpTimer[%d], "
-                                "LocalRtcpTimer[%d]",
-                            nLocalNetworkToneTimer, nLocalRtpTimer, nLocalRtcpTimer);
-                    IMS_TRACE_I("OnNotify() - Notified rtp inactivity[%d], rtcp inactivity[%d]",
-                            pParam->m_nRtpInactivityTimerMillis,
-                            pParam->m_nRtcpInactivityTimerMillis, 0);
-
-                    if (nLocalNetworkToneTimer > 0 && pParam->m_nRtpInactivityTimerMillis > 0 &&
-                            pParam->m_nRtpInactivityTimerMillis >= nLocalNetworkToneTimer)
-                    {
-                        m_objAudioController.SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
-                        m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
-                                pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
-                        m_pClientListener->MediaSession_Notify(
-                                REPORT_NW_TONE_RTP_RECEIVE_FAILED, pParam->m_eMediaType);
-                    }
-                    else if (nLocalRtpTimer > 0 && pParam->m_nRtpInactivityTimerMillis > 0 &&
-                            pParam->m_nRtpInactivityTimerMillis >= nLocalRtpTimer)
-                    {
-                        m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
-                                pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
-                    }
-                    else if (nLocalRtcpTimer > 0 && pParam->m_nRtcpInactivityTimerMillis > 0 &&
-                            pParam->m_nRtcpInactivityTimerMillis >= nLocalRtcpTimer)
-                    {
-                        m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
-                                pParam->m_eMediaType, MEDIA_PROTOCOL_RTCP);
-                    }
-                }
-                else
-                {
-                    ImsMediaNotifyInactivityParam* pParam =
-                            reinterpret_cast<ImsMediaNotifyInactivityParam*>(nParam);
-                    m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
-                            pParam->m_eMediaType,
-                            pParam->m_eMediaProtocolType == RTP ? MEDIA_PROTOCOL_RTP
-                                                                : MEDIA_PROTOCOL_RTCP);
-                }
-
-                return IMS_TRUE;
-            }
+            IMS_TRACE_I("OnNotify() - media Inactivity timer", 0, 0, 0);
+            return HandleNotifyMediaInactivity(nParam);
         }
         break;
         case IJniMedia::NOTIFY_PACKET_LOSS:
@@ -1345,7 +1295,8 @@ void MediaSession::ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eM
     }
 }
 
-PRIVATE IpAddress MediaSession::GetAndroidIP()
+PRIVATE
+IpAddress MediaSession::GetAndroidIP()
 {
     if (m_pEnvironment != IMS_NULL && m_pEnvironment->pIService != IMS_NULL)
     {
@@ -1353,4 +1304,106 @@ PRIVATE IpAddress MediaSession::GetAndroidIP()
     }
 
     return IpAddress();
+}
+
+PRIVATE
+IMS_BOOL MediaSession::HandleNotifyMediaInactivity(IN IMS_UINTP nParam)
+{
+    ImsMediaMsgParamBase* pTempParam = reinterpret_cast<ImsMediaMsgParamBase*>(nParam);
+
+    if (pTempParam != IMS_NULL)
+    {
+        if (pTempParam->m_eMediaType == MEDIA_TYPE_AUDIO)
+        {
+            ImsMediaNotifyQualityStatusParam* pParam =
+                    reinterpret_cast<ImsMediaNotifyQualityStatusParam*>(nParam);
+            IMS_SINT32 nLocalNetworkToneTimer = m_objAudioController.GetInactivityTimer(
+                    NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID);
+            IMS_SINT32 nLocalRtpTimer =
+                    m_objAudioController.GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID);
+            IMS_SINT32 nLocalRtcpTimer =
+                    m_objAudioController.GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID);
+            IMS_TRACE_I("OnNotify() - LocalNetworkToneTimer[%d], LocalRtpTimer[%d], "
+                        "LocalRtcpTimer[%d]",
+                    nLocalNetworkToneTimer, nLocalRtpTimer, nLocalRtcpTimer);
+            IMS_TRACE_I("OnNotify() - Notified rtp inactivity[%d], rtcp inactivity[%d]",
+                    pParam->m_nRtpInactivityTimerMillis, pParam->m_nRtcpInactivityTimerMillis, 0);
+
+            if (nLocalNetworkToneTimer > 0)
+            {
+                if (IsInactivityTimerExpired(
+                            pParam->m_nRtpInactivityTimerMillis, nLocalNetworkToneTimer))
+                {
+                    IMS_TRACE_I("HandleNotifyMediaInactivity() - Notified netwok tone timeout", 0,
+                            0, 0);
+                    m_objAudioController.SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
+                    m_pClientListener->MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_FAILED,
+                            pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
+                }
+            }
+            else
+            {
+                if (nLocalRtpTimer > 0 && nLocalRtcpTimer > 0)
+                {
+                    if (IsInactivityTimerExpired(
+                                pParam->m_nRtpInactivityTimerMillis, nLocalRtpTimer) &&
+                            IsInactivityTimerExpired(
+                                    pParam->m_nRtcpInactivityTimerMillis, nLocalRtcpTimer))
+                    {
+                        IMS_TRACE_I(
+                                "OnNotify() - Notified rtp and rtcp inactivity timeout", 0, 0, 0);
+                        m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
+                                pParam->m_eMediaType, MEDIA_PROTOCOL_BOTH);
+                    }
+                }
+                else if (nLocalRtpTimer > 0)
+                {
+                    if (IsInactivityTimerExpired(
+                                pParam->m_nRtpInactivityTimerMillis, nLocalRtpTimer))
+                    {
+                        IMS_TRACE_I("OnNotify() - Notified rtp inactivity timeout", 0, 0, 0);
+                        m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
+                                pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
+                    }
+                }
+                else if (nLocalRtcpTimer > 0)
+                {
+                    if (IsInactivityTimerExpired(
+                                pParam->m_nRtcpInactivityTimerMillis, nLocalRtcpTimer))
+                    {
+                        IMS_TRACE_I("OnNotify() - Notified rtcp inactivity timeout", 0, 0, 0);
+                        m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
+                                pParam->m_eMediaType, MEDIA_PROTOCOL_RTCP);
+                    }
+                }
+                else
+                {
+                    IMS_TRACE_I("OnNotify() - No inactivity timer", 0, 0, 0);
+                }
+            }
+        }
+        else
+        {
+            ImsMediaNotifyInactivityParam* pParam =
+                    reinterpret_cast<ImsMediaNotifyInactivityParam*>(nParam);
+            m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, pParam->m_eMediaType,
+                    pParam->m_eMediaProtocolType == RTP ? MEDIA_PROTOCOL_RTP : MEDIA_PROTOCOL_RTCP);
+        }
+
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL MediaSession::IsInactivityTimerExpired(
+        IN IMS_SINT32 nRunningTimerValue, IN IMS_SINT32 nTimerValue)
+{
+    if (nRunningTimerValue > 0 && nTimerValue > 0 && nRunningTimerValue >= nTimerValue)
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }

@@ -93,7 +93,7 @@ protected:
     void CreateNegoProfile()
     {
         m_pAudioNego = new FakeAudioNego(DEFAULT_SLOT_ID);
-        m_pAudioNego->CreateProfiles(m_pEnvironment, MEDIA_TYPE_AUDIO, m_pConfig);
+        m_pAudioNego->CreateProfiles(m_pEnvironment, m_pConfig);
     }
 
     void CreateEnvironment()
@@ -124,7 +124,7 @@ protected:
     void PrepareEvsConfig()
     {
         ON_CALL(*m_pMockICarrierConfig,
-                GetBoolean(CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL,
+                GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_EVS_SUPPORT_BOOL,
                         AudioConfiguration::DEFAULT_SUPPORT_EVS))
                 .WillByDefault(Return(IMS_TRUE));
 

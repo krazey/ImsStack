@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "core/MockISession.h"
-#include "core/media/IMedia.h"
+#include "MockISession.h"
+#include "SdpAttribute.h"
+#include "SdpMedia.h"
+#include "media/IMedia.h"
 #include "media/MockIMedia.h"
 #include "media/MockIMediaDescriptor.h"
+#include "offeranswer/SdpPrecondition.h"
 #include "precondition/MockQosStatusTable.h"
 #include "precondition/SdpPreconditionHelper.h"
-#include "sdp/SdpAttribute.h"
-#include "sdp/SdpMedia.h"
-#include "sdp/offeranswer/SdpPrecondition.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;

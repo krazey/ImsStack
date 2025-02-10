@@ -30,7 +30,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipInfoBaseTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipInfoBaseTest, EncodeAndDecode)
 {
     SipInfoBase* pHeader = reinterpret_cast<SipInfoBase*>(
             SipInfoBase::GetNewObj(SipHeaderBase::ALERT_INFO, nullptr));
@@ -43,14 +43,15 @@ TEST_F(SipInfoBaseTest, EncodeHdrAndDecodeHdr)
     SIP_CHAR* pBuff = &(aBuffer[0]);
     AStringBuffer objBuffer(64);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
+
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     /* only value and no params, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("<http://www.example.com/audio/xyz.wav>", 38));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("<http://www.example.com/audio/xyz.wav>", 38));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("<http://www.example.com/audio/xyz.wav>", &(aBuffer[0]));
 
     SipInfoBase* pCopyHeader = reinterpret_cast<SipInfoBase*>(
@@ -69,13 +70,12 @@ TEST_F(SipInfoBaseTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* value and params, success */
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr("<http://www.example.com/audio/xyz.wav>;appearance=2", 51));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("<http://www.example.com/audio/xyz.wav>;appearance=2", 51));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("<http://www.example.com/audio/xyz.wav>;appearance=2", &(aBuffer[0]));
 
     pCopyHeader = reinterpret_cast<SipInfoBase*>(

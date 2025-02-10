@@ -147,12 +147,11 @@ public class CarrierConfigMenu extends AppCompatActivity {
                     ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVoice.KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVoice.KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY)),
-            Map.entry(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
-                    Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
+            Map.entry(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+                    Arrays.asList(CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY)),
             Map.entry(ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
-                    ImsRtt.KEY_T140_PAYLOAD_TYPE_INT,
-                    ImsRtt.KEY_RED_PAYLOAD_TYPE_INT)),
+                    ImsRtt.KEY_T140_PAYLOAD_TYPE_INT, ImsRtt.KEY_RED_PAYLOAD_TYPE_INT)),
             Map.entry(ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
                     ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT,
                     ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY,
@@ -183,13 +182,13 @@ public class CarrierConfigMenu extends AppCompatActivity {
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY)),
-            Map.entry(Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
+            Map.entry(CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY,
-                    Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
-                    Assets.KEY_HEVC_PROFILE_INT,
-                    Assets.KEY_HEVC_LEVEL_INT)),
+                    CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
+                    CarrierConfig.ImsVt.KEY_HEVC_PROFILE_INT,
+                    CarrierConfig.ImsVt.KEY_HEVC_LEVEL_INT)),
             Map.entry(Assets.KEY_EXTRA_REG_ERR_BUNDLE, Arrays.asList(
                     Assets.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
                     Assets.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
@@ -235,7 +234,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
             ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
-            Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
+            CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
             ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
     private static SparseArray<List<String>> sConfigKeys = null;
@@ -482,12 +481,12 @@ public class CarrierConfigMenu extends AppCompatActivity {
 
                 if (pb != null) {
                     Set<String> keys = pb.keySet();
-                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - starts");
+                    Log.i(this, "CarrierConfig(" + mSlotId + ") - starts");
                     for (String key : keys) {
-                        Log.i(Log.TAG, "CarrierConfig: " + key
+                        Log.i(this, "CarrierConfig: " + key
                                 + "=" + CarrierConfig.getValue(pb, key));
                     }
-                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - ends");
+                    Log.i(this, "CarrierConfig(" + mSlotId + ") - ends");
                 }
             }
             return true;
@@ -1113,10 +1112,9 @@ public class CarrierConfigMenu extends AppCompatActivity {
 
         if (videoPayloadTypes != null) {
             int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
-                    Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+                    CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
             addPayloadDescriptionKeys(mBundleKeys,
-                    Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE,
-                    hevcPayloadTypes);
+                    CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE, hevcPayloadTypes);
 
             int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
                     ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);

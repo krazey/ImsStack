@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Parcel;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
@@ -26,6 +28,9 @@ import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.RtpReceptionStats;
 import android.view.Surface;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.IMediaListener;
 import com.android.imsstack.enabler.media.MediaFactory;
@@ -80,6 +85,13 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
          * Called when the ANBR query is triggered for the audio stream
          */
         public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
+            // no-op
+        }
+
+        /**
+         * Called when the incoming dtmf digit received from peer device
+         */
+        public void onNotifyIncomingDtmfReceived(int dtmfDigit) {
             // no-op
         }
     }
@@ -223,6 +235,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private boolean mIsAudioSessionOpened = false;
     private MmTelMediaQualityReporter mMediaQualityReporter = null;
     private MmTelMediaRegistry.Listener mMediaThresholdListener = null;
+    private int mSlotId = -1;
 
     public MtcMediaSession(IBaseContext context, Call call) {
         mCall = call;
@@ -231,6 +244,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         mIsPendingSelectCamera = false;
         mIsAudioSessionOpened = false;
         mMediaThresholdListener = new MediaThresholdListener();
+        mSlotId = context.getSlotId();
     }
 
     public void dispose() {
@@ -372,6 +386,19 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     /**
+     * Notify an accumulated video data usage of the current session.
+     *
+     * @param bytes bytes of send and received rtp video data.
+     */
+    public void onNotifyVideoDataUsage(final long bytes) {
+        log("onNotifyVideoDataUsage bytes=" + bytes);
+
+        if (mVideoListener != null) {
+            mVideoListener.onMediaSessionDataUsageChanged(this, bytes);
+        }
+    }
+
+    /**
      * Notifies when the remote party has sent text message via RTT
      * @param rttMessage String containing the received characters.
      */
@@ -429,6 +456,28 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         log("rtpHeaderExtensionsReceived");
         if (mAudioListener != null) {
             mAudioListener.onRtpHeaderExtensionsReceived(extensions);
+        }
+    }
+
+    /**
+     * A notification is sent when an incoming audio dtmf is received.
+     * @param dtmfDigit Received incoming dtmf digit
+     * @param durationMs Dtmf tone playback time
+     */
+    @Override
+    public void onNotifyIncomingDtmfReceived(int dtmfDigit, int durationMs) {
+        log("onNotifyIncomingDtmfReceived");
+        if (isIncomingDtmfTonePlaySupported()) {
+            log("onNotifyIncomingDtmfReceived - TonePlay");
+            ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_VOICE_CALL, 80);
+            if (durationMs > 0) {
+                toneGenerator.startTone(dtmfDigit, durationMs);
+            } else {
+                toneGenerator.startTone(dtmfDigit, 300);
+            }
+        }
+        if (mAudioListener != null) {
+            mAudioListener.onNotifyIncomingDtmfReceived(dtmfDigit);
         }
     }
 
@@ -578,7 +627,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      */
     public void requestCallDataUsage() {
         log("requestCallDataUsage");
-        // TODO: add implementation
+
+        if (mMediaSession != null) {
+            mMediaSession.requestCallDataUsage();
+        }
     }
 
     public void notifyMediaInfoChanged(int mediaInfo, int intParam, String strParam) {
@@ -640,6 +692,23 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         synchronized (mLock) {
             return mMediaSession != null;
         }
+    }
+
+    private boolean isIncomingDtmfTonePlaySupported() {
+        log("isIncomingDtmfTonePlaySupported");
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mSlotId);
+        boolean bIncomingDtmfTonePlaySupported = false;
+
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+            if (cc != null) {
+                bIncomingDtmfTonePlaySupported = cc.getBoolean(
+                        CarrierConfig.ImsVoice.KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL, false);
+            }
+        }
+
+        return bIncomingDtmfTonePlaySupported;
     }
 
     /**

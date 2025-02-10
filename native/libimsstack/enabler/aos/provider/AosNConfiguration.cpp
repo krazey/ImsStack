@@ -111,6 +111,11 @@ PUBLIC VIRTUAL void AosNConfiguration::RemoveListener(IN IAosNConfigurationListe
     }
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTcpRequiredForReg() const
+{
+    return m_objCarrierConfig.bTcpRequiredForReg;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSubscription() const
 {
     return m_objCarrierConfig.bRegistrationEventPackageSupported;
@@ -222,6 +227,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecEnabled() const
     return m_objCarrierConfig.bSipOverIpsecEnabled;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRetryRuleForERegUsed() const
+{
+    return m_objAsset.bUseRetryRuleForEReg;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSecurityServerPortInRegContactOfInitRegUsed() const
 {
     return m_objAsset.bUseSecurityServerPortInRegContactOfInitReg;
@@ -235,6 +245,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSecurityServerPortInInitRegUsed() c
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() const
 {
     return m_objAsset.bRemoveOldSaOnEstablishingSa;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsBlockPcscfOnRegFailure() const
+{
+    return m_objAsset.bBlockPcscfOnRegFailure;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsCallEndAndPdnReactivationByRegTerminated() const
@@ -286,6 +301,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsERegWithOnlyTcpInRoaming() const
     return m_objAsset.bERegWithOnlyTcpInRoaming;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsERegUsingFirstImpuInIsim() const
+{
+    return m_objAsset.bERegUsingFirstImpuInIsim;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithIpcanChangedDuringImsCallHeld() const
 {
     return m_objAsset.bHoldRegWithIpcanChangedDuringImsCall;
@@ -296,9 +316,19 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDeregOn3gNetwork() const
     return m_objAsset.bImsDeregOn3gNetwork;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsiBasedUriPrioritized() const
+{
+    return m_objAsset.bImsiBasedUriPrioritized;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecInitializedWithNewPcscf() const
 {
     return m_objAsset.bInitializeIpsecWithNewPcscf;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepERegRetryOnWlanRequired() const
+{
+    return m_objAsset.bKeepERegRetryOnWlan;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsNoInitRegOnPcscfChange() const
@@ -369,6 +399,12 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsContactUriValidationChecked() const
     return m_objAsset.bRegContactValidation;
 }
 
+PUBLIC VIRTUAL IMS_BOOL
+AosNConfiguration::IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported() const
+{
+    return m_objAsset.bPlmnBlockWithTimeoutOnFailureWithAllPcscfs;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRetryWithIpVerFallback() const
 {
     return m_objAsset.bRegRetryWithIpVerFallback;
@@ -392,11 +428,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithFeatureTagUnavailableSupport
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() const
 {
     return m_objAsset.bSupportVerstatForReg;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsAwtUsedWhenInitRegWithNextPcscf() const
-{
-    return m_objAsset.bUseAwtWhenInitRegWithNextPcscf;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const
@@ -423,6 +454,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsWfcErrorMessageSupported(IN IMS_SIN
         default:
             return IMS_FALSE;
     }
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVideoSupportedForEmergencyReg() const
+{
+    return m_objAsset.bSupportVideoForEmergencyReg;
 }
 
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
@@ -500,6 +536,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetIpv6MtuSize() const
     return m_objCarrierConfig.nIpv6SipMtuSizeCellular;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetWaitTimeSecForReleaseEPdnAfterECallEnd() const
+{
+    return m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredEmergencyRegistration() const
 {
     return m_objCarrierConfig.nPreferredEmergencyRegistration;
@@ -525,6 +566,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegActualWaitTimePolicy() const
     return m_objAsset.nRegActualWaitTimePolicy;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegDefaultWaitTime() const
+{
+    return m_objAsset.nRegDefaultWaitTime;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegOutOfServicePolicy() const
 {
     return m_objAsset.nRegOutOfServicePolicy;
@@ -538,6 +584,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRoamingPreferredEmcReg() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportChange() const
 {
     return m_objAsset.nSipMessageThresholdForTransportChange;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSubRetrySip503CodePolicy() const
+{
+    return m_objAsset.nSubRetry503Policy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUsatRegEventDownloadPolicy() const
@@ -827,6 +878,11 @@ AosNConfiguration::GetReregErrCodeForInitRegWithAvailablePcscf()
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForImsPdnReactivation()
 {
     return m_objAsset.objReregErrCodeForImsPdnReactivation;
+}
+
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetUnavailableFeaturesInLimitedReg()
+{
+    return m_objAsset.objUnavailableFeaturesInLimitedReg;
 }
 
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
@@ -1242,6 +1298,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 
     /* carrier_config */
     /// ims.
+    m_objCarrierConfig.bTcpRequiredForReg =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_TCP_TRANSPORT_FOR_REGISTER_BOOL);
     m_objCarrierConfig.bUnsubscribeRegistrationEventPackage =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL);
     m_objCarrierConfig.nIsimIndexForImpu =
@@ -1262,6 +1320,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
     /// imsemergency.
     m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL);
+    m_objCarrierConfig.nWaitTimeSecForReleaseEPdnAfterECallEnd = piCc->GetInt(
+            CarrierConfig::ImsEmergency::KEY_WAIT_TIME_SEC_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT);
     m_objCarrierConfig.nPreferredEmergencyRegistration =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT);
     /// imssms.
@@ -1275,6 +1335,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 PROTECTED
 void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
+    m_objAsset.bBlockPcscfOnRegFailure =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL);
     m_objAsset.bCallEndAndPdnReactivationByRegTerminated = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL);
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
@@ -1285,20 +1347,28 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL);
     m_objAsset.bERegWithOnlyTcpInRoaming =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL);
+    m_objAsset.bERegUsingFirstImpuInIsim =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bImsDeregOn3gNetwork =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL);
+    m_objAsset.bImsiBasedUriPrioritized =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_IMSI_BASED_URI_PRIORITIZED_BOOL);
     m_objAsset.bInitializeIpsecWithNewPcscf =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
+    m_objAsset.bKeepERegRetryOnWlan =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL);
     m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL);
     m_objAsset.bRegContactValidation =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL);
+    m_objAsset.bPlmnBlockWithTimeoutOnFailureWithAllPcscfs = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_REG_PLMN_BLOCK_WITH_TIMEOUT_ON_FAILURE_WITH_ALL_PCSCFS_BOOL);
     m_objAsset.bRegRetryWithIpVerFallback =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
@@ -1325,10 +1395,12 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatForReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
-    m_objAsset.bUseAwtWhenInitRegWithNextPcscf =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL);
+    m_objAsset.bSupportVideoForEmergencyReg =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Assets::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
+    m_objAsset.bUseRetryRuleForEReg =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL);
     m_objAsset.bUseSecurityServerPortInInitReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL);
     m_objAsset.bUseSecurityServerPortInRegContactOfInitReg = piCc->GetBoolean(
@@ -1355,6 +1427,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT);
     m_objAsset.nRegActualWaitTimePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT);
+    m_objAsset.nRegDefaultWaitTime =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_DEFAULT_WAIT_TIME_INT);
     m_objAsset.nRegOutOfServicePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT);
     m_objAsset.nRegPcscfUpdatePolicy =
@@ -1383,6 +1457,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EREG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
+    m_objAsset.nSubRetry503Policy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_SUB_RETRY_503_POLICY_INT);
     m_objAsset.nUsatRegEventDownloadPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT);
     m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT);
@@ -1407,6 +1483,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY);
     m_objAsset.objSupportedRoamingRats =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY);
+    m_objAsset.objUnavailableFeaturesInLimitedReg = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
 }

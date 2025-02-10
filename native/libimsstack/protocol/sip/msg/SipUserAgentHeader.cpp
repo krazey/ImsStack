@@ -74,7 +74,7 @@ SIP_BOOL SipUserAgentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipUserAgentHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_objProductList.IsEmpty() == SIP_TRUE)
     {
@@ -87,17 +87,16 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     {
         if (nIndex != SIP_ZERO)
         {
-            SIP_ENC_SP(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, SPACE);
         }
-        SIP_CHAR* pszVal = m_objProductList.GetAt(nIndex);
-        SipPf_Strcpy(*ppCurrPos, pszVal);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+
+        SipAbnfUtil::Append(*ppCurrPos, m_objProductList.GetAt(nIndex));
     }
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUserAgentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipUserAgentHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -120,7 +119,7 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDec
             return SIP_FALSE;
         }
 
-        if (SipFindLWS(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
+        if (SipAbnfUtil::FindWhiteSpace(pStartPt, pEndPt, pTempPos) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
@@ -133,19 +132,17 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDec
             pTempPos = pCommentEnd;
         }
 
-        SIP_CHAR* pszUserAgent = SipCreateString(pStartPt, pTempPos);
+        SIP_CHAR* pszUserAgent = SipAbnfUtil::CreateString(pStartPt, pTempPos);
         if (pszUserAgent == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Put the value into list*/
         if (m_objProductList.Add(pszUserAgent) < SIP_ZERO)
         {
             delete[] pszUserAgent;
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr:Adding in list failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -156,7 +153,7 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDec
         else
         {
             pTempPos = pTempPos + SIP_ONE;
-            pStartPt = SipSkipFwLWS(pTempPos, pEndPt);
+            pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempPos, pEndPt);
             pTempPos = SIP_NULL;
         }
     }

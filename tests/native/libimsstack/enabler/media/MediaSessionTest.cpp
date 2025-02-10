@@ -180,8 +180,8 @@ public:
 
         if (pAudioNego != IMS_NULL)
         {
-            m_objAudioController.CreateSession(
-                    this, nMediaNego, m_pMediaSessionConfig->GetAudioConfiguration());
+            m_objAudioController.CreateSession(this, nMediaNego,
+                    m_pMediaSessionConfig->GetAudioConfiguration(), MEDIA_SERVICE_DEFAULT);
         }
 
         VideoNego* pVideoNego = pMediaNego->GetVideoNego();

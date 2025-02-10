@@ -15,10 +15,19 @@
  */
 
 #include "CarrierConfig.h"
+#include "IMessageBodyPart.h"
+#include "ISipHeader.h"
 #include "ImsList.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
+#include "MockISubscription.h"
 #include "MtcDef.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -32,21 +41,12 @@
 #include "conferencecall/MockConferenceInfoUpdater.h"
 #include "conferencecall/MockConferenceParticipantList.h"
 #include "conferencecall/MockIConferenceSubscriptionListener.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessageBodyPart.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIMessageBodyPart.h"
-#include "core/MockISession.h"
-#include "core/MockISubscription.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
 #include "service/MockIFeatureCaps.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 #include <memory>
@@ -55,6 +55,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
+using ::testing::SafeMatcherCast;
 
 namespace android
 {
@@ -77,8 +78,7 @@ public:
             objMtcSession(),
             objMessageUtils(),
             objListener(),
-            pConfigurationManager(new MockIMtcConfigurationManager()),
-            objConfigurationProxy(pConfigurationManager),
+            objConfigurationProxy(),
             objInterfaceFactory(),
             objHolderListener(),
             objSubsHolder(objHolderListener),
@@ -102,8 +102,7 @@ protected:
     MockIMtcSession objMtcSession;
     MockIMessageUtils objMessageUtils;
     MockIConferenceSubscriptionListener objListener;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy objConfigurationProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
 
     MockIMtcSipInterfaceFactory objInterfaceFactory;
     MockIInterfaceHolderListener objHolderListener;
@@ -144,10 +143,10 @@ protected:
 
     void SetConferenceSubscription(IN IMS_BOOL bInDialog)
     {
-        IMS_UINT32 nType = bInDialog
-                ? CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG
-                : CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG;
-        ON_CALL(*pConfigurationManager, GetConferenceSubscribeType).WillByDefault(Return(nType));
+        IMS_UINT32 nType = bInDialog ? ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG
+                                     : ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG;
+        ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+                .WillByDefault(Return(nType));
         pConferenceSubscription = std::make_unique<ConferenceSubscription>(
                 objContext, CONFERENCE_CALL_KEY, objParticipantList, objListener, objFactory);
     }
@@ -525,6 +524,36 @@ TEST_F(ConferenceSubscriptionTest,
 
     pConferenceSubscription->SubscriptionStartFailed(&objSubscription);
     EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::SUBSCRIBING);
+}
+
+TEST_F(ConferenceSubscriptionTest, SubscriptionStartFailedBy403AndStartedPutsConfigurationToCache)
+{
+    SetConferenceSubscription(IMS_FALSE);
+
+    // Sets state to Subscribing.
+    ON_CALL(objSubscription, GetNextRequest).WillByDefault(ReturnNull());
+    ON_CALL(objSubscription, Subscribe).WillByDefault(Return(IMS_SUCCESS));
+    pConferenceSubscription->Subscribe(AString::ConstEmpty());
+    EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::SUBSCRIBING);
+
+    // Tests.
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_403));
+    ON_CALL(objSubscription, GetPreviousResponse).WillByDefault(Return(&objMessage));
+
+    MockISubscription objNewSubscription;
+    // Dialog type is changed to In-Dialog after receiving 403 so objISession is used.
+    EXPECT_CALL(objSubsHolder, GetISubscription(&objISession, _))
+            .WillOnce(Return(&objNewSubscription));
+    EXPECT_CALL(objNewSubscription, Subscribe).WillOnce(Return(IMS_SUCCESS));
+
+    pConferenceSubscription->SubscriptionStartFailed(&objSubscription);
+    EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::SUBSCRIBING);
+
+    EXPECT_CALL(objConfigurationProxy,
+            PutCache(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT,
+                    SafeMatcherCast<IMS_SINT32>(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG)));
+    pConferenceSubscription->SubscriptionStarted(&objSubscription);
 }
 
 TEST_F(ConferenceSubscriptionTest, SubscriptionStartFailedBy423NotifiesFailedIfNoMinExpires)

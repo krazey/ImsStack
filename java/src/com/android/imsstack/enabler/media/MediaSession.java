@@ -46,7 +46,7 @@ public class MediaSession implements IMediaConnectionObserver {
      */
     @Override
     public void onMediaConnected() {
-        ImsLog.v("handle ImsMedia Connected");
+        ImsLog.d("handle ImsMedia Connected");
     }
 
     /**
@@ -54,7 +54,7 @@ public class MediaSession implements IMediaConnectionObserver {
      */
     @Override
     public void onMediaDisconnected() {
-        ImsLog.v("Handle ImsMedia disconnection");
+        ImsLog.d("Handle ImsMedia disconnection");
         if (mAudioSessionHandler != null) {
             mAudioSessionHandler.onImsMediaAudioMessage(MediaConstants.NOTIFY_MEDIA_DETACH, null);
         }
@@ -69,7 +69,7 @@ public class MediaSession implements IMediaConnectionObserver {
     }
 
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
-        ImsLog.v("MediaSession created");
+        ImsLog.d("MediaSession created");
         mContext = context;
         mMtcMediaSession = mtcMediaSession;
         mMediaManager = new MediaManagerHelper(this);
@@ -103,6 +103,20 @@ public class MediaSession implements IMediaConnectionObserver {
         }
     }
 
+    /**
+     * request Video call data usage to the ImsMedia
+     */
+
+    public void requestCallDataUsage() {
+        ImsLog.v("requestCallDataUsage");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(MediaConstants.REQUEST_VIDEO_DATA_USAGE);
+        parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        parcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(parcel);
+    }
+
     @VisibleForTesting
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession,
             ImsMediaManager imsMediaManager, Executor executor) {
@@ -112,7 +126,7 @@ public class MediaSession implements IMediaConnectionObserver {
                 imsMediaManager, executor);
         mMediaListener = new MediaListener();
         setMtcMediaListener(mtcMediaSession);
-        ImsLog.v("MediaSession created");
+        ImsLog.d("MediaSession created");
     }
 
     @VisibleForTesting
@@ -185,7 +199,7 @@ public class MediaSession implements IMediaConnectionObserver {
         public void onMediaMessage(Parcel parcel) {
             final int requestType = parcel.readInt();
             final int sessionType = parcel.readInt();
-            ImsLog.v("requestType=" + requestType + ", sessionType=" + sessionType);
+            ImsLog.d("requestType=" + requestType + ", sessionType=" + sessionType);
 
             switch (sessionType) {
                 case ImsMediaSession.SESSION_TYPE_AUDIO: {

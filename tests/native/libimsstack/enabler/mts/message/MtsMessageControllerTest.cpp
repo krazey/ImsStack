@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
+#include "IPageMessage.h"
 #include "ImsTypeDef.h"
 #include "IuMtsService.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtsService.h"
 #include "MockIMtsServiceState.h"
+#include "MockIPageMessage.h"
+#include "MockISipMessage.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
+#include "SipHeaderName.h"
 #include "TestConfigService.h"
 #include "TestTimerService.h"
-#include "core/IPageMessage.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIMessageBodyPart.h"
-#include "core/MockIPageMessage.h"
 #include "message/MtsMessageController.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipHeaderName.h"
 #include "utility/MtsDynamicLoader.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+const LOCAL IMS_SINT32 MESSAGE_RESPONSE_WAIT_TIMER = 8000;
 
 namespace android
 {
@@ -133,8 +135,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -166,7 +167,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetBoolean(CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
@@ -174,8 +175,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -342,8 +342,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetNextRequest)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(nullptr));
 
     EXPECT_CALL(objMockMtsService,
@@ -373,8 +372,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToAddHeader)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_FAILURE));
 
@@ -405,8 +403,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToSendPageMessage)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_FAILURE));
@@ -438,8 +435,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndPageMessageDeliveryFailed)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -486,8 +482,7 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
@@ -545,8 +540,7 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAckWithout202Accepted)
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
@@ -598,8 +592,7 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithSMMAAndFailToFormDestination)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
@@ -646,8 +639,7 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, GetPreviousRequest(IMessage::PAGEMESSAGE_SEND))
@@ -701,8 +693,7 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAckFailed)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, GetPreviousRequest(IMessage::PAGEMESSAGE_SEND))
@@ -756,8 +747,7 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck3gpp2)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, GetPreviousRequest(IMessage::PAGEMESSAGE_SEND))
@@ -959,8 +949,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -993,8 +982,7 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDelivered)
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -1030,8 +1018,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -1044,7 +1031,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     pMtsMessageController->PageMessageDeliveryFailed(IMS_NULL);
 }
 
-TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDeliveryFailed)
+TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsUserFailure)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
@@ -1067,8 +1054,7 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDeliveryFailed)
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -1077,10 +1063,54 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDeliveryFailed)
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
-    EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
+    EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_GENERIC, _, _)).Times(1);
+    pMtsMessageController->NotifyMoSms(
+            SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
+    pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
+}
+
+TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
+{
+    IMS_BOOL bEmergency = IMS_FALSE;
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SipAddress objSipAddress;
+    objSipAddress.Create(strTargetAddress);
+    AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
+    ImsList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
+    ImsVector<IMS_SINT32> objArray;
+    objArray.Push(SipStatusCode::SC_406);
+
+    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    pContent->Append((IMS_BYTE)0x02);                     // message reference
+    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtsService, GetICoreService(bEmergency))
+            .WillByDefault(Return(&objMockCoreService));
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(nullptr));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            .WillByDefault(Return(objArray));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT, _))
+            .WillByDefault(Return(MO_ERROR_FALLBACK));
+
+    EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_FALLBACK, _, _)).Times(1);
     pMtsMessageController->NotifyMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
@@ -1107,8 +1137,7 @@ TEST_F(MtsMessageControllerTest, OnServiceDisconnectedThenRemoveAllMessages)
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -1143,8 +1172,7 @@ TEST_F(MtsMessageControllerTest, OnServiceSuspendedThenRemoveAllMessages)
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
@@ -1195,10 +1223,10 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
             .WillByDefault(Return(5));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
             .WillByDefault(Return(45));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
@@ -1207,8 +1235,7 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
@@ -1272,10 +1299,10 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxDuration)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
             .WillByDefault(Return(3));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
             .WillByDefault(Return(45));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
@@ -1283,8 +1310,7 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxDuration)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
@@ -1331,10 +1357,10 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxCount)
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
             .WillByDefault(Return(3));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
             .WillByDefault(Return(45));
     ON_CALL(objMockMtsService, GetICoreService(bEmergency))
             .WillByDefault(Return(&objMockCoreService));
@@ -1342,8 +1368,7 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxCount)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
@@ -1398,9 +1423,9 @@ TEST_F(MtsMessageControllerTest, ProcessPendingRpDataFromNetwork)
     pFirstRpAck->Append((IMS_BYTE)0x03);                     // message reference
     pFirstRpAck->Append((IMS_BYTE)0x0F);                     // other required information elements
 
-    ByteArray* pSecondRpAck = new ByteArray((IMS_BYTE)0x02); // message type indicator(RP-ACK)
-    pSecondRpAck->Append((IMS_BYTE)0x04);                    // message reference
-    pSecondRpAck->Append((IMS_BYTE)0x0F);                    // other required information elements
+    ByteArray* pSecondRpAck = new ByteArray((IMS_BYTE)0x02);  // message type indicator(RP-ACK)
+    pSecondRpAck->Append((IMS_BYTE)0x04);                     // message reference
+    pSecondRpAck->Append((IMS_BYTE)0x0F);                     // other required information elements
 
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
@@ -1411,8 +1436,7 @@ TEST_F(MtsMessageControllerTest, ProcessPendingRpDataFromNetwork)
             .WillByDefault(Return(&objMockMtsServiceState));
     ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCoreService, CreatePageMessage(_, _))
-            .WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
     ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
     ON_CALL(objMockPageMessage, GetPreviousRequest(IMessage::PAGEMESSAGE_SEND))

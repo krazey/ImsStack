@@ -107,6 +107,7 @@ public:
     virtual IMS_BOOL IsAudioInactive() override;
     virtual void AdjustDirectionForAutoOffer(IN CallType eCallType);
     virtual void AdjustDirectionForAutoAnswer();
+    virtual void AdjustDirectionForLocalResourceConfirmation(IN CallType eCallType);
     void SetSrvccState(IN SrvccState eState) override;
     IMS_BOOL IsOnHold() override;
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
@@ -124,6 +125,7 @@ private:
     void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);
     void RequestToRegisterQosCallback(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents);
     IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
+    void SetDirectionToActiveFromInactive(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
 
 protected:
     IMediaManager& m_objMediaManager;

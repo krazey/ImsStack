@@ -21,9 +21,9 @@
 #include "MediaDef.h"
 #include "video/VideoDef.h"
 #include "config/VideoConfiguration.h"
-#include "video/VideoProfileExtractor.h"
+#include "video/VideoSdpParser.h"
 #include "video/VideoSdpGenerator.h"
-#include "video/VideoSdpNegotiator.h"
+#include "video/VideoProfileNegotiator.h"
 #include "video/VideoProfileUtil.h"
 
 class VideoNego : public BaseNego
@@ -91,7 +91,7 @@ private:
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
 
 private:
-    std::unique_ptr<VideoProfileExtractor> m_pProfileExtractor;
+    std::unique_ptr<VideoSdpParser> m_pSdpParser;
 };
 
 #endif

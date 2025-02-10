@@ -172,7 +172,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         /* Inform txn about transport error, this terminates Txn */
         objTxnHandler.OnSendTranspError(pTxnKey);
 
-        if (objTxnInfo.bTxnCreated == SIP_TRUE)
+        if (objTxnInfo.m_bTxnCreated == SIP_TRUE)
         {
             // It will be destroyed by the caller.
             objTxnInfo.m_pUserData->SetUserData(SIP_NULL);
@@ -191,7 +191,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         /* BSP_TODO: do we need to inform Txn layer for error
            objTxnHandler.OnSendTranspError */
 
-        if (objTxnInfo.bTxnCreated == SIP_TRUE)
+        if (objTxnInfo.m_bTxnCreated == SIP_TRUE)
         {
             // It will be destroyed by the caller.
             objTxnInfo.m_pUserData->SetUserData(SIP_NULL);
@@ -204,7 +204,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         return SIP_FALSE;
     }
 
-    if (objTxnInfo.bTxnTerminated == SIP_TRUE)
+    if (objTxnInfo.m_bTxnTerminated == SIP_TRUE)
     {
         pUserData->SetUserData(objTxnInfo.m_pUserData->GetUserData());
         pUserData->SetDeleteFlag(SIP_TRUE);
@@ -228,7 +228,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
             // if ACK no need to maintain transaction
             if (pSipMsg->GetMethodType() != SipMessage::METHOD_ACK)
             {
-                if (objTxnInfo.bTxnCreated == SIP_TRUE)
+                if (objTxnInfo.m_bTxnCreated == SIP_TRUE)
                 {
                     // It will be destroyed by the caller.
                     objTxnInfo.m_pUserData->SetUserData(SIP_NULL);
@@ -241,7 +241,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
             }
         }
 
-        if (objTxnInfo.bTxnCreated == SIP_TRUE)
+        if (objTxnInfo.m_bTxnCreated == SIP_TRUE)
         {
             /* return Key of newly created txn */
             *ppTxnKey = pTxnKey;
@@ -253,7 +253,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
     }
 
     // If it's a new request, then the user data is managed by the transaction object.
-    if (objTxnInfo.bTxnCreated == SIP_TRUE)
+    if (objTxnInfo.m_bTxnCreated == SIP_TRUE)
     {
         pUserData->SetUserData(SIP_NULL);
     }
@@ -349,8 +349,8 @@ stack user must process this request and can decide whether to ignore or not
                                                                : "retransmission or stray",
                 0);
 
-        pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
-        pTxnKey->SetRespCode(200);
+        pTxnKey->SetTxnType(SipTxn::INVITE_SERVER);
+        pTxnKey->SetResponseCode(200);
         *ppTxnKey = pTxnKey;
         return SIP_TRUE;
     }
@@ -367,7 +367,7 @@ stack user must process this request and can decide whether to ignore or not
         {
             SIP_UINT16 nStatusCode = pSipMsg->GetStatusCode();
 
-            if (SIP_SUCCESSFUL_RESP(nStatusCode))
+            if (SipMsgUtil::IsSuccessfulResponse(nStatusCode))
             {
                 *peTxnStatus = SipTxn::STATUS_2XX_STRAY_RESP;
 
@@ -399,10 +399,10 @@ stack user must process this request and can decide whether to ignore or not
         return SIP_FALSE;
     }
 
-    *peTxnStatus = objTxnInfo.eTxnStatus;
+    *peTxnStatus = objTxnInfo.m_eTxnStatus;
 
     // If it's a new request, then the user data is managed by the transaction object.
-    if (objTxnInfo.bTxnCreated == SIP_TRUE)
+    if (objTxnInfo.m_bTxnCreated == SIP_TRUE)
     {
         pUserData->SetUserData(SIP_NULL);
     }
@@ -419,9 +419,9 @@ stack user must process this request and can decide whether to ignore or not
        In case of ignore req, ignore resp --> simply return
        stack user can simply ignore these cases
      */
-    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn :: txnStatus=%d", objTxnInfo.eTxnStatus, 0);
+    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn :: txnStatus=%d", objTxnInfo.m_eTxnStatus, 0);
 
-    switch (objTxnInfo.eTxnStatus)
+    switch (objTxnInfo.m_eTxnStatus)
     {
         case SipTxn::STATUS_IGNORE_REQ:
         case SipTxn::STATUS_IGNORE_RESP:
@@ -452,7 +452,7 @@ stack user must process this request and can decide whether to ignore or not
        state, re-transmit the last response. INV Failure Resp --> Failure response recv is completed
        state, re-transmit the failure ACK
      */
-    if (objTxnInfo.eTxnStatus == SipTxn::STATUS_RETRANSMISSION)
+    if (objTxnInfo.m_eTxnStatus == SipTxn::STATUS_RETRANSMISSION)
     {
         if (SendToNetwork(objTxnInfo.m_pTranspInfo, objTxnInfo.m_pUserData) == SIP_FALSE)
         {
@@ -478,10 +478,10 @@ stack user must process this request and can decide whether to ignore or not
 
         SipPf_Memset(pSipBuffer, 0x00, nSipBufferLen);
 
-        if (objTxnInfo.m_pSendSipMsg->EncodeMsg(
+        if (objTxnInfo.m_pSendSipMsg->Encode(
                     &pSipBuffer, &nSipBufferLen, pUserData->GetMsgOptions()) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage:EncodeMsg Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage:Encode Fail", SIP_ZERO, SIP_ZERO);
             objTxnHandler.OnSendTranspError(pTxnKey);
             pTxnKey->SipDelete();
             return SIP_TRUE;
@@ -535,7 +535,7 @@ stack user must process this request and can decide whether to ignore or not
 
     /* INV Client Txn --> For INV 2xx case, txn is terminated
        INV Serv Txn --> For TCP, on ACK recv Txn is terminated */
-    if (objTxnInfo.bTxnTerminated == SIP_TRUE)
+    if (objTxnInfo.m_bTxnTerminated == SIP_TRUE)
     {
         if (objTxnInfo.m_pUserData != SIP_NULL)
         {
@@ -560,7 +560,7 @@ stack user must process this request and can decide whether to ignore or not
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn: Txn Terminated", SIP_ZERO, SIP_ZERO);
     }
-    else if ((objTxnInfo.bTxnCreated == SIP_TRUE) ||
+    else if ((objTxnInfo.m_bTxnCreated == SIP_TRUE) ||
             (pSipMsg->GetMethodType() == SipMessage::METHOD_ACK))
     {
         /* return Key of newly created txn */

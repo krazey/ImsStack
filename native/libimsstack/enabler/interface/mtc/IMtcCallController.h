@@ -53,9 +53,15 @@ public:
      * Sets an interface to interact with the Java layer.
      *
      * @param nCallKey Key of the call to be manipulated.
-     * @param pJniMtcCallThread Interface to send messages to the Java layer.
      */
     virtual void Attach(IN CallKey nCallKey) = 0;
+
+    /**
+     * Detaches the call associated with the specified call key.
+     *
+     * @param nCallKey Key of the call to be manipulated.
+     */
+    virtual void Detach(IN CallKey nCallKey) = 0;
 
     /**
      * Creates a call to handle the incoming call.

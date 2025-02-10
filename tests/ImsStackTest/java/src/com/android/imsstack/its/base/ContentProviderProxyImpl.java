@@ -113,7 +113,7 @@ public class ContentProviderProxyImpl implements ContentProviderProxy {
                     return Integer.parseInt(value);
                 }
             } catch (NumberFormatException e) {
-                Log.e(Log.TAG, "getInt: " + key + ", exception=" + e, e);
+                Log.e(this, "getInt: " + key + ", exception=" + e, e);
             }
 
             return defaultValue;

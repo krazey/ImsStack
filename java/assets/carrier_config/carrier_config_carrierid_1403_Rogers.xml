@@ -16,16 +16,16 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
-    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
-    <boolean name="hold_reg_with_ipcan_changed_during_ims_call_bool" value="true"/>
-    <int-array name="supported_roaming_rats_int_array" num="3">
+    <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="true"/>
+    <int-array name="ims.supported_roaming_rats_int_array" num="3">
         <item value="3"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN -->
         <item value="5"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN -->
         <item value="6"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN -->
     </int-array>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>
@@ -39,7 +39,7 @@
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
-    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
 
     <!-- Ut/Xcap AOSP -->

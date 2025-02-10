@@ -95,7 +95,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
             mNativeStateListener = new NativeStateInterface.Listener() {
                 @Override
                 public void onNativeServiceReady() {
-                    ImsLog.i(mSlotId, "NativeState: service ready.");
+                    ImsLog.i(this, mSlotId, "NativeState: service ready.");
                     notifySsacInfoToNative();
                 }
             };
@@ -117,7 +117,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
         checkHalVersion();
 
-        ImsLog.d(mSlotId, "ims hal supported = " + mIsImsHalSupported);
+        ImsLog.d(this, mSlotId, "ImsHalSupported=" + mIsImsHalSupported);
     }
 
     @Override
@@ -193,7 +193,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
             }
         }
 
-        ImsLog.d(mSlotId, "startImsTraffic - type=" + trafficType + ", network type="
+        ImsLog.d(this, mSlotId, "startImsTraffic - type=" + trafficType + ", network type="
                 + accessNetworkType + ", id=" + id + ", size=" + mConnectionListeners.size());
     }
 
@@ -212,7 +212,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
             }
         }
 
-        ImsLog.d(mSlotId, "stopImsTraffic - size=" + mConnectionListeners.size());
+        ImsLog.d(this, mSlotId, "stopImsTraffic - size=" + mConnectionListeners.size());
     }
 
     @Override
@@ -228,7 +228,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
     @Override
     public void startImsTraffic(int id, @TrafficType int trafficType,
             @AccessNetworkType int accessNetworkType, @Direction int direction) {
-        ImsLog.d(mSlotId, "startImsTraffic - id=" + id + ", type=" + trafficType
+        ImsLog.d(this, mSlotId, "startImsTraffic - id=" + id + ", type=" + trafficType
                 + ", network type=" + accessNetworkType + ", dir=" + direction);
 
         for (Integer i : mTrafficCallbacks.keySet()) {
@@ -253,7 +253,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     @Override
     public void stopImsTraffic(int id) {
-        ImsLog.d(mSlotId, "stopImsTraffic - id=" + id);
+        ImsLog.d(this, mSlotId, "stopImsTraffic - id=" + id);
 
         TrafficCallback tcb = mTrafficCallbacks.get(id);
 
@@ -265,7 +265,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     @Override
     public boolean triggerEpsFallback(int reason) {
-        ImsLog.d(mSlotId, "triggerEpsFallback - reason=" + reason);
+        ImsLog.d(this, mSlotId, "triggerEpsFallback - reason=" + reason);
 
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         MmTelFeature mtf = isr.getMmTelFeature();
@@ -275,7 +275,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
                 mtf.triggerEpsFallback(reason);
                 return true;
             } catch (IllegalStateException e) {
-                ImsLog.e(mSlotId, "triggerEpsFallback: " + e.toString());
+                ImsLog.e(this, mSlotId, "triggerEpsFallback: " + e.toString());
             }
         }
 
@@ -351,7 +351,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
                 mIsImsHalSupported = false;
             }
         } catch (IllegalStateException e) {
-            ImsLog.e("checkHalVersion: " + e.toString());
+            ImsLog.e(this, mSlotId, "checkHalVersion: " + e.toString());
         }
     }
 
@@ -418,7 +418,8 @@ public class ImsRadioAgent implements ImsRadioInterface {
             ssacInfo.setForVideo(videoBarringFactor, videoBarringTime);
         }
 
-        ImsLog.d(mSlotId, "voice - factor=" + voiceBarringFactor + ", time=" + voiceBarringTime
+        ImsLog.d(this, mSlotId,
+                "voice - factor=" + voiceBarringFactor + ", time=" + voiceBarringTime
                 + " : video - factor=" + videoBarringFactor + ", time=" + videoBarringTime);
 
         notifySsacInfo(ssacInfo);
@@ -426,7 +427,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     private void handleTrafficCallbackOnError(
             int id, int reason, int causeCode, int waitTimeMillis) {
-        ImsLog.d(mSlotId, "handleTrafficCallbackOnError - id=" + id + ", reason=" + reason
+        ImsLog.d(this, mSlotId, "handleTrafficCallbackOnError - id=" + id + ", reason=" + reason
                 + " , cause=" + causeCode + " , timeM=" + waitTimeMillis);
 
         if (reason == REASON_INTERNAL_ERROR) {
@@ -455,7 +456,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
     }
 
     private void handleTrafficCallbackOnReady(int id) {
-        ImsLog.d(mSlotId, "handleTrafficCallbackOnReady - id=" + id);
+        ImsLog.d(this, mSlotId, "handleTrafficCallbackOnReady - id=" + id);
 
         if (id >= ID_MIN) {
             ConnectionListener listener = mConnectionListeners.get(id);
@@ -486,7 +487,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
             try {
                 mtf.modifyImsTrafficSession(accessNetworkType, callback);
             } catch (IllegalStateException e) {
-                ImsLog.e("modifyImsTrafficSession: " + e.toString());
+                ImsLog.e(this, mSlotId, "modifyImsTrafficSession: " + e.toString());
                 return;
             }
         }
@@ -508,7 +509,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
                 mtf.startImsTrafficSession(trafficType, accessNetworkType, direction, executor,
                         callback);
             } catch (IllegalStateException e) {
-                ImsLog.e("startImsTrafficSession: " + e.toString());
+                ImsLog.e(this, mSlotId, "startImsTrafficSession: " + e.toString());
                 return;
             }
         }
@@ -526,7 +527,7 @@ public class ImsRadioAgent implements ImsRadioInterface {
             try {
                 mtf.stopImsTrafficSession(callback);
             } catch (IllegalStateException e) {
-                ImsLog.e("stopImsTrafficSession: " + e.toString());
+                ImsLog.e(this, mSlotId, "stopImsTrafficSession: " + e.toString());
                 return;
             }
         }
@@ -640,8 +641,9 @@ public class ImsRadioAgent implements ImsRadioInterface {
             mBarringTimeSecForVoice = ssacInfo.mBarringTimeSecForVoice;
             mBarringFactorForVideo = ssacInfo.mBarringFactorForVideo;
             mBarringTimeSecForVideo = ssacInfo.mBarringTimeSecForVideo;
-            ImsLog.d(mSlotId, "update :: voicefactor=" + mBarringFactorForVoice + ", timeSec="
-                    + mBarringTimeSecForVoice + ", videofactor=" + mBarringFactorForVideo
+            ImsLog.d(this, mSlotId, "ssac-update: voicefactor=" + mBarringFactorForVoice
+                    + ", timeSec=" + mBarringTimeSecForVoice
+                    + ", videofactor=" + mBarringFactorForVideo
                     + ", timeSec=" + mBarringTimeSecForVideo);
         }
     }
@@ -699,8 +701,8 @@ public class ImsRadioAgent implements ImsRadioInterface {
                 return;
             }
 
-            ImsLog.d(mSlotId,
-                    "Simultaneous calling support for SubId[" + mSubId + "] = " + isSupported);
+            ImsLog.d(this, mSlotId,
+                    "Simultaneous calling support for SubId[" + mSubId + "]=" + isSupported);
 
             mIsSimultaneousCallingSupported = isSupported;
 

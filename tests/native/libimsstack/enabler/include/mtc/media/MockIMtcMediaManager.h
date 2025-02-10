@@ -76,6 +76,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAudioInactive, (), (override));
     MOCK_METHOD(void, AdjustDirectionForAutoOffer, (IN CallType eCallType), (override));
     MOCK_METHOD(void, AdjustDirectionForAutoAnswer, (), (override));
+    MOCK_METHOD(
+            void, AdjustDirectionForLocalResourceConfirmation, (IN CallType eCallType), (override));
     MOCK_METHOD(void, SetSrvccState, (IN SrvccState eState), (override));
     MOCK_METHOD(IMS_BOOL, IsOnHold, (), (override));
     MOCK_METHOD(IMS_UINT32, GetSupportedMediaTypesFromSdp, (IN ISession * piSession), (override));

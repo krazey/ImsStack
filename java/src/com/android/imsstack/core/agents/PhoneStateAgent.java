@@ -168,7 +168,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
     @Override
     public void setImsCallState(@CallState int state) {
         if (mImsCallState.get() != state) {
-            ImsLog.i(mSlotId, "IMS call state: "
+            ImsLog.i(this, mSlotId, "IMS call state: "
                     + TelephonyInterface.callStateToString(mImsCallState.get()) + " -> "
                     + TelephonyInterface.callStateToString(state));
             mImsCallState.set(state);
@@ -214,7 +214,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
         }
 
         if (mCsCallState != state) {
-            ImsLog.i(mSlotId, "CS call state: "
+            ImsLog.i(this, mSlotId, "CS call state: "
                     + TelephonyInterface.callStateToString(mCsCallState) + " -> "
                     + TelephonyInterface.callStateToString(state));
             mCsCallState = state;
@@ -300,7 +300,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
     private void listenForPhoneStateEventChanged() {
         synchronized (mLock) {
             if (mPhoneStateListener != null) {
-                ImsLog.i(mSlotId, "listenForPhoneStateEventChanged: subId="
+                ImsLog.i(this, mSlotId, "listenForPhoneStateEventChanged: subId="
                         + mPhoneStateListener.getSubId());
                 mPhoneStateListener.registerCallbacks(mEvents.getEvents());
             }
@@ -319,11 +319,11 @@ public class PhoneStateAgent implements PhoneStateInterface,
 
             if (subId == mPhoneStateListener.getSubId()) {
                 // no-op
-                ImsLog.w(mSlotId, "Subscription is not changed; subId=" + subId);
+                ImsLog.w(this, mSlotId, "Subscription is not changed; subId=" + subId);
                 return;
             }
 
-            ImsLog.i(mSlotId, "handleSimStateChanged: subId=" + subId);
+            ImsLog.i(this, mSlotId, "handleSimStateChanged: subId=" + subId);
             mPhoneStateListener.unregisterCallbacks();
             mPhoneStateListener.dispose();
 
@@ -399,7 +399,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
         PhoneStateListener(int subId) {
             super(AppContext.getInstance().getMainLooper());
             mSubId = subId;
-            ImsLog.i(mSlotId, "PhoneStateListener: subId=" + subId);
+            ImsLog.i(this, mSlotId, "PhoneStateListener: subId=" + subId);
 
             mTelephonyCallbacks.put(ImsPhoneStateListener.LISTEN_SERVICE_STATE,
                     new ServiceStateListener());
@@ -470,7 +470,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 TelephonyCallback.CallStateListener {
             @Override
             public void onCallStateChanged(@CallState int state) {
-                ImsLog.i(mSlotId, "onCallStateChanged: "
+                ImsLog.i(this, mSlotId, "onCallStateChanged: "
                         + TelephonyInterface.callStateToString(mCallState) + " -> "
                         + TelephonyInterface.callStateToString(state));
                 if (state == TelephonyManager.CALL_STATE_IDLE) {
@@ -488,7 +488,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             @Override
             public void onCellInfoChanged(@NonNull List<CellInfo> cellInfo) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onCellInfoChanged");
+                    ImsLog.i(this, mSlotId, "onCellInfoChanged");
                 }
                 notifyCellInfo(cellInfo);
             }
@@ -499,7 +499,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             @Override
             public void onPreciseCallStateChanged(@NonNull PreciseCallState callState) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onPreciseCallStateChanged: cs=" + callState);
+                    ImsLog.i(this, mSlotId, "onPreciseCallStateChanged: cs=" + callState);
                 }
                 notifyPreciseCallState(callState);
             }
@@ -509,7 +509,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 TelephonyCallback.ServiceStateListener {
             @Override
             public void onServiceStateChanged(@NonNull ServiceState serviceState) {
-                ImsLog.i(mSlotId, "onServiceStateChanged: ss=" + serviceState
+                ImsLog.i(this, mSlotId, "onServiceStateChanged: ss=" + serviceState
                         + ", changed(operator|roaming|data_rat|data_reg|voice_rat|voice_reg)="
                         + Integer.toHexString(getChangedStates(mServiceState, serviceState)));
 
@@ -525,7 +525,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             @Override
             public void onSignalStrengthsChanged(@NonNull SignalStrength signalStrength) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onSignalStrengthsChanged: ss=" + signalStrength);
+                    ImsLog.i(this, mSlotId, "onSignalStrengthsChanged: ss=" + signalStrength);
                 }
                 notifySignalStrengths(signalStrength);
             }
@@ -535,7 +535,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 TelephonyCallback.SrvccStateListener {
             @Override
             public void onSrvccStateChanged(@SrvccState int state) {
-                ImsLog.i(mSlotId, "onSrvccStateChanged: state=" + state);
+                ImsLog.i(this, mSlotId, "onSrvccStateChanged: state=" + state);
                 notifySrvccState(state);
             }
         }
@@ -546,7 +546,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             public void onPreciseDataConnectionStateChanged(
                     @NonNull PreciseDataConnectionState dataConnectionState) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onPreciseDataConnectionStateChanged: dcs="
+                    ImsLog.i(this, mSlotId, "onPreciseDataConnectionStateChanged: dcs="
                             + dataConnectionState);
                 }
                 notifyPreciseDataConnectionState(dataConnectionState);

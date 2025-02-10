@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-#include "../../../../config/interface/common/MockISubscriberConfig.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "FeatureCaps.h"
+#include "MediaNego.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtcService.h"
 #include "MockIPhoneInfoLocation.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
+#include "MockISubscriberConfig.h"
+#include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/MessageFormatter.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIMessageBodyPart.h"
-#include "core/MockISession.h"
 #include "dialogevent/MockIMultiEndpointManager.h"
 #include "helper/MtcSupplementaryService.h"
 #include "service/MockIFeatureCaps.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipHeaderName.h"
 #include "utility/MessageUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
@@ -42,6 +43,7 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::AnyOf;
+using ::testing::AnyOfArray;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -70,19 +72,16 @@ public:
     MockIMtcService objService;
     MockISession objSession;
     MockISubscriberConfig objSubscriberConfig;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
     MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
+        pSupplementaryService = new MtcSupplementaryService(objContext, objConfigurationProxy);
 
-        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
@@ -104,7 +103,6 @@ protected:
     virtual void TearDown() override
     {
         delete pFormatter;
-        delete pConfigurationProxy;
         delete pSupplementaryService;
     }
 
@@ -143,22 +141,36 @@ TEST_F(MessageFormatterTest, FormStartMessageFailureCase)
     EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
-TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
+TEST_F(MessageFormatterTest, FormStartMessageWithoutGeolocation)
 {
-    ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
+                    static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE)))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    static_cast<IMS_SINT32>(
+                            ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR)))
             .WillByDefault(Return(IMS_FALSE));
 
-    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
-    EXPECT_EQ(nResult, IMS_SUCCESS);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::GEOLOCATION), _)).Times(0);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::GEOLOCATION_ROUTING), _)).Times(0);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
 
-    ON_CALL(*pConfigurationManager, IsSupportGeolocationPidfInSipInvite)
+TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
+                    static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE)))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    static_cast<IMS_SINT32>(
+                            ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR)))
             .WillByDefault(Return(IMS_TRUE));
 
-    nResult = pFormatter->FormStartMessage(CallType::VOIP);
-
-    EXPECT_EQ(nResult, IMS_SUCCESS);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormStartMessageWithoutCallComposerElements)
@@ -210,26 +222,28 @@ TEST_F(MessageFormatterTest, FormStartMessageWithIncompleteCallComposerLocation)
 
 TEST_F(MessageFormatterTest, FormStartMessageWithCallComposerLocation)
 {
-    const ByteArray objContent =
-            ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                      "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
-                      "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
-                      "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
-                      "xmlns:gml=\"http://www.opengis.net/gml\" "
-                      "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" entity=\"pres:prid\">\n"
-                      "<dm:person id=\"\">\n"
-                      "<gp:geopriv>\n"
-                      "<gp:location-info>\n"
-                      "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">\n"
-                      "<gml:pos>1 2</gml:pos>\n"
-                      "</gs:Circle>\n"
-                      "</gp:location-info>\n"
-                      "<gp:usage-rules/>\n"
-                      "</gp:geopriv>\n"
-                      "</dm:person>\n"
-                      "</presence>\n");
+    const ByteArray objContent = ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                           "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                                           "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                                           "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                                           "xmlns:gml=\"http://www.opengis.net/gml\" "
+                                           "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+                                           "entity=\"pres:prid\">\n"
+                                           "<dm:person id=\"\">\n"
+                                           "<gp:geopriv>\n"
+                                           "<gp:location-info>\n"
+                                           "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">\n"
+                                           "<gml:pos>1 2</gml:pos>\n"
+                                           "</gs:Circle>\n"
+                                           "</gp:location-info>\n"
+                                           "<gp:usage-rules>\n"
+                                           "</gp:usage-rules>\n"
+                                           "</gp:geopriv>\n"
+                                           "</dm:person>\n"
+                                           "</presence>\n");
+
     EXPECT_CALL(objBodyPart, SetContent(objContent));
-    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("500")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("517")));
     EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), _));
     EXPECT_CALL(objBodyPart,
             SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
@@ -248,7 +262,9 @@ TEST_F(MessageFormatterTest, FormProvisionalResponseMessageNormalCase)
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
-    ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
+                    static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::PROVISIONAL_RESPONSE)))
             .WillByDefault(Return(IMS_TRUE));
 
     nResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
@@ -335,7 +351,9 @@ TEST_F(MessageFormatterTest, FormAcceptMessageNormalCase)
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
-    ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
+                    static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_SUCCESS_RESPONSE)))
             .WillByDefault(Return(IMS_TRUE));
 
     nResult = pFormatter->FormAcceptMessage();
@@ -362,7 +380,9 @@ TEST_F(MessageFormatterTest, FormRejectMessageWithCodeUserDecline)
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 
-    ON_CALL(*pConfigurationManager, IsMessageTypeSupportGeolocationPidf)
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY,
+                    static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_FAILURE_RESPONSE)))
             .WillByDefault(Return(IMS_TRUE));
 
     nResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
@@ -381,6 +401,55 @@ TEST_F(MessageFormatterTest, FormRejectMessageFailureCase)
     IMS_RESULT nResult = pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWithUnsupported)
+{
+    const AString strUnsupportedValue("any value");
+    CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS, -1, strUnsupportedValue);
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, strUnsupportedValue, ISipHeader::UNSUPPORTED, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithInvalidDescriptor)
+{
+    const AString strWarning("305 IMS-client \"Incompatible media format\"");
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_INVALID_DESCRIPTOR);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithIpMismatch)
+{
+    const AString strWarning("301 IMS-client \"Incompatible network address formats\"");
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_IP_MISMATCH);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+}
+
+TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithNoCodecMatched)
+{
+    const AString strWarning("304 IMS-client \"Media type not available\"");
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+
+    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_NO_CODEC_MATCHED);
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
+
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 }
 
 TEST_F(MessageFormatterTest, FormAckMessageNormalCase)
@@ -486,7 +555,9 @@ TEST_F(MessageFormatterTest, FormTerminateMessageFailureCase)
 TEST_F(MessageFormatterTest, FormTerminateMessageAddCarrierSpecificHeaderByConfig)
 {
     const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strByeCauseNormal("normal");
@@ -596,11 +667,11 @@ TEST_F(MessageFormatterTest, SetCallerIdHeader)
     pFormatter->FormStartMessage(CallType::VOIP);
 
     pSupplementaryService->Add(SuppType::CALLER_ID, CALLERID_RESTRICTED);
-    ON_CALL(*pConfigurationManager, GetSessionPrivacyType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::SESSION_PRIVACY_TYPE_HEADER));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_HEADER));
     pFormatter->FormStartMessage(CallType::VOIP);
-    ON_CALL(*pConfigurationManager, GetSessionPrivacyType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::SESSION_PRIVACY_TYPE_NONE));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_SESSION_PRIVACY_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::SESSION_PRIVACY_TYPE_NONE));
     pFormatter->FormStartMessage(CallType::VOIP);
 
     pSupplementaryService->Delete(SuppType::CALLER_ID);
@@ -630,14 +701,23 @@ TEST_F(MessageFormatterTest, SetReasonHeader)
     pFormatter->FormTerminateMessage(objReasonInfo);
 
     const AString strReason = "TEST_REASON";
-    ON_CALL(*pConfigurationManager, GetCallTerminateReasonHeader).WillByDefault(Return(strReason));
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING))
+            .WillByDefault(Return(strReason));
 
     pFormatter->FormTerminateMessage(objReasonInfo);
 }
 
 TEST_F(MessageFormatterTest, SetCarrierSpecificHeaders)
 {
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_TTA_VOLTE_INFO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_SKT_BYE_CAUSE))
+            .WillByDefault(Return(IMS_TRUE));
     pFormatter->FormStartMessage(CallType::VOIP);
     pFormatter->FormAcceptMessage();
     pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
@@ -646,7 +726,6 @@ TEST_F(MessageFormatterTest, SetCarrierSpecificHeaders)
 
 TEST_F(MessageFormatterTest, SetCarrierSpecificHeadersSetsTranscodingHeaderIfCallPull)
 {
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader).WillByDefault(Return(IMS_FALSE));
     pSupplementaryService->Add(SuppType::CALL_PULL, IMS_FALSE);
     const AString strTranscodingHeader(MessageUtil::STR_P_COM_ENABLETRANSCODING);
 
@@ -681,7 +760,8 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
 
     EXPECT_EQ(GetRejectStatusCode(CODE_NONE), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_UNSPECIFIED), SipStatusCode::SC_480);
-    ON_CALL(*pConfigurationManager, GetIncomingCallRejectCodeForUserDecline)
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT))
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_DECLINE), nTestStatusCode);
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_NOANSWER), SipStatusCode::SC_486);
@@ -707,17 +787,20 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_488);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_606),
             SipStatusCode::SC_606);
-    ON_CALL(*pConfigurationManager, GetCallRejectCodeForNotAcceptableCallType)
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT))
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
             nTestStatusCode);
+    EXPECT_EQ(GetRejectStatusCode(CODE_SIP_REQUEST_PENDING), SipStatusCode::SC_491);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPGRADE), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_INTERNAL_ERROR), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED),
             SipStatusCode::SC_580);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_INIT_FAILED), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_NOT_ACCEPTABLE), SipStatusCode::SC_488);
-    ON_CALL(*pConfigurationManager, GetIncomingCallRejectCodeForNoAnswer)
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT))
             .WillByDefault(Return(nTestStatusCode));
     EXPECT_EQ(GetRejectStatusCode(CODE_TIMEOUT_NO_ANSWER), nTestStatusCode);
     EXPECT_EQ(GetRejectStatusCode(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE), SipStatusCode::SC_603);
@@ -729,7 +812,18 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
 TEST_F(MessageFormatterTest, GetRejectPhrase)
 {
     const IMS_CHAR pszTestPhrase[] = "TEST_PHRASE";
-    ON_CALL(*pConfigurationManager, GetCallRejectReasonPhrase)
+    std::vector<std::string> expectedKeys = {
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_VILTE_AND_NO_LTE_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CONNECTING_CALL_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_EXCEEDS_MAX_CALL_COUNT_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CONVERTING_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_NEGOTIATION_FAILURE_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_NO_ANSWER_BY_USER_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING,
+            ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING};
+
+    ON_CALL(objConfigurationProxy, GetString(AnyOfArray(expectedKeys)))
             .WillByDefault(Return(AString(pszTestPhrase)));
 
     EXPECT_TRUE(GetRejectPhrase(CODE_NONE).GetLength() < 1);
@@ -743,7 +837,7 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
     EXPECT_STREQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE).GetStr(), pszTestPhrase);
 }
 
-TEST_F(MessageFormatterTest, GetRejectPhraseForBusySpecialCase)
+TEST_F(MessageFormatterTest, GetRejectPhraseForBusyRttOn)
 {
     CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_RTT_ON);
 
@@ -752,6 +846,20 @@ TEST_F(MessageFormatterTest, GetRejectPhraseForBusySpecialCase)
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
 
     EXPECT_STREQ("RTT on", strPhrase.GetStr());
+}
+
+TEST_F(MessageFormatterTest, GetRejectPhraseForBusyVowifiOff)
+{
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING))
+            .WillByDefault(Return(AString("VoWiFi OFF")));
+    CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_VOWIFI_OFF);
+
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+
+    EXPECT_STREQ("VoWiFi OFF", strPhrase.GetStr());
 }
 
 TEST_F(MessageFormatterTest, SetUpdateReason)
@@ -796,8 +904,6 @@ TEST_F(MessageFormatterTest, SetTerminateReason)
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersByNoConfiguration)
 {
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(_)).WillByDefault(Return(IMS_FALSE));
-
     MockISipMessage objMessage;
     EXPECT_CALL(objMessage, AddHeader(_, _, _)).Times(0);
 
@@ -822,8 +928,9 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersB
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwConfiguration)
 {
-    const AString strCarrierSpecificHeader(MessageUtil::STR_REASON_USER_SESSIONEXPIRED);
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_REASON_USER_SESSIONEXPIRED))
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strReasonHeaderValue("USER;text=\"Session Expired\"");
@@ -852,7 +959,9 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwCo
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrConfiguration)
 {
     const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strReasonHeaderSip("SIP; cause=103; text=\"Session-Expire\"; fc=9602");
@@ -889,8 +998,9 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrCon
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetPrivateHeaderSetsPrivateHeaderByKrConfiguration)
 {
-    const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strPSktByeCause(MessageUtil::STR_P_SKT_BYE_CAUSE);

@@ -57,6 +57,7 @@ public:
     TestAosHandle* m_pTestAosHandle;
     AosInfo* m_pAosInfo;
     MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosApplication m_objMockIAosApplication;
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
@@ -73,6 +74,8 @@ protected:
         EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
                 .Times(AnyNumber())
                 .WillRepeatedly(ReturnRef(strValue));
+
+        ON_CALL(m_objMockIAosAppContext, GetApp()).WillByDefault(Return(&m_objMockIAosApplication));
 
         m_pTestAosHandle = new TestAosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
@@ -109,7 +112,6 @@ protected:
     {
         m_pAosInfo->NotifyEmergencyCallState(bIsInitialized);
     }
-    void NotifyScbmState(IN IMS_UINT32 nState) { m_pAosInfo->NotifyScbmState(nState); }
     void NotifyPublishState(IN IMS_BOOL bIsStarted) { m_pAosInfo->NotifyPublishState(bIsStarted); }
     void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
     {
@@ -505,39 +507,10 @@ TEST_F(AosInfoTest, NotifyEmergencyCallState_Test)
             .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_INIT, _)).Times(1);
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_DONE, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ECALL_INIT, _));
 
     NotifyEmergencyCallState(IMS_TRUE);
     NotifyEmergencyCallState(IMS_FALSE);
-}
-
-TEST_F(AosInfoTest, NotifyScbmState_Test)
-{
-    // Expectation: Call AosRegistration::RequestCmd()
-    //      with (IAosRegistration::CMD_SCBM_STARTED) if param is SCBM_STARTED
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED) if param is SCBM_TERMINATED
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED_ECALL) if param is SCBM_TERMINATED_BY_ECALL
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED_ESMS) if param is SCBM_TERMINATED_BY_ESMS
-    //      No call if param is invalid
-
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
-
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_STARTED, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED_ECALL, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED_ESMS, _))
-            .Times(1);
-
-    NotifyScbmState(IImsAosInfo::SCBM_STARTED);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED_BY_ECALL);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED_BY_ESMS);
-    NotifyScbmState(0);
 }
 
 TEST_F(AosInfoTest, NotifyPublishState_Test)
@@ -569,6 +542,7 @@ TEST_F(AosInfoTest, NotifyEmergencySmsState_Test)
             .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_INIT, _)).Times(1);
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_DONE, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ESMS_INIT, _));
 
     NotifyEmergencySmsState(IMS_TRUE);
     NotifyEmergencySmsState(IMS_FALSE);

@@ -39,6 +39,7 @@ public:
     AString GetWifiCallingAddressId() override;
 
     IMS_SINT32 GetCsCallStateInOtherSlot() const override;
+    IMS_BOOL IsCrossSimRedialingAvailable() const override;
 };
 
 #endif

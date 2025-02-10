@@ -425,13 +425,13 @@ TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyCarrierSignalPcoValueC
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyEmcCallbackModeChanged)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyEmergencyCallbackModeChanged)
 {
     // GIVEN
-    m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_EMC_CALLBACK_MODE_CHANGED);
+    m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED);
     m_objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyEmcCallbackModeChanged(_, _, _));
+    EXPECT_CALL(m_objMockIAosService, NotifyEmergencyCallbackModeChanged(_, _, _));
 
     // WHEN
     m_pJniAosService->SendData(m_objParcel);

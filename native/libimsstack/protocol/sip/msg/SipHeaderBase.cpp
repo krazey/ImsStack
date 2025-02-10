@@ -250,7 +250,7 @@ SIP_BOOL SipHeaderBase::IsValidHeader() const
     {
         return SIP_TRUE;
     }
-    return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+    return IsEmptyHeaderBodyAllowed();
 }
 
 SIP_BOOL SipHeaderBase::SetValue(const SIP_CHAR* pszValue)
@@ -265,7 +265,8 @@ SIP_BOOL SipHeaderBase::SetValue(const SIP_CHAR* pszValue)
         }
     }
 
-    return SetCharVar(pszValue, m_pszValue);
+    SipMsgUtil::SetValue(pszValue, m_pszValue);
+    return SIP_TRUE;
 }
 
 const SIP_CHAR* SipHeaderBase::GetValue() const
@@ -304,7 +305,7 @@ SIP_BOOL SipHeaderBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     if (m_pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Empty header body", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+        return IsEmptyHeaderBodyAllowed();
     }
 
     objBuffer += m_pszValue;
@@ -312,16 +313,15 @@ SIP_BOOL SipHeaderBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
+SIP_BOOL SipHeaderBase::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
     if (m_pszValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No header Value to encode", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Empty header body", SIP_ZERO, SIP_ZERO);
+        return IsEmptyHeaderBodyAllowed();
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszValue);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszValue);
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
@@ -336,7 +336,7 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(
 
     if (m_pParameters == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -348,19 +348,20 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipHeaderBase::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "zero length buffer", SIP_ZERO, SIP_ZERO);
-        return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+        return IsEmptyHeaderBodyAllowed();
     }
 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
     /*First Check the presence of params i.e. ";" and decode if present*/
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
@@ -370,13 +371,17 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pEndPt = pTempPre;
     }
     /*Now Decode the Value*/
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pEndPt);
+    if (pszValue == SIP_NULL)
+    {
+        return IsEmptyHeaderBodyAllowed();
+    }
 
     if ((m_eHdrType == SipHeaderBase::ACCEPT_CONTACT) ||
             (m_eHdrType == SipHeaderBase::FEATURE_CAPS) ||
             (m_eHdrType == SipHeaderBase::REJECT_CONTACT))
     {
-        if ((pszValue != SIP_NULL) && (SipPf_Strcmp(pszValue, "*") != 0))
+        if (SipPf_Strcmp(pszValue, "*") != 0)
         {
             return SIP_FALSE;
         }
@@ -384,15 +389,18 @@ SIP_BOOL SipHeaderBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
-        if (pszValue != SIP_NULL)
-        {
-            delete[] pszValue;
-        }
+        delete[] pszValue;
         return SIP_FALSE;
     }
+
     delete[] pszValue;
     return SIP_TRUE;
+}
+
+SIP_BOOL SipHeaderBase::IsEmptyHeaderBodyAllowed() const
+{
+    return IsHeaderTypeValid(m_eHdrType) ? gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED]
+                                         : SIP_FALSE;
 }
 
 SIP_BOOL SipHeaderBase::IsHeaderTypeValid(SIP_INT32 eHdrType)
@@ -402,7 +410,8 @@ SIP_BOOL SipHeaderBase::IsHeaderTypeValid(SIP_INT32 eHdrType)
 
 SIP_BOOL SipHeaderBase::IsMultiValueHeader(SIP_INT32 eHdrType)
 {
-    return gHeaderAttributes[eHdrType][HEADER_MULTI_VALUE_ALLOWED];
+    return IsHeaderTypeValid(eHdrType) ? gHeaderAttributes[eHdrType][HEADER_MULTI_VALUE_ALLOWED]
+                                       : SIP_TRUE;
 }
 
 SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
@@ -492,24 +501,24 @@ SIP_BOOL SipNameAddrHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) c
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddrHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
+SIP_BOOL SipNameAddrHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
     if (m_pNameAddr == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "name address not present", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing name-addr", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (m_pNameAddr->EncodeNameAddr(ppCurrPos) == SIP_FALSE)
+    if (m_pNameAddr->Encode(ppCurrPos) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode name address fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encoding name-addr failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipNameAddrHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -521,14 +530,14 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
 
     if (GetHdrType() == SipHeaderBase::CONTACT)
     {
-        pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
+        pEndPt = SipAbnfUtil::SkipWhiteSpaceFromRight(pStartPt, pEndPt);
 
         if ((pStartPt == pEndPt) && (*pStartPt == ASTERISK))
         {
             if (SetValue("*") == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(
-                        ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+                        ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
             }
             return SIP_TRUE;
@@ -538,16 +547,17 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, RIGHT_ANGLE) == SIP_TRUE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, RIGHT_ANGLE) ==
+            SIP_TRUE)
     {
-        if (m_pNameAddr->DecodeNameAddr(pStartPt, pTempPre) == SIP_FALSE)
+        if (m_pNameAddr->Decode(pStartPt, pTempPre) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
 
         pStartPt = pTempNext;
         pTempNext = SIP_NULL;
-        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempNext, SIP_SEMI) == SIP_TRUE)
+        if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempNext, SIP_SEMI) == SIP_TRUE)
         {
             pTempNext = pTempNext + SIP_TWO;
         }
@@ -555,7 +565,8 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     else
     {
         SIP_INT32 nLen = nDecLen;
-        if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+                SIP_TRUE)
         {
             nLen = pTempPre - pStartPt + SIP_ONE;
         }
@@ -574,7 +585,7 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecL
             return SIP_FALSE;
         }
 
-        if (pAddrSpec->DecodeAddrSpec(pStartPt, nLen) == SIP_FALSE)
+        if (pAddrSpec->Decode(pStartPt, nLen) == SIP_FALSE)
         {
             pAddrSpec->SipDelete();
             return SIP_FALSE;

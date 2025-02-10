@@ -486,6 +486,11 @@ public class SscServiceImpl implements IUtInterface {
                 handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
                 return;
             }
+
+            if (!SscConfig.isCfnrTimerSupported(mSlotId)) {
+                ImsLog.d(mSlotId, "CFNR Timer is not supported");
+                timeSeconds = 0;
+            }
         }
 
         SscRequestData requestData = new SscRequestData(tId);

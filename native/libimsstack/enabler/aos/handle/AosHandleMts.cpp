@@ -205,3 +205,14 @@ PROTECTED VIRTUAL void AosHandleMts::Handle_Notify(IN IMS_UINT32 nType, IN IMS_B
         }
     }
 }
+
+PROTECTED VIRTUAL void AosHandleMts::Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState /* = 0 */)
+{
+    if (nType == IAosHandle::TYPE_LIMITED_MODE)
+    {
+        if (IsFeatureUnavailableInLimitedReg(CarrierConfig::Assets::REG_FEATURE_SMS))
+        {
+            ProcessBlock(BLOCK_LIMITED_SMS, (nState == IAosHandle::STATE_ADD));
+        }
+    }
+}

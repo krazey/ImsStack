@@ -43,7 +43,7 @@ public class SampleSmsTest extends SmsTestBase {
     @Test
     public void testMoSms() throws Exception {
         performRegistration();
-        logi("testMoSms - TISS: 202, RP ACK");
+        logi(this, "testMoSms - TISS: 202, RP ACK");
         sendSms();
         expectResultWithin(2000);
 
@@ -53,7 +53,7 @@ public class SampleSmsTest extends SmsTestBase {
     @Test
     public void testMtSms() throws Exception {
         performRegistration();
-        logi("testMtSms - TISS: MESSAGE(SMS)");
+        logi(this, "testMtSms - TISS: MESSAGE(SMS)");
         expectIncomingSmsWithin(10000);
         // expectContent(predefined content);
         acknowledgeSms();

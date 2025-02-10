@@ -16,8 +16,10 @@
 
 #include "CarrierConfig.h"
 #include "ImsList.h"
+#include "MockICoreService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
@@ -36,13 +38,11 @@
 #include "conferencecall/MockConferenceParticipantList.h"
 #include "conferencecall/MockIConferenceControllerListener.h"
 #include "conferencecall/MockIConferenceReference.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
-#include "sipcore/SipStatusCode.h"
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -95,8 +95,7 @@ public:
             pParticipantList(IMS_NULL),
             pNotifier(IMS_NULL),
             objMockCallStateProxy(),
-            pConfigurationManager(new MockIMtcConfigurationManager()),
-            objConfigurationProxy(pConfigurationManager),
+            objConfigurationProxy(),
             pExpandController(nullptr)
     {
     }
@@ -114,8 +113,7 @@ protected:
     MockConferenceParticipantList* pParticipantList;  // Deleted internally.
     MockConferenceEventNotifier* pNotifier;           // Deleted internally.
     MockICallStateProxy objMockCallStateProxy;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy objConfigurationProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
 
     std::unique_ptr<TestExpandController> pExpandController;
 
@@ -175,7 +173,8 @@ TEST_F(ExpandControllerTest, OnReferenceStartedNotiesExpandedIfExpandingAndNoRef
     pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
-    ON_CALL(*pConfigurationManager, IsSupportConferenceReferSubscribe)
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pNotifier, NotifyExpanded);
@@ -187,7 +186,8 @@ TEST_F(ExpandControllerTest, OnReferenceStartedDoesNothingIfNotExpandingState)
 {
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
-    ON_CALL(*pConfigurationManager, IsSupportConferenceReferSubscribe)
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pNotifier, NotifyExpanded).Times(0);
@@ -273,8 +273,8 @@ TEST_F(ExpandControllerTest,
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
     ON_CALL(*pOperationQueue, GetTypeOfCurrentOperation)
             .WillByDefault(Return(CONTROL_OPERATION_REFER_INVITE));
-    ON_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
 
     EXPECT_CALL(*pNotifier, NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)));
     EXPECT_CALL(*pOperationQueue, Clear);
@@ -356,8 +356,8 @@ TEST_F(ExpandControllerTest, OnReferenceUpdatedInvokesStopMedia1to1SessionIfExpa
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
 
-    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
     // TODO: Implementation required for ExpandController::StopMedia1to1Session().
     EXPECT_CALL(
             *pOperationQueue, CompleteCurrentOperation(CONTROL_OPERATION_REFER_INVITE, IMS_NULL));
@@ -372,8 +372,8 @@ TEST_F(ExpandControllerTest, StopMedia1to1SessionDoesNothingIfConfigIsReferMulti
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
 
-    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+    EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
     // TODO: Implementation required for ExpandController::StopMedia1to1Session().
 
     pExpandController->OnReferenceUpdated(
@@ -474,7 +474,8 @@ TEST_F(ExpandControllerTest, OnReferenceUpdatedWithErrorCodeChangesUserStatus)
     pExpandController->SetStateForTest(ConferenceController::STATE_JOINING);
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
-    ON_CALL(*pConfigurationManager, IsSupportConferenceReferSubscribe)
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     ConfUser objUser;
@@ -574,8 +575,8 @@ TEST_F(ExpandControllerTest,
     objUsersCopied.Append(&objUserCopied1);
     ON_CALL(*pParticipantList, GetConfUsers).WillByDefault(Return(objUsersCopied));
 
-    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
 
     {
         InSequence s;
@@ -612,8 +613,8 @@ TEST_F(ExpandControllerTest,
     objUsersCopied.Append(&objUserCopied1);
     ON_CALL(*pParticipantList, GetConfUsers).WillByDefault(Return(objUsersCopied));
 
-    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+    EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
 
     {
         InSequence s;
@@ -659,8 +660,8 @@ TEST_F(ExpandControllerTest, OnCallStateChangedDoesNothingIfConfigIsSingleRefer)
 {
     pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
 
-    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
 
     EXPECT_CALL(*pParticipantList, AddUser(_)).Times(0);
     EXPECT_CALL(*pOperationQueue, CompleteCurrentOperation(_, _)).Times(0);
@@ -672,8 +673,8 @@ TEST_F(ExpandControllerTest, OnCallStateChangedDoesNothingIfConfigIsSingleRefer)
 
 TEST_F(ExpandControllerTest, OnCallStateChangedDoesNothingIfStateIsNotExpanding)
 {
-    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+    EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
 
     EXPECT_CALL(*pParticipantList, AddUser(_)).Times(0);
     EXPECT_CALL(*pOperationQueue, CompleteCurrentOperation(_, _)).Times(0);
@@ -687,8 +688,8 @@ TEST_F(ExpandControllerTest, OnCallStateChangedAddsUserToParticipantAndCompletes
 {
     pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
 
-    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
-            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+    EXPECT_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillOnce(Return(ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
 
     ParticipantInfo objParticipantInfo(objConfCallContext);
     ON_CALL(objConfCallContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));

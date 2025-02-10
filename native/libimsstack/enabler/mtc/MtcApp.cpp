@@ -31,7 +31,7 @@
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
 #include "conferencecall/ConferenceManager.h"
-#include "configuration/MtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialogevent/MultiEndpointFactory.h"
 #include "dialogevent/MultiEndpointManager.h"
@@ -40,7 +40,7 @@
 #include "helper/CallStateProxy.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "helper/MtcTimerWrapper.h"
-#include "helper/OperationAsyncRunner.h"
+#include "helper/OperationAsyncRunnerManager.h"
 #include "helper/PassiveTimerHolder.h"
 #include "utility/MessageUtils.h"
 #include <functional>
@@ -54,7 +54,8 @@ PUBLIC
 MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTC_APP_NAME),
         m_nSlotId(nSlotId),
-        m_objConfigurationProxy(MtcConfigurationProxy(new MtcConfigurationManager())),
+        m_objConfigurationProxy(MtcConfigurationProxy()),
+        m_objOperationAsyncRunnerManager(nSlotId),
         m_lstServices(ImsList<IMtcService*>()),
         m_objDialingPlan(MtcDialingPlan(
                 *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId))),
@@ -92,7 +93,6 @@ PUBLIC VIRTUAL void MtcApp::Start()
 {
     IMS_TRACE_I("Start", 0, 0, 0);
 
-    InitConfiguration();
     CreateServices();
     InitCallManager();
     m_objMtcRadioChecker.Init();
@@ -167,14 +167,10 @@ PUBLIC VIRTUAL IMtcEmergencyServiceManager& MtcApp::GetEmergencyServiceManager()
     return *m_pEmergencyServiceManager.get();
 }
 
-PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<void()> objOperation)
+PUBLIC VIRTUAL void MtcApp::RunAsyncOperation(
+        IN void* pOwner, IN std::function<void()> objOperation)
 {
-    if (objOperation == nullptr)
-    {
-        return IMS_NULL;
-    }
-    // object is deleted by itself
-    return new OperationAsyncRunner(m_nSlotId, objOperation);
+    m_objOperationAsyncRunnerManager.Run(pOwner, objOperation);
 }
 
 PUBLIC VIRTUAL std::unique_ptr<MtcTimerWrapper> MtcApp::CreateTimer()
@@ -190,11 +186,6 @@ PUBLIC VIRTUAL ILastComeFirstServedHelper& MtcApp::GetLastComeFirstServedHelper(
     }
 
     return *m_pLastComeFirstServedHelper.get();
-}
-
-PROTECTED VIRTUAL void MtcApp::InitConfiguration()
-{
-    m_objConfigurationProxy.Init();
 }
 
 PROTECTED VIRTUAL void MtcApp::CreateServices()

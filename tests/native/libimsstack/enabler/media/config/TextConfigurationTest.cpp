@@ -88,7 +88,7 @@ TEST_F(TextConfigurationTest, GetConfigTextPort)
     objTextPortRtp.Push(nTextRtpEnd);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY))
             .WillByDefault(Return(objTextPortRtp));
 
     GetReadyToCreate();
@@ -101,12 +101,12 @@ TEST_F(TextConfigurationTest, GetConfigTextPort)
 
 TEST_F(TextConfigurationTest, GetConfigTextRtcpInterval)
 {
-    IMS_SINT32 nTextRtcpLiveInterval = 0;
-    IMS_SINT32 nTextRtcpInterval = 3;
+    IMS_SINT32 nTextRtcpIntervalOnActive = 0;
+    IMS_SINT32 nTextRtcpIntervalOnHold = 3;
 
     ImsVector<IMS_SINT32> objTextRtcpInterval;
-    objTextRtcpInterval.Push(nTextRtcpLiveInterval);
-    objTextRtcpInterval.Push(nTextRtcpInterval);
+    objTextRtcpInterval.Push(nTextRtcpIntervalOnActive);
+    objTextRtcpInterval.Push(nTextRtcpIntervalOnHold);
 
     ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY))
@@ -115,8 +115,8 @@ TEST_F(TextConfigurationTest, GetConfigTextRtcpInterval)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), nTextRtcpLiveInterval);
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), nTextRtcpInterval);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnActive(), nTextRtcpIntervalOnActive);
+    EXPECT_EQ(m_pConfig->GetRtcpIntervalOnHold(), nTextRtcpIntervalOnHold);
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextBandwidth)
@@ -149,11 +149,11 @@ TEST_F(TextConfigurationTest, GetConfigTextInactivityTimer)
     IMS_UINT32 nTextRtcpInactivity = 10000;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT,
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTP_INACTIVITY))
             .WillByDefault(Return(nTextRtpInactivity));
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTCP_INACTIVITY))
             .WillByDefault(Return(nTextRtcpInactivity));
 
@@ -169,7 +169,7 @@ TEST_F(TextConfigurationTest, GetConfigTextDscp)
     IMS_UINT32 nTextDscp = 40;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT, DEFAULT_TEXT_DSCP))
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RTP_DSCP_INT, DEFAULT_TEXT_DSCP))
             .WillByDefault(Return(nTextDscp));
 
     GetReadyToCreate();
@@ -183,7 +183,7 @@ TEST_F(TextConfigurationTest, GetConfigTextCodecEmptyRedundantEnabled)
     IMS_BOOL bTextEmptyRedundantEnabled = IMS_TRUE;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL,
+            GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL,
                     DEFAULT_EMPTY_REDUNDANT))
             .WillByDefault(Return(bTextEmptyRedundantEnabled));
 

@@ -28,7 +28,7 @@
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/MockConferenceParticipantList.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MtcSupplementaryService.h"
@@ -124,7 +124,7 @@ protected:
 
 TEST_F(ConferenceEventNotifierTest, NotifyMerged)
 {
-    MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
+    MtcConfigurationProxy objConfigurationProxy;
     MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 

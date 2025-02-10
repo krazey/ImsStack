@@ -27,8 +27,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 MessageSender::MessageSender(IN IMtcCallContext& objContext, IN ISession& objSession) :
         m_objContext(objContext),
@@ -41,15 +39,11 @@ MessageSender::MessageSender(IN IMtcCallContext& objContext, IN ISession& objSes
     CreateFormatter();
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC VIRTUAL MessageSender::~MessageSender()
 {
     IMS_TRACE_I("~MessageSender", 0, 0, 0);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::Start(IN CallType eCallType)
 {
@@ -64,8 +58,6 @@ IMS_RESULT MessageSender::Start(IN CallType eCallType)
     return nResult;
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::SendProvisionalResponse(IN IMS_SINT32 eStatusCode, IN IMS_BOOL bReliable,
         IN IMS_BOOL bIncludeSdp, IN IMS_BOOL bIncludeAlertInfo)
@@ -83,8 +75,6 @@ IMS_RESULT MessageSender::SendProvisionalResponse(IN IMS_SINT32 eStatusCode, IN 
     return m_objSession.SendProvisionalResponse(eStatusCode);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::SendPrack()
 {
@@ -99,8 +89,6 @@ IMS_RESULT MessageSender::SendPrack()
     return nResult;
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::RespondToPrack(IN IMS_SINT32 eStatusCode)
 {
@@ -112,8 +100,6 @@ IMS_RESULT MessageSender::RespondToPrack(IN IMS_SINT32 eStatusCode)
     return m_objSession.RespondToPrack(eStatusCode);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::SendEarlyUpdate(IN UpdateType eUpdateType)
 {
@@ -128,8 +114,6 @@ IMS_RESULT MessageSender::SendEarlyUpdate(IN UpdateType eUpdateType)
     return nResult;
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::RespondToEarlyUpdate(IN IMS_SINT32 eStatusCode)
 {
@@ -141,8 +125,6 @@ IMS_RESULT MessageSender::RespondToEarlyUpdate(IN IMS_SINT32 eStatusCode)
     return m_objSession.RespondToEarlyUpdate(eStatusCode);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::Accept()
 {
@@ -154,8 +136,6 @@ IMS_RESULT MessageSender::Accept()
     return m_objSession.Accept();
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::Reject(IN const CallReasonInfo& objReason)
 {
@@ -170,8 +150,6 @@ IMS_RESULT MessageSender::Reject(IN const CallReasonInfo& objReason)
     return m_objSession.RejectEx(eStatusCode, strPhrase);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::SendAck()
 {
@@ -183,8 +161,6 @@ IMS_RESULT MessageSender::SendAck()
     return m_objSession.SendAck();
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::Update(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo,
         IN IMS_SINT32 eMethod, IN IMS_BOOL bSessionRefresh)
@@ -197,8 +173,6 @@ IMS_RESULT MessageSender::Update(IN UpdateType eUpdateType, IN IMS_BOOL bInclude
     return m_objSession.UpdateEx(eMethod, bSessionRefresh);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::AcceptUpdate()
 {
@@ -210,8 +184,6 @@ IMS_RESULT MessageSender::AcceptUpdate()
     return m_objSession.Accept();
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::CancelUpdate(IN const CallReasonInfo& objReason)
 {
@@ -223,8 +195,6 @@ IMS_RESULT MessageSender::CancelUpdate(IN const CallReasonInfo& objReason)
     return m_objSession.TerminateEx(IMS_FALSE);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PUBLIC
 IMS_RESULT MessageSender::Terminate(IN IMS_BOOL bUseBye, IN const CallReasonInfo& objReason)
 {
@@ -237,12 +207,10 @@ IMS_RESULT MessageSender::Terminate(IN IMS_BOOL bUseBye, IN const CallReasonInfo
     return m_objSession.TerminateEx(bUseBye);
 }
 
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
 void MessageSender::CreateFormatter()
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
         m_pFormatter = std::make_unique<EmergencyMessageFormatter>(m_objContext, m_objSession);
         return;

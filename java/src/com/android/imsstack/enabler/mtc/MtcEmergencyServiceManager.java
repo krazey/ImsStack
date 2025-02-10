@@ -38,6 +38,8 @@ public class MtcEmergencyServiceManager {
     private MtcJniProxy mMtcJniProxy;
     private ECallStateListener mECallStateListener = null;
     private final ICallStateTracker mCallStateTracker;
+    private int mEmergencyType;
+    private boolean mIsStopEmergencyServiceRequired;
 
     public MtcEmergencyServiceManager(IBaseContext context, ICallStateTracker callStateTracker) {
         mContext = context;
@@ -88,18 +90,29 @@ public class MtcEmergencyServiceManager {
      */
     public void openEmergencyService(
             @EmergencyCallRouting int emergencyRouting, IServiceStateTracker serviceStateTracker) {
-        log("openEmergencyService");
+        mEmergencyType = emergencyRouting == EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL
+                ? IUMtcCall.EMERGENCYTYPE_NORMAL_ROUTING
+                : IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
+
+        if (mCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false)
+                && !CallFeature.isWiFiEmcOverEmergencyPdn(mContext.getSlotId())) {
+            emergencyRouting = EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL;
+        }
+
+        log("openEmergencyService :: emergencyRouting=" + emergencyRouting);
 
         if (serviceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)) {
-            onEsOpened(IUMtcCall.SERVICETYPE_EMERGENCY);
+            onEsOpened(emergencyRouting == EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL
+                    ? IUMtcCall.SERVICETYPE_NORMAL : IUMtcCall.SERVICETYPE_EMERGENCY);
             return;
         }
 
         mCallStateTracker.addListener(mECallStateListener);
+        mIsStopEmergencyServiceRequired = true;
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
-        parcel.writeInt(convertEmergencyRouting(emergencyRouting));
+        parcel.writeInt(convertEmergencyRoutingToServiceType(emergencyRouting));
         sendRequest(parcel);
     }
 
@@ -135,8 +148,7 @@ public class MtcEmergencyServiceManager {
 
     private void onEsIdle() {
         log("onEsIdle");
-
-        releaseCall();
+        mIsStopEmergencyServiceRequired = false;
     }
 
     private void onEsOpening() {
@@ -145,29 +157,30 @@ public class MtcEmergencyServiceManager {
 
     private void onEsOpened(int serviceType) {
         log("onEsOpened :: serviceType=" + serviceType);
+        mIsStopEmergencyServiceRequired = false;
 
         if (mCall == null) {
             return;
         }
 
         mCall.createNativeCallObject();
-        mCall.open(serviceType, true, false, false);
-        releaseCall();
+        mCall.open(serviceType, mEmergencyType, false, false);
     }
 
     private void onEsUnavailable() {
         log("onEsUnavailable");
-        releaseCall();
+        mIsStopEmergencyServiceRequired = false;
     }
 
-    private int convertEmergencyRouting(@EmergencyCallRouting int emergencyRoutingIn) {
+    private int convertEmergencyRoutingToServiceType(
+            @EmergencyCallRouting int emergencyRoutingIn) {
         switch (emergencyRoutingIn) {
             case EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN:
-                return IUMtcService.EMERGENCY_CALL_ROUTING_UNKNOWN;
+                return IUMtcCall.SERVICETYPE_EMERGENCY;
             case EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL:
-                return IUMtcService.EMERGENCY_CALL_ROUTING_NORMAL;
+                return IUMtcCall.SERVICETYPE_NORMAL;
             default: // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY
-                return IUMtcService.EMERGENCY_CALL_ROUTING_EMERGENCY;
+                return IUMtcCall.SERVICETYPE_EMERGENCY;
         }
     }
 
@@ -222,8 +235,14 @@ public class MtcEmergencyServiceManager {
                 return;
             }
 
+            IServiceStateTracker sst = mContext.getServiceStateTracker();
+            sst.handleEmergencyCallDestroyed();
+
             releaseCall();
-            stopEmergencyService();
+            if (mIsStopEmergencyServiceRequired) {
+                mIsStopEmergencyServiceRequired = false;
+                stopEmergencyService();
+            }
         }
     }
 }

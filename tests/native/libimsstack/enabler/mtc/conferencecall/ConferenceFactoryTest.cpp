@@ -24,7 +24,7 @@
 #include "conferencecall/MockConferenceParticipantList.h"
 #include "conferencecall/MockIConferenceReferenceListener.h"
 #include "conferencecall/MockIConferenceSubscriptionListener.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
@@ -40,8 +40,7 @@ class ConferenceFactoryTest : public ::testing::Test
 public:
     ConferenceFactory* pFactory;
     MockIMtcContext objContext;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockReferenceInterfaceHolder* pReferenceInterfaceHolder;
     MockSubscriptionInterfaceHolder* pSubscriptionInterfaceHolder;
@@ -50,8 +49,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         pReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objInterfaceHolderListener);
@@ -78,7 +76,8 @@ protected:
 
 TEST_F(ConferenceFactoryTest, CreateSubscriptionReturnsSubscription)
 {
-    ON_CALL(*pConfigurationManager, GetConferenceSubscribeType).WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG));
 
     MockConferenceParticipantList objList;
     MockIConferenceSubscriptionListener objListener;

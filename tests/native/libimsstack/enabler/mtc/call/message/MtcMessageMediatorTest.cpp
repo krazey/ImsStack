@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+#include "ISipHeader.h"
 #include "MockISession.h"
+#include "MockISipMessage.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/message/MtcMessageMediator.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/MockIMedia.h"
 #include "media/MockIMediaDescriptor.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -47,16 +47,14 @@ public:
     MockIMtcCallContext objContext;
     MockISession objISession;
     MockIMtcSession objMtcSession;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MtcMessageMediator* pMessageMediator;
     MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
@@ -90,7 +88,9 @@ protected:
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfNoContactHeader)
 {
-    ON_CALL(*pConfigurationManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     MockISipMessage objMessage;
@@ -106,7 +106,9 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfNoContactHeader)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfConfigIsNotSet)
 {
-    ON_CALL(*pConfigurationManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     MockISipMessage objMessage;
@@ -122,7 +124,9 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfConfigIsNotSet)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtSdp)
 {
-    ON_CALL(*pConfigurationManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     MockISipMessage objMessage;
@@ -143,7 +147,9 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtSdp)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesVideoFeatureIfRttSdp)
 {
-    ON_CALL(*pConfigurationManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     MockISipMessage objMessage;
@@ -165,7 +171,9 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesVideoFeatureIfRttSdp)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfCallTypeHasChangedToVtFromRtt)
 {
-    ON_CALL(*pConfigurationManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     MockISipMessage objMessage;
@@ -192,7 +200,9 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfCallTypeHasChang
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtCallType)
 {
-    ON_CALL(*pConfigurationManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     MockISipMessage objMessage;
@@ -213,7 +223,9 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtCallType)
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageSetOriginalContactIfUnknownCallType)
 {
-    ON_CALL(*pConfigurationManager, IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::
+                            KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     MockISipMessage objMessage;

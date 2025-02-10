@@ -53,6 +53,15 @@ public:
     virtual void RemoveListener(IN IAosNConfigurationListener* piListener) = 0;
 
     /**
+     * @brief Indicate whether SIP REGISTER message should be transmitted by TCP or not.
+     *        The default value is false and if set to true, SIP REGISTER message will be
+     *        transmitted by only TCP transport type.
+     *
+     * @return IMS_BOOL Return whether SIP REGISTER message should be transmitted by TCP or not.
+     */
+    virtual IMS_BOOL IsTcpRequiredForReg() const = 0;
+
+    /**
      * @brief Returns whether subscription is initiated after registration.
      *
      * @return IMS_BOOL Return whether to be applied or not
@@ -203,6 +212,13 @@ public:
     virtual IMS_BOOL IsIpsecEnabled() const = 0;
 
     /**
+     * @brief Returns whether to follow reg retry rule when emergency registration failed.
+     *
+     * @return IMS_BOOL Return whether to be applied or not
+     */
+    virtual IMS_BOOL IsRegRetryRuleForERegUsed() const = 0;
+
+    /**
      * @brief Returns whether the security server port is used in reg contact of
      *        initial registration.
      *
@@ -224,6 +240,13 @@ public:
      * @return IMS_BOOL Return wherther to be applied or not
      */
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const = 0;
+
+    /**
+     * @brief Returns flag indicating whether PCSCFs that UE fails to register will be blocked.
+     *
+     * @return IMS_BOOL Return whether to be blocked or not
+     */
+    virtual IMS_BOOL IsBlockPcscfOnRegFailure() const = 0;
 
     /**
      * @brief Returns whether a call should be terminated due to expiration of registration.
@@ -290,6 +313,18 @@ public:
     virtual IMS_BOOL IsERegWithOnlyTcpInRoaming() const = 0;
 
     /**
+     * @brief Flag specifying if the first public user identity to the list stored in the ISIM is
+     *        used in emergency registration requests.
+     *
+     *        If this is set as TRUE, the first public user identity in the ISIM will be used for
+     *        emergency IMS registration.
+     *
+     * @return IMS_BOOL Return whether to use the first public user identity in the ISIM for
+     *         emergency registration.
+     */
+    virtual IMS_BOOL IsERegUsingFirstImpuInIsim() const = 0;
+
+    /**
      * @brief Flag specifying if emergency re-registration is required after handover.
      *
      *        If this is set as TRUE, emergency re-registration will be conducted
@@ -316,11 +351,25 @@ public:
     virtual IMS_BOOL IsDeregOn3gNetwork() const = 0;
 
     /**
+     * @brief Check if IMSI-based URI should be prioritized.
+     *
+     * @return IMS_TRUE if IMSI-based URI should be prioritized, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsImsiBasedUriPrioritized() const = 0;
+
+    /**
      * @brief Flag indicating whether ipsec setting is initialized with new pcscf.
      *
      * @return IMS_BOOL Return whether initialize ipsec wetting with new pcscf or not.
      */
     virtual IMS_BOOL IsIpsecInitializedWithNewPcscf() const = 0;
+
+    /**
+     * @brief Flag indicating whether keep on retrying emergency registration on WLAN.
+     *
+     * @return IMS_BOOL Return whether keep on retrying emergency registration on WLAN or not.
+     */
+    virtual IMS_BOOL IsKeepERegRetryOnWlanRequired() const = 0;
 
     /**
      * @brief Returns whether UE doesn't send initial registration due to pcscf change
@@ -423,6 +472,14 @@ public:
     virtual IMS_BOOL IsContactUriValidationChecked() const = 0;
 
     /**
+     * @brief Returns flag indicating whether the PLMN block with timeout is supported
+     *        when registration failed with all PCSCFs.
+     *
+     * @return IMS_BOOL Return whether to be supported or not
+     */
+    virtual IMS_BOOL IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported() const = 0;
+
+    /**
      * @brief Returns whether IMS registration is retried based on IP version fallback
      *        from IPv6 to IPv4
      *
@@ -461,19 +518,6 @@ public:
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
 
     /**
-     * @brief Flag specifying whether to wait AWT when initial registration proceeds with
-     *        the next pcscf.
-     *
-     * @return IMS_BOOL Returns whether to wait actual wait time(AWT) before attempting initial
-     *         registration with the next pcscf when error responses without retry-after to
-     *         the REGISTER message is received. When true, the UE waits AWT before attempting
-     *         initial registration with next pcscf. When false, the UE doesn't wait.
-     *         This function related to GetRegActualWaitTimePolicy. This is only valid when the
-     *         value of GetRegActualWaitTimePolicy() is CarrierConfig::Assets::AWT_POLICY_RFC_RULE.
-     */
-    virtual IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const = 0;
-
-    /**
      * @brief Flag specifying if service fallback is required when voice call is unavailable.
      *
      * @return IMS_TRUE if required, else IMS_FALSE
@@ -486,6 +530,13 @@ public:
      * @return IMS_TRUE if supported, else IMS_FALSE
      */
     virtual IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const = 0;
+
+    /**
+     * @brief Flag specifying if video feature tag is supported for emergency registration.
+     *
+     * @return IMS_TRUE if required, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsVideoSupportedForEmergencyReg() const = 0;
 
     /**
      * @brief Get the registration retry base-time
@@ -663,6 +714,17 @@ public:
     virtual IMS_SINT32 GetIpv6MtuSize() const = 0;
 
     /**
+     * @brief Returns the wait time in seconds before releasing an emergency PDN.
+     *
+     *        Emergency PDN can be released after a specific time when the emergency call ends.
+     *        This returns the delay time from the end of the call to the start of the emergency
+     *        PDN release. If this is set to zero, it will wait for emergency registration
+     *        expiration unless KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL is true.
+     * @return IMS_SINT32 Return the wait time in seconds before releasing an emergency PDN.
+     */
+    virtual IMS_SINT32 GetWaitTimeSecForReleaseEPdnAfterECallEnd() const = 0;
+
+    /**
      * @brief Indicate whether emergency call is tried without emergency registration
      *
      *        Specify the preferred policy for emergency registration.
@@ -681,7 +743,7 @@ public:
      *        be established until completion of the emergency registration procedure.
      *        Upon timer expiry, the UE considers the emergency REGISTER request or
      *        the emergency call attempt as failed, and stop the
-     *        CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer, if running.
+     *        CarrierConfig::Assets::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer, if running.
      *
      * @return IMS_SINT32 Return the milli-second time
      */
@@ -733,6 +795,14 @@ public:
     virtual IMS_SINT32 GetRegActualWaitTimePolicy() const = 0;
 
     /**
+     * @brief Indicate the default wait time prior to proceed to the next PCSCF.
+     *        If this value is greater than 0, this will overlay the actual wait time.
+     *
+     * @return IMS_SINT32 Return the default wait time
+     */
+    virtual IMS_SINT32 GetRegDefaultWaitTime() const = 0;
+
+    /**
      * @brief Get the out of service policy object
      *
      *        CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT
@@ -777,6 +847,19 @@ public:
      * @return IMS_SINT32 Return the threshold size of SIP message
      */
     virtual IMS_SINT32 GetSipMessageThresholdForTransportChange() const = 0;
+
+    /**
+     * @brief Indicate the SIP 503 response policy for subscription (reg event package)
+     *
+     *        Possible values are,
+     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT
+     *         - Follow default retry operation. (Retry SUBSCRIBE message after retry-after or AWT)
+     *        CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP
+     *         - Follow 3GPP 24.229.
+     *
+     * @return IMS_SINT32 Return the SIP 503 response policy
+     */
+    virtual IMS_SINT32 GetSubRetrySip503CodePolicy() const = 0;
 
     /**
      * @brief Indicate the USAT IMS registration event download policy.
@@ -1420,6 +1503,18 @@ public:
      * @return vector error code
      */
     virtual ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() = 0;
+
+    /**
+     * @brief List of features that unavailable in limited registration.
+     *        Possible values are,
+     *        CarrierConfig::Assets::REG_FEATURE_MMTEL
+     *        CarrierConfig::Assets::REG_FEATURE_VIDEO
+     *        CarrierConfig::Assets::REG_FEATURE_TEXT
+     *        CarrierConfig::Assets::REG_FEATURE_SMS
+     *
+     * @return vector features list
+     */
+    virtual ImsVector<IMS_SINT32>& GetUnavailableFeaturesInLimitedReg() = 0;
 
     enum
     {

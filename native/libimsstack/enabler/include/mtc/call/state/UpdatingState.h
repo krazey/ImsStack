@@ -18,13 +18,13 @@
 #define UPDATING_STATE_H_
 
 #include "CarrierConfig.h"
+#include "ISession.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/state/MtcCallState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
 #include "precondition/QosDef.h"
 
 struct CallReasonInfo;

@@ -24,22 +24,17 @@ private:
     SIP_CHAR* m_pszHdrName;
 
 public:
-    /*constructor*/
     SipBadHeader();
-
     SipBadHeader(const SipBadHeader& objHeader);
 
-    /*virtual methods*/
     inline SIP_BOOL Encode(AStringBuffer& /*objBuffer*/, SIP_BOOL /*bParams*/) const override
     {
         return SIP_TRUE;
     }
 
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_VOID SetHeaderName(const SIP_CHAR* pszHdrName);
 

@@ -79,7 +79,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
 
     pAudioProfile->SetSupportRtcpXr(pConfig->IsRtcpXrEnabled());
 
-    IMS_TRACE_D("SetRtcpXr() Support Rtcp-Xr[%d]", pAudioProfile->IsRtcpXrSupported(), 0, 0);
+    IMS_TRACE_D("SetRtcpXr() - Support Rtcp-Xr[%d]", pAudioProfile->IsRtcpXrSupported(), 0, 0);
 
     if (pAudioProfile->IsRtcpXrSupported() == IMS_TRUE)
     {
@@ -100,135 +100,14 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
             pAudioProfile->GetRtcpXrAttr().SetSupportPacketDuplicatedRle(IMS_TRUE);
         }
 
-        IMS_TRACE_D("SetRtcpXr() VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
+        IMS_TRACE_D("SetRtcpXr() - VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
                 pAudioProfile->GetRtcpXrAttr().IsVoipMetricsSupported(),
                 pAudioProfile->GetRtcpXrAttr().IsStatisticMetricsSupported(),
                 pAudioProfile->GetRtcpXrAttr().IsPacketLossRleSupported());
-        IMS_TRACE_D("SetRtcpXr() PacketDuplicatedRl[%d]",
+        IMS_TRACE_D("SetRtcpXr() - PacketDuplicatedRl[%d]",
                 pAudioProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported(), 0, 0);
     }
 
-    return IMS_TRUE;
-}
-
-PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig,
-        IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
-        IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT AudioProfile* pNegotiatedProfile)
-{
-    IMS_TRACE_D("MakeNegotiatedBandwidth() - BW_NEGO_OPTION_VALUE[%d]",
-            pConfig->GetBandwidthNegoOption(), 0, 0);
-
-    if (bIsOfferReceived == IMS_FALSE)
-    {
-        // MO's Bandwidth Setting
-        //  1. Set AS Value
-        if (pPeerProfile->GetBandwidthAs() > 0)
-        {
-            if (pPeerProfile->GetBandwidthAs() > nAsValueOfNegoticatedCodec)
-            {
-                pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegoticatedCodec);
-            }
-            else
-            {
-                pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
-            }
-        }
-        else
-        {  // Exception Handling (b= AS line is not included in Answer SDP)
-            pNegotiatedProfile->SetBandwidthAs(pLocalProfile->GetBandwidthAs());
-        }
-
-        // 2. Set RS/RR Value
-        // 2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
-        if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
-        {
-            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
-            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
-
-            IMS_TRACE_D("MakeNegotiatedBandwidth() - Nego AS[%d] RS[%d] RR[%d]",
-                    pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
-                    pLocalProfile->GetBandwidthRr());
-            return IMS_TRUE;
-        }
-
-        // 2.2 Normal Case
-        if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
-        {
-            // if RS/RR is used for RTCP Nego value
-            pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
-            pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
-        }
-        else
-        {
-            // default case (RS/RR is not negotiated value)
-            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
-            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
-        }
-    }
-    else
-    {
-        // MT's Bandwidth Setting
-        // 1. Set Negotiated AS Value
-        if (nAsValueOfNegoticatedCodec > 0)
-        {
-            pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegoticatedCodec);
-
-            // if GetBandwidthNegoOption is BW_OPTION_NEGOTIATED_VALUE, use lower AS value
-            if ((pConfig->GetBandwidthNegoOption() ==
-                        MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE) &&
-                    (nAsValueOfNegoticatedCodec > pPeerProfile->GetBandwidthAs()) &&
-                    (pPeerProfile->GetBandwidthAs() > 0))
-            {
-                pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
-            }
-        }
-        else
-        {
-            pNegotiatedProfile->SetBandwidthAs(pLocalProfile->GetBandwidthAs());
-        }
-        // 3. Set RS/RR Value
-        if (pPeerProfile->GetDirection() != MEDIA_DIRECTION_SEND_RECEIVE)
-        {  // Hold Case
-            // 3.1 Hold Case
-            MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig);
-        }
-        else
-        {
-            // 3.2 Active Call Case
-            // 3.2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
-            if (pNegotiatedProfile->GetBandwidthRs() < 0 ||
-                    pNegotiatedProfile->GetBandwidthRr() < 0)
-            {
-                pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
-                pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
-
-                IMS_TRACE_D("MakeNegotiatedBandwidth() - AS[%d] RS[%d] RR[%d]",
-                        pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
-                        pLocalProfile->GetBandwidthRr());
-                return IMS_TRUE;
-            }
-
-            // 3.2.2 Normal Case
-            if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
-            {
-                // if RS/RR is used for RTCP Nego value
-                IMS_TRACE_D("MakeNegotiatedBandwidth() - use peer RS[%d] RR[%d]",
-                        pPeerProfile->GetBandwidthRs(), pPeerProfile->GetBandwidthRr(), 0);
-                pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
-                pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
-            }
-            else
-            {
-                // default case (RS/RR is not negotiated value)
-                pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
-                pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
-            }
-        }
-    }
-
-    IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-            pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
-            pLocalProfile->GetBandwidthRr());
     return IMS_TRUE;
 }
 
@@ -274,8 +153,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
         IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6, IN IMS_SINT32 nModeSet,
         IN IMS_BOOL bGetMaxValue /*= IMS_FALSE*/)
 {
-    IMS_TRACE_D("ConvertToBandwidthAS() - Entered. eCodec[%d] nOctet[%d] nModeSet[%d]", eCodec,
-            nOctet, nModeSet);
+    IMS_TRACE_D(
+            "ConvertToBandwidthAS() - Codec[%d], Octet[%d], ModeSet[%d]", eCodec, nOctet, nModeSet);
 
     IMS_SINT32 nResultAs = -1;
 
@@ -304,7 +183,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
 
     nResultAs = pArrAmr[nModeSet];
 
-    IMS_TRACE_D("ConvertToBandwidthAS() - Ended : IPv6[%d], nAs[%d]", bIpV6, nResultAs, 0);
+    IMS_TRACE_D("ConvertToBandwidthAS() - IPv6[%d], As[%d]", bIpV6, nResultAs, 0);
     return nResultAs;
 }
 
@@ -312,8 +191,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
         IN IMS_BOOL bIpV6, IN IMS_SINT32 nCodecFormat, IN IMS_SINT32 nCodecMode,
         IN IMS_BOOL bGetMaxValue)
 {
-    IMS_TRACE_D("ConvertToBandwidthAS() - Entered. eCodec[%d] bIpV6[%d] nCodecFormat[%d]", eCodec,
-            bIpV6, nCodecFormat);
+    IMS_TRACE_D("ConvertToBandwidthAS() - Codec[%d], IpV6[%d], CodecFormat[%d]", eCodec, bIpV6,
+            nCodecFormat);
 
     IMS_SINT32 nResultAs = -1;
 
@@ -337,7 +216,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
     }
 
     nResultAs = pArrEvs[nCodecMode];
-    IMS_TRACE_D("ConvertToBandwidthAS() - Ended : nAs[%d]", nResultAs, 0, 0);
+    IMS_TRACE_D("ConvertToBandwidthAS() - As[%d]", nResultAs, 0, 0);
 
     return nResultAs;
 }
@@ -345,7 +224,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToBandwidthAS(IN IMS_SINT32 eC
 PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToModeSet(
         IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet, IN IMS_BOOL bIpV6, IN IMS_SINT32 nAs)
 {
-    IMS_TRACE_D("ConvertToModeSet() eCodec[%d], nOctet[%d], nAs[%d]", eCodec, nOctet, nAs);
+    IMS_TRACE_D("ConvertToModeSet() - Codec[%d], Octet[%d], As[%d]", eCodec, nOctet, nAs);
 
     IMS_SINT32 nModeSet = -1;
     const IMS_SINT32* pArrAmr;
@@ -378,7 +257,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::ConvertToModeSet(
         }
     }
 
-    IMS_TRACE_D("ConvertToModeSet() - Result : bIpV6[%d]m nModeSet[%d]", bIpV6, nModeSet, 0);
+    IMS_TRACE_D("ConvertToModeSet() - IpV6[%d], ModeSet[%d]", bIpV6, nModeSet, 0);
     return nModeSet;
 }
 
@@ -522,7 +401,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
     pAudioProfile->SetBandwidthAs(pConfig->GetAsBandwidthKbps());
 
     MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pConfig);
-    IMS_TRACE_D("UpdateAudioProfileBandwidth() update AS[%d]", nAsMax, 0, 0);
+    IMS_TRACE_D("UpdateAudioProfileBandwidth() - updatedAS[%d]", nAsMax, 0, 0);
 
     return IMS_TRUE;
 }
@@ -662,12 +541,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
 
         if (pAmrFmtp->GetModeSetList() > 0)
         {
-            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->GetModeSetList(), 0, 0);
+            IMS_TRACE_D("GetModesetList() - ModesetList[%d]", pAmrFmtp->GetModeSetList(), 0, 0);
             return pAmrFmtp->GetModeSetList();
         }
         else
         {
-            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->GetDefaultRtpModeSet(), 0, 0);
+            IMS_TRACE_D("GetModesetList() - DefaultModeSet[%d]", pAmrFmtp->GetDefaultRtpModeSet(),
+                    0, 0);
             return pAmrFmtp->GetDefaultRtpModeSet();
         }
     }
@@ -685,13 +565,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
         {
             if (pEvsFmtp->GetBrList() == 0)
             {
-                IMS_TRACE_D(
-                        "BrList is 0 -> GetModesetList is %d", EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
+                IMS_TRACE_D("GetModesetList() - BrList is 0, ModesetList[%d]",
+                        EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
                 return EVS_PRIMARY_MODE_MAX_MODESET;
             }
             else
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetBrList(), 0, 0);
+                IMS_TRACE_D("GetModesetList() - BrList[%d]", pEvsFmtp->GetBrList(), 0, 0);
                 return pEvsFmtp->GetBrList();
             }
         }
@@ -699,12 +579,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
         {
             if (pEvsFmtp->GetModeSetList() > 0)
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetModeSetList(), 0, 0);
+                IMS_TRACE_D("GetModesetList() - ModeSetList[%d]", pEvsFmtp->GetModeSetList(), 0, 0);
                 return pEvsFmtp->GetModeSetList();
             }
             else
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetDefaultRtpModeSet(), 0, 0);
+                IMS_TRACE_D("GetModesetList() - DefaultModeSet[%d]",
+                        pEvsFmtp->GetDefaultRtpModeSet(), 0, 0);
                 return pEvsFmtp->GetDefaultRtpModeSet();
             }
         }
@@ -725,7 +606,7 @@ PUBLIC GLOBAL void AudioProfileUtil::SetAnbr(
         if (pMediaSessionConfig != IMS_NULL)
         {
             pProfile->SetAnbr(pMediaSessionConfig->IsAnbrSupported());
-            IMS_TRACE_D("SetAnbr anbr : %d", pProfile->IsAnbrSupported(), 0, 0);
+            IMS_TRACE_D("SetAnbr() - anbr[%d]", pProfile->IsAnbrSupported(), 0, 0);
         }
     }
 }

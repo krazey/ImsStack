@@ -19,6 +19,7 @@
 #include "provider/AosFeature.h"
 #include "interface/IAosLocationStarter.h"
 #include "interface/IAosBlockListener.h"
+#include "interface/IAosBlockSilentListener.h"
 #include "ITimer.h"
 #include "IEventListener.h"
 
@@ -29,7 +30,8 @@ class AosLocationStarter :
         public ITimerListener,
         public IEventListener,
         public IAosLocationStarter,
-        public IAosBlockListener
+        public IAosBlockListener,
+        public IAosBlockSilentListener
 {
 public:
     AosLocationStarter();
@@ -56,6 +58,7 @@ protected:
             IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     void Block_Changed(IN IMS_UINT32 nType = 0, IN IMS_UINT32 nParam = 0) override;
+    void Block_SilentChanged(IN IMS_UINT32 nType = 0, IN IMS_UINT32 nParam = 0) override;
 
     void OnFeatureEnabled(IN IMS_UINT32 nFeature) override;
     void OnFeatureDisabled(IN IMS_UINT32 nFeature) override;

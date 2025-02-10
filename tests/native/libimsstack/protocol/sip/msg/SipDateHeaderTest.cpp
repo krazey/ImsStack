@@ -29,7 +29,7 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
+TEST_F(SipDateHeaderTest, Encode)
 {
     SipDateHeader* pHeader = reinterpret_cast<SipDateHeader*>(
             SipDateHeader::GetNewObj(SipHeaderBase::DATE, nullptr));
@@ -44,11 +44,11 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     AStringBuffer objValue(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetDate(35);
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetDate(25);
 
@@ -61,7 +61,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
 
     pHeader->SetMonth(SipDateHeader::JANUARY);
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     objValue = AString::ConstNull();
     pBuff = &(aBuffer[0]);
@@ -69,7 +69,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
 
     pHeader->SetYear(999);
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     pHeader->SetYear(2050);
 
@@ -81,7 +81,7 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
 
     pHeader->SetWkDay(SipDateHeader::MONDAY);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
 
     EXPECT_STREQ("Mon, 25 Jan 2050 00:00:00 GMT", objValue.GetCharString());
@@ -102,22 +102,22 @@ TEST_F(SipDateHeaderTest, EncodeAndEncodeHdr)
     pHeader->SetHour(21);
     pHeader->SetSecond(30);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("Mon, 25 Jan 2050 21:45:30 GMT", &(aBuffer[0]));
 
     pHeader->SipDelete();
 }
 
-TEST_F(SipDateHeaderTest, DecodeHdr)
+TEST_F(SipDateHeaderTest, Decode)
 {
     SipDateHeader* pHeader = reinterpret_cast<SipDateHeader*>(
             SipDateHeader::GetNewObj(SipHeaderBase::DATE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
     /* Only month present, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Mon", 3));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Mon", 3));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -125,7 +125,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Only month and date present, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Mon, 25", 7));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Mon, 25", 7));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -133,7 +133,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Only month, date and month present, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Tue, 25 Jan ", 12));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Tue, 25 Jan ", 12));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -141,7 +141,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* time missing, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Wed, 25 Feb 2050", 16));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Wed, 25 Feb 2050", 16));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -149,7 +149,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* minutes and seconds missing, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Thu, 25 Mar 2050 21", 19));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Thu, 25 Mar 2050 21", 19));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -157,7 +157,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* seconds missing, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Fri, 25 Apr 2050 21:45", 22));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Fri, 25 Apr 2050 21:45", 22));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -165,7 +165,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* time zone GMT missinf, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Sat, 25 May 2050 21:45:30", 25));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Sat, 25 May 2050 21:45:30", 25));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -173,7 +173,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Timezone other than GMT, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Sun, 25 Jun 2050 21:45:30 IST", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Sun, 25 Jun 2050 21:45:30 IST", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -181,7 +181,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid weekday, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Son, 25 Jul 2050 21:45:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Son, 25 Jul 2050 21:45:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -189,7 +189,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid weekday, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Min, 25 Jul 2050 21:45:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Min, 25 Jul 2050 21:45:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -197,7 +197,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid weekday, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Teu, 25 Jul 2050 21:45:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Teu, 25 Jul 2050 21:45:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -205,7 +205,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid weekday, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Win, 25 Jul 2050 21:45:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Win, 25 Jul 2050 21:45:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -213,7 +213,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid weekday, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Fir, 25 Jul 2050 21:45:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Fir, 25 Jul 2050 21:45:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -221,7 +221,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* invalid month, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Mon, 25 Aal 2050 21:45:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Mon, 25 Aal 2050 21:45:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -229,7 +229,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* invalid year, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Tue, 25 Aug 999 21:45:30 GMT", 28));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Tue, 25 Aug 999 21:45:30 GMT", 28));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -237,7 +237,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid hour, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Wed, 25 Sep 2050 25:45:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Wed, 25 Sep 2050 25:45:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -245,7 +245,7 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid minutes, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Thu, 25 Oct 2050 21:64:30 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Thu, 25 Oct 2050 21:64:30 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
@@ -253,14 +253,14 @@ TEST_F(SipDateHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Invalid seconds, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("Fri, 25 Nov 2050 21:45:70 GMT", 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("Fri, 25 Nov 2050 21:45:70 GMT", 29));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipDateHeader*>(
             SipDateHeader::GetNewObj(SipHeaderBase::DATE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("Sat, 25 Dec 2050 21:45:30 GMT", 29));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("Sat, 25 Dec 2050 21:45:30 GMT", 29));
 
     EXPECT_EQ(25, pHeader->GetDate());
     EXPECT_EQ(SipDateHeader::DECEMBER, pHeader->GetMonth());

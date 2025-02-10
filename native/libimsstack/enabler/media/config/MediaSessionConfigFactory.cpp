@@ -51,7 +51,7 @@ void MediaSessionConfigFactory::CreateMediaSessionConfig(
         pListMediaSessionConfig->Append(objMediaSessionConfig);
     }
 
-    IMS_TRACE_D("CreateMediaSessionConfig - nSlotId[%d], listSize[%d], svc[%d]", nSlotId,
+    IMS_TRACE_D("CreateMediaSessionConfig - SlotId[%d], ListSize[%d], ServiceType[%d]", nSlotId,
             pListMediaSessionConfig->GetSize(), (IMS_SINT32)eServiceType);
 }
 
@@ -66,7 +66,7 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(
         pListMediaSessionConfig = new ImsList<MediaSessionConfig*>();
         pListMediaSessionConfig->Append(pMediaSessionConfig);
 
-        IMS_TRACE_D("AddMediaSessionConfig - nSlotId[%d], listSize[%d]", nSlotId,
+        IMS_TRACE_D("AddMediaSessionConfig - SlotId[%d], ListSize[%d]", nSlotId,
                 pListMediaSessionConfig->GetSize(), 0);
 
         m_mapListMediaSessionConfig.Add(nSlotId, pListMediaSessionConfig);
@@ -84,7 +84,7 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(
 
         pListMediaSessionConfig->Append(pMediaSessionConfig);
 
-        IMS_TRACE_D("AddMediaSessionConfig - nSlotId[%d], listSize[%d]", nSlotId,
+        IMS_TRACE_D("AddMediaSessionConfig - SlotId[%d], ListSize[%d]", nSlotId,
                 pListMediaSessionConfig->GetSize(), 0);
     }
 }
@@ -96,8 +96,8 @@ void MediaSessionConfigFactory::DestroyListSessionConfig(IN IMS_SINT32 nSlotId)
 
     if (pListMediaSessionConfig != IMS_NULL)
     {
-        IMS_TRACE_D(
-                "DestroyListSessionConfig - list[%d]", pListMediaSessionConfig->GetSize(), 0, 0);
+        IMS_TRACE_D("DestroyListSessionConfig - ListSize[%d]", pListMediaSessionConfig->GetSize(),
+                0, 0);
 
         for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
         {
@@ -153,7 +153,7 @@ MediaSessionConfig* MediaSessionConfigFactory::FindMediaSessionConfig(
 
     if (pMediaSessionConfig != NULL)
     {
-        IMS_TRACE_D("FindMediaSessionConfig() - eServiceType[%d]",
+        IMS_TRACE_D("FindMediaSessionConfig() - ServiceType[%d]",
                 pMediaSessionConfig->GetServiceType(), 0, 0);
     }
 
@@ -170,7 +170,8 @@ void MediaSessionConfigFactory::DestroySessionConfig(
 
         if (pListMediaSessionConfig != IMS_NULL)
         {
-            IMS_TRACE_D("DestroySessionConfig list[%d]", pListMediaSessionConfig->GetSize(), 0, 0);
+            IMS_TRACE_D("DestroySessionConfig - ListSize[%d]", pListMediaSessionConfig->GetSize(),
+                    0, 0);
 
             for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
             {

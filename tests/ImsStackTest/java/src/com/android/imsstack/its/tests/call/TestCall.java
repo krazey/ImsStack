@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 import com.android.ims.internal.IImsCallSession;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.mmtel.call.ImsCallSessionWrapper;
+import com.android.imsstack.its.servercontrol.ServerFailureHandler;
 import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
@@ -40,7 +41,7 @@ import java.util.function.Predicate;
 /**
  * Provides utilities and assertions for call tests that use {@link ImsCallSessionWrapper}.
  */
-public class TestCall {
+public class TestCall extends ServerFailureHandler {
     private static final int TIMEOUT_DEFAULT_MS = 10000;
 
     private final @NonNull ImsMmTelFeatureWrapper mMmTelFeature;
@@ -126,6 +127,11 @@ public class TestCall {
         return this.mCallSession.getState();
     }
 
+    @Override
+    protected void handleServerFailure() {
+        mLatch.countDownAndInit();
+    }
+
     private void resetExpectation() {
         this.mExpectedEvent = new CallEvent(CallEvent.Type.NONE);
         this.mEventRecords.clear();
@@ -150,6 +156,10 @@ public class TestCall {
                     mLatch.await(waitingTimeInMillis);
                 } else {
                     mLatch.awaitTimeout(waitingTimeInMillis);
+                }
+
+                if (mFailureDetail != null) {
+                    fail(mFailureDetail);
                 }
             };
             mWaitingTimeInMillis = waitingTimeInMillis;
@@ -275,7 +285,7 @@ public class TestCall {
         @Override
         public @Nullable IImsCallSessionListener onIncomingCall(
                 @NonNull IImsCallSession c, @Nullable String callId, @Nullable Bundle extras) {
-            Log.d(Log.TAG, "onIncomingCall");
+            Log.d(this, "onIncomingCall");
 
             mEventRecords.put(CallEvent.Type.MMTEL_INCOMING_CALL, new CallEvent.EventRecord());
 
@@ -292,7 +302,7 @@ public class TestCall {
     private class CallSessionListener extends ImsCallSessionWrapper.ImsCallSessionListener {
         @Override
         public void callSessionInitiated(ImsCallProfile profile) {
-            Log.d(Log.TAG, "callSessionInitiated - profile: " + profile);
+            Log.d(this, "callSessionInitiated - profile: " + profile);
 
             mEventRecords.put(CallEvent.Type.SESSION_INITIATED, new CallEvent.EventRecord(profile));
 
@@ -305,7 +315,7 @@ public class TestCall {
 
         @Override
         public void callSessionTerminated(ImsReasonInfo reason) {
-            Log.d(Log.TAG, "callSessionTerminated - reason: " + reason);
+            Log.d(this, "callSessionTerminated - reason: " + reason);
 
             mEventRecords.put(CallEvent.Type.SESSION_TERMINATED, new CallEvent.EventRecord(reason));
 
@@ -318,7 +328,7 @@ public class TestCall {
 
         @Override
         public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
-            Log.d(Log.TAG, "callSessionUssdMessageReceived - "
+            Log.d(this, "callSessionUssdMessageReceived - "
                     + "mode: " + mode + " ussdMessage: " + ussdMessage);
 
             mEventRecords.put(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,

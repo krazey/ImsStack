@@ -32,26 +32,26 @@ CodecAudioConfig::CodecAudioConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTy
         m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
         m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
 {
-    IMS_TRACE_D("+CodecAudioConfig Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecAudioConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAudioConfig::~CodecAudioConfig()
 {
-    IMS_TRACE_D("~CodecAudioConfig", 0, 0, 0);
+    IMS_TRACE_I("~CodecAudioConfig", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CodecAudioConfig::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create - nCodec[%d, %s]", m_nCodec, ImsCodec::CodecToString(m_nCodec), 0);
+    IMS_TRACE_D("Create - Codec[%s]", ImsCodec::CodecToString(m_nCodec), 0, 0);
 
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - piCc is NULL or invalid codecIdx", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - piCc is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
     m_bShowAmrModeSet = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL, IMS_FALSE);
+            CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL, IMS_FALSE);
 
     return IMS_TRUE;
 }
@@ -59,10 +59,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAudioConfig::Create(IN ICarrierConfig* piCc)
 PUBLIC VIRTUAL void CodecAudioConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
-    IMS_TRACE_D("m_nChannel(%d), mode-set(0x%04x), default mode-set(0x%04x)", m_nChannel,
-            m_nAmrModeSetList, m_nDefaultAmrModeSetList);
-    IMS_TRACE_D("show modeset(%d), dtx(%d)", m_bShowAmrModeSet, m_bDtx, 0);
-    IMS_TRACE_D("ModeChangeCapability(%d), ModeChangePeriod(%d), ModeChangeNeighbor(%d)",
+    IMS_TRACE_D("ChannelCount[%d], AmrModeSetList[0x%04x], default AmrModeSetList[0x%04x]",
+            m_nChannel, m_nAmrModeSetList, m_nDefaultAmrModeSetList);
+    IMS_TRACE_D("show AmrModeSet[%d], Dtx[%d]", m_bShowAmrModeSet, m_bDtx, 0);
+    IMS_TRACE_D("ModeChangeCapability[%d], ModeChangePeriod[%d], ModeChangeNeighbor[%d]",
             m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 }
 

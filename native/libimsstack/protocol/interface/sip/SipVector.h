@@ -347,9 +347,17 @@ inline SIP_SLONG SipVector<T>::RemoveElementsAt(
 template <class T>
 inline void SipVector<T>::Shrink()
 {
-    if (mVector.empty() || (mVector.size() <= (mVector.capacity() / 2)))
+    if (mVector.capacity() > 0)
     {
-        mVector.shrink_to_fit();
+        if (mVector.empty())
+        {
+            std::vector<T> objEmptyVector;
+            mVector.swap(objEmptyVector);
+        }
+        else if (mVector.size() <= (mVector.capacity() / 2))
+        {
+            mVector.shrink_to_fit();
+        }
     }
 }
 

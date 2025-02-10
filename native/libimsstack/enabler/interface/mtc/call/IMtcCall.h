@@ -42,6 +42,22 @@ enum class CallType
     VIDEO_RTT = 4,
 };
 
+enum class EmergencyType
+{
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_NORMAL.
+    NONE = 0,
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to either
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN or
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY.
+    EMERGENCY_ROUTING = 1,
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL.
+    NORMAL_ROUTING = 2,
+};
+
 enum class PeerType
 {
     MO,
@@ -277,7 +293,7 @@ public:
     explicit CallInfo() :
             ePeerType(PeerType::MO),
             eInitialCallType(CallType::VOIP),
-            bEmergency(IMS_FALSE),
+            eEmergencyType(EmergencyType::NONE),
             bOffline(IMS_FALSE),
             bUssi(IMS_FALSE),
             bConference(IMS_FALSE)
@@ -287,7 +303,7 @@ public:
     explicit CallInfo(IN const CallInfo& objRhs) :
             ePeerType(objRhs.ePeerType),
             eInitialCallType(objRhs.eInitialCallType),
-            bEmergency(objRhs.bEmergency),
+            eEmergencyType(objRhs.eEmergencyType),
             bOffline(objRhs.bOffline),
             bUssi(objRhs.bUssi),
             bConference(objRhs.bConference)
@@ -300,7 +316,7 @@ public:
         {
             ePeerType = objRhs.ePeerType;
             eInitialCallType = objRhs.eInitialCallType;
-            bEmergency = objRhs.bEmergency;
+            eEmergencyType = objRhs.eEmergencyType;
             bOffline = objRhs.bOffline;
             bUssi = objRhs.bUssi;
             bConference = objRhs.bConference;
@@ -317,16 +333,21 @@ public:
         }
 
         return ePeerType == objRhs.ePeerType && eInitialCallType == objRhs.eInitialCallType &&
-                bEmergency == objRhs.bEmergency && bOffline == objRhs.bOffline &&
+                eEmergencyType == objRhs.eEmergencyType && bOffline == objRhs.bOffline &&
                 bUssi == objRhs.bUssi && bConference == objRhs.bConference;
     }
 
     IMS_BOOL operator!=(const CallInfo& objRhs) const { return !(*this == objRhs); }
 
+    inline IMS_BOOL IsEmergency() const
+    {
+        return eEmergencyType == EmergencyType::EMERGENCY_ROUTING;
+    }
+
 public:
     PeerType ePeerType;
     CallType eInitialCallType;
-    IMS_BOOL bEmergency;
+    EmergencyType eEmergencyType;
     IMS_BOOL bOffline;
     IMS_BOOL bUssi;
     IMS_BOOL bConference;

@@ -112,7 +112,7 @@ protected:
             MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
     virtual IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
-    void SetMediaQuality(IN AudioMediaSession* pAudioSession);
+    void SetMediaQuality(IN AudioSession* pAudioSession);
     IMS_BOOL OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
     IMS_BOOL OnResponse(IN IMS_UINTP pParam);
     IMS_BOOL OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
@@ -125,6 +125,8 @@ protected:
 
 private:
     IpAddress GetAndroidIP();
+    IMS_BOOL HandleNotifyMediaInactivity(IN IMS_UINTP nParam);
+    IMS_BOOL IsInactivityTimerExpired(IN IMS_SINT32 nRunningTimerValue, IN IMS_SINT32 nTimerValue);
 
 protected:
     IMS_UINT32 m_nSlotId;

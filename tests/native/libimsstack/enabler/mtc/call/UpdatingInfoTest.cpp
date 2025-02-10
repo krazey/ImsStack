@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+#include "MockISession.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/UpdatingInfo.h"
-#include "core/MockISession.h"
 #include "media/MockIMtcMediaManager.h"
 #include <gtest/gtest.h>
 

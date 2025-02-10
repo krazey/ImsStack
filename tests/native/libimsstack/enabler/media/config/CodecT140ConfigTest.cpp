@@ -61,7 +61,7 @@ TEST_F(CodecT140ConfigTest, GetConfigTest)
     IMS_UINT32 nTextRedLevel = 5;
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     ON_CALL(*pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
             .WillByDefault(Return(nTextRedLevel));
 
     EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig));
@@ -78,7 +78,7 @@ TEST_F(CodecT140ConfigTest, GetConfigTestT140)
     IMS_UINT32 nTextRedLevel = 5;
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     ON_CALL(*pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
             .WillByDefault(Return(nTextRedLevel));
 
     EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig));

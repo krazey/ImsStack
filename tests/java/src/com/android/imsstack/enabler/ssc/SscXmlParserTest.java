@@ -989,7 +989,7 @@ public class SscXmlParserTest {
 
     @Test
     public void getSscServiceFromDoc_serviceCapability() {
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
 
         processEntireDocumentQuery();
@@ -1033,7 +1033,7 @@ public class SscXmlParserTest {
 
     @Test
     public void getSscServiceFromDoc_serviceCapabilityWhenNoData() {
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
 
         SscServiceQueryData documentQueryData = getDocumentQueryData();

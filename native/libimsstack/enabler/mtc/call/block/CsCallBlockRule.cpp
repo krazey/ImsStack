@@ -26,7 +26,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 CsCallBlockRule::CsCallBlockRule(IN IMtcCallContext& objContext) :
         m_objEventReceiver(objContext.GetImsEventReceiver()),
-        m_bEmergencyCall(objContext.GetCallInfo().bEmergency)
+        m_bEmergencyCall(objContext.GetCallInfo().IsEmergency())
 {
 }
 

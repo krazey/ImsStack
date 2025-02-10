@@ -20,36 +20,35 @@
 #include "AString.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "configuration/ConfigDef.h"
+#include <optional>
+#include <variant>
+
+using ConfigValue = std::variant<IMS_SINT32, IMS_BOOL, AString>;
 
 class ConfigCache final
 {
 public:
-    explicit ConfigCache();
-    ~ConfigCache();
+    inline explicit ConfigCache() {}
+    inline virtual ~ConfigCache() = default;
     ConfigCache(IN const ConfigCache&) = delete;
     ConfigCache& operator=(IN const ConfigCache&) = delete;
 
-    // no additional info is allowed.
-    void PutCache(IN Feature eFeature, IN IMS_BOOL bValue);
-    void PutCache(IN Feature eFeature, IN IMS_SINT32 nValue);
-    void PutCache(IN Feature eFeature, const IN AString& strValue);
+    inline void PutCache(IN const IMS_CHAR* pszKey, const ConfigValue& objValue)
+    {
+        objConfigMap.Add(pszKey, objValue);
+    }
 
-    IMS_BOOL ResetCache(IN Feature eFeature);
-
-    IMS_BOOL GetBooleanCache(IN Feature eFeature) const;
-    IMS_SINT32 GetIntegerCache(IN Feature eFeature) const;
-    const AString GetStringCache(IN Feature eFeature) const;
-
-    IMS_BOOL HasBooleanCache(IN Feature eFeature) const;
-    IMS_BOOL HasIntegerCache(IN Feature eFeature) const;
-    IMS_BOOL HasStringCache(IN Feature eFeature) const;
-    IMS_BOOL IsEmpty() const;
+    inline std::optional<ConfigValue> GetCache(const IMS_CHAR* pszKey) const
+    {
+        if (objConfigMap.GetIndexOfKey(pszKey) > -1)
+        {
+            return objConfigMap.GetValue(pszKey);
+        }
+        return std::nullopt;
+    }
 
 private:
-    ImsMap<Feature, IMS_BOOL> m_objBooleanCache;
-    ImsMap<Feature, IMS_SINT32> m_objIntegerCache;
-    ImsMap<Feature, AString> m_objStringCache;
+    ImsMap<const IMS_CHAR*, ConfigValue> objConfigMap;
 };
 
 #endif

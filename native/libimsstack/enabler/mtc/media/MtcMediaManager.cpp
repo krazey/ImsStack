@@ -382,7 +382,8 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
     // When UE receives P-Early-Media header with "gated", PemType will be keep the value.
 
     if (ePemType != PemType::NONE ||
-            m_objContext.GetConfigurationProxy().Is(Feature::INITIALIZE_PEM_WHEN_NO_HEADER))
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL))
     {
         m_pProfileManager->SetPemType(piSession, ePemType);
     }
@@ -585,6 +586,22 @@ PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAnswer()
     }
 }
 
+PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForLocalResourceConfirmation(
+        IN CallType eCallType)
+{
+    SetDirectionToActiveFromInactive(MEDIATYPE_AUDIO, m_pMediaInfo->eAudioDirection);
+
+    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    {
+        SetDirectionToActiveFromInactive(MEDIATYPE_VIDEO, m_pMediaInfo->eVideoDirection);
+    }
+
+    if (eCallType == CallType::RTT || eCallType == CallType::VIDEO_RTT)
+    {
+        SetDirectionToActiveFromInactive(MEDIATYPE_TEXT, m_pMediaInfo->eTextDirection);
+    }
+}
+
 PUBLIC VIRTUAL void MtcMediaManager::SetSrvccState(IN SrvccState eState)
 {
     if (!m_piMediaSession)
@@ -645,7 +662,7 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMes
     else
     {
         IMS_SINT32 nLocalRbtPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                Feature::POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE);
+                ConfigVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT);
 
         IMS_TRACE_D("UpdateLocalTone : local RBT policy[%d]", nLocalRbtPolicy, 0, 0);
 
@@ -865,11 +882,20 @@ IMS_BOOL MtcMediaManager::IsDynamicRbtRequired(IN ISession* piSession)
     }
 
     IMS_SINT32 nLocalRbtPolicy = m_objContext.GetConfigurationProxy().GetInt(
-            Feature::POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE);
+            ConfigVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT);
     if (nLocalRbtPolicy != USE_DYNAMIC_NW_TONE_TIMER)
     {
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
+}
+
+PRIVATE
+void MtcMediaManager::SetDirectionToActiveFromInactive(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir)
+{
+    if (eDir == DIRECTION_INACTIVE)
+    {
+        UpdateMediaDirection(eMediaType, DIRECTION_SEND_RECEIVE);
+    }
 }

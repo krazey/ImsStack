@@ -18,17 +18,23 @@
 #include "IConfiguration.h"
 #include "IIpcan.h"
 #include "IMtcService.h"
+#include "IPageMessage.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
 #include "ImsVector.h"
 #include "JniEnablerConnector.h"
+#include "MockICapabilities.h"
 #include "MockICarrierConfig.h"
+#include "MockICoreService.h"
 #include "MockIFeatureCaps.h"
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcServiceThread.h"
+#include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
+#include "MockIReference.h"
+#include "MockISession.h"
 #include "MtcService.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
@@ -37,14 +43,8 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
 #include "call/radio/MockIMtcRadioChecker.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IPageMessage.h"
-#include "core/MockICapabilities.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
 #include "emergency/MockIMtcEmergencyServiceManager.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
@@ -103,8 +103,7 @@ class MtcServiceTest : public ::testing::Test
 {
 public:
     MockIMtcContext objMockContext;
-    MockIMtcConfigurationManager* pMockConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcEmergencyServiceManager* pMockEmergencyManager;
     MockIMtcCallManager objMockCallManager;
     MockIMtcCallController objMockCallController;
@@ -128,8 +127,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pMockConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -148,8 +146,9 @@ protected:
         pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_SERVICE, &objMockJniEnabler);
         ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockServiceThread));
 
-        ON_CALL(*pMockConfigurationManager,
-                IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::
+                                KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL))
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(objMockContext, GetImsEventReceiver).WillByDefault(ReturnRef(objEventReceiver));
 
@@ -198,6 +197,51 @@ protected:
         pMockEmergencyAosConnector = new MockIMtcAosConnector();
         pService->ReplaceAosConnector(pMockEmergencyAosConnector);
         return pService;
+    }
+
+    void SetIsCsfbAvailable(IN IMS_BOOL bIfEpsOnlyAttachBlocked, IN IMS_BOOL bEpsOnlydAttach,
+            IN IMS_BOOL bInNrBlocked, IN IMS_BOOL bNr, IN IMS_BOOL bInWifiBlocked,
+            IN IMS_BOOL bWlanIpCanType, IN IMS_BOOL bInRoamingBlocked, IN IMS_BOOL bRoaming,
+            IN IMS_BOOL bInHomeBlocked)
+    {
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH))
+                .WillByDefault(Return(bIfEpsOnlyAttachBlocked));
+
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_NR))
+                .WillByDefault(Return(bInNrBlocked));
+
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_WIFI))
+                .WillByDefault(Return(bInWifiBlocked));
+
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_ROAMING))
+                .WillByDefault(Return(bInRoamingBlocked));
+
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_HOME))
+                .WillByDefault(Return(bInHomeBlocked));
+
+        ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+                .WillByDefault(Return(bEpsOnlydAttach ? IMS_LTE_INFO_EPS_ONLY_ATTACHED
+                                                      : IMS_LTE_INFO_COMBINED_ATTACHED));
+
+        ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+                .WillByDefault(Return(bNr ? NW_REPORT_RADIO_NR : NW_REPORT_RADIO_LTE));
+
+        ON_CALL(*pMockAosConnector, GetIpcanType)
+                .WillByDefault(
+                        Return(bWlanIpCanType ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE));
+
+        ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+                .WillByDefault(Return(bRoaming ? IMS_ROAMING_STATE_ON : IMS_ROAMING_STATE_OFF));
     }
 };
 
@@ -317,21 +361,6 @@ TEST_F(MtcServiceTest, IsEmergencyReturnsTrue)
     EXPECT_EQ(pEmergencyMtcService->IsEmergency(), IMS_TRUE);
 }
 
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
-{
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_TRUE);
-
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
-}
-
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalseIfAosConnectorIsNull)
-{
-    MtcService objRealService(objMockContext, ServiceType::NORMAL);
-    EXPECT_FALSE(objRealService.IsWlanIpCanType());
-}
-
 TEST_F(MtcServiceTest, IsNrChecksWifiFirst)
 {
     ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
@@ -354,21 +383,8 @@ TEST_F(MtcServiceTest, IsNrChecksRatType)
     EXPECT_TRUE(pNormalMtcService->IsNr());
 }
 
-TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksWifiFirst)
-{
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
-
-    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
-}
-
 TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksRatType)
 {
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_NR));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
@@ -384,8 +400,6 @@ TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksRatType)
 
 TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksLteInfo)
 {
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
@@ -403,6 +417,134 @@ TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksLteInfo)
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
             .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
     EXPECT_TRUE(pNormalMtcService->IsEpsCombinedAttach());
+}
+
+TEST_F(MtcServiceTest, IsRoamingReturnsTrue)
+{
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_ON));
+    EXPECT_EQ(pNormalMtcService->IsRoaming(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsRoamingReturnsFalse)
+{
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
+    EXPECT_EQ(pNormalMtcService->IsRoaming(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_TRUE);
+
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalseIfAosConnectorIsNull)
+{
+    MtcService objRealService(objMockContext, ServiceType::NORMAL);
+    EXPECT_FALSE(objRealService.IsWlanIpCanType());
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
+{
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsFalseIfEpsOnlyAttachBlocked)
+{
+    SetIsCsfbAvailable(IMS_TRUE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsFalseIfInNrBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsFalseIfInWifiBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_TRUE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsFalseIfInRoamingBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE,
+            IMS_TRUE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsFalseIfInHomeBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_TRUE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsTrueIfNoBlockConditions)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsTrueIfEpsOnlyAttachNotBlocked)
+{
+    SetIsCsfbAvailable(IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsTrueIfInNrNotBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsTrueIfInWifiNotBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsTrueIfInRoamingNotBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_TRUE, IMS_FALSE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsCsfbAvailableReturnsTrueIfInHomeNotBlocked)
+{
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_TRUE, IMS_TRUE);
+    EXPECT_EQ(pNormalMtcService->IsCsfbAvailable(), IMS_TRUE);
 }
 
 TEST_F(MtcServiceTest, ImsAosConnectedNormalServiceInvokesSetReady)
@@ -488,12 +630,6 @@ TEST_F(MtcServiceTest, ImsAosConnectedDoesNothingForCallComposerIfCoreServiceIsN
 
     const IMS_UINT32 nFeatures = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
     pNormalMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
-}
-
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
-{
-    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
 }
 
 TEST_F(MtcServiceTest, GetOldStatusReturnsOldStatus)
@@ -583,8 +719,8 @@ TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
 
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 {
-    EXPECT_CALL(*pMockEmergencyManager, StartOpen(EmergencyCallRoutingPdn::EMERGENCY)).Times(1);
-    pNormalMtcService->OpenEmergencyService(EmergencyCallRoutingPdn::EMERGENCY);
+    EXPECT_CALL(*pMockEmergencyManager, StartOpen(ServiceType::EMERGENCY)).Times(1);
+    pNormalMtcService->OpenEmergencyService(ServiceType::EMERGENCY);
 }
 
 TEST_F(MtcServiceTest, StopEmergencyServiceInvokesStopOpenService)

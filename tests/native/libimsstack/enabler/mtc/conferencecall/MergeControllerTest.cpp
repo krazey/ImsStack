@@ -15,8 +15,10 @@
  */
 
 #include "CarrierConfig.h"
+#include "MockICoreService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "SipStatusCode.h"
 #include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
 #include "call/MockCallConnectionIdManager.h"
@@ -37,15 +39,13 @@
 #include "conferencecall/MockIConferenceControllerListener.h"
 #include "conferencecall/MockIConferenceReference.h"
 #include "conferencecall/MockIConferenceSubscriptionListener.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
-#include "sipcore/SipStatusCode.h"
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -78,13 +78,12 @@ public:
     MockConferenceFactory* pMockFactory;
     MockConferenceParticipantList* pMockParticipantList;
     MockConferenceEventNotifier* pMockNotifier;
-    MockIMtcConfigurationManager* pMockConfigurationManager;
     std::unique_ptr<MockMtcTimerWrapper> pMockTimerWrapper;
 
     MockIMtcCall* piMockConferenceCall;
     MockIMtcCallContext objMockCallContext;
     MergeController* pController;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
 
 protected:
     virtual void SetUp() override
@@ -101,8 +100,7 @@ protected:
         ON_CALL(*pMockFactory, CreateOperationQueue).WillByDefault(Return(pMockQueue));
         ON_CALL(*pMockFactory, CreateParticipantList).WillByDefault(Return(pMockParticipantList));
 
-        pMockConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -173,13 +171,12 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeAndRefer)
     objUsersCopied.Append(&objUserCopied1);
     objUsersCopied.Append(&objUserCopied1);
 
-    ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSubscribeType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSipFlowOrder)
-            .WillByDefault(
-                    Return(CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER));
 
     EXPECT_CALL(*pMockParticipantList, GetSize)
             .Times(AnyNumber())
@@ -219,7 +216,8 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithReferAndSubscribeFlow)
 
     // Sets up CallType.
     // TODO: Check the value of m_eStartCallType.
-    ON_CALL(*pMockConfigurationManager, GetCallTypeAfterAudioAndVideoCallMerged)
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT))
             .WillByDefault(Return(1));  // VOIP
     MockIMtcCall objCall1;
     ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
@@ -234,14 +232,12 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithReferAndSubscribeFlow)
     ConfUser objUserCopied2(*pUser2);
     objUsersCopied.Append(&objUserCopied1);
     objUsersCopied.Append(&objUserCopied1);
-
-    ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSubscribeType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSipFlowOrder)
-            .WillByDefault(
-                    Return(CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_REFER_AND_SUBSCRIBE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SIP_FLOW_REFER_AND_SUBSCRIBE));
 
     EXPECT_CALL(*pMockParticipantList, GetSize)
             .Times(AnyNumber())
@@ -286,7 +282,8 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeNotifyReferFlow)
 
     // Sets up CallType.
     // TODO: Check the value of m_eStartCallType.
-    ON_CALL(*pMockConfigurationManager, GetCallTypeAfterAudioAndVideoCallMerged)
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT))
             .WillByDefault(Return(1));  // CallType::VOIP
     MockIMtcCall objCall1;
     ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
@@ -301,14 +298,12 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeNotifyReferFlow)
     ConfUser objUserCopied2(*pUser2);
     objUsersCopied.Append(&objUserCopied1);
     objUsersCopied.Append(&objUserCopied1);
-
-    ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSubscribeType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSipFlowOrder)
-            .WillByDefault(Return(
-                    CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER));
 
     EXPECT_CALL(*pMockParticipantList, GetSize)
             .Times(AnyNumber())
@@ -357,8 +352,8 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithoutRefer)
             .WillOnce(Return(&objCall1))
             .WillOnce(Return(&objCall2));
 
-    ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_COPYCONTROL));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_INVITE_COPYCONTROL));
 
     EXPECT_CALL(*pMockParticipantList, GetSize)
             .Times(AnyNumber())
@@ -402,13 +397,12 @@ TEST_F(MergeControllerTest, ProcessMergeInvokesMergeFailedIfStateIsNotReady)
     objUsersCopied.Append(&objUserCopied1);
     objUsersCopied.Append(&objUserCopied1);
 
-    ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSubscribeType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
-    ON_CALL(*pMockConfigurationManager, GetConferenceSipFlowOrder)
-            .WillByDefault(
-                    Return(CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER));
 
     EXPECT_CALL(*pMockParticipantList, GetSize)
             .Times(AnyNumber())
@@ -491,8 +485,8 @@ TEST_F(MergeControllerTest, OnIndividualCallTerminatedUpdatesUserStateIfCopyCont
                         return std::move(pMockTimerWrapper);
                     }));
 
-    ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
-            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_COPYCONTROL));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_INVITE_COPYCONTROL));
 
     ConfUser objUser1;
     objUser1.eStatus = STATUS_IDLE;
@@ -532,9 +526,13 @@ TEST_F(MergeControllerTest, StartFailedNotifiesFailureAndClearsQueueIfInCreating
     ON_CALL(*pMockQueue, GetTypeOfCurrentOperation)
             .WillByDefault(Return(CONTROL_OPERATION_CREATE_CONFERENCE_CALL));
 
+    MockIConferenceControllerListener objListener;
+    pController->SetListener(&objListener);
+
     EXPECT_CALL(
             *pMockNotifier, NotifyMergeFailed(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, -1)));
     EXPECT_CALL(*pMockQueue, Clear());
+    EXPECT_CALL(objListener, OnClosed(pController));
 
     const CallType eAnyType = CallType::VOIP;
     const IMS_BOOL bAnyEmergency = IMS_FALSE;

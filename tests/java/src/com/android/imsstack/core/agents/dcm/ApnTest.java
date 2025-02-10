@@ -381,14 +381,34 @@ public class ApnTest {
 
     @Test
     public void requestNetworkForImsTypeIncludesImsAndMmtelCapability() throws Exception {
-        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
         mApn.mType = EApnType.IMS;
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
+        when(mMockIDcSettings.isImsPdnRequestWithoutMmtelRequired())
+                .thenReturn(false);
 
         mApn.requestNetwork();
 
         NetworkRequest.Builder nrb = new NetworkRequest.Builder();
         nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
         nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
+        NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
+        verify(mConnectivityManagerProxy)
+                .requestNetwork(eq(nr), eq(mMockNetworkCallback), eq(mApn));
+    }
+
+    @Test
+    public void requestNetworkForImsTypeIncludesImsOnlyCapability() throws Exception {
+        mApn.mType = EApnType.IMS;
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
+        when(mMockIDcSettings.isImsPdnRequestWithoutMmtelRequired())
+                .thenReturn(true);
+
+        mApn.requestNetwork();
+
+        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
+        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
         NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
         verify(mConnectivityManagerProxy)
                 .requestNetwork(eq(nr), eq(mMockNetworkCallback), eq(mApn));

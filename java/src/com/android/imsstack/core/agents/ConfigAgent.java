@@ -109,10 +109,10 @@ public class ConfigAgent implements ConfigInterface {
                 CarrierConfig.TEST_CARRIER_CONFIG_FILE)) {
             mTestConfig = PersistableBundle.readFromStream(is);
         } catch (FileNotFoundException e) {
-            ImsLog.d(mSlotId, "readTestConfig: not found");
+            ImsLog.d(this, mSlotId, "readTestConfig: not found");
             mTestConfig = new PersistableBundle();
         } catch (Exception e) {
-            ImsLog.d(mSlotId, "readTestConfig: " + e.toString());
+            ImsLog.d(this, mSlotId, "readTestConfig: " + e.toString());
             mTestConfig = new PersistableBundle();
         }
 
@@ -132,10 +132,10 @@ public class ConfigAgent implements ConfigInterface {
                     CarrierConfig.TEST_CARRIER_CONFIG_FILE,
                     Context.MODE_APPEND)) {
                 config.writeToStream(os);
-                ImsLog.d(mSlotId, "writeTestConfig: Ok");
+                ImsLog.d(this, mSlotId, "writeTestConfig: Ok");
                 return true;
             } catch (IOException e) {
-                ImsLog.d(mSlotId, "writeTestConfig: " + e.toString());
+                ImsLog.d(this, mSlotId, "writeTestConfig: " + e.toString());
             }
 
             return false;
@@ -169,7 +169,7 @@ public class ConfigAgent implements ConfigInterface {
 
     @VisibleForTesting
     protected void notifyCarrierConfigChanged(int subId) {
-        ImsLog.i("notifyCarrierConfigChanged: slotId=" + mSlotId + ", subId=" + subId);
+        ImsLog.i(this, mSlotId, "notifyCarrierConfigChanged: subId=" + subId);
 
         AppContext.runTask(() -> {
             for (Listener l : mListeners) {
@@ -219,12 +219,12 @@ public class ConfigAgent implements ConfigInterface {
         // Loads override configs in the hidden key of CarrierConfigManager
         overrideHiddenConfigs(subId, config);
 
-        ImsLog.d(mSlotId, "updateCarrierConfig: " + config.toString());
+        ImsLog.d(this, mSlotId, "updateCarrierConfig: " + config.toString());
 
         java.util.Set<String> keys = config.keySet();
 
         for (String key : keys) {
-            ImsLog.d(mSlotId, key + "=" + CarrierConfig.getValue(config, key));
+            ImsLog.d(this, mSlotId, key + "=" + CarrierConfig.getValue(config, key));
         }
 
         overrideTestConfigs(config);
@@ -251,13 +251,13 @@ public class ConfigAgent implements ConfigInterface {
             return;
         }
 
-        ImsLog.i(mSlotId, "Override internal settings for the hidden key");
+        ImsLog.i(this, mSlotId, "Override internal settings for the hidden key");
         CarrierConfig.overrideNestedBundles(config, configsInHiddenKey);
         config.putAll(configsInHiddenKey);
     }
 
     private void overrideTestConfigs(PersistableBundle config) {
-        ImsLog.i(mSlotId, "overrideTestConfigs...");
+        ImsLog.i(this, mSlotId, "overrideTestConfigs...");
 
         boolean usePredefinedUaString = ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_UA_STRING, false, mSlotId);
@@ -267,7 +267,7 @@ public class ConfigAgent implements ConfigInterface {
                     ImsPrivateProperties.Persistent.KEY_CONFIG_UA_STRING, mSlotId);
 
             if (!TextUtils.isEmpty(uaString)) {
-                ImsLog.d(mSlotId, "Use predefined UA string: " + uaString);
+                ImsLog.d(this, mSlotId, "Use predefined UA string: " + uaString);
                 config.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, uaString);
             }
         }
@@ -283,7 +283,7 @@ public class ConfigAgent implements ConfigInterface {
             java.util.Set<String> keys = testConfig.keySet();
 
             for (String key : keys) {
-                ImsLog.d(mSlotId, key + "=" + CarrierConfig.getValue(testConfig, key));
+                ImsLog.d(this, mSlotId, key + "=" + CarrierConfig.getValue(testConfig, key));
             }
         }
     }
@@ -310,11 +310,11 @@ public class ConfigAgent implements ConfigInterface {
         String fileName = getCarrierConfigFile(subId, id);
 
         if (TextUtils.isEmpty(fileName)) {
-            ImsLog.d(mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
+            ImsLog.d(this, mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
             return new PersistableBundle();
         }
 
-        ImsLog.d(mSlotId, "readCarrierConfig: " + fileName);
+        ImsLog.d(this, mSlotId, "readCarrierConfig: " + fileName);
 
         return readCarrierConfigFromAsset(fileName, id);
     }
@@ -332,7 +332,7 @@ public class ConfigAgent implements ConfigInterface {
 
             return readConfigFromXml(parser, id);
         } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
-            ImsLog.e(mSlotId, "readCarrierConfigFromAsset: " + e.toString());
+            ImsLog.e(this, mSlotId, "readCarrierConfigFromAsset: " + e.toString());
             return new PersistableBundle();
         }
     }
@@ -341,7 +341,7 @@ public class ConfigAgent implements ConfigInterface {
         try (XmlResourceParser parser = AppContext.getInstance().getResources().getXml(resId)) {
             return readConfigFromXml(parser, id);
         } catch (IOException | XmlPullParserException e) {
-            ImsLog.e(mSlotId, "readCarrierConfigFromRes: " + e.toString());
+            ImsLog.e(this, mSlotId, "readCarrierConfigFromRes: " + e.toString());
             return new PersistableBundle();
         }
     }
@@ -362,7 +362,7 @@ public class ConfigAgent implements ConfigInterface {
             try {
                 files = AppContext.getInstance().getAssets().list(CarrierConfig.CARRIER_CONFIG);
             } catch (IOException e) {
-                ImsLog.e(mSlotId, "getCarrierConfigFile: " + e);
+                ImsLog.e(this, mSlotId, "getCarrierConfigFile: " + e);
                 return null;
             }
 
@@ -422,7 +422,7 @@ public class ConfigAgent implements ConfigInterface {
         return config;
     }
 
-    private static boolean checkFilters(XmlPullParser parser, SimCarrierId id) {
+    private boolean checkFilters(XmlPullParser parser, SimCarrierId id) {
         for (int i = 0; i < parser.getAttributeCount(); ++i) {
             boolean result = true;
             String attribute = parser.getAttributeName(i);
@@ -447,7 +447,7 @@ public class ConfigAgent implements ConfigInterface {
                     result = (id == null) || matchOnCarrierId(value, id);
                     break;
                 default:
-                    ImsLog.w("Unknown attribute: " + attribute + "=" + value);
+                    ImsLog.w(this, mSlotId, "Unknown attribute: " + attribute + "=" + value);
                     result = false;
                     break;
             }
@@ -519,7 +519,7 @@ public class ConfigAgent implements ConfigInterface {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            ImsLog.d(mSlotId, "onReceive: " + intent);
+            ImsLog.d(this, mSlotId, "onReceive: " + intent);
 
             String action = intent.getAction();
 
@@ -529,7 +529,7 @@ public class ConfigAgent implements ConfigInterface {
                 if (ImsPrivateProperties.Persistent.isConfigProperty(key)) {
                     String value = intent.getStringExtra(KEY_VALUE);
 
-                    ImsLog.d(mSlotId, "TestCarrierConfigPut: [" + key + "=" + value + "]");
+                    ImsLog.d(this, mSlotId, "TestCarrierConfigPut: [" + key + "=" + value + "]");
 
                     if (value == null) {
                         value = "";
@@ -540,7 +540,7 @@ public class ConfigAgent implements ConfigInterface {
                     putConfig(key, intent);
                 }
             } else if (ACTION_TEST_CARRIER_CONFIG_APPLY.equals(action)) {
-                ImsLog.d(mSlotId, "TestCarrierConfigApply");
+                ImsLog.d(this, mSlotId, "TestCarrierConfigApply");
                 if (mConfig != null) {
                     writeTestConfig(mTestConfig);
                     mConfig = null;
@@ -622,7 +622,7 @@ public class ConfigAgent implements ConfigInterface {
                 mCarrierConfig.getConfig().putBoolean(key, value);
             }
 
-            ImsLog.d(mSlotId, "TestCarrierConfigPut: [" + key + "=" + valueForLog + "]");
+            ImsLog.d(this, mSlotId, "TestCarrierConfigPut: [" + key + "=" + valueForLog + "]");
         }
     }
 }

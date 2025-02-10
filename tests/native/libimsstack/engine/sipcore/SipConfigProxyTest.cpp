@@ -89,7 +89,7 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_FALSE(
             SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsSessionIdHeaderSupported(IMS_SLOT_0));
-    EXPECT_FALSE(SipConfigProxy::IsMacAddressHiddenInPaniHeader(IMS_SLOT_0));
+    EXPECT_TRUE(SipConfigProxy::IsMacAddressHiddenInPaniHeader(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(IMS_SLOT_0));
 
     EXPECT_EQ(SipConfigProxy::GetTimerValue100Trying(IMS_SLOT_0), 200);

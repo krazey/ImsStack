@@ -15,6 +15,16 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_uri_type_for_cf_target_number_int" value="1"/>
+    <!-- Ut/Xcap -->
+    <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="2">
+        <item value="27"/>
+        <item value="33"/>
+    </int-array>
+    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="3">
+        <item value="0"/>
+        <item value="403"/>
+        <item value="404"/>
+    </int-array>
+    <int name="imsss.ut_max_retry_count_int" value="2"/>
+    <int name="imsss.ut_uri_type_for_cf_target_number_int" value="1"/>
 </carrier_config>

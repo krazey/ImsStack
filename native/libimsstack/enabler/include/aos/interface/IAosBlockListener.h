@@ -23,6 +23,14 @@ class IAosBlockListener
 public:
     virtual ~IAosBlockListener(){};
 
+    /**
+     * @brief Called when a block reason is changed.
+     *
+     * This method is invoked for block reason changes.
+     *
+     * @param nType The type of the block.
+     * @param nParam The state of the block.
+     */
     virtual void Block_Changed(IN IMS_UINT32 nType = 0, IN IMS_UINT32 nParam = 0) = 0;
 };
 #endif  // INTERFACE_AOS_BLOCK_LISTENER_H_

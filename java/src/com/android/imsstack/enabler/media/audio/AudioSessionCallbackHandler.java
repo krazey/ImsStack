@@ -43,7 +43,7 @@ public class AudioSessionCallbackHandler {
 
     public AudioSessionCallbackHandler(@NonNull final IMtcMediaInterface mtcMediaInterface) {
         mMtcMediaInterface = mtcMediaInterface;
-        ImsLog.v("Constructor - Exit");
+        ImsLog.d("Constructor - Exit");
     }
 
     private IMtcMediaInterface getMtcMediaInterface() {
@@ -76,7 +76,7 @@ public class AudioSessionCallbackHandler {
      * @param result The result of modify session
      */
     public void modifySessionResponse(AudioConfig audioConfig, int result) {
-        ImsLog.v("modifySessionResponse");
+        ImsLog.d("modifySessionResponse");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.RESPONSE_MODIFY_SESSION);
@@ -94,7 +94,7 @@ public class AudioSessionCallbackHandler {
      * @param result The result of adding a configuration
      */
     public void addConfigResponse(AudioConfig audioConfig, int result) {
-        ImsLog.v("addConfigResponse");
+        ImsLog.d("addConfigResponse");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.RESPONSE_ADD_CONFIG);
@@ -112,7 +112,7 @@ public class AudioSessionCallbackHandler {
      * @param result The result of confirm configuration
      */
     public void confirmConfigResponse(AudioConfig audioConfig, int result) {
-        ImsLog.v("confirmConfigResponse");
+        ImsLog.d("confirmConfigResponse");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.RESPONSE_CONFIRM_CONFIG);
@@ -128,7 +128,7 @@ public class AudioSessionCallbackHandler {
      * @param audioConfig the remote config where media packet is received
      */
     public void firstMediaPacketReceived(AudioConfig audioConfig) {
-        ImsLog.v("firstMediaPacketReceived");
+        ImsLog.d("firstMediaPacketReceived");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.NOTIFY_FIRST_PACKET);
@@ -144,10 +144,22 @@ public class AudioSessionCallbackHandler {
      * @param rtpExtensions List of received RTP header extensions
      */
     public void headerExtensionReceived(List<RtpHeaderExtension> rtpExtensions) {
-        ImsLog.v("headerExtensionReceived");
+        ImsLog.d("headerExtensionReceived");
 
         getMtcMediaInterface().rtpHeaderExtensionsReceived(
                 rtpExtensions.stream().collect(Collectors.toSet()));
+    }
+
+    /**
+     * A notification is sent when an incoming audio dtmf is received.
+     * @param dtmfDigit Received incoming dtmf digit
+     * @param durationMs Dtmf tone playback time in milliseconds
+     */
+    public void onNotifyIncomingDtmfReceived(int dtmfDigit, int durationMs) {
+        ImsLog.v("onNotifyIncomingDtmfReceived: dtmfDigit= " + dtmfDigit + " duration= "
+                + durationMs);
+
+        getMtcMediaInterface().onNotifyIncomingDtmfReceived(dtmfDigit, durationMs);
     }
 
     /**
@@ -157,7 +169,7 @@ public class AudioSessionCallbackHandler {
      * @param qualityStatus The object of MediaQualityStatus with the rtp and the rtcp statistics.
      */
     public void onNotifyMediaQualityStatus(int accessNetwork, MediaQualityStatus qualityStatus) {
-        ImsLog.v("onNotifyMediaQualityStatus");
+        ImsLog.d("onNotifyMediaQualityStatus");
 
         // Send Rtp/Rtcp Inactivity information to native
         Parcel parcel = Parcel.obtain();
@@ -178,7 +190,7 @@ public class AudioSessionCallbackHandler {
      * @return MediaThreshold media threshold information
      */
     public MediaThreshold getMediaThreshold(int mediaSessionType) {
-        ImsLog.v("getMediaThreshold for sessionType[" + mediaSessionType + "]");
+        ImsLog.d("getMediaThreshold for sessionType[" + mediaSessionType + "]");
 
         return getMtcMediaInterface().getMediaThreshold(mediaSessionType);
     }
@@ -189,7 +201,7 @@ public class AudioSessionCallbackHandler {
      * @param callQuality The call quality statistics since last report
      */
     public void callQualityChanged(CallQuality callQuality) {
-        ImsLog.v("callQualityChanged");
+        ImsLog.d("callQualityChanged");
         getMtcMediaInterface().callQualityChanged(callQuality);
     }
 
@@ -205,7 +217,7 @@ public class AudioSessionCallbackHandler {
      * Handles notification when the ImsMedia service is disconnected
      */
     public void nofityMediaDetach() {
-        ImsLog.v("nofityMediaDetach");
+        ImsLog.d("nofityMediaDetach");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.NOTIFY_MEDIA_DETACH);
@@ -221,7 +233,7 @@ public class AudioSessionCallbackHandler {
      * @param result QoS connection result
      */
     public void onNotifyQosInfo(@NonNull String remoteAddress, int remotePort, boolean result) {
-        ImsLog.v("onNotifyQosInfo remoteAddress= " + remoteAddress + " remotePort= " + remotePort
+        ImsLog.d("onNotifyQosInfo remoteAddress= " + remoteAddress + " remotePort= " + remotePort
                 + " result= " + result);
 
         Parcel parcel = Parcel.obtain();
@@ -244,7 +256,7 @@ public class AudioSessionCallbackHandler {
      *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
      */
     public void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
-        ImsLog.v("triggerAnbrQuery");
+        ImsLog.d("triggerAnbrQuery");
 
         getMtcMediaInterface().triggerAnbrQuery(mediaType, direction, bitsPerSecond);
     }
@@ -258,7 +270,7 @@ public class AudioSessionCallbackHandler {
      *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
      */
     public void notifyAnbrReceived(int mediaType, int direction, int bitsPerSecond) {
-        ImsLog.v("notifyAnbrReceived - NOTIFY_ANBR_RECEIVED");
+        ImsLog.d("notifyAnbrReceived - NOTIFY_ANBR_RECEIVED");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.NOTIFY_ANBR_RECEIVED);
@@ -275,7 +287,7 @@ public class AudioSessionCallbackHandler {
      * @param stats The object of the RtpReceptionStats
      */
     public void onNotifyRtpReceptionStats(final RtpReceptionStats stats) {
-        ImsLog.v("onNotifyRtpReceptionStats: stats= " + stats);
+        ImsLog.d("onNotifyRtpReceptionStats: stats= " + stats);
 
         getMtcMediaInterface().onNotifyRtpReceptionStats(ImsMediaSession.SESSION_TYPE_AUDIO, stats);
     }

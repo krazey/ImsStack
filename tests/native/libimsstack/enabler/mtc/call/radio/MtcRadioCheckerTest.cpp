@@ -27,10 +27,13 @@
 #include "TestImsRadioService.h"
 #include "TestPhoneInfoService.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/radio/MockIMtcRadioChecker.h"
 #include "call/radio/MtcRadioChecker.h"
 #include "helper/IMtcAosStateListener.h"
-#include "helper/MockICallStateProxy.h"
+#include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -51,7 +54,11 @@ class MtcRadioCheckerTest : public ::testing::Test
 public:
     MtcRadioCheckerTest() :
             m_objContext(),
-            m_objCallStateProxy(),
+            m_objNormalService(),
+            m_objEmergencyService(),
+            m_objIMtcRadioCheckerListener(),
+            m_objSipInterfaceFactory(),
+            m_objSessionInterfaceHolder(),
             m_objPhoneInfoService(),
             m_objImsRadioService(),
             m_piImsRadioConnectionListener(IMS_NULL),
@@ -64,7 +71,10 @@ public:
     MockIMtcService m_objNormalService;
     MockIMtcService m_objEmergencyService;
     MockIMtcRadioCheckerListener m_objIMtcRadioCheckerListener;
-    MockICallStateProxy m_objCallStateProxy;
+    MockIMtcSipInterfaceFactory m_objSipInterfaceFactory;
+    MockIMtcCallManager m_objCallManager;
+    MockIMtcCall m_objCall;
+    MockSessionInterfaceHolder m_objSessionInterfaceHolder;
     TestPhoneInfoService m_objPhoneInfoService;
     TestImsRadioService m_objImsRadioService;
     IImsRadioConnectionListener* m_piImsRadioConnectionListener;
@@ -85,7 +95,6 @@ protected:
                 PlatformContext::SERVICE_RADIO, &m_objImsRadioService);
 
         ON_CALL(m_objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
-        ON_CALL(m_objContext, GetCallStateProxy).WillByDefault(ReturnRef(m_objCallStateProxy));
 
         ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
                 .WillByDefault(Return(NW_REPORT_RADIO_LTE));
@@ -96,6 +105,15 @@ protected:
         ON_CALL(m_objContext, GetServiceByType(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&m_objEmergencyService));
         ON_CALL(m_objEmergencyService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+
+        ON_CALL(m_objContext, GetSipInterfaceFactory)
+                .WillByDefault(ReturnRef(m_objSipInterfaceFactory));
+        ON_CALL(m_objSipInterfaceFactory, GetISessionHolder)
+                .WillByDefault(ReturnRef(m_objSessionInterfaceHolder));
+
+        ON_CALL(m_objContext, GetCallManager).WillByDefault(ReturnRef(m_objCallManager));
+        ON_CALL(m_objCallManager, GetCallByCallKey(_)).WillByDefault(Return(&m_objCall));
+        ON_CALL(m_objCall, GetKey).WillByDefault(Return(IMtcCall::CALL_KEY_INVALID));
 
         m_pMtcRadioChecker = new MtcRadioChecker(m_objContext);
         m_pMtcRadioChecker->Init();
@@ -109,6 +127,24 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
     }
 };
+
+TEST_F(MtcRadioCheckerTest, InitAddsListenersAndDeInitRemovesListeners)
+{
+    delete m_pMtcRadioChecker;
+    m_pMtcRadioChecker = IMS_NULL;
+
+    MtcRadioChecker objTempObject(m_objContext);
+
+    EXPECT_CALL(m_objSessionInterfaceHolder, AddListener(_));
+    EXPECT_CALL(m_objNormalService, AddAosStateListener(_));
+    EXPECT_CALL(m_objEmergencyService, AddAosStateListener(_));
+
+    objTempObject.Init();
+
+    EXPECT_CALL(m_objSessionInterfaceHolder, RemoveListener(&objTempObject));
+    EXPECT_CALL(m_objNormalService, RemoveAosStateListener(&objTempObject));
+    EXPECT_CALL(m_objEmergencyService, RemoveAosStateListener(&objTempObject));
+}
 
 TEST_F(MtcRadioCheckerTest, CheckTrafficPreparedReturnsUnblocked)
 {
@@ -180,8 +216,7 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingAddCallKey)
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingExistsMtcTrafficInfoWithCallKey)
@@ -365,27 +400,47 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficEmergency)
     m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
 }
 
-TEST_F(MtcRadioCheckerTest, OnCallStateChanged)
+TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTraffic)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
             IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
 
     // no keys, just delete `MtcTrafficInfo`.
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
 
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO, IMS_TRUE, CALL_KEY1);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
 
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY2, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_FALSE, 0);
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+}
+
+TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedDoesNotInvokeStopImsTrafficDuringSilentRedial)
+{
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
+            IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
+
+    // no keys, just delete `MtcTrafficInfo`.
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO, IMS_TRUE, CALL_KEY1);
+
+    // Call is silent redialing, so not in TERMINATING state
+    ON_CALL(m_objCall, GetKey).WillByDefault(Return(CALL_KEY1));
+    ON_CALL(m_objCall, GetState).WillByDefault(Return(IMtcCall::State::OUTGOING));
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
+
+    m_pMtcRadioChecker->OnSessionInterfaceReleased(CALL_KEY1);
+
+    // Destructor triggers it
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_));
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyWithOutMtcRadioCheckerListener)

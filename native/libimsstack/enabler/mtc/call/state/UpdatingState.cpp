@@ -17,8 +17,10 @@
 #include "CarrierConfig.h"
 #include "ICarrierConfig.h"
 #include "IMessage.h"
+#include "ISession.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
@@ -30,12 +32,10 @@
 #include "call/termination/UpdateErrorHandler.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -139,7 +139,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
         IMS_SINT32 nRejectCode =
                 ConfigService::GetConfigService()
                         ->GetCarrierConfig(m_objContext.GetSlotId())
-                        ->GetInt(CarrierConfig::Assets::
+                        ->GetInt(ConfigVoice::
                                         KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
         if (nRejectCode == SipStatusCode::SC_200)
         {
@@ -315,7 +315,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* p
 {
     if (m_objContext.GetTimer().IsActive(TIMER_GLARE_CONDITION))
     {
-        IMS_TRACE_I("SessionUpdateReceived during waiting glare condition timer", 0, 0, 0);
+        IMS_TRACE_I("SessionUpdateReceived - waiting glare condition timer", 0, 0, 0);
 
         NotifyFailure();
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
@@ -324,6 +324,11 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* p
                     return pState->SessionUpdateReceived(piSession);
                 });
         return CallStateName::ESTABLISHED;
+    }
+    else
+    {
+        IMS_TRACE_E(0, "SessionUpdateReceived - Update during previous transaction.", 0, 0, 0);
+        m_objContext.GetSession()->Reject(CallReasonInfo(CODE_SIP_REQUEST_PENDING));
     }
     return GetStateName();
 }
@@ -343,7 +348,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();
@@ -370,7 +375,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateReceived(IN I
     IMtcSession* pMtcSession = m_objContext.GetSession();
     pMtcSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         if (pMtcSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -437,7 +442,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackReceived(IN ISession* pi
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
         const CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
@@ -478,7 +483,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
 
     pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();
@@ -532,7 +537,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(
     IMS_TRACE_I(
             "OnReceivingMediaDataFailed : Media[%d] Protocol[%d]", eMediaType, eProtocolType, 0);
 
-    if (IsCallEndNeededByAudioInactivity(eMediaType, eProtocolType))
+    if (eMediaType == MEDIATYPE_AUDIO)
     {
         CallReasonInfo objReason(CODE_MEDIA_NO_DATA);
         HandleTerminate(objReason);
@@ -638,8 +643,9 @@ GLOBAL PUBLIC IMS_BOOL UpdatingState::IsPreconditionRequired(
         IN const MtcConfigurationProxy& objConfigProxy, IN const UpdatingInfo& objInfo)
 {
     return objInfo.IsModified() && !objInfo.IsDowngraded() &&
-            objConfigProxy.GetInt(Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING) ==
-            CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING;
+            objConfigProxy.GetInt(
+                    ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT) ==
+            ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING;
 }
 
 PROTECTED VIRTUAL CallStateName UpdatingState::HandleSrvccStarted()
@@ -693,7 +699,7 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
 
     if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
     {
-        // TODO
+        IMS_TRACE_E(0, "Negotiation failed. Keep the call just in case there is RTP.", 0, 0, 0);
     }
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
@@ -727,7 +733,8 @@ IMS_RESULT UpdatingState::SendRecoverUpdate()
     pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE);
 
     m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
-            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_REMOTE_RESPONSE_TIMER));
+            m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVt::KEY_CONVERT_REMOTE_RESPONSE_TIMER_MILLIS_INT));
 
     return IMS_SUCCESS;
 }

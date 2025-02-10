@@ -18,6 +18,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/state/TerminatingState.h"
+#include "media/IMtcMediaManager.h"
 #include "helper/MtcTimerWrapper.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -29,3 +30,8 @@ TerminatingState::TerminatingState(IN IMtcCallContext& objContext) :
 }
 
 PUBLIC VIRTUAL TerminatingState::~TerminatingState() {}
+
+PUBLIC VIRTUAL void TerminatingState::OnEnter()
+{
+    m_objContext.GetMediaManager().DestroyMediaSession();
+}

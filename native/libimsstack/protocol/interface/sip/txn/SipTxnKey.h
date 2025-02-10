@@ -84,13 +84,13 @@ public:
     inline SIP_UINT32 GetCSeqNum() const { return m_nCseqNum; }
     inline SIP_INT32 GetMsgType() const { return m_eMsgType; }
     inline SIP_UINT32 GetRSeq() const { return m_nRSeqNum; }
-    inline SIP_UINT16 GetRespCode() const { return m_nRespCode; }
+    inline SIP_UINT16 GetResponseCode() const { return m_nRespCode; }
     inline SIP_INT32 GetTxnType() const { return m_eTxnType; }
 
     SIP_VOID SetMethod(const SIP_CHAR* pszMethod);
     inline SIP_VOID SetCseqNum(SIP_UINT32 nCseqNum) { m_nCseqNum = nCseqNum; }
     inline SIP_VOID SetRSeq(SIP_UINT32 nRseqNum) { m_nRSeqNum = nRseqNum; }
-    inline SIP_VOID SetRespCode(SIP_UINT16 nStatusCode) { m_nRespCode = nStatusCode; }
+    inline SIP_VOID SetResponseCode(SIP_UINT16 nRespCode) { m_nRespCode = nRespCode; }
     inline SIP_VOID SetTxnType(SIP_INT32 eTxnType) { m_eTxnType = eTxnType; }
 
     SIP_INT32 CompareKeys(SipTxnKey* pGeneratedKey);

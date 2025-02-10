@@ -68,8 +68,18 @@ public:
     // Request : nType
     enum
     {
+        // Notify to Handle
+        TYPE_LIMITED_MODE = 100,
+
         // Notify to Monitor
         TYPE_HANDOVER = 111,
+    };
+
+    // Request : nState
+    enum
+    {
+        STATE_ADD = 0,
+        STATE_REMOVE
     };
 
     virtual void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) = 0;

@@ -53,6 +53,7 @@ public:
     void RemoveListenerForMonitor(IN IAosSubscriberManagerListener* piListener) override;
 
     const AStringArray& GetConfiguredImpus() const override;
+    const AStringArray& GetOrderedImpus() const override;
     const AStringArray& GetConfiguredImpusForFake() const override;
     const AStringArray& GetFakeImpus() const override;
 
@@ -95,6 +96,7 @@ protected:
     void ConfigureAsFake();
 
     IMS_BOOL CheckIsimValues();
+    IMS_BOOL IsValidImpu(IN const AStringArray& objImpus);
 
     ISubscriberConfig* GetSubscriberConfiguration(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
@@ -208,6 +210,7 @@ protected:
     AosIsimState m_eNotifyIsimState;
 
     AStringArray m_objPuids;
+    AStringArray m_objOrderedPuids;
     AStringArray m_objPuidsForFake;
 
     AString m_strPriority;
@@ -217,6 +220,7 @@ protected:
     // Carrier Configuration
     IMS_UINT32 m_nIsimIndexForImpu;
     IMS_BOOL m_bSupportLimitedAdminSmsMode;
+    IMS_BOOL m_bPrioritizeImsiBasedUri;
     ImsVector<IMS_SINT32> m_objImsIdentityPriority;
 
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;

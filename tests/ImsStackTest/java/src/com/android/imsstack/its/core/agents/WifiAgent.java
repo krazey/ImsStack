@@ -435,11 +435,11 @@ public class WifiAgent {
         }
     }
 
-    private static void logi(String s) {
-        Log.i(Log.TAG, "WifiAgent: " + s);
+    private void logi(String s) {
+        Log.i(this, s);
     }
 
-    private static void loge(String s) {
-        Log.e(Log.TAG, "WifiAgent: " + s);
+    private void loge(String s) {
+        Log.e(this, s);
     }
 }

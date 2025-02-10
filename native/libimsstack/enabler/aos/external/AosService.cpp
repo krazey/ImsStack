@@ -214,10 +214,10 @@ PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosEmergencyListener* piListe
     }
 }
 
-PUBLIC VIRTUAL void AosService::NotifyEmcCallbackModeChanged(
+PUBLIC VIRTUAL void AosService::NotifyEmergencyCallbackModeChanged(
         IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration)
 {
-    A_IMS_TRACE_I(AOSTAG, "NotifyEmcCallbackModeChanged :: nType(%d), nState(%d), nDuration(%d)",
+    A_IMS_TRACE_I(AOSTAG, "NotifyEmergencyCallbackModeChanged nType(%d), nState(%d), nDuration(%d)",
             nType, nState, nDuration);
     for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
     {
@@ -225,8 +225,8 @@ PUBLIC VIRTUAL void AosService::NotifyEmcCallbackModeChanged(
 
         if (piListener != IMS_NULL)
         {
-            piListener->CallbackModeChanged(static_cast<EmcCallbackModeType>(nType),
-                    static_cast<EmcCallbackMode>(nState), nDuration);
+            piListener->CallbackModeChanged(static_cast<EmergencyCallbackModeType>(nType),
+                    static_cast<EmergencyCallbackMode>(nState), nDuration);
         }
     }
 }

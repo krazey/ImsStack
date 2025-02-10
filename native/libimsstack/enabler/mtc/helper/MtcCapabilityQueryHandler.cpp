@@ -16,6 +16,7 @@
 
 #include "AString.h"
 #include "AStringBuffer.h"
+#include "CarrierConfig.h"
 #include "ICapabilities.h"
 #include "ICoreService.h"
 #include "IMessage.h"
@@ -84,8 +85,9 @@ PUBLIC VIRTUAL IMS_RESULT MtcCapabilityQueryHandler::HandleIncomingCapabilityQue
         return IMS_FAILURE;
     }
 
-    if (m_objContext.GetConfigurationProxy().Is(
-                Feature::USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE) == IMS_TRUE)
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL) ==
+            IMS_TRUE)
     {
         piCapabilities->SetMessageMediator(this);
     }
@@ -109,8 +111,8 @@ void MtcCapabilityQueryHandler::SetHeaderForCapabilityQuery(IN IMessage* piMessa
     piMessage->AddHeader(SipHeaderName::SUPPORTED, MessageUtil::STR_TIMER);
     piMessage->AddHeader(SipHeaderName::SUPPORTED, Sip::STR_100REL);
 
-    if (m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED) ==
-            IMS_TRUE)
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
     {
         // checking only voice for precondition is enough.
         piMessage->AddHeader(SipHeaderName::SUPPORTED, MessageUtil::STR_PRECONDITION);

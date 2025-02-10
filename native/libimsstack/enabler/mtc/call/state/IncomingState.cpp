@@ -85,7 +85,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
             piSession, IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
@@ -127,7 +127,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -163,7 +163,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
 
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
         // According to RFC 6337, UE must send re-offer.
@@ -287,8 +287,7 @@ PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
     IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
     m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
 
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
-            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger() &&
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger() &&
             !m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();

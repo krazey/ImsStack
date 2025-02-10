@@ -66,21 +66,20 @@ public:
     virtual IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment) = 0;
 
     /**
-     * @brief Create a session instance of the Audio/Video/TextMediaSession. If the argument nego id
-     * is not zero, session will be created as a forking session from the session of the negotiated
-     * id
+     * @brief Create a session instance of the Audio/Video/TextSession. If the argument nego id is
+     * not zero, session will be created as a forking session from the session of the negotiated id
      *
      * @param nNegoId The identification of the session
      * @param eMediaType The type of session
-     * @return IMS_UINTP Returns identification of the Audio/Video/TextMediaSession instance
-     * represents call dialog
+     * @return IMS_UINTP Returns identification of the Audio/Video/TextSession instance represents
+     * call dialog
      */
     virtual IMS_UINTP CreateProfile(
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
 
     /**
-     * @brief Destroy a session instance of the Audio/Video/TextMediaSession with the given
-     * negotiation id
+     * @brief Destroy a session instance of the Audio/Video/TextSession with the given negotiation
+     * id
      *
      * @param nNegoId The identification of the session
      * @return IMS_BOOL Returns IMS_TRUE when the destroy the profile successfully
@@ -89,7 +88,7 @@ public:
 
     /**
      * @brief Form the SDP to the target dialog with the direction parameters for each
-     * Audio/Video/TestMediaSession
+     * Audio/Video/TextSession
      *
      * @param nNegoId The identification of the session
      * @param pSession ISession instance to get the SDP descriptor
@@ -117,7 +116,7 @@ public:
 
     /**
      * @brief Negotiate the SDP to the target dialog with the direction parameters for each
-     * Audio/Video/TestMediaSession
+     * Audio/Video/TextSession
      *
      * @param nNegoId The identification of the session
      * @param pSession ISession instance to get the SDP descriptor
@@ -154,7 +153,7 @@ public:
     /**
      * @brief Runs target dialog to operate open/update/close session
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @return IMS_BOOL Returns IMS_TRUE when the opeation is done successfully, IMS_FALSE when it
      * is failed
      */
@@ -171,7 +170,7 @@ public:
     /**
      * @brief Get the negotiation state
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @return NEGO_STATE The nego state
      */
     virtual NEGO_STATE GetNegoState(IN IMS_UINTP nNegoId) = 0;
@@ -179,7 +178,7 @@ public:
     /**
      * @brief Get the negotiated media type
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @return MEDIA_CONTENT_TYPE The media type
      */
     virtual MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId) = 0;
@@ -187,7 +186,7 @@ public:
     /**
      * @brief Get the negotiated media quality
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @param type The negotiated media type
      * @return IMS_SINT32 Returns the quality of the target media type
      */
@@ -196,7 +195,7 @@ public:
     /**
      * @brief Get the negotiated codec bitrate
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @param type The negotiated media type
      * @return IMS_SINT32 Returns the bitrate of the negotiated codec
      */
@@ -206,7 +205,7 @@ public:
     /**
      * @brief Get the remote port number
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @param type The media type to retrieve
      * @return IMS_SINT32 Returns the remote port number
      *                    Returns -1 when invalid nNegoId
@@ -215,7 +214,7 @@ public:
     /**
      * @brief Get the negotiated direction
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @param type The negotiated media type
      * @return MEDIA_DIRECTION Returns media direction
      */
@@ -225,7 +224,7 @@ public:
     /**
      * @brief Set the additional update for the MediaSession
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @param type The additional option type
      * @param param1 The optional parameter to set, if there is no optional parameter, it is zero
      * @param param1 The optional parameter to set, if there is no optional parameter, it is zero
@@ -236,7 +235,7 @@ public:
     /**
      * @brief Set the timer of waiting to check the rtp stream is received from the network
      *
-     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextSession identification
      * @param eMediaType The media type to set the wait timer
      * @param nRtpTimer The time in sec units to set
      */
@@ -248,12 +247,12 @@ public:
      *
      * @param nStatus The status defined in MediaDef.h
      * @return IMS_TRUE when the status update is done in right state. The status of the
-     * AudioMediaSession is invalid, returns IMS_FALSE.
+     * AudioSession is invalid, returns IMS_FALSE.
      */
     virtual IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus) = 0;
 
     /**
-     * @brief Send the message event to the Audio/Video/TextMediaSession
+     * @brief Send the message event to the Audio/Video/TextSession
      *
      * @param nMsg The message type
      * @param pParam The message parameter

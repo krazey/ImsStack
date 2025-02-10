@@ -19,4 +19,7 @@
 
     <!-- Aos -->
     <int name="ims.preferred_ims_dscp_int" value="2"/>
+
+    <!-- Mtc -->
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="210000"/>
 </carrier_config>

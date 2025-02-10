@@ -15,8 +15,18 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IReference.h"
+#include "ISipHeader.h"
+#include "ISipMessageBodyPart.h"
 #include "ImsList.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtcContext.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
+#include "MockISipMessageBodyPart.h"
+#include "SdpMedia.h"
+#include "SipHeaderName.h"
 #include "call/IMtcCall.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
@@ -24,20 +34,10 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
-#include "core/IReference.h"
-#include "core/MockIMessage.h"
-#include "core/MockIMessageBodyPart.h"
-#include "core/MockISession.h"
-#include "core/media/IMedia.h"
-#include "core/media/MockIMedia.h"
-#include "core/media/MockIMediaDescriptor.h"
 #include "helper/MockICallStateProxy.h"
-#include "sdp/SdpMedia.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/ISipMessageBodyPart.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
-#include "sipcore/SipHeaderName.h"
+#include "media/IMedia.h"
+#include "media/MockIMedia.h"
+#include "media/MockIMediaDescriptor.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
@@ -114,9 +114,13 @@ public:
         ON_CALL(*piSession, GetPreviousRequest(eServiceMethod)).WillByDefault(Return(piMessage));
     }
 
-    void SetUpPreviousResponses(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START)
+    void SetUpPreviousResponses(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START,
+            IN IMS_BOOL bIsEmpty = IMS_FALSE)
     {
-        objMessages.Append(piMessage);
+        if (!bIsEmpty)
+        {
+            objMessages.Append(piMessage);
+        }
         ON_CALL(*piSession, GetPreviousResponses(eServiceMethod))
                 .WillByDefault(Return(objMessages));
     }
@@ -135,6 +139,9 @@ public:
 
 TEST_F(MessageUtilsTest, GetPreviousResponse)
 {
+    EXPECT_TRUE(objMessageUtils.GetPreviousResponse(IMS_NULL, ANY_METHOD) == IMS_NULL);
+
+    SetUpPreviousResponses(ANY_METHOD, IMS_TRUE);
     EXPECT_TRUE(objMessageUtils.GetPreviousResponse(IMS_NULL, ANY_METHOD) == IMS_NULL);
 
     SetUpPreviousResponses();
@@ -1430,7 +1437,7 @@ TEST_F(MessageUtilsTest, GetCallTypeReturnsVideoRtt)
     EXPECT_EQ(objMessageUtils.GetCallType(piMessage, piSession, IMS_FALSE), CallType::VIDEO_RTT);
 }
 
-TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithNegoSdpIsTrue)
+TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithActiveMediaOnly)
 {
     // bNegoSdp=false case is done by GetCallType
     MockISipMessageBodyPart objBodyPart;

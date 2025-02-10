@@ -195,7 +195,7 @@ public class AudioSessionHandler extends MediaState {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("messageType = " + msg.what);
+            ImsLog.d("messageType = " + msg.what);
 
             // Till open session response is received, handling other commands has to wait
             try {
@@ -268,7 +268,8 @@ public class AudioSessionHandler extends MediaState {
 
                 case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
                 {
-                    handleAudioSetMediaQualityThreshold((MediaQualityThreshold) msg.obj);
+                    handleAudioSetMediaQualityThreshold((MediaQualityThreshold) msg.obj,
+                            msg.arg1 == 1);
                 }
                     break;
 
@@ -361,9 +362,15 @@ public class AudioSessionHandler extends MediaState {
                     handleTriggerAnbrQuery((AudioConfig) msg.obj);
                 }
                     break;
+
                 case MediaConstants.NOTIFY_RTP_RECEPTION_STATS:
                     handleNotifyRtpReceptionStats((RtpReceptionStats) msg.obj);
                     break;
+
+                case MediaConstants.NOTIFY_DTMF_RECEIVED:
+                    handleNotifyIncomingDtmfReceived((int) msg.obj, msg.arg1);
+                    break;
+
                 default:
                 {
                     ImsLog.e("Invalid RequestType");
@@ -457,7 +464,7 @@ public class AudioSessionHandler extends MediaState {
 
         @Override
         public void onCallQualityChanged(@NonNull final CallQuality callQuality) {
-            ImsLog.v("Media Quality Changed: " + callQuality.toString());
+            ImsLog.d("Media Quality Changed: " + callQuality.toString());
 
             Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_CALL_QUALITY_CHANGE,
                     callQuality).sendToTarget();
@@ -473,12 +480,19 @@ public class AudioSessionHandler extends MediaState {
 
         @Override
         public void notifyRtpReceptionStats(final RtpReceptionStats stats) {
-            ImsLog.v("notifyRtpReceptionStats: stats=" + stats);
+            ImsLog.d("notifyRtpReceptionStats: stats=" + stats);
 
             Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS,
                     stats).sendToTarget();
         }
 
+        @Override
+        public void onDtmfReceived(final char dtmfDigit, final int durationMs) {
+            ImsLog.d("onDtmfReceived: digit=" + ((int) dtmfDigit) + ", duration=" + durationMs);
+
+            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_DTMF_RECEIVED,
+                    durationMs, UNUSED, (int) dtmfDigit).sendToTarget();
+        }
     }
 
     /** Implements Interface to receive callbacks when the QoS is connected or disconnected. */
@@ -514,7 +528,7 @@ public class AudioSessionHandler extends MediaState {
      * @param parcel parcel received from Media Native
      */
     public void onImsMediaAudioMessage(final int requestType, Parcel parcel) {
-        ImsLog.v("requestType= " + requestType);
+        ImsLog.d("requestType= " + requestType);
 
         switch (requestType) {
             /** Requests (ImsStack -> ImsMedia) */
@@ -523,7 +537,7 @@ public class AudioSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_OPENING);
                 String localIpAddress = parcel.readString();
                 int localPortNumber = parcel.readInt();
-                ImsLog.v("localIpAddress= " + localIpAddress
+                ImsLog.d("localIpAddress= " + localIpAddress
                         + " localPortNumber= " + localPortNumber);
 
                 Message.obtain(
@@ -553,7 +567,7 @@ public class AudioSessionHandler extends MediaState {
             {
                 String remoteIpAddress = parcel.readString();
                 int remotePortNumber = parcel.readInt();
-                ImsLog.v("remoteIpAddress= " + remoteIpAddress
+                ImsLog.d("remoteIpAddress= " + remoteIpAddress
                         + " remotePortNumber= " + remotePortNumber);
 
                 Message.obtain(
@@ -566,7 +580,7 @@ public class AudioSessionHandler extends MediaState {
             {
                 char dtmfDigit = (char)parcel.readByte();
                 int duration = parcel.readInt();
-                ImsLog.v("dtmfDigit=" + dtmfDigit + ", duration=" +duration);
+                ImsLog.d("dtmfDigit=" + dtmfDigit + ", duration=" + duration);
 
                 Message.obtain(mAudioMessageHandler, requestType, duration, UNUSED, dtmfDigit)
                         .sendToTarget();
@@ -577,16 +591,19 @@ public class AudioSessionHandler extends MediaState {
             {
                 MediaQualityThreshold threshold =
                     MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("MediaQualityThreshold: " + threshold.toString());
+                Boolean needFwkTimer = parcel.readBoolean();
+                ImsLog.d("MediaQualityThreshold: " + threshold.toString() + ", needFwkTimer="
+                        + needFwkTimer);
 
-                Message.obtain(mAudioMessageHandler, requestType, threshold).sendToTarget();
+                Message.obtain(mAudioMessageHandler, requestType, needFwkTimer ? 1 : 0, UNUSED,
+                    threshold).sendToTarget();
             }
                 break;
 
             case MediaConstants.REQUEST_SET_QNS_MEDIA_THRESHOLD:
             {
                 MediaThreshold mediaThreshold = MediaThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("MediaThreshold: " + mediaThreshold.toString());
+                ImsLog.d("MediaThreshold: " + mediaThreshold.toString());
 
                 Message.obtain(mAudioMessageHandler, requestType, mediaThreshold).sendToTarget();
             }
@@ -609,7 +626,7 @@ public class AudioSessionHandler extends MediaState {
             case MediaConstants.REQUEST_UPDATE_ANBR_ENABLED_CONFIG:
             {
                 Boolean anbrEnabled = parcel.readBoolean();
-                ImsLog.v("anbr config =" + anbrEnabled);
+                ImsLog.d("anbr config =" + anbrEnabled);
 
                 Message.obtain(mAudioMessageHandler, requestType, anbrEnabled).sendToTarget();
             }
@@ -620,7 +637,7 @@ public class AudioSessionHandler extends MediaState {
                 int mediaType = parcel.readInt();
                 int direction = parcel.readInt();
                 int bitrate = parcel.readInt();
-                ImsLog.v("media type=" + mediaType + " direction=" + direction
+                ImsLog.d("media type=" + mediaType + " direction=" + direction
                         + " bitrate=" + bitrate);
                 Message.obtain(mAudioMessageHandler, requestType, direction, bitrate, mediaType)
                         .sendToTarget();
@@ -877,10 +894,10 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold mediaThreshold) {
-        if (mMediaConfig.updateMediaQualityThreshold(mediaThreshold)) {
-            setAudioQualityThreshold();
-        }
+    private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold mediaThreshold,
+            Boolean needFwkTimer) {
+        mMediaConfig.updateMediaQualityThreshold(mediaThreshold, needFwkTimer);
+        setAudioQualityThreshold();
     }
 
     private void handleAudioSetQnsMediaThreshold(MediaThreshold mediaThreshold) {
@@ -1075,6 +1092,12 @@ public class AudioSessionHandler extends MediaState {
     private void handleNotifyRtpReceptionStats(final RtpReceptionStats stats) {
         if (mAudioSessionCallbackHandler != null) {
             mAudioSessionCallbackHandler.onNotifyRtpReceptionStats(stats);
+        }
+    }
+
+    private void handleNotifyIncomingDtmfReceived(final int dtmfDigit, final int durationMs) {
+        if (mAudioSessionCallbackHandler != null) {
+            mAudioSessionCallbackHandler.onNotifyIncomingDtmfReceived(dtmfDigit, durationMs);
         }
     }
 

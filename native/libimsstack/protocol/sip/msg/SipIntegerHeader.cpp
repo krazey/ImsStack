@@ -32,24 +32,12 @@ SipIntegerHeader::~SipIntegerHeader() {}
 
 SIP_BOOL SipIntegerHeader::SetValueInt(const SIP_UINT32 nValue)
 {
-    if (nValue > MAX_MAXFD)
+    if ((GetHdrType() == SipHeaderBase::GEOLOCATION_ERROR) && (nValue > MAX_GEOLOCATION_ERROR))
     {
-        if (GetHdrType() == SipHeaderBase::MAX_FORWARDS)
-        {
-            return SIP_FALSE;
-        }
+        return SIP_FALSE;
     }
 
-    if (nValue > MAX_ERROR_CODE)
-    {
-        if (GetHdrType() == SipHeaderBase::GEOLOCATION_ERROR)
-        {
-            return SIP_FALSE;
-        }
-    }
-
-    const SIP_UINT16 MAX_LEN = 11;
-    SIP_CHAR szValue[MAX_LEN];
+    SIP_CHAR szValue[SipMsgUtil::MAX_INT_VALUE_LEN];
     SipPf_Sprintf(szValue, "%u", nValue);
     return SetValue(szValue);
 }
@@ -72,7 +60,7 @@ SIP_BOOL SipIntegerHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) co
     return SipHeaderBase::Encode(objBuffer, bParams);
 }
 
-SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
+SIP_BOOL SipIntegerHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
     const SIP_CHAR* pszValue = GetValue();
 
@@ -80,12 +68,12 @@ SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
     {
         SetValue("0");
     }
-    return SipHeaderBase::EncodeHdr(ppCurrPos, bParams);
+    return SipHeaderBase::Encode(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipIntegerHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipIntegerHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+    if (SipHeaderBase::Decode(pStartPt, nDecLen) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -97,9 +85,9 @@ SIP_BOOL SipIntegerHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         SIP_UINT32 nValue = SipPf_Atoi(pszValue);
         SIP_INT32 eHeaderType = GetHdrType();
 
-        if (((eHeaderType == SipHeaderBase::MAX_FORWARDS) && (nValue > MAX_MAXFD)) ||
-                ((eHeaderType == SipHeaderBase::EXPIRES_SEC) && (nValue > MAX_EXPIRES)) ||
-                ((eHeaderType == SipHeaderBase::GEOLOCATION_ERROR) && (nValue > MAX_ERROR_CODE)))
+        if (((eHeaderType == SipHeaderBase::EXPIRES_SEC) && (nValue > MAX_EXPIRES)) ||
+                ((eHeaderType == SipHeaderBase::GEOLOCATION_ERROR) &&
+                        (nValue > MAX_GEOLOCATION_ERROR)))
         {
             return SIP_FALSE;
         }

@@ -31,12 +31,12 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_nCmr(DEFAULT_CMR),
         m_nChAwRecv(DEFAULT_CH_AW_RECV)
 {
-    IMS_TRACE_D("+CodecEvsConfig Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecEvsConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecEvsConfig::~CodecEvsConfig()
 {
-    IMS_TRACE_D("~CodecEvsConfig", 0, 0, 0);
+    IMS_TRACE_I("~CodecEvsConfig", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
@@ -72,7 +72,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
     m_nChannel = piCcSubBundle->GetInt(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL);
     m_bShowDtx = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE);
+            CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE);
     m_bDtx = piCcSubBundle->GetBoolean(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX);
     m_bDtxRecv = piCcSubBundle->GetBoolean(
@@ -107,12 +107,13 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
     m_nChAwRecv = piCcSubBundle->GetInt(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT, DEFAULT_CH_AW_RECV);
     m_bShowAmrModeSet = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL, IMS_FALSE);
+            CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
+            IMS_FALSE);
     m_nAmrModeSetList = static_cast<IMS_UINT32>(piCc->GetInt(
             CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT, DEFAULT_MODESET_AMR_WB));
 
     m_nDefaultAmrModeSetList = static_cast<IMS_UINT32>(piCc->GetInt(
-            CarrierConfig::Assets::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
+            CarrierConfig::ImsVoice::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
             DEFAULT_MODESET_AMR_WB));
 
     m_nModeChangeCapability = piCcSubBundle->GetInt(
@@ -133,10 +134,10 @@ PUBLIC VIRTUAL void CodecEvsConfig::ToDebugString() const
 {
     CodecAudioConfig::ToDebugString();
 
-    IMS_TRACE_D("ShowDtx(%d), DtxRecv(%d), HfOnly(%d)", m_bShowDtx, m_bDtxRecv, m_nHfOnly);
-    IMS_TRACE_D("EvsModeSwitch(%d), BrList(0x%04x), BwList(%d)", m_nEvsModeSwitch, m_nBrList,
-            m_nBwList);
-    IMS_TRACE_D("Cmr(%d), ChAwRecv(%d)", m_nCmr, m_nChAwRecv, 0);
+    IMS_TRACE_D("ShowDtx[%d], DtxRecv[%d], HfOnly[%d]", m_bShowDtx, m_bDtxRecv, m_nHfOnly);
+    IMS_TRACE_D("EvsModeSwitch[%d], BitrateList[0x%04x], BandwidthList[%d]", m_nEvsModeSwitch,
+            m_nBrList, m_nBwList);
+    IMS_TRACE_D("Cmr[%d], ChAwRecv[%d]", m_nCmr, m_nChAwRecv, 0);
 }
 
 PRIVATE
@@ -144,7 +145,7 @@ IMS_SINT32 CodecEvsConfig::ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IM
 {
     IMS_SINT32 nBitrateSet = 0;
 
-    IMS_TRACE_D("ConvertEvsBitrateToList nBrStart(%d) nBrEnd(%d)", nBrStart, nBrEnd, 0);
+    IMS_TRACE_D("ConvertEvsBitrateToList - Bitrate range:[%d]~[%d]", nBrStart, nBrEnd, 0);
 
     if (nBrStart < EVS_PRIMARY_MODE_BITRATE_5_9_KBPS ||
             nBrEnd < EVS_PRIMARY_MODE_BITRATE_5_9_KBPS ||
@@ -157,7 +158,7 @@ IMS_SINT32 CodecEvsConfig::ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IM
     {
         for (IMS_SINT32 nBitrate = nBrStart; nBitrate <= nBrEnd; nBitrate++)
         {
-            IMS_TRACE_D("ConvertEvsBitrateToList nBitrate (%d) ", nBitrate, 0, 0);
+            IMS_TRACE_D("ConvertEvsBitrateToList - Bitrate[%d] ", nBitrate, 0, 0);
             nBitrateSet = (nBitrateSet | (1 << nBitrate));
         }
     }
@@ -169,7 +170,8 @@ PRIVATE
 IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
         IN IMS_SINT32 nBwList, IN IMS_SINT32 nBrList)
 {
-    IMS_TRACE_D("CheckEvsBandwidthWithBitrate nBwList(%d) nBrList(%d)", nBwList, nBrList, 0);
+    IMS_TRACE_D("CheckEvsBandwidthWithBitrate - BandwidthList[%d] BitrateList[%d]", nBwList,
+            nBrList, 0);
 
     if ((nBrList & 0xFF8) == IMS_FALSE)
     {
@@ -190,7 +192,7 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
                 nBwList = EVS_ENCODED_BW_TYPE_NB_WB;
                 break;
         }
-        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed bwList : %d", nBwList, 0, 0);
+        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed BandwidthList[%d]", nBwList, 0, 0);
     }
     else if ((nBrList & 0xFE0) == IMS_FALSE)
     {
@@ -211,7 +213,7 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
                 nBwList = EVS_ENCODED_BW_TYPE_NB_WB_SWB;
                 break;
         }
-        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed bwList : %d", nBwList, 0, 0);
+        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed BandwidthList[%d]", nBwList, 0, 0);
     }
 
     switch (nBwList)
@@ -241,7 +243,7 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
             break;
     }
 
-    IMS_TRACE_D("CheckEvsBandwidthWithBitrate - new changed bwList : 0x%04x", nBwList, 0, 0);
+    IMS_TRACE_D("CheckEvsBandwidthWithBitrate - new changed BandwidthList[0x%04x]", nBwList, 0, 0);
 
     return nBwList;
 }

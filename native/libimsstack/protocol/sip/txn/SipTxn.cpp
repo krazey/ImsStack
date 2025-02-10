@@ -23,13 +23,13 @@
 #include "txn/SipTxnFsm.h"
 
 SipTxn::SipTxn() :
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_pTxnKey(SIP_NULL),
         m_pSipMsg(SIP_NULL),
         m_pTranspInfo(SIP_NULL),
         m_pUserData(SIP_NULL),
         m_nTxnState(SIP_ZERO),
-        m_nReTxCount(SIP_ZERO),
+        m_nRetransmissionCount(SIP_ZERO),
         m_eTimerType(SipTxn::TIMER_TYPE_INVALID),
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
@@ -40,13 +40,13 @@ SipTxn::SipTxn() :
 
 SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSipMsg,
         IN SipTimerContext* pSipTxnTimerContext, OUT SIP_UINT16* pnError) :
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_pTxnKey(SIP_NULL),
         m_pSipMsg(SIP_NULL),
         m_pTranspInfo(SIP_NULL),
         m_pUserData(SIP_NULL),
         m_nTxnState(SIP_ZERO),
-        m_nReTxCount(SIP_ZERO),
+        m_nRetransmissionCount(SIP_ZERO),
         m_eTimerType(SipTxn::TIMER_TYPE_INVALID),
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
@@ -56,10 +56,10 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
     m_eTxnType = eTxnType;
     m_pTxnKey = new SipTxnKey(pTxnKey, pnError);
 
-    if ((pSipTxnTimerContext != SIP_NULL) && (pSipTxnTimerContext->pTxnSipTxnTimers != SIP_NULL))
+    if ((pSipTxnTimerContext != SIP_NULL) && (pSipTxnTimerContext->m_pTxnSipTxnTimers != SIP_NULL))
     {
-        objTxnTimerValues.UpdateSipTimers(
-                pSipTxnTimerContext->nTimerOptions, pSipTxnTimerContext->pTxnSipTxnTimers);
+        m_objTxnTimerValues.UpdateSipTimers(
+                pSipTxnTimerContext->m_nTimerOptions, pSipTxnTimerContext->m_pTxnSipTxnTimers);
     }
 
     if (m_pTxnKey == SIP_NULL)
@@ -79,7 +79,7 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
 
     /* IDLE State */
     m_nTxnState = SIP_ZERO;
-    m_nReTxCount = SIP_ZERO;
+    m_nRetransmissionCount = SIP_ZERO;
 }
 
 SipTxn::~SipTxn()
@@ -116,7 +116,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 
     switch (eTxnType)
     {
-        case SipTxn::INV_CLI_TXN:
+        case SipTxn::INVITE_CLIENT:
         {
             if (gpfSipInvClientTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -127,7 +127,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
         }
         break;
 
-        case SipTxn::INV_SER_TXN:
+        case SipTxn::INVITE_SERVER:
         {
             if (gpfSipInvSerTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -137,7 +137,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
         }
         break;
 
-        case SipTxn::NON_INV_CLI_TXN:
+        case SipTxn::NON_INVITE_CLIENT:
         {
             if (gpfSipNonInvClientTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -148,7 +148,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
         }
         break;
 
-        case SipTxn::NON_INV_SER_TXN:
+        case SipTxn::NON_INVITE_SERVER:
         {
             if (gpfSipNonInvSerTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -345,7 +345,8 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
         {
             SipAddrSpec* pNewObjReqUri = new SipAddrSpec(*pReqUri);
             pReqUri->SipDelete();
-            pReqLine = new SipRequestLine(ACK_METHOD, pNewObjReqUri, SIP_SIPVERSION);
+            pReqLine = new SipRequestLine(
+                    SipMsgUtil::METHOD_ACK, pNewObjReqUri, SipMsgUtil::SIP_VERSION);
             if (pReqLine == SIP_NULL)
             {
                 SIP_DEBUG_WARNING(
@@ -417,7 +418,7 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
 
     /* Set MaxForward Header */
     SipIntegerHeader* pMaxForward = new SipIntegerHeader(SipHeaderBase::MAX_FORWARDS);
-    SIP_CHAR szMaxFwdValue[SIP_CONTLEN_LEN] = {
+    SIP_CHAR szMaxFwdValue[SipMsgUtil::MAX_INT_VALUE_LEN] = {
             0,
     };
     SipPf_Sprintf(szMaxFwdValue, "%d", SIP_MAX_HOP);
@@ -561,7 +562,7 @@ SIP_BOOL SipTxn::IsTxnTerminated()
 {
     switch (m_eTxnType)
     {
-        case SipTxn::INV_CLI_TXN:
+        case SipTxn::INVITE_CLIENT:
         {
             if (m_nTxnState == SipTxn::INV_CLI_TERMINATED_ST)
             {
@@ -570,7 +571,7 @@ SIP_BOOL SipTxn::IsTxnTerminated()
         }
         break;
 
-        case SipTxn::NON_INV_CLI_TXN:
+        case SipTxn::NON_INVITE_CLIENT:
         {
             if (m_nTxnState == SipTxn::NON_INV_CLI_TERMINATED_ST)
             {
@@ -579,7 +580,7 @@ SIP_BOOL SipTxn::IsTxnTerminated()
         }
         break;
 
-        case SipTxn::INV_SER_TXN:
+        case SipTxn::INVITE_SERVER:
         {
             if (m_nTxnState == SipTxn::INV_SER_TERMINATED_ST)
             {
@@ -587,7 +588,7 @@ SIP_BOOL SipTxn::IsTxnTerminated()
             }
         }
         break;
-        case SipTxn::NON_INV_SER_TXN:
+        case SipTxn::NON_INVITE_SERVER:
         {
             if (m_nTxnState == SipTxn::NON_INV_SER_TERMINATED_ST)
             {
@@ -607,17 +608,17 @@ SIP_BOOL SipTxn::IsTxnTerminated()
 
 SIP_VOID SipTxn::InitRetransmissionInfo()
 {
-    m_nReTxCount = SIP_ZERO;
+    m_nRetransmissionCount = SIP_ZERO;
     m_nMaxDuration = SIP_ZERO;
     m_nDurationExpired = SIP_ZERO;
     m_nCurrentDuration = SIP_ZERO;
 }
 
-SIP_VOID SipTxn::SetRespCode(SIP_UINT16 nRespCode)
+SIP_VOID SipTxn::SetResponseCode(SIP_UINT16 nRespCode)
 {
     if (m_pTxnKey != SIP_NULL)
     {
-        m_pTxnKey->SetRespCode(nRespCode);
+        m_pTxnKey->SetResponseCode(nRespCode);
     }
 }
 
@@ -709,15 +710,15 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     switch (eTxnType)
     {
-        case SipTxn::INV_CLI_TXN:
+        case SipTxn::INVITE_CLIENT:
         {
             if ((eTimerType == SipTxn::TIMER_A) || (eTimerType == SipTxn::TIMER_B))
             {
-                nEvent = SipTxn::INV_CLI_TIMERA_B_TIME_OUT_EVT;
+                nEvent = SipTxn::INV_CLI_TIMER_A_B_TIME_OUT_EVT;
             }
             else if (eTimerType == SipTxn::TIMER_D)
             {
-                nEvent = SipTxn::INV_CLI_TIMERD_TIME_OUT_EVT;
+                nEvent = SipTxn::INV_CLI_TIMER_D_TIME_OUT_EVT;
             }
             else
             {
@@ -730,7 +731,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
         }
         break;
 
-        case SipTxn::NON_INV_CLI_TXN:
+        case SipTxn::NON_INVITE_CLIENT:
         {
             if ((eTimerType == SipTxn::TIMER_E) || (eTimerType == SipTxn::TIMER_F))
             {
@@ -751,7 +752,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
         }
         break;
 
-        case SipTxn::INV_SER_TXN:
+        case SipTxn::INVITE_SERVER:
         {
             if ((eTimerType == SipTxn::TIMER_G) || (eTimerType == SipTxn::TIMER_H))
             {
@@ -771,7 +772,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
             }
         }
         break;
-        case SipTxn::NON_INV_SER_TXN:
+        case SipTxn::NON_INVITE_SERVER:
         {
             if (eTimerType == SipTxn::TIMER_J)
             {

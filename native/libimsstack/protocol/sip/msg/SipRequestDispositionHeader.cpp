@@ -19,9 +19,10 @@
 #include "msg/SipRequestDispositionHeader.h"
 #include "platform/SipString.h"
 
-SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN] = {"proxy", "redirect",
-        "cancel", "no-cancel", "fork", "no-fork", "recurse", "no-recurse", "parallel", "sequential",
-        "queue", "no-queue"};
+const SIP_CHAR* SipRequestDispositionHeader::DIRECTIVE_STRING
+        [SipRequestDispositionHeader::MAX_DIRECTIVE_SIZE] = {"proxy", "redirect", "cancel",
+                "no-cancel", "fork", "no-fork", "recurse", "no-recurse", "parallel", "sequential",
+                "queue", "no-queue"};
 
 SipRequestDispositionHeader::SipRequestDispositionHeader() :
         SipHeaderBase(SipHeaderBase::REQUEST_DISPOSITION)
@@ -36,9 +37,9 @@ SipRequestDispositionHeader::SipRequestDispositionHeader(
 
 SipRequestDispositionHeader::~SipRequestDispositionHeader() {}
 
-SIP_BOOL SipRequestDispositionHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRequestDispositionHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+    if (SipHeaderBase::Decode(pStartPt, nDecLen) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -50,15 +51,25 @@ SIP_BOOL SipRequestDispositionHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UI
         return SIP_FALSE;
     }
 
-    for (SIP_UINT16 nCnt = 0; nCnt < SIP_DIRECTIVE_SIZE; nCnt++)
+    for (SIP_UINT16 nCnt = 0; nCnt < MAX_DIRECTIVE_SIZE; nCnt++)
     {
-        if (SipPf_Strcmp(gaszDirectivesArray[nCnt], pszValue) == 0)
+        if (SipPf_Strcmp(DIRECTIVE_STRING[nCnt], pszValue) == 0)
         {
             return SIP_TRUE;
         }
     }
 
     return SIP_FALSE;
+}
+
+const SIP_CHAR* SipRequestDispositionHeader::GetDirectiveString(SIP_UINT32 nIndex)
+{
+    if (nIndex < MAX_DIRECTIVE_SIZE)
+    {
+        return DIRECTIVE_STRING[nIndex];
+    }
+
+    return SIP_NULL;
 }
 
 SipHeaderBase* SipRequestDispositionHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)

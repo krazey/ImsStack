@@ -23,6 +23,7 @@
 #include "ITimer.h"
 #include "ImsActivityEx.h"
 #include "MtsDef.h"
+#include "helper/MtsTransactionTimerUpdateHelper.h"
 #include <functional>
 
 class IMessage;
@@ -100,7 +101,7 @@ private:
     void SetLocationToMessage(IN IMessage* piMessage);
 
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const;
-    AString GetPreviousCallId(IN const ByteArray& objContent);
+    AString GetPreviousCallId(IN const IMtsMessage* piMtsMessage) const;
     static IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     static void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri);
@@ -126,6 +127,7 @@ private:
     ITimer* m_piRetryAfterTimer;
     std::function<void()> m_objRetryFunction;
     ByteArray* m_pRetryContent;
+    MtsTransactionTimerUpdateHelper m_objTimerUpdateHelper;
 };
 
 #endif

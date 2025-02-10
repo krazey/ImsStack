@@ -35,8 +35,8 @@ public:
     MOCK_METHOD(IMS_SINT32, GetPortRtp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPortRtpEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPortRtcp, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRtcpLiveInterval, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRtcpInterval, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRtcpIntervalOnActive, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRtcpIntervalOnHold, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetAsBandwidthKbps, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRsBandwidthBps, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRrBandwidthBps, (), (const, override));

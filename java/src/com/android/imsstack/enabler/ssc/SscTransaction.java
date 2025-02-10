@@ -446,7 +446,7 @@ public class SscTransaction {
         int appType = getSscUtils().getTelephonySimType(mSlotId);
         int gbaMode = SscConfig.getGbaMode(mSlotId);
         boolean isTls = SscConfig.isTls(mSlotId);
-        String nafFqdn = authAgent.getNafFqdnFromRealm();
+        String nafFqdn = authAgent.getNafFqdn();
         String securityProtocol = authAgent.getCipherSuite();
 
         GbaCredentials gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,

@@ -89,6 +89,17 @@ public class DcSettingsTest {
     }
 
     @Test
+    public void testIsImsPdnRequestWithoutMmtelRequired() throws Exception {
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
+                .thenReturn(true)
+                .thenReturn(false);
+
+        assertTrue(mDcSettingsUT.isImsPdnRequestWithoutMmtelRequired());
+        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtelRequired());
+    }
+
+    @Test
     public void testGetImsSupportedRats() throws Exception {
         int[] emptyList = {};
         int[] availableList = {AccessNetworkConstants.AccessNetworkType.EUTRAN};

@@ -162,6 +162,8 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getIntArray(
             CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
             .thenReturn(mServerBasedServices);
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_SUPPORT_CFNR_TIMER_BOOL)))
+                .thenReturn(true);
 
         when(mContext.getSharedPreferences(anyString(), anyInt()))
                 .thenReturn(mMockSharedPreferences);
@@ -233,7 +235,7 @@ public class SscServiceImplTest {
     @Test
     public void testBasicOperation_informErrorPhrase() {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
+                eq(CarrierConfig.ImsSs.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(true);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
         mErrorPhrase = "check error phrase";
@@ -257,7 +259,7 @@ public class SscServiceImplTest {
     @Test
     public void testBasicOperation_ignoreErrorPhrase() {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
+                eq(CarrierConfig.ImsSs.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(false);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
         mErrorPhrase = "check error phrase";
@@ -429,7 +431,7 @@ public class SscServiceImplTest {
     @Test
     public void testQueryCallForward_multipleRequest() {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL)))
+                eq(CarrierConfig.ImsSs.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL)))
                 .thenReturn(true);
 
         int responseCount = 1;
@@ -503,7 +505,7 @@ public class SscServiceImplTest {
     @Test
     public void testQueryCallForward_queryCfaAndCfacNotSupported() {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL)))
+                eq(CarrierConfig.ImsSs.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL)))
                 .thenReturn(false);
 
         int tId = 1;
@@ -797,7 +799,7 @@ public class SscServiceImplTest {
     public void testUpdateCallBarringWithPassword_insertNewRule() {
         mIsIcbRulesExist = false;
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -900,7 +902,7 @@ public class SscServiceImplTest {
     public void testUpdateCallForward_insertRuleSet() {
         mIsCfRuleSetExist = false;
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -921,7 +923,7 @@ public class SscServiceImplTest {
         mIsCfRuleSetExist = true;
         mIsCfbRuleExist = false;
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -941,7 +943,7 @@ public class SscServiceImplTest {
     public void testUpdateCallForward_notInsertRuleForCfnrTimer() {
         mIsCfRuleSetExist = false;
 
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -964,7 +966,7 @@ public class SscServiceImplTest {
         mIsCfnlRuleExist = true;
 
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
+                eq(CarrierConfig.ImsSs.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
         int tId = 1;
 
         mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ERASURE,
@@ -1001,6 +1003,25 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testUpdateCallForward_Cfnr_CfnrTimerNotSupported() {
+        mIsTimerInCfnr = false;
+        int tId = 1;
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.ImsSs.KEY_UT_SUPPORT_CFNR_TIMER_BOOL))).thenReturn(false);
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, 0, 20);
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFNR);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
     public void testUpdateCallForward_CfnrWithTimer() {
         mIsTimerInCfnr = true;
         int tId = 1;
@@ -1008,7 +1029,25 @@ public class SscServiceImplTest {
         mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_CFNR, null, 0, 20);
         processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFNR);
 
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateCallForward_CfnrWithTimer_CfnrTimerNotSupported() {
+        mIsTimerInCfnr = true;
+        int tId = 1;
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.ImsSs.KEY_UT_SUPPORT_CFNR_TIMER_BOOL))).thenReturn(false);
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, 0, 20);
+        processEntireXmlDocQueryAsSuccess();
         processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
                 SscConstant.CONDITION_CFNR);
 
@@ -1075,7 +1114,7 @@ public class SscServiceImplTest {
     @Test
     public void testUpdateCallForward_erasureNotSupported() {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(false);
+                eq(CarrierConfig.ImsSs.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(false);
 
         int tId = 1;
 
@@ -1133,7 +1172,7 @@ public class SscServiceImplTest {
         int tId = 1;
         int invalidTimer = SscConstant.CFNR_TIMER_MAX + 1;
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
+                eq(CarrierConfig.ImsSs.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
 
         mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_REGISTRATION,
                 SscConstant.CONDITION_CFB, null, 0, invalidTimer);

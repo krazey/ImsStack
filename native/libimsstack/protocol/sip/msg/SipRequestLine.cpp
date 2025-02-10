@@ -62,56 +62,42 @@ SipRequestLine::~SipRequestLine()
     }
 }
 
-SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipRequestLine::Encode(SIP_CHAR** ppCurrPos)
 {
     /*check for existence of Method, request uri and version */
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Method missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Method missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pReqUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Request Uri missing", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Request Uri missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pszSipVersion == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Sip Version missing", SIP_ZERO,
-                SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Sip Version missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    /*Encode Method*/
-    SipPf_Strcpy(*ppCurrPos, m_pszMethod);
-    /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
-
-    /* Put a space */
-    SIP_ENC_SP(*ppCurrPos);
-
-    /* Encode Request Uri*/
-    m_pReqUri->EncodeAddrSpec(ppCurrPos);
-
-    SIP_ENC_SP(*ppCurrPos);
-    SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
-
-    /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszMethod);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
+    m_pReqUri->Encode(ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszSipVersion);
 
     return SIP_TRUE;
 }
 
 SIP_VOID SipRequestLine::SetMethod(const SIP_CHAR* pMethod)
 {
-    SetCharVar(pMethod, m_pszMethod);
+    SipMsgUtil::SetValue(pMethod, m_pszMethod);
 }
 
 SIP_VOID SipRequestLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
-    SetCharVar(pszVer, m_pszSipVersion);
+    SipMsgUtil::SetValue(pszVer, m_pszSipVersion);
 }
 
 SIP_VOID SipRequestLine::SetReqUri(SipAddrSpec* pAddrSpec)
@@ -138,24 +124,22 @@ SipAddrSpec* SipRequestLine::GetReqUri()
     return m_pReqUri;
 }
 
-SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRequestLine::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     const SIP_CHAR* pTempLoc = SIP_NULL;
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*find first space i.e. end of Method*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Create a NULL terminated String of Method*/
-    m_pszMethod = SipCreateString(pStartPt, pTempLoc);
+    m_pszMethod = SipAbnfUtil::CreateString(pStartPt, pTempLoc);
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -164,10 +148,9 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
     /*find Second space i.e. end of Req URI*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Space not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -176,8 +159,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
     m_pReqUri = new SipAddrSpec();
     if (m_pReqUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -185,27 +167,24 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 
 #ifdef SIP_STRICT_PARSING
     if (IsValidAddress(pStartPt, nTempLen) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Address Spec is Invalid", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Addr-spec is invalid", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
 #endif
 
-    if (m_pReqUri->DecodeAddrSpec(pStartPt, nTempLen) == SIP_FALSE)
+    if (m_pReqUri->Decode(pStartPt, nTempLen) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Addr Spec decode failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Addr-spec decode failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Take the ptr to the start of  Sip Version*/
     pStartPt = pTempLoc + SIP_TWO;
     pTempLoc = SIP_NULL;
-    m_pszSipVersion = SipCreateString(pStartPt, pEndPt);
+    m_pszSipVersion = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszSipVersion == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

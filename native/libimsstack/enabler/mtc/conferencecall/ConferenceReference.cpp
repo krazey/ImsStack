@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IMessage.h"
 #include "IMtcService.h"
@@ -334,7 +335,8 @@ void ConferenceReference::GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1To1
     // Send Refer with Target number - multiple refer with resource list
     else if (m_objConfUsers.GetSize() > 0)
     {
-        strUri = m_objContext.GetConfigurationProxy().GetStr(Feature::CONFERENCE_FACTORY_URI, 0);
+        strUri = m_objContext.GetConfigurationProxy().GetString(
+                ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING);
     }
 }
 

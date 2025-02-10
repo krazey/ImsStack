@@ -44,7 +44,7 @@ public:
     void RemoveListener(IN IAosEmergencyListener* piListener) override;
 
     /// Java -> Native
-    void NotifyEmcCallbackModeChanged(
+    void NotifyEmergencyCallbackModeChanged(
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration) override;
     void UpdateSipDelegateRegistration() override;
     void TriggerSipDelegateDeregistration() override;

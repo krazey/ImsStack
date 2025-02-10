@@ -24,10 +24,12 @@
 #include "helper/PassiveTimerHolder.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Invoke;
 
-#define ANY_TIMER_TYPE     IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER
-#define ANY_TIMER_DURATION 10000
+LOCAL const IPassiveTimerHolder::Type ANY_TIMER_TYPE =
+        IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER;
+LOCAL const IMS_SINT32 ANY_TIMER_DURATION = 10000;
 
 class PassiveTimerHolderTest : public ::testing::Test
 {
@@ -69,6 +71,14 @@ TEST_F(PassiveTimerHolderTest, AddTimerCreatesTimerAndLetsIsActiveReturnTrue)
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
+TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeDoesNothingIfDurationIsNegative)
+{
+    EXPECT_CALL(objTimer, SetTimer(_, _)).Times(0);
+
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, -1, IMS_TRUE);
+    EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
+}
+
 TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeDoesNothingIfNotAllowsReset)
 {
     EXPECT_CALL(objTimer, SetTimer(ANY_TIMER_DURATION, pPassiveTimerHolder)).Times(1);
@@ -87,6 +97,19 @@ TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeResetsTimerIfAllowsReset)
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
     pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_TRUE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
+}
+
+TEST_F(PassiveTimerHolderTest, RemoveTimerReleasesTimer)
+{
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->RemoveTimer(ANY_TIMER_TYPE);
+    EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
+}
+
+TEST_F(PassiveTimerHolderTest, RemoveTimerDoesNothingIfNoMatchingTimer)
+{
+    pPassiveTimerHolder->RemoveTimer(ANY_TIMER_TYPE);
+    EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
 TEST_F(PassiveTimerHolderTest, IsActiveReturnsFalseAfterAosDisconnected)

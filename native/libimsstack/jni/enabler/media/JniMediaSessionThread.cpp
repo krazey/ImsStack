@@ -188,11 +188,13 @@ IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("OnSetMediaQualityThreshold - type[%d]", pParam->m_eMediaType, 0, 0);
+    IMS_TRACE_D("OnSetMediaQualityThreshold - type[%d], Framework timer needed[%d]",
+            pParam->m_eMediaType, pParam->m_bRtpInactivityFwkTimer, 0);
     Parcel objParcel;
     objParcel.writeInt32(IJniMedia::REQUEST_SET_MEDIA_QUALITY);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_objMediaQualityThreshold.writeToParcel(&objParcel);
+    objParcel.writeBool(pParam->m_bRtpInactivityFwkTimer);
     SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;

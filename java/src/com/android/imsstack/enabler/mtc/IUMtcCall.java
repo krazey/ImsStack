@@ -49,28 +49,27 @@ public class IUMtcCall {
     // Event : IMS to UI
     public static final int STARTED                 = (EVENT_I2U + 1);
     public static final int START_FAILED            = (EVENT_I2U + 2);
-    public static final int PROGRESSING             = (EVENT_I2U + 3);
-    public static final int HELD                    = (EVENT_I2U + 4);
-    public static final int HOLD_FAILED             = (EVENT_I2U + 5);
-    public static final int HELD_BY                 = (EVENT_I2U + 6);
-    public static final int RESUMED                 = (EVENT_I2U + 7);
-    public static final int RESUME_FAILED           = (EVENT_I2U + 8);
-    public static final int RESUMED_BY              = (EVENT_I2U + 9);
-    public static final int TERMINATED              = (EVENT_I2U + 10);
-    public static final int INCOMING_UPDATE         = (EVENT_I2U + 11);
-    public static final int UPDATED                 = (EVENT_I2U + 12);
-    public static final int UPDATE_FAILED           = (EVENT_I2U + 13);
-    public static final int UPDATED_BY              = (EVENT_I2U + 14);
-    public static final int NOTIFY_INFO             = (EVENT_I2U + 15);
-    public static final int INCOMING_RESUME         = (EVENT_I2U + 16);
-    public static final int SET_PROPERTY            = (EVENT_I2U + 17);
-    public static final int INCOMING_CALL_RECEIVED  = (EVENT_I2U + 18);
+    public static final int INITIATING              = (EVENT_I2U + 3);
+    public static final int PROGRESSING             = (EVENT_I2U + 4);
+    public static final int HELD                    = (EVENT_I2U + 5);
+    public static final int HOLD_FAILED             = (EVENT_I2U + 6);
+    public static final int HELD_BY                 = (EVENT_I2U + 7);
+    public static final int RESUMED                 = (EVENT_I2U + 8);
+    public static final int RESUME_FAILED           = (EVENT_I2U + 9);
+    public static final int RESUMED_BY              = (EVENT_I2U + 10);
+    public static final int TERMINATED              = (EVENT_I2U + 11);
+    public static final int INCOMING_UPDATE         = (EVENT_I2U + 12);
+    public static final int UPDATED                 = (EVENT_I2U + 13);
+    public static final int UPDATE_FAILED           = (EVENT_I2U + 14);
+    public static final int UPDATED_BY              = (EVENT_I2U + 15);
+    public static final int NOTIFY_INFO             = (EVENT_I2U + 16);
+    public static final int INCOMING_RESUME         = (EVENT_I2U + 17);
+    public static final int SET_PROPERTY            = (EVENT_I2U + 18);
+    public static final int INCOMING_CALL_RECEIVED  = (EVENT_I2U + 19);
 
     public static final int ECT_COMPLETED           = (EVENT_I2U + 61);
     public static final int REPLACED_BY             = (EVENT_I2U + 62);
     public static final int CALL_PUSH_COMPLETED     = (EVENT_I2U + 63);
-
-    public static final int CODEC_INFO_UPDATED = (EVENT_I2U + 91);
 
     // Call Type
     public static final int VOLTE_CALL_TYPE_NORMAL = 0;
@@ -91,6 +90,20 @@ public class IUMtcCall {
     public static final int SERVICETYPE_NONE            = 0;
     public static final int SERVICETYPE_NORMAL          = (0x00000001);
     public static final int SERVICETYPE_EMERGENCY       = (0x00000002);
+
+    // Emergency Type
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_NORMAL.
+    public static final int EMERGENCYTYPE_NONE              = 0;
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to either
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN or
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY.
+    public static final int EMERGENCYTYPE_EMERGENCY_ROUTING = 1;
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL.
+    public static final int EMERGENCYTYPE_NORMAL_ROUTING    = 2;
 
     // Property AGOODUC - WILL REMOVED
     public static final int PROPERTY_IS_CONF                = 0;

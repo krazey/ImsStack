@@ -19,9 +19,12 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "IMessage.h"
+#include "IMessageBodyPart.h"
+#include "ISession.h"
 #include "ISipConfig.h"
 #include "ISipConfigV.h"
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
@@ -33,22 +36,53 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCallManager.h"
+#include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
+#include "call/termination/EmergencyStartErrorHandler.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IMessageBodyPart.h"
-#include "core/ISession.h"
+#include "configuration/MtcConfigurationResolver.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaUtil.h"
-#include "sipcore/ISipMessage.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW =
         "simultaneous call limit has already been reached";
+// clang-format off
+const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
+        StartErrorHandler::objActionFuncMap = {
+    {ConfigVoice::START_ERROR_ACTION_CSFB,
+            &StartErrorHandler::HandleCsfb},
+    {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE,
+            &StartErrorHandler::HandleSilentReinvite},
+    {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT,
+            &StartErrorHandler::HandleSilentReinviteBySdpContent},
+    {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER,
+            &StartErrorHandler::HandleSilentReinviteByRetryAfter},
+    {ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY,
+            &StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy},
+    {ConfigVoice::START_ERROR_ACTION_REDIRECTION_BY_CONTACT,
+            &StartErrorHandler::HandleRedirectionByContact},
+    {ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL,
+            &StartErrorHandler::HandleNonUeDetectableEmergencyCall},
+    {ConfigVoice::START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY,
+            &StartErrorHandler::HandleForbiddenByPolicy},
+    {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE_MAX_CALL_LIMIT,
+            &StartErrorHandler::HandleTerminateByReasonPhraseMaxCallLimit},
+    {ConfigVoice::START_ERROR_ACTION_USSI_CSFB,
+            &StartErrorHandler::HandleUssiCsfb},
+    {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER,
+            &StartErrorHandler::HandleBlockCallByTimer},
+    {ConfigVoice::START_ERROR_ACTION_TRIGGER_EPSFB,
+            &StartErrorHandler::HandleTriggerEpsfb},
+    {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_RESPONSE_SOURCE,
+            &StartErrorHandler::HandleTerminateByResponseSource}
+};
+// clang-format on
 
 PUBLIC
 StartErrorHandler::StartErrorHandler(IN IMtcCallContext& objContext, IN ISession& objSession) :
@@ -63,18 +97,9 @@ StartErrorHandler::~StartErrorHandler() {}
 PUBLIC
 CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (m_objContext.GetCallInfo().IsEmergency())
     {
-        // According to Domain Selection and legacy Call Framework behavior,
-        // IMS Stack should use same failure reason as normal call.
-        // Emergency Call is redialed for all reasons except
-        // CODE_USER_TERMINATED, CODE_USER_TERMINATED_BY_REMOTE, and CODE_SIP_USER_REJECTED
-        IMS_TRACE_D("Handle : Emergency Call Failure.", 0, 0, 0);
-
-        if (IsRedialEmergencyWithNextPcscfRequired(piMessage))
-        {
-            return HandleRedialEmergencyWithNextPcscf();
-        }
+        return EmergencyStartErrorHandler(m_objContext, m_objSession).Handle(piMessage);
     }
 
     if (IsTransactionTimeout(piMessage))
@@ -83,72 +108,74 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
         return HandleTransactionTimeout();
     }
 
-    if (IsConditionCheckRequiredBeforeRetry1x(*piMessage) == IMS_FALSE &&
-            IsRetry1xRequiredForNormalCall(*piMessage))
+    ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
+            m_objContext.GetConfigurationProxy(), piMessage->GetStatusCode());
+    for (IMS_UINT32 i = 0; i < objActions.GetSize(); ++i)
     {
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+        auto it = objActionFuncMap.find(objActions.GetAt(i));
+        if (it != objActionFuncMap.end())
+        {
+            CallReasonInfo objResult = (this->*(it->second))(*piMessage);
+            if (objResult.nCode != CODE_NONE)
+            {
+                return objResult;
+            }
+        }
     }
 
-    if (m_objContext.GetCallInfo().bEmergency)
-    {
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
-    }
-
-    return HandleResponse(*piMessage);
+    return GetDefaultCallReasonInfo(*piMessage);
 }
 
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
-    if (m_objContext.GetCallInfo().bEmergency)
+    if (EpsFallbackTrigger::ShouldTriggerByMoRequestTimeout(m_objContext))
     {
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
     }
 
-    Feature eFeature = m_objContext.GetService().IsWlanIpCanType()
-            ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
-            : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
+    const IMS_CHAR* pszKey = m_objContext.GetService().IsWlanIpCanType()
+            ? ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT
+            : ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT;
 
-    const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(eFeature);
+    const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(pszKey);
     IMS_SINT32 nReason = CODE_NETWORK_RESP_TIMEOUT;
     IMS_SINT32 nExtraCode = EXTRA_CODE_METHOD_INVITE;
     switch (nPolicy)
     {
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END:
             break;
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE:
             ControlAos(ImsAosControl::PCSCF_NEXT);
             break;
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             }
             break;
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
             ControlAos(ImsAosControl::REGISTER_REINITIATE);
             break;
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF:
             ControlAos(ImsAosControl::PCSCF_NEXT);
             break;
-        case CarrierConfig::ImsVoice::
+        case ConfigVoice::
                 MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
                 ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
             }
             break;
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
             nReason = CODE_INTERNAL_REDIAL;
             nExtraCode = EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT;
             break;
-        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT:
             return HandleRedialByNetworkContext();
     }
 
@@ -156,71 +183,123 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::HandleResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleCsfb(IN const IMessage& /*objMessage*/) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    if (SipStatusCode::SC_300 <= nStatusCode && nStatusCode < SipStatusCode::SC_400)
-    {
-        return Handle3xxResponse(objMessage);
-    }
-    else if (SipStatusCode::SC_400 <= nStatusCode && nStatusCode < SipStatusCode::SC_500)
-    {
-        return Handle4xxResponse(objMessage);
-    }
-    else if (SipStatusCode::SC_500 <= nStatusCode && nStatusCode < SipStatusCode::SC_600)
-    {
-        return Handle5xxResponse(objMessage);
-    }
-    else if (SipStatusCode::SC_600 <= nStatusCode && nStatusCode < SipStatusCode::SC_MAX)
-    {
-        return Handle6xxResponse(objMessage);
-    }
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::Handle3xxResponse(IN const IMessage& objMessage) const
-{
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    switch (nStatusCode)
-    {
-        case SipStatusCode::SC_300:
-        case SipStatusCode::SC_301:
-        case SipStatusCode::SC_302:
-        case SipStatusCode::SC_305:
-            return HandleRedirection(objMessage);
-        case SipStatusCode::SC_380:
-            return Handle380Response(objMessage);
-    }
-
-    return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::HandleRedirection(IN const IMessage& objMessage) const
-{
-    AString strContact =
-            m_objContext.GetMessageUtils().GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL);
-    if (strContact.GetLength() > 0)
-    {
-        // TODO: silent redial with the Contact header to be implemented
-        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION, strContact);
-    }
-
-    if (IsRetry1xRequiredForNormalCall(objMessage))
+    IMS_TRACE_I("HandleCsfb", 0, 0, 0);
+    if (m_objContext.GetService().IsCsfbAvailable())
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
-
-    return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleSilentReinvite(IN const IMessage& /*objMessage*/) const
 {
+    IMS_TRACE_I("HandleSilentReinvite", 0, 0, 0);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_ERROR_RESPONSE);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleSilentReinviteBySdpContent(
+        IN const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteBySdpContent", 0, 0, 0);
+    if (m_objContext.GetMessageUtils().HasSdp(&objMessage))
+    {
+        IMS_UINT32 eMediaTypes =
+                m_objContext.GetMediaManager().GetSupportedMediaTypesFromSdp(&m_objSession);
+        if (eMediaTypes != MEDIATYPE_NONE)
+        {
+            return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE,
+                    MtcMediaUtil::MediaTypesToString(eMediaTypes));
+        }
+    }
+
+    return CallReasonInfo(CODE_NONE);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleSilentReinviteByRetryAfter(
+        IN const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteByRetryAfter", 0, 0, 0);
+    IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            &objMessage, ISipHeader::RETRY_AFTER_ANY);
+    if (nRetryAfter <= 0)
+    {
+        return CallReasonInfo(CODE_NONE);
+    }
+    AString strRetryAfter;
+    strRetryAfter.SetNumber(nRetryAfter * 1000);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfter);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy(
+        IN const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleRegistrationRestorationOnIms3gppByPolicy", 0, 0, 0);
+    if (m_objContext.GetConfigurationProxy().GetBoolean(ConfigVoice::
+                        KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
+    {
+        if (!m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader()) &&
+                !m_objContext.GetMessageUtils().ContainsAddressInPaid(
+                        &objMessage, GetServiceRouteHeader()))
+        {
+            IMS_TRACE_E(0, "P-Asserted-Identity header validation failed.", 0, 0, 0);
+            return CallReasonInfo(CODE_NONE);
+        }
+    }
+
+    if (IsInitialRegistrationRequired(objMessage))
+    {
+        const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT);
+        switch (nPolicy)
+        {
+            case ConfigVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
+                break;
+            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
+                if (m_objContext.GetService().IsCsfbAvailable())
+                {
+                    break;
+                }
+                __IMS_FALLTHROUGH__
+            case ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
+                ControlAos(ImsAosControl::PCSCF_NEXT);
+                break;
+
+            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION:
+                // If there is an operator that requires PDN reconnect, AoS I/F should be added.
+            case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
+                ControlAos(ImsAosControl::REGISTER_REINITIATE);
+                break;
+        }
+    }
+
+    return CallReasonInfo(CODE_NONE);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleRedirectionByContact(IN const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleRedirectionByContact", 0, 0, 0);
+    AString strContact =
+            m_objContext.GetMessageUtils().GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL);
+    if (strContact.GetLength() > 0)
+    {
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION, strContact);
+    }
+    return CallReasonInfo(CODE_NONE);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleNonUeDetectableEmergencyCall(
+        IN const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleNonUeDetectableEmergencyCall", 0, 0, 0);
     IMS_SINT32 eSosType = m_objContext.GetMessageUtils().GetSosTypeFromServiceUrn(
             &objMessage, ISipHeader::CONTACT_NORMAL);
     if (eSosType != EXTRA_CODE_EMERGENCYSERVICE_INVALID &&
@@ -235,118 +314,38 @@ CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessag
                 CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
     }
 
-    if (IsRetry1xRequiredForNormalCall(objMessage))
-    {
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
-    }
-    return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& /*objMessage*/) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    switch (nStatusCode)
-    {
-        case SipStatusCode::SC_400:
-            return CallReasonInfo(CODE_SIP_BAD_REQUEST, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_401:
-            return CallReasonInfo(CODE_SIP_CLIENT_ERROR, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_403:
-            return Handle403Response(objMessage);
-        case SipStatusCode::SC_404:
-            return Handle404Response();
-        case SipStatusCode::SC_405:
-            return CallReasonInfo(CODE_SIP_METHOD_NOT_ALLOWED, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_406:
-            return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_407:
-            return Handle407Response();
-        case SipStatusCode::SC_408:
-            return CallReasonInfo(CODE_SIP_REQUEST_TIMEOUT, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_410:
-            return CallReasonInfo(CODE_SIP_NOT_REACHABLE, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_413:
-            return CallReasonInfo(
-                    CODE_SIP_REQUEST_ENTITY_TOO_LARGE, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_414:
-            return CallReasonInfo(CODE_SIP_REQUEST_URI_TOO_LARGE, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_415:
-        case SipStatusCode::SC_416:
-        case SipStatusCode::SC_420:
-            return CallReasonInfo(CODE_SIP_NOT_SUPPORTED, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_421:
-            // re-INVITE should be sent with the extension of Require header using Supported header
-            return CallReasonInfo(CODE_SIP_EXTENSION_REQUIRED, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_422:
-            // re-INVITE is sent by the engine without notification if it has Min-SE header
-            // so, if there is no Min-SE header, CODE_SIP_INTERVAL_TOO_BRIEF will be used
-            return CallReasonInfo(CODE_SIP_INTERVAL_TOO_BRIEF, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_480:
-            return CallReasonInfo(CODE_SIP_TEMPRARILY_UNAVAILABLE, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_481:
-            return CallReasonInfo(
-                    CODE_SIP_TRANSACTION_DOES_NOT_EXIST, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_482:
-            return CallReasonInfo(CODE_SIP_LOOP_DETECTED, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_483:
-            return CallReasonInfo(CODE_SIP_TOO_MANY_HOPS, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_484:
-            return CallReasonInfo(CODE_SIP_BAD_ADDRESS, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_485:
-            return CallReasonInfo(CODE_SIP_AMBIGUOUS, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_486:
-            return CallReasonInfo(CODE_SIP_BUSY, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_487:
-            return CallReasonInfo(CODE_SIP_REQUEST_CANCELLED, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_488:
-            return Handle488Response(objMessage);
-        case SipStatusCode::SC_491:
-            return CallReasonInfo(CODE_SIP_REQUEST_PENDING, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_493:
-            return CallReasonInfo(CODE_SIP_UNDECIPHERABLE, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_499:  // only for SKT VT
-            return CallReasonInfo(CODE_SIP_NOT_REACHABLE, GetDefaultExtraCode(objMessage));
-    }
-
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::Handle403Response(IN const IMessage& objMessage) const
-{
-    if (IsByMaxCallLimit(objMessage))
-    {
-        return CallReasonInfo(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED);
-    }
-
+    IMS_TRACE_I("HandleForbiddenByPolicy", 0, 0, 0);
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-            Feature::POLICY_FOR_403_RESPONSE_FOR_INVITE);
+            ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT);
     switch (nPolicy)
     {
-        case CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL:
+        case ConfigVoice::SIP_403_POLICY_TERMINATE_CALL:
             break;
 
-        case CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION:
+        case ConfigVoice::SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION:
             ControlAos(ImsAosControl::REGISTER_REINITIATE);
             break;
 
-        case CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION:
+        case ConfigVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION:
             ControlAos(ImsAosControl::REGISTER_REFRESH);
             break;
 
-        case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+        case ConfigVoice::SIP_403_POLICY_CSFB:
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 return CallReasonInfo(
                         CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
             }
             break;
 
-        case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION:
-            if (m_objContext.GetService().IsEpsCombinedAttach())
+        case ConfigVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION:
+            if (m_objContext.GetService().IsCsfbAvailable())
             {
                 ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
                 return CallReasonInfo(
@@ -355,101 +354,42 @@ CallReasonInfo StartErrorHandler::Handle403Response(IN const IMessage& objMessag
             break;
     }
 
-    return CallReasonInfo(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403);
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle404Response() const
+CallReasonInfo StartErrorHandler::HandleTerminateByReasonPhraseMaxCallLimit(
+        IN const IMessage& objMessage) const
 {
-    if (m_objContext.GetCallInfo().bUssi && m_objContext.GetService().IsEpsCombinedAttach())
+    IMS_TRACE_I("HandleTerminateByReasonPhraseMaxCallLimit", 0, 0, 0);
+    if (IsByMaxCallLimit(objMessage))
+    {
+        return CallReasonInfo(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED);
+    }
+    return CallReasonInfo(CODE_NONE);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleUssiCsfb(IN const IMessage& /*objMessage*/) const
+{
+    IMS_TRACE_I("HandleUssiCsfb", 0, 0, 0);
+    if (m_objContext.GetCallInfo().bUssi && m_objContext.GetService().IsCsfbAvailable())
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
-    else
-    {
-        return CallReasonInfo(CODE_SIP_NOT_FOUND, SipStatusCode::SC_404);
-    }
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle407Response()
+CallReasonInfo StartErrorHandler::HandleBlockCallByTimer(IN const IMessage& objMessage) const
 {
-    // TODO: an initial INVITE must be sent with Authorization.
-    return CallReasonInfo(CODE_SIP_PROXY_AUTHENTICATION_REQUIRED, SipStatusCode::SC_407);
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::Handle488Response(IN const IMessage& objMessage) const
-{
-    if (m_objContext.GetMessageUtils().HasSdp(&objMessage))
-    {
-        IMS_UINT32 eMediaTypes =
-                m_objContext.GetMediaManager().GetSupportedMediaTypesFromSdp(&m_objSession);
-        if (eMediaTypes != MEDIATYPE_NONE)
-        {
-            return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE,
-                    MtcMediaUtil::MediaTypesToString(eMediaTypes));
-        }
-    }
-
-    if (IsRetry1xRequiredForNormalCall(objMessage))
-    {
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
-    }
-
-    return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessage) const
-{
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    switch (nStatusCode)
-    {
-        case SipStatusCode::SC_500:
-            return Handle500Response(objMessage);
-        case SipStatusCode::SC_501:
-            return CallReasonInfo(CODE_SIP_SERVER_INTERNAL_ERROR, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_502:
-            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_503:
-            return Handle503Response(objMessage);
-        case SipStatusCode::SC_504:
-            return Handle504Response(objMessage);
-        case SipStatusCode::SC_505:
-        case SipStatusCode::SC_513:
-        case SipStatusCode::SC_580:  // remote precondition failure case
-            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
-    }
-
-    return Handle500Response(objMessage);
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::Handle500Response(IN const IMessage& objMessage) const
-{
-    if (!m_objContext.GetMessageUtils().IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC))
-    {
-        if (IsIpcanResourceUnavailable(objMessage))
-        {
-            // TS 24.229 5.1.3.1: There's the method to examine headers but no further behavior.
-            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
-        }
-    }
-
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
-}
-
-PRIVATE
-CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessage) const
-{
+    IMS_TRACE_I("HandleBlockCallByTimer", 0, 0, 0);
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
     IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
-    if (IsRetry1xRequiredForNormalCall(objMessage))
+    if (m_objContext.GetService().IsCsfbAvailable() &&
+            IsCsfbActionRequiredStatusCode(objMessage.GetStatusCode()))
     {
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(
@@ -458,7 +398,7 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
 
     if (!m_objContext.GetCallManager().GetCallsByState(IMtcCall::State::ESTABLISHED).IsEmpty())
     {
-        return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, objMessage.GetStatusCode());
+        return CallReasonInfo(CODE_NONE);
     }
 
     if (IsRegisterWithNextPcscfAndRedialRequiredFor503(nRetryAfter))
@@ -471,7 +411,7 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
         return CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR);
     }
 
-    if (m_objContext.GetService().IsEpsCombinedAttach())
+    if (m_objContext.GetService().IsCsfbAvailable())
     {
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(
@@ -484,87 +424,43 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleTriggerEpsfb(IN const IMessage& /*objMessage*/) const
 {
-    if (m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader()) ||
-            m_objContext.GetMessageUtils().ContainsAddressInPaid(
-                    &objMessage, GetServiceRouteHeader()))
-    {
-        if (IsInitialRegistrationRequired(objMessage))
-        {
-            const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-                    Feature::REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE);
-            switch (nPolicy)
-            {
-                case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
-                    break;
-                case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
-                    if (m_objContext.GetService().IsEpsCombinedAttach())
-                    {
-                        break;
-                    }
-                    __IMS_FALLTHROUGH__
-                case CarrierConfig::ImsVoice::
-                        REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
-                    ControlAos(ImsAosControl::PCSCF_NEXT);
-                    break;
-
-                case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION:
-                    // If there is an operator that requires PDN reconnect, AoS I/F should be added.
-                case CarrierConfig::ImsVoice::
-                        REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
-                    ControlAos(ImsAosControl::REGISTER_REINITIATE);
-                    break;
-            }
-        }
-    }
-
-    if (IsRetry1xRequiredForNormalCall(objMessage))
-    {
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
-    }
-
-    return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, GetDefaultExtraCode(objMessage));
+    IMS_TRACE_I("HandleTriggerEpsfb", 0, 0, 0);
+    // TODO: b/361459657
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle6xxResponse(IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleTerminateByResponseSource(
+        IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    switch (nStatusCode)
+    IMS_TRACE_I("HandleTerminateByResponseSource", 0, 0, 0);
+    if (!m_objContext.GetMessageUtils().IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC))
     {
-        case SipStatusCode::SC_600:
-            return CallReasonInfo(CODE_SIP_BUSY, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_603:
-            return CallReasonInfo(CODE_SIP_USER_REJECTED, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_604:
-            return CallReasonInfo(CODE_SIP_NOT_REACHABLE, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_606:
-            return CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, GetDefaultExtraCode(objMessage));
+        if (IsIpcanResourceUnavailable(objMessage))
+        {
+            // TS 24.229 5.1.3.1: There's the method to examine headers but no further behavior.
+            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
+        }
     }
 
-    return CallReasonInfo(CODE_SIP_GLOBAL_ERROR, GetDefaultExtraCode(objMessage));
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
 {
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
-            m_objContext.GetService().IsNr())
-    {
-        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
-    }
-
-    if (m_objContext.GetConfigurationProxy().Is(Feature::REQUIRED_CDMALESS_FEATURE_TAG) &&
-            !IsRoaming())
+    IMS_TRACE_I("HandleRedialByNetworkContext", 0, 0, 0);
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigAssets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL) &&
+            !m_objContext.GetService().IsRoaming())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
     }
 
-    if (!m_objContext.GetService().IsEpsCombinedAttach())
+    if (!m_objContext.GetService().IsCsfbAvailable())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
@@ -581,10 +477,25 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::HandleRedialEmergencyWithNextPcscf() const
+CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfo(IN const IMessage& objMessage) const
 {
-    ControlAos(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF);
-    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
+    const IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
+    IMS_SINT32 nReasonCode = MtcConfigurationResolver::LookupReasonCodeByStatusCodeForNormal(
+            m_objContext.GetConfigurationProxy(), nStatusCode);
+    if (nReasonCode == CODE_NONE)
+    {
+        auto it = s_defaultStatusCodeAndReasonCodeMap.find(nStatusCode);
+        if (it != s_defaultStatusCodeAndReasonCodeMap.end())
+        {
+            nReasonCode = it->second;
+        }
+        else
+        {
+            nReasonCode = CODE_SIP_SERVER_ERROR;
+        }
+    }
+    IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
+    return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objMessage));
 }
 
 PRIVATE
@@ -601,58 +512,15 @@ IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage)
 PRIVATE
 IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 {
-    if (piMessage == IMS_NULL)
-    {
-        return IMS_TRUE;
-    }
-
-    return piMessage->GetStatusCode() == SipStatusCode::SC_INVALID;
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const
-{
-    if (m_objContext.GetCallInfo().bEmergency)
-    {
-        return IMS_FALSE;
-    }
-
-    if (!m_objContext.GetService().IsEpsCombinedAttach())
-    {
-        return IMS_FALSE;
-    }
-
-    return m_objContext.GetConfigurationProxy().Is(
-            Feature::REJECT_CODE_FOR_CSFB, objMessage.GetStatusCode());
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsConditionCheckRequiredBeforeRetry1x(IN const IMessage& objMessage)
-{
-    switch (objMessage.GetStatusCode())
-    {
-        case SipStatusCode::SC_300:
-        case SipStatusCode::SC_301:
-        case SipStatusCode::SC_302:
-        case SipStatusCode::SC_305:
-        case SipStatusCode::SC_380:
-        case SipStatusCode::SC_403:
-        // POLICY_FOR_403_RESPONSE_FOR_INVITE overrides REJECT_CODE_FOR_CSFB
-        case SipStatusCode::SC_488:
-        case SipStatusCode::SC_503:
-        case SipStatusCode::SC_504:
-            return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
+    return piMessage == IMS_NULL;
 }
 
 PRIVATE
 IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const
 {
     // clang-format off
-    if (m_objContext.GetConfigurationProxy().Is(Feature::
-            EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
+    if (m_objContext.GetConfigurationProxy().GetBoolean(ConfigEmergency::
+            KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL))
     {
         return IMS_TRUE;
     }
@@ -726,44 +594,11 @@ IMS_BOOL StartErrorHandler::IsByMaxCallLimit(IN const IMessage& objMessage) cons
 }
 
 PRIVATE
-IMS_BOOL StartErrorHandler::IsRedialEmergencyWithNextPcscfRequired(
-        IN const IMessage* piMessage) const
+IMS_BOOL StartErrorHandler::IsCsfbActionRequiredStatusCode(IN IMS_SINT32 nStatusCode) const
 {
-    if (!m_objContext.GetConfigurationProxy().Is(
-                Feature::RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF))
-    {
-        return IMS_FALSE;
-    }
-
-    if (!m_objContext.GetService().IsEmergency())
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_SINT32 nStatusCode =
-            (piMessage == IMS_NULL) ? SipStatusCode::SC_INVALID : piMessage->GetStatusCode();
-    if (nStatusCode >= SipStatusCode::SC_300 && nStatusCode < SipStatusCode::SC_400)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_objContext.GetMessageUtils().GetNumberOfPreviousResponses(
-                &m_objContext.GetSession()->GetISession(), IMessage::SESSION_START) > 1)
-    {
-        return IMS_FALSE;
-    }
-
-    // support re-dial emergency with next P-CSCF,
-    // an emergency call is over sos pdn,
-    // and it receives error response except 3xx before receiving 100 Trying.
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsRoaming() const
-{
-    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
-            IMS_ROAMING_STATE_ON;
+    return MtcConfigurationResolver::LookupActionForStatusCode(
+            m_objContext.GetConfigurationProxy(), nStatusCode)
+            .Contains(ConfigVoice::START_ERROR_ACTION_CSFB);
 }
 
 PRIVATE

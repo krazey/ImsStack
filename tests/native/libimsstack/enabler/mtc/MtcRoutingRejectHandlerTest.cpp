@@ -18,10 +18,11 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockINetworkWatcher.h"
+#include "MockISipMessage.h"
+#include "MockISipServerConnection.h"
 #include "MtcRoutingRejectHandler.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipServerConnection.h"
-#include "sipcore/SipMethod.h"
+#include "SipMethod.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -35,10 +36,13 @@ public:
     MockIMtcContext objContext;
     MockINetworkWatcher objNetworkWatcher;
     MockIMtcImsEventReceiver objImsEventReceiver;
+    MockMtcConfigurationProxy objConfigurationProxy;
 
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
+
         ON_CALL(objContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         pRoutingRejectHandler = new MtcRoutingRejectHandler(objContext, objNetworkWatcher);
     }
@@ -140,6 +144,9 @@ TEST_F(MtcRoutingRejectHandlerTest, NotifyRequestSets486ForInviteInWlanWfcOff)
     ON_CALL(objNetworkWatcher, GetNetRadioTechType()).WillByDefault(Return(NW_REPORT_RADIO_WLAN));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_WFC_SETTING_CHANGED))
             .WillByDefault(Return(IMS_WFC_OFF));
+    ON_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING))
+            .WillByDefault(Return(AString("VoWiFi OFF")));
 
     EXPECT_TRUE(pRoutingRejectHandler->RoutingReject_NotifyRequest(&objMessage, objStatusCode));
     EXPECT_EQ(SipStatusCode::SC_486, objStatusCode.ToInt());

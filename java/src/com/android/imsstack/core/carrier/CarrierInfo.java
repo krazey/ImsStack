@@ -80,13 +80,13 @@ public final class CarrierInfo {
         final SimCarrierId oldCid = mSimCarrierIds.get(slotId);
 
         if (oldCid == null) {
-            Log.e(Log.TAG, "Invalid slot: " + slotId);
+            Log.e(this, "Invalid slot: " + slotId);
             return false;
         }
 
         final SimCarrierId newCid = getCarrierIdFromSim(slotId);
 
-        Log.i(Log.TAG, "CarrierId: old=" + oldCid + ", new=" + newCid);
+        Log.i(this, "CarrierId: old=" + oldCid + ", new=" + newCid);
 
         mSimCarrierIds.put(slotId, newCid);
 
@@ -150,7 +150,7 @@ public final class CarrierInfo {
     /** Sets the current operator/country string. */
     public static void setSimOperatorCountry(
             String operator, String operatorSub, String country, int slotId) {
-        Log.i(Log.TAG, "CarrierInfo(" + slotId + "): "
+        Log.i(CarrierInfo.class, "CarrierInfo(" + slotId + "): "
                 + "op=" + operator + ", opSub=" + operatorSub + ", co=" + country);
 
         operator = emptyIfNull(operator);

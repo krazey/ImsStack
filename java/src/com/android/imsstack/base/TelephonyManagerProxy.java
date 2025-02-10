@@ -259,14 +259,15 @@ public interface TelephonyManagerProxy {
     /**
      * Fetches the sim service table from the EFUST/EFIST based on the application type
      * {@link TelephonyManager#APPTYPE_USIM} or {@link TelephonyManager#APPTYPE_ISIM}.
-     * The return value is hexaString format representing X bytes (x >= 1).
+     * The return value is a byte array.
      * Each bit of every byte indicates which optional services are available
      * for the given application type.
      *
      * @param appType The UICC application type.
-     * @return HexString represents sim service table else null.
+     * @return The byte array representing sim service table or an empty byte array
+     *         if not available.
      */
-    String getSimServiceTable(@UiccAppType int appType);
+    @NonNull byte[] getSimServiceTable(@UiccAppType int appType);
 
     /**
      * Returns the IMS home network domain name that was loaded from the ISIM

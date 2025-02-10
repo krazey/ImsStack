@@ -32,17 +32,22 @@ class Element
 {
 public:
     virtual ~Element();
+    Element(IN const Element&) = delete;
+    Element& operator=(IN const Element&) = delete;
 
     virtual void Write(IN_OUT IXmlStreamWriter& objWriter) const;
+    virtual void Append(IN Element* pElement);
+
+    static Element* const s_pEmptyElement;
 
 protected:
-    explicit inline Element(IN const std::vector<Element*>& lstChildren) :
+    explicit inline Element(IN std::initializer_list<Element*> lstChildren) :
             m_lstChildren(lstChildren)
     {
     }
 
 private:
-    const std::vector<Element*> m_lstChildren;
+    std::vector<Element*> m_lstChildren;
 };
 
 class PidfLoXml : public Element
@@ -75,6 +80,7 @@ public:
         GS = 1 << 4,
         CL = 1 << 5,
         CON = 1 << 6,
+        GBP = 1 << 7,
         ALL = ~0,
 
         COUNTRY = DM | GP | CL,
@@ -176,12 +182,27 @@ public:
 class UsageRules : public Element
 {
 public:
-    inline UsageRules() :
-            Element({})
+    explicit inline UsageRules(IN std::initializer_list<Element*> lstChildren) :
+            Element(lstChildren)
     {
     }
 
     void Write(IN_OUT IXmlStreamWriter& objWriter) const override;
+};
+
+class RetransmissionAllowed : public Element
+{
+public:
+    explicit inline RetransmissionAllowed(IN const AString& strRetransmissionAllowed) :
+            Element({}),
+            m_strRetransmissionAllowed(strRetransmissionAllowed)
+    {
+    }
+
+    void Write(IN_OUT IXmlStreamWriter& objWriter) const override;
+
+private:
+    const AString m_strRetransmissionAllowed;
 };
 
 class Method : public Element
@@ -292,8 +313,10 @@ private:
 class CivicAddress : public Element
 {
 public:
-    inline CivicAddress(IN const AString& strCountry, IN const AString& strState,
-            IN const AString& strCity, IN const AString& strPostal) :
+    inline CivicAddress(IN const AString& strCountry,
+            IN const AString& strState = AString::ConstNull(),
+            IN const AString& strCity = AString::ConstNull(),
+            IN const AString& strPostal = AString::ConstNull()) :
             Element({}),
             m_strCountry(strCountry),
             m_strState(strState),

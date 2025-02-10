@@ -16,15 +16,16 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
-    <int name="reg_retry_default_policy_int" value="1"/>
+    <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
+    <boolean name="ims.reg_retry_with_ip_ver_fallback_bool" value="true"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.registration_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <boolean name="ims_dereg_on_3g_network_bool" value="true"/>
-    <boolean name="reg_retry_with_ip_ver_fallback_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>
@@ -34,19 +35,34 @@
         <item value="3"/>
     </int-array>
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
-    <int-array name="imsvoice.reject_code_for_csfb_int_array" num="8">
-        <item value="403"/>
-        <item value="408"/>
-        <item value="480"/>
-        <item value="488"/>
-        <item value="500"/>
-        <item value="503"/>
-        <item value="600"/>
-    </int-array>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="18">
+        <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB  -->
+        <item value="403:0"/> <!-- CSFB  -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="408:0"/> <!-- CSFB -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="488:2,0"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, CSFB -->
+        <item value="500:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
+        <item value="503:10,0"/> <!-- BLOCK_CALL_BY_TIMER, CSFB -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="600:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="60000"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
-    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
+
+    <!-- Mts -->
+    <int name="imssms.sms_message_response_wait_timer_millis_int" value="10000"/>
+    <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="4"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
@@ -55,6 +71,6 @@
     <int name="imsss.ut_as_server_port_int" value="443"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
 
-    <!-- Ut/Xcap Config -->
+    <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/MyService</string>
 </carrier_config>

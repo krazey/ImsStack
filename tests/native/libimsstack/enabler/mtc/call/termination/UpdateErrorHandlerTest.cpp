@@ -18,21 +18,22 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "ImsTypeDef.h"
+#include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "MockISipMessage.h"
 #include "PlatformContext.h"
 #include "SipMethod.h"
+#include "SipStatusCode.h"
 #include "TestConfigService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
-#include "core/MockIMessage.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/IPassiveTimerHolder.h"
-#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockIMtcAosConnector.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "utility/MockIMessageUtils.h"
-#include <gtest/gtest.h>
 #include <array>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -198,7 +199,7 @@ TEST_F(UpdateErrorHandlerTest,
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
+            GetInt(ConfigIms::KEY_SIP_TIMER_B_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
 
@@ -218,7 +219,7 @@ TEST_F(UpdateErrorHandlerTest,
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
 
@@ -238,7 +239,7 @@ TEST_F(UpdateErrorHandlerTest,
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
-            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
 

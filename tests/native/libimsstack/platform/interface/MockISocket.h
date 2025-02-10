@@ -60,6 +60,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetOption, (IN IMS_SINT32 nOption), (override));
     MOCK_METHOD(
             IMS_BOOL, SetOption, (IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue), (override));
+    MOCK_METHOD(IMS_BOOL, IsClosedOrBeingClosed, (), (const, override));
 };
 
 class MockISocketListener : public ISocketListener

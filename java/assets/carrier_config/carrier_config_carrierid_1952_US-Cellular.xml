@@ -18,5 +18,5 @@
     <!-- Carrier configurations -->
 
     <!-- Aos -->
-    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
+    <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
 </carrier_config>

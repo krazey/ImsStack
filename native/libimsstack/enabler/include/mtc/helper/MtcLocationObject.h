@@ -45,12 +45,12 @@ public:
      */
     static MtcLocationProperties* GetLocationFromMessage(IN const IMessage& objMessage);
 
-    void SetLocationToMessage(IN_OUT IMessage& objMessage, IN const ByteArray& objContent,
-            IN IMS_BOOL bGeolocationRouting);
+    void SetLocationToMessage(IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting,
+            IN const ByteArray& objContent);
     inline void SetLocationToMessage(
             IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting = IMS_FALSE)
     {
-        SetLocationToMessage(objMessage, CreateLocationBody(), bGeolocationRouting);
+        SetLocationToMessage(objMessage, bGeolocationRouting, CreateLocationBody());
     }
 
     ByteArray CreateLocationBody() const;
@@ -68,6 +68,8 @@ private:
     static AString GetContentIdHeader(IN const AString& strCid);
     static AString GetContentDispositionHeader();
     static AString GetEntityUri(IN const ISubscriberConfig& objSubscriberConfig);
+
+    static IMS_BOOL IsGeolocationBlocked(IN IMtcCallContext& objContext);
 
     IMtcCallContext& m_objContext;
 };

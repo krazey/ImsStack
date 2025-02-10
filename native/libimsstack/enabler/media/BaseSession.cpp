@@ -23,6 +23,9 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC
 BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
+        m_pConfiguration(IMS_NULL),
+        m_objLocalAddress(IpAddress::IPv6NONE),
+        m_nLocalPort(0),
         m_piMediaSessionListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
         m_pRtpConfig(IMS_NULL),
@@ -32,6 +35,12 @@ BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
 }
 
 PUBLIC VIRTUAL BaseSession::~BaseSession() {}
+
+PUBLIC
+void BaseSession::SetConfiguration(IN MediaConfiguration* pConfiguration)
+{
+    m_pConfiguration = pConfiguration;
+}
 
 PUBLIC VIRTUAL void BaseSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 {
@@ -124,4 +133,18 @@ void BaseSession::SetAnbrMode(AnbrMode anbrMode)
     IMS_TRACE_D("SetAnbrMode() - uplink codec mode[%d] downlink codec mode[%d]",
             anbrMode.getAnbrUplinkCodecMode(), anbrMode.getAnbrDownlinkCodecMode(), 0);
     m_pRtpConfig->setAnbrMode(anbrMode);
+}
+
+PUBLIC
+void BaseSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
+{
+    if (!objLocalAddr.ToString().IsNULL())
+    {
+        m_objLocalAddress = objLocalAddr;
+    }
+
+    m_nLocalPort = nPort;
+
+    IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
+            m_objLocalAddress.ToString().GetStr(), m_nLocalPort, 0);
 }

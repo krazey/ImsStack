@@ -35,19 +35,28 @@ public:
         SSAC_VOICE_BARRING,
         SSAC_VIDEO_BARRING,
         PRE_ALERTING_GUARD,
+        REGISTRATION_TO_18X,
+        SILENT_REDIAL_MAX_DURATION,
     };
 
     virtual ~IPassiveTimerHolder() = default;
 
     /**
-     * @brief Adds a timer with specific type.
+     * @brief Adds a timer with a specific type.
      *
-     * @param eType the type of the timer.
-     * @param nTimeInMillis the duration time of the timer to be active.
+     * @param eType The type of the timer.
+     * @param nTimeInMillis The duration time of the timer to be active. Do nothing if < 0.
      * @param bAllowReset Reset the active timer if it is true.
      */
-    virtual void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_UINT32 nTimeInMillis,
+    virtual void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_SINT32 nTimeInMillis,
             IN IMS_BOOL bAllowReset = IMS_FALSE) = 0;
+
+    /**
+     * @brief Removes a timer with a specific type.
+     *
+     * @param eType The type of the timer.
+     */
+    virtual void RemoveTimer(IN IPassiveTimerHolder::Type eType) = 0;
 
     /**
      * @brief Gets existence of a timer with specific type.

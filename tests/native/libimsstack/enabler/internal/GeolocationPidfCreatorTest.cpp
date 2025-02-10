@@ -42,6 +42,7 @@ public:
     const AString strAltitude = "alt";
     const AString strVerticalAccuracy = "v_accuracy";
     const AString strDeviceId = "device_id";
+    const AString strRetransmissionAllowed = "allowed";
 
     TestPhoneInfoService objPhoneInfoService;
     MockILocationProperties objLocationProperties;
@@ -58,6 +59,7 @@ public:
 
         pCreator = new GeolocationPidfCreator(0);
         pCreator->SetDeviceId(strDeviceId);
+        pCreator->SetRetransmissionAllowed(strRetransmissionAllowed);
     }
 
     void TearDown() override
@@ -104,31 +106,77 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutPositionFailsWhenCountryUnknown)
     EXPECT_FALSE(pCreator->CreateWithoutPosition("entity_uri", IMS_FALSE, bAny, objContent));
 }
 
+TEST_F(GeolocationPidfCreatorTest, CreateWithoutPositionFailsWhenTimestampUnknown)
+{
+    const IMS_BOOL bAny = IMS_FALSE;
+    ByteArray objContent;
+
+    const AString strEmptyTimestamp = "";
+    ON_CALL(objLocationProperties, GetCurrentTime).WillByDefault(ReturnRef(strEmptyTimestamp));
+    EXPECT_FALSE(pCreator->CreateWithoutPosition("entity_uri", IMS_FALSE, bAny, objContent));
+}
+
 TEST_F(GeolocationPidfCreatorTest, CreateWithoutPosition)
 {
     const IMS_BOOL bAny = IMS_FALSE;
     ByteArray objContent;
     ASSERT_TRUE(pCreator->CreateWithoutPosition("entity_uri", IMS_TRUE, bAny, objContent));
 
-    const AString strExpected =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
-            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
-            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
-            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"entity_uri\">"
-            "<dm:device id=\"Phone\">"
-            "<gp:geopriv>"
-            "<gp:location-info>"
-            "<cl:civicAddress>"
-            "<cl:country>country</cl:country>"
-            "</cl:civicAddress>"
-            "</gp:location-info>"
-            "<gp:usage-rules/>"
-            "</gp:geopriv>"
-            "<dm:deviceID>device_id</dm:deviceID>"
-            "<dm:timestamp>time</dm:timestamp>"
-            "</dm:device>"
-            "</presence>";
+    const AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                                "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                                "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                                "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+                                "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+                                "entity=\"entity_uri\">"
+                                "<dm:device id=\"Phone\">"
+                                "<gp:geopriv>"
+                                "<gp:location-info>"
+                                "<cl:civicAddress>"
+                                "<cl:country>country</cl:country>"
+                                "</cl:civicAddress>"
+                                "</gp:location-info>"
+                                "<gp:usage-rules>"
+                                "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+                                "</gp:usage-rules>"
+                                "</gp:geopriv>"
+                                "<dm:deviceID>device_id</dm:deviceID>"
+                                "<dm:timestamp>time</dm:timestamp>"
+                                "</dm:device>"
+                                "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateWithoutPositionAsTuple)
+{
+    const IMS_BOOL bAny = IMS_FALSE;
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithoutPosition("entity_uri", IMS_TRUE, bAny, objContent));
+
+    const AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                                "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                                "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                                "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+                                "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+                                "entity=\"entity_uri\">"
+                                "<tuple id=\"VoLte\">"
+                                "<status>"
+                                "<gp:geopriv>"
+                                "<gp:location-info>"
+                                "<cl:civicAddress>"
+                                "<cl:country>country</cl:country>"
+                                "</cl:civicAddress>"
+                                "</gp:location-info>"
+                                "<gp:usage-rules>"
+                                "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+                                "</gp:usage-rules>"
+                                "</gp:geopriv>"
+                                "</status>"
+                                "<dm:timestamp>time</dm:timestamp>"
+                                "</tuple>"
+                                "</presence>";
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
 
@@ -139,6 +187,15 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionFailsWhenPositionUnknown)
 
     ON_CALL(objLocationProperties, GetLatitude).WillByDefault(ReturnRef(strUnknownPosition));
     ON_CALL(objLocationProperties, GetLongitude).WillByDefault(ReturnRef(strUnknownPosition));
+    EXPECT_FALSE(pCreator->CreateWithPosition("entity_uri", objContent));
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateWithPositionFailsWhenTimestampUnknown)
+{
+    ByteArray objContent;
+
+    const AString strEmptyTimestamp = "";
+    ON_CALL(objLocationProperties, GetCurrentTime).WillByDefault(ReturnRef(strEmptyTimestamp));
     EXPECT_FALSE(pCreator->CreateWithPosition("entity_uri", objContent));
 }
 
@@ -156,7 +213,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithNoMethod)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -175,7 +234,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithNoMethod)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
@@ -197,7 +258,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPosition)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -216,12 +279,62 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPosition)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
+            "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAsTuple)
+{
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithPosition("entity_uri", objContent));
+
+    const AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
+            "<tuple id=\"VoLte\">"
+            "<status>"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "<cl:A1>state</cl:A1>"
+            "<cl:A2>city</cl:A2>"
+            "<cl:PC>postal</cl:PC>"
+            "</cl:civicAddress>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "</status>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</tuple>"
             "</presence>";
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
@@ -239,7 +352,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithNoUnknownCountry)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -257,7 +372,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithNoUnknownCountry)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
@@ -292,7 +409,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithUnknownCountry)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -311,7 +430,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithUnknownCountry)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
@@ -335,7 +456,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithConfidence)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -354,7 +477,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionWithConfidence)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">99</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
@@ -374,6 +499,15 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryFailsWhenPosition
     EXPECT_FALSE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
 }
 
+TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryFailsWhenTimestampUnknown)
+{
+    ByteArray objContent;
+
+    const AString strEmptyTimestamp = "";
+    ON_CALL(objLocationProperties, GetCurrentTime).WillByDefault(ReturnRef(strEmptyTimestamp));
+    EXPECT_FALSE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
+}
+
 TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoMethod)
 {
     ByteArray objContent;
@@ -388,7 +522,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoMethod)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -404,7 +540,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoMethod)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
@@ -426,7 +564,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountry)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -442,12 +582,59 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountry)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
+            "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryAsTuple)
+{
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithPositionAndCountry("entity_uri", objContent));
+
+    const AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
+            "<tuple id=\"VoLte\">"
+            "<status>"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "</cl:civicAddress>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "</status>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</tuple>"
             "</presence>";
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
@@ -465,7 +652,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoUnknownCoun
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -478,7 +667,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithNoUnknownCoun
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
@@ -513,7 +704,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithUnknownCountr
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -529,7 +722,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithUnknownCountr
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
@@ -553,7 +748,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithConfidence)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -569,7 +766,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithPositionAndCountryWithConfidence)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">99</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
@@ -589,6 +788,15 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicFailsWhenPositionUnknown)
     EXPECT_FALSE(pCreator->CreateWithoutCivic("entity_uri", objContent));
 }
 
+TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicFailsWhenTimestampUnknown)
+{
+    ByteArray objContent;
+
+    const AString strEmptyTimestamp = "";
+    ON_CALL(objLocationProperties, GetCurrentTime).WillByDefault(ReturnRef(strEmptyTimestamp));
+    EXPECT_FALSE(pCreator->CreateWithoutCivic("entity_uri", objContent));
+}
+
 TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithNoMethod)
 {
     ByteArray objContent;
@@ -603,7 +811,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithNoMethod)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -616,7 +826,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithNoMethod)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
@@ -638,7 +850,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivic)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -651,12 +865,56 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivic)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"
             "<dm:timestamp>time</dm:timestamp>"
             "</dm:device>"
+            "</presence>";
+    AssertXmlStringEquality(objContent.ToString(), strExpected);
+}
+
+TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicAsTuple)
+{
+    ByteArray objContent;
+    pCreator->SetFeatures(GeolocationPidfCreator::FEATURE_FORMAT_TUPLE);
+    ASSERT_TRUE(pCreator->CreateWithoutCivic("entity_uri", objContent));
+
+    const AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
+            "<tuple id=\"VoLte\">"
+            "<status>"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "</status>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</tuple>"
             "</presence>";
     AssertXmlStringEquality(objContent.ToString(), strExpected);
 }
@@ -675,7 +933,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithConfidence)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"entity_uri\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"entity_uri\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -688,7 +948,9 @@ TEST_F(GeolocationPidfCreatorTest, CreateWithoutCivicWithConfidence)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">99</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "<gbp:retransmission-allowed>allowed</gbp:retransmission-allowed>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:deviceID>device_id</dm:deviceID>"

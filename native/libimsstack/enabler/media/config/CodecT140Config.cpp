@@ -25,12 +25,12 @@ CodecT140Config::CodecT140Config(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadType
         m_nRedLevel(DEFAULT_RED_LEVEL),
         m_nTextSamplingRate(DEFAULT_TEXT_SAMPLING_RATE)
 {
-    IMS_TRACE_D("+CodecT140Config Type[%d]", nType, 0, 0);
+    IMS_TRACE_I("+CodecT140Config - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecT140Config::~CodecT140Config()
 {
-    IMS_TRACE_D("~CodecT140Config", 0, 0, 0);
+    IMS_TRACE_I("~CodecT140Config", 0, 0, 0);
 }
 
 PUBLIC
@@ -44,13 +44,14 @@ IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
     // T140/RED parameters
     if (GetCodec() == ImsCodec::TEXT_RED)
     {
-        m_nRedLevel = piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT);
+        m_nRedLevel = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT);
     }
     m_nTextSamplingRate = DEFAULT_TEXT_SAMPLING_RATE;
 
     if (GetCodec() == ImsCodec::TEXT_RED && m_nRedLevel <= 1)
     {
-        IMS_TRACE_E(0, "'red' attribute needs more than 1 of redundancy(%d>1)", m_nRedLevel, 0, 0);
+        IMS_TRACE_E(0, "Create - 'red' attribute needs more than 1 of redundancy[%d]>1)",
+                m_nRedLevel, 0, 0);
         return IMS_FALSE;
     }
     else if (GetCodec() == ImsCodec::TEXT_T140)
@@ -65,7 +66,7 @@ PUBLIC VIRTUAL void CodecT140Config::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 
-    IMS_TRACE_D("RedLevel (%d), SamplingRate (%d)", m_nRedLevel, m_nTextSamplingRate, 0);
+    IMS_TRACE_D("RedLevel[%d], SamplingRate[%d]", m_nRedLevel, m_nTextSamplingRate, 0);
 }
 
 PUBLIC

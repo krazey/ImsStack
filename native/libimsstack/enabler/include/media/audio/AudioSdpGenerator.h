@@ -17,11 +17,14 @@
 #ifndef AUDIO_SDP_GENERATOR_H_
 #define AUDIO_SDP_GENERATOR_H_
 
-#include "SdpGenerator.h"
+#include "MediaSdpGenerator.h"
+#include "audio/AudioProfile.h"
 
-class AudioProfile;
-
-class AudioSdpGenerator : public SdpGenerator
+/**
+ * This class is to generate an audio Sdp by adding audio attributes from audio profile to the
+ * MediaDescriptor and the SessionDescriptor
+ */
+class AudioSdpGenerator : public MediaSdpGenerator
 {
 public:
     AudioSdpGenerator();
@@ -30,7 +33,7 @@ public:
     IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MediaBaseProfile* pBaseProfile) override;
 
-private:
+protected:
     void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     IMS_BOOL GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::Payload* pPayload);
     void GeneratePtime(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
@@ -38,6 +41,34 @@ private:
     void GenerateCandidateAttribute(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void GenerateRtcpXr(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void GenerateAnbr(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
+    AString GenerateAmrFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp);
+    AString GenerateEvsFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp);
+
+    // AudioFmtp
+    void AddModeSetListToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
+    void AddModeChangeCapabilityToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
+    void AddModeChangePeriodToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
+    void AddModeChangeNeighborToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
+    void AddMaxRedToFmtp(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
+
+    // AmrFmtp
+    void AddOctetAlignToFmtp(IN AudioProfile::AmrFmtp* pFmtp, OUT AString& strFmtp);
+
+    // EvsFmtp
+    void AddDtxToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddEvsModeSwitchToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddBwToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddBrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddCmrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddChannelAwModeToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddBwSendToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddBrSendToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+    void AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* pFmtp, OUT AString& strFmtp);
+
+    void ForceToAddModeSetList(IN AudioProfile::AudioFmtp* pFmtp, OUT AString& strFmtp);
+    void ForceToAddOctetAlign(IN AudioProfile::AmrFmtp* pFmtp, OUT AString& strFmtp);
 };
 
 #endif

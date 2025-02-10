@@ -43,9 +43,10 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_bAudioRtcpxrPacketLossRleEnabled(DEFAULT_RTCPXR_PACKET_LOSS_RLE),
         m_bAudioRtcpxrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
-        m_objAudioCandidateAttribute(ImsVector<AString>())
+        m_objAudioCandidateAttribute(ImsVector<AString>()),
+        m_objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>())
 {
-    IMS_TRACE_D("+AudioConfiguration eSessionType(%d)", eSessionType, 0, 0);
+    IMS_TRACE_I("+AudioConfiguration - SessionType[%d]", eSessionType, 0, 0);
     m_objAudioCandidateAttribute.Push(DEFAULT_CANDIDATE_ATTRIBUTE);
 }
 
@@ -67,7 +68,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     }
 
     // Media Configuration attributes
-    SetPorts(piCc, CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY);
+    SetPorts(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY);
 
     m_nAsBandwidthKbps =
@@ -77,6 +78,9 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     m_nRrBandwidthBps =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RR_BANDWIDTH_BPS_INT, DEFAULT_RR);
 
+    m_objAudioInactivityCallEndReasons = piCc->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY);
+
     m_nRtpInactivityTimerMillis =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTP_INACTIVITY);
@@ -85,21 +89,22 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
                     DEFAULT_RTCP_INACTIVITY);
 
     m_bAudioBwNegoOptionEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
+            CarrierConfig::ImsVoice::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
 
     // Audio Configuration attributes
     m_bEvsSupported = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL, DEFAULT_SUPPORT_EVS);
-    m_nAudioPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT, DEFAULT_PTIME);
+            CarrierConfig::ImsVoice::KEY_AUDIO_EVS_SUPPORT_BOOL, DEFAULT_SUPPORT_EVS);
+    m_nAudioPtime =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_PTIME_MILLIS_INT, DEFAULT_PTIME);
     m_nAudioMaxPtime =
-            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT, DEFAULT_MAX_PTIME);
-    m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT, DEFAULT_MAX_RED);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_MILLIS_INT, DEFAULT_MAX_PTIME);
+    m_nAudioMaxRed = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXRED_INT, DEFAULT_MAX_RED);
 
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
     m_nAudioRtpDscp =
-            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP);
 
     ImsVector<IMS_SINT32> objAudioJitterBufferSize =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY);
@@ -120,26 +125,27 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
         }
     }
 
-    m_objAudioCandidateAttribute =
-            piCc->GetStringArray(CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
+    m_objAudioCandidateAttribute = piCc->GetStringArray(
+            CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
 
     // rtcp-xr
     m_bAudioRtcpxrEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR);
     m_bAudioRtcpxrStatisticsEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL, DEFAULT_RTCPXR_STATISTICS);
-    m_bAudioRtcpxrVoipMetricsEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL, DEFAULT_RTCPXR_VOIP_METRICS);
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL, DEFAULT_RTCPXR_STATISTICS);
+    m_bAudioRtcpxrVoipMetricsEnabled =
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL,
+                    DEFAULT_RTCPXR_VOIP_METRICS);
     m_bAudioRtcpxrPacketLossRleEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_LOSS_RLE);
     m_bAudioRtcpxrPacketDuplicateRleEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
                     DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE);
 
     // DTMF Duration Parameter
     m_nDtmfDuration =
-            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
                     DEFAULT_DTMF_DURATION);
 
     // Creates a codec configuration
@@ -231,7 +237,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
     }
 
     // to avoid static analysis issue (not used variable and variable scope)
-    IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
+    IMS_TRACE_D("CreateCodecConfigs - NumOfCodec[%d]", nCodecCnt, 0, 0);
 
     return IMS_TRUE;
 }
@@ -240,25 +246,26 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
 {
     MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("m_nAudioPtime[%d], m_nAudioMaxPtime[%d], m_nAudioMaxRed[%d]", m_nAudioPtime,
-            m_nAudioMaxPtime, m_nAudioMaxRed);
-    IMS_TRACE_D("m_bAudioBwNegoOptionEnabled[%d], m_nAudioRtpDscp[%d], DTMFDuration[%d]",
-            m_bAudioBwNegoOptionEnabled, m_nAudioRtpDscp, m_nDtmfDuration);
-    IMS_TRACE_D("jitter_buffer_min[%d], jitter_buffer_max[%d], Evs_Supported[%d]",
-            m_nJitterBufferMinSize, m_nJitterBufferMaxSize, m_bEvsSupported);
-    IMS_TRACE_D("jitter_buffer_adjust_time[%d], jitter_buffer_step_size[%d]",
-            m_nJitterBufferAdjustTime, m_nJitterBufferStepSize, 0);
-    IMS_TRACE_D("m_bAudioRtcpxrEnabled[%d], m_bAudioRtcpxrStatisticsEnabled[%d]",
-            m_bAudioRtcpxrEnabled, m_bAudioRtcpxrStatisticsEnabled, 0);
-    IMS_TRACE_D("m_bAudioRtcpxrVoipMetricsEnabled[%d], m_bAudioRtcpxrPacketLossRleEnabled[%d], \
-            m_bAudioRtcpxrPacketDuplicateRleEnabled[%d]",
+    IMS_TRACE_D("Ptime[%d], MaxPtime[%d], MaxRedundancy[%d]", m_nAudioPtime, m_nAudioMaxPtime,
+            m_nAudioMaxRed);
+    IMS_TRACE_D("BandwidthNegoOption[%d], Dscp[%d], DtmfDuration[%d]", m_bAudioBwNegoOptionEnabled,
+            m_nAudioRtpDscp, m_nDtmfDuration);
+    IMS_TRACE_D("SupportEvs[%d], RtcpxrEnabled[%d], RtcpxrStatisticsEnabled[%d]", m_bEvsSupported,
+            m_bAudioRtcpxrEnabled, m_bAudioRtcpxrStatisticsEnabled);
+    IMS_TRACE_D("RtcpxrVoipMetricsEnabled[%d], RtcpxrPacketLossRleEnabled[%d], \
+            RtcpxrPacketDuplicateRleEnabled[%d]",
             m_bAudioRtcpxrVoipMetricsEnabled, m_bAudioRtcpxrPacketLossRleEnabled,
             m_bAudioRtcpxrPacketDuplicateRleEnabled);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {
-        IMS_TRACE_D("m_objAudioCandidateAttribute[%d] : [%s]", i,
+        IMS_TRACE_D("AudioCandidateAttribute[%d] : [%s]", i,
                 m_objAudioCandidateAttribute.GetAt(i).GetStr(), 0);
+    }
+    for (IMS_UINT32 i = 0; i < m_objAudioInactivityCallEndReasons.GetSize(); i++)
+    {
+        IMS_TRACE_D("AudioInactivityCallEndReasons[%d] : [%d]", i,
+                m_objAudioInactivityCallEndReasons.GetAt(i), 0);
     }
     for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)
     {
@@ -326,7 +333,7 @@ IMS_SINT32 AudioConfiguration::GetJitterBufferStepSize() const
     return m_nJitterBufferStepSize;
 }
 
-/*!
+/**
  * @brief   GetRtcpXr
  * @details Get RTCP-XR enable
  */
@@ -336,7 +343,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrEnabled() const
     return m_bAudioRtcpxrEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrStatistics
  * @details Get RTCP-XR statistic metrics enable
  */
@@ -346,7 +353,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrStatisticsEnabled() const
     return m_bAudioRtcpxrStatisticsEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrVoip
  * @details Get RTCP-XR Voip metrics enable
  */
@@ -356,7 +363,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrVoipEnabled() const
     return m_bAudioRtcpxrVoipMetricsEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrPlr
  * @details Get RTCP-XR packet loss rle enable
  */
@@ -366,7 +373,7 @@ IMS_BOOL AudioConfiguration::IsRtcpXrPlrEnabled() const
     return m_bAudioRtcpxrPacketLossRleEnabled;
 }
 
-/*!
+/**
  * @brief   GetRtcpXrPdr
  * @details Get RTCP-XR packet duplicate rle enable
  */
@@ -376,14 +383,38 @@ IMS_BOOL AudioConfiguration::IsRtcpXrPdrEnabled() const
     return m_bAudioRtcpxrPacketDuplicateRleEnabled;
 }
 
+/**
+ * @brief   GetDtmfDuration
+ * @details Get the dtmf duration value for playing
+ */
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetDTMFDuration() const
+IMS_SINT32 AudioConfiguration::GetDtmfDuration() const
 {
     return m_nDtmfDuration;
 }
 
+/**
+ * @brief   GetAudioCandidateAttribute
+ * @details Get the audioCandidateAttribute
+ */
 PUBLIC
 const ImsVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
 {
     return m_objAudioCandidateAttribute;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const
+{
+    IMS_TRACE_D("IsAudioInactivityCallEndReason()", 0, 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_objAudioInactivityCallEndReasons.GetSize(); i++)
+    {
+        if (m_objAudioInactivityCallEndReasons.GetAt(i) == nReason)
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
