@@ -131,21 +131,29 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallStateChanged(IN CallKey nC
 
         case IMtcCall::State::TERMINATING:
             Stop18xWaitingTimer();
-
-            if (IsTerminatingCallSetupUnsuccessful(m_eEmergencyCallState) &&
-                    m_objContext.GetConfigurationProxy().GetBoolean(ConfigEmergency::
-                                    KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL))
-            {
-                Close();
-            }
-
-            m_nEmergencyCallKey = IMtcCall::CALL_KEY_INVALID;
             break;
         default:
             break;
     }
 
     m_eEmergencyCallState = eState;
+}
+
+PUBLIC VIRTUAL void EmergencyServiceController::OnCallSessionReleased(
+        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished)
+{
+    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) || m_eState != State::OPENED)
+    {
+        return;
+    }
+
+    if (!bEstablished &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL))
+    {
+        Close();
+    }
+    m_nEmergencyCallKey = IMtcCall::CALL_KEY_INVALID;
 }
 
 PUBLIC void EmergencyServiceController::OnPassiveTimerExpired(
@@ -265,13 +273,6 @@ void EmergencyServiceController::SetState(IN State eState)
 {
     IMS_TRACE_D("SetState :: state[%d]", eState, 0, 0);
     m_eState = eState;
-}
-
-PRIVATE
-IMS_BOOL EmergencyServiceController::IsTerminatingCallSetupUnsuccessful(
-        IN IMtcCall::State eOldState) const
-{
-    return eOldState == IMtcCall::State::IDLE || eOldState == IMtcCall::State::OUTGOING;
 }
 
 PRIVATE IMS_BOOL EmergencyServiceController::IsCurrentEmergencyCall(IN CallKey nCallKey) const

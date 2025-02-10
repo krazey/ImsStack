@@ -32,6 +32,7 @@
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include <gtest/gtest.h>
+#include <vector>
 
 using ::testing::_;
 using ::testing::Return;
@@ -153,10 +154,26 @@ TEST_F(EmergencyServiceControllerTest, CallStateChangeDoesNothingInitially)
 {
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
 
+    // clang-format off
+    std::vector<IMtcCall::State> objCallStates{
+            IMtcCall::State::IDLE, IMtcCall::State::OUTGOING,
+            IMtcCall::State::INCOMING, IMtcCall::State::ALERTING,
+            IMtcCall::State::ESTABLISHED, IMtcCall::State::UPDATING,
+            IMtcCall::State::TERMINATING};
+    // clang-format on
+    for (IMtcCall::State eCallState : objCallStates)
+    {
+        pController->OnCallStateChanged(
+                1, eCallState, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    }
+}
+
+TEST_F(EmergencyServiceControllerTest, OnCallSessionReleasedDoesNothingInitially)
+{
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
     pController->OnCallStateChanged(
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndStartNotifiesOpening)
@@ -354,10 +371,7 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallNormallyEndsDoesNothing)
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
     pController->OnCallStateChanged(
             1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::ESTABLISHED, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallSessionReleased(1, IMS_TRUE, IMS_TRUE);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailDoesNothing)
@@ -371,8 +385,7 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailDoesNothing)
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
     pController->OnCallStateChanged(
             1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailStopsRegistrationWhenConfigSet)
@@ -389,8 +402,7 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailStopsRegistrationWh
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
     pController->OnCallStateChanged(
             1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndNormalCallSetupFailDoesNothingWhenConfigSet)
@@ -407,8 +419,7 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndNormalCallSetupFailDoesNothingWh
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
     pController->OnCallStateChanged(
             1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
+    pController->OnCallSessionReleased(1, IMS_FALSE, IMS_FALSE);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndOtherEmergencyCallBlockDoesNothingWhenConfigSet)
@@ -434,8 +445,7 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndOtherEmergencyCallBlockDoesNothi
     const CallKey nSecondCall = 2;
     pController->OnCallStateChanged(
             nSecondCall, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(nSecondCall, IMtcCall::State::TERMINATING,
-            IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallSessionReleased(nSecondCall, IMS_TRUE, IMS_FALSE);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartStartsRegTo18xTimer)
