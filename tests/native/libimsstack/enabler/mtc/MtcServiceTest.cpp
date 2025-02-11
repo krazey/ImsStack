@@ -34,6 +34,7 @@
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
+#include "MockIMtcService.h"
 #include "MockIReference.h"
 #include "MockISession.h"
 #include "MtcService.h"
@@ -56,6 +57,7 @@
 #include "helper/MockSrvccStateManager.h"
 #include "service/IReasonInfo.h"
 #include <gtest/gtest.h>
+#include <vector>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -280,11 +282,13 @@ TEST_F(MtcServiceTest, AddSrvccStateListenerThenBeingNotified)
     MockISrvccStateListener* pSrvccListener = new MockISrvccStateListener();
     pNormalMtcService->AddSrvccStateListener(pSrvccListener);
 
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED)).Times(1);
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::SUCCEEDED)).Times(1);
-
-    pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
-    pNormalMtcService->UpdateSrvccState(SrvccState::SUCCEEDED);
+    std::vector<SrvccState> objSrvccState{SrvccState::IDLE, SrvccState::STARTED,
+            SrvccState::SUCCEEDED, SrvccState::FAILED, SrvccState::CANCELED};
+    for (SrvccState eSrvccState : objSrvccState)
+    {
+        EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(eSrvccState));
+        pNormalMtcService->UpdateSrvccState(eSrvccState);
+    }
 }
 
 TEST_F(MtcServiceTest, RemoveSrvccStateListenerThenNotBeingNotified)
@@ -293,9 +297,28 @@ TEST_F(MtcServiceTest, RemoveSrvccStateListenerThenNotBeingNotified)
     pNormalMtcService->AddSrvccStateListener(pSrvccListener);
     pNormalMtcService->RemoveSrvccStateListener(pSrvccListener);
 
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED)).Times(0);
+    std::vector<SrvccState> objSrvccState{SrvccState::IDLE, SrvccState::STARTED,
+            SrvccState::SUCCEEDED, SrvccState::FAILED, SrvccState::CANCELED};
+    for (SrvccState eSrvccState : objSrvccState)
+    {
+        EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(eSrvccState)).Times(0);
+        pNormalMtcService->UpdateSrvccState(eSrvccState);
+    }
+}
 
-    pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
+TEST_F(MtcServiceTest, UpdateSrvccStateInvokesSameApiForEmergencyType)
+{
+    MockIMtcService objEmergencyService;
+    ON_CALL(objMockContext, GetServiceByType(ServiceType::EMERGENCY))
+            .WillByDefault(Return(&objEmergencyService));
+
+    std::vector<SrvccState> objSrvccState{SrvccState::IDLE, SrvccState::STARTED,
+            SrvccState::SUCCEEDED, SrvccState::FAILED, SrvccState::CANCELED};
+    for (SrvccState eSrvccState : objSrvccState)
+    {
+        EXPECT_CALL(objEmergencyService, UpdateSrvccState(eSrvccState));
+        pNormalMtcService->UpdateSrvccState(eSrvccState);
+    }
 }
 
 TEST_F(MtcServiceTest, AddNetworkWatcherListenerInvokesMtcNetworkWatcher)
