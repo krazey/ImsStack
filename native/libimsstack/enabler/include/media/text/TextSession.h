@@ -32,9 +32,9 @@ public:
         STATE_NONE = 0,
         /** The state that the openSession is done */
         STATE_IDLE,
-        /** The state that the rtp/rtcp stream is running */
+        /** The state that the RTP/RTCP stream is running */
         STATE_LIVE,
-        /** The state that the rtp stream is stopped but the rtcp stream is running */
+        /** The state that the RTP stream is stopped but the RTCP stream is running */
         STATE_PAUSED,
     };
 
@@ -42,28 +42,21 @@ public:
     virtual ~TextSession();
 
     /**
-     * @brief Set TextConfig for libpixelimsmedia from src/dest/negotiated profile
-     * @param pLocalProfile : local profile of the SDP negotiation
-     * @param pPeerProfile : peer profile of the SDP negotiation
-     * @param pNegoProfile : negotiated profile of the SDP negotiation
+     * @brief Set the TextConfig for the ImsMedia from the src/dest/negotiated profiles
+     * @param pLocalProfile : The local profile of the SDP negotiation
+     * @param pPeerProfile : The peer profile of the SDP negotiation
+     * @param pNegoProfile : The negotiated profile of the SDP negotiation
      * return IMS_BOOL : false for error, true for successful
      */
     IMS_BOOL UpdateRtpConfig(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             IN TextProfile* pNegoProfile);
 
     /**
-     * @brief Update AccessNetwork information in the RtpConfig
-     *
-     * @param nAccessNetwork : AccessNetwork information
-     */
-    void UpdateAccessNetwork(IMS_UINT32 nAccessNetwork);
-
-    /**
-     * @brief Update MediaQualityThreshold parameters and send it to the java
+     * @brief Update the MediaQualityThreshold parameters and send it to the java
      *
      * @param bActiveSession Set IMS_TRUE if this session is active
-     * @param bEnableRtcp Set IMS_TRUE to enable monitoring Rtcp inacitivity, IMS_FALSE to disable
-     * rtcp monitoring
+     * @param bEnableRtcp Set IMS_TRUE to enable monitoring the RTCP inactivity, IMS_FALSE to
+     * disable RTCP monitoring
      * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
      * successfully, IMS_FALSE when it is failed with invalid arguments
      */
@@ -79,38 +72,24 @@ public:
     IMS_BOOL OnTextMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
     /*
-     * request OPEN_SESSION with updated TextConfig
+     * Request the OPEN_SESSION with the updated TextConfig
      */
     IMS_BOOL Open();
 
     /*
-     * request MODIFY_SESSION with updated TextConfig
+     * Request the MODIFY_SESSION with the updated TextConfig
      */
     IMS_BOOL Modify();
 
     /*
-     * request CLOSE_SESSION with updated TextConfig
+     * Request the CLOSE_SESSION with the updated TextConfig
      */
     IMS_BOOL Close();
 
     /*
-     * request SET_MEDIA_QUALITY with Text Media qualityThreshold
+     * Request the SET_MEDIA_QUALITY with the MediaQualityThreshold
      */
     IMS_BOOL SetMediaQuality();
-
-    /**
-     * @brief Get the local port number
-     *
-     * @return IMS_SINT32 The port number
-     */
-    IMS_SINT32 GetLocalPort();
-
-    /**
-     * @brief Get the remote port number
-     *
-     * @return IMS_SINT32 The port number
-     */
-    IMS_SINT32 GetRemotePort();
 
 private:
     TextConfiguration* GetConfiguration();

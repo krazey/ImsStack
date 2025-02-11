@@ -38,27 +38,19 @@ BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
 
 PUBLIC VIRTUAL BaseSession::~BaseSession() {}
 
-PUBLIC void BaseSession::UpdateRtpConfig(IN MediaBaseProfile* pLocalProfile,
-        IN MediaBaseProfile* pPeerProfile, OUT RtpConfig* pRtpConfig)
-{
-    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL)
-    {
-        return;
-    }
-
-    UpdateLocalEndPoint(pLocalProfile->GetIpAddress(), pLocalProfile->GetDataPort());
-    UpdateRemoteEndPoint(pPeerProfile->GetIpAddress(), pPeerProfile->GetDataPort(), pRtpConfig);
-}
-
-PUBLIC
-void BaseSession::SetConfiguration(IN MediaConfiguration* pConfiguration)
+PUBLIC VIRTUAL void BaseSession::SetConfiguration(IN MediaConfiguration* pConfiguration)
 {
     m_pConfiguration = pConfiguration;
 }
 
 PUBLIC VIRTUAL void BaseSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 {
-    m_pEnvironment->eServiceType = eServiceType;
+    m_eServiceType = eServiceType;
+}
+
+PUBLIC VIRTUAL MEDIA_SERVICE_TYPE BaseSession::GetServiceType()
+{
+    return m_eServiceType;
 }
 
 PUBLIC VIRTUAL void BaseSession::SetMediaSessionListener(IN IMediaSessionListener* pListener)
@@ -71,35 +63,40 @@ PUBLIC VIRTUAL void BaseSession::SetMediaEnvironment(MediaEnvironment* pEnvironm
     m_pEnvironment = pEnvironment;
 }
 
-PUBLIC
-void BaseSession::SetDirection(IN MEDIA_DIRECTION eDirection)
+PUBLIC VIRTUAL void BaseSession::SetDirection(IN MEDIA_DIRECTION eDirection)
 {
-    IMS_TRACE_D("SetDirection() - eDirection[%d]", eDirection, 0, 0);
-    SetPrevDirection(GetDirection());
-
-    switch (eDirection)
+    if (m_pRtpConfig != IMS_NULL)
     {
-        case MEDIA_DIRECTION_INVALID:
-            m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_NO_FLOW);
-            break;
-        case MEDIA_DIRECTION_SEND:
-            m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
-            break;
-        case MEDIA_DIRECTION_RECEIVE:
-            m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
-            break;
-        case MEDIA_DIRECTION_SEND_RECEIVE:
-            m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
-            break;
-        case MEDIA_DIRECTION_INACTIVE:
-            m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_INACTIVE);
-            break;
+        SetPrevDirection(GetDirection());
+
+        switch (eDirection)
+        {
+            case MEDIA_DIRECTION_INVALID:
+                m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_NO_FLOW);
+                break;
+            case MEDIA_DIRECTION_SEND:
+                m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
+                break;
+            case MEDIA_DIRECTION_RECEIVE:
+                m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+                break;
+            case MEDIA_DIRECTION_SEND_RECEIVE:
+                m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+                break;
+            case MEDIA_DIRECTION_INACTIVE:
+                m_pRtpConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_INACTIVE);
+                break;
+        }
     }
 }
 
-PUBLIC
-MEDIA_DIRECTION BaseSession::GetDirection()
+PUBLIC VIRTUAL MEDIA_DIRECTION BaseSession::GetDirection()
 {
+    if (m_pRtpConfig == IMS_NULL)
+    {
+        return MEDIA_DIRECTION_INVALID;
+    }
+
     IMS_UINT32 nDirection = m_pRtpConfig->getMediaDirection();
 
     switch (nDirection)
@@ -119,14 +116,12 @@ MEDIA_DIRECTION BaseSession::GetDirection()
     return MEDIA_DIRECTION_INVALID;
 }
 
-PUBLIC
-void BaseSession::SetPrevDirection(MEDIA_DIRECTION eDir)
+PUBLIC VIRTUAL void BaseSession::SetPrevDirection(MEDIA_DIRECTION eDir)
 {
     m_ePrevDirection = eDir;
 }
 
-PUBLIC
-MEDIA_DIRECTION BaseSession::GetPrevDirection()
+PUBLIC VIRTUAL MEDIA_DIRECTION BaseSession::GetPrevDirection()
 {
     return m_ePrevDirection;
 }
@@ -136,21 +131,32 @@ PUBLIC VIRTUAL IMS_SINT32 BaseSession::GetState()
     return m_nState;
 }
 
-PUBLIC VIRTUAL void BaseSession::SetState(IMS_SINT32 state)
+PUBLIC VIRTUAL void BaseSession::SetState(IMS_SINT32 nState)
 {
-    m_nState = state;
+    m_nState = nState;
 }
 
-PUBLIC
-void BaseSession::SetAnbrMode(AnbrMode anbrMode)
+PUBLIC VIRTUAL IMS_BOOL BaseSession::SetAccessNetwork(IMS_UINT32 nAccessNetwork)
 {
-    IMS_TRACE_D("SetAnbrMode() - uplink codec mode[%d] downlink codec mode[%d]",
-            anbrMode.getAnbrUplinkCodecMode(), anbrMode.getAnbrDownlinkCodecMode(), 0);
-    m_pRtpConfig->setAnbrMode(anbrMode);
+    if (m_pRtpConfig->getAccessNetwork() != nAccessNetwork)
+    {
+        m_pRtpConfig->setAccessNetwork(nAccessNetwork);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
-PUBLIC
-void BaseSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
+PUBLIC VIRTUAL void BaseSession::SetAnbrMode(AnbrMode objAnbrMode)
+{
+    if (m_pRtpConfig != IMS_NULL)
+    {
+        m_pRtpConfig->setAnbrMode(objAnbrMode);
+    }
+}
+
+PUBLIC VIRTUAL void BaseSession::SetLocalEndPoint(
+        IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     if (!objLocalAddr.ToString().IsNULL())
     {
@@ -158,27 +164,43 @@ void BaseSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_U
     }
 
     m_nLocalPort = nPort;
-
-    IMS_TRACE_D("UpdateLocalEndPoint() - LocalIP[%s], LocalPort[%d]",
-            m_objLocalAddress.ToString().GetStr(), m_nLocalPort, 0);
 }
 
-PROTECTED
-void BaseSession::UpdateRemoteEndPoint(
-        IN const IpAddress& objRemoteAddr, IN IMS_UINT32 nPort, OUT RtpConfig* pRtpConfig)
+PUBLIC VIRTUAL RtpConfig* BaseSession::GetRtpConfig()
 {
-    if (pRtpConfig == IMS_NULL)
+    return m_pRtpConfig;
+}
+
+PUBLIC VIRTUAL IpAddress& BaseSession::GetLocalIpAddress()
+{
+    return m_objLocalAddress;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 BaseSession::GetLocalPort()
+{
+    return m_nLocalPort;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 BaseSession::GetRemotePort()
+{
+    if (m_pRtpConfig != IMS_NULL)
     {
-        pRtpConfig = m_pRtpConfig;
+        return m_pRtpConfig->getRemotePort();
     }
 
-    if (!objRemoteAddr.ToString().IsNULL())
+    return 0;
+}
+
+PROTECTED void BaseSession::SetRemoteEndPoint(
+        IN const IpAddress& objRemoteAddr, IN IMS_UINT32 nPort)
+{
+    if (m_pRtpConfig != IMS_NULL)
     {
-        pRtpConfig->setRemoteAddress(android::String8(objRemoteAddr.ToString().GetStr()));
+        if (!objRemoteAddr.ToString().IsNULL())
+        {
+            m_pRtpConfig->setRemoteAddress(android::String8(objRemoteAddr.ToString().GetStr()));
+        }
+
+        m_pRtpConfig->setRemotePort(nPort);
     }
-
-    pRtpConfig->setRemotePort(nPort);
-
-    IMS_TRACE_D("UpdateRemoteEndPoint() - RemoteIP[%s], RemotePort[%d]",
-            objRemoteAddr.ToString().GetStr(), nPort, 0);
 }

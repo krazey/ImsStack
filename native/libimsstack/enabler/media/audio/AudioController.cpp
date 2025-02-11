@@ -160,7 +160,7 @@ IMS_BOOL AudioController::OpenSession(IN IMS_UINTP nNegoId)
 
     if (pAudioSession != IMS_NULL && m_eMediaState == AudioSession::STATE_NONE)
     {
-        pAudioSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
+        pAudioSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
 
         if (pAudioSession->Open() == IMS_TRUE)
         {
@@ -426,7 +426,7 @@ IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
 
         if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioSession::STATE_LIVE)
         {
-            pAudioSession->UpdateAccessNetwork(accessNetwork);
+            pAudioSession->SetAccessNetwork(accessNetwork);
             IMS_BOOL bResult = pAudioSession->Modify();
             if (bResult)
             {

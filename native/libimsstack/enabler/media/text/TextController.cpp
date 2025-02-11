@@ -66,7 +66,7 @@ IMS_BOOL TextController::OpenSession()
 
         if (m_pSession->GetState() == TextSession::STATE_NONE)
         {
-            m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
+            m_pSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
 
             if (m_nPort > 0)
             {
@@ -166,7 +166,7 @@ void TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 
     if (m_pSession != IMS_NULL)
     {
-        m_pSession->UpdateAccessNetwork(nAccessNetwork);
+        m_pSession->SetAccessNetwork(nAccessNetwork);
     }
 }
 

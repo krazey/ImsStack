@@ -96,7 +96,8 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         return IMS_FALSE;
     }
 
-    BaseSession::UpdateRtpConfig(pLocalProfile, pPeerProfile);
+    SetLocalEndPoint(pLocalProfile->GetIpAddress(), pLocalProfile->GetDataPort());
+    SetRemoteEndPoint(pPeerProfile->GetIpAddress(), pPeerProfile->GetDataPort());
 
     VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
@@ -289,17 +290,6 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
             pVideoConfig->getRtcpFbType(), 0);
 
     return IMS_TRUE;
-}
-
-PUBLIC
-void VideoSession::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
-{
-    if (m_pRtpConfig != NULL)
-    {
-        m_pRtpConfig->setAccessNetwork(nAccessNetwork);
-        IMS_TRACE_D("UpdateAccessNetwork() - accessNetwork[%d]", m_pRtpConfig->getAccessNetwork(),
-                0, 0);
-    }
 }
 
 PUBLIC
@@ -505,18 +495,6 @@ IMS_BOOL VideoSession::SetMediaQuality()
                 IJniMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
     return bResult;
-}
-
-PUBLIC
-IMS_SINT32 VideoSession::GetLocalPort()
-{
-    return m_nLocalPort;
-}
-
-PUBLIC
-IMS_SINT32 VideoSession::GetRemotePort()
-{
-    return m_pRtpConfig->getRemotePort();
 }
 
 PUBLIC

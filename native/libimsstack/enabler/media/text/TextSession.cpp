@@ -68,7 +68,8 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
         return IMS_FALSE;
     }
 
-    BaseSession::UpdateRtpConfig(pLocalProfile, pPeerProfile);
+    SetLocalEndPoint(pLocalProfile->GetIpAddress(), pLocalProfile->GetDataPort());
+    SetRemoteEndPoint(pPeerProfile->GetIpAddress(), pPeerProfile->GetDataPort());
 
     TextConfig* pTextConfig = REINTERPRET_CAST(TextConfig*, m_pRtpConfig);
 
@@ -168,17 +169,6 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
             pTextConfig->getCodecType(), pTextConfig->getRedundantPayload(),
             pTextConfig->getRedundantLevel());
     return IMS_TRUE;
-}
-
-PUBLIC
-void TextSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
-{
-    if (m_pRtpConfig != NULL)
-    {
-        m_pRtpConfig->setAccessNetwork(nAccessNetwork);
-        IMS_TRACE_D("UpdateAccessNetwork() - accessNetwork[%d]", m_pRtpConfig->getAccessNetwork(),
-                0, 0);
-    }
 }
 
 PUBLIC
@@ -296,18 +286,6 @@ IMS_BOOL TextSession::SetMediaQuality()
     }
 
     return IMS_FALSE;
-}
-
-PUBLIC
-IMS_SINT32 TextSession::GetLocalPort()
-{
-    return m_nLocalPort;
-}
-
-PUBLIC
-IMS_SINT32 TextSession::GetRemotePort()
-{
-    return m_pRtpConfig->getRemotePort();
 }
 
 PRIVATE

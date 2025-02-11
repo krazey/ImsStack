@@ -37,27 +37,25 @@ public:
     virtual ~BaseSession();
 
     /**
-     * @brief Set RtpConfig for libpixelimsmedia from local/peer/negotiated profile
-     * @param pLocalProfile : local profile of the SDP negotiation
-     * @param pPeerProfile : peer profile of the SDP negotiation
-     * @param pRtpConfig : The target rtpConfig to be set ip address and port number
-     */
-    void UpdateRtpConfig(IN MediaBaseProfile* pLocalProfile, IN MediaBaseProfile* pPeerProfile,
-            OUT RtpConfig* pRtpConfig = IMS_NULL);
-
-    /**
      * @brief Set the text configuration
      *
      * @param pConfiguration The Media(Audio/Video/Text)Configuration instance to set
      */
-    void SetConfiguration(IN MediaConfiguration* pConfiguration);
+    virtual void SetConfiguration(IN MediaConfiguration* pConfiguration);
 
     /**
-     * @brief Set the media service type of the sesison
+     * @brief Set the media service type of the session
      *
      * @param eServiceType Defined MEDIA_SERVICE_TYPE in MediaDef.h
      */
     virtual void SetServiceType(MEDIA_SERVICE_TYPE eServiceType);
+
+    /**
+     * @brief Get the service type
+     *
+     * @return MEDIA_SERVICE_TYPE The service type of the current call - default, emergency
+     */
+    virtual MEDIA_SERVICE_TYPE GetServiceType();
 
     /**
      * @brief Set the listener to MediaSession
@@ -95,43 +93,58 @@ public:
 
     /**
      * @brief Get the session state
-     *
-     * @return IMS_SINT32 The state
      */
     virtual IMS_SINT32 GetState();
 
     /**
      * @brief Set the session state
-     *
-     * @param state The state to set
      */
-    virtual void SetState(IMS_SINT32 state);
+    virtual void SetState(IMS_SINT32 nState);
 
     /**
-     * @brief Set the AnbrMode parameter
+     * @brief Update AccessNetwork information in the RtpConfig
      *
-     * @param anbrMode The codec mode of the current activated code in EvsParams and AmrParams
+     * @param nAccessNetwork : AccessNetwork information return IMS_BOOL : Returns false when the
+     * parameter is the same or failed to set the RtpConfig, true if the parameter changed
      */
-    virtual void SetAnbrMode(AnbrMode AnbrMode);
+    virtual IMS_BOOL SetAccessNetwork(IN const IMS_UINT32 nAccessNetwork);
 
     /**
-     * @brief Update the local ip address and port number
+     * @brief Set the ANBR mode
+     *
+     * @param objAnbrMode The codec mode of the current activated code in EvsParams and AmrParams in
+     * the AudioConfig.
+     */
+    virtual void SetAnbrMode(AnbrMode objAnbrMode);
+
+    /**
+     * @brief Set the local ip address and port number
      *
      * @param objLocalAddr The local ip address
      * @param nPort The local port number
      */
-    void UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
+    virtual void SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
+
+    /** Get the RtpConfig object */
+    virtual RtpConfig* GetRtpConfig();
+
+    /** Get local port number */
+    virtual IpAddress& GetLocalIpAddress();
+
+    /** Get local port number */
+    virtual IMS_SINT32 GetLocalPort();
+
+    /** Get remote port number */
+    virtual IMS_SINT32 GetRemotePort();
 
 protected:
     /**
-     * @brief Update the remote ip address and port number
+     * @brief Set the remote ip address and port number
      *
      * @param objRemoteAddr The remote ip address
      * @param nPort The remote port number
-     * @param pRtpConfig The target rtpConfig to be set ip address and port number
      */
-    void UpdateRemoteEndPoint(IN const IpAddress& objRemoteAddr, IN IMS_UINT32 nPort,
-            OUT RtpConfig* pRtpConfig = IMS_NULL);
+    void SetRemoteEndPoint(IN const IpAddress& objRemoteAddr, IN IMS_UINT32 nPort);
 
     IMS_SINT32 m_nSlotId;
     MediaConfiguration* m_pConfiguration;
@@ -140,6 +153,7 @@ protected:
     IMS_SINT32 m_nLocalPort;
     IMediaSessionListener* m_piMediaSessionListener;
     MediaEnvironment* m_pEnvironment;
+    MEDIA_SERVICE_TYPE m_eServiceType;
     RtpConfig* m_pRtpConfig;
     MEDIA_DIRECTION m_ePrevDirection;
     IMS_SINT32 m_nState;

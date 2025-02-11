@@ -21,28 +21,59 @@
 class AudioSessionTest : public ::testing::Test
 {
 public:
-    AudioSession* m_pAudioMediaSession;
+    std::unique_ptr<AudioSession> m_pSession;
 
 protected:
-    virtual void SetUp() override { m_pAudioMediaSession = new AudioSession(); }
+    virtual void SetUp() override
+    {
+        m_pSession = std::unique_ptr<AudioSession>(new AudioSession());
+    }
 
-    virtual void TearDown() override { delete m_pAudioMediaSession; }
+    virtual void TearDown() override {}
 };
 
 TEST_F(AudioSessionTest, testSetGetInactivityTimer)
 {
     IMS_UINT32 INACTIVITY_TIME = 12000;
 
-    m_pAudioMediaSession->SetNetworkToneTimer(INACTIVITY_TIME);
-    EXPECT_EQ(m_pAudioMediaSession->GetInactivityTimer(NETWORK_TONE_INACTIVITY), INACTIVITY_TIME);
-    m_pAudioMediaSession->SetNetworkToneTimer(0);
+    m_pSession->SetNetworkToneTimer(INACTIVITY_TIME);
+    EXPECT_EQ(m_pSession->GetInactivityTimer(NETWORK_TONE_INACTIVITY), INACTIVITY_TIME);
+    m_pSession->SetNetworkToneTimer(0);
 }
 
-TEST_F(AudioSessionTest, testSetServiceType)
+TEST_F(AudioSessionTest, testSetDirection)
 {
-    m_pAudioMediaSession->SetServiceType(MEDIA_SERVICE_DEFAULT);
-    EXPECT_EQ(m_pAudioMediaSession->GetServiceType(), MEDIA_SERVICE_DEFAULT);
+    m_pSession->SetDirection(MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(m_pSession->GetDirection(), MEDIA_DIRECTION_INVALID);
+    m_pSession->SetDirection(MEDIA_DIRECTION_SEND);
+    EXPECT_EQ(m_pSession->GetDirection(), MEDIA_DIRECTION_SEND);
+    m_pSession->SetDirection(MEDIA_DIRECTION_RECEIVE);
+    EXPECT_EQ(m_pSession->GetDirection(), MEDIA_DIRECTION_RECEIVE);
+    m_pSession->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(m_pSession->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pSession->SetDirection(MEDIA_DIRECTION_INACTIVE);
+    EXPECT_EQ(m_pSession->GetDirection(), MEDIA_DIRECTION_INACTIVE);
+}
 
-    m_pAudioMediaSession->SetServiceType(MEDIA_SERVICE_EMERGENCY);
-    EXPECT_EQ(m_pAudioMediaSession->GetServiceType(), MEDIA_SERVICE_EMERGENCY);
+TEST_F(AudioSessionTest, testSetNegoId)
+{
+    const IMS_UINTP nNegoId = 0x1234;
+    m_pSession->SetNegoId(nNegoId);
+    EXPECT_TRUE(m_pSession->IsSameNegoId(nNegoId));
+    EXPECT_FALSE(m_pSession->IsSameNegoId(0x3456));
+}
+
+TEST_F(AudioSessionTest, testAccessNetwork)
+{
+    const IMS_UINTP nNetwork = 0x11;
+    EXPECT_TRUE(m_pSession->SetAccessNetwork(nNetwork));
+    ASSERT_TRUE(m_pSession->GetRtpConfig() != IMS_NULL);
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAccessNetwork(), nNetwork);
+}
+
+TEST_F(AudioSessionTest, testSetAnbrMode)
+{
+    AnbrMode objAnbrMode;
+    m_pSession->SetAnbrMode(objAnbrMode);
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode(), objAnbrMode);
 }

@@ -86,7 +86,7 @@ IMS_BOOL VideoController::OpenSession()
 
         if (m_pSession->GetState() == VideoSession::STATE_IDLE)
         {
-            m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
+            m_pSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
 
             if (m_nPort > 0)
             {
@@ -180,7 +180,7 @@ void VideoController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 
     if (m_pSession != IMS_NULL)
     {
-        m_pSession->UpdateAccessNetwork(nAccessNetwork);
+        m_pSession->SetAccessNetwork(nAccessNetwork);
     }
 }
 

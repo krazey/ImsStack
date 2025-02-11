@@ -33,18 +33,18 @@ public:
         /** The state that video session created and openSession is finished */
         STATE_OPENED,
         /** The state that video session created and camera is running in preview mode and no
-           rx/rtcp streaming is on going */
+           rx/RTCP streaming is on going */
         STATE_PREVIEW,
         /** The state that video session is running tx with camera recording streaming, rx
-           displaying rtp from the network and rtcp is running by the configuration  */
+           displaying the RTP from the network and the RTCP is running by the configuration  */
         STATE_RECORDING,
         /** The state that video session is running with paused image streaming and has the same rx,
-           rtcp streaming with STATE_RECORDING */
+           RTCP streaming with STATE_RECORDING */
         STATE_PAUSE_IMAGE,
-        /** The state that video session is running same with rx, rtcp streaming with
+        /** The state that video session is running same with rx, the RTCP streaming with
            STATE_RECORDING but tx streaming is disabled */
         STATE_RENDERING,
-        /** The state that video session is running only rtcp streaming */
+        /** The state that video session is running only the RTCP streaming */
         STATE_PAUSED,
     };
 
@@ -54,21 +54,14 @@ public:
     virtual ~VideoSession();
 
     /**
-     * @brief Set VideoConfig for libpixelimsmedia from src/dest/negotiated profile
-     * @param pLocalProfile : local profile of the SDP negotiation
-     * @param pPeerProfile : peer profile of the SDP negotiation
-     * @param pNegoProfile : negotiated profile of the SDP negotiation
-     * return IMS_BOOL : false for error, true for successful
+     * @brief Set the VideoConfig for the ImsMedia from src/dest/negotiated profile
+     * @param pLocalProfile : The local profile of the SDP negotiation
+     * @param pPeerProfile : The peer profile of the SDP negotiation
+     * @param pNegoProfile : The negotiated profile of the SDP negotiation
+     * return IMS_BOOL : IMS_FALSE for error, IMS_TRUE for successful
      */
     IMS_BOOL UpdateRtpConfig(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             IN VideoProfile* pNegoProfile);
-
-    /**
-     * @brief Update AccessNetwork information in the RtpConfig
-     *
-     * @param nAccessNetwork : AccessNetwork information
-     */
-    void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
 
     /**
      * @brief Set MTU size in the VideoConfig
@@ -78,12 +71,12 @@ public:
     void SetMtu(IN IMS_SINT32 nMtu);
 
     /**
-     * @brief Update MediaQualityThreshold parameters and send it to the java
+     * @brief Update the MediaQualityThreshold parameters and send it to the java
      *
      * @param bActiveSession Set IMS_TRUE if this session is active
      * @param bConfirmedSession Set IMS_TRUE if this session is confirmed session
-     * @param bEnableRtcp Set IMS_TRUE to enable monitoring Rtcp inacitivity, IMS_FALSE to disable
-     * rtcp monitoring
+     * @param bEnableRtcp Set IMS_TRUE to enable monitoring the RTCP inactivity, IMS_FALSE to
+     * disable the RTCP monitoring
      * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
      * successfully, IMS_FALSE when it is failed with invalid arguments
      */
@@ -99,23 +92,17 @@ public:
      */
     IMS_BOOL OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
-    /** request OPEN_SESSION with updated VideoConfig */
+    /** Request the OPEN_SESSION with the updated VideoConfig */
     IMS_BOOL Open();
 
-    /** request MODIFY_SESSION with updated VideoConfig */
+    /** Request the MODIFY_SESSION with the updated VideoConfig */
     IMS_BOOL Modify();
 
-    /** request CLOSE_SESSION with updated VideoConfig */
+    /** Request the CLOSE_SESSION with the updated VideoConfig */
     IMS_BOOL Close();
 
-    /** request SET_MEDIA_QUALITY with Video Media qualityThreshold */
+    /** Request the SET_MEDIA_QUALITY with the MediaQualityThreshold */
     IMS_BOOL SetMediaQuality();
-
-    /** Get local port number */
-    IMS_SINT32 GetLocalPort();
-
-    /** Get remote port number */
-    IMS_SINT32 GetRemotePort();
 
     /** Get camera id */
     IMS_SINT32 GetCameraId();

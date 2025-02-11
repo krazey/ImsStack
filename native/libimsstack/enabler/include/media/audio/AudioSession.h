@@ -38,19 +38,19 @@ public:
         STATE_NONE = 0,
         /** The state that the openSession is done */
         STATE_IDLE,
-        /** The state that the rtp/rtcp stream is running */
+        /** The state that the RTP/RTCP stream is running */
         STATE_LIVE,
-        /** The state that the rtp stream is stopped but the rtcp stream is running */
+        /** The state that the RTP stream is stopped but the RTCP stream is running */
         STATE_PAUSED,
     };
 
     enum MEDIA_DIRECTION_ANBR
     {
-        /** The media direction for Anbr is none (default value). */
+        /** The media direction when the ANBR is none (default value). */
         DIRECTION_NONE = 0,
-        /** The media direction for Anbr is uplink */
+        /** The media direction when the ANBR is uplink */
         DIRECTION_UPLINK,
-        /** The media direction for Anbr is downlink */
+        /** The media direction when the ANBR is downlink */
         DIRECTION_DOWNLINK
     };
 
@@ -72,24 +72,9 @@ public:
     virtual ~AudioSession();
 
     /**
-     * implements ITimerListener interfaces.
+     * Implementation of the ITimerListener interfaces.
      */
     void Timer_TimerExpired(IN ITimer* piTimer) override;
-
-    /**
-     * @brief Set the service type
-     *
-     * @param eServiceType The service type of the current call - default, emergency,
-     * For testing purpose
-     */
-    void SetServiceType(MEDIA_SERVICE_TYPE eServiceType);
-
-    /**
-     * @brief Get the service type
-     *
-     * @return MEDIA_SERVICE_TYPE The service type of the current call - default, emergency
-     */
-    MEDIA_SERVICE_TYPE GetServiceType();
 
     /**
      * @brief Set the negotiation id
@@ -99,7 +84,7 @@ public:
     void SetNegoId(IMS_UINTP nNegoId);
 
     /**
-     * @brief Check the negotiation id is same with given parameter
+     * @brief Check the negotiation id is the same with given parameter
      *
      * @param nNegoId The id to check
      * @return IMS_BOOL Returns IMS_TRUE when it is same, IMS_FALSE when it is different with
@@ -108,31 +93,23 @@ public:
     IMS_BOOL IsSameNegoId(IMS_UINTP nNegoId);
 
     /**
-     * @brief Set AudioConfig for libpixelimsmedia from src/dest/negotiated profile
-     * @param nAccessNetwork : AccessNetwork information
-     * @param pLocalProfile : local profile of the SDP negotiation
-     * @param pPeerProfile : peer profile of the SDP negotiation
-     * @param pNegoProfile : negotiated profile of the SDP negotiation
+     * @brief Set the AudioConfig for the ImsMedia from the src/dest/negotiated profiles.
+     * @param nAccessNetwork : The AccessNetwork information
+     * @param pLocalProfile : The local profile of the SDP negotiation
+     * @param pPeerProfile : The peer profile of the SDP negotiation
+     * @param pNegoProfile : The negotiated profile of the SDP negotiation
      * return IMS_BOOL : false for not updated parameter, true for there is updates
      */
     AudioConfig* UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork, IN AudioProfile* pLocalProfile,
             IN AudioProfile* pPeerProfile, IN AudioProfile* pNegoProfile);
 
     /**
-     * @brief Update AccessNetwork information in the RtpConfig
-     *
-     * @param nAccessNetwork : AccessNetwork information
-     * return IMS_BOOL : false for parameter is same, true if the parameter changed
-     */
-    IMS_BOOL UpdateAccessNetwork(IN const IMS_UINT32 nAccessNetwork);
-
-    /**
-     * @brief Update MediaQualityThreshold parameters and send it to the java
+     * @brief Update the MediaQualityThreshold parameters and send it to the java
      *
      * @param bActiveSession Set IMS_TRUE if this session is active
      * @param bConfirmedSession Set IMS_TRUE if this session is confirmed session
-     * @param bEnableRtcp Set IMS_TRUE to enable monitoring Rtcp inacitivity, IMS_FALSE to disable
-     * rtcp monitoring
+     * @param bEnableRtcp Set IMS_TRUE to enable monitoring the RTCP inactivity, IMS_FALSE to
+     * disable the RTCP monitoring
      * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
      * successfully, IMS_FALSE when it is failed with invalid arguments
      */
@@ -140,54 +117,54 @@ public:
             IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp);
 
     /**
-     * @brief Get the rtcp is enabled
+     * @brief Get the RTCP is enabled
      */
     IMS_BOOL GetEnabledRtcp();
 
     /*
-     * request OPEN_SESSION with updated AudioConfig
+     * Request the OPEN_SESSION with the updated AudioConfig
      */
     IMS_BOOL Open();
 
     /*
-     * request MODIFY_SESSION with updated AudioConfig
+     * Request the MODIFY_SESSION with the updated AudioConfig
      */
     IMS_BOOL Modify();
 
     /*
-     * request ADD_CONFIG with updated AudioConfig
+     * Request the ADD_CONFIG with the updated AudioConfig
      */
     IMS_BOOL Add();
 
     /*
-     * request DELETE_CONFIG with updated AudioConfig
+     * Request the DELETE_CONFIG with the updated AudioConfig
      */
     IMS_BOOL Delete();
 
     /*
-     * request CONFIRM_CONFIG with updated AudioConfig
+     * Request the CONFIRM_CONFIG with the updated AudioConfig
      */
     IMS_BOOL Confirm();
 
     /*
-     * request CLOSE_SESSION with updated AudioConfig
+     * Request the CLOSE_SESSION with the updated AudioConfig
      */
     IMS_BOOL Close();
 
     /**
      * @brief request SET_MEDIA_QUALITY with Audio Media qualityThreshold
      *
-     * @param bConfirmedSession Set IMS_TRUE if this session is confirmed session
+     * @param bConfirmedSession Set IMS_TRUE if the session is confirmed
      * @return IMS_BOOL returns IMS_TRUE when the SetMediaQualityThreshold request is triggered
      */
     IMS_BOOL SetMediaQuality(IN IMS_BOOL bConfirmedSession);
 
     /**
-     * @brief Send a dtmf digit to the ImsMedia
+     * @brief Send the DTMF digit to the ImsMedia
      *
      * @param cDtmfCode The digit to send
-     * @return IMS_BOOL Return IMS_TRUE, when the send dtmf is done successfully, IMS_FALSE when it
-     * is failed
+     * @return IMS_BOOL Return IMS_TRUE, when the DTMF is sent successfully, IMS_FALSE when it is
+     * failed
      */
     IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode);
 
@@ -201,36 +178,36 @@ public:
     /**
      * @brief Get Inactivity timer
      *
-     * @param eType Inactivitiy timer type
+     * @param eType Inactivity timer type
      * @return IMS_UINT32 Inactivity timer value
      */
     IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType);
 
     /**
-     * @brief Update the sdp negotiation result on whether to support anbr feature
+     * @brief Update the sdp negotiation result on whether to support the ANBR feature
      *
-     * @param anbrEnabled Anbr negotiation result, if it is true, anbr feature can be supported on
-     * both devices.
+     * @param bAnbrEnabled The ANBR negotiation result, if it is true, the ANBR feature can be
+     * supported on both devices.
      * @return IMS_BOOL Return IMS_TRUE, when the update is done successfully, IMS_FALSE when it is
      * failed
      */
-    IMS_BOOL UpdateAnbrEnabledConfig(IN IMS_BOOL anbrEnabled);
+    IMS_BOOL UpdateAnbrEnabledConfig(IN IMS_BOOL bAnbrEnabled);
 
     /**
-     * @brief Notify the received ANBR information such as mediaType, bitrate and direction received
-     * from the network
+     * @brief Notify the received the ANBR information such as media type, bit rate and direction
+     * received from the network
      *
-     * @param anbrMediaType mediaType such as audio and video
-     * @param anbrDirection media stream direction to change the bitrate
-     * @param anbrBitrate bitrate the network wants to change
+     * @param nAnbrMediaType The media type such as audio and video
+     * @param nAnbrDirection The media stream direction to change the bit rate
+     * @param nAnbrBitRate The bit rate what the network wants to change
      * @return IMS_BOOL Return IMS_TRUE if the parameter is passed successfully, IMS_FALSE if it is
      * failed
      */
     IMS_BOOL NotifyAnbrReceived(
-            IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
+            IN IMS_UINT32 nAnbrMediaType, IN IMS_UINT32 nAnbrDirection, IN IMS_UINT32 nAnbrBitRate);
 
 private:
-    IMS_SINT32 ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_UINT32 codecType);
+    IMS_SINT32 ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT32 nCodecType);
     void NetworkToneTimerExpired();
     IMS_RESULT StartTimer(IN IMS_SINT32 nDuration);
     void StopTimer();
@@ -246,7 +223,6 @@ protected:
     IMS_SINT32 m_nRtcpInactivityTimer;
     IMS_BOOL m_bAnbrEnabled;
     ITimer* m_piNetworkToneWaitTimer;
-    MEDIA_SERVICE_TYPE m_eServiceType;
 };
 
 #endif
