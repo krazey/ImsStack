@@ -33,6 +33,7 @@ const IMS_CHAR AosString::STR_CS_WITH_DQ[] = "\"cs\"";
 const IMS_CHAR AosString::STR_VOLTE[] = "volte";
 const IMS_CHAR AosString::STR_REG_RETRY_TIME0[] = "vendor.ims.reg_retry_time0";
 const IMS_CHAR AosString::STR_REG_RETRY_TIME1[] = "vendor.ims.reg_retry_time1";
+const IMS_CHAR AosString::STR_EMERGENCY_CALL_FAIL_CAUSE[] = "vendor.ims.emergency_call_fail_cause";
 
 const IMS_CHAR* FeatureTags::STANDALONE_MSG[4] = {
         "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.msg\"",

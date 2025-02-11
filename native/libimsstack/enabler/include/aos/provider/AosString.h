@@ -39,6 +39,7 @@ public:
     static const IMS_CHAR STR_VOLTE[];
     static const IMS_CHAR STR_REG_RETRY_TIME0[];
     static const IMS_CHAR STR_REG_RETRY_TIME1[];
+    static const IMS_CHAR STR_EMERGENCY_CALL_FAIL_CAUSE[];
 };
 
 class FeatureTags

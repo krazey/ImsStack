@@ -26,6 +26,7 @@
 #include "PlatformContext.h"
 #include "SipStatusCode.h"
 #include "TestPhoneInfoService.h"
+#include "TestUtilService.h"
 
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "../../../engine/interface/registration/MockIRegistration.h"
@@ -106,6 +107,7 @@ using ::testing::ReturnRef;
     using Base::Transaction_OnConnectionFailed;                              \
     using Base::Transaction_OnConnectionSetupPrepared;                       \
     using Base::Transaction_OnTrafficPriorityChanged;                        \
+    using Base::SetCallFailureCauseToProperty;                               \
     using Base::UpdateRegIpcanCategory;                                      \
     using Base::UpdateTransactionStarted;
 
@@ -180,6 +182,11 @@ public:
 
     inline IMS_UINT32 GetTxnPending() { return m_nTxnPending; }
 
+    inline IMS_UINT32 GetERegTimeoutFailureCause()
+    {
+        return AosERegistration::ECALL_FAILURE_CAUSE_EREG_TIMEOUT_DUE_TO_TCP_FAILURE;
+    }
+
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
 
     // Functions where calls are being counted
@@ -211,6 +218,8 @@ public:
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_UTIL, &m_objUtilService);
 
         m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker(SLOT_ID);
         AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
@@ -230,6 +239,7 @@ public:
             delete m_pAosStaticProfile;
         }
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
 
         AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, SLOT_ID);
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
@@ -240,6 +250,7 @@ public:
 
     TestAosERegistration* m_pAosERegistration;
     TestPhoneInfoService m_objPhoneInfoService;
+    TestUtilService m_objUtilService;
 
     AosStaticProfile* m_pAosStaticProfile;
     IAosCallTracker* m_piAosCallTracker;
@@ -1054,6 +1065,7 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsAllowed)
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(3));
     ON_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillByDefault(Return(1));
 
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(0);
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration()).Times(0);
 
@@ -1072,6 +1084,8 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsNotAllowedAndConf
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
+
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(0);
 
     m_pAosERegistration->ProcessTransactionTimerExpired();
 
@@ -1092,6 +1106,7 @@ TEST_F(AosERegistrationTest,
             .WillByDefault(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
 
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _));
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
@@ -1114,6 +1129,7 @@ TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenRetryIsNotAllowedAndConf
             .WillByDefault(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
 
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(0);
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
@@ -1367,6 +1383,14 @@ TEST_F(AosERegistrationTest, TransactionConnectionSetupPrepared_DoNothing)
 TEST_F(AosERegistrationTest, TransactionTrafficPriorityChanged_DoNothing)
 {
     m_pAosERegistration->Transaction_OnTrafficPriorityChanged();
+}
+
+TEST_F(AosERegistrationTest, SetCallFailureCauseToProperty_SetProperty)
+{
+    EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _));
+
+    m_pAosERegistration->SetCallFailureCauseToProperty(
+            m_pAosERegistration->GetERegTimeoutFailureCause());
 }
 
 TEST_F(AosERegistrationTest, CallbackModeChangedWhenEmergencyCallbackModeNotSupported)

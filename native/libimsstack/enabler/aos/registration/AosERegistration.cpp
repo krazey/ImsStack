@@ -17,6 +17,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
+#include "ServiceUtil.h"
 
 #include "IImsRadio.h"
 #include "IIpcan.h"
@@ -555,7 +556,11 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
         }
     }
 
-    if (m_eImsReasonCode != AosReasonCode::REG_RESP_NETWORK_TIMEOUT)
+    if (m_eImsReasonCode == AosReasonCode::REG_RESP_NETWORK_TIMEOUT)
+    {
+        SetCallFailureCauseToProperty(ECALL_FAILURE_CAUSE_EREG_TIMEOUT_DUE_TO_TCP_FAILURE);
+    }
+    else
     {
         if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
                 CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
@@ -777,6 +782,21 @@ PROTECTED VIRTUAL void AosERegistration::ClearCbm()
     m_pEModeInfo->SetScbm(IMS_FALSE);
     m_pEModeInfo->SetCbmBeginTime(0);
     m_pEModeInfo->SetReRegTryTime(0);
+}
+
+// TODO: This is to inform the modem that the exact emergency call failure cause is the E-IMS
+// registration failure with the TCP socket problems. It directly set the property since there is no
+// AOSP HAL APIs that can be used for this purpose. This implementation may be removed when the AOSP
+// HAL API is available or the call failure causes are not needed in APDS's logic later.
+PROTECTED void AosERegistration::SetCallFailureCauseToProperty(IN IMS_UINT32 nFailureCause)
+{
+    AString strName;
+    strName.Sprintf("%s%d", AosString::STR_EMERGENCY_CALL_FAIL_CAUSE, m_nSlotId);
+
+    AString strCallFailureCause;
+    strCallFailureCause.SetNumber(nFailureCause);
+
+    UtilService::GetUtilService()->GetSystemProperty()->Set(strName, strCallFailureCause);
 }
 
 PROTECTED void AosERegistration::CallbackModeChanged(

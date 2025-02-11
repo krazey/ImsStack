@@ -136,6 +136,8 @@ protected:
 
     void ClearCbm();
 
+    void SetCallFailureCauseToProperty(IN IMS_UINT32 nFailureCause);
+
     /// IAosEmergencyListener
     void CallbackModeChanged(IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
             IN IMS_ULONG nDuration) override;
@@ -167,5 +169,7 @@ private:
 
 protected:
     EmergencyModeInfo* m_pEModeInfo;
+
+    static const IMS_UINT32 ECALL_FAILURE_CAUSE_EREG_TIMEOUT_DUE_TO_TCP_FAILURE = 1;
 };
 #endif  // AOS_E_REGISTRATION_H_
