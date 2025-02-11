@@ -54,7 +54,8 @@ public:
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     inline void OnTotalCallStateChanged(IN State) override {}
-
+    void OnCallSessionReleased(
+            IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) override;
     void OnPassiveTimerExpired(IN IPassiveTimerHolder::Type eType) override;
 
 private:
@@ -88,7 +89,6 @@ private:
     void Start18xWaitingTimer();
     void Stop18xWaitingTimer();
 
-    IMS_BOOL IsTerminatingCallSetupUnsuccessful(IN IMtcCall::State eOldState) const;
     IMS_BOOL IsCurrentEmergencyCall(IN CallKey nCallKey) const;
     IMS_BOOL IsRetryOverImsPdnRequired(IN IMS_SINT32 eAosReason) const;
 };
