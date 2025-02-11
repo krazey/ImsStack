@@ -27,7 +27,7 @@
 #include "media/IMediaDescriptor.h"
 #include "offeranswer/SdpPrecondition.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
-#include "precondition/QosStringDef.h"
+#include "precondition/QosStringUtils.h"
 #include "precondition/SdpPreconditionHelper.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -70,8 +70,8 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::FormPreconditionSdp(
         }
 
         IMS_SINT32 eSdpMediaType = pLocalSdp->GetType();
-        IMS_TRACE_D(
-                "FormPreconditionSdp : %s, start forming", PS_SdpMediaType(eSdpMediaType), 0, 0);
+        IMS_TRACE_D("FormPreconditionSdp : [%s], start forming",
+                QosStringUtils::ConvertSdpMediaType(eSdpMediaType), 0, 0);
 
         FormCurrentAttribute(piMediaDescriptor, pStatusTable);
         FormDesiredAttribute(piMediaDescriptor, pStatusTable);
@@ -408,11 +408,12 @@ void SdpPreconditionHelper::FormConfirmAttribute(IN IMediaDescriptor* piMediaDes
     if (pStatusTable->IsCurrentStatusEnabled(eSdpMediaType, SdpPrecondition::STATUS_REMOTE))
     {
         IMS_TRACE_D("FormConfirmAttribute : %s, don't form confirm attribute",
-                PS_SdpMediaType(eSdpMediaType), 0, 0);
+                QosStringUtils::ConvertSdpMediaType(eSdpMediaType), 0, 0);
         return;
     }
 
-    IMS_TRACE_D("FormConfirmAttribute : %s", PS_SdpMediaType(eSdpMediaType), 0, 0);
+    IMS_TRACE_D(
+            "FormConfirmAttribute : %s", QosStringUtils::ConvertSdpMediaType(eSdpMediaType), 0, 0);
 
     IMS_SINT32 eDirTag = pStatusTable->GetDirectionTag(
             eSdpMediaType, SdpAttribute::CONF, SdpPrecondition::STATUS_REMOTE);
@@ -490,7 +491,7 @@ IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
         }
 
         IMS_TRACE_D("HasReservedResourceInSdp : MediaType from parsed SDP [%s]",
-                PS_SdpMediaType(nSdpMediaType), 0, 0);
+                QosStringUtils::ConvertSdpMediaType(nSdpMediaType), 0, 0);
 
         if (objSdpMedia.GetPort() == 0)
         {
@@ -517,6 +518,7 @@ IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
         }
     }
 
-    IMS_TRACE_D("HasReservedResourceInSdp : There's no %s.", PS_SdpMediaType(eSdpMediaType), 0, 0);
+    IMS_TRACE_D("HasReservedResourceInSdp : There's no %s.",
+            QosStringUtils::ConvertSdpMediaType(eSdpMediaType), 0, 0);
     return IMS_TRUE;
 }

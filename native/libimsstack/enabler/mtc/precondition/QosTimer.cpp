@@ -15,7 +15,7 @@
  */
 
 #include "ServiceTrace.h"
-#include "precondition/QosStringDef.h"
+#include "precondition/QosStringUtils.h"
 #include "precondition/QosTimer.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -66,7 +66,7 @@ PUBLIC VIRTUAL void QosTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)
         piTimer->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(piTimer);
         IMS_TRACE_D("Timer_TimerExpired : Type[%s] removed. Timers size[%d]",
-                PS_QosTimerType(eTimerType), m_objTimers.GetSize(), 0);
+                QosStringUtils::ConvertQosTimerType(eTimerType), m_objTimers.GetSize(), 0);
 
         m_pQosTimerListener->OnTimerExpired(this, eTimerType);
         return;
@@ -84,7 +84,8 @@ void QosTimer::StartQosTimer(IN QosTimerType eType, IN IMS_SINT32 nDuration)
         return;
     }
 
-    IMS_TRACE_D("StartQosTimer : Type[%s] Duration[%d]", PS_QosTimerType(eType), nDuration, 0);
+    IMS_TRACE_D("StartQosTimer : Type[%s] Duration[%d]", QosStringUtils::ConvertQosTimerType(eType),
+            nDuration, 0);
 
     if (nDuration <= 0)
     {
@@ -115,7 +116,7 @@ void QosTimer::StopQosTimer(IN QosTimerType eType)
     piTimer->KillTimer();
     TimerService::GetTimerService()->DestroyTimer(piTimer);
 
-    IMS_TRACE_D("StopQosTimer : Type[%s]", PS_QosTimerType(eType), 0, 0);
+    IMS_TRACE_D("StopQosTimer : Type[%s]", QosStringUtils::ConvertQosTimerType(eType), 0, 0);
     IMS_TRACE_D("StopQosTimer : Timer size[%d]", m_objTimers.GetSize(), 0, 0);
 }
 
@@ -124,8 +125,8 @@ IMS_BOOL QosTimer::IsQosTimerActivated(IN QosTimerType eType)
 {
     IMS_BOOL bResult = (GetTimer(eType)) ? IMS_TRUE : IMS_FALSE;
 
-    IMS_TRACE_D("IsQosTimerActivated : Type[%s] Result[%s]", PS_QosTimerType(eType),
-            _TRACE_B_(bResult), 0);
+    IMS_TRACE_D("IsQosTimerActivated : Type[%s] Result[%s]",
+            QosStringUtils::ConvertQosTimerType(eType), _TRACE_B_(bResult), 0);
     return bResult;
 }
 

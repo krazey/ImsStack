@@ -33,7 +33,7 @@
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaUtil.h"
 #include "precondition/MtcPreconditionManager.h"
-#include "precondition/QosStringDef.h"
+#include "precondition/QosStringUtils.h"
 #include "precondition/SdpPreconditionHelper.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
@@ -152,7 +152,8 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocated(
         IN ISession* piSession, IN IMS_UINT32 eMediaType) const
 {
     QosStatus eStatus = GetQosStatus(piSession, eMediaType);
-    IMS_TRACE_D("IsDedicatedBearerAllocated [%d][%s]", eMediaType, PS_QosStatus(eStatus), 0);
+    IMS_TRACE_D("IsDedicatedBearerAllocated [%d][%s]", eMediaType,
+            QosStringUtils::ConvertQosStatus(eStatus), 0);
 
     return eStatus == QosStatus::AVAILABLE;
 }
@@ -432,7 +433,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
 PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
         IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType)
 {
-    IMS_TRACE_D("OnQosStatusChanged media type[%d][%s]", eMediaType, PS_QosStatus(eStatus), 0);
+    IMS_TRACE_D("OnQosStatusChanged media type[%d][%s]", eMediaType,
+            QosStringUtils::ConvertQosStatus(eStatus), 0);
 
     QosStatus eCurrStatus = GetQosStatus(piSession, eMediaType);
     if (!IsNeedToUpdateQosStatus(eCurrStatus, eStatus))
@@ -466,7 +468,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
 PUBLIC VIRTUAL void MtcPreconditionManager::OnTimerExpired(
         IN QosTimer* pTimer, IN QosTimerType eType)
 {
-    IMS_TRACE_D("OnTimerExpired [%s]", PS_QosTimerType(eType), 0, 0);
+    IMS_TRACE_D("OnTimerExpired [%s]", QosStringUtils::ConvertQosTimerType(eType), 0, 0);
 
     switch (eType)
     {
@@ -810,8 +812,8 @@ PRIVATE
 void MtcPreconditionManager::HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrentStatus,
         IN QosStatus eNewStatus, IN IMS_UINT32 eMediaType) const
 {
-    IMS_TRACE_D(
-            "HandleQosTimer [%s]->[%s]", PS_QosStatus(eCurrentStatus), PS_QosStatus(eNewStatus), 0);
+    IMS_TRACE_D("HandleQosTimer [%s]->[%s]", QosStringUtils::ConvertQosStatus(eCurrentStatus),
+            QosStringUtils::ConvertQosStatus(eNewStatus), 0);
 
     if (IsLocalResourceReserved(piSession, IMS_FALSE))
     {
@@ -1049,7 +1051,8 @@ IMS_BOOL MtcPreconditionManager::IsLocalResourceReservedByMediaType(
     IMS_BOOL bDefaultBearerAllowed = IsDefaultBearerAllowed(eMediaType);
 
     IMS_TRACE_D("IsLocalResourceReservedByMediaType [%d] status[%s] use default bearer[%s]",
-            eMediaType, PS_QosStatus(eStatus), _TRACE_B_(bDefaultBearerAllowed));
+            eMediaType, QosStringUtils::ConvertQosStatus(eStatus),
+            _TRACE_B_(bDefaultBearerAllowed));
 
     return (bDefaultBearerAllowed || eStatus == QosStatus::AVAILABLE);
 }
@@ -1344,7 +1347,8 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
         }
     }
 
-    IMS_TRACE_D("GetActionForQosLoss The next action is %s", PS_QosLossPolicy(eAction), 0, 0);
+    IMS_TRACE_D("GetActionForQosLoss The next action is [%s]",
+            QosStringUtils::ConvertQosLossPolicy(eAction), 0, 0);
     return eAction;
 }
 
