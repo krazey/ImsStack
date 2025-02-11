@@ -869,8 +869,8 @@ public class ApnTest {
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockApnListener).onPreciseDataConnectionStateChanged(
-                EApnType.IMS.getType(), TelephonyManager.DATA_CONNECTING);
+        verify(mMockApnListener).onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
+                        TelephonyManager.DATA_CONNECTING, 0, TelephonyManager.NETWORK_TYPE_LTE);
     }
 
     @Test
@@ -886,7 +886,8 @@ public class ApnTest {
         mTestableLooper.processAllMessages();
 
         verify(mMockApnListener, never()).onPreciseDataConnectionStateChanged(
-                EApnType.IMS.getType(), TelephonyManager.DATA_CONNECTING);
+                EApnType.IMS.getType(), TelephonyManager.DATA_CONNECTING, 0,
+                TelephonyManager.NETWORK_TYPE_LTE);
     }
 
     @Test

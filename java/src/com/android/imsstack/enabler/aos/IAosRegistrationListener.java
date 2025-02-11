@@ -385,6 +385,25 @@ public interface IAosRegistrationListener {
         CLEAR_RAT_BLOCKS(ReasonCode.BASE_MODEM, 3),
 
         /**
+         * BASE_DATA : 3000 (Errors due to data failures.)
+         * The reasons below are for mapping the ImsReasonInfo ExtraCode by the data failure causes.
+         */
+        DATA_NOT_MATCHED(ReasonCode.BASE_DATA, 0),
+        DATA_UNSPECIFIED(ReasonCode.BASE_DATA, 1),
+        DATA_LOCAL_NETWORK_NO_SERVICE(ReasonCode.BASE_DATA, 2),
+        DATA_LOCAL_SERVICE_UNAVAILABLE(ReasonCode.BASE_DATA, 3),
+        DATA_EPDG_TUNNEL_ESTABLISH_FAILURE(ReasonCode.BASE_DATA, 4),
+        DATA_WIFI_LOST(ReasonCode.BASE_DATA, 5),
+        DATA_RADIO_OFF(ReasonCode.BASE_DATA, 6),
+        DATA_NO_VALID_SIM(ReasonCode.BASE_DATA, 7),
+        DATA_RADIO_INTERNAL_ERROR(ReasonCode.BASE_DATA, 8),
+        DATA_RADIO_LINK_LOST(ReasonCode.BASE_DATA, 9),
+        DATA_RADIO_RELEASE_NORMAL(ReasonCode.BASE_DATA, 10),
+        DATA_RADIO_RELEASE_ABNORMAL(ReasonCode.BASE_DATA, 11),
+        DATA_NETWORK_DETACH(ReasonCode.BASE_DATA, 12),
+        DATA_OEM_CAUSE_4(ReasonCode.BASE_DATA, 13),
+
+        /**
          * BASE_RESP_4XX : 14000 (Errors due to registration response 4XX.)
          */
         REG_RESP_403(ReasonCode.BASE_RESP_4XX, 403),
@@ -422,6 +441,11 @@ public interface IAosRegistrationListener {
          * Errors requiring special action from the modem.
          */
         private static final int BASE_MODEM = 2000;
+
+        /**
+         * Errors due to data failures.
+         */
+        private static final int BASE_DATA = 3000;
 
         /**
          * Errors due to registration common failures.

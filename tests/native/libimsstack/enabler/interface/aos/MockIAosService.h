@@ -49,6 +49,7 @@ public:
     MOCK_METHOD(void, ControlRegistration,
             (IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause),
             (override));
+    MOCK_METHOD(void, UpdateDataFailureReason, (IN IMS_SINT32 nReason), (override));
     MOCK_METHOD(void, NotifyAirplaneSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyDataRoamingSetting, (IN IMS_UINT32 nIsAllowed), (override));
     MOCK_METHOD(void, NotifyMobileDataSetting, (IN IMS_UINT32 nIsOn), (override));

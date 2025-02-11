@@ -131,6 +131,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             ControlRegistration(objParcel);
             break;
 
+        case IIAosService::J2N_UPDATE_DATA_FAILURE_REASON:
+            UpdateDataFailureReason(objParcel);
+            break;
+
         case IIAosService::J2N_NOTIFY_AIRPLANE_SETTING:
             NotifyAirplaneSetting(objParcel);
             break;
@@ -295,6 +299,16 @@ void JniAosService::ControlRegistration(IN const android::Parcel& objParcel)
     {
         piAosService->ControlRegistration(
                 objParcel.readInt32(), objParcel.readInt32(), objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::UpdateDataFailureReason(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->UpdateDataFailureReason(objParcel.readInt32());
     }
 }
 

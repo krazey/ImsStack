@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.PersistableBundle;
+import android.telephony.DataFailCause;
 import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -527,7 +528,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void onPreciseDataConnectionStateChanged(int apnType, int state) {
+    public void onPreciseDataConnectionStateChanged(int apnType, int state, int failCause,
+            int networkType) {
         if (apnType != EApnType.IMS.getType()) {
             return;
         }
@@ -550,6 +552,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     controlRegistration(RequestType.STOP,
                             Pcscf.CURRENT, Cause.DATA);
                 }
+            }
+            case TelephonyManager.DATA_DISCONNECTED -> {
+                updateDataFailureReason(updateDataFailCause(
+                        failCause, networkType).getValue());
             }
             default -> { }
         }
@@ -618,6 +624,58 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         sendRequest(parcel);
 
         notifyCapabilitiesUpdated(mCapabilityPairs);
+    }
+
+    private void updateDataFailureReason(int reason) {
+        Parcel parcel = Parcel.obtain();
+
+        parcel.writeInt(IIAosService.J2N_UPDATE_DATA_FAILURE_REASON);
+        parcel.writeInt(reason);
+
+        sendRequest(parcel);
+    }
+
+    protected ReasonCode updateDataFailCause(int failCause, int networkType) {
+        switch (failCause) {
+            case DataFailCause.ERROR_UNSPECIFIED:
+                return ReasonCode.DATA_UNSPECIFIED;
+            case DataFailCause.SERVICE_TEMPORARILY_UNAVAILABLE: // FALL-THROUGH
+            case DataFailCause.NO_SERVICE:
+                return ReasonCode.DATA_LOCAL_NETWORK_NO_SERVICE;
+            case DataFailCause.SIGNAL_LOST:
+                if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                    return ReasonCode.DATA_LOCAL_SERVICE_UNAVAILABLE;
+                } else if (networkType == TelephonyManager.NETWORK_TYPE_IWLAN) {
+                    return ReasonCode.DATA_WIFI_LOST;
+                } else {
+                    return ReasonCode.DATA_RADIO_LINK_LOST;
+                }
+            case DataFailCause.IWLAN_NETWORK_FAILURE:
+                return ReasonCode.DATA_EPDG_TUNNEL_ESTABLISH_FAILURE;
+            case DataFailCause.RADIO_POWER_OFF: // FALL-THROUGH
+            case DataFailCause.RADIO_NOT_AVAILABLE:
+                return ReasonCode.DATA_RADIO_OFF;
+            case DataFailCause.INVALID_SIM_STATE:
+                return ReasonCode.DATA_NO_VALID_SIM;
+            case DataFailCause.PDN_CONN_DOES_NOT_EXIST:
+                return ReasonCode.DATA_RADIO_INTERNAL_ERROR;
+            case DataFailCause.LOST_CONNECTION:
+                return ReasonCode.DATA_RADIO_LINK_LOST;
+            case DataFailCause.NORMAL_RELEASE:
+                return ReasonCode.DATA_RADIO_RELEASE_NORMAL;
+            case DataFailCause.NETWORK_FAILURE:
+                return ReasonCode.DATA_RADIO_RELEASE_ABNORMAL;
+            case DataFailCause.REGULAR_DEACTIVATION:
+                return ReasonCode.DATA_NETWORK_DETACH;
+            case DataFailCause.NONE:
+                return ReasonCode.DATA_OEM_CAUSE_4;
+            default:
+                if (networkType == TelephonyManager.NETWORK_TYPE_IWLAN) {
+                    return ReasonCode.DATA_NOT_MATCHED;
+                } else {
+                    return ReasonCode.UNSPECIFIED;
+                }
+        }
     }
 
     private void handleCarrierSignalPcoValueChanged(Intent intent) {

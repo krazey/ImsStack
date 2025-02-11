@@ -313,6 +313,20 @@ PUBLIC VIRTUAL void AosService::ControlRegistration(
     }
 }
 
+PUBLIC VIRTUAL void AosService::UpdateDataFailureReason(IN IMS_SINT32 nReason)
+{
+    A_IMS_TRACE_I(AOSTAG, "UpdateDataFailureReason :: nReason(%d)", nReason, 0, 0);
+    for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
+    {
+        IAosRegistrationControlListener* piListener = m_objAosRegistrationControlListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->RegistrationControl_UpdateDataFailureReason(nReason);
+        }
+    }
+}
+
 PUBLIC VIRTUAL void AosService::NotifyAirplaneSetting(IN IMS_UINT32 nIsOn)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyAirplaneSetting :: nIsOn(%d)", nIsOn, 0, 0);

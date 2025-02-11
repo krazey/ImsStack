@@ -62,6 +62,7 @@ public:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
     virtual void ControlRegistration(
             IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause) = 0;
+    virtual void UpdateDataFailureReason(IN IMS_SINT32 nReason) = 0;
 
     /**
      * AosService(Java) -> IAosServiceSettingListener(Native)
@@ -260,6 +261,9 @@ enum class AosReasonCodeBase
     /// Errors requiring special action from the modem.
     BASE_MODEM = 2000,
 
+    /// Errors due to data failures.
+    BASE_DATA = 3000,
+
     /// Errors due to registration common failures.
     BASE_COMMON_OTHER = 4000,
 
@@ -355,6 +359,53 @@ enum class AosReasonCode
 
     /// Clears blocks for all RATs.
     CLEAR_RAT_BLOCKS = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 3,
+
+    /**
+     * @brief : BASE_DATA(3000) - Errors due to DataFailCause
+     * The reasons below are for mapping the ImsReasonInfo ExtraCode by the DataFailCause.
+     */
+
+    /// IMS PDN is disconnected in IWLAN and it doesn't have a matching DataFailCause
+    DATA_NOT_MATCHED = TO_UINT32(AosReasonCodeBase::BASE_DATA),
+
+    /// IMS PDN is disconnected by ERROR_UNSPECIFIED DataFailCause
+    DATA_UNSPECIFIED = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 1,
+
+    /// IMS PDN is disconnected by SERVICE_TEMPORARILY_UNAVAILABLE and NO_SERVICE DataFailCause
+    DATA_LOCAL_NETWORK_NO_SERVICE = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 2,
+
+    /// IMS PDN is disconnected by SIGNAL_LOST DataFailCause
+    DATA_LOCAL_SERVICE_UNAVAILABLE = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 3,
+
+    /// IMS PDN is disconnected by IWLAN_NETWORK_FAILURE DataFailCause
+    DATA_EPDG_TUNNEL_ESTABLISH_FAILURE = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 4,
+
+    /// IMS PDN is disconnected by SIGNAL_LOST (WiFi) DataFailCause
+    DATA_WIFI_LOST = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 5,
+
+    /// IMS PDN is disconnected by RADIO_POWER_OFF and RADIO_NOT_AVAILABLE DataFailCause
+    DATA_RADIO_OFF = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 6,
+
+    /// IMS PDN is disconnected by INVALID_SIM_STATE DataFailCause
+    DATA_NO_VALID_SIM = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 7,
+
+    /// IMS PDN is disconnected by PDN_CONN_DOES_NOT_EXIST DataFailCause
+    DATA_RADIO_INTERNAL_ERROR = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 8,
+
+    /// IMS PDN is disconnected by SIGNAL_LOST (Cellular) and LOST_CONNECTION DataFailCause
+    DATA_RADIO_LINK_LOST = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 9,
+
+    /// IMS PDN is disconnected by NORMAL_RELEASE DataFailCause
+    DATA_RADIO_RELEASE_NORMAL = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 10,
+
+    /// IMS PDN is disconnected by NETWORK_FAILURE DataFailCause
+    DATA_RADIO_RELEASE_ABNORMAL = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 11,
+
+    /// IMS PDN is disconnected by REGULAR_DEACTIVATION DataFailCause
+    DATA_NETWORK_DETACH = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 12,
+
+    /// IMS PDN is disconnected by NONE DataFailCause
+    DATA_OEM_CAUSE_4 = TO_UINT32(AosReasonCodeBase::BASE_DATA) + 13,
 
     /**
      * @brief : BASE_RESP_4XX(14000) - Errors due to registration response 4XX.

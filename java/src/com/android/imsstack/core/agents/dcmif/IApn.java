@@ -78,8 +78,12 @@ public interface IApn {
          *                {@link EApnType#INTERNET},
          *                {@link EApnType#EMERGENCY}
          * @param state The data connection state.
+         * @param failCause The data failcause.
+         *                  {@link android.telephony.DataFailCause}
+         * @param networkType The network type
          */
-        default void onPreciseDataConnectionStateChanged(int apnType, int state) {
+        default void onPreciseDataConnectionStateChanged(int apnType, int state, int failCause,
+                int networkType) {
         }
     }
 

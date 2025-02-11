@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.DataFailCause;
 import android.telephony.DisconnectCause;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDisconnectCause;
@@ -85,6 +86,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
@@ -93,6 +97,33 @@ public class AosServiceTest extends ImsStackTest {
     private static final int SLOT_0 = 0;
     public static final int PCO_NONE_VALUE = 0;
     public static final int PCO_LIMITED_SERVICE_VALUE = 5;
+
+    private static final Map<Integer, ReasonCode> DATA_REASON_CODE = Map.ofEntries(
+            Map.entry(DataFailCause.ERROR_UNSPECIFIED, ReasonCode.DATA_UNSPECIFIED),
+            Map.entry(DataFailCause.SERVICE_TEMPORARILY_UNAVAILABLE,
+                    ReasonCode.DATA_LOCAL_NETWORK_NO_SERVICE),
+            Map.entry(DataFailCause.NO_SERVICE, ReasonCode.DATA_LOCAL_NETWORK_NO_SERVICE),
+            Map.entry(DataFailCause.SIGNAL_LOST, ReasonCode.DATA_LOCAL_SERVICE_UNAVAILABLE),
+            Map.entry(DataFailCause.IWLAN_NETWORK_FAILURE,
+                    ReasonCode.DATA_EPDG_TUNNEL_ESTABLISH_FAILURE),
+            Map.entry(DataFailCause.RADIO_POWER_OFF, ReasonCode.DATA_RADIO_OFF),
+            Map.entry(DataFailCause.RADIO_NOT_AVAILABLE, ReasonCode.DATA_RADIO_OFF),
+            Map.entry(DataFailCause.INVALID_SIM_STATE, ReasonCode.DATA_NO_VALID_SIM),
+            Map.entry(DataFailCause.PDN_CONN_DOES_NOT_EXIST, ReasonCode.DATA_RADIO_INTERNAL_ERROR),
+            Map.entry(DataFailCause.LOST_CONNECTION, ReasonCode.DATA_RADIO_LINK_LOST),
+            Map.entry(DataFailCause.NORMAL_RELEASE, ReasonCode.DATA_RADIO_RELEASE_NORMAL),
+            Map.entry(DataFailCause.NETWORK_FAILURE, ReasonCode.DATA_RADIO_RELEASE_ABNORMAL),
+            Map.entry(DataFailCause.REGULAR_DEACTIVATION, ReasonCode.DATA_NETWORK_DETACH),
+            Map.entry(DataFailCause.NONE, ReasonCode.DATA_OEM_CAUSE_4)
+            );
+
+    private static final Map<Integer, ReasonCode> DATA_REASON_CODE_FOR_WLAN = Map.ofEntries(
+            Map.entry(DataFailCause.SIGNAL_LOST, ReasonCode.DATA_WIFI_LOST),
+            Map.entry(DataFailCause.NAS_SIGNALLING, ReasonCode.DATA_NOT_MATCHED)
+            );
+    private static final Map<Integer, ReasonCode> DATA_REASON_CODE_FOR_CELLULAR = Map.ofEntries(
+            Map.entry(DataFailCause.SIGNAL_LOST, ReasonCode.DATA_RADIO_LINK_LOST)
+            );
 
     private FakeAosService mAosService;
     private final long mNativeObject = 1000;
@@ -814,8 +845,8 @@ public class AosServiceTest extends ImsStackTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
 
-        mAosService.onPreciseDataConnectionStateChanged(
-                EApnType.EMERGENCY.getType(), TelephonyManager.DATA_CONNECTING);
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.EMERGENCY.getType(),
+                TelephonyManager.DATA_CONNECTING, 0, TelephonyManager.NETWORK_TYPE_LTE);
 
         verify(mMockJniIms, never()).sendData(mNativeObject, startEstTimerData);
     }
@@ -829,8 +860,8 @@ public class AosServiceTest extends ImsStackTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
 
-        mAosService.onPreciseDataConnectionStateChanged(
-                EApnType.IMS.getType(), TelephonyManager.DATA_CONNECTING);
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
+                TelephonyManager.DATA_CONNECTING, 0, TelephonyManager.NETWORK_TYPE_LTE);
 
         verify(mMockJniIms).sendData(mNativeObject, startEstTimerData);
     }
@@ -844,9 +875,50 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.mRegisteredNetworkType = NetworkType.LTE;
 
         mAosService.onPreciseDataConnectionStateChanged(
-                EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTING);
+                EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTING, 0,
+                TelephonyManager.NETWORK_TYPE_LTE);
 
         verify(mMockJniIms).sendData(mNativeObject, stopData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_updateReasonUponDisconnectedWithWlan() {
+        DATA_REASON_CODE_FOR_WLAN.forEach((key, value) -> {
+            byte[] reasonData = createBytes(IIAosService.J2N_UPDATE_DATA_FAILURE_REASON,
+                    value.getValue());
+
+            mAosService.onPreciseDataConnectionStateChanged(
+                    EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTED, key,
+                    TelephonyManager.NETWORK_TYPE_IWLAN);
+
+            verify(mMockJniIms).sendData(mNativeObject, reasonData);
+        });
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_updateReasonUponDisconnectedWithCellular() {
+        DATA_REASON_CODE_FOR_CELLULAR.forEach((key, value) -> {
+            byte[] reasonData = createBytes(IIAosService.J2N_UPDATE_DATA_FAILURE_REASON,
+                    value.getValue());
+
+            mAosService.onPreciseDataConnectionStateChanged(
+                    EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTED, key,
+                    TelephonyManager.NETWORK_TYPE_LTE);
+
+            verify(mMockJniIms).sendData(mNativeObject, reasonData);
+        });
+    }
+
+    @Test
+    public void updateDataDisconnecedReason() {
+        List<ReasonCode> reasons = new ArrayList<>();
+        List<ReasonCode> expectedReasons = new ArrayList<>();
+
+        DATA_REASON_CODE.forEach((key, value) -> {
+            expectedReasons.add(value);
+            reasons.add(mAosService.updateDataFailCause(key , 0));
+        });
+        assertEquals(reasons, expectedReasons);
     }
 
     @Test

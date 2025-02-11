@@ -648,9 +648,9 @@ public abstract class Apn extends Handler implements IApn {
     /**
      * Notifies that data connection state is changed.
      */
-    protected void notifyConnectionStateChanged(int state) {
+    protected void notifyConnectionStateChanged(int state, int failCause, int networkType) {
         for (Listener l : mListeners) {
-            l.onPreciseDataConnectionStateChanged(mType.getType(), state);
+            l.onPreciseDataConnectionStateChanged(mType.getType(), state, failCause, networkType);
         }
     }
 
@@ -1255,7 +1255,7 @@ public abstract class Apn extends Handler implements IApn {
                 mPreciseDcState = dataState;
                 ImsLog.i(mSlotId, "notifyConnectionStateChanged : apnType=" + mType.getString()
                         + ", dataState=" + dataState);
-                notifyConnectionStateChanged(dataState);
+                notifyConnectionStateChanged(dataState, causeCode, networkType);
             }
         }
 
