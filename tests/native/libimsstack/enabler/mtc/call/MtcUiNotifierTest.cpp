@@ -145,11 +145,11 @@ TEST_F(MtcUiNotifierTest, SendIncomingCallRejected)
     MockIJniMtcServiceThread objMockServiceThread;
 
     ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(nullptr));
-    EXPECT_CALL(objMockServiceThread, OnRejectedIncomingCall(_, _, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMockServiceThread, OnRejectedIncomingCall(_, _, _, _, _, _, _)).Times(0);
     pNotifier->SendIncomingCallRejected(*pReason);
 
     ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objMockServiceThread));
-    EXPECT_CALL(objMockServiceThread, OnRejectedIncomingCall(_, _, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMockServiceThread, OnRejectedIncomingCall(CALL_KEY, _, _, _, _, _, _)).Times(1);
     pNotifier->SendIncomingCallRejected(*pReason);
 }
 

@@ -92,8 +92,8 @@ void MtcUiNotifier::SendIncomingCallRejected(IN const CallReasonInfo& objReason)
         return;
     }
 
-    piServiceThread->OnRejectedIncomingCall(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+    piServiceThread->OnRejectedIncomingCall(m_objContext.GetCallKey(),
+            m_objContext.CreateJniCallInfo(), m_objContext.GetMediaManager().GetMediaInfo(),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
             m_objContext.GetParticipantInfo().GetRemoteNumber(), objReason);

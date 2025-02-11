@@ -134,7 +134,9 @@ TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)
 TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
 {
     IMS_UINT32 eType = IuMtcService::AUTO_REJECTED_CALL;
+    CallKey nCallKey = 1;
     objParcel.writeInt32(eType);
+    objParcel.writeInt64(nCallKey);
     objParcel.setDataPosition(0);
 
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
@@ -145,7 +147,7 @@ TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
     ImsMap<SuppType, SuppService*> objSuppServices;
     CallReasonInfo objReason(CODE_NONE);
     pJniServiceThread->OnRejectedIncomingCall(
-            objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", objReason);
+            nCallKey, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", objReason);
 }
 
 TEST_F(JniMtcServiceThreadTest, OnJniReady)

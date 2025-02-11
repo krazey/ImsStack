@@ -474,18 +474,22 @@ public class MtcApp implements Closeable {
                 parcel.readString();
 
                 MtcCall call = createMtcCallAndAttach(0);
+                call.attach(nativeCallKey);
 
-                if (mCallListener != null && call != null) {
+                if (mCallListener != null) {
                     mPreIncomingNativeCallId = call.getNativeCallId();
                     mCallListener.onPreIncomingCallReceived(MtcApp.this, mPreIncomingNativeCallId);
-                    call.attach(nativeCallKey);
                 } else {
                     rejectAndCloseCall(call);
                 }
             } else if (msg == IUMtcService.AUTO_REJECTED_CALL) {
+                long nativeCallKey = parcel.readLong();
+
                 MtcCall call = getPendingCall(mPreIncomingNativeCallId);
                 if (call == null) {
                     call = createMtcCallAndAttach(0);
+                    call.attach(nativeCallKey);
+
                     if (mCallListener != null) {
                         mCallListener.onPreIncomingCallReceived(
                                 MtcApp.this, call.getNativeCallId());

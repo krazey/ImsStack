@@ -32,8 +32,9 @@ public:
             (IN IuMtcService::EmergencyServiceState, IN IMS_SINT32, IN ServiceType), (override));
     MOCK_METHOD(void, OnPreIncomingCallReceived, (IN IMS_ULONG), (override));
     MOCK_METHOD(void, OnRejectedIncomingCall,
-            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsMap<SuppType, SuppService*>&),
-                    IN OipType, IN const AString&, IN const CallReasonInfo&),
+            (IN IMS_ULONG, IN const JniCallInfo&, IN const MediaInfo&,
+                    (IN const ImsMap<SuppType, SuppService*>&), IN OipType, IN const AString&,
+                    IN const CallReasonInfo&),
             (override));
     MOCK_METHOD(void, OnExternalCallsChanged, (IN ImsList<const JniExternalCall*>&), (override));
 };

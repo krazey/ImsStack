@@ -60,13 +60,14 @@ public:
     /**
      * @brief Notifies there is an rejected incoming call for call logs.
      *
+     * @param nCallKey
      * @param objCallInfo
      * @param objMediaInfo
      * @param objSuppServices
      * @param eOipType
      * @param strRemoteNumber
      */
-    virtual void OnRejectedIncomingCall(IN const JniCallInfo& objCallInfo,
+    virtual void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
             IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
             IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason) = 0;

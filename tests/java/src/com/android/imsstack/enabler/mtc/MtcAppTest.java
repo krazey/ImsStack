@@ -472,12 +472,46 @@ public class MtcAppTest extends ImsStackTest {
     }
 
     @Test
-    public void testOnMessageForCallApp() {
+    public void testPreIncomingCallMessage() {
         mTestMtcApp.setNativeObj(1);
-        assertTrue(mTestMtcApp.isServiceValid());
-
         long nativeCallID = 1;
         doReturn(nativeCallID).when(mMtcCall).getNativeCallId();
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcService.PRE_INCOMING_CALL);
+        parcel.setDataPosition(0);
+        mTestMtcApp.getNativeListener().onMessage(parcel);
+        parcel.recycle();
+
+        verify(mCM, times(1)).attachPreIncomingCall(mMtcCall);
+        verify(mCallListener, times(1)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
+        verify(mMtcCall, times(1)).attach(anyLong());
+    }
+
+    @Test
+    public void testPreIncomingCallMessageWhenListenerIsNull() {
+        mTestMtcApp.setNativeObj(1);
+        long nativeCallID = 1;
+        doReturn(nativeCallID).when(mMtcCall).getNativeCallId();
+        doReturn(mExecutor).when(mBaseContext).getExecutor();
+        mTestMtcApp.setCallListener(null);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcService.PRE_INCOMING_CALL);
+        parcel.setDataPosition(0);
+        mTestMtcApp.getNativeListener().onMessage(parcel);
+        parcel.recycle();
+
+        verify(mMtcCall, times(1)).attach(anyLong());
+        verify(mExecutor, times(1)).execute(any());
+    }
+
+    @Test
+    public void testAutoRejectedCallMessage() {
+        mTestMtcApp.setNativeObj(1);
+        long nativeCallID = 1;
+        doReturn(nativeCallID).when(mMtcCall).getNativeCallId();
+
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.AUTO_REJECTED_CALL);
         parcel.setDataPosition(0);
@@ -487,54 +521,49 @@ public class MtcAppTest extends ImsStackTest {
         verify(mCM, times(1)).getPendingCall(0);
         verify(mCM, times(1)).attachPreIncomingCall(mMtcCall);
         verify(mCallListener, times(1)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
+        verify(mMtcCall, times(1)).attach(anyLong());
         verify(mMtcCall, times(1)).invokeIncomingCallReceivedForAutoRejecting(
                 any(IncomingRejectedMtcCall.class));
+    }
 
-        Parcel parcel1 = Parcel.obtain();
-        parcel1.writeInt(IUMtcService.PRE_INCOMING_CALL);
-        parcel1.setDataPosition(0);
-        mTestMtcApp.getNativeListener().onMessage(parcel);
-        parcel1.recycle();
+    @Test
+    public void testAutoRejectedCallMessageWhenPreIncomingCallExists() {
+        mTestMtcApp.setNativeObj(1);
+        long nativeCallID = 1;
 
-        verify(mCM, times(2)).attachPreIncomingCall(mMtcCall);
-        verify(mCallListener, times(2)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
-        verify(mMtcCall, times(1)).attach(anyLong());
-
+        doReturn(nativeCallID).when(mMtcCall).getNativeCallId();
+        doReturn(mExecutor).when(mBaseContext).getExecutor();
         doReturn(mMtcCall).when(mCM).getPendingCall(nativeCallID);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcService.PRE_INCOMING_CALL);
+        parcel.setDataPosition(0);
+        mTestMtcApp.getNativeListener().onMessage(parcel);
+        parcel.recycle();
         parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.AUTO_REJECTED_CALL);
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
+        parcel.recycle();
 
         verify(mCM, times(1)).getPendingCall(nativeCallID);
-        verify(mCM, times(2)).attachPreIncomingCall(mMtcCall);
-        verify(mCallListener, times(2)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
-        verify(mMtcCall, times(2)).invokeIncomingCallReceivedForAutoRejecting(
+        verify(mCM, times(1)).attachPreIncomingCall(mMtcCall);
+        verify(mCallListener, times(1)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
+        verify(mMtcCall, times(1)).attach(anyLong());
+        verify(mMtcCall, times(1)).invokeIncomingCallReceivedForAutoRejecting(
                 any(IncomingRejectedMtcCall.class));
+    }
 
+    @Test
+    public void testExternalCallsChangedMessage() {
+        mTestMtcApp.setNativeObj(1);
+        mTestMtcApp.setCallListener(mCallListener);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcService.EXTERNAL_CALLS_CHANGED);
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
-        processAllMessages();
-
-        verify(mCM, times(2)).getPendingCall(0);
-
-        doReturn(mExecutor).when(mBaseContext).getExecutor();
-        mTestMtcApp.setCallListener(null);
-        parcel1 = Parcel.obtain();
-        parcel1.writeInt(IUMtcService.PRE_INCOMING_CALL);
-        parcel1.setDataPosition(0);
-        mTestMtcApp.getNativeListener().onMessage(parcel);
-        parcel1.recycle();
-
-        verify(mExecutor, times(1)).execute(any());
-
-        mTestMtcApp.setCallListener(mCallListener);
-        Parcel parcel2 = Parcel.obtain();
-        parcel2.writeInt(IUMtcService.EXTERNAL_CALLS_CHANGED);
-        parcel2.setDataPosition(0);
-        mTestMtcApp.getNativeListener().onMessage(parcel2);
-        parcel2.recycle();
 
         verify(mCallListener, times(1)).onExternalCallStateChanged(
                 any(MtcApp.class), any(ExternalCalls.class));
