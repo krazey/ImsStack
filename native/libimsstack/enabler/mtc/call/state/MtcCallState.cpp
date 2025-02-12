@@ -457,6 +457,11 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
             return HandleSrvccStarted();
         case SrvccState::SUCCEEDED:
         {
+            const ImsList<IMtcSession*>& objMtcSessions = m_objContext.GetSessions();
+            for (IMS_UINT32 i = 0; i < objMtcSessions.GetSize(); i++)
+            {
+                objMtcSessions.GetAt(i)->SetSessionTerminatedOrStartFailed();
+            }
             const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
             return Terminate(objReason);
         }

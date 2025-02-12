@@ -470,10 +470,27 @@ TEST_F(MtcCallStateTest, OnMediaFailedDoesNothing)
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnMediaFailed(*pReason));
 }
 
-TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothingIfNotFailedOrCanceled)
+TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothingIfIdleOrStarted)
 {
+    ImsList<IMtcSession*> objSessions;
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
+
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::IDLE));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::STARTED));
+}
+
+TEST_F(MtcCallStateTest, OnSrvccStateUpdatedSetsSessionTerminatedIfSucceeded)
+{
+    MockIMtcSession objMtcSession1;
+    MockIMtcSession objMtcSession2;
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession1);
+    objSessions.Append(&objMtcSession2);
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
+
+    EXPECT_CALL(objMtcSession1, SetSessionTerminatedOrStartFailed);
+    EXPECT_CALL(objMtcSession2, SetSessionTerminatedOrStartFailed);
+
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::SUCCEEDED));
 }
 
@@ -482,7 +499,7 @@ TEST_F(MtcCallStateTest, OnSrvccStateUpdateSendEarlyUpdateIfFailedOrCanceled)
     MockIMtcSession objMtcSession;
     ImsList<IMtcSession*> objSessions;
     objSessions.Append(&objMtcSession);
-    ON_CALL(objContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
     ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
@@ -498,7 +515,7 @@ TEST_F(MtcCallStateTest, OnSrvccStateUpdateDoesNothingIfFailedOrCanceledButNegoS
     MockIMtcSession objMtcSession;
     ImsList<IMtcSession*> objSessions;
     objSessions.Append(&objMtcSession);
-    ON_CALL(objContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
     ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
