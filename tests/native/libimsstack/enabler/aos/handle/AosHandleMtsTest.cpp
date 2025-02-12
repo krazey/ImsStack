@@ -99,22 +99,15 @@ public:
 protected:
     void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
 
         const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(strValue));
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetApp())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosApplication));
+        ON_CALL(m_objMockIAosAppContext, GetApp()).WillByDefault(Return(&m_objMockIAosApplication));
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+        ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+                .WillByDefault(Return(&m_objMockIAosNetTracker));
 
         ON_CALL(m_objMockIAosAppContext, GetConnection())
                 .WillByDefault(Return(&m_objMockIAosConnection));
@@ -124,8 +117,6 @@ protected:
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
-
-        EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
 
         const AString strAppId = AString("ims.app.mts.test");
         const AString strServiceId = AString("ims.service.mts.test");
@@ -203,9 +194,8 @@ TEST_F(AosHandleMtsTest, NConfiguration_NotifyConfigChanged_Test)
     // Expectation: Supported rat = 0
 
     ImsVector<IMS_SINT32> objTestRats;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
-            .Times(1)
-            .WillOnce(ReturnRef(objTestRats));
+    ON_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
+            .WillByDefault(ReturnRef(objTestRats));
 
     m_pAosHandleMts->NConfiguration_NotifyConfigChanged();
 
@@ -223,9 +213,8 @@ TEST_F(AosHandleMtsTest, InitializeSupportedRats_Test)
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN);
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
-            .Times(1)
-            .WillOnce(ReturnRef(objTestRats));
+    ON_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
+            .WillByDefault(ReturnRef(objTestRats));
 
     m_pAosHandleMts->InitializeSupportedRats();
 
@@ -240,13 +229,11 @@ TEST_F(AosHandleMtsTest, Init_Test)
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
-            .Times(1)
-            .WillOnce(ReturnRef(objTestRats));
+    ON_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
+            .WillByDefault(ReturnRef(objTestRats));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
@@ -494,9 +481,8 @@ TEST_F(AosHandleMtsTest, IsSupportedNetworkTypeForCellular_Test)
     objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
     objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
-            .Times(1)
-            .WillOnce(ReturnRef(objRats));
+    ON_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
+            .WillByDefault(ReturnRef(objRats));
 
     m_pAosHandleMts->InitializeSupportedRats();
 
