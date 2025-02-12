@@ -56,8 +56,5 @@ protected:
 protected:
     IMS_BOOL m_bMtcBlocked;
     IMS_UINT32 m_nSupportedRats;
-
-private:
-    friend class AosHandleMtsTest;
 };
 #endif  // AOS_HANDLE_MTS_H_

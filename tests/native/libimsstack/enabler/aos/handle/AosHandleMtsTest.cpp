@@ -65,6 +65,7 @@ public:
     inline ImsMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_objCapabilities; }
     inline IMS_UINT32 GetSupportedRats() { return m_nSupportedRats; }
     inline void SetBlocked(IN IMS_BOOL bBlocked) { m_bBlocked = bBlocked; }
+    inline void SetDataConnected(IN IMS_BOOL bConnected) { m_bDataConnected = bConnected; }
     inline void SetMtcBlocked(IN IMS_BOOL bBlocked) { m_bMtcBlocked = bBlocked; }
     inline void SetNetworkType(IN IMS_UINT32 nNetworkType) { m_nNetworkType = nNetworkType; }
     inline void SetServiceType(IN IMS_UINT32 nServiceType) { m_nServiceType = nServiceType; }
@@ -135,7 +136,7 @@ protected:
 
         ASSERT_TRUE(m_pAosHandleMts != nullptr);
 
-        m_pAosHandleMts->m_bDataConnected = IMS_TRUE;
+        m_pAosHandleMts->SetDataConnected(IMS_TRUE);
     }
 
     void TearDown() override
