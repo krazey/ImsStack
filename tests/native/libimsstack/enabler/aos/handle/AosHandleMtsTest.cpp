@@ -123,8 +123,7 @@ protected:
                 .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
 
         EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
 
