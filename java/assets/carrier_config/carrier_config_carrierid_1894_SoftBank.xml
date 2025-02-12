@@ -49,6 +49,7 @@
 
     <!-- Aos -->
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="8000"/>
+    <int name="imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int" value="3000"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
