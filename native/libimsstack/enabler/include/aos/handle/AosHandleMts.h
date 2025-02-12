@@ -53,11 +53,8 @@ protected:
     // IAosHandle
     void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
 
-private:
+protected:
     IMS_BOOL m_bMtcBlocked;
     IMS_UINT32 m_nSupportedRats;
-
-private:
-    friend class AosHandleMtsTest;
 };
 #endif  // AOS_HANDLE_MTS_H_
