@@ -1386,6 +1386,7 @@ public:
     public:
         // Public carrier-config - starts
         static const IMS_CHAR KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY[];
+        static const IMS_CHAR KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL[];
         // Public carrier-config - ends
 
         // ut terminal based services

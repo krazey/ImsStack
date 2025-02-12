@@ -1045,6 +1045,8 @@ const IMS_CHAR CarrierConfig::ImsWfc::KEY_WFC_ERR_OTHER_FAILURES_STRING[] =
 // Public carrier-config - starts
 const IMS_CHAR CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY[] =
         KEY_IMS_SS_PREFIX "ut_terminal_based_services_int_array";
+const IMS_CHAR CarrierConfig::ImsSs::KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL[] =
+        KEY_IMS_SS_PREFIX "network_initiated_ussd_over_ims_supported_bool";
 // Public carrier-config - ends
 
 //// Assets

@@ -166,6 +166,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSupportLimitedAdminSmsMode() const
     return m_objCarrierConfig.bSupportLimitedAdminSmsMode;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsNetworkInitiatedUssdOverImsSupported() const
+{
+    return m_objCarrierConfig.bNetworkInitiatedUssdOverImsSupported;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVolteTtySupported() const
 {
     return m_objCarrierConfig.bCarrierVolteTtySupported;
@@ -1339,6 +1344,9 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT);
     m_objCarrierConfig.nRefreshGeolocationTimeoutMillis =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT);
+    /// imsss.
+    m_objCarrierConfig.bNetworkInitiatedUssdOverImsSupported = piCc->GetBoolean(
+            CarrierConfig::ImsSs::KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL);
     /// imsvt.
     /// imswfc.
 

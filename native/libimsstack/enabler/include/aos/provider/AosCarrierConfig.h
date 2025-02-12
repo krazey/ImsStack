@@ -40,6 +40,7 @@ public:
             bCarrierVolteRoamingAvailable(IMS_TRUE),
             bSmsOverImsSupported(IMS_TRUE),
             bEmergencyCallbackModeSupported(IMS_FALSE),
+            bNetworkInitiatedUssdOverImsSupported(IMS_TRUE),
             bTcpRequiredForReg(IMS_FALSE),
             bUnsubscribeRegistrationEventPackage(IMS_FALSE),
             bSupportLimitedAdminSmsMode(IMS_FALSE),
@@ -106,6 +107,8 @@ public:
     IMS_BOOL bSmsOverImsSupported;
     /// aosp_carrier_config - imsemergency.
     IMS_BOOL bEmergencyCallbackModeSupported;
+    /// aosp_carrier_config - imsss.
+    IMS_BOOL bNetworkInitiatedUssdOverImsSupported;
 
     /// carrier_config - ims
     IMS_BOOL bTcpRequiredForReg;

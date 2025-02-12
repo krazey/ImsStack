@@ -131,6 +131,13 @@ public:
     virtual IMS_BOOL IsSupportLimitedAdminSmsMode() const = 0;
 
     /**
+     * @brief Check if network initiated USSD over IMS (USSI) is supported.
+     *
+     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     */
+    virtual IMS_BOOL IsNetworkInitiatedUssdOverImsSupported() const = 0;
+
+    /**
      * @brief Check if TTY over VoLTE is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.

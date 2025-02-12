@@ -117,6 +117,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
     EXPECT_EQ(0, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
+    EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
 
     MockICarrierConfig objCarrierConfig;
@@ -397,6 +398,13 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(0));
 
+    /// imsss.
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::ImsSs::KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL,
+                    IMS_FALSE))
+            .Times(2)
+            .WillRepeatedly(Return(IMS_TRUE));
+
     m_pAosNConfiguration->InitConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
     EXPECT_TRUE(m_pAosNConfiguration->IsEmergencySmsOverImsSupported());
@@ -456,6 +464,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
     EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
+    EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
 
     // 2nd call to test invoking InitConfig() several times
@@ -519,6 +528,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
+    EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
 }
 
 TEST_F(AosNConfigurationTest, InitAssetConfig)
