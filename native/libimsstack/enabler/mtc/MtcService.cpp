@@ -273,6 +273,15 @@ PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
 {
     IMS_TRACE_I("UpdateSrvccState", 0, 0, 0);
     m_pSrvccStateManager->UpdateSrvccState(eState);
+    if (m_eType == ServiceType::NORMAL)
+    {
+        // UpdateSrvccState is invoked only for ServiceType::NORMAL.
+        IMtcService* piEmergencyService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
+        if (piEmergencyService)
+        {
+            piEmergencyService->UpdateSrvccState(eState);
+        }
+    }
 }
 
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN ServiceType eServiceType)
