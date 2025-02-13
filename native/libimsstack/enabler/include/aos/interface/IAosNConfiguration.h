@@ -1465,6 +1465,17 @@ public:
     virtual ImsVector<IMS_SINT32>& GetSmsOverImsSupportedRats() = 0;
 
     /**
+     * @brief Returns the list of RAT technologies on which emergency call using IMS is supported.
+     *        Possible values are,
+     *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN
+     *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN
+     *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN
+     *
+     * @return vector rat list on which emergency call using IMS is supported
+     */
+    virtual ImsVector<IMS_SINT32>& GetEmergencyOverImsSupportedRats() = 0;
+
+    /**
      * @brief Indicate the error codes for registration
      *        - ERROR_POLICY_PCSCF
      *        Indicate the error codes that result in initial registration

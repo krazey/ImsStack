@@ -185,13 +185,17 @@ TEST_F(AosNetTrackerTest, Init_ImsType)
 
 TEST_F(AosNetTrackerTest, Init_EmergencyType)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NetworkPolicy::APN_EMERGENCY));
+    ImsVector<IMS_SINT32> objRats;
+    objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
+    ON_CALL(m_objMockIAosNConfiguration, GetEmergencyOverImsSupportedRats())
+            .WillByDefault(ReturnRef(objRats));
+    ON_CALL(m_objMockIAosConnection, GetConnectionType())
+            .WillByDefault(Return(NetworkPolicy::APN_EMERGENCY));
 
     m_pAosNetTracker->Init();
 
-    EXPECT_EQ(m_pAosNetTracker->GetAccessPolicy(), 0xFFFFFFFF);
+    IMS_UINT32 nExpectedCnxPolicy = 0xFFFFFFFF & (~NW_REPORT_RADIO_WLAN);
+    EXPECT_EQ(m_pAosNetTracker->GetAccessPolicy(), nExpectedCnxPolicy);
     EXPECT_EQ(m_pAosNetTracker->GetFeature(),
             AosNetTracker::FEATURE_IN_GUARD | AosNetTracker::FEATURE_OUT_GUARD);
     EXPECT_NE(m_pAosNetTracker->GetNetworkWatcher(), nullptr);
@@ -661,6 +665,23 @@ TEST_F(AosNetTrackerTest, NConfiguration_NotifyConfigChanged)
     m_pAosNetTracker->SetNetworkWatcher(&m_objMockINetworkWatcher);
 
     m_pAosNetTracker->NConfiguration_NotifyConfigChanged();
+}
+
+TEST_F(AosNetTrackerTest, UpdateCnxPolicyWhenNotifyConfigChanged)
+{
+    IMS_UINT32 nExpectedCnxPolicy = 0xFFFFFFFF & (~NW_REPORT_RADIO_WLAN);
+    m_pAosNetTracker->SetCnxPolicy(nExpectedCnxPolicy);
+    ImsVector<IMS_SINT32> objRats;
+    objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
+    ON_CALL(m_objMockIAosNConfiguration, GetEmergencyOverImsSupportedRats())
+            .WillByDefault(ReturnRef(objRats));
+    ON_CALL(m_objMockIAosConnection, GetConnectionType())
+            .WillByDefault(Return(NetworkPolicy::APN_EMERGENCY));
+
+    m_pAosNetTracker->NConfiguration_NotifyConfigChanged();
+
+    nExpectedCnxPolicy |= NW_REPORT_RADIO_WLAN;
+    EXPECT_EQ(m_pAosNetTracker->GetAccessPolicy(), nExpectedCnxPolicy);
 }
 
 TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithRatGuardTime)
