@@ -223,9 +223,10 @@ PROTECTED VIRTUAL void MtcApp::InitCallManager()
 
 PROTECTED VIRTUAL void MtcApp::DestroyServices()
 {
-    for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
+    for (IMS_SINT32 i = static_cast<IMS_SINT32>(m_lstServices.GetSize()) - 1; i >= 0; i--)
     {
-        delete m_lstServices.GetAt(i);
+        IMtcService* pCurrentService = m_lstServices.GetAt(i);
+        m_lstServices.RemoveAt(i);
+        delete pCurrentService;
     }
-    m_lstServices.Clear();
 }
