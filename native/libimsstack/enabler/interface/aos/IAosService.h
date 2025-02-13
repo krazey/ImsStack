@@ -249,9 +249,13 @@ public:
 };
 
 /**
- * @brief Enum class defining base values for categorizing AosReasonCode.
- *        Each base value represents a distinct category of errors or conditions that can lead to
- *        registration failures.
+ * @brief Enum class defining base values for categorizing {@link AosReasonCode}.
+ * Each base value represents a distinct category of errors or conditions that can lead to
+ * registration failures.
+ *
+ * Note: It is crucial that each BASE_XXX value is separated by a consistent interval,
+ * specifically the {@link BASE_CONVERSION_FACTOR}, to ensure proper categorization
+ * and comparison of {@link AosReasonCode} values.
  */
 enum class AosReasonCodeBase
 {
@@ -296,6 +300,54 @@ enum class AosReasonCodeBase
 
     /// Errors due to WFC registration other response.
     BASE_RESP_WFC_OTHER = 27000
+};
+
+/**
+ * @class AosReasonCodeWrapper
+ * @brief A wrapper class for {@link AosReasonCode} enum values, providing utility functions.
+ *
+ * This class wraps {@link AosReasonCode} enum values, offering functionality to check if
+ * a given code belongs to a specific base group and to retrieve the integer
+ * representation of the enum value.
+ */
+class AosReasonCodeWrapper
+{
+public:
+    /**
+     * @brief Constructor for the {@link AosReasonCodeWrapper} class.
+     * @param eCode The {@link AosReasonCode} enum value to be wrapped.
+     */
+    AosReasonCodeWrapper(IN AosReasonCode eCode) :
+            m_eCode(eCode)
+    {
+    }
+
+    /**
+     * @brief Checks if the wrapped {@link AosReasonCode belongs} to a specific base group.
+     * @param eBase The {@link AosReasonCodeBase} group to check against.
+     * @return IMS_BOOL, {@code IMS_TRUE} if in base group, {@code IMS_FALSE} otherwise.
+     *
+     * This function converts both the {@link AosReasonCode} and {@link AosReasonCodeBase} to
+     * integers, divides each by 1000, and compares the quotients to determine if they belong
+     * to the same base group.
+     *
+     * @note {@link BASE_CONVERSION_FACTOR} is the factor used to determine base groups.
+     */
+    inline IMS_BOOL IsInBase(IN AosReasonCodeBase eBase) const
+    {
+        constexpr unsigned int BASE_CONVERSION_FACTOR = 1000;
+        return TO_UINT32(m_eCode) / BASE_CONVERSION_FACTOR ==
+                TO_UINT32(eBase) / BASE_CONVERSION_FACTOR;
+    }
+
+    /**
+     * @brief Returns the wrapped {@link AosReasonCode} as an integer.
+     * @return IMS_UINT32 representation of the {@@link AosReasonCode}.
+     */
+    inline IMS_UINT32 GetInt() const { return TO_UINT32(m_eCode); }
+
+private:
+    AosReasonCode m_eCode;
 };
 
 /**
