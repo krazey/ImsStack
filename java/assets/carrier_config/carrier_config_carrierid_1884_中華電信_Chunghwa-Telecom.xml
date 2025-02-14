@@ -31,8 +31,6 @@
         <item value="0"/>
     </int-array>
 
-    <string name="imssms.sms_over_ims_supported_bool" value="false"/>
-
     <!-- ImsMedia -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
