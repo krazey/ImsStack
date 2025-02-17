@@ -609,7 +609,8 @@
         <item value="0"/> <!-- NORMAL_LTE -->
         <item value="0"/> <!-- NORMAL_WIFI -->
     </int-array>
-    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="0">
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
+        <item value="0"/> <!-- INVITE -->
     </int-array>
     <int-array name="imsvoice.geolocation_block_condition_int_array" num="0">
     </int-array>
@@ -645,6 +646,9 @@
     <int name="imsvoice.wait_video_text_qos_after_audio_qos_acquisition_timer_millis_int" value="1000"/>
     <int name="imsvoice.qos_lost_guard_timer_millis_int" value="5000"/>
     <int name="imsvoice.qos_forced_acquisition_timer_millis_int" value="500"/>
+    <string-array name="imsemergency.plmn_allowing_geolocation_pidf_in_sip_invite_no_uicc_string_array" num="1">
+        <item value="311480"/>
+    </string-array>
 
     <!-- Media -->
     <boolean name="imsvoice.support_multi_config_in_early_session_bool" value="false"/>

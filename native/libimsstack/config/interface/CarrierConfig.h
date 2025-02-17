@@ -630,6 +630,8 @@ public:
         static const IMS_CHAR KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[];
         static const IMS_CHAR KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL[];
         static const IMS_CHAR KEY_NUMBER_NEED_OIR_STRING_ARRAY[];
+        static const IMS_CHAR
+                KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY[];
 
         // Preferred Emergency Registration Type
         enum
@@ -1251,7 +1253,6 @@ public:
         enum
         {
             GEOLOCATON_BLOCK_CONDITION_IN_ROAMING = 0,
-            GEOLOCATON_BLOCK_CONDITION_ANONYMOUS = 1,
         };
 
         // KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY
