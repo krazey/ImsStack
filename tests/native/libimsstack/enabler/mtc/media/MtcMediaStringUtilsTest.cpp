@@ -188,24 +188,6 @@ TEST_F(MtcMediaStringUtilsTest, ConvertPemType)
     EXPECT_EQ(MtcMediaStringUtils::ConvertPemType(ePemType), "inactive");
 }
 
-TEST_F(MtcMediaStringUtilsTest, ConvertCallType)
-{
-    CallType eCallType = CallType::UNKNOWN;
-    EXPECT_EQ(MtcMediaStringUtils::ConvertCallType(eCallType), "unknown");
-
-    eCallType = CallType::VOIP;
-    EXPECT_EQ(MtcMediaStringUtils::ConvertCallType(eCallType), "voip");
-
-    eCallType = CallType::VT;
-    EXPECT_EQ(MtcMediaStringUtils::ConvertCallType(eCallType), "vt");
-
-    eCallType = CallType::RTT;
-    EXPECT_EQ(MtcMediaStringUtils::ConvertCallType(eCallType), "rtt");
-
-    eCallType = CallType::VIDEO_RTT;
-    EXPECT_EQ(MtcMediaStringUtils::ConvertCallType(eCallType), "video_rtt");
-}
-
 TEST_F(MtcMediaStringUtilsTest, ConvertQuality)
 {
     IMS_SINT32 eCodecType = MEDIA_QUALITY_NONE - 1;
@@ -267,6 +249,33 @@ TEST_F(MtcMediaStringUtilsTest, ConvertDirection)
 
     eDirection = MEDIA_DIRECTION_SEND_RECEIVE + 1;
     EXPECT_EQ(MtcMediaStringUtils::ConvertDirection(eDirection), "OUT_OF_RANGE");
+}
+
+TEST_F(MtcMediaStringUtilsTest, ConvertProtocolType)
+{
+    IMS_SINT32 eProtocolType = MEDIA_PROTOCOL_NONE;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "none");
+
+    eProtocolType = MEDIA_PROTOCOL_ANY;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "any");
+
+    eProtocolType = MEDIA_PROTOCOL_RTP;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "rtp");
+
+    eProtocolType = MEDIA_PROTOCOL_RTCP;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "rtcp");
+
+    eProtocolType = MEDIA_PROTOCOL_NO_CHANGE;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "no change");
+
+    eProtocolType = MEDIA_PROTOCOL_BOTH;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "both");
+
+    eProtocolType = MEDIA_PROTOCOL_NONE - 1;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "OUT_OF_RANGE");
+
+    eProtocolType = MEDIA_PROTOCOL_BOTH + 1;
+    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "OUT_OF_RANGE");
 }
 
 }  // namespace android

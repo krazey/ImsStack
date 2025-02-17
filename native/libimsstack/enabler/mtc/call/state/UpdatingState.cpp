@@ -24,6 +24,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
 #include "call/state/IMtcCallState.h"
@@ -795,7 +796,7 @@ CallStateName UpdatingState::HandleRetry()
     UpdateType eType = m_objContext.GetUpdatingInfo().GetRequestingType();
     CallType eCallType = m_objContext.GetUpdatingInfo().GetTargetCallType();
 
-    IMS_TRACE_I("HandleRetry UpdateType[%d]", eType, 0, 0);
+    IMS_TRACE_I("HandleRetry UpdateType[%s]", MtcCallStringUtils::ConvertUpdateType(eType), 0, 0);
     if (eType == UpdateType::HOLD)
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(

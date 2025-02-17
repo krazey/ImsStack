@@ -22,6 +22,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/IMtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -293,7 +294,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
         return IMS_FAILURE;
     }
 
-    IMS_TRACE_D("FormSdp : CallType[%s]", MtcMediaStringUtils::ConvertCallType(eCallType), 0, 0);
+    IMS_TRACE_D("FormSdp : CallType[%s]", MtcCallStringUtils::ConvertCallType(eCallType), 0, 0);
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromCallType(eCallType);
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 

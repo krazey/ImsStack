@@ -33,6 +33,7 @@
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCall.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/MtcSession.h"
 #include "call/block/MtcBlockChecker.h"
 #include "call/message/MessageSender.h"
@@ -46,6 +47,8 @@
 #include "helper/UdpKeepAliveSender.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "media/MtcMediaStringUtils.h"
+#include "precondition/QosStringUtils.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiData.h"
 #include <functional>
@@ -217,7 +220,8 @@ PUBLIC VIRTUAL void MtcCall::HandleUserAlert()
 
 PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
-    IMS_TRACE_I("%s - Accept : type[%d]", ToString().GetStr(), eCallType, 0);
+    IMS_TRACE_I("%s - Accept : type[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertCallType(eCallType), 0);
 
     if (IsUssi())
     {
@@ -1012,7 +1016,8 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplici
 
 PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
 {
-    IMS_TRACE_I("%s - OnTimerExpired : type[%d]", ToString().GetStr(), nType, 0);
+    IMS_TRACE_I("%s - OnTimerExpired : type[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertTimerType(nType), 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1023,8 +1028,8 @@ PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
 
 PUBLIC VIRTUAL void MtcCall::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
 {
-    IMS_TRACE_I("%s - OnBlockChecked : result[%d]", ToString().GetStr(),
-            static_cast<IMS_SINT32>(objResult.eStatus), 0);
+    IMS_TRACE_I("%s - OnBlockChecked : result[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertBlockStatus(objResult.eStatus), 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1035,7 +1040,8 @@ PUBLIC VIRTUAL void MtcCall::OnBlockChecked(IN IMtcBlockChecker::Result objResul
 
 PUBLIC VIRTUAL void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
-    IMS_TRACE_I("%s - QosReserved : MediaType[%d]", ToString().GetStr(), eMediaType, 0);
+    IMS_TRACE_I("%s - QosReserved : MediaType[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertMediaType(eMediaType), 0);
 
     if (piSession == IMS_NULL)
     {
@@ -1052,7 +1058,8 @@ PUBLIC VIRTUAL void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
 
 PUBLIC VIRTUAL void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
-    IMS_TRACE_I("%s - QosReserveFailed : NextAction[%d]", ToString().GetStr(), eNextAction, 0);
+    IMS_TRACE_I("%s - QosReserveFailed : NextAction[%s]", ToString().GetStr(),
+            QosStringUtils::ConvertQosLossPolicy(eNextAction), 0);
 
     if (piSession == IMS_NULL)
     {
@@ -1138,8 +1145,8 @@ PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
 PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataStarted(
         IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {
-    IMS_TRACE_I(
-            "%s - OnReceivingMediaDataStarted : type[%u]", ToString().GetStr(), eProtocolType, 0);
+    IMS_TRACE_I("%s - OnReceivingMediaDataStarted : type[%s]", ToString().GetStr(),
+            MtcMediaStringUtils::ConvertProtocolType(eProtocolType), 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1151,8 +1158,8 @@ PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataStarted(
 PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataFailed(
         IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {
-    IMS_TRACE_I(
-            "%s - OnReceivingMediaDataFailed : type[%u]", ToString().GetStr(), eProtocolType, 0);
+    IMS_TRACE_I("%s - OnReceivingMediaDataFailed : type[%s]", ToString().GetStr(),
+            MtcMediaStringUtils::ConvertProtocolType(eProtocolType), 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1207,7 +1214,8 @@ PUBLIC VIRTUAL void MtcCall::OnMediaFailed(IN const CallReasonInfo& objReason)
 
 PUBLIC VIRTUAL void MtcCall::OnSrvccStateUpdated(IN SrvccState eState)
 {
-    IMS_TRACE_I("%s - OnSrvccStateUpdated : state[%d]", ToString().GetStr(), eState, 0);
+    IMS_TRACE_I("%s - OnSrvccStateUpdated : state[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertSrvccState(eState), 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1219,8 +1227,9 @@ PUBLIC VIRTUAL void MtcCall::OnSrvccStateUpdated(IN SrvccState eState)
 PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
         IN IMtcService& /*objMtcService*/, IN MtcAosState eState, IN IMS_UINT32 eAosReason)
 {
-    IMS_TRACE_I("%s - OnAosStateChanged : AosState[%d] reason[%u]", ToString().GetStr(), eState,
-            eAosReason);
+    IMS_TRACE_I("%s - OnAosStateChanged : AosState[%s] reason[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertAosState(eState),
+            MtcCallStringUtils::ConvertAosReason(eAosReason));
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1231,7 +1240,8 @@ PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
 
 PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, IN IMS_UINT32 eIpcan)
 {
-    IMS_TRACE_I("%s - OnIpcanChanged : IpCan[%d]", ToString().GetStr(), eIpcan, 0);
+    IMS_TRACE_I("%s - OnIpcanChanged : IpCan[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertIpcanType(eIpcan), 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1243,7 +1253,8 @@ PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, I
 PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServiceType,
         IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
-    IMS_TRACE_I("%s - OnRatChanged : RAT[%d]", ToString().GetStr(), eRatType, 0);
+    IMS_TRACE_I("%s - OnRatChanged : RAT[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertRatType(eRatType), 0);
 
     m_objPreconditionManager.OnRatChanged(eRatType);
     m_objUiNotifier.SendRatChanged(eRatType);
@@ -1252,8 +1263,8 @@ PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServi
 PUBLIC VIRTUAL void MtcCall::OnConnectionFailed(
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis)
 {
-    IMS_TRACE_I("%s - OnConnectionFailed : Reason[%u] Time[%u]", ToString().GetStr(),
-            nFailureReason, nWaitTimeMillis);
+    IMS_TRACE_I("%s - OnConnectionFailed : Reason[%s] Time[%u]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertFailureReason(nFailureReason), nWaitTimeMillis);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
