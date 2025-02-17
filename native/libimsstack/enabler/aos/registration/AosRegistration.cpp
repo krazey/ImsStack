@@ -1284,6 +1284,15 @@ PROTECTED VIRTUAL void AosRegistration::Init()
         }
     }
 
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+        if (piService != IMS_NULL)
+        {
+            piService->AddListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
+        }
+    }
+
     SetTrafficListener(IMS_TRUE);
 }
 
@@ -1314,6 +1323,15 @@ PROTECTED VIRTUAL void AosRegistration::CleanUp()
     StopTimer(TIMER_OFFLINE_RECOVER);
 
     SetTrafficListener(IMS_FALSE);
+
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+        if (piService != IMS_NULL)
+        {
+            piService->RemoveListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
+        }
+    }
 
     IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCt != IMS_NULL)
@@ -6252,6 +6270,19 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
     piSipMsg->SetHeader(ISipHeader::GEOLOCATION, strGeolocation);
 
     return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL void AosRegistration::RegistrationControl_UpdateDataFailureReason(
+        IN AosReasonCode eReason)
+{
+    if (m_eRegType != AosRegistrationType::NORMAL ||
+            m_eImsReasonCode != AosReasonCode::UNSPECIFIED ||
+            !AosReasonCodeWrapper(eReason).IsInBase(AosReasonCodeBase::BASE_DATA))
+    {
+        return;
+    }
+
+    m_eImsReasonCode = eReason;
 }
 
 PRIVATE

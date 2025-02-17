@@ -32,8 +32,8 @@ public:
     MOCK_METHOD(void, RegistrationControl_ControlRegistration,
             (IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause),
             (override));
-    MOCK_METHOD(
-            void, RegistrationControl_UpdateDataFailureReason, (IN IMS_SINT32 nReason), (override));
+    MOCK_METHOD(void, RegistrationControl_UpdateDataFailureReason, (IN AosReasonCode eReason),
+            (override));
 };
 
 #endif  // MOCK_I_AOS_REGISTRATION_CONTROL_LISTENER_H_

@@ -70,6 +70,7 @@
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
+#include "interface/IAosRegistrationControlListener.h"
 #include "handle/AosFeatureTag.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
@@ -79,6 +80,7 @@
 #include "registration/AosSubscription.h"
 
 using ::testing::_;
+using ::testing::An;
 using ::testing::AnyNumber;
 using ::testing::DoAll;
 using ::testing::Return;
@@ -150,6 +152,7 @@ using ::testing::SetArgReferee;
     using Base::Registration_Terminated;                          \
     using Base::Registration_Updated;                             \
     using Base::Registration_UpdateFailed;                        \
+    using Base::RegistrationControl_UpdateDataFailureReason;      \
     using Base::RemoveFeatureTagForMtc;                           \
     using Base::SendRegisterEx;                                   \
     using Base::SetBlocked;                                       \
@@ -2193,6 +2196,7 @@ TEST_F(AosRegistrationTest, InitializeFeaturesAndListenersOnInit)
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosBlock, SetListener(_));
     EXPECT_CALL(m_objMockIAosCallTracker, SetListener(_));
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosRegistrationControlListener*>()));
     EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _));
 
     m_pAosRegistration->Init();
@@ -2204,6 +2208,7 @@ TEST_F(AosRegistrationTest, InitializeFeaturesAndListenersOnInit)
 TEST_F(AosRegistrationTest, RemoveListenersOnCleanUp)
 {
     EXPECT_CALL(m_objMockIAosBlock, RemoveListener(_));
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosRegistrationControlListener*>()));
     EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(_));
     EXPECT_CALL(m_objMockIAosTransaction, RemoveListener(_, _));
 
@@ -5755,6 +5760,44 @@ TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfPidfFormingPolicy
 
     EXPECT_FALSE(bResult);
     GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, UpdatedReasonCodeWhenDataFailureReasonIsUpdated)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+
+    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(
+            AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
+}
+
+TEST_F(AosRegistrationTest, NoUpdatedReasonCodeWhenDataFailureReasonIsUpdatedWithEmergencyType)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(
+            AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
+
+    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
+}
+
+TEST_F(AosRegistrationTest, NoUpdatedReasonCodeWhenDataFailureReasonIsUpdatedWithModemReason)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+
+    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(AosReasonCode::RAT_BLOCK);
+
+    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::RAT_BLOCK);
+}
+
+TEST_F(AosRegistrationTest, NoUpdatedReasonCodeWhenDataFailureReasonIsUpdatedWithOtherReasons)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+
+    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(AosReasonCode::REG_RESP_403);
+
+    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_403);
 }
 
 TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecoverTimer)

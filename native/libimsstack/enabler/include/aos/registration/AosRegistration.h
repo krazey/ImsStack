@@ -33,6 +33,7 @@
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosNetTrackerListener.h"
 #include "interface/IAosRegistration.h"
+#include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosSubscriptionListener.h"
 #include "interface/IAosTransaction.h"
 
@@ -66,7 +67,8 @@ class AosRegistration :
         public ITimerListener,
         public IMessageMediator,
         public IAosTransactionListener,
-        public IRegUserIdentityNotifier
+        public IRegUserIdentityNotifier,
+        public AosRegistrationControlListener
 {
 public:
     AosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
@@ -404,6 +406,9 @@ protected:
 
     virtual IMS_BOOL AddLocationHeaderBody(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
+
+    // AosRegistrationControlListener
+    void RegistrationControl_UpdateDataFailureReason(IN AosReasonCode eReason) override;
 
 private:
     void ControlPrivateHeader();

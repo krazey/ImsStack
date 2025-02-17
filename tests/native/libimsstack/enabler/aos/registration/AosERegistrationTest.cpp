@@ -52,12 +52,14 @@
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
+#include "interface/IAosEmergencyListener.h"
 #include "handle/AosFeatureTag.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
 #include "registration/AosERegistration.h"
 
 using ::testing::_;
+using ::testing::An;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -718,8 +720,9 @@ TEST_F(AosERegistrationTest, Initialize_SetListenersSuccessfully)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosService, AddListener(m_pAosERegistration)).Times(1);
-    EXPECT_CALL(m_objMockIAosCallTracker, SetListener(m_pAosERegistration)).Times(1);
+
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosEmergencyListener*>()));
+    EXPECT_CALL(m_objMockIAosCallTracker, SetListener(m_pAosERegistration));
     EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(1);
 
     m_pAosERegistration->Init();
@@ -731,8 +734,8 @@ TEST_F(AosERegistrationTest, CleanUp_RemoveListenersSuccessfully)
 {
     m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
 
-    EXPECT_CALL(m_objMockIAosService, RemoveListener(m_pAosERegistration)).Times(1);
-    EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(m_pAosERegistration)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosEmergencyListener*>()));
+    EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(m_pAosERegistration));
     EXPECT_CALL(m_objMockIAosTransaction, RemoveListener(_, _)).Times(1);
 
     m_pAosERegistration->CleanUp();
@@ -1336,7 +1339,7 @@ TEST_F(AosERegistrationTest, NotifyConfigChangedWhenEmergencyCallbackModeSupport
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosService, AddListener(m_pAosERegistration)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosEmergencyListener*>()));
 
     m_pAosERegistration->NConfiguration_NotifyConfigChanged();
 }
@@ -1347,7 +1350,7 @@ TEST_F(AosERegistrationTest, NotifyConfigChangedWhenEmergencyCallbackModeNotSupp
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosService, RemoveListener(m_pAosERegistration)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosEmergencyListener*>()));
 
     m_pAosERegistration->NConfiguration_NotifyConfigChanged();
 }
