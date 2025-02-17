@@ -741,8 +741,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "block_wifi_emergency_call_if_not_provisioned_bool";
         public static final String KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT =
                 KEY_PREFIX + "wifi_emergency_18x_timer_millis_int";
-        public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL =
-                KEY_PREFIX + "release_emergency_pdn_with_emergency_call_fail_bool";
         public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
                 KEY_PREFIX + "emergency_call_current_location_discovery_supported_bool";
         public static final String KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY =

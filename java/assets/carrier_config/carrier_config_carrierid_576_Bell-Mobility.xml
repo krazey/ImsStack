@@ -58,7 +58,6 @@
     </string-array>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="60000"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
-    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->

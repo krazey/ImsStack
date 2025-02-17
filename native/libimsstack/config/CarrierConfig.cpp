@@ -1184,9 +1184,6 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MI
         KEY_IMS_VOICE_PREFIX "send_udp_keep_alive_interval_time_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[] =
         KEY_IMS_VOICE_PREFIX "call_reject_code_for_not_acceptable_call_type_int";
-const IMS_CHAR
-        CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[] =
-                KEY_IMS_EMERGENCY_PREFIX "release_emergency_pdn_with_emergency_call_fail_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "emergency_call_current_location_discovery_supported_bool";

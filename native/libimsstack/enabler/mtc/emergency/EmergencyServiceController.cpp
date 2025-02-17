@@ -140,19 +140,13 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallStateChanged(IN CallKey nC
 }
 
 PUBLIC VIRTUAL void EmergencyServiceController::OnCallSessionReleased(
-        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished)
+        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN [[maybe_unused]] IMS_BOOL bEstablished)
 {
     if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) || m_eState != State::OPENED)
     {
         return;
     }
 
-    if (!bEstablished &&
-            m_objContext.GetConfigurationProxy().GetBoolean(
-                    ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL))
-    {
-        Close();
-    }
     m_nEmergencyCallKey = IMtcCall::CALL_KEY_INVALID;
 }
 
