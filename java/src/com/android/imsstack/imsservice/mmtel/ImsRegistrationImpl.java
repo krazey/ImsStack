@@ -27,32 +27,21 @@ import android.util.Pair;
 
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCodeMap;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.imsservice.mmtel.reg.IRegistrationNotifier;
 import com.android.imsstack.imsservice.sipcontroller.ISipTransportBaseRegistrationListener;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.Map;
 import java.util.Set;
 
-public final class ImsRegistrationImpl extends ImsRegistrationImplBase
+public class ImsRegistrationImpl extends ImsRegistrationImplBase
         implements IRegistrationNotifier {
 
     ImsRegistrationTracker mRegTracker;
 
     private ISipTransportBaseRegistrationListener mSipTransportBaseRegListener;
-
-    private static final Map<ReasonCode, Pair<Integer, Integer>> REASON_CODE_MAP = Map.ofEntries(
-            Map.entry(ReasonCode.REG_RESP_403, Pair.create(
-                    ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
-            Map.entry(ReasonCode.WFC_REG_RESP_403, Pair.create(
-                    ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
-            Map.entry(ReasonCode.WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY, Pair.create(
-                    ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
-            Map.entry(ReasonCode.REG_RESP_NETWORK_TIMEOUT, Pair.create(
-                    ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                            ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT))
-    );
 
     public ImsRegistrationImpl() {
     }
@@ -144,9 +133,9 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
         onSubscriberAssociatedUriChanged(uris);
     }
 
-    private ImsReasonInfo getReasonInfo(ReasonCode reason, String message) {
-        Pair<Integer, Integer> pair = REASON_CODE_MAP.getOrDefault(reason,
-                Pair.create(ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_UNSPECIFIED));
+    @VisibleForTesting
+    protected ImsReasonInfo getReasonInfo(ReasonCode reason, String message) {
+        Pair<Integer, Integer> pair = ReasonCodeMap.getImsReasonPair(reason);
 
         return new ImsReasonInfo(pair.first, pair.second,
                 (message != null && !message.trim().isEmpty()) ? message : null);

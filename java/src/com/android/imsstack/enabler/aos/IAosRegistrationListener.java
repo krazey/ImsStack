@@ -17,11 +17,14 @@ package com.android.imsstack.enabler.aos;
 
 import android.annotation.NonNull;
 import android.net.Uri;
+import android.telephony.ims.ImsReasonInfo;
+import android.util.Pair;
 
 import com.android.internal.annotations.Keep;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public interface IAosRegistrationListener {
@@ -552,6 +555,84 @@ public interface IAosRegistrationListener {
                 .filter(cause -> cause.mValue == value)
                 .findFirst()
                 .orElse(UNSPECIFIED);
+        }
+    }
+
+    /**
+     *  Map it with the {@code ImsReasonInfo} information based on {@code ReasonCode}
+     */
+    class ReasonCodeMap {
+        private static final Map<ReasonCode, Pair<Integer, Integer>> REASON_MAP = Map.ofEntries(
+                Map.entry(ReasonCode.DATA_NOT_MATCHED, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR, 65535)),
+                Map.entry(ReasonCode.DATA_UNSPECIFIED, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_UNSPECIFIED)),
+                Map.entry(ReasonCode.DATA_LOCAL_NETWORK_NO_SERVICE, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE)),
+                Map.entry(ReasonCode.DATA_LOCAL_SERVICE_UNAVAILABLE, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE)),
+                Map.entry(ReasonCode.DATA_EPDG_TUNNEL_ESTABLISH_FAILURE, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE)),
+                Map.entry(ReasonCode.DATA_WIFI_LOST, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE, ImsReasonInfo.CODE_WIFI_LOST)),
+                Map.entry(ReasonCode.DATA_RADIO_OFF, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE, ImsReasonInfo.CODE_RADIO_OFF)),
+                Map.entry(ReasonCode.DATA_NO_VALID_SIM, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_NO_VALID_SIM)),
+                Map.entry(ReasonCode.DATA_RADIO_INTERNAL_ERROR, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR)),
+                Map.entry(ReasonCode.DATA_RADIO_LINK_LOST, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_RADIO_LINK_LOST)),
+                Map.entry(ReasonCode.DATA_RADIO_RELEASE_NORMAL, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_RADIO_RELEASE_NORMAL)),
+                Map.entry(ReasonCode.DATA_RADIO_RELEASE_ABNORMAL, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_RADIO_RELEASE_ABNORMAL)),
+                Map.entry(ReasonCode.DATA_NETWORK_DETACH, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_NETWORK_DETACH)),
+                Map.entry(ReasonCode.DATA_OEM_CAUSE_4, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE,
+                        ImsReasonInfo.CODE_OEM_CAUSE_4)),
+                Map.entry(ReasonCode.REG_RESP_403, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
+                Map.entry(ReasonCode.WFC_REG_RESP_403, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
+                Map.entry(ReasonCode.WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
+                Map.entry(ReasonCode.REG_RESP_NETWORK_TIMEOUT, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT))
+
+        );
+
+        /**
+         * Return the map variable that matches {@code ReasonCode} and {@code ImsReasonInfo}.
+         *
+         * @return The map variable.
+         */
+        public static Map<ReasonCode, Pair<Integer, Integer>> getReasonMap() {
+            return REASON_MAP;
+        }
+
+        /**
+         * Returns the pair of {@code ImsReasonInfo} based on Reasoncode.
+         * The pair is consist of code and extraCode of {@code ImsReasonInfo}
+         *
+         * @param key ReasonCode
+         * @return The pair of {@code ImsReasonInfo}
+         */
+        public static Pair<Integer, Integer> getImsReasonPair(ReasonCode key) {
+            return REASON_MAP.getOrDefault(key, Pair.create(ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                    ImsReasonInfo.CODE_UNSPECIFIED));
         }
     }
 
