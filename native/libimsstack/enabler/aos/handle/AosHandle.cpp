@@ -1868,9 +1868,6 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
             break;
 
         case IMS_EVENT_ROAMING_STATE:
-            // jryou: This will be added later
-            // ProcessCsRoamingStateChanged(nLParam);
-
             ProcessPsRoamingStateChanged(nWParam);
             break;
 
