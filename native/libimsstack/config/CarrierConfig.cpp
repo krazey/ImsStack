@@ -222,6 +222,10 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_MULTIPLE_REGISTRATION_INT[] =
         KEY_IMS_PREFIX "support_multiple_registration_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[] =
         KEY_IMS_PREFIX "retransmission_allowed_of_geolocation_pidf_string";
+const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_CELLULAR_NETWORK_INFO_HEADER_BOOL[] =
+        KEY_IMS_PREFIX "allow_cellular_network_info_header_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT[] =
+        KEY_IMS_PREFIX "cellular_network_info_cache_expiration_sec_int";
 
 // Aos
 const IMS_CHAR CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[] =

@@ -439,9 +439,13 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
     nSipFeatureCaps |= SIP_FEATURE_CAPS_TRUST_DOMAIN;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_SIP_INSTANCE_FOR_CALLER_PREFERENCE;
-    nSipFeatureCaps |= SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_USER_AGENT;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX;
+
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_ALLOW_CELLULAR_NETWORK_INFO_HEADER_BOOL))
+    {
+        nSipFeatureCaps |= SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER;
+    }
 
     if (piCc->GetBoolean(CarrierConfig::Ims::KEY_GRUU_ENABLED_BOOL))
     {
