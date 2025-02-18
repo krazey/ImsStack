@@ -197,7 +197,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
                     Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
                     Ims.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
                     Ims.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
-                    Ims.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
+                    Ims.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT,
                     Ims.KEY_EXTRA_REG_ERR_POLICY_INT,
                     Ims.KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
                     Ims.KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY)),

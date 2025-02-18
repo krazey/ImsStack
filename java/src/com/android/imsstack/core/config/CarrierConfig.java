@@ -532,7 +532,7 @@ public class CarrierConfig {
                 KEY_PREFIX
                         + "extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int";
         public static final String
-                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT =
+                KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT =
                 KEY_PREFIX
                         + "extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int";
         public static final String KEY_EXTRA_REG_ERR_POLICY_INT =

@@ -23,7 +23,7 @@
 class IAosNConfigurationListener;
 
 /**
- * @brief This class provids an interface to access the configuration information related to Aos.
+ * @brief This class provides an interface to access the configuration information related to Aos.
  *
  */
 class IAosNConfiguration
@@ -58,6 +58,7 @@ public:
      *        transmitted by only TCP transport type.
      *
      * @return IMS_BOOL Return whether SIP REGISTER message should be transmitted by TCP or not.
+     * @see {@code ims.use_tcp_transport_for_register_bool}
      */
     virtual IMS_BOOL IsTcpRequiredForReg() const = 0;
 
@@ -65,12 +66,14 @@ public:
      * @brief Returns whether subscription is initiated after registration.
      *
      * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.registration_event_package_supported_bool}
      */
     virtual IMS_BOOL IsSubscription() const = 0;
     /**
      * @brief Returns whether un-subscription is initiated before de-registration.
      *
      * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.unsubscribe_registration_event_package_bool}
      */
     virtual IMS_BOOL IsUnSubscription() const = 0;
 
@@ -78,6 +81,7 @@ public:
      * @brief Check if VoLTE is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code carrier_volte_available_bool}
      */
     virtual IMS_BOOL IsVoLteAvailable() const = 0;
 
@@ -85,6 +89,7 @@ public:
      * @brief Check if VoLTE roaming is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code imsvoice.carrier_volte_roaming_available_bool}
      */
     virtual IMS_BOOL IsVoLteRoamingAvailable() const = 0;
 
@@ -92,6 +97,7 @@ public:
      * @brief Check if Video calling is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code carrier_vt_available_bool}
      */
     virtual IMS_BOOL IsVtAvailable() const = 0;
 
@@ -99,6 +105,7 @@ public:
      * @brief Check if WFC is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code carrier_wfc_ims_available_bool}
      */
     virtual IMS_BOOL IsWfcImsAvailable() const = 0;
 
@@ -106,6 +113,7 @@ public:
      * @brief Check if single registration is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
+     * @see {@code ims.ims_single_registration_required_bool}
      */
     virtual IMS_BOOL IsImsSingleRegistrationRequired() const = 0;
 
@@ -113,6 +121,7 @@ public:
      * @brief Check if RTT is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code rtt_supported_bool}
      */
     virtual IMS_BOOL IsRttSupported() const = 0;
 
@@ -120,6 +129,7 @@ public:
      * @brief Check if RTT is supported while UE is on roaming network.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code rtt_supported_while_roaming_bool}
      */
     virtual IMS_BOOL IsRttSupportedWhileRoaming() const = 0;
 
@@ -127,6 +137,7 @@ public:
      * @brief Check if limited admin sms mode is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code imssms.support_limited_admin_sms_mode_bool}
      */
     virtual IMS_BOOL IsSupportLimitedAdminSmsMode() const = 0;
 
@@ -134,6 +145,7 @@ public:
      * @brief Check if network initiated USSD over IMS (USSI) is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code imsss.network_initiated_ussd_over_ims_supported_bool}
      */
     virtual IMS_BOOL IsNetworkInitiatedUssdOverImsSupported() const = 0;
 
@@ -141,6 +153,7 @@ public:
      * @brief Check if TTY over VoLTE is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code carrier_volte_tty_supported_bool}
      */
     virtual IMS_BOOL IsVolteTtySupported() const = 0;
 
@@ -148,6 +161,7 @@ public:
      * @brief Check if VOPS is ignored for VoLTE enable.
      *
      * @return IMS_TRUE if ignored, IMS_FALSE if considered.
+     * @see {@code imsvoice.ignore_vops_for_volte_enable_bool}
      */
     virtual IMS_BOOL IsVopsIgnoredForVolteEnabled() const = 0;
 
@@ -155,6 +169,7 @@ public:
      * @brief Check if Sms Over Ims is available without voice capability.
      *
      * @return IMS_TRUE if available, IMS_FALSE if not available.
+     * @see {@code imssms.sms_over_ims_available_without_voice_capa_bool}
      */
     virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const = 0;
 
@@ -162,6 +177,7 @@ public:
      * @brief Check if VoLTE service block by SSAC is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
+     * @see {@code imsvoice.required_volte_block_by_ssac_bool}
      */
     virtual IMS_BOOL IsRequiredVolteBlockBySsac() const = 0;
 
@@ -169,6 +185,7 @@ public:
      * @brief Check if WFC service block by Airplane mode is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
+     * @see {@code imswfc.required_wfc_block_by_airplane_mode_bool}
      */
     virtual IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const = 0;
 
@@ -176,6 +193,7 @@ public:
      * @brief Returns whether re-registration is sent on Wifi when the country is changed.
      *
      * @return IMS_BOOL Return whether to be sent re-registration or not
+     * @see {@code imswfc.rereg_with_changed_country_on_wifi_bool}
      */
     virtual IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const = 0;
 
@@ -183,13 +201,15 @@ public:
      * @brief Returns whether IPSec is enabled for SIP messages in roaming networks.
      *
      * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.sip_over_ipsec_enabled_in_roaming_bool}
      */
     virtual IMS_BOOL IsSipOverIpsecInRoamingEnabled() const = 0;
 
     /**
-     * @brief Check if conuntry code availability check for wfc is required.
+     * @brief Check if country code availability check for wfc is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
+     * @see {@code imswfc.use_wfc_country_code_availability_check_bool}
      */
     virtual IMS_BOOL UseWfcCountryCodeAvailabilityCheck() const = 0;
 
@@ -201,6 +221,7 @@ public:
      *        Subscription decides whether to follow the mentioned function by this return value.
      *
      * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.reg_retry_interval_used_for_sub_bool}
      */
     virtual IMS_BOOL IsRegRetryIntervalsUsedForSub() const = 0;
 
@@ -208,13 +229,15 @@ public:
      * @brief Check if SmsOverIp is enabled.
      *
      * @return IMS_TRUE if enabled, IMS_FALSE if not enabled.
+     * @see {@code KEY_SMS_OVER_IP_ENABLED} (@code ProvisioningManager)
      */
     virtual IMS_BOOL IsSmsOverIpEnabled() const = 0;
 
     /**
      * @brief Returns whether the ipsec is supported or not.
      *
-     * @return IMS_BOOL Return wherther to be applied or not
+     * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.sip_over_ipsec_enabled_bool}
      */
     virtual IMS_BOOL IsIpsecEnabled() const = 0;
 
@@ -222,6 +245,7 @@ public:
      * @brief Returns whether to follow reg retry rule when emergency registration failed.
      *
      * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code imsemergency.use_reg_retry_rule_for_ereg_bool}
      */
     virtual IMS_BOOL IsRegRetryRuleForERegUsed() const = 0;
 
@@ -229,14 +253,16 @@ public:
      * @brief Returns whether the security server port is used in reg contact of
      *        initial registration.
      *
-     * @return IMS_BOOL Return wherther to be applied or not
+     * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.use_security_server_port_in_reg_contact_of_init_reg_bool}
      */
     virtual IMS_BOOL IsSecurityServerPortInRegContactOfInitRegUsed() const = 0;
 
     /**
      * @brief Returns whether the security server port is used in initial registration.
      *
-     * @return IMS_BOOL Return wherther to be applied or not
+     * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.use_security_server_port_in_init_reg_bool}
      */
     virtual IMS_BOOL IsSecurityServerPortInInitRegUsed() const = 0;
 
@@ -244,7 +270,8 @@ public:
      * @brief Returns whether the old security association is removed on establishing
      *        the security association
      *
-     * @return IMS_BOOL Return wherther to be applied or not
+     * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.remove_old_sa_on_establishing_sa_bool}
      */
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const = 0;
 
@@ -253,6 +280,7 @@ public:
      *        in contact header of REGISTER messages when call composer is for B2C only.
      *
      * @return IMS_BOOL Return whether to be included or not
+     * @see {@code ims.b2c_call_composer_feature_tag_in_reg_contact_bool}
      */
     virtual IMS_BOOL IsB2cCallComposerFeatureTagInRegContact() const = 0;
 
@@ -260,34 +288,39 @@ public:
      * @brief Returns flag indicating whether PCSCFs that UE fails to register will be blocked.
      *
      * @return IMS_BOOL Return whether to be blocked or not
+     * @see {@code ims.block_pcscf_on_reg_failure_bool}
      */
     virtual IMS_BOOL IsBlockPcscfOnRegFailure() const = 0;
 
     /**
      * @brief Returns whether a call should be terminated due to expiration of registration.
      *
-     * @return IMS_BOOL Return wherther to be applied or not
+     * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.call_end_and_pdn_reactivation_by_reg_terminated_bool}
      */
     virtual IMS_BOOL IsCallEndAndPdnReactivationByRegTerminated() const = 0;
 
     /**
      * @brief Returns whether unsecure tcp socket is destroyed on accomplishing the registration
      *
-     * @return IMS_BOOL Return wherther to be applied or not
+     * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool}
      */
     virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const = 0;
 
     /**
      * @brief Flag specifying if SMS over IMS support is available or not.
      *
-     * @return IMS_BOOL Return wherther to be available or not
+     * @return IMS_BOOL Return whether to be available or not
+     * @see {@code imssms.sms_over_ims_supported_bool}
      */
     virtual IMS_BOOL IsSmsOverImsSupported() const = 0;
 
     /**
      * @brief Flag specifying if IMS over NR is enabled or not.
      *
-     * @return IMS_BOOL Return wherther to be enabled or not
+     * @return IMS_BOOL Return whether to be enabled or not
+     * @see {@code carrier_nr_availabilities_int_array}
      */
     virtual IMS_BOOL IsImsOverNrEnabled() const = 0;
 
@@ -295,7 +328,8 @@ public:
      * @brief Flag indicating whether the authorized IMPU from P-Associated-URI header in 200 OK
      *        for IMS registration is used in emergency call.
      *
-     * @return IMS_BOOL Return wherther to be supported or not
+     * @return IMS_BOOL Return whether to be supported or not
+     * @see {@code imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool}
      */
     virtual IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const = 0;
 
@@ -305,7 +339,8 @@ public:
      *        If this is set as TRUE, UE will choose P-CSCF randomly for emergency registration if
      *        UE receives multiple P-CSCF addresses from P-CSCF discovery for emergency.
      *
-     * @return IMS_BOOL Return wherther UE tries emergency registration on random pcscf.
+     * @return IMS_BOOL Return whether UE tries emergency registration on random pcscf.
+     * @see {@code imsemergency.ereg_on_random_pcscf_bool}
      */
     virtual IMS_BOOL IsEmcRegOnRandomPcscf() const = 0;
 
@@ -317,6 +352,7 @@ public:
      *        via this emergency IMS registration.
      *
      * @return IMS_BOOL Return whether to be set or not to use only TCP transport.
+     * @see {@code imsemergency.ereg_set_tcp_only_in_roaming_bool}
      */
     virtual IMS_BOOL IsERegWithOnlyTcpInRoaming() const = 0;
 
@@ -329,6 +365,7 @@ public:
      *
      * @return IMS_BOOL Return whether to use the first public user identity in the ISIM for
      *         emergency registration.
+     * @see {@code imsemergency.ereg_using_first_impu_in_isim_bool}
      */
     virtual IMS_BOOL IsERegUsingFirstImpuInIsim() const = 0;
 
@@ -339,6 +376,7 @@ public:
      *        when ipcan is changed
      *
      * @return IMS_BOOL Return whether emergency re-registration is required after handover.
+     * @see {@code imsemergency.support_erereg_on_ipcan_change_bool}
      */
     virtual IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const = 0;
 
@@ -347,6 +385,7 @@ public:
      *        registration in roaming.
      *
      * @return IMS_TRUE if supported, else IMS_FALSE
+     * @see {@code imsemergency.support_giba_for_ereg_in_roaming_bool}
      */
     virtual IMS_BOOL IsGibaSupportedForERegInRoaming() const = 0;
 
@@ -354,7 +393,8 @@ public:
      * @brief Flag specifying whether the re-registration is held when IPCAN is changed
      *        during IMS calls and performed immediately after they are released.
      *
-     * @return IMS_BOOL Return wherther to be held or not
+     * @return IMS_BOOL Return whether to be held or not
+     * @see {@code ims.hold_reg_with_ipcan_changed_during_ims_call_bool}
      */
     virtual IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const = 0;
 
@@ -362,7 +402,8 @@ public:
      * @brief Flag specifying whether IMS de-registers if the network is changed to 3G
      *        while IMS registered.
      *
-     * @return IMS_BOOL Return wherther IMS de-registers or not.
+     * @return IMS_BOOL Return whether IMS de-registers or not.
+     * @see {@code ims.ims_dereg_on_3g_network_bool}
      */
     virtual IMS_BOOL IsDeregOn3gNetwork() const = 0;
 
@@ -370,6 +411,7 @@ public:
      * @brief Check if IMSI-based URI should be prioritized.
      *
      * @return IMS_TRUE if IMSI-based URI should be prioritized, IMS_FALSE otherwise.
+     * @see {@code ims.imsi_based_uri_prioritized_bool}
      */
     virtual IMS_BOOL IsImsiBasedUriPrioritized() const = 0;
 
@@ -377,6 +419,7 @@ public:
      * @brief Flag indicating whether ipsec setting is initialized with new pcscf.
      *
      * @return IMS_BOOL Return whether initialize ipsec wetting with new pcscf or not.
+     * @see {@code ims.init_ipsec_setting_with_new_pcscf_bool}
      */
     virtual IMS_BOOL IsIpsecInitializedWithNewPcscf() const = 0;
 
@@ -385,6 +428,7 @@ public:
      *        requesting fake registration with the next pcscf.
      *
      * @return IMS_BOOL Return whether to keep the emergency pdn or not in this case.
+     * @see {@code imsemergency.keep_epdn_upon_pcscf_unavailable_bool}
      */
     virtual IMS_BOOL IsKeepEPdnUponPcscfUnavailable() const = 0;
 
@@ -392,6 +436,7 @@ public:
      * @brief Flag indicating whether to keep on retrying emergency registration on WLAN.
      *
      * @return IMS_BOOL Return whether to keep on retrying emergency registration on WLAN or not.
+     * @see {@code imsemergency.keep_ereg_retry_on_wlan_bool}
      */
     virtual IMS_BOOL IsKeepERegRetryOnWlanRequired() const = 0;
 
@@ -400,6 +445,7 @@ public:
      *
      * @return IMS_BOOL Return whether to stop on emergency registration timer on E-PDN connection
      *         or not.
+     * @see {@code imsemergency.stop_ereg_timer_on_epdn_connected_bool}
      */
     virtual IMS_BOOL IsStopERegTimerOnEpdnConnected() const = 0;
 
@@ -409,27 +455,30 @@ public:
      *        If this is set as TRUE, UE doesn't send initial registration due to pcscf change.
      *
      * @return IMS_BOOL Return whether the logic is applied or not.
+     * @see {@code ims.no_init_reg_on_pcscf_change_bool}
      */
     virtual IMS_BOOL IsNoInitRegOnPcscfChange() const = 0;
 
     /**
      * @brief Flag specifying if video call is supported over wifi when voice call is unavailable.
      *
-     * @return IMS_BOOL Return wherther video call is supported over wifi
+     * @return IMS_BOOL Return whether video call is supported over wifi
      *         when voice call is unavailable.
+     * @see {@code imswfc.video_over_wifi_supported_without_voice_bool}
      */
     virtual IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const = 0;
 
     /**
      * @brief Flag specifying if Geolocation-PIDF is supported.
      *
-     * @param IMS_SINT32 The Geolocation-PIDF type to be evaluated.\n
+     * @param nGeolocationPidfType The Geolocation-PIDF type to be evaluated.\n
      *        #CarrierConfig#Ims#GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI\n
      *        #CarrierConfig#Ims#GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI\n
      *        #CarrierConfig#Ims#GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR\n
      *        #CarrierConfig#Ims#GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR
      *
      * @return IMS_TRUE if the specified Geolocation-PIDF type is supported, otherwise IMS_FALSE.
+     * @see {@code ims.geolocation_pidf_in_sip_register_support_int_array}
      */
     virtual IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const = 0;
 
@@ -438,15 +487,17 @@ public:
      *        to indicate available voice call type ("cs", "volte" or "cs,volte").
      *        Example) g.gsma.rcs.telephony = "cs,volte"
      *
-     * @return IMS_BOOL Return wherther the feature tag is used
+     * @return IMS_BOOL Return whether the feature tag is used
      *                  to indicate available voice call type.
+     * @see {@code ims.use_rcs_telephony_feature_tag_as_available_voice_call_type_bool}
      */
     virtual IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const = 0;
 
     /**
      * @brief Flag specifying if "+cdmaless" feature tag is required.
      *
-     * @return IMS_BOOL Return wherther the feature tag is required.
+     * @return IMS_BOOL Return whether the feature tag is required.
+     * @see {@code ims.required_cdmaless_feature_tag_bool}
      */
     virtual IMS_BOOL IsCdmalessFeatureTagRequired() const = 0;
 
@@ -457,7 +508,8 @@ public:
      *        This function relates to GetRegErrCodeWithRetryAfterTime() and
      *        GetReregErrCodeWithRetryAfterTime()
      *
-     * @return IMS_BOOL Return wherther the defined error codes is used.
+     * @return IMS_BOOL Return whether the defined error codes is used.
+     * @see {@code ims.reg_err_code_with_ra_time_only_defined_bool}
      */
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const = 0;
 
@@ -465,7 +517,8 @@ public:
      * @brief Returns whether the registration is handled as a failure when the UE receives
      *        an error response against re-registration in roaming
      *
-     * @return IMS_BOOL Return wherther to be handled as a failure or not.
+     * @return IMS_BOOL Return whether to be handled as a failure or not.
+     * @see {@code ims.extra_reg_err_code_as_failure_in_roaming_for_update_bool}
      */
     virtual IMS_BOOL IsExtraReregErrInRoamingAsFailureHandled() const = 0;
 
@@ -473,8 +526,9 @@ public:
      * @brief Flag indicating whether the retry counter should be shared between REGISTER and
      *        SUBSCRIBE for reg event package.
      *
-     * @return IMS_BOOL Return whether to be suppoted retry count shared for registration and
+     * @return IMS_BOOL Return whether to be supported retry count shared for registration and
      *         reg event package
+     * @see {@code ims.extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool}
      */
     virtual IMS_BOOL IsExtraRegErrRetryCntSharedForRegAndSubRequired() const = 0;
 
@@ -483,6 +537,7 @@ public:
      *        after emergency call is ended.
      *
      * @return IMS_BOOL Return whether to be supported or not
+     * @see {@code imsemergency.emergency_callback_mode_supported_bool}
      */
     virtual IMS_BOOL IsEmergencyCallbackModeSupported() const = 0;
 
@@ -491,6 +546,7 @@ public:
      *        is supported when in LTE/limited LTE (Emergency only) service mode.
      *
      * @return IMS_BOOL Return whether to be supported or not
+     * @see {@code support_emergency_sms_over_ims_bool}
      */
     virtual IMS_BOOL IsEmergencySmsOverImsSupported() const = 0;
 
@@ -500,6 +556,7 @@ public:
      *        If the Contact URI is not matched, the 200 OK response is disregarded.
      *
      * @return IMS_BOOL Return whether to be checked or not
+     * @see {@code ims.reg_contact_validation_bool}
      */
     virtual IMS_BOOL IsContactUriValidationChecked() const = 0;
 
@@ -508,6 +565,7 @@ public:
      *        when registration failed with all PCSCFs.
      *
      * @return IMS_BOOL Return whether to be supported or not
+     * @see {@code ims.reg_plmn_block_with_timeout_on_failure_with_all_pcscfs_bool}
      */
     virtual IMS_BOOL IsPlmnBlockWithTimeoutOnFailureWithAllPcscfsSupported() const = 0;
 
@@ -516,6 +574,7 @@ public:
      *        from IPv6 to IPv4
      *
      * @return IMS_BOOL Return whether to be applied or not
+     * @see {@code ims.reg_retry_with_ip_ver_fallback_bool}
      */
     virtual IMS_BOOL IsRegRetryWithIpVerFallback() const = 0;
 
@@ -523,6 +582,7 @@ public:
      * @brief Flag specifying if emergency PDN would be released when the network is unavailable.
      *
      * @return IMS_TRUE if emergency PDN needs to be released, else IMS_FALSE
+     * @see {@code imsemergency.release_epdn_of_unavailable_network_bool}
      */
     virtual IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const = 0;
 
@@ -531,22 +591,25 @@ public:
      *        in fake mode.
      *
      * @return IMS_TRUE if released, else IMS_FALSE
+     * @see {@code imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool}
      */
     virtual IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const = 0;
 
     /**
      * @brief Flag indicating the initial registration is tried on not
-     *        right after IMS call is ended while registration is held bacuase re-registration is
+     *        right after IMS call is ended while registration is held because re-registration is
      *        failed during active call.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code ims.required_init_reg_after_ims_call_end_on_reg_held_bool}
      */
     virtual IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const = 0;
 
     /**
      * @brief Flag indicating reg includes feature tag even though the feature is not available.
      *
-     * @return IMS_BOOL Return wherther the feature tag is included.
+     * @return IMS_BOOL Return whether the feature tag is included.
+     * @see {@code ims.support_reg_with_feature_tag_unavailable_bool}
      */
     virtual IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const = 0;
 
@@ -554,6 +617,7 @@ public:
      * @brief Flag specifying if verstat is supported for registration or not
      *
      * @return IMS_BOOL Return whether to be supported or not
+     * @see {@code ims.support_verstat_for_reg_bool}
      */
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
 
@@ -562,6 +626,7 @@ public:
      *        present in the 200 OK response to REGISTER message.
      *
      * @return IMS_BOOL Return TRUE if network feature is required for verstat, else IMS_FALSE
+     * @see {@code ims.support_verstat_based_on_network_for_reg_bool}
      */
     virtual IMS_BOOL IsVerstatSupportedBasedOnNetworkForReg() const = 0;
 
@@ -569,6 +634,7 @@ public:
      * @brief Flag specifying if service fallback is required when voice call is unavailable.
      *
      * @return IMS_TRUE if required, else IMS_FALSE
+     * @see {@code imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool}
      */
     virtual IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const = 0;
 
@@ -576,6 +642,7 @@ public:
      * @brief Flag specifying if WFC error message is supported.
      *
      * @return IMS_TRUE if supported, else IMS_FALSE
+     * @see {@code imswfc.wfc_err_message_bundle}
      */
     virtual IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const = 0;
 
@@ -583,6 +650,7 @@ public:
      * @brief Flag specifying if video feature tag is supported for emergency registration.
      *
      * @return IMS_TRUE if required, else IMS_FALSE
+     * @see {@code imsemergency.support_video_for_ereg_bool}
      */
     virtual IMS_BOOL IsVideoSupportedForEmergencyReg() const = 0;
 
@@ -593,6 +661,7 @@ public:
      *        #CarrierConfig#Ims#TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION
      *
      * @return IMS_TRUE if enabled, else IMS_FALSE
+     * @see {@code ims.test_mode_int_array}
      */
     virtual IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const = 0;
 
@@ -603,6 +672,7 @@ public:
      *        It defines in millisecond.
      *
      * @return IMS_SINT32 Return the SIP timer T1
+     * @see {@code ims.sip_timer_t1_millis_int}
      */
     virtual IMS_SINT32 GetSipTimerT1() = 0;
 
@@ -613,6 +683,7 @@ public:
      *        It defines in millisecond.
      *
      * @return IMS_UINT32 Return retry base-time value
+     * @see {@code ims.registration_retry_base_timer_millis_int}
      */
     virtual IMS_UINT32 GetRegistrationRetryBaseTime() = 0;
 
@@ -623,6 +694,7 @@ public:
      *         It defines in millisecond.
      *
      * @return IMS_UINT32 Return retry max-time value
+     * @see {@code ims.registration_retry_max_timer_millis_int}
      */
     virtual IMS_UINT32 GetRegistrationRetryMaxTime() = 0;
 
@@ -630,6 +702,7 @@ public:
      * @brief Get the ISIM index for IMPU.
      *
      * @return IMS_UINT32 Returns ISIM index for IMPU.
+     * @see {@code ims.isim_index_for_impu_int}
      */
     virtual IMS_UINT32 GetIsimIndexForImpu() = 0;
 
@@ -642,6 +715,7 @@ public:
      *        CarrierConfig::Ims::IPCAN_ALL
      *
      * @return IMS_SINT32 Return IPCAN
+     * @see {@code imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int}
      */
     virtual IMS_SINT32 GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const = 0;
 
@@ -649,6 +723,7 @@ public:
      * @brief Get the IMS establishment time.
      *
      * @return IMS_SINT32 Returns IMS establishment time.
+     * @see {@code ims.ims_establishment_time_sec_int}
      */
     virtual IMS_SINT32 GetImsEstablishmentTime() const = 0;
 
@@ -664,6 +739,7 @@ public:
      *        CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR_WIFI
      *
      * @return IMS_SINT32 Return the preferred IP-CAN type for SIP Packets
+     * @see {@code ims.preferred_ims_dscp_int}
      */
     virtual IMS_SINT32 GetPreferredImsDscp() const = 0;
 
@@ -678,6 +754,7 @@ public:
      *        CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE
      *
      * @return IMS_SINT32 Return the preferred IP-CAN type for SIP Packets
+     * @see {@code ims.registration_preferred_accesstype_feature_tag_int}
      */
     virtual IMS_SINT32 GetRegistrationPreferredAccessTypeFeatureTag() const = 0;
 
@@ -685,10 +762,13 @@ public:
      * @brief Get USSD preference method.
      *
      * @return IMS_SINT32 Returns USSD preference value.
-     * @see CarrierConfig::USSD_OVER_CS_PREFERRED
+     *
+     *      CarrierConfig::USSD_OVER_CS_PREFERRED
      *      CarrierConfig::USSD_OVER_IMS_PREFERRED
      *      CarrierConfig::USSD_OVER_CS_ONLY
      *      CarrierConfig::USSD_OVER_IMS_ONLY
+     *
+     * @see {@code carrier_ussd_method_int}
      */
     virtual IMS_SINT32 GetUssdMethod() const = 0;
 
@@ -700,6 +780,7 @@ public:
      *
      * @return IMS_SINT32
      * @see CarrierConfig::Ims::IP_VERSION_4
+     * @see {@code ims.ims_preferred_iptype_int}
      */
     virtual IMS_SINT32 GetPreferredIpType() const = 0;
 
@@ -711,6 +792,7 @@ public:
      *
      * @return IMS_SINT32
      * @see CarrierConfig::Ims::IP_VERSION_4
+     * @see {@code imsemergency.epdn_preferred_iptype_int}
      */
     virtual IMS_SINT32 GetEmergencyPreferredIpType() const = 0;
 
@@ -733,6 +815,7 @@ public:
      *       setting value.
      *
      * @return IMS_SINT32 Return the retry attempt count
+     * @see {@code imsemergency.ereg_retry_max_cnt_int}
      */
     virtual IMS_SINT32 GetEmcRegRetryMaxCnt() const = 0;
 
@@ -752,6 +835,7 @@ public:
      *        that the UE doesn't support the emerg-reg-retry timer defined in 3GPP 24.229.
      *
      * @return IMS_SINT32 Return the milli-second time
+     * @see {@code imsemergency.ereg_retry_timer_millis_int}
      */
     virtual IMS_SINT32 GetEmcRegRetryTimerMillis() const = 0;
 
@@ -759,6 +843,7 @@ public:
      * @brief Get the IMS Server default port as per operator
      *
      * @return IMS_SINT32 Return default P-CSCF port number
+     * @see {@code ims.sip_server_port_number_int}
      */
     virtual IMS_SINT32 GetPcscfPort() const = 0;
 
@@ -772,6 +857,7 @@ public:
      *
      * @return IMS_SINT32
      * @see CarrierConfig::Ims::PREFERRED_TRANSPORT_UDP
+     * @see {@code ims.sip_preferred_transport_int}
      */
     virtual IMS_SINT32 GetSipPreferredTransport() const = 0;
 
@@ -783,6 +869,7 @@ public:
      *        else the SIP transport is UDP.
      *
      * @return IMS_SINT32 Return IPV4 MTU size of SIP message
+     * @see {@code ims.ipv4_sip_mtu_size_cellular_int}
      */
     virtual IMS_SINT32 GetIpv4MtuSize() const = 0;
 
@@ -794,6 +881,7 @@ public:
      *        else the SIP transport is UDP.
      *
      * @return IMS_SINT32 Return IPV6 MTU size of SIP message
+     * @see {@code ims.ipv6_sip_mtu_size_cellular_int}
      */
     virtual IMS_SINT32 GetIpv6MtuSize() const = 0;
 
@@ -811,6 +899,7 @@ public:
      *        #KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL
      *
      * @return IMS_SINT32 Return the wait time in millisecond before releasing an emergency PDN.
+     * @see {@code imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int}
      */
     virtual IMS_SINT32 GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const = 0;
 
@@ -823,6 +912,7 @@ public:
      *        CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL
      *        CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK
      * @return IMS_SINT32 Return the preferred policy for emergency registration
+     * @see {@code imsemergency.preferred_emergency_registration_int}
      */
     virtual IMS_SINT32 GetPreferredEmergencyRegistration() const = 0;
 
@@ -837,6 +927,7 @@ public:
      *        if running.
      *
      * @return IMS_SINT32 Return the milli-second time
+     * @see {@code imsemergency.emergency_registration_timer_millis_int}
      */
     virtual IMS_SINT32 GetEmergencyRegistrationTimerMillis() const = 0;
 
@@ -848,6 +939,7 @@ public:
      *        DSCP integer must be between 8 and 56.
      *
      * @return IMS_SINT32 Return the DSCP value for IMS signalling
+     * @see {@code ims.ims_signalling_dscp_int}
      */
     virtual IMS_SINT32 GetImsSignallingDscp() const = 0;
 
@@ -861,6 +953,7 @@ public:
      *        CarrierConfig::ImsWfc::REGISTRATION_P_LAST_ACCESS_NETWORK_INFO
      *
      * @return IMS_SINT32 Return the preferred private hader value
+     * @see {@code imswfc.registration_private_header_int}
      */
     virtual IMS_SINT32 GetRegistrationPrivateHeader() const = 0;
 
@@ -879,9 +972,10 @@ public:
      *            if the registration to each known PCSCF is attempted and handled
      *            as temporary failure without Retry-After header.
      *        CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL
-     *            @see KEY_REG_RETRY_INTERVAL_BUNDLE
+     *            Follow the wait time defined in KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY.
      *
      * @return IMS_SINT32 Return the actual wait time policy
+     * @see {@code ims.reg_actual_wait_time_policy_int}
      */
     virtual IMS_SINT32 GetRegActualWaitTimePolicy() const = 0;
 
@@ -890,6 +984,7 @@ public:
      *        If this value is greater than 0, this will overlay the actual wait time.
      *
      * @return IMS_SINT32 Return the default wait time
+     * @see {@code ims.reg_default_wait_time_int}
      */
     virtual IMS_SINT32 GetRegDefaultWaitTime() const = 0;
 
@@ -906,6 +1001,7 @@ public:
      *            the initial registration is tried.
      *
      * @return IMS_SINT32 Return the out of service policy
+     * @see {@code ims.reg_out_of_service_policy_int}
      */
     virtual IMS_SINT32 GetRegOutOfServicePolicy() const = 0;
 
@@ -924,7 +1020,8 @@ public:
      * @note  If 'PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED' is returned,
      *        the UE in roaming follows the same rule as the home.
      *
-     * @return IMS_SINT32 Return the emerrgency registration policy in roaming
+     * @return IMS_SINT32 Return the emergency registration policy in roaming
+     * @see {@code imsemergency.roaming_preferred_ereg_int}
      */
     virtual IMS_SINT32 GetRoamingPreferredEmcReg() const = 0;
 
@@ -936,6 +1033,7 @@ public:
      *        else the SIP transport is UDP.
      *
      * @return IMS_SINT32 Return the threshold size of SIP message
+     * @see {@code ims.sip_message_threshold_for_transport_change_int}
      */
     virtual IMS_SINT32 GetSipMessageThresholdForTransportChange() const = 0;
 
@@ -949,6 +1047,7 @@ public:
      *         - Follow 3GPP 24.229.
      *
      * @return IMS_SINT32 Return the SIP 503 response policy
+     * @see {@code ims.sub_retry_503_policy_int}
      */
     virtual IMS_SINT32 GetSubRetrySip503CodePolicy() const = 0;
 
@@ -966,6 +1065,7 @@ public:
      *        CarrierConfig::Ims::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD
      *
      * @return IMS_SINT32 Returns registration event download policy for USAT.
+     * @see {@code ims.usat_reg_event_download_policy_int}
      */
     virtual IMS_SINT32 GetUsatRegEventDownloadPolicy() const = 0;
 
@@ -973,6 +1073,7 @@ public:
      * @brief Get the VoLTE Hysteresis time.
      *
      * @return IMS_SINT32 Returns VoLTE Hysteresis time.
+     * @see {@code imsvoice.volte_hys_time_sec_int}
      */
     virtual IMS_SINT32 GetVolteHysTime() const = 0;
 
@@ -993,6 +1094,7 @@ public:
      *            after a 305 response for registration is received.
      *
      * @return IMS_SINT32 Return the SIP 305 response policy
+     * @see {@code ims.reg_retry_305_policy_int}
      */
     virtual IMS_SINT32 GetRegRetrySip305CodePolicy() const = 0;
 
@@ -1013,6 +1115,7 @@ public:
      *            after a 305 response for registration is received.
      *
      * @return IMS_SINT32 Return the SIP 305 response policy
+     * @see {@code ims.rereg_retry_305_policy_int}
      */
     virtual IMS_SINT32 GetReregRetrySip305CodePolicy() const = 0;
 
@@ -1027,6 +1130,7 @@ public:
      *            Follow 3GPP 24.229.
      *
      * @return IMS_SINT32 Return the SIP 503 response policy
+     * @see {@code ims.reg_retry_503_policy_int}
      */
     virtual IMS_SINT32 GetRegRetrySip503CodePolicy() const = 0;
 
@@ -1037,6 +1141,7 @@ public:
      *        If the value is 0, it is not applicable.
      *
      * @return IMS_SINT32 Return the number of retry
+     * @see {@code ims.reg_retry_cnt_on_single_pcscf_int}
      */
     virtual IMS_SINT32 GetRegRetryCountOnSinglePcscf() const = 0;
 
@@ -1047,6 +1152,7 @@ public:
      *        If the value is 0, it follows default scheme.
      *
      * @return IMS_SINT32 Return the number of retry
+     * @see {@code ims.reg_retry_cnt_per_pcscf_int}
      */
     virtual IMS_SINT32 GetRegRetryCountPerPcscf() const = 0;
 
@@ -1059,14 +1165,16 @@ public:
      *        CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_NOTIFY
      *
      * @return IMS_SINT32 Return the policy of clearing the retry count for registration
+     * @see {@code ims.reg_retry_cnt_reset_policy_int}
      */
     virtual IMS_SINT32 GetRegRetryCountResetPolicy() const = 0;
 
     /**
-     * @brief Get the numbner of registration retry to maintain ipsec setting on authentication
+     * @brief Get the number of registration retry to maintain ipsec setting on authentication
      *        failure.
      *
      * @return IMS_SINT32 Return the number of retry
+     * @see {@code ims.reg_retry_cnt_with_ipsec_on_auth_failure_int}
      */
     virtual IMS_SINT32 GetRegRetryCountWithIpsecOnAuthFailure() const = 0;
 
@@ -1080,6 +1188,7 @@ public:
      *        CarrierConfig::Ims::DEFAULT_RETRY_POLICY_NEXT_PCSCF
      *
      * @return IMS_SINT32 Return the default policy for the registration retry
+     * @see {@code ims.reg_retry_default_policy_int}
      */
     virtual IMS_SINT32 GetRegRetryDefaultPolicy() const = 0;
 
@@ -1092,6 +1201,7 @@ public:
      *        as well. (0: TimerF)
      *
      * @return IMS_SINT32 Return retry policy
+     * @see {@code ims.reg_retry_timer_f_policy_int}
      */
     virtual IMS_SINT32 GetRegRetryTimerFPolicy() const = 0;
 
@@ -1102,6 +1212,7 @@ public:
      *        Indicate the number as millisecond.
      *
      * @return IMS_SINT32 Return a waiting reg timer for an emergency call
+     * @see {@code imsemergency.reg_timer_for_ecall_millis_int}
      */
     virtual IMS_SINT32 GetRegTimerForEmcCall() const = 0;
 
@@ -1122,6 +1233,7 @@ public:
      *            like T3402.
      *
      * @return IMS_SINT32 Return the extra error type
+     * @see {@code ims.extra_reg_err_final_type_int}
      */
     virtual IMS_SINT32 GetExtraRegErrFinalType() const = 0;
 
@@ -1135,6 +1247,7 @@ public:
      *        CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED
      *
      * @return IMS_SINT32 Return the extra error policy
+     * @see {@code ims.extra_reg_err_policy_int}
      */
     virtual IMS_SINT32 GetExtraRegErrPolicy() const = 0;
 
@@ -1150,6 +1263,7 @@ public:
      *          If this number reaches, it is handled as a critical error.
      *
      * @return IMS_SINT32 Return max of the extra error
+     * @see {@code ims.extra_reg_err_max_cnt_int}
      */
     virtual IMS_SINT32 GetExtraRegErrMaxCount() const = 0;
 
@@ -1168,6 +1282,7 @@ public:
      *            of the current PCSCF address in the new PCSCF list.
      *
      * @return IMS_SINT32 Return the policy for which the pcscf address to use
+     * @see {@code ims.reg_pcscf_update_policy_int}
      */
     virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const = 0;
 
@@ -1182,6 +1297,7 @@ public:
      *        CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_NO_IMSI
      *
      * @return IMS_SINT32 Return the policy of setting the user info
+     * @see {@code ims.contact_user_info_policy_for_non_reg_message_int}
      */
     virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const = 0;
 
@@ -1195,6 +1311,7 @@ public:
      *        CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_CIVIC
      *
      * @return IMS_SINT32 Return the policy of setting the user info
+     * @see {@code ims.geolocation_pidf_forming_policy_int}
      */
     virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const = 0;
 
@@ -1202,13 +1319,15 @@ public:
      * @brief Get the retry attempt count about pcscfs being discovered in combined network
      *
      * @return IMS_SINT32 Return the retry attempt count
+     * @see {@code ims.extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int}
      */
     virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached() const = 0;
 
     /**
      * @brief Get the retry attempt count about pcscfs being discovered in only attached network
      *
-     * @return IMS_SINT32 Retrurn the retry attempt count
+     * @return IMS_SINT32 Return the retry attempt count
+     * @see {@code ims.extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int}
      */
     virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const = 0;
 
@@ -1220,6 +1339,7 @@ public:
      *        It defines in second.
      *
      * @return ImsVector<IMS_SINT32>& Return registration retry intervals.
+     * @see {@code ims.reg_retry_interval_sec_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetRegRetryIntervals() = 0;
 
@@ -1233,6 +1353,7 @@ public:
      *        It defines in second.
      *
      * @return ImsVector<IMS_SINT32>& Return random value for registration retry intervals
+     * @see {@code ims.reg_retry_interval_random_upper_value_sec_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetRegRandomRetryIntervals() = 0;
 
@@ -1242,6 +1363,7 @@ public:
      *        These algorithms consist of the IpSecType class
      *
      * @return ImsVector<IMS_SINT32>& Return what authentication algorithms will be used
+     * @see {@code ims.ipsec_authentication_algorithms_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetIpsecAuthenticationAlgorithms() = 0;
 
@@ -1251,6 +1373,7 @@ public:
      *        These algorithms consist of the IpSecType class
      *
      * @return ImsVector<IMS_SINT32>& Return what encryption algorithms will be used
+     * @see {@code ims.ipsec_encryption_algorithms_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetIpsecEncryptionAlgorithms() = 0;
 
@@ -1265,6 +1388,7 @@ public:
      *        in GetNotifyEventForInitialRegWithWaitTime(), use the values.
      *
      * @return IMS_UINT32 Return value whether to perform initial registration
+     * @see {@code ims.notify_terminated_for_init_reg_used_event_int_array}
      */
     virtual IMS_UINT32 GetNotifyEventForInitialRegistration() const = 0;
     /**
@@ -1275,6 +1399,7 @@ public:
      *        event taken from GetNotifyEventForInitialRegWithWaitTime() this return value is used
      *
      * @return IMS_SINT32 Return set wait time value
+     * @see {@code ims.notify_terminated_for_init_reg_with_wait_time_int}
      */
     virtual IMS_SINT32 GetNotifyWaitTime() const = 0;
     /**
@@ -1289,6 +1414,7 @@ public:
      *        GetNotifyWaitTime() at these return value
      *
      * @return IMS_UINT32 Return value whether to perform initial registration with wait time
+     * @see {@code ims.notify_terminated_for_init_reg_used_event_with_wait_time_int_array}
      */
     virtual IMS_UINT32 GetNotifyEventForInitialRegWithWaitTime() const = 0;
 
@@ -1298,16 +1424,18 @@ public:
      *        retrying PCSCF recovery.
      *
      * @return IMS_SINT32 Return max count to retry with fixed wait time.
+     * @see {@code ims.pcscf_recovery_max_cnt_int}
      */
     virtual IMS_SINT32 GetPcscfRecoveryMaxRetryCnt() const = 0;
 
     /**
      * @brief Returns wait time in seconds before retrying PCSCF recovery.
-     *        This is used as waiting time for PCSCF recovery during fail count is unter max count.
+     *        This is used as waiting time for PCSCF recovery during fail count is under max count.
      *        If valid PCSCF acquisition fails during this time, IMS PDN reestablishment will be
      *        requested for PCSCF recovery.
      *
      * @return IMS_SINT32 Return wait time before retrying PCSCF recovery.
+     * @see {@code ims.pcscf_recovery_wait_time_sec_int}
      */
     virtual IMS_SINT32 GetPcscfRecoveryWaitTime() const = 0;
 
@@ -1318,6 +1446,7 @@ public:
      *        and half of it.
      *
      * @return IMS_SINT32 Return base time value of upper-bound wait time.
+     * @see {@code ims.pcscf_recovery_base_time_sec_int}
      */
     virtual IMS_SINT32 GetPcscfRecoveryBaseTime() const = 0;
 
@@ -1328,6 +1457,7 @@ public:
      *        and half of it.
      *
      * @return IMS_SINT32 Return max time value of upper-bound wait time.
+     * @see {@code ims.pcscf_recovery_max_time_sec_int}
      */
     virtual IMS_SINT32 GetPcscfRecoveryMaxTime() const = 0;
 
@@ -1338,6 +1468,7 @@ public:
      *        This function relates to GetRetryCountSubErrorRegRequired()
      *
      * @return ImsVector<IMS_SINT32>& return array list for error response information
+     * @see {@code ims.sub_err_code_for_init_reg_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetSubErrorRegRequired() = 0;
 
@@ -1348,6 +1479,7 @@ public:
      *        This function relates to GetSubErrorRegRequired()
      *
      * @return IMS_SINT32 Return retry count for initial registration
+     * @see {@code ims.sub_err_code_for_init_reg_with_retry_max_cnt_int}
      */
     virtual IMS_SINT32 GetRetryCountSubErrorRegRequired() const = 0;
 
@@ -1356,6 +1488,7 @@ public:
      *        initial registration with next pcscf.
      *
      * @return ImsVector<IMS_SINT32>& return array list for error response information
+     * @see {@code ims.sub_err_code_for_init_reg_with_next_pcscf_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() = 0;
 
@@ -1366,6 +1499,7 @@ public:
      *        This function relates to GetRetryCountSubErrorSubTerminated()
      *
      * @return ImsVector<IMS_SINT32>& return array list for error response information
+     * @see {@code ims.sub_err_code_for_terminated_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetSubErrorSubTerminated() = 0;
 
@@ -1376,6 +1510,7 @@ public:
      *        This function relates to GetSubErrorSubTerminated()
      *
      * @return IMS_SINT32 Return retry count for terminating subscription
+     * @see {@code ims.sub_err_code_for_terminated_with_retry_max_cnt_int}
      */
     virtual IMS_SINT32 GetRetryCountSubErrorSubTerminated() const = 0;
 
@@ -1387,6 +1522,7 @@ public:
      *        its subscription until its expiration time
      *
      * @return ImsVector<IMS_SINT32>& return array list for error response information
+     * @see {@code ims.sub_err_code_for_stopping_by_expiration_time_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetSubErrorStoppingResub() = 0;
 
@@ -1395,6 +1531,7 @@ public:
      *        perform initial registration.
      *
      * @return ImsVector<IMS_SINT32>& return array list for error response information
+     * @see {@code imswfc.vowifi_sub_err_code_for_init_reg_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetVowifiSubErrorRegRequired() = 0;
 
@@ -1403,9 +1540,10 @@ public:
      *
      * @return vector list
      * @see {0} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM
-            {1} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM
-            {2} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI
-            {3} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF
+     *      {1} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM
+     *      {2} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI
+     *      {3} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF
+     * @see {@code ims.ims_identity_priority_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetImsIdentityPriority() = 0;
 
@@ -1416,7 +1554,7 @@ public:
      *        otherwise, it uses the pre-configured P-CSCF address.
      *
      * @return vector list
-     * @see CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_PCO
+     * @see {@code ims.pcscf_discovery_method_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetPcscfDiscoveryMethod() = 0;
 
@@ -1429,6 +1567,7 @@ public:
      *        ...
      *
      * @return vector rat list
+     * @see {@code ims.update_registration_with_rat_change_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetUpdateRegistrationWithRatChange() = 0;
 
@@ -1442,6 +1581,7 @@ public:
      *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN
      *
      * @return vector rat list
+     * @see {@code ims.supported_rats_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetSupportedRats() = 0;
 
@@ -1455,6 +1595,7 @@ public:
      *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN
      *
      * @return vector rat list
+     * @see {@code ims.supported_roaming_rats_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetSupportedRoamingRats() = 0;
 
@@ -1468,6 +1609,7 @@ public:
      *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN
      *
      * @return vector rat list
+     * @see {@code imssms.sms_over_ims_supported_rats_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetSmsOverImsSupportedRats() = 0;
 
@@ -1479,6 +1621,7 @@ public:
      *        CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN
      *
      * @return vector rat list on which emergency call using IMS is supported
+     * @see {@code imsemergency.emergency_over_ims_supported_rats_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetEmergencyOverImsSupportedRats() = 0;
 
@@ -1502,14 +1645,15 @@ public:
      *        CarrierConfig::Ims::REG_ERROR_CODE_TIMER_F, etc
      *
      * @return vector error code list
+     * @see {@code ims.extra_reg_err_code_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetExtraRegErrCode() = 0;
 
     /**
      * @brief Indicate the error codes for reregistration
-     *        see@GetExtraRegErrCode
      *
      * @return vector error code list
+     * @see {@code ims.extra_reg_err_code_for_update_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetExtraReregErrCode() = 0;
 
@@ -1517,6 +1661,7 @@ public:
      * @brief Indicate the list of wait-time seconds when registration is retried.
      *
      * @return vector wait time list
+     * @see {@code ims.extra_reg_err_wait_time_sec_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetExtraRegErrWaitTime() = 0;
 
@@ -1524,6 +1669,7 @@ public:
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF
      *
      * @return vector error code list
+     * @see {@code ims.rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() = 0;
 
@@ -1532,6 +1678,7 @@ public:
      *        until power cycled, switched in and out of airplane mode.
      *
      * @return vector permanent error code list
+     * @see {@code ims.registration_permanent_error_code_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetRegPermanentErrCode() = 0;
 
@@ -1547,13 +1694,15 @@ public:
      *        in the home and roaming network.
      *
      * @return vector max count list
+     * @see {@code ims.reg_permanent_err_max_cnt_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetRegPermanentErrMaxCount() = 0;
 
     /**
-     * @brief Inidicate the list of error codes to attempt initial registration without ipsec.
+     * @brief Indicate the list of error codes to attempt initial registration without ipsec.
      *
      * @return vector error code list
+     * @see {@code ims.reg_retry_err_code_without_ipsec_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() = 0;
 
@@ -1564,6 +1713,7 @@ public:
      *        This function relates to IsRegErrCodeWithRetryAfterTimeOnlyDefined()
      *
      * @return vector error code list
+     * @see {@code ims.reg_err_code_with_ra_time_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() = 0;
 
@@ -1574,6 +1724,7 @@ public:
      *        This function relates to IsRegErrCodeWithRetryAfterTimeOnlyDefined()
      *
      * @return vector error code list
+     * @see {@code ims.reg_err_code_with_ra_time_for_update_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() = 0;
 
@@ -1581,21 +1732,24 @@ public:
      * @brief Indicate the error codes of the registration followed by PCSCF discovery
      *        when PCSCF is unavailable.
      * @return vector error code
+     * @see {@code ims.reg_err_code_for_pcscf_discovery_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() = 0;
 
     /**
      * @brief Indicate the list of error codes that result in terminating the IMS call
-     *        when reregistraiton fails.
+     *        when reregistration fails.
      *
      * @return vector error code
+     * @see {@code ims.rereg_err_code_for_call_end_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetReregErrCodeForCallEnd() = 0;
 
     /**
-     * @brief Indicate the error codes of the reregistration followed by intital registration
+     * @brief Indicate the error codes of the reregistration followed by initial registration
      *        with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
      * @return vector error code
+     * @see {@code ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() = 0;
 
@@ -1603,6 +1757,7 @@ public:
      * @brief Indicate the error codes of the reregistration followed by IMS PDN reactivation
      *
      * @return vector error code
+     * @see {@code ims.rereg_err_code_for_ims_pdn_reactivation_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() = 0;
 
@@ -1615,6 +1770,7 @@ public:
      *        CarrierConfig::Ims::REG_FEATURE_SMS
      *
      * @return vector features list
+     * @see {@code ims.unavailable_features_in_limited_reg_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetUnavailableFeaturesInLimitedReg() = 0;
 
@@ -1623,6 +1779,7 @@ public:
      *        policy. The UE follows default retry logic when receiving the code on this list.
      *
      * @return vector error code
+     * @see {@code imsemergency.ereg_err_code_not_supported_common_policy_int_array}
      */
     virtual ImsVector<IMS_SINT32>& GetERegErrCodeNotSupportedCommonPolicy() = 0;
 
