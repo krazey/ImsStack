@@ -27,6 +27,7 @@ public:
     AosAsset() :
             bB2cCallComposerFeatureTagInRegContact(IMS_TRUE),
             bBlockPcscfOnRegFailure(IMS_TRUE),
+            bBlockRegOnCsCall(IMS_TRUE),
             bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
@@ -120,6 +121,7 @@ public:
 public:
     IMS_BOOL bB2cCallComposerFeatureTagInRegContact;
     IMS_BOOL bBlockPcscfOnRegFailure;
+    IMS_BOOL bBlockRegOnCsCall;
     IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;

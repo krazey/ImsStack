@@ -374,6 +374,7 @@
     <!-- Aos -->
     <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="true"/>
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="true"/>
+    <boolean name="ims.block_reg_on_cs_call_bool" value="true" />
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
     <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>

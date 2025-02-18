@@ -244,6 +244,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONT
         KEY_IMS_PREFIX "b2c_call_composer_feature_tag_in_reg_contact_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[] =
         KEY_IMS_PREFIX "block_pcscf_on_reg_failure_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_BLOCK_REG_ON_CS_CALL_BOOL[] =
+        KEY_IMS_PREFIX "block_reg_on_cs_call_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL[] =
         KEY_IMS_PREFIX "call_end_and_pdn_reactivation_by_reg_terminated_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[] =

@@ -293,6 +293,14 @@ public:
     virtual IMS_BOOL IsBlockPcscfOnRegFailure() const = 0;
 
     /**
+     * @brief Returns flag indicating whether to block IMS registration on CS call.
+     *
+     * @return IMS_BOOL Return whether to be blocked or not
+     * @see {@code ims.block_reg_on_cs_call_bool}
+     */
+    virtual IMS_BOOL IsBlockRegOnCsCall() const = 0;
+
+    /**
      * @brief Returns whether a call should be terminated due to expiration of registration.
      *
      * @return IMS_BOOL Return whether to be applied or not

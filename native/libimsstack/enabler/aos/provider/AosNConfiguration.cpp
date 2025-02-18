@@ -267,6 +267,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsBlockPcscfOnRegFailure() const
     return m_objAsset.bBlockPcscfOnRegFailure;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsBlockRegOnCsCall() const
+{
+    return m_objAsset.bBlockRegOnCsCall;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsCallEndAndPdnReactivationByRegTerminated() const
 {
     return m_objAsset.bCallEndAndPdnReactivationByRegTerminated;
@@ -1398,6 +1403,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONTACT_BOOL);
     m_objAsset.bBlockPcscfOnRegFailure =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL);
+    m_objAsset.bBlockRegOnCsCall =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_BLOCK_REG_ON_CS_CALL_BOOL);
     m_objAsset.bCallEndAndPdnReactivationByRegTerminated = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL);
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
