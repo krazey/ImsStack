@@ -26,11 +26,13 @@
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcSession.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/UpdatingInfo.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
 #include "media/IMtcMediaManager.h"
+#include "media/MtcMediaStringUtils.h"
 #include "media/MtcMediaUtil.h"
 #include "precondition/MtcPreconditionManager.h"
 #include "precondition/QosStringUtils.h"
@@ -99,10 +101,12 @@ PUBLIC VIRTUAL void MtcPreconditionManager::SetListener(IN IMtcPreconditionListe
 
 PUBLIC VIRTUAL void MtcPreconditionManager::InitializeMobileRatInformation()
 {
-    IMS_TRACE_D("InitializeMobileRatInformation previous[%d] current[%d]", m_ePreviousRatType,
-            m_eCurrentRatType, 0);
     m_ePreviousRatType = m_objContext.GetService().GetMobileRatType();
     m_eCurrentRatType = m_ePreviousRatType;
+
+    IMS_TRACE_D("InitializeMobileRatInformation previous[%s] current[%s]",
+            MtcCallStringUtils::ConvertRatType(m_ePreviousRatType),
+            MtcCallStringUtils::ConvertRatType(m_eCurrentRatType), 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal() const
@@ -143,8 +147,8 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
             break;
     }
 
-    IMS_TRACE_D(
-            "IsPreconditionSupportedInLocal CallType[%d][%s]", eCallType, _TRACE_B_(bSupport), 0);
+    IMS_TRACE_D("IsPreconditionSupportedInLocal CallType[%s][%s]",
+            MtcCallStringUtils::ConvertCallType(eCallType), _TRACE_B_(bSupport), 0);
     return bSupport;
 }
 
@@ -152,7 +156,8 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocated(
         IN ISession* piSession, IN IMS_UINT32 eMediaType) const
 {
     QosStatus eStatus = GetQosStatus(piSession, eMediaType);
-    IMS_TRACE_D("IsDedicatedBearerAllocated [%d][%s]", eMediaType,
+    IMS_TRACE_D("IsDedicatedBearerAllocated [%s][%s]",
+            MtcMediaStringUtils::ConvertContentType(eMediaType),
             QosStringUtils::ConvertQosStatus(eStatus), 0);
 
     return eStatus == QosStatus::AVAILABLE;
@@ -377,7 +382,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallModified(IN ISession* piSessio
 
 PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
 {
-    IMS_TRACE_D("OnRatChanged RAT type[%d]", eRatType, 0, 0);
+    IMS_TRACE_D("OnRatChanged RAT type[%s]", MtcCallStringUtils::ConvertRatType(eRatType), 0, 0);
     UpdateMobileRatType(m_objContext.GetService().GetMobileRatType());
 
     IMS_BOOL bPreviousOnWlan = m_bOnWlan;
@@ -433,7 +438,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
 PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
         IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType)
 {
-    IMS_TRACE_D("OnQosStatusChanged media type[%d][%s]", eMediaType,
+    IMS_TRACE_D("OnQosStatusChanged media type[%s][%s]",
+            MtcMediaStringUtils::ConvertContentType(eMediaType),
             QosStringUtils::ConvertQosStatus(eStatus), 0);
 
     QosStatus eCurrStatus = GetQosStatus(piSession, eMediaType);
@@ -495,7 +501,9 @@ QosInfo* MtcPreconditionManager::GetQosInfo(IN ISession* piSession) const
 PROTECTED
 IMS_BOOL MtcPreconditionManager::IsEpsFallback() const
 {
-    IMS_TRACE_D("IsEpsFallback pre[%d] curr[%d]", m_ePreviousRatType, m_eCurrentRatType, 0);
+    IMS_TRACE_D("IsEpsFallback pre[%s] curr[%s]",
+            MtcCallStringUtils::ConvertRatType(m_ePreviousRatType),
+            MtcCallStringUtils::ConvertRatType(m_eCurrentRatType), 0);
 
     if (m_ePreviousRatType != INetworkWatcher::RADIOTECH_TYPE_NR)
     {
@@ -741,7 +749,8 @@ void MtcPreconditionManager::InitializeStatusForUnusedLostQos(IN ISession* piSes
     {
         if (GetQosStatus(piSession, eMediaType) == QosStatus::LOST)
         {
-            IMS_TRACE_D("InitializeStatusForUnusedLostQos [%d]", eMediaType, 0, 0);
+            IMS_TRACE_D("InitializeStatusForUnusedLostQos [%s]",
+                    MtcMediaStringUtils::ConvertContentType(eMediaType), 0, 0);
             SetQosStatus(piSession, QosStatus::IDLE, eMediaType);
         }
     }
@@ -1050,9 +1059,9 @@ IMS_BOOL MtcPreconditionManager::IsLocalResourceReservedByMediaType(
     QosStatus eStatus = GetQosStatus(piSession, eMediaType);
     IMS_BOOL bDefaultBearerAllowed = IsDefaultBearerAllowed(eMediaType);
 
-    IMS_TRACE_D("IsLocalResourceReservedByMediaType [%d] status[%s] use default bearer[%s]",
-            eMediaType, QosStringUtils::ConvertQosStatus(eStatus),
-            _TRACE_B_(bDefaultBearerAllowed));
+    IMS_TRACE_D("IsLocalResourceReservedByMediaType [%s] status[%s] use default bearer[%s]",
+            MtcMediaStringUtils::ConvertContentType(eMediaType),
+            QosStringUtils::ConvertQosStatus(eStatus), _TRACE_B_(bDefaultBearerAllowed));
 
     return (bDefaultBearerAllowed || eStatus == QosStatus::AVAILABLE);
 }
@@ -1106,8 +1115,8 @@ IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal(IN IMS_UINT32 eM
                 ConfigRtt::KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL);
     }
 
-    IMS_TRACE_D(
-            "IsPreconditionSupportedInLocal MediaType[%d][%s]", eMediaType, _TRACE_B_(bSupport), 0);
+    IMS_TRACE_D("IsPreconditionSupportedInLocal MediaType[%s][%s]",
+            MtcMediaStringUtils::ConvertContentType(eMediaType), _TRACE_B_(bSupport), 0);
 
     return bSupport;
 }
@@ -1183,7 +1192,8 @@ IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSess
         }
     }
 
-    IMS_TRACE_D("SetLocalResourceAvailable Enabled Media Types[%d]", eEnabledMediaTypes, 0, 0);
+    IMS_TRACE_D("SetLocalResourceAvailable Enabled Media Types[%s]",
+            MtcCallStringUtils::ConvertMediaType(eEnabledMediaTypes), 0, 0);
     return eEnabledMediaTypes;
 }
 
@@ -1376,8 +1386,9 @@ IMS_BOOL MtcPreconditionManager::IsConfirmationRequired(IN const ISession& objIS
 PRIVATE
 IMS_BOOL MtcPreconditionManager::IsNotUsingDedicatedWaitTimerByRatCondition() const
 {
-    IMS_TRACE_D("IsNotUsingDedicatedWaitTimerByRatCondition pre[%d] curr[%d]", m_ePreviousRatType,
-            m_eCurrentRatType, 0);
+    IMS_TRACE_D("IsNotUsingDedicatedWaitTimerByRatCondition pre[%s] curr[%s]",
+            MtcCallStringUtils::ConvertRatType(m_ePreviousRatType),
+            MtcCallStringUtils::ConvertRatType(m_eCurrentRatType), 0);
     if (m_objContext.GetConfigurationProxy().Contains(
                 ConfigVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY,
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_NR) &&

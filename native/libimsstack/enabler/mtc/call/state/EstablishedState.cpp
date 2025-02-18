@@ -24,6 +24,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/RttAutoUpgrader.h"
 #include "call/UpdatingInfo.h"
@@ -519,7 +520,7 @@ PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
         IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo)
 {
-    IMS_TRACE_D("HandleUpdate Type[%d]", eUpdateType, 0, 0);
+    IMS_TRACE_D("HandleUpdate Type[%s]", MtcCallStringUtils::ConvertUpdateType(eUpdateType), 0, 0);
     m_objContext.GetUpdatingInfo().SetTargetCallType(eCallType);
     m_objContext.GetUpdatingInfo().SetModifier();
     m_objContext.GetUpdatingInfo().SetRequestingType(eUpdateType);
@@ -691,7 +692,7 @@ ImsList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
 PRIVATE
 CallStateName EstablishedState::Downgrade(IN CallType eCallType)
 {
-    IMS_TRACE_I("Downgrade [%d]", eCallType, 0, 0);
+    IMS_TRACE_I("Downgrade [%s]", MtcCallStringUtils::ConvertCallType(eCallType), 0, 0);
 
     MediaInfo objNewMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
 

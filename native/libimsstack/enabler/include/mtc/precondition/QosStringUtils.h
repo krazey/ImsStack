@@ -18,6 +18,7 @@
 #define QOS_STRING_UTILS_H_
 
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "SdpAttribute.h"
 #include "SdpMedia.h"
 #include "offeranswer/SdpPrecondition.h"

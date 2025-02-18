@@ -118,20 +118,6 @@ public:
         return it->second;
     }
 
-    inline static const IMS_CHAR* ConvertCallType(IN CallType eCallType)
-    {
-        static const std::unordered_map<CallType, const IMS_CHAR*> objCallTypeStrings = {
-                {CallType::UNKNOWN,   "unknown"  },
-                {CallType::VOIP,      "voip"     },
-                {CallType::VT,        "vt"       },
-                {CallType::RTT,       "rtt"      },
-                {CallType::VIDEO_RTT, "video_rtt"},
-        };
-
-        auto it = objCallTypeStrings.find(eCallType);
-        return it->second;
-    }
-
     inline static const IMS_CHAR* ConvertQuality(IN IMS_SINT32 eCodecType)
     {
         if (eCodecType < MEDIA_QUALITY_NONE || eCodecType > MEDIA_QUALITY_NOTUSED)
@@ -174,6 +160,21 @@ public:
 
         auto it = objMediaDirectionStrings.find(eDirection);
         return it != objMediaDirectionStrings.end() ? it->second : "OUT_OF_RANGE";
+    }
+
+    inline static const IMS_CHAR* ConvertProtocolType(IN IMS_UINT32 eProtocolType)
+    {
+        static const std::unordered_map<IMS_UINT32, const IMS_CHAR*> objProtocolTypeStrings = {
+                {MEDIA_PROTOCOL_NONE,      "none"     },
+                {MEDIA_PROTOCOL_ANY,       "any"      },
+                {MEDIA_PROTOCOL_RTP,       "rtp"      },
+                {MEDIA_PROTOCOL_RTCP,      "rtcp"     },
+                {MEDIA_PROTOCOL_NO_CHANGE, "no change"},
+                {MEDIA_PROTOCOL_BOTH,      "both"     },
+        };
+
+        auto it = objProtocolTypeStrings.find(eProtocolType);
+        return it != objProtocolTypeStrings.end() ? it->second : "OUT_OF_RANGE";
     }
 };
 
