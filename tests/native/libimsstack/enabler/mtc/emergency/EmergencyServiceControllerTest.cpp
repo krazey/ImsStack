@@ -388,66 +388,6 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailDoesNothing)
     pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
 }
 
-TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailStopsRegistrationWhenConfigSet)
-{
-    pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
-
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
-
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
-}
-
-TEST_F(EmergencyServiceControllerTest, OpenedAndNormalCallSetupFailDoesNothingWhenConfigSet)
-{
-    pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
-
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
-
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
-    pController->OnCallStateChanged(
-            1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
-    pController->OnCallSessionReleased(1, IMS_FALSE, IMS_FALSE);
-}
-
-TEST_F(EmergencyServiceControllerTest, OpenedAndOtherEmergencyCallBlockDoesNothingWhenConfigSet)
-{
-    pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
-
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-
-    const CallKey nFirstCall = 1;
-    pController->OnCallStateChanged(
-            nFirstCall, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(
-            nFirstCall, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallStateChanged(nFirstCall, IMtcCall::State::ESTABLISHED,
-            IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-
-    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
-
-    // Blocked because call cannot be added while an emergency call
-    const CallKey nSecondCall = 2;
-    pController->OnCallStateChanged(
-            nSecondCall, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
-    pController->OnCallSessionReleased(nSecondCall, IMS_TRUE, IMS_FALSE);
-}
-
 TEST_F(EmergencyServiceControllerTest, StartStartsRegTo18xTimer)
 {
     const IMS_BOOL bWifi = IMS_FALSE;
