@@ -223,39 +223,57 @@ public class QosAgent {
     }
 
     /**
-    * Update rtpsocket/rtcpsocket with remote address and port
-    * Register QosCallback
-    */
+     * Establish a remote network connection, specifying both the remote address and port.
+     * Subsequently, register a new Quality of Service (QoS) callback function.
+     * Implement a mechanism to detect and terminate any existing QoS connections associated
+     * with the same socket if the provided remote address differs from
+     * the currently connected address.
+     *
+     * @param rtpSocket rtp datagram socket
+     * @param rtcpSocket rtcp datagram socket
+     * @param remoteAddress Remote address
+     * @param remotePort Remote port
+     * @param isRemoteChanged true if remote address/port is changed
+     */
     public boolean updateQosConnection(
             DatagramSocket rtpSocket, DatagramSocket rtcpSocket,
-            String remoteAddress, int remotePort) {
+            String remoteAddress, int remotePort, boolean isRemoteChanged) {
+
+        if (rtpSocket == null || rtcpSocket == null || remoteAddress.isEmpty() || remotePort <= 0) {
+            ImsLog.e(this, mSlotId,
+                    "updateQosConnection - Sockets are null or invalid remote address");
+            return false;
+        }
+
+        if (isRemoteChanged) {
+            removeQosConnection(rtpSocket, rtcpSocket, false);
+        }
+
         InetAddress remoteAddr = createInetAddress(remoteAddress);
 
         if (remoteAddr == null) {
-            ImsLog.e(this, mSlotId, "Remote address not found; rtpSocket: " + rtpSocket
-                    + " remotePort: " + remotePort);
+            ImsLog.e(this, mSlotId, "updateQosConnection - Remote address not found; rtpSocket: "
+                    + rtpSocket + " remotePort: " + remotePort);
             return false;
         }
 
         Network network = getNetworkForIpAddress(rtpSocket.getLocalAddress());
 
         if (network == null) {
-            ImsLog.e(this, mSlotId, "Network not found; rtpSocket: " + rtpSocket
-                    + " remotePort: " + remotePort);
+            ImsLog.e(this, mSlotId, "updateQosConnection - Network not found; rtpSocket: "
+                    + rtpSocket + " remotePort: " + remotePort);
             return false;
         }
 
-        ImsLog.d(this, mSlotId, "updateQosConnection - rtpSocket: " + rtpSocket
-                + " remotePort: " + remotePort);
+        ImsLog.d(this, mSlotId, "updateQosConnection - rtpSocket: "
+                + rtpSocket + " remotePort: " + remotePort);
 
-        if (!remoteAddress.isEmpty() && (remotePort > 0)) {
-            rtpSocket.connect(remoteAddr, remotePort);
-            rtcpSocket.connect(remoteAddr, (remotePort + 1));
+        rtpSocket.connect(remoteAddr, remotePort);
+        rtcpSocket.connect(remoteAddr, (remotePort + 1));
 
-            QosSocket qosSocket = new QosSocket(rtpSocket);
-            mSockets.put(remotePort, qosSocket);
-            registerQosCallback(network, rtpSocket, qosSocket);
-        }
+        QosSocket qosSocket = new QosSocket(rtpSocket);
+        mSockets.put(remotePort, qosSocket);
+        registerQosCallback(network, rtpSocket, qosSocket);
 
         return true;
     }
@@ -269,19 +287,34 @@ public class QosAgent {
         }
 
         if (rtpSocket != null) {
+            removeQosConnection(rtpSocket, rtcpSocket, true);
+            ImsUtils.closeQuietly(rtpSocket);
+        }
+    }
+
+    /** Unregister QosConnection and remove QosSocket */
+    private void removeQosConnection(
+            DatagramSocket rtpSocket, DatagramSocket rtcpSocket, boolean close) {
+        if (rtpSocket != null) {
             int remotePort = rtpSocket.getPort();
             QosSocket socket = mSockets.get(remotePort);
 
             if (socket != null) {
                 unregisterQosCallback(socket);
                 mSockets.remove(remotePort);
-                ImsLog.d(this, mSlotId, "QosSocket closed");
-                socket.close();
+                if (close) {
+                    ImsLog.d(this, mSlotId, "removeQosConnection - QosSocket closed");
+                    socket.close();
+                } else {
+                    ImsLog.d(this, mSlotId, "removeQosConnection - disconnect; rtpSocket: "
+                            + rtpSocket + " remotePort: " + remotePort);
+                    rtpSocket.disconnect();
+                    rtcpSocket.disconnect();
+                }
             } else {
-                ImsLog.d(this, mSlotId, "Socket not found");
+                ImsLog.d(this, mSlotId, "removeQosConnection - QosSocket for remotePort: "
+                        + remotePort + "is not found");
             }
-
-            ImsUtils.closeQuietly(rtpSocket);
         }
     }
 

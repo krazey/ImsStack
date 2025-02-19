@@ -17,6 +17,7 @@
 package com.android.imsstack.core.agents;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -67,6 +68,8 @@ public class QosAgentTest {
     private static final int LOCAL_RTP_PORT = 50010;
     private static final String REMOTE_RTP_ADDRESS = "127.0.0.10";
     private static final int REMOTE_RTP_PORT = 1240;
+    private static final String REMOTE_NEW_RTP_ADDRESS = "127.0.0.2";
+    private static final int REMOTE_NEW_RTP_PORT = 1210;
 
     @Before
     public void setUp() throws Exception {
@@ -139,11 +142,48 @@ public class QosAgentTest {
 
         boolean retResult =
                 mQosAgent.updateQosConnection(retSocket.first, retSocket.second, REMOTE_RTP_ADDRESS,
-                REMOTE_RTP_PORT);
+                REMOTE_RTP_PORT, false);
 
         assertTrue(retResult);
         verify(mConnectivityManager, times(2)).getLinkProperties(eq(mMockNetwork));
         verify(mMockDcApn, times(2)).getNetworkByCapability(eq(EApnType.IMS.getType()));
+
+        mQosAgent.destroyQosConnection(retSocket.first, retSocket.second);
+    }
+
+    @Test
+    public void testUpdateQosConnectionWithNewRemote() throws Exception {
+        Pair<DatagramSocket, DatagramSocket> retSocket =
+                mQosAgent.createQosConnection(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
+
+        boolean retResult =
+                mQosAgent.updateQosConnection(retSocket.first, retSocket.second, REMOTE_RTP_ADDRESS,
+                    REMOTE_RTP_PORT, false);
+
+        boolean retNewResult =
+                mQosAgent.updateQosConnection(retSocket.first, retSocket.second,
+                    REMOTE_NEW_RTP_ADDRESS, REMOTE_NEW_RTP_PORT, true);
+
+        assertTrue(retResult);
+        assertTrue(retNewResult);
+        verify(mConnectivityManager, times(3)).getLinkProperties(eq(mMockNetwork));
+        verify(mMockDcApn, times(3)).getNetworkByCapability(eq(EApnType.IMS.getType()));
+
+        mQosAgent.destroyQosConnection(retSocket.first, retSocket.second);
+    }
+
+    @Test
+    public void testUpdateQosConnectionWithInvalidPort() throws Exception {
+        Pair<DatagramSocket, DatagramSocket> retSocket =
+                mQosAgent.createQosConnection(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
+
+        boolean retResult =
+                mQosAgent.updateQosConnection(retSocket.first, retSocket.second, REMOTE_RTP_ADDRESS,
+                    0, true);
+
+        assertFalse(retResult);
+        verify(mConnectivityManager, times(1)).getLinkProperties(eq(mMockNetwork));
+        verify(mMockDcApn, times(1)).getNetworkByCapability(eq(EApnType.IMS.getType()));
 
         mQosAgent.destroyQosConnection(retSocket.first, retSocket.second);
     }

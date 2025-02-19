@@ -252,7 +252,7 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
-                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT), eq(false));
         testParcel.recycle();
     }
 

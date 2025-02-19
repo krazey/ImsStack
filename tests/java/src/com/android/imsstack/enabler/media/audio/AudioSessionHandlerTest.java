@@ -263,25 +263,6 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
-    public void testRequestQoSForCreateConnection() {
-        // QoS Request
-        Parcel testParcel = Parcel.obtain();
-        testParcel.writeInt(MediaConstants.REQUEST_QOS);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        testParcel.writeString(REMOTE_RTP_ADDRESS);
-        testParcel.writeInt(REMOTE_RTP_PORT);
-        testParcel.setDataPosition(0);
-        mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
-        mAudioSessionHandler.setLocalAddress(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
-        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
-        verify(mMockQosAgent).createQosConnection(eq(LOCAL_RTP_ADDRESS), eq(LOCAL_RTP_PORT),
-                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
-        testParcel.recycle();
-    }
-
-    @Test
     public void testRequestQoSForUpdateConnection() {
         // QoS Request
         Parcel testParcel = Parcel.obtain();
@@ -291,13 +272,68 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         testParcel.writeInt(REMOTE_RTP_PORT);
         testParcel.setDataPosition(0);
         mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
+        mAudioSessionHandler.setLocalAddress(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
         mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
         mAudioSessionHandler.setQosUpdateRequired(true);
         mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
-                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT), eq(false));
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testRequestQoSForNewRemote() {
+        // QoS Request
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_QOS);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeString(REMOTE_RTP_ADDRESS);
+        testParcel.writeInt(REMOTE_RTP_PORT);
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
+        mAudioSessionHandler.setLocalAddress(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
+        mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
+        mAudioSessionHandler.setQosUpdateRequired(false);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
+                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT), eq(true));
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testRequestQoSForNoChangeinRemote() {
+        // QoS Request
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_QOS);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeString(REMOTE_RTP_ADDRESS);
+        testParcel.writeInt(REMOTE_RTP_PORT);
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
+        mAudioSessionHandler.setLocalAddress(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
+        mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
+        mAudioSessionHandler.setQosUpdateRequired(true);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+
+        // QoS Request again with same remote details
+        Parcel testNewParcel = Parcel.obtain();
+        testNewParcel.writeInt(MediaConstants.REQUEST_QOS);
+        testNewParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testNewParcel.writeString(REMOTE_RTP_ADDRESS);
+        testNewParcel.writeInt(REMOTE_RTP_PORT);
+        testNewParcel.setDataPosition(0);
+
+        mMediaListener.onMediaMessage(testParcel);
+        mMediaListener.onMediaMessage(testNewParcel);
+        processAllMessages();
+
+        //verify that updateQosConnection() is called only once
+        verify(mMockQosAgent, times(1)).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
+                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT), eq(true));
         testParcel.recycle();
     }
 
@@ -333,7 +369,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
                 eq(ImsMediaSession.SESSION_TYPE_AUDIO), eq(null), eq(mMockExecutor),
                 eq(mAudioSessionCallback));
         verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
-                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT), eq(false));
         testParcel.recycle();
         testQosParcel.recycle();
     }
