@@ -88,7 +88,6 @@ PUBLIC VIRTUAL CallStateName TerminatingState::OnTimerExpired(IN IMS_SINT32 nTyp
 {
     if (nType == TIMER_E911_WAIT_SESSION_RELEASED)
     {
-        IMS_TRACE_D("OnTimerExpired", 0, 0, 0);
         HandleCallSessionReleased();
     }
     return GetStateName();
@@ -97,6 +96,9 @@ PUBLIC VIRTUAL CallStateName TerminatingState::OnTimerExpired(IN IMS_SINT32 nTyp
 PRIVATE
 void TerminatingState::HandleCallSessionReleased()
 {
+    IMS_TRACE_D("HandleCallSessionReleased - session released notified [%d]",
+            m_bSessionReleasedNotified, 0, 0);
+
     if (m_bSessionReleasedNotified)
     {
         return;
