@@ -1250,7 +1250,8 @@ public:
         // Conditions to block geolocation
         enum
         {
-            GEOLOCATON_BLOCK_CONDITION_IN_ROAMING = 0,
+            GEOLOCATION_BLOCK_CONDITION_IN_ROAMING = 0,
+            GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL = 1,
         };
 
         // KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY

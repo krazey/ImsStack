@@ -306,12 +306,56 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfBlockedByIn
 
     ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
-                    ConfigVoice::GEOLOCATON_BLOCK_CONDITION_IN_ROAMING))
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_IN_ROAMING))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
             .WillByDefault(Return(IMS_ROAMING_STATE_ON));
 
     EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredForNormalRoutingEmergencyCall)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    AddGeolocationValue(IMS_TRUE);
+
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
 TEST_F(MtcLocationObjectTest, GetLocationFromMessageIfNoContent)
