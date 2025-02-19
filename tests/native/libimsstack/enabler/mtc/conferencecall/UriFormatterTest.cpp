@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "MockIMtcService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "conferencecall/ConferenceDef.h"
@@ -61,6 +62,10 @@ protected:
 
 TEST_F(UriFormatterTest, GetReferToForInvite)
 {
+    MockIMtcService objService;
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
     // TODO: test for PAID should be added
     MtcSupplementaryService objSupplementaryService(objContext, *pConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));

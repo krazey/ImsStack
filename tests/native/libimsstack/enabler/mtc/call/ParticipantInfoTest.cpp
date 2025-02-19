@@ -218,6 +218,10 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteNumber)
     const AString strNumber = "some_number";
     const AString strToUri = "some_uri";
 
+    MockIMtcService objService;
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
     MockIMtcDialingPlan objDialingPlan;
     ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strToUri));
     ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
@@ -238,6 +242,10 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteUri)
     const AString strNumber = "some_number";
     const AString strToUri = "some_uri";
 
+    MockIMtcService objService;
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
     MockIMtcDialingPlan objDialingPlan;
     ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strToUri));
     ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
@@ -251,6 +259,51 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteUri)
     pParticipantInfo->UpdateFromRemoteNumber(strNumber);
 
     EXPECT_EQ(strToUri, pParticipantInfo->GetRemoteUri());
+}
+
+TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteUriIfIsEmergency)
+{
+    const AString strNumber = "some_number";
+    const AString strToUri = "sip_uri";
+
+    MockIMtcService objService;
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
+    MockIMtcDialingPlan objDialingPlan;
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strToUri));
+    ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
+
+    CallInfo objCallInfo;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
+
+    pParticipantInfo->UpdateFromRemoteNumber(strNumber);
+
+    EXPECT_EQ(strToUri, pParticipantInfo->GetRemoteUri());
+}
+
+TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberDoesNotThingIfIsEmergencyAndTargetUriIsSet)
+{
+    const AString strNumber = "some_number";
+    const AString strUri = "some_uri";
+
+    MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
+    objSupplementaryService.Add(SuppType::TARGET_URI, strUri);
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
+
+    MockIMtcService objService;
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
+    CallInfo objCallInfo;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    pParticipantInfo->UpdateFromRemoteNumber(strNumber);
+
+    EXPECT_EQ(strNumber, pParticipantInfo->GetRemoteNumber());
 }
 
 TEST_F(ParticipantInfoTest, HandleRequestDoesNothingIfNotStartMethod)

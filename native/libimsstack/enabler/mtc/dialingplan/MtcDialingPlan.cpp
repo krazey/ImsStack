@@ -64,12 +64,6 @@ AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo&
         return strUri;
     }
 
-    if (objCallInfo.IsEmergency())
-    {
-        IMS_TRACE_D("GetToUri Emergency URN will be obtained using SuppType::TARGET_URI", 0, 0, 0);
-        return strUri;
-    }
-
     if (objCallInfo.bConference)
     {
         return GetConferenceFactoryUri();

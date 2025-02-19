@@ -131,8 +131,26 @@ PUBLIC
 void ParticipantInfo::UpdateFromRemoteNumber(IN const AString& strRemoteNumber)
 {
     m_strRemoteNumber = strRemoteNumber;
+
+    const SuppService* pSuppService =
+            m_objContext.GetSupplementaryService().Get(SuppType::TARGET_URI);
+    if (m_objContext.GetService().IsEmergency() && pSuppService != IMS_NULL)
+    {
+        return;
+    }
+
+    Scheme eScheme;
+    if (m_objContext.GetService().IsEmergency())
+    {
+        eScheme = Scheme::SIP;
+    }
+    else
+    {
+        eScheme = Scheme::UNKNOWN;
+    }
+
     m_strRemoteUri =
-            m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo());
+            m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo(), eScheme);
     IMS_TRACE_D("UpdateFromRemoteNumber : URI[%s]", m_strRemoteUri.GetStr(), 0, 0);
 }
 

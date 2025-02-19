@@ -153,6 +153,9 @@ protected:
 
     void SetUpUriFormatter(IN const AString& strUri)
     {
+        ON_CALL(objMtcService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(objMockTargetContext, GetService).WillByDefault(ReturnRef(objMtcService));
+
         ON_CALL(objMockTargetContext, GetCallInfo).WillByDefault(ReturnRef(objTargetInfo));
         objTargetInfo.bConference = IMS_TRUE;  // to get Remote Uri from ParticipantInfo easily
 

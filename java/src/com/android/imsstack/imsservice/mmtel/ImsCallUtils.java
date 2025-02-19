@@ -41,6 +41,7 @@ import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
+import com.android.imsstack.util.ImsLog;
 import com.android.internal.telephony.imsphone.ImsExternalCallTracker;
 
 import java.util.Arrays;
@@ -359,20 +360,25 @@ public class ImsCallUtils {
 
         // "sos" URN for IMS emergency call
         if (isEmergencyCall(profile)) {
-            List<String> urns = profile.getEmergencyUrns();
             String urn = null;
 
-            if (urns.isEmpty()) {
-                ConfigInterface config = AgentFactory.getInstance().getAgent(
-                        ConfigInterface.class, context.getSlotId());
-                CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
-                int[] policies = cc != null ? cc.getIntArray(
-                    CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
-                urn = getSosUrnFromECallServiceCategory(
-                        profile.getEmergencyServiceCategories(), policies);
+            if (profile.isEmergencyCallTesting()) {
+                ImsLog.d("Omit TYPE_TARGET_URI");
             } else {
-                // The first item has priority ??
-                urn = urns.get(0);
+                List<String> urns = profile.getEmergencyUrns();
+
+                if (urns.isEmpty()) {
+                    ConfigInterface config = AgentFactory.getInstance().getAgent(
+                            ConfigInterface.class, context.getSlotId());
+                    CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
+                    int[] policies = cc != null ? cc.getIntArray(
+                        CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
+                    urn = getSosUrnFromECallServiceCategory(
+                            profile.getEmergencyServiceCategories(), policies);
+                } else {
+                    // The first item has priority ??
+                    urn = urns.get(0);
+                }
             }
 
             if (urn != null) {
