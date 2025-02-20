@@ -1076,7 +1076,7 @@ PUBLIC VIRTUAL void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLoss
 
 PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
 {
-    IMS_TRACE_I("%s - OnStateTransition : state[%s]", ToString().GetStr(), PrintState(eState), 0);
+    IMS_TRACE_I("%s - OnStateTransition", ToString().GetStr(), 0, 0);
 
     if (eState == CallStateName::ESTABLISHED)
     {
@@ -1271,6 +1271,13 @@ PUBLIC VIRTUAL void MtcCall::OnConnectionFailed(
             {
                 return pState->OnConnectionFailed(nFailureReason, nWaitTimeMillis);
             });
+}
+
+PUBLIC const AString MtcCall::ToString() const
+{
+    AString strCall;
+    strCall.Sprintf("MtcCall[%lu][%s]", GetKey(), MtcCallStringUtils::ConvertCallState(GetState()));
+    return strCall;
 }
 
 PRIVATE

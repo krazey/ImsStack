@@ -36,6 +36,7 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/MtcCall.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/NullCall.h"
 #include "call/radio/MockIMtcRadioChecker.h"
@@ -2249,4 +2250,17 @@ TEST_F(MtcCallTest, OnConnectionFailedCallsState)
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
 
     objCall.OnConnectionFailed(nFailureReason, nWaitTimeMillis);
+}
+
+TEST_F(MtcCallTest, ToString)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::TERMINATING));
+
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+
+    AString strCall;
+    strCall.Sprintf("MtcCall[%lu][TERMINATING]", objCall.GetKey());
+
+    EXPECT_EQ(objCall.ToString(), strCall);
 }

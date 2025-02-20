@@ -223,6 +223,22 @@ public:
         auto it = objAosReasonStrings.find(eAosReason);
         return it != objAosReasonStrings.end() ? it->second : "OUT_OF_RANGE";
     }
+
+    inline static const IMS_CHAR* ConvertCallState(IN CallStateName eState)
+    {
+        static const std::unordered_map<CallStateName, const IMS_CHAR*> objCallStateStrings = {
+                {CallStateName::IDLE,        "IDLE"       },
+                {CallStateName::OUTGOING,    "OUTGOING"   },
+                {CallStateName::INCOMING,    "INCOMING"   },
+                {CallStateName::ALERTING,    "ALERTING"   },
+                {CallStateName::ESTABLISHED, "ESTABLISHED"},
+                {CallStateName::UPDATING,    "UPDATING"   },
+                {CallStateName::TERMINATING, "TERMINATING"},
+        };
+
+        auto it = objCallStateStrings.find(eState);
+        return it->second;
+    }
 };
 
 #endif

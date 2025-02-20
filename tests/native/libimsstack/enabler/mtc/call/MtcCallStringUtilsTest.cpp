@@ -361,4 +361,28 @@ TEST_F(MtcCallStringUtilsTest, ConvertAosReason)
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "OUT_OF_RANGE");
 }
 
+TEST_F(MtcCallStringUtilsTest, ConvertCallState)
+{
+    CallStateName eState = CallStateName::IDLE;
+    EXPECT_EQ(MtcCallStringUtils::ConvertCallState(eState), "IDLE");
+
+    eState = CallStateName::OUTGOING;
+    EXPECT_EQ(MtcCallStringUtils::ConvertCallState(eState), "OUTGOING");
+
+    eState = CallStateName::INCOMING;
+    EXPECT_EQ(MtcCallStringUtils::ConvertCallState(eState), "INCOMING");
+
+    eState = CallStateName::ALERTING;
+    EXPECT_EQ(MtcCallStringUtils::ConvertCallState(eState), "ALERTING");
+
+    eState = CallStateName::ESTABLISHED;
+    EXPECT_EQ(MtcCallStringUtils::ConvertCallState(eState), "ESTABLISHED");
+
+    eState = CallStateName::UPDATING;
+    EXPECT_EQ(MtcCallStringUtils::ConvertCallState(eState), "UPDATING");
+
+    eState = CallStateName::TERMINATING;
+    EXPECT_EQ(MtcCallStringUtils::ConvertCallState(eState), "TERMINATING");
+}
+
 }  // namespace android

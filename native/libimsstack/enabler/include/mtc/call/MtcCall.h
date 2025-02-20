@@ -323,6 +323,7 @@ public:
 
     inline void OnConnectionSetupPrepared() override {}
     void OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) override;
+    const AString ToString() const;
 
 private:
     static IMutex* s_pKeyCreationLock;

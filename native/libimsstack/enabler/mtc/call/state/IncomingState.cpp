@@ -16,7 +16,6 @@
 
 #include "IMessage.h"
 #include "ISession.h"
-#include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
@@ -33,8 +32,6 @@
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "utility/IMessageUtils.h"
-
-__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 IncomingState::IncomingState(IN IMtcCallContext& objContext) :
