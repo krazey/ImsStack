@@ -296,6 +296,15 @@ public interface TelephonyManagerProxy {
     List<Uri> getImsPublicUserIdentities();
 
     /**
+     * Returns the IMS Proxy Call Session Control Function(P-CSCF) that were loaded from the
+     * ISIM records {@link TelephonyManager#APPTYPE_ISIM}.
+     *
+     * @return List of P-CSCF address string (IP address or FQDN) or
+     *         empty list if EF_PCSCF is not available.
+     */
+    List<String> getImsPcscfAddresses();
+
+    /**
      * Returns the response of authentication for the default subscription.
      * Returns null if the authentication hasn't been successful.
      *

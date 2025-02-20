@@ -266,6 +266,12 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
+    public List<String> getImsPcscfAddresses() {
+        TelephonyManager tm = getTelephonyManager();
+        return tm != null ? tm.getImsPcscfAddresses() : Collections.emptyList();
+    }
+
+    @Override
     public String getIccAuthentication(@UiccAppType int appType, @AuthType int authType,
             String data) {
         TelephonyManager tm = getTelephonyManager();
