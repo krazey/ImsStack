@@ -76,10 +76,12 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class CellInfoAgentTest {
-    private static final long TIMESTAMP = 55004107851687L;
-    private static final long RECENT_TIMESTAMP = 55004907851687L;
+    private static final int CELL_INFO_AGE_EXPIRATION_SEC = 7200;
+    private static final long TIMESTAMP =
+            System.currentTimeMillis() - (CELL_INFO_AGE_EXPIRATION_SEC * 500);
+    private static final long RECENT_TIMESTAMP = TIMESTAMP - (CELL_INFO_AGE_EXPIRATION_SEC * 250);
     private static final String LAST_ANI =
-            "13,2023-05-27T10:25:45Z,1685183145247,001,01,d8237,b112,FDD";
+            "13,2023-05-27T10:25:45Z," + RECENT_TIMESTAMP + ",001,01,d8237,b112,FDD";
 
     @Mock private SharedPreferences mSp;
     @Mock private SharedPreferences.Editor mSpEditor;
@@ -115,6 +117,10 @@ public class CellInfoAgentTest {
         when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO),
                 anyString())).thenReturn("");
         when(mSp.edit()).thenReturn(mSpEditor);
+        when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
+        when(mCarrierConfig.getInt(
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT), anyInt()))
+                .thenReturn(CELL_INFO_AGE_EXPIRATION_SEC);
 
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigInterface, SLOT0);
         when(mSimInterface.getSubId()).thenReturn(SUB_ID_1);
@@ -389,6 +395,37 @@ public class CellInfoAgentTest {
 
         String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo();
         assertTrue(defaultAni[CellInfoAgent.ANI_INDEX_UTC_TIME_FORMAT].endsWith("Z"));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWithValidCellInfoAgeFromPersistentStorage() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO),
+                anyString())).thenReturn(LAST_ANI);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_NR);
+        assertTrue(
+                Integer.parseInt(defaultAni[CellInfoAgent.ANI_INDEX_CELL_INFO_AGE])
+                        < CELL_INFO_AGE_EXPIRATION_SEC);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWithInvalidCellInfoAgeFromPersistentStorage() {
+        final long recentTimestamp = TIMESTAMP - (CELL_INFO_AGE_EXPIRATION_SEC * 1000);
+        String lastAni =
+                "13,2023-05-27T10:25:45Z," + recentTimestamp + ",001,01,d8237,b112,FDD";
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO),
+                anyString())).thenReturn(lastAni);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_NR);
+        assertNull(defaultAni);
     }
 
     private void testUpdateAllCellInfoWithInvalidCellIdentity(int networkType) {
