@@ -598,6 +598,62 @@ TEST_F(OutgoingStateTest, QosReserveFailedDoesNothingCallIfNextActionIsNotReleas
             pOutgoingState->QosReserveFailed(&objSession, QosLossPolicy::MODIFY));
 }
 
+TEST_F(OutgoingStateTest, SessionStartedReturnsOutgoingStateIfNoResponseForUpdate)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+    MockIMessage objUpdateMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
+            .WillByDefault(Return(&objUpdateMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objUpdateMessage)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendAck);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStarted(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionStartedReturnsTerminatingStateIfSendAckFailed)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+    MockIMessage objUpdateMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
+            .WillByDefault(Return(&objUpdateMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objUpdateMessage)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendAck).WillOnce(Return(IMS_FAILURE));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStarted(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionStartedReturnsOutgoingStateIfNoResponseForPrack)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
+            .WillByDefault(Return(nullptr));
+    MockIMessage objPrackMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objPrackMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objPrackMessage)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendAck);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStarted(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionStartedTerminatesCallIfSdpOaFails)
 {
     MockIMessage objMessage;
@@ -1039,6 +1095,24 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendEarlyUpdate)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
 
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSessionStartedIfEstablished)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    EXPECT_CALL(objUiNotifier, SendStarted);
+
+    EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedReturnsTerminating)
 {
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
@@ -1399,16 +1473,12 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredTerminatesCallIfSendingUpdateFail
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
-TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIf200OkIsAlreadyReceived)
+TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIf200OkIsAlreadyReceivedAndNoSdp)
 {
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
-            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(SipStatusCode::SC_200));
 
@@ -1416,6 +1486,28 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIf200OkIsAlreadyRe
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionPrackDeliveredInvokesSessionStartedIfEstablished)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(SipStatusCode::SC_200));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to make IMessage have SDP
+
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objUiNotifier, SendStarted);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedDoesNothingIfNeedToIgnoreByConfig)

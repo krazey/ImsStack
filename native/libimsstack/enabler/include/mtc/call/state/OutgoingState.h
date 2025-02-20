@@ -79,6 +79,7 @@ private:
     CallStateName MaySendPreconditionConfirmation(IN ISession& objSession);
     CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode);
     CallStateName HandleSilentRedial(IN const CallReasonInfo& objReason);
+    IMS_BOOL HasNotRespondedQosConfirmation(IN ISession& objISession) const;
     void OnStarted(IN IMtcSession& objMtcSession);
     void OnStartFailed(
             IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
