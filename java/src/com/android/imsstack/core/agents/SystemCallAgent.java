@@ -179,6 +179,8 @@ public final class SystemCallAgent implements SystemCallInterface {
                 record = domain != null ? List.of(domain) : null;
             } else if (fileId == Sim.ISIM_FILE_ID_IMPU) {
                 record = Collections.unmodifiableList(sim.getIsimImpu());
+            } else if (fileId == Sim.ISIM_FILE_ID_PCSCF) {
+                record = Collections.unmodifiableList(sim.getIsimPcscf());
             }
 
             Log.d(this, "ISIM" + mSlotId + " record: fileId=" + Integer.toHexString(fileId)

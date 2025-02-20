@@ -119,11 +119,13 @@ public interface Sim {
     int ISIM_FILE_ID_IMPI = 0x6F02;
     int ISIM_FILE_ID_DOMAIN = 0x6F03;
     int ISIM_FILE_ID_IMPU = 0x6F04;
+    int ISIM_FILE_ID_PCSCF = 0x6F09;
 
     @IntDef(value = {
         ISIM_FILE_ID_IMPI,
         ISIM_FILE_ID_DOMAIN,
-        ISIM_FILE_ID_IMPU
+        ISIM_FILE_ID_IMPU,
+        ISIM_FILE_ID_PCSCF
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface IsimFileId {}
@@ -278,6 +280,8 @@ public interface Sim {
                 return "DOMAIN";
             case Sim.ISIM_FILE_ID_IMPU:
                 return "IMPU";
+            case Sim.ISIM_FILE_ID_PCSCF:
+                return "PCSCF";
             default:
                 return "UNKNOWN";
         }
