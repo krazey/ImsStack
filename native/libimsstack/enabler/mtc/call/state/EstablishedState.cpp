@@ -117,19 +117,13 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
     }
 
     if (!UpdatingInfo::IsValidHoldDirection(
-                m_objContext.GetMediaManager().GetMediaInfo().eAudioDirection,
-                objMediaInfo.eAudioDirection))
+                objOldMediaInfo.eAudioDirection, objMediaInfo.eAudioDirection) ||
+            HandleUpdate(UpdateType::HOLD, m_objContext.GetSession()->GetCallType(),
+                    objMediaInfo) == IMS_FAILURE)
     {
         m_objContext.GetUiNotifier().SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
         return GetStateName();
     }
-
-    if (HandleUpdate(UpdateType::HOLD, m_objContext.GetSession()->GetCallType(), objMediaInfo) ==
-            IMS_FAILURE)
-    {
-        // TODO: CODE_SUPP_SVC_FAILED
-    }
-
     return CallStateName::UPDATING;
 }
 
@@ -145,20 +139,15 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo& objMediaInfo
         return GetStateName();
     }
 
+    const MediaInfo& objOldMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
     if (!UpdatingInfo::IsValidResumeDirection(
-                m_objContext.GetMediaManager().GetMediaInfo().eAudioDirection,
-                objMediaInfo.eAudioDirection))
+                objOldMediaInfo.eAudioDirection, objMediaInfo.eAudioDirection) ||
+            HandleUpdate(UpdateType::RESUME, m_objContext.GetSession()->GetCallType(),
+                    objMediaInfo) == IMS_FAILURE)
     {
         m_objContext.GetUiNotifier().SendResumeFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
         return GetStateName();
     }
-
-    if (HandleUpdate(UpdateType::RESUME, m_objContext.GetSession()->GetCallType(), objMediaInfo) ==
-            IMS_FAILURE)
-    {
-        // TODO: CODE_SUPP_SVC_FAILED
-    }
-
     return CallStateName::UPDATING;
 }
 
@@ -177,9 +166,10 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
 
     if (HandleUpdate(UpdateType::SESSION, eCallType, objMediaInfo) == IMS_FAILURE)
     {
-        // TODO: CODE_SESSION_MODIFICATION_FAILED
+        m_objContext.GetUiNotifier().SendUpdateFailed(
+                CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
+        return GetStateName();
     }
-
     return CallStateName::UPDATING;
 }
 
@@ -478,8 +468,11 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
         return GetStateName();
     }
 
-    HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(),
-            m_objContext.GetMediaManager().GetMediaInfo());
+    if (HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(),
+                m_objContext.GetMediaManager().GetMediaInfo()) == IMS_FAILURE)
+    {
+        return GetStateName();
+    }
     return CallStateName::UPDATING;
 }
 
@@ -511,8 +504,11 @@ PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateTyp
 
     // TODO: check ShouldPendOperation in MtcCallState#OnSrvccStateUpdated?
     // Handling in UpdatingState is also needed.
-    HandleUpdate(eType, m_objContext.GetSession()->GetCallType(),
-            m_objContext.GetMediaManager().GetMediaInfo());
+    if (HandleUpdate(eType, m_objContext.GetSession()->GetCallType(),
+                m_objContext.GetMediaManager().GetMediaInfo()) == IMS_FAILURE)
+    {
+        return GetStateName();
+    }
     return CallStateName::UPDATING;
 }
 
@@ -536,7 +532,10 @@ IMS_RESULT EstablishedState::HandleUpdate(
 
     if (pSession->Update(eUpdateType, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
     {
-        // TODO: reset the CallType
+        pSession->SetCallType(pSession->GetPreviousCallType());
+        m_objContext.GetMediaManager().RestoreSdp(&pSession->GetISession());
+        m_objContext.DeleteUpdatingInfo();
+        return IMS_FAILURE;
     }
 
     if (!m_objContext.GetTimer().IsActive(TIMER_CONVERT_REMOTE_RESPONSE))
