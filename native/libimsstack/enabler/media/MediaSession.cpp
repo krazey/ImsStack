@@ -769,6 +769,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             m_objAudioController.SetCallSessionState(param1);
             m_objVideoController.SetCallSessionState(param1);
             m_bSessionConfirmed = (param1 > 0);
+            IMS_TRACE_I("SetOptions() - Confirmed flag[%d]", m_bSessionConfirmed, 0, 0);
             break;
         case SET_DIRECTION:
         case SET_CONFERENCE_ENABLE:

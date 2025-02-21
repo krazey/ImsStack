@@ -58,7 +58,7 @@ PUBLIC VIRTUAL VideoSession::~VideoSession()
 }
 
 PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
-        IN VideoProfile* pPeerProfile, IN VideoProfile* pNegoProfile)
+        IN VideoProfile* pPeerProfile, IN VideoProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
             m_pRtpConfig == NULL)
@@ -137,9 +137,19 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
                 break;
             case MEDIA_DIRECTION_SEND:
                 nVideoDirection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
+                if (!bConfirmedSession)
+                {
+                    nVideoDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+                    IMS_TRACE_D("UpdateRtpConfig() - media direction[%d]", nVideoDirection, 0, 0);
+                }
                 break;
             case MEDIA_DIRECTION_SEND_RECEIVE:
                 nVideoDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
+                if (!bConfirmedSession)
+                {
+                    nVideoDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+                    IMS_TRACE_D("UpdateRtpConfig() - media direction[%d]", nVideoDirection, 0, 0);
+                }
                 break;
             case MEDIA_DIRECTION_INACTIVE:
                 nVideoDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;

@@ -61,7 +61,7 @@ public:
      * return IMS_BOOL : IMS_FALSE for error, IMS_TRUE for successful
      */
     IMS_BOOL UpdateRtpConfig(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
-            IN VideoProfile* pNegoProfile);
+            IN VideoProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession);
 
     /**
      * @brief Set MTU size in the VideoConfig

@@ -167,7 +167,8 @@ IMS_BOOL VideoController::UpdateRtpConfig(IN VideoNego* pNego)
         return m_pSession->UpdateRtpConfig(
                 pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
-                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
+                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()),
+                m_eCallState == CONFIRMED_SESSION);
     }
 
     return IMS_FALSE;

@@ -101,7 +101,8 @@ public:
      * return IMS_BOOL : false for not updated parameter, true for there is updates
      */
     AudioConfig* UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork, IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegoProfile);
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegoProfile,
+            IN IMS_BOOL bConfirmedSession);
 
     /**
      * @brief Update the MediaQualityThreshold parameters and send it to the java
