@@ -130,11 +130,26 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
 
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
 {
+    m_objContext.GetTimer().StopAll();
+
     IMessage* piMessage =
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_START);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
-    m_objContext.GetTimer().StopAll();
+    if (HasNotRespondedQosConfirmation(*piSession))
+    {
+        IMS_TRACE_E(0, "SessionStarted - wait response for QoS confirmation", 0, 0, 0);
+        if (pSession->SendAck() == IMS_FAILURE)
+        {
+            CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
+            HandleCancel(piSession, objReason);
+            OnStartFailed(objReason);
+
+            return CallStateName::TERMINATING;
+        }
+        return GetStateName();
+    }
+
     pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
     m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
@@ -146,7 +161,10 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
     if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
-        pSession->SendAck();
+        if (!piSession->GetPreviousRequest(IMessage::SESSION_ACK))
+        {
+            pSession->SendAck();
+        }
         CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
 
         HandleCancel(piSession, objReason);
@@ -157,7 +175,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (pSession->SendAck() == IMS_FAILURE)
+    if (!piSession->GetPreviousRequest(IMessage::SESSION_ACK) && pSession->SendAck() == IMS_FAILURE)
     {
         CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
         HandleCancel(piSession, objReason);
@@ -234,6 +252,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
+
+    if (piSession->GetState() == ISession::STATE_ESTABLISHED)
+    {
+        IMS_TRACE_I("SessionEarlyMediaUpdated - Handle pending started event", 0, 0, 0);
+        return SessionStarted(piSession);
+    }
 
     return MaySendPreconditionConfirmation(*piSession);
 }
@@ -356,6 +380,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* p
     else if (nStatusCode == SipStatusCode::SC_200)
     {
         // TODO: send update after sending ACK to 200 OK response.
+        if (m_objContext.GetMessageUtils().HasSdp(piMessage))
+        {
+            IMS_TRACE_I("SessionPrackDelivered - Handle pending started event", 0, 0, 0);
+            return SessionStarted(piSession);
+        }
     }
 
     return GetStateName();
@@ -793,6 +822,33 @@ CallStateName OutgoingState::HandleSilentRedial(IN const CallReasonInfo& objReas
     }
 
     return CallStateName::IDLE;
+}
+
+PRIVATE
+IMS_BOOL OutgoingState::HasNotRespondedQosConfirmation(IN ISession& objISession) const
+{
+    // 3GPP TS 24.229 5.1.3.1 - NOTE 5
+    if (m_objContext.GetMessageUtils().GetResponseStatusCode(
+                &objISession, IMessage::SESSION_EARLY_UPDATE) == SipStatusCode::SC_INVALID)
+    {
+        const IMessage* piMessage = objISession.GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+        if (piMessage && m_objContext.GetMessageUtils().HasSdp(piMessage))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    if (m_objContext.GetMessageUtils().GetResponseStatusCode(
+                &objISession, IMessage::SESSION_PRACK) == SipStatusCode::SC_INVALID)
+    {
+        const IMessage* piMessage = objISession.GetPreviousRequest(IMessage::SESSION_PRACK);
+        if (piMessage && m_objContext.GetMessageUtils().HasSdp(piMessage))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
