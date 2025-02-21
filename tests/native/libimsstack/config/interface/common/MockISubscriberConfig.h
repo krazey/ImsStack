@@ -64,6 +64,7 @@ public:
     MOCK_METHOD(const AString&, GetPrivateUserId, (), (const, override));
     MOCK_METHOD(const AString&, GetPublicUserId, (IN IMS_SINT32 nImpuType), (const, override));
     MOCK_METHOD(const AStringArray&, GetPublicUserIds, (), (const, override));
+    MOCK_METHOD(const AStringArray&, GetPcscfAddressesFromIsim, (), (const, override));
 
     MOCK_METHOD(void, HandleMessage,
             (IN IMS_SINT32 nMSG, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2), (override));

@@ -135,6 +135,7 @@ protected:
         EXPECT_CALL(objIsim, GetImpi()).Times(nCount).WillRepeatedly(Return(m_strImpi));
         EXPECT_CALL(objIsim, GetImpu()).Times(nCount).WillRepeatedly(Return(m_objImpu));
         EXPECT_CALL(objIsim, GetHomeDomainName()).Times(nCount).WillRepeatedly(Return(m_strDomain));
+        EXPECT_CALL(objIsim, GetPcscf()).Times(nCount).WillRepeatedly(Return(m_objPcscfs));
     }
 
     void SetUpCarrierConfig()
@@ -281,6 +282,7 @@ TEST_F(SubscriberConfigTest, Init)
     EXPECT_TRUE(m_pSubscriberConfig->GetPrivateUserId().IsNull());
     EXPECT_TRUE(m_pSubscriberConfig->GetPublicUserId().IsNull());
     EXPECT_TRUE(m_pSubscriberConfig->GetPublicUserIds().IsEmpty());
+    EXPECT_TRUE(m_pSubscriberConfig->GetPcscfAddressesFromIsim().IsEmpty());
     EXPECT_TRUE(m_pSubscriberConfig->GetScscfAddress().IsNull());
     EXPECT_TRUE(m_pSubscriberConfig->IsAuthRealmLenient());
     EXPECT_NE(m_pSubscriberConfig->GetSubscriberInfoEx(), nullptr);

@@ -1541,6 +1541,7 @@ void SubscriberConfig::UpdateIsimRecords()
         UpdatePrivateUserId(pSubsInfo, m_piIsim->GetImpi());
         UpdatePublicUserIds(pSubsInfo, m_piIsim->GetImpu());
         UpdateHomeDomainName(pSubsInfo, m_piIsim->GetHomeDomainName());
+        UpdatePcscfAddressesFromIsim(m_piIsim->GetPcscf());
 
         IMS_SINT32 nOldState = GetState();
         SetState(STATE_PROVISIONED);
@@ -1636,6 +1637,12 @@ void SubscriberConfig::UpdatePublicUserIds(
 
     // Additional operation: set the primary IMPU
     SetPrimaryImpu(pSubsInfo);
+}
+
+PRIVATE
+void SubscriberConfig::UpdatePcscfAddressesFromIsim(IN const AStringArray& objPcscfAddresses)
+{
+    m_objPcscfAddressesFromIsim = objPcscfAddresses;
 }
 
 PRIVATE
@@ -2021,6 +2028,8 @@ PRIVATE GLOBAL const IMS_CHAR* SubscriberConfig::PcscfDiscoveryMethodToString(IN
             return "PCO";
         case PCSCF_DISCOVERY_METHOD_CONFIG:
             return "CONFIG";
+        case PCSCF_DISCOVERY_METHOD_ISIM:
+            return "ISIM";
         default:
             return "UNKNOWN";
     }
