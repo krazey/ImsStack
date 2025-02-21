@@ -232,6 +232,7 @@ enum
     using Base::StateUpdating_Registration;              \
     using Base::StateDisconnecting_Condition;            \
     using Base::StateDisconnecting_Registration;         \
+    using Base::ProcessConnectionDeactivated;            \
     using Base::ProcessDisconnectingState;               \
     using Base::ProcessNetworkEvent;                     \
     using Base::ProcessRegControlEvent;                  \
@@ -2151,6 +2152,22 @@ TEST_F(AosApplicationTest, SetBlockInvalidPcscfWhenStateReadyConnection)
     ImsMessage objMessage(
             MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_PCSCF_DISCOVERY_FAILED);
     m_pAosApplication->StateReady_Connection(objMessage);
+}
+
+TEST_F(AosApplicationTest, SetAirplaneModeReasonWhenProcessConnectionDeactivatedAfterAirplaneModeOn)
+{
+    m_pAosApplication->SetImsCall(IMS_FALSE);
+
+    EXPECT_FALSE(m_pAosApplication->IsRequestCmdHeldByCondition(
+            AosCondition::REQUEST_STOP, AosReason::AIRPLANE_MODE));
+    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::AIRPLANE_MODE);
+}
+
+TEST_F(AosApplicationTest, SetDataDisconnectedReasonWhenProcessConnectionDeactivated)
+{
+    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
 }
 
 TEST_F(AosApplicationTest, ResetBlockInvalidPcscfWhenNetStatusChanged)
