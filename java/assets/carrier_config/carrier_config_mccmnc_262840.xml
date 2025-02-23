@@ -19,6 +19,7 @@
     <int name="ims.isim_index_for_impu_int" value="0"/>
 
     <!-- Media -->
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
         <int-array name="imsvt.h264_payload_type_int_array" num="2">
             <item value="115"/>
