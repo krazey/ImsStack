@@ -24,6 +24,7 @@
 #include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/TemplateFormatter.h"
+#include "device/OsLocationInfo.h"
 #include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>
 
@@ -149,10 +150,37 @@ TEST_F(TemplateFormatterTest, FormatWithPublicUserId)
 
 TEST_F(TemplateFormatterTest, FormatWithAid)
 {
+    const AString strCountry("KR");
+    ON_CALL(objPhoneInfoService.GetMockLocationInfo(), GetLastKnownCountry)
+            .WillByDefault(ReturnRef(strCountry));
     ON_CALL(objPhoneInfoService.GetMockCallInfo(), GetWifiCallingAddressId)
             .WillByDefault(Return(AString("some_aid")));
 
     EXPECT_STREQ("<some_aid>", TemplateFormatter::Format("<#AID#>", objContext).GetStr());
+}
+
+TEST_F(TemplateFormatterTest, FormatWithNoAid)
+{
+    const AString strCountry("KR");
+    ON_CALL(objPhoneInfoService.GetMockLocationInfo(), GetLastKnownCountry)
+            .WillByDefault(ReturnRef(strCountry));
+    AString strAid(AString::ConstNull());
+    ON_CALL(objPhoneInfoService.GetMockCallInfo(), GetWifiCallingAddressId)
+            .WillByDefault(Return(strAid));
+
+    EXPECT_STREQ(
+            "<0000:0000:0000:0000>", TemplateFormatter::Format("<#AID#>", objContext).GetStr());
+}
+
+TEST_F(TemplateFormatterTest, FormatWithAidAndNoCountry)
+{
+    const AString strNoCountry(OsLocationInfo::COUNTRY_ISO_UNKNOWN);
+    ON_CALL(objPhoneInfoService.GetMockLocationInfo(), GetLastKnownCountry)
+            .WillByDefault(ReturnRef(strNoCountry));
+    EXPECT_CALL(objPhoneInfoService.GetMockCallInfo(), GetWifiCallingAddressId).Times(0);
+
+    EXPECT_STREQ(
+            "<0000:0000:0000:0000>", TemplateFormatter::Format("<#AID#>", objContext).GetStr());
 }
 
 }  // namespace android
