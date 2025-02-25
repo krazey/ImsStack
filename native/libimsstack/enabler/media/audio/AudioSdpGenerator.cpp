@@ -295,8 +295,8 @@ PROTECTED AString AudioSdpGenerator::GenerateEvsFmtp(IN AudioProfile::EvsFmtp* p
     AddHfOnlyToFmtp(pEvsFmtp, strFmtp);
     AddEvsModeSwitchToFmtp(pEvsFmtp, strFmtp);
     AddMaxRedToFmtp(pEvsFmtp, strFmtp);
-    AddBwToFmtp(pEvsFmtp, strFmtp);
     AddBrToFmtp(pEvsFmtp, strFmtp);
+    AddBwToFmtp(pEvsFmtp, strFmtp);
     AddCmrToFmtp(pEvsFmtp, strFmtp);
     AddChannelAwModeToFmtp(pEvsFmtp, strFmtp);
     AddModeSetListToFmtp(pEvsFmtp, strFmtp);
@@ -308,10 +308,10 @@ PROTECTED AString AudioSdpGenerator::GenerateEvsFmtp(IN AudioProfile::EvsFmtp* p
         AddModeChangeNeighborToFmtp(pEvsFmtp, strFmtp);
     }
 
-    AddBwSendToFmtp(pEvsFmtp, strFmtp);
-    AddBwRecvToFmtp(pEvsFmtp, strFmtp);
     AddBrSendToFmtp(pEvsFmtp, strFmtp);
     AddBrRecvToFmtp(pEvsFmtp, strFmtp);
+    AddBwSendToFmtp(pEvsFmtp, strFmtp);
+    AddBwRecvToFmtp(pEvsFmtp, strFmtp);
 
     return strFmtp;
 }
