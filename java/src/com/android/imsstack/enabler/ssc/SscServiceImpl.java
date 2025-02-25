@@ -73,6 +73,7 @@ public class SscServiceImpl implements IUtInterface {
     private Context mContext = null;
     private IUtListener mUtListener = null;
     private IUtServiceStateListener mUtServiceStateListener = null;
+    private SscPreferenceHelper mSscPreferenceHelper = null;
     private SscTransactionFactory mSscTransactionFactory = null;
     private SscTransaction mSscTransaction = null;
 
@@ -83,6 +84,7 @@ public class SscServiceImpl implements IUtInterface {
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
         mSscRequestQueue = new ConcurrentLinkedDeque<SscRequestData>();
+        setSscPreferenceHelper(new SscPreferenceHelper(mSlotId));
         setSscTransactionFactory(new SscTransactionFactory());
     }
 
@@ -207,6 +209,11 @@ public class SscServiceImpl implements IUtInterface {
     }
 
     @VisibleForTesting
+    protected void setSscPreferenceHelper(SscPreferenceHelper preferenceHelper) {
+        mSscPreferenceHelper = preferenceHelper;
+    }
+
+    @VisibleForTesting
     protected void setSscTransactionFactory(SscTransactionFactory transactionFactory) {
         mSscTransactionFactory = transactionFactory;
     }
@@ -316,6 +323,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCLIR(int tId) {
+        if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB OIR request");
+            handleQueryClirTb(tId);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
@@ -552,6 +565,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCLIR(int tId, int clirMode) {
+        if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB OIR request");
+            handleUpdateClirTb(tId, clirMode);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
@@ -738,6 +757,49 @@ public class SscServiceImpl implements IUtInterface {
         } else if (sscData.getEventNumber() == SscConstant.EVENT_SSC_UPDATE_CF) {
             ImsLog.w(mSlotId, "Need to insert new rule ID for CF");
             sscData.setEventNumber(SscConstant.EVENT_SSC_INSERT_CF);
+        }
+    }
+
+    private void handleQueryClirTb(int tId) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int clirMode = mSscPreferenceHelper.queryClir();
+        if (clirMode < 0) {
+            clirMode = SscConstant.OIR_DEFAULT;
+        }
+
+        int outgoingState = clirMode; // 3GPP 27.007 7.7 m
+        int provisionStatus = switch (clirMode) { // 3GPP 27.007 7.7 n
+            case SscConstant.OIR_DEFAULT -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+            case SscConstant.OIR_INVOCATION ->
+                    SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED;
+            case SscConstant.OIR_SUPPRESSION -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+            default -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+        };
+
+        int state = (provisionStatus == SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED)
+                ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+
+        postAndRunTask(() -> mUtListener.lineIdentificationSupplementaryServiceResponse(tId,
+                new ImsSsInfo.Builder(state).setClirInterrogationStatus(provisionStatus)
+                .setClirOutgoingState(outgoingState).build()));
+    }
+
+    private void handleUpdateClirTb(int tId, int clirMode) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        boolean result = mSscPreferenceHelper.updateClir(clirMode);
+        if (result) {
+            postAndRunTask(() -> mUtListener.utConfigurationUpdated(tId));
+        } else {
+            ImsLog.d(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
+            ImsReasonInfo ri = new ImsReasonInfo(ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR,
+                    ImsReasonInfo.CODE_UNSPECIFIED, null);
+            postAndRunTask(() -> mUtListener.utConfigurationUpdateFailed(tId, ri));
         }
     }
 
