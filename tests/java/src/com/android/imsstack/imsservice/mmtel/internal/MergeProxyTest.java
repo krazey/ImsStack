@@ -19,7 +19,7 @@ package com.android.imsstack.imsservice.mmtel.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -317,8 +317,8 @@ public class MergeProxyTest extends ImsStackTest {
         mMergeProxy.setStateForTest(STATE_MERGE_WAITING);
         mMtcCallListenerProxy.onCallTerminated(mMockFgCall, mFailInfo);
         processAllMessages();
-        verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(anyObject(),
-                anyObject());
+        verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(any(),
+                any());
 
         mMergeProxy.setStateForTest(STATE_HOLDING);
         clearInvocations(mMockMtcConferencelistenerProxy);
@@ -333,8 +333,8 @@ public class MergeProxyTest extends ImsStackTest {
         mMergeProxy.setStateForTest(STATE_MERGE_WAITING);
         mMtcCallListenerProxy.onCallTerminated(mMockMtcCall, mFailInfo);
         processAllMessages();
-        verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(anyObject(),
-                anyObject());
+        verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(any(),
+                any());
     }
 
     @Test
@@ -345,8 +345,8 @@ public class MergeProxyTest extends ImsStackTest {
         //notifySessionMergeFailed()
         mMtcCallListenerProxy.onCallHeld(mMockBgCall, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
         processAllMessages();
-        verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(anyObject(),
-                anyObject());
+        verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(any(),
+                any());
         assertFalse(mMergeProxy.isBackgroundCallRecoveryRequired());
     }
 

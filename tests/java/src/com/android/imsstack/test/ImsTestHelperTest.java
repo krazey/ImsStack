@@ -24,7 +24,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -239,7 +238,7 @@ public class ImsTestHelperTest extends ImsStackTest {
 
         mBroadcastReceiver.onReceive(mContext, intentSrv);
         verify(mImsServiceManager).getCallApp(SLOT0);
-        verify(mtcApp).openEmergencyService(anyObject(), anyInt());
+        verify(mtcApp).openEmergencyService(any(), anyInt());
     }
 
     @Test
@@ -287,7 +286,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         intentSrv.putExtra("extras", extra);
 
         mBroadcastReceiver.onReceive(mContext, intentSrv);
-        verify(mtcCall).start(anyInt(), anyString(), anyString(), anyObject(), anyObject());
+        verify(mtcCall).start(anyInt(), anyString(), anyString(), any(), any());
     }
 
     @Test
@@ -351,7 +350,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         intentSrv.putExtra("slotid", SLOT0);
         intentSrv.putExtra("command", 106);
         mBroadcastReceiver.onReceive(mContext, intentSrv);
-        verify(mtcApp).setCallListener(anyObject());
+        verify(mtcApp).setCallListener(any());
     }
 
     @Test
@@ -402,7 +401,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         intentSrv.putExtra("command", 105);
         intentSrv.putExtra("extras", extra);
         mBroadcastReceiver.onReceive(mContext, intentSrv);
-        verify(mtcCall).accept(anyInt(), anyObject());
+        verify(mtcCall).accept(anyInt(), any());
     }
 
     @Test

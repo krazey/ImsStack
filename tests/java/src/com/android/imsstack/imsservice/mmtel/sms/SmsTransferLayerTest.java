@@ -20,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -114,7 +113,7 @@ public class SmsTransferLayerTest {
                 mSmsFormat, mMessageRef, mSmsc, mPdu));
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.RP_ACK, mMessageRef, mSmsc, mPdu);
         verify(mSmsRL).sendRPMessage(anyInt(), anyInt(), anyString(), anyString(),
-                anyObject(), anyInt());
+                any(), anyInt());
     }
 
     @Test
