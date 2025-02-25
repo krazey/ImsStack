@@ -1511,8 +1511,7 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
 {
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::AIRPLANE_MODE),
-            ImsAosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::AIRPLANE_MODE), ImsAosReason::AIRPLANE_MODE);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_DISCONNECTED),
             ImsAosReason::DATA_DISCONNECTED);
     EXPECT_EQ(

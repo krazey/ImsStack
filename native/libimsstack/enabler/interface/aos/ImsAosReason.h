@@ -36,6 +36,10 @@ public:
 
         /// Indicate that power is down.
         POWER_OFF = 10000,
+        /// Indicate that airplane mode is on.
+        AIRPLANE_MODE,
+        /// Indicate that wifi is off.
+        WIFI_OFF,
         /// Indicate that IMS services are not available based on network feature
         /// or something
         SERVICE_POLICY,

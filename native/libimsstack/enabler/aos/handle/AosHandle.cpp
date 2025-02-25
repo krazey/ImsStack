@@ -632,7 +632,9 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AosReason::POWER_OFF:
             nImsAosReason = ImsAosReason::POWER_OFF;
             break;
-        case AosReason::AIRPLANE_MODE:  // FALL-THROUGH
+        case AosReason::AIRPLANE_MODE:
+            nImsAosReason = ImsAosReason::AIRPLANE_MODE;
+            break;
         case AosReason::DATA_DISCONNECTED:
             nImsAosReason = ImsAosReason::DATA_DISCONNECTED;
             break;

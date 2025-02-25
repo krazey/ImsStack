@@ -806,6 +806,11 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRequestCmdHeldByCondition(
         return IMS_FALSE;
     }
 
+    if (nReason == AosReason::AIRPLANE_MODE)
+    {
+        SetOffReason(nReason);
+    }
+
     if (IsImsCall() && (nCommand == AosCondition::REQUEST_STOP))
     {
         m_pUtil->AddFeature(PENDING_REG_STOP_HELD, m_nRegPending);
@@ -1888,7 +1893,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT3
     }
     else
     {
-        CleanAll(AosReason::DATA_DISCONNECTED);
+        CleanAll((GetOffReason() == AosReason::AIRPLANE_MODE) ? AosReason::AIRPLANE_MODE
+                                                              : AosReason::DATA_DISCONNECTED);
     }
 
     Report_StateChanged(IMS_FALSE);
