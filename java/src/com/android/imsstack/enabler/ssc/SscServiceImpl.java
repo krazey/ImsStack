@@ -88,6 +88,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public boolean isUtAvailable() {
+        if (SscConfig.isUtSupported(mSlotId)
+                && isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB SS is enabled");
+            return true;
+        }
+
         return SscServiceStateAgent.getInstance().isUtAvailable(mSlotId);
     }
 
@@ -657,7 +663,7 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        if (!isUtAvailable()) {
+        if (!SscServiceStateAgent.getInstance().isUtAvailable(mSlotId)) {
             ImsLog.w(mSlotId, "Clear pending data due to Ut is not available");
             postFailResponseMessage(sscData);
         } else if (sscData.getSsType() != ESsType.NONE
@@ -743,6 +749,16 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         return SscConfig.isServerBasedService(mSlotId, carrierConfigServiceType);
+    }
+
+    private boolean isTerminalBasedService(ESsType ssType, int condition) {
+        int carrierConfigServiceType =
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ssType, condition);
+        if (carrierConfigServiceType == SscConfig.SERVICE_TYPE_INVALID) {
+            return false;
+        }
+
+        return SscConfig.isTerminalBasedService(mSlotId, carrierConfigServiceType);
     }
 
     private final class SscRequestHandler extends Handler {

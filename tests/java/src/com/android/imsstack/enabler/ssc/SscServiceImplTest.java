@@ -21,6 +21,7 @@ import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPa
 import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_WIFI_TEST;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -218,6 +219,50 @@ public class SscServiceImplTest {
         mSscServiceImpl.onServiceStateChanged();
 
         verify(mMockUtServiceStateListener).onServiceStateChanged();
+    }
+
+    @Test
+    public void testIsUtAvailable_utNotAvailableAndTbOirNotEnabled_returnFalse() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(true);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(false);
+
+        boolean result = mSscServiceImpl.isUtAvailable();
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsUtAvailable_utNotAvailableButTbOirEnabled_returnTrue() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(true);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(false);
+
+        boolean result = mSscServiceImpl.isUtAvailable();
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsUtAvailable_tbOirEnabledButTtNotEnabled_returnFalse() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(false);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(false);
+
+        boolean result = mSscServiceImpl.isUtAvailable();
+
+        assertFalse(result);
     }
 
     @Test

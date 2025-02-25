@@ -227,6 +227,11 @@ public final class SscConfig {
                 CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY);
     }
 
+    static int[] getTerminalBasedServices(int slotId) {
+        return getIntArray(slotId,
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY);
+    }
+
     static int[] getSupportedRats(int slotId) {
         return getIntArray(slotId,
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY);
@@ -363,6 +368,15 @@ public final class SscConfig {
         }
 
         return Arrays.stream(serverBasedServices).anyMatch(value -> value == serviceType);
+    }
+
+    static boolean isTerminalBasedService(int slotId, @CarrierConfigServiceType int serviceType) {
+        int[] terminalBasedServices = getTerminalBasedServices(slotId);
+        if (terminalBasedServices == null) {
+            return false;
+        }
+
+        return Arrays.stream(terminalBasedServices).anyMatch(value -> value == serviceType);
     }
 
     static boolean isSupportedNetwork(int slotId, @AccessNetworkTypes int networkType) {
