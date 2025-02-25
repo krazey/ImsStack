@@ -114,6 +114,10 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
+        const AString strCountry("KR");
+        ON_CALL(objPhoneInfoService.GetMockLocationInfo(), GetLastKnownCountry)
+                .WillByDefault(ReturnRef(strCountry));
+
         ImsVector<AString> lstPpi;
         lstPpi.Add("");
         lstPpi.Add("");

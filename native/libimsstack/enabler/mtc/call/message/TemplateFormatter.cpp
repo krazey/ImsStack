@@ -23,10 +23,13 @@
 #include "ServicePhoneInfo.h"
 #include "call/IMtcCallContext.h"
 #include "call/message/TemplateFormatter.h"
+#include "device/OsLocationInfo.h"
 #include "helper/IMtcAosConnector.h"
 #include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
+
+LOCAL const AString ALL_ZERO_ADDRESS("0000:0000:0000:0000");
 
 PUBLIC GLOBAL AString TemplateFormatter::Format(
         IN const AString& strFormatString, IN IMtcCallContext& objContext)
@@ -142,9 +145,23 @@ PRIVATE GLOBAL const AString& TemplateFormatter::GetPublicUserId(IN IMtcCallCont
 
 PRIVATE GLOBAL AString TemplateFormatter::GetWifiCallingAddressId(IN IMtcCallContext& objContext)
 {
-    return PhoneInfoService::GetPhoneInfoService()
-            ->GetCallInfo(objContext.GetSlotId())
-            ->GetWifiCallingAddressId();
+    if (IsInUnknownCountry(objContext.GetSlotId()))
+    {
+        IMS_TRACE_D("country is unknown", 0, 0, 0);
+        return ALL_ZERO_ADDRESS;
+    }
+
+    AString strAid = PhoneInfoService::GetPhoneInfoService()
+                             ->GetCallInfo(objContext.GetSlotId())
+                             ->GetWifiCallingAddressId();
+
+    if (strAid.GetLength() == 0)
+    {
+        IMS_TRACE_D("No AID", 0, 0, 0);
+        return ALL_ZERO_ADDRESS;
+    }
+
+    return strAid;
 }
 
 PRIVATE GLOBAL void TemplateFormatter::Replace(IN_OUT AString& strText,
@@ -156,4 +173,22 @@ PRIVATE GLOBAL void TemplateFormatter::Replace(IN_OUT AString& strText,
     }
 
     strText.Replace(strTemplateLiteral, objSubstitution());
+}
+
+PRIVATE GLOBAL IMS_BOOL TemplateFormatter::IsInUnknownCountry(IN IMS_SINT32 nSlotId)
+{
+    AString strCountry;
+    ILocationInfo* piLocationInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId);
+    if (piLocationInfo != IMS_NULL)
+    {
+        strCountry = piLocationInfo->GetLastKnownCountry();
+    }
+
+    if ((strCountry.GetLength() == 0) || strCountry.Equals(OsLocationInfo::COUNTRY_ISO_UNKNOWN))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }

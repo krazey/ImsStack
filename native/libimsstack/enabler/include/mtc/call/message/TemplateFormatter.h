@@ -48,6 +48,8 @@ private:
 
     static void Replace(IN_OUT AString& strText, IN const AString& strTemplateLiteral,
             IN const std::function<AString()>& objSubstitution);
+
+    static IMS_BOOL IsInUnknownCountry(IN IMS_SINT32 nSlotId);
 };
 
 #endif
