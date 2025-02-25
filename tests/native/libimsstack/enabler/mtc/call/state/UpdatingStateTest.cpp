@@ -21,6 +21,7 @@
 #include "ImsVector.h"
 #include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "MockIMtcService.h"
 #include "MockISession.h"
 #include "MtcDef.h"
 #include "PlatformContext.h"
@@ -54,6 +55,11 @@ using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+MATCHER_P(IsEqualCallReason, reason, "")
+{
+    return arg == reason;
+}
+
 class UpdatingStateTest : public ::testing::Test
 {
 public:
@@ -76,6 +82,7 @@ public:
     MediaInfo objMediaInfo;
     SipMethod* pSipMethod;
     ImsVector<AString> objActionSets;
+    MockIMtcService objMtcService;
 
 protected:
     virtual void SetUp() override
@@ -111,6 +118,7 @@ protected:
                 .WillByDefault(ReturnRef(objPendingOperationHolder));
 
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMtcService));
 
         pSipMethod = new SipMethod(SipMethod::ACK);
 
@@ -413,9 +421,17 @@ TEST_F(UpdatingStateTest, SessionTerminatedTerminatesCall)
 
 TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedInvokesSendTerminated)
 {
-    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, _));
-    EXPECT_CALL(objUiNotifier, SendTerminated(_));
+    EXPECT_CALL(objMtcService, IsWlanIpCanType)
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, _)).Times(2);
+    EXPECT_CALL(objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_WIFI_LOST))));
+    EXPECT_CALL(
+            objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))));
 
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTCP));
     EXPECT_EQ(CallStateName::TERMINATING,
             pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTCP));
 }

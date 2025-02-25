@@ -47,6 +47,8 @@ public:
 
     static CallReasonInfo GetDefaultCallReasonInfo(
             IN IMtcCallContext& objContext, IN const IMessage& objMessage);
+    static IMS_SINT32 GetDefaultReasonCode(
+            IN IMtcCallContext& objContext, IN IMS_SINT32 nStatusCode);
     static IMS_SINT32 GetDefaultExtraCode(
             IN IMtcCallContext& objContext, IN const IMessage& objMessage);
 
@@ -61,11 +63,12 @@ private:
     CallReasonInfo HandleRedirectionByContact(IN const IMessage& objMessage) const;
     CallReasonInfo HandleNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const;
     CallReasonInfo HandleForbiddenByPolicy(IN const IMessage& objMessage) const;
-    CallReasonInfo HandleTerminateByReasonPhraseMaxCallLimit(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleTerminateByReasonPhrase(IN const IMessage& objMessage) const;
     CallReasonInfo HandleUssiCsfb(IN const IMessage& objMessage) const;
     CallReasonInfo HandleBlockCallByTimer(IN const IMessage& objMessage) const;
     CallReasonInfo HandleTriggerEpsfb(IN const IMessage& objMessage) const;
     CallReasonInfo HandleTerminateByResponseSource(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleTerminateByReasonHeaderText(IN const IMessage& objMessage) const;
 
     CallReasonInfo RegisterAfterMayPerformCsfb() const;
 
@@ -73,7 +76,6 @@ private:
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL IsAlternativeEmergencyService(IN const IMessage& objMessage) const;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;
-    IMS_BOOL IsByMaxCallLimit(IN const IMessage& objMessage) const;
     IMS_BOOL IsRoaming() const;
     IMS_BOOL IsCsfbActionRequiredStatusCode(IN IMS_SINT32 nStatusCode) const;
 

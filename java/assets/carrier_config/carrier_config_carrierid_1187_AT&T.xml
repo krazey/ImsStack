@@ -175,7 +175,7 @@
         <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="380:6,5,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, REDIRECTION_BY_CONTACT, CSFB  -->
-        <item value="403:7"/> <!-- HANDLE_FORBIDDEN_BY_POLICY  -->
+        <item value="403:13,7"/> <!-- TERMINATE_BY_REASON_HEADER_TEXT, HANDLE_FORBIDDEN_BY_POLICY  -->
         <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
         <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->

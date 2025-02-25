@@ -53,6 +53,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW =
         "simultaneous call limit has already been reached";
+
 // clang-format off
 const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
         StartErrorHandler::objActionFuncMap = {
@@ -72,8 +73,8 @@ const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
             &StartErrorHandler::HandleNonUeDetectableEmergencyCall},
     {ConfigVoice::START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY,
             &StartErrorHandler::HandleForbiddenByPolicy},
-    {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE_MAX_CALL_LIMIT,
-            &StartErrorHandler::HandleTerminateByReasonPhraseMaxCallLimit},
+    {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE,
+            &StartErrorHandler::HandleTerminateByReasonPhrase},
     {ConfigVoice::START_ERROR_ACTION_USSI_CSFB,
             &StartErrorHandler::HandleUssiCsfb},
     {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER,
@@ -81,7 +82,9 @@ const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
     {ConfigVoice::START_ERROR_ACTION_TRIGGER_EPSFB,
             &StartErrorHandler::HandleTriggerEpsfb},
     {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_RESPONSE_SOURCE,
-            &StartErrorHandler::HandleTerminateByResponseSource}
+            &StartErrorHandler::HandleTerminateByResponseSource},
+    {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_HEADER_TEXT,
+            &StartErrorHandler::HandleTerminateByReasonHeaderText}
 };
 // clang-format on
 
@@ -131,23 +134,29 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 PUBLIC GLOBAL CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfo(
         IN IMtcCallContext& objContext, IN const IMessage& objMessage)
 {
-    const IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-    IMS_SINT32 nReasonCode = MtcConfigurationResolver::LookupReasonCodeByStatusCodeForNormal(
-            objContext.GetConfigurationProxy(), nStatusCode);
-    if (nReasonCode == CODE_NONE)
-    {
-        auto it = s_defaultStatusCodeAndReasonCodeMap.find(nStatusCode);
-        if (it != s_defaultStatusCodeAndReasonCodeMap.end())
-        {
-            nReasonCode = it->second;
-        }
-        else
-        {
-            nReasonCode = CODE_SIP_SERVER_ERROR;
-        }
-    }
+    IMS_SINT32 nReasonCode = GetDefaultReasonCode(objContext, objMessage.GetStatusCode());
     IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
     return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objContext, objMessage));
+}
+
+PUBLIC GLOBAL IMS_SINT32 StartErrorHandler::GetDefaultReasonCode(
+        IN IMtcCallContext& objContext, IN IMS_SINT32 nStatusCode)
+{
+    IMS_SINT32 nReasonCode = MtcConfigurationResolver::LookupReasonCodeByStatusCodeForNormal(
+            objContext.GetConfigurationProxy(), nStatusCode);
+
+    if (nReasonCode != CODE_NONE)
+    {
+        return nReasonCode;
+    }
+
+    auto it = s_defaultStatusCodeAndReasonCodeMap.find(nStatusCode);
+    if (it != s_defaultStatusCodeAndReasonCodeMap.end())
+    {
+        nReasonCode = it->second;
+    }
+
+    return nReasonCode == CODE_NONE ? CODE_SIP_SERVER_ERROR : nReasonCode;
 }
 
 PUBLIC GLOBAL IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(
@@ -411,13 +420,15 @@ CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& /*o
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::HandleTerminateByReasonPhraseMaxCallLimit(
-        IN const IMessage& objMessage) const
+CallReasonInfo StartErrorHandler::HandleTerminateByReasonPhrase(IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleTerminateByReasonPhraseMaxCallLimit", 0, 0, 0);
-    if (IsByMaxCallLimit(objMessage))
+    IMS_TRACE_I("HandleTerminateByReasonPhrase", 0, 0, 0);
+
+    const AString strNormalizedReasonPhrase = objMessage.GetReasonPhrase().SimplifyWsp();
+    if (strNormalizedReasonPhrase.MakeLower().Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW))
     {
-        return CallReasonInfo(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED);
+        return CallReasonInfo(GetDefaultReasonCode(m_objContext, objMessage.GetStatusCode()), -1,
+                strNormalizedReasonPhrase);
     }
     return CallReasonInfo(CODE_NONE);
 }
@@ -505,6 +516,21 @@ CallReasonInfo StartErrorHandler::HandleTerminateByResponseSource(
     return CallReasonInfo(CODE_NONE);
 }
 
+CallReasonInfo StartErrorHandler::HandleTerminateByReasonHeaderText(
+        IN const IMessage& objMessage) const
+{
+    ReasonHeaderValue objValue =
+            m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
+
+    if (objValue.strText.GetLength() > 0)
+    {
+        return CallReasonInfo(GetDefaultReasonCode(m_objContext, objMessage.GetStatusCode()), -1,
+                objValue.strText.SimplifyWsp());
+    }
+
+    return CallReasonInfo(CODE_NONE);
+}
+
 PRIVATE
 CallReasonInfo StartErrorHandler::RegisterAfterMayPerformCsfb() const
 {
@@ -564,22 +590,6 @@ IMS_BOOL StartErrorHandler::IsInitialRegistrationRequired(IN const IMessage& obj
             Ims3gpp::AlternativeService::TYPE_RESTORATION &&
             objIms3gppData.eAlternativeServiceAction ==
             Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION;
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsByMaxCallLimit(IN const IMessage& objMessage) const
-{
-    const AString strNormalizedReasonPhrase =
-            objMessage.GetReasonPhrase().SimplifyWsp().MakeLower();
-    if (strNormalizedReasonPhrase.Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW))
-    {
-        return IMS_TRUE;
-    }
-
-    ReasonHeaderValue objValue =
-            m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
-    const AString strNormalizedText = objValue.strText.SimplifyWsp().MakeLower();
-    return strNormalizedText.Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW);
 }
 
 PRIVATE

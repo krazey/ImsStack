@@ -202,6 +202,12 @@ protected:
         return objResult == CallReasonInfo(nCode, nExtraCode);
     }
 
+    IMS_BOOL CheckHandleResult(IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode, IN AString& strExtra)
+    {
+        CallReasonInfo objResult = pHandler->Handle(pMessage);
+        return objResult == CallReasonInfo(nCode, nExtraCode, strExtra);
+    }
+
     IMS_BOOL CheckHandleResult(
             IN IMS_SINT32 nCode, IN IMS_SINT32 nExtraCode, IN const AString& strExtraMessage)
     {
@@ -576,17 +582,28 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, Handle403ResponseForMaxCallLimitInReasonHeader)
+TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonPhrase)
 {
     SetMessageCode(SipStatusCode::SC_403);
-    SetActionConfig(SipStatusCode::SC_403,
-            ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE_MAX_CALL_LIMIT);
+    SetActionConfig(
+            SipStatusCode::SC_403, ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE);
+    AString reasonPhrase = "Forbidden: Simultaneous Call Limit Has Already Been Reached";
+    ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(reasonPhrase));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, -1, reasonPhrase));
+}
+
+TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonHeaderText)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    SetActionConfig(
+            SipStatusCode::SC_403, ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_HEADER_TEXT);
     ReasonHeaderValue objValue;
     objValue.strText = "Simultaneous Call Limit Has Already Been Reached";
     ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(pMessage, _))
             .WillByDefault(Return(objValue));
 
-    EXPECT_TRUE(CheckHandleResult(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, -1, objValue.strText.SimplifyWsp()));
 }
 
 TEST_F(StartErrorHandlerTest, Handle404Response)
