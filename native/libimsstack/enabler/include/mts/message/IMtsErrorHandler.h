@@ -28,10 +28,36 @@ class IMtsErrorHandler
 public:
     virtual ~IMtsErrorHandler() {}
 
+    /**
+     * @brief Handles an error encountered during SIP transaction.
+     *
+     * This method processes the error and takes appropriate actions, such as
+     * attempting recovery and handling retry mechanisms.
+     *
+     * @param objMtsService A reference to the IMtsService object.
+     * @param objMtsDynamicLoader A reference to the IMtsDynamicLoader object.
+     * @param piMessage A pointer to the IMessage object associated with the error, if available.
+     *
+     * @return A status code indicating the outcome of the error handling process.
+     */
     virtual IMS_SINT32 Handle(IN IMtsService& objMtsService,
             IN const IMtsDynamicLoader& objMtsDynamicLoader,
             IN const IMessage* piMessage = IMS_NULL) = 0;
+
+    /**
+     * @brief Retrieves the Retry-After value.
+     *
+     * This method returns the currently stored Retry-After value,
+     * which is typically obtained from a Retry-After header in a SIP response.
+     *
+     * @return The Retry-After value in seconds.
+     */
     virtual IMS_SINT32 GetRetryAfterValue() const = 0;
+
+    /**
+     * @brief Resets the Retry-After value and related member variables.
+     *
+     */
     virtual void ResetRetryAfterStatus() = 0;
 };
 

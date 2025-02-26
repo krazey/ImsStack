@@ -25,11 +25,11 @@ class MockIMtsMessageController : public IMtsMessageController
 public:
     virtual ~MockIMtsMessageController() {}
 
-    MOCK_METHOD(void, NotifyMoSms,
+    MOCK_METHOD(void, ProcessMoSms,
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
                     IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),
             (override));
-    MOCK_METHOD(void, NotifyMtSms, (IN IPageMessage * piMessage), (override));
+    MOCK_METHOD(void, ProcessMtSms, (IN IPageMessage * piMessage), (override));
     MOCK_METHOD(void, ClearAllMessages, (), (override));
 };
 

@@ -24,13 +24,37 @@ class IMtsTrafficListener
 public:
     virtual ~IMtsTrafficListener() {}
 
+    /**
+     * @brief Notifies the reason of the connection setup corresponding with the IMS traffic type
+     *
+     * @param nType  The type of the traffic. (e.g. IImsRadio::TRAFFIC_TYPE_SMS)
+     * @param nDirection The direction of the traffic. (e.g. IImsRadio::DIRECTION_MO)
+     * @param nFailureReason The reason of connection failure based on IMS traffic type.
+     *                       (e.g. IImsRadio::REASON_ACCESS_DENIED)
+     * @param nCauseCode Failure cause code from network or modem specific to the failure.
+     * @param nWaitTimeMillis Retry wait time provided by network in milliseconds.
+     */
     virtual void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
             IN IMS_UINT32 nWaitTimeMillis) = 0;
 
+    /**
+     * @brief Notifies the preparation of the connection setup corresponding
+     *        with the IMS traffic type
+     *
+     * @param nType  The type of the traffic. (e.g. IImsRadio::TRAFFIC_TYPE_SMS)
+     * @param nDirection The direction of the traffic. (e.g. IImsRadio::DIRECTION_MO)
+     */
     virtual void Traffic_OnConnectionSetupPrepared(
             IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) = 0;
 
+    /**
+     * @brief Notifies that a guard timer for a connection has expired.
+     *
+     *
+     * @param nType The type of the traffic (e.g., IImsRadio::TRAFFIC_TYPE_SMS).
+     * @param nDirection The direction of the traffic (e.g., IImsRadio::DIRECTION_MO).
+     */
     virtual void Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) = 0;
 };
 
