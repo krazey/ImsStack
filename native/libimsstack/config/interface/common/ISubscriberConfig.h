@@ -254,6 +254,14 @@ public:
      */
     virtual const AStringArray& GetPublicUserIds() const = 0;
 
+    /**
+     * @brief Gets the list of P-CSCF address strings (IP address or FQDN) that are stored in ISIM.
+     *        This will be used when the P-CSCF discovery method is #PCSCF_DISCOVERY_METHOD_ISIM.
+     *
+     * @return A list of P-CSCF address.
+     */
+    virtual const AStringArray& GetPcscfAddressesFromIsim() const = 0;
+
 public:
     /// Error codes when the provisioning failed
     enum
@@ -286,7 +294,8 @@ public:
     enum
     {
         PCSCF_DISCOVERY_METHOD_PCO = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_PCO,
-        PCSCF_DISCOVERY_METHOD_CONFIG = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_CONFIG
+        PCSCF_DISCOVERY_METHOD_CONFIG = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_CONFIG,
+        PCSCF_DISCOVERY_METHOD_ISIM = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_ISIM
     };
 
     /// Listening events for ISubscriberConfigListener

@@ -161,6 +161,13 @@ public interface SimInterface extends IAgent {
     @NonNull List<String> getIsimImpu();
 
     /**
+     * Returns the IMS Proxy Call Session Control Function(P-CSCF) that were loaded from the ISIM.
+     *
+     * @return A list of P-CSCF address or empty list if not present or not loaded.
+     */
+    @NonNull List<String> getIsimPcscf();
+
+    /**
      * Checks if GBA is available in the ISIM service table.
      *
      * @return true if GBA is available in the ISIM, false otherwise.

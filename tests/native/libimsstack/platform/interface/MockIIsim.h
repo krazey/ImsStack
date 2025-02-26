@@ -31,6 +31,7 @@ public:
     MOCK_METHOD(AString, GetImpi, (), (const override));
     MOCK_METHOD(AStringArray, GetImpu, (), (const override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
+    MOCK_METHOD(AStringArray, GetPcscf, (), (const override));
     MOCK_METHOD(IMS_BOOL, IsLoadCompleted, (), (const override));
     MOCK_METHOD(void, AddListener, (IN IIsimListener * piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IIsimListener * piListener), (override));

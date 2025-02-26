@@ -67,6 +67,7 @@ public:
     AString GetHomeDomainName() const override;
     AString GetImpi() const override;
     AStringArray GetImpu() const override;
+    AStringArray GetPcscf() const override;
     inline IMS_SINT32 GetState() const override { return m_nState; }
     inline IMS_BOOL IsLoadCompleted() const override
     {
@@ -99,7 +100,8 @@ public:
     {
         EF_ID_IMPI = 0x6F02,
         EF_ID_DOMAIN = 0x6F03,
-        EF_ID_IMPU = 0x6F04
+        EF_ID_IMPU = 0x6F04,
+        EF_ID_PCSCF = 0x6F09
     };
 
     // ISIM events of platform layer (aligned with SimAgent.java)

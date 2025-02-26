@@ -479,6 +479,11 @@ PUBLIC VIRTUAL AStringArray OsIsim::GetImpu() const
     return PlatformContext::GetInstance()->GetSystem()->GetIsimRecord(EF_ID_IMPU, GetSlotId());
 }
 
+PUBLIC VIRTUAL AStringArray OsIsim::GetPcscf() const
+{
+    return PlatformContext::GetInstance()->GetSystem()->GetIsimRecord(EF_ID_PCSCF, GetSlotId());
+}
+
 PUBLIC VIRTUAL void OsIsim::AddListener(IN IIsimListener* piListener)
 {
     if (piListener == IMS_NULL)

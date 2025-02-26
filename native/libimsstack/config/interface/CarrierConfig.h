@@ -347,7 +347,8 @@ public:
         enum
         {
             PCSCF_DISCOVERY_METHOD_PCO = 0,
-            PCSCF_DISCOVERY_METHOD_CONFIG = 1
+            PCSCF_DISCOVERY_METHOD_CONFIG = 1,
+            PCSCF_DISCOVERY_METHOD_ISIM = 2
         };
 
         // IMS identity priority types

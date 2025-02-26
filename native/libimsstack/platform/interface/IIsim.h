@@ -62,6 +62,15 @@ public:
     virtual AStringArray GetImpu() const = 0;
 
     /**
+     * @brief Gets the list of P-CSCF address string (IP address or FQDN)
+     *
+     * NOTE: The result of this operation will be reported by the IIsimListener interface.
+     *
+     * @return A list of IMS Proxy Call Session Control Function(P-CSCF) of ISIM record.
+     */
+    virtual AStringArray GetPcscf() const = 0;
+
+    /**
      * @brief Returns the state of ISIM.
      *
      * @return The ISIM state.\n

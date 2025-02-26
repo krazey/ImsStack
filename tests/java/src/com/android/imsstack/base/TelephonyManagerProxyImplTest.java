@@ -198,6 +198,9 @@ public class TelephonyManagerProxyImplTest {
         mTelephonyManagerProxy.getImsPublicUserIdentities();
         verify(mTelephonyManager).getImsPublicUserIdentities();
 
+        mTelephonyManagerProxy.getImsPcscfAddresses();
+        verify(mTelephonyManager).getImsPcscfAddresses();
+
         final String data = "+/Qu0CsHvIXkqHjH4+8r5HywZGqmAQAAZIbcuUWhIpc=";
         mTelephonyManagerProxy.getIccAuthentication(
                 TelephonyManager.APPTYPE_ISIM, TelephonyManager.AUTHTYPE_EAP_AKA, data);
@@ -264,6 +267,7 @@ public class TelephonyManagerProxyImplTest {
             mTelephonyManagerProxy.getImsPrivateUserIdentity();
         });
         assertEquals(Collections.EMPTY_LIST, mTelephonyManagerProxy.getImsPublicUserIdentities());
+        assertEquals(Collections.EMPTY_LIST, mTelephonyManagerProxy.getImsPcscfAddresses());
 
         final String data = "+/Qu0CsHvIXkqHjH4+8r5HywZGqmAQAAZIbcuUWhIpc=";
         assertNull(mTelephonyManagerProxy.getIccAuthentication(

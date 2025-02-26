@@ -66,7 +66,7 @@ import java.util.List;
 public class SimAgentTest {
     private static final String UST = "86EF112C27FE01744200FF040100001E01";
     private static final byte[] UST_BYTES = ImsUtils.hexStringToBytes(UST);
-    private static final String IST = "E200";
+    private static final String IST = "E300";
     private static final byte[] IST_BYTES = ImsUtils.hexStringToBytes(IST);
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
     private static final String IMPI = "1234@test.ims.com";
@@ -74,6 +74,8 @@ public class SimAgentTest {
     private static final String[] IMPU_ARRAY = { "sip:1234@test.ims.com", "tel:1234" };
     private static final List<Uri> IMPU_LIST =
             List.of(Uri.parse("sip:1234@test.ims.com"), Uri.parse("tel:1234"));
+    private static final String[] PCSCF_ARRAY = { "test.pcscf.com", "11.22.33.44" };
+    private static final List<String> PCSCF_LIST = List.of("test.pcscf.com", "11.22.33.44");
 
     @Mock private Sim.Listener mSimListener;
     @Mock private Sim.IsimListener mIsimListener;
@@ -102,6 +104,7 @@ public class SimAgentTest {
         when(mTelephonyManagerProxy.getImsPrivateUserIdentity()).thenReturn(IMPI);
         when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(DOMAIN);
         when(mTelephonyManagerProxy.getImsPublicUserIdentities()).thenReturn(IMPU_LIST);
+        when(mTelephonyManagerProxy.getImsPcscfAddresses()).thenReturn(PCSCF_LIST);
         when(mTelephonyManagerProxy.isApplicationOnUicc(eq(TelephonyManager.APPTYPE_ISIM)))
                 .thenReturn(true);
 
@@ -254,6 +257,7 @@ public class SimAgentTest {
         assertEquals(IMPI, mSimAgent.getIsimImpi());
         assertEquals(DOMAIN, mSimAgent.getIsimDomain());
         assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
+        assertArrayEquals(PCSCF_ARRAY, mSimAgent.getIsimPcscf().toArray(new String[0]));
         assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
 
         // ISIM_STATE_ABSENT
@@ -262,18 +266,22 @@ public class SimAgentTest {
         assertNull(mSimAgent.getIsimImpi());
         assertNull(mSimAgent.getIsimDomain());
         assertTrue(mSimAgent.getIsimImpu().isEmpty());
+        assertTrue(mSimAgent.getIsimPcscf().isEmpty());
         assertArrayEquals(EMPTY_BYTE_ARRAY, mSimAgent.getIsimServiceTable());
 
-        // ISIM_STATE_LOADED and throw RuntimeException for IMPI/IMPU
+        // ISIM_STATE_LOADED and throw RuntimeException for IMPI/IMPU/P-CSCF
         doThrow(new RuntimeException("IMPI not loaded."))
                 .when(mTelephonyManagerProxy).getImsPrivateUserIdentity();
         doThrow(new RuntimeException("IMPU not loaded."))
                 .when(mTelephonyManagerProxy).getImsPublicUserIdentities();
+        doThrow(new RuntimeException("P-CSCF not loaded."))
+                .when(mTelephonyManagerProxy).getImsPcscfAddresses();
         mSimAgent.updateSimState();
 
         assertNull(mSimAgent.getIsimImpi());
         assertEquals(DOMAIN, mSimAgent.getIsimDomain());
         assertTrue(mSimAgent.getIsimImpu().isEmpty());
+        assertTrue(mSimAgent.getIsimPcscf().isEmpty());
         assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
     }
 

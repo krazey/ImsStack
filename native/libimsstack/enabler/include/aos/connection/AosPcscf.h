@@ -233,6 +233,7 @@ protected:
 
     virtual IMS_BOOL GetFromPco(IN IMS_SINT32 nIpVersion);
     virtual IMS_BOOL GetFromConf(IN IMS_SINT32 nIpVersion);
+    virtual IMS_BOOL GetFromIsim(IN IMS_SINT32 nIpVersion);
     virtual IMS_BOOL ProcessDnsQuery(
             IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion);
 

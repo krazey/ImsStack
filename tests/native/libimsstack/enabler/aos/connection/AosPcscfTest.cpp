@@ -46,6 +46,7 @@ using ::testing::SetArgPointee;
     using Base::ProcessDiscovery;       \
     using Base::GetNextDiscoveryMethod; \
     using Base::GetFromConf;            \
+    using Base::GetFromIsim;            \
     using Base::ProcessDnsQuery;        \
     using Base::CleanAll;               \
     using Base::StartTimer;             \
@@ -922,6 +923,57 @@ TEST_F(AosPcscfTest, GetFromConfReturnsFalseIfPreconfiguredPcscfListIsEmpty)
     IMS_BOOL bResult = m_pAosPcscf->GetFromConf(IpAddress::IPV4);
 
     EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosPcscfTest, GetFromIsimShouldReturnFalseIfSubscriberConfigIsNull)
+{
+    ON_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosPcscf->GetFromIsim(IpAddress::IPV4);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosPcscfTest, GetFromIsimShouldReturnFalseIfPcscfListOfIsimIsEmpty)
+{
+    AStringArray objEmptyPcscfList;
+    ON_CALL(m_objMockISubscriberConfig, GetPcscfAddressesFromIsim())
+            .WillByDefault(ReturnRef(objEmptyPcscfList));
+
+    IMS_BOOL bResult = m_pAosPcscf->GetFromIsim(IpAddress::IPV4);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosPcscfTest, ConfigurePcscfIfValidIpAddressIsExistInIsim)
+{
+    AStringArray objPcscfList;
+    objPcscfList.AddElement(AString("0.0.0.1"));
+    ON_CALL(m_objMockISubscriberConfig, GetPcscfAddressesFromIsim())
+            .WillByDefault(ReturnRef(objPcscfList));
+
+    IMS_BOOL bResult = m_pAosPcscf->GetFromIsim(IpAddress::IPV4);
+
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pAosPcscf->GetPcscfCount(), 1);
+}
+
+TEST_F(AosPcscfTest, ConfigurePcscfIfValidFqdnIsExistInIsim)
+{
+    AStringArray objPcscfList;
+    objPcscfList.AddElement(AString("aaa.bbb.ccc"));
+    ON_CALL(m_objMockISubscriberConfig, GetPcscfAddressesFromIsim())
+            .WillByDefault(ReturnRef(objPcscfList));
+
+    ImsList<IpAddress> objIpas;
+    objIpas.Append(IpAddress(AString("0.0.0.4")));
+    EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
+            .WillOnce(DoAll(SetArgPointee<1>(objIpas), Return(1)));
+
+    IMS_BOOL bResult = m_pAosPcscf->GetFromIsim(IpAddress::IPV4);
+
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pAosPcscf->GetPcscfCount(), 1);
 }
 
 TEST_F(AosPcscfTest, ProcessDnsQueryReturnsTrueIfSucceed)

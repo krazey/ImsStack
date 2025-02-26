@@ -242,6 +242,12 @@ public class SystemCallAgentTest {
 
         assertEquals(1, record.size());
         assertEquals("impu", record.get(0));
+
+        when(mSimAgent.getIsimPcscf()).thenReturn(List.of("pcscfAddress"));
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_PCSCF);
+
+        assertEquals(1, record.size());
+        assertEquals("pcscfAddress", record.get(0));
     }
 
     @Test

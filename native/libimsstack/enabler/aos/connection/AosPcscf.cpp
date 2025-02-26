@@ -703,6 +703,15 @@ PROTECTED VIRTUAL void AosPcscf::ProcessDiscovery(IN IMS_SINT32 nIpVersion)
                 }
             }
         }
+        else if (nDiscoveryMethod == ISubscriberConfig::PCSCF_DISCOVERY_METHOD_ISIM)
+        {
+            if (GetFromIsim(nIpVersion))
+            {
+                SetConfigured(IMS_TRUE);
+                ClearDiscoveryContents();
+                break;
+            }
+        }
     }
 
     PrintPcscfs();
@@ -844,6 +853,69 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
         }
     }
 
+    return (m_objPcscfList.GetSize() > 0);
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromIsim(IN IMS_SINT32 nIpVersion)
+{
+    A_IMS_TRACE_I(APPPROFILE, "GetFromIsim :: IPv(%d)", nIpVersion, 0, 0);
+
+    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
+    if (piSubsConfig == IMS_NULL)
+    {
+        A_IMS_TRACE_D(APPPROFILE, "piSubsConfig is null", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    const AStringArray& objPcscfFromIsim = piSubsConfig->GetPcscfAddressesFromIsim();
+    if (objPcscfFromIsim.IsEmpty())
+    {
+        A_IMS_TRACE_I(APPPROFILE, "no pcscf count", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    for (IMS_SINT32 nAt = 0; nAt < objPcscfFromIsim.GetCount(); nAt++)
+    {
+        const AString& strHost = objPcscfFromIsim.GetElementAt(nAt);
+        if (strHost.GetLength() == 0)
+        {
+            continue;
+        }
+
+        IMS_SINT32 nPort = GetDefaultPcscfPort();
+        IpAddress objIpa;
+        objIpa.Parse(strHost);
+        if (objIpa.GetVersion() == nIpVersion)
+        {
+            if (!IsSamePcscf(objIpa, nPort))
+            {
+                AddPcscf(strHost, nPort);
+            }
+        }
+        else if (objIpa.IsUnknownAddress())
+        {
+            A_IMS_TRACE_D(APPPROFILE, "DNS query :: host (%s)", strHost.GetStr(), 0, 0);
+            ImsList<IpAddress> objIpas;
+            if (m_piAppContext->GetConnection()->GetHostByName(strHost, objIpas, nIpVersion) == -1)
+            {
+                continue;
+            }
+
+            for (IMS_UINT32 i = 0; i < objIpas.GetSize(); ++i)
+            {
+                const IpAddress& objIpa = objIpas.GetAt(i);
+                if (objIpa.IsAnyAddress())
+                {
+                    continue;
+                }
+
+                if (!IsSamePcscf(objIpa, nPort))
+                {
+                    AddPcscf(objIpa.ToString(), nPort);
+                }
+            }
+        }
+    }
     return (m_objPcscfList.GetSize() > 0);
 }
 

@@ -56,6 +56,10 @@ public:
     {
         return m_objPcscfDiscoveryMethods;
     }
+    inline const AStringArray& GetPcscfAddressesFromIsim() const override
+    {
+        return m_objPcscfAddressesFromIsim;
+    }
     inline IMS_SINT32 GetSubscriberCount() const override
     {
         return static_cast<IMS_SINT32>(m_objSubscriberInfos.GetSize());
@@ -171,6 +175,7 @@ private:
     void UpdatePrivateUserId(IN ImsSubscriberInfo* pSubsInfo, IN const AString& strPrivateUserId);
     void UpdatePublicUserIds(
             IN ImsSubscriberInfo* pSubsInfo, IN const AStringArray& objPublicUserIds);
+    void UpdatePcscfAddressesFromIsim(IN const AStringArray& objPcscfAddresses);
     void UpdatePcscfAddresses();
     void NotifyInitCompleted(IN IMS_SINT32 nEvent);
     void NotifyRefreshCompleted(IN IMS_SINT32 nEvent);
@@ -245,6 +250,9 @@ private:
     // The list of P-CSCF address is provided when the P-CSCF discovery method
     // is PCSCF_DISCOVERY_METHOD_CONFIG.
     ImsVector<ServerAddress*> m_objPcscfAddresses;
+    // The list of P-CSCF address is provided when the P-CSCF discovery method
+    // is PCSCF_DISCOVERY_METHOD_ISIM.
+    AStringArray m_objPcscfAddressesFromIsim;
 
     IIsim* m_piIsim;
     IMS_SINT32 m_nState;

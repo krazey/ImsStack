@@ -249,6 +249,11 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
+    public List<String> getImsPcscfAddresses() {
+        return mSimInfoRecord.getImsPcscfAddresses();
+    }
+
+    @Override
     public String getIccAuthentication(@UiccAppType int appType, @AuthType int authType,
             String data) {
         // This is not supported yet in the test environment.
@@ -549,11 +554,13 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         final String impuSip = String.format("sip:%s", impi);
         final String impuTel = String.format("sip:%s@%s", phoneNumber, domain);
         final List<Uri> impus = List.of(Uri.parse(impuSip), Uri.parse(impuTel));
+        final List<String> pcscfs = List.of("1.1.1.1", "2.2.2.2");
 
         mSimInfoRecord.setIsimAppType(TelephonyManager.APPTYPE_ISIM);
         mSimInfoRecord.setIsimDomain(domain);
         mSimInfoRecord.setIsimPrivateUserIdentity(impi);
         mSimInfoRecord.setIsimPublicUserIdentities(impus);
+        mSimInfoRecord.setImsPcscfAddresses(pcscfs);
         mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, new byte[0]);
     }
 
@@ -575,6 +582,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setIsimDomain(null);
         mSimInfoRecord.setIsimPrivateUserIdentity(null);
         mSimInfoRecord.setIsimPublicUserIdentities(null);
+        mSimInfoRecord.setImsPcscfAddresses(null);
         mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, new byte[0]);
     }
 
@@ -738,6 +746,15 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void setImsPublicUserIdentities(List<Uri> publicUserIdentities) {
         mSimInfoRecord.setIsimPublicUserIdentities(publicUserIdentities);
+    }
+
+    /**
+     * Sets the IMS P-CSCFs of ISIM.
+     *
+     * @param pcscfs The list of IMS proxy call session control function(P-CSCF).
+     */
+    public void setImsPcscfAddresses(List<String> pcscfs) {
+        mSimInfoRecord.setImsPcscfAddresses(pcscfs);
     }
 
     /**
@@ -1030,6 +1047,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         private String mIsimDomain;
         private String mIsimPrivateUserIdentity;
         private List<Uri> mIsimPublicUserIdentities = Collections.emptyList();
+        private List<String> mIsimPcscfAddresses = Collections.emptyList();
 
         boolean hasIccCard() {
             return mState != TelephonyManager.SIM_STATE_UNKNOWN
@@ -1111,6 +1129,10 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             return mIsimPublicUserIdentities;
         }
 
+        List<String> getImsPcscfAddresses() {
+            return mIsimPcscfAddresses;
+        }
+
         void setUsimAppType(@UiccAppType int appType) {
             mUsimAppType = appType;
         }
@@ -1186,6 +1208,12 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         void setIsimPublicUserIdentities(List<Uri> publicUserIdentities) {
             mIsimPublicUserIdentities = publicUserIdentities != null
                     ? Collections.unmodifiableList(publicUserIdentities)
+                    : Collections.emptyList();
+        }
+
+        void setImsPcscfAddresses(List<String> pcscfs) {
+            mIsimPcscfAddresses = pcscfs != null
+                    ? Collections.unmodifiableList(pcscfs)
                     : Collections.emptyList();
         }
     }

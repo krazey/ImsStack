@@ -67,6 +67,10 @@ public final class SimAgent implements SimInterface {
         }
     }
 
+    /** Services in ISIM Service Table (please refer to the 3GPP TS 31.103) */
+    private static final byte ISIM_SERVICE_P_CSCF_ADDRESS = 0x01;
+    private static final byte ISIM_SERVICE_GBA = 0x02;
+
     private final int mSlotId;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private final Handler mSimHandler;
@@ -85,6 +89,7 @@ public final class SimAgent implements SimInterface {
     private String mIsimImpi;
     private final List<String> mIsimImpu = new ArrayList<>();
     private final Set<Sim.IsimListener> mIsimListeners = new CopyOnWriteArraySet<>();
+    private final List<String> mIsimPcscf = new ArrayList<>();
     private NativeStateInterface.Listener mNativeStateListener;
 
     public SimAgent(int slotId) {
@@ -251,9 +256,14 @@ public final class SimAgent implements SimInterface {
     }
 
     @Override
+    public @NonNull List<String> getIsimPcscf() {
+        return mIsimPcscf;
+    }
+
+    @Override
     public boolean isGbaAvailable() {
         if (mIsimIst.length > 0) {
-            return (mIsimIst[0] & 0x02) != 0;
+            return (mIsimIst[0] & ISIM_SERVICE_GBA) != 0;
         }
 
         return false;
@@ -485,6 +495,7 @@ public final class SimAgent implements SimInterface {
         mIsimImpi = null;
         mIsimDomain = null;
         mIsimImpu.clear();
+        mIsimPcscf.clear();
     }
 
     private void loadIsimRecords() {
@@ -514,10 +525,24 @@ public final class SimAgent implements SimInterface {
                 mIsimImpu.add(uri.toString());
             }
 
+            mIsimPcscf.clear();
+            // read pcscf only when a IST indicates it is available (refer to the 3GPP TS 31.103)
+            if (isIsimPcscfAvailable()) {
+                List<String> pcscfs = Collections.emptyList();
+                try {
+                    pcscfs = tmp.getImsPcscfAddresses();
+                } catch (RuntimeException e) {
+                    logw(this, "Reading P-CSCF failed: " + e.toString());
+                }
+
+                mIsimPcscf.addAll(pcscfs);
+            }
+
             logi(this, "IsimRecords: ist=" + ImsUtils.bytesToHexString(mIsimIst)
                     + ", impi=" + ImsLog.hiddenString(mIsimImpi)
                     + ", domain=" + ImsLog.hiddenString(mIsimDomain)
-                    + ", impu=" + ImsLog.hiddenString(mIsimImpu.toArray(new String[0])));
+                    + ", impu=" + ImsLog.hiddenString(mIsimImpu.toArray(new String[0]))
+                    + ", pcscf=" + ImsLog.hiddenString(mIsimPcscf.toArray(new String[0])));
         }
     }
 
@@ -586,6 +611,13 @@ public final class SimAgent implements SimInterface {
         }
 
         setIsimState(newIsimState);
+    }
+
+    private boolean isIsimPcscfAvailable() {
+        if (mIsimIst.length > 0) {
+            return (mIsimIst[0] & ISIM_SERVICE_P_CSCF_ADDRESS) != 0;
+        }
+        return false;
     }
 
     private void logd(Object o, String s) {
