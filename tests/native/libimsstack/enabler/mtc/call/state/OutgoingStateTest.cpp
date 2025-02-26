@@ -701,6 +701,7 @@ TEST_F(OutgoingStateTest, SessionStartedInvokesSendStartedToUi)
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_FALSE));
     EXPECT_CALL(objUiNotifier, SendStarted);
     EXPECT_CALL(objPreconditionManager, OnCallEstablished(&objSession));
+    EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::ACCEPT, _));
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionStarted(&objSession));
 

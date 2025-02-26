@@ -150,7 +150,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         return GetStateName();
     }
 
-    pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
+    pSession->HandleResponse(ResponseType::ACCEPT, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
     m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
 
