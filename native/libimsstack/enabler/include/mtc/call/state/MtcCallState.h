@@ -212,7 +212,7 @@ protected:
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
-    static IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason);
+    IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;
     IMS_BOOL IsRprRequired() const;
