@@ -350,6 +350,10 @@ public final class SscConfig {
         return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT);
     }
 
+    static boolean isSyncWithCsForTbSs(int slotId) {
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL);
+    }
+
     // Specific APIs
     static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);

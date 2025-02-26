@@ -906,6 +906,8 @@ public class CarrierConfig {
         public static final String KEY_UT_NAF_FQDN_STRING = KEY_PREFIX + "ut_naf_fqdn_string";
         public static final String KEY_UT_TRANSACTION_TIMER_SEC_INT =
                 KEY_PREFIX + "ut_transaction_timer_sec_int";
+        public static final String KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL =
+                KEY_PREFIX + "ut_sync_with_cs_for_tb_ss_bool";
 
         private ImsSs() {}
     }

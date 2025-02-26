@@ -29,6 +29,8 @@ import android.telephony.ims.ImsSsInfo;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.enabler.ssc.data.CbServiceData;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
@@ -794,6 +796,23 @@ public class SscServiceImpl implements IUtInterface {
 
         boolean result = mSscPreferenceHelper.updateClir(clirMode);
         if (result) {
+            if (SscConfig.isSyncWithCsForTbSs(mSlotId)) {
+                // Invokes utConfigurationUpdateFailed() with CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+                // to trigger CSFB, then the modem will handle the request as well. It should
+                // always be handled successfully in the modem side because it's a terminal-based
+                // service request. The CSFB will be requested only when UE is in the CS voice
+                // available network, or the Telephony will sync the state when UE camps in the CS
+                // voice available network later.
+                if (isCsVoiceNetworkRegistered()) {
+                    ImsLog.d(mSlotId, "Sync CLIR");
+                    ImsReasonInfo ri = new ImsReasonInfo(
+                            ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                            ImsReasonInfo.CODE_UNSPECIFIED, null);
+                    postAndRunTask(() -> mUtListener.utConfigurationUpdateFailed(tId, ri));
+                    return;
+                }
+            }
+
             postAndRunTask(() -> mUtListener.utConfigurationUpdated(tId));
         } else {
             ImsLog.d(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
@@ -821,6 +840,18 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         return SscConfig.isTerminalBasedService(mSlotId, carrierConfigServiceType);
+    }
+
+    private boolean isCsVoiceNetworkRegistered() {
+        PhoneStateInterface phoneState = AgentFactory.getInstance()
+                .getAgent(PhoneStateInterface.class, mSlotId);
+        if (phoneState == null) {
+            return false;
+        }
+
+        int regState = phoneState.getCsNetworkRegistrationState();
+        return (regState == android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING)
+                || (regState == android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
     }
 
     private final class SscRequestHandler extends Handler {
