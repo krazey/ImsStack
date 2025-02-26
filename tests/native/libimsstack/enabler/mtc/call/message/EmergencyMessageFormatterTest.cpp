@@ -53,6 +53,7 @@ using ::testing::ReturnRef;
 using ::testing::Unused;
 
 LOCAL const AString HEADER_P_EMERGENCY_INFO = "P-Emergency-Info";
+LOCAL const AString COUNTRY = "KR";
 
 namespace android
 {
@@ -114,9 +115,8 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
-        const AString strCountry("KR");
         ON_CALL(objPhoneInfoService.GetMockLocationInfo(), GetLastKnownCountry)
-                .WillByDefault(ReturnRef(strCountry));
+                .WillByDefault(ReturnRef(COUNTRY));
 
         ImsVector<AString> lstPpi;
         lstPpi.Add("");
