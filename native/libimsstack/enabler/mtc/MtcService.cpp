@@ -310,7 +310,7 @@ PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
             ImsAos_Disconnected((IMS_UINT32)nWParam);
             break;
         case static_cast<IMS_SINT32>(TestCommand::RAT_CHANGED):
-            m_pNetworkWatcher->SetTestRatChanged((IMS_SINT32)nWParam);
+            m_pNetworkWatcher->UpdateMobileRat((IMS_SINT32)nWParam);
             break;
         default:
             break;
@@ -369,8 +369,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
         UpdateCallComposerFeature(nFeatures);
     }
 
-    m_pNetworkWatcher->OnServiceConnected(nIpcan);
-
+    m_pNetworkWatcher->OnConnected(nIpcan);
     m_pAosEventHandler->OnConnected(nFeatures);
     SetAosReady(IMS_TRUE);
 }
@@ -385,6 +384,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
     SetStatus(ServiceStatus::SERVICE_IDLE);
+    m_pNetworkWatcher->OnDisconnected();
     m_pAosEventHandler->OnDisconnected(nReason);
 }
 
