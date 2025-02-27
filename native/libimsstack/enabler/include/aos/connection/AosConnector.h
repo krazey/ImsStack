@@ -47,6 +47,7 @@ public:
     virtual void SetListener(IN IAosConnectorListener* piListener);
     virtual IMS_BOOL IsReady() const;
     virtual void ResetReadyRecovery();
+    virtual IMS_BOOL IsCrossSimConnected() const;
 
     // GetState
     enum
@@ -154,6 +155,7 @@ protected:
 
     // AosServicePhoneListener
     void ServicePhone_PcoValueChanged(IN IMS_SINT32 nValue) override;
+    void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bCrossSimConnected) override;
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
@@ -180,6 +182,7 @@ protected:
 
     IMS_BOOL m_bPcscfConfigured;
     IMS_BOOL m_bDataConnected;
+    IMS_BOOL m_bCrossSimConnected;
     IMS_BOOL m_bEmergencyType;
     IMS_BOOL m_bIsTerminating;
     IMS_BOOL m_bIsPcscfChangeIgnored;

@@ -306,6 +306,11 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::IsOn()
     return bConnected;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosApplication::IsCrossSimConnected()
+{
+    return m_pConnector->IsCrossSimConnected();
+}
+
 PUBLIC VIRTUAL void AosApplication::SetActivation(IN IMS_BOOL bActivation)
 {
     m_bIsActivated = bActivation;

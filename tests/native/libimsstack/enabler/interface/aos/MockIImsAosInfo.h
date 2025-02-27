@@ -41,6 +41,7 @@ public:
     MOCK_METHOD(IMS_UINT32, GetRegistrationMode, (), (override));
     MOCK_METHOD(AString, GetSupportedHeaderValue, (), (override));
     MOCK_METHOD(AString, GetServiceRouteHeaderValue, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsCrossSimConnected, (), (override));
     MOCK_METHOD(void, NotifyEmergencyCallState, (IN IMS_BOOL bIsInitialized), (override));
     MOCK_METHOD(void, NotifyPublishState, (IN IMS_BOOL bIsStarted), (override));
     MOCK_METHOD(void, NotifyEmergencySmsState, (IN IMS_BOOL bIsInitialized), (override));

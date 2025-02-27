@@ -223,6 +223,11 @@ PRIVATE VIRTUAL AString AosInfo::GetServiceRouteHeaderValue()
     return strServiceRoute;
 }
 
+PRIVATE VIRTUAL IMS_BOOL AosInfo::IsCrossSimConnected()
+{
+    return m_piContext->GetApp()->IsCrossSimConnected();
+}
+
 PRIVATE VIRTUAL void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized)
 {
     if (bIsInitialized)

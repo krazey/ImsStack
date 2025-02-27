@@ -140,6 +140,13 @@ public:
     virtual AString GetServiceRouteHeaderValue() = 0;
 
     /**
+     * @brief Indicates whether cross sim is connected or not.
+     *
+     * @return IMS_BOOL Return whether cross sim is connected or not
+     */
+    virtual IMS_BOOL IsCrossSimConnected() = 0;
+
+    /**
      * @brief Notify the emergency call state.
      *
      * @param bIsInitialized Indicated whether emergency call is initialized or done.

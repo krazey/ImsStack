@@ -35,6 +35,7 @@ public:
     MOCK_METHOD(IMS_UINT32, GetOffReason, (), (override));
     MOCK_METHOD(IMS_BOOL, IsActivated, (), (override));
     MOCK_METHOD(IMS_BOOL, IsOn, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsCrossSimConnected, (), (override));
     MOCK_METHOD(void, SetActivation, (IN IMS_BOOL bActivation), (override));
     MOCK_METHOD(void, NotifyEpsFallbackCallState, (IN IMS_UINT32 nState), (override));
     MOCK_METHOD(void, NotifyPublishState, (IN IMS_BOOL bStart), (override));

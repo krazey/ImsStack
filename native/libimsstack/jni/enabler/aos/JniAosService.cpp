@@ -215,6 +215,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyCarrierSignalPcoValueChanged(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_CROSS_SIM_STATUS:
+            NotifyCrossSimStatus(objParcel);
+            break;
+
         case IIAosService::J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED:
             NotifyEmergencyCallbackModeChanged(objParcel);
             break;
@@ -509,6 +513,16 @@ void JniAosService::NotifyCarrierSignalPcoValueChanged(IN const android::Parcel&
     if (piAosService)
     {
         piAosService->NotifyCarrierSignalPcoValueChanged(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyCrossSimStatus(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyCrossSimStatus(objParcel.readInt32());
     }
 }
 

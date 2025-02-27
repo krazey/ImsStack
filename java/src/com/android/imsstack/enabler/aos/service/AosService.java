@@ -716,6 +716,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 IAosRegistration.Cause.IMS_SERVICE);
     }
 
+    private void notifyCrossSimStatus(NetworkType networkType) {
+        sendRequest(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                (networkType == NetworkType.CROSS_SIM
+                ? CrossSimStatus.DATA_CONNECTED : CrossSimStatus.DATA_DISCONNECTED).getValue());
+    }
+
     private void adjustCapabilities(CapabilityPairs pairs) {
         /*
          * Note : If LTE/NR-VIDEO capability is enabled, add IWLAN-VIDEO capability.
@@ -740,6 +746,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             l.notifyRegistered(RegistrationType.NORMAL, mRegisteredNetworkType, mFeatureTagBits,
                     mFeatureTags);
         }
+
+        notifyCrossSimStatus(networkType);
     }
 
     private NetworkType adjustedNetworkType(

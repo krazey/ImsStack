@@ -85,6 +85,7 @@ public:
 
     IMS_BOOL IsActivated() override;
     IMS_BOOL IsOn() override;
+    IMS_BOOL IsCrossSimConnected() override;
 
     void SetActivation(IN IMS_BOOL bActivation) override;
     void NotifyEpsFallbackCallState(IN IMS_UINT32 nState) override;

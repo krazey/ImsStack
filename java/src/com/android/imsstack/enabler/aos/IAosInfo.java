@@ -286,6 +286,30 @@ public interface IAosInfo {
         }
     }
 
+    /*
+     * Represents the connection status through cross sim
+     */
+    enum CrossSimStatus {
+
+        DATA_DISCONNECTED(0),
+        DATA_CONNECTED(1);
+
+        private final int mValue;
+
+        CrossSimStatus(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with the connection of cross sim.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
+    }
+
     /**
      * Represents the type of emergency callback mode.
      */

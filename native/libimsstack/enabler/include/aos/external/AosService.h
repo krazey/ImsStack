@@ -78,6 +78,7 @@ public:
     void NotifyPowerOff() override;
     void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
     void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
+    void NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected) override;
 
     // Native -> Java
     IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
