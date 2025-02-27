@@ -293,21 +293,26 @@ public class PhoneStateAgentTest {
         verify(mPsNotifier).notifyPreciseDataConnectionState(any(PreciseDataConnectionState.class));
         verify(mPsNotifier).notifyBarringInfo(any(BarringInfo.class));
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // Network is not registered.
         mNetworkRegistrationInfo = new NetworkRegistrationInfo.Builder().build();
         when(mServiceState.getNetworkRegistrationInfo(
-                eq(NetworkRegistrationInfo.DOMAIN_PS),
-                eq(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)))
+                anyInt(), eq(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)))
                 .thenReturn(mNetworkRegistrationInfo);
         when(mServiceState.getRoaming()).thenReturn(true);
         mServiceStateListener.onServiceStateChanged(mServiceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // NetworkRegistrationInfo is null.
         when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
         mServiceStateListener.onServiceStateChanged(mServiceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
     }
 
     @Test
@@ -326,6 +331,8 @@ public class PhoneStateAgentTest {
         }
 
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // Network is not registered.
         ServiceState serviceState = mock(ServiceState.class);
@@ -336,11 +343,15 @@ public class PhoneStateAgentTest {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
         mServiceStateListener.onServiceStateChanged(serviceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // NetworkRegistrationInfo is null.
         when(serviceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
         mServiceStateListener.onServiceStateChanged(serviceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
     }
 
     @Test
