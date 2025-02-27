@@ -26,6 +26,7 @@ struct AosAsset
 public:
     AosAsset() :
             bB2cCallComposerFeatureTagInRegContact(IMS_TRUE),
+            bBlockNrRatWhenReceive403ForReg(IMS_FALSE),
             bBlockPcscfOnRegFailure(IMS_TRUE),
             bBlockRegOnCsCall(IMS_TRUE),
             bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
@@ -120,6 +121,7 @@ public:
 
 public:
     IMS_BOOL bB2cCallComposerFeatureTagInRegContact;
+    IMS_BOOL bBlockNrRatWhenReceive403ForReg;
     IMS_BOOL bBlockPcscfOnRegFailure;
     IMS_BOOL bBlockRegOnCsCall;
     IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;

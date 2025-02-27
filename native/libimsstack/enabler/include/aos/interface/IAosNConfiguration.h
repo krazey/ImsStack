@@ -285,6 +285,14 @@ public:
     virtual IMS_BOOL IsB2cCallComposerFeatureTagInRegContact() const = 0;
 
     /**
+     * @brief Returns flag indicating whether to block NR RAT when receive SIP 403 for REGISTER.
+     *
+     * @return IMS_BOOL Return whether to be blocked or not
+     * @see {@code ims.block_nr_rat_when_receive_403_for_reg_bool}
+     */
+    virtual IMS_BOOL IsBlockNrRatWhenReceive403ForReg() const = 0;
+
+    /**
      * @brief Returns flag indicating whether PCSCFs that UE fails to register will be blocked.
      *
      * @return IMS_BOOL Return whether to be blocked or not

@@ -57,6 +57,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInInitRegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsOldSaOnEstablishingSaRemoved, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsB2cCallComposerFeatureTagInRegContact, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsBlockNrRatWhenReceive403ForReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsBlockPcscfOnRegFailure, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsBlockRegOnCsCall, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCallEndAndPdnReactivationByRegTerminated, (), (const, override));
