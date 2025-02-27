@@ -50,9 +50,9 @@ public:
     void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
 
     // IMtsMessageController
-    void NotifyMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
+    void ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
-    void NotifyMtSms(IN IPageMessage* piPageMessage) override;
+    void ProcessMtSms(IN IPageMessage* piPageMessage) override;
     void ClearAllMessages() override;
 
     // ITimerListener

@@ -22,10 +22,32 @@ class IMtsTraffic : public IImsRadioConnectionListener
 public:
     virtual ~IMtsTraffic() {}
 
-    // MtsService
+    /**
+     * @brief Gets the direction of the SMS traffic.
+     *
+     * @return The direction of the traffic. (e.g., IImsRadio::DIRECTION_MO)
+     */
     virtual IMS_UINT32 GetDirection() = 0;
+
+    /**
+     * @brief Gets the type of the SMS traffic.
+     *
+     * @return The type of the traffic (e.g., IImsRadio::TRAFFIC_TYPE_SMS).
+     */
+
     virtual IMS_UINT32 GetTrafficType() = 0;
+
+    /**
+     * @brief Checks whether the radio guard timer is currently active.
+     *
+     * @return {@code IMS_TRUE} If the guard timer is active,
+     *         {@code IMS_FALSE} otherwise.
+     */
     virtual IMS_BOOL IsRadioGuardTimerActive() = 0;
+
+    /**
+     * @brief Starts the radio guard timer.
+     */
     virtual void StartRadioGuardTimer() = 0;
 };
 

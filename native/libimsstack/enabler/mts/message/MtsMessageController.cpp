@@ -174,10 +174,10 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     return;
 }
 
-PUBLIC void MtsMessageController::NotifyMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
+PUBLIC void MtsMessageController::ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
         IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency)
 {
-    IMS_TRACE_I("NotifyMoSms", 0, 0, 0);
+    IMS_TRACE_I("ProcessMoSms", 0, 0, 0);
 
     if (SendMtsMessage(eSmsFormat, pContent, strAddress, nSeqId, bEmergency) == IMS_FAILURE)
     {
@@ -185,9 +185,9 @@ PUBLIC void MtsMessageController::NotifyMoSms(IN SmsFormatType eSmsFormat, IN By
     }
 }
 
-PUBLIC void MtsMessageController::NotifyMtSms(IN IPageMessage* piPageMessage)
+PUBLIC void MtsMessageController::ProcessMtSms(IN IPageMessage* piPageMessage)
 {
-    IMS_TRACE_I("NotifyMtSms", 0, 0, 0);
+    IMS_TRACE_I("ProcessMtSms", 0, 0, 0);
 
     ReceiveMtsMessage(piPageMessage, IMS_FALSE);
 }
@@ -581,7 +581,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     m_pRetryContent = pContent;
     m_objRetryFunction = [=, this]()
     {
-        NotifyMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
+        ProcessMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
     };
 
     SetMessageInfo(piPageMessage, *pContent, eSmsFormat, strDestination,

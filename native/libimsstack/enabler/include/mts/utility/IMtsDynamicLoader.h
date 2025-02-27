@@ -25,7 +25,22 @@ class IMtsDynamicLoader
 public:
     virtual ~IMtsDynamicLoader() {}
 
+    /**
+     * @brief Gets an instance of the MtsSipFormUtils class.
+     *
+     * This class provides utility functions related to SIP messages.
+     *
+     * @return A pointer to the MtsSipFormUtils object.
+     */
     virtual MtsSipFormUtils* GetMtsSipFormUtils() const = 0;
+
+    /**
+     * @brief Gets an instance of the MtsSmUtils class.
+     *
+     * This class provides utility functions for retrieving information from the PDU.
+     *
+     * @return A pointer to the MtsSmUtils object.
+     */
     virtual MtsSmUtils* GetMtsSmUtils() const = 0;
 };
 

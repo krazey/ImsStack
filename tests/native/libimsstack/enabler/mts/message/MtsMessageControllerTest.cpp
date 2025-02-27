@@ -165,7 +165,7 @@ TEST_F(MtsMessageControllerTest, Constructor)
     ASSERT_NE(pMtsMessageController, nullptr);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsWithoutEmergencyFlag)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -201,12 +201,12 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsWithEmergencyFlag)
 {
     IMS_BOOL bEmergency = IMS_TRUE;
     AString strTargetAddress = "tel:+12345678901";
@@ -245,12 +245,12 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutTargetAddress)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsWithoutTargetAddress)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress("");
@@ -262,11 +262,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutTargetAddress)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutRPDU)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsWithoutRPDU)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -276,11 +276,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutRPDU)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsWhenMoServiceBlocked)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsWhenMoServiceBlocked)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -296,11 +296,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWhenMoServiceBlocked)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetICoreService)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToGetICoreService)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -320,11 +320,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetICoreService)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetUri)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToGetUri)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -347,11 +347,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetUri)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToCreatePageMessage)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToCreatePageMessage)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -376,11 +376,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToCreatePageMessage)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetNextRequest)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToGetNextRequest)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -406,11 +406,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetNextRequest)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToAddHeader)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToAddHeader)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -437,11 +437,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToAddHeader)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToSendPageMessage)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsAndFailToSendPageMessage)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -469,11 +469,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToSendPageMessage)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMoSmsAndPageMessageDeliveryFailed)
+TEST_F(MtsMessageControllerTest, ProcessMoSmsAndPageMessageDeliveryFailed)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
@@ -509,7 +509,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndPageMessageDeliveryFailed)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 }
@@ -569,12 +569,12 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, NormalMoSmsAndInReplyToMismatched)
@@ -632,13 +632,13 @@ TEST_F(MtsMessageControllerTest, NormalMoSmsAndInReplyToMismatched)
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 
     EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_488, _)).Times(1);
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAckWithout202Accepted)
@@ -697,11 +697,11 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAckWithout202Accepted)
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(0);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 0);
 }
 
@@ -741,7 +741,7 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithSMMAAndFailToFormDestination)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_GENERIC, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }
@@ -788,7 +788,7 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithGeoLocationInformation)
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
 }
 
@@ -836,12 +836,12 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }
@@ -890,12 +890,12 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAckFailed)
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 }
@@ -944,17 +944,17 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck3gpp2)
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP2, _)).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP2, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP2, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMtSmsWhenMtServiceBlocked)
+TEST_F(MtsMessageControllerTest, ProcessMtSmsWhenMtServiceBlocked)
 {
     ON_CALL(objMockMtsService, GetIMtsServiceState())
             .WillByDefault(Return(&objMockMtsServiceState));
@@ -963,10 +963,10 @@ TEST_F(MtsMessageControllerTest, NotifyMtSmsWhenMtServiceBlocked)
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
     EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_480, _)).Times(1);
     EXPECT_CALL(objMockPageMessage, Destroy()).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
-TEST_F(MtsMessageControllerTest, NotifyMtSmsAndFailToGetICoreService)
+TEST_F(MtsMessageControllerTest, ProcessMtSmsAndFailToGetICoreService)
 {
     IMS_BOOL bEmergency = IMS_FALSE;
 
@@ -978,7 +978,7 @@ TEST_F(MtsMessageControllerTest, NotifyMtSmsAndFailToGetICoreService)
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
     EXPECT_CALL(objMockPageMessage, Reject(SipStatusCode::SC_480, _)).Times(1);
     EXPECT_CALL(objMockPageMessage, Destroy()).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageIfIMessageIsNull)
@@ -999,7 +999,7 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageIfIMessageIsNull)
 
     EXPECT_CALL(objMockPageMessage, Reject(400, _)).Times(1);
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfNoToHeader)
@@ -1022,7 +1022,7 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfNoToHeader
 
     EXPECT_CALL(objMockPageMessage, Reject(400, _)).Times(1);
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfNoMessageBody)
@@ -1048,7 +1048,7 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfNoMessageB
 
     EXPECT_CALL(objMockPageMessage, Reject(400, _)).Times(1);
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfInvalidSmsFormat)
@@ -1077,7 +1077,7 @@ TEST_F(MtsMessageControllerTest, FailInProcessReceivedMessageBecauseOfInvalidSms
 
     EXPECT_CALL(objMockPageMessage, Reject(415, _)).Times(1);
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, ReceivedTooLargeRpdu)
@@ -1110,7 +1110,7 @@ TEST_F(MtsMessageControllerTest, ReceivedTooLargeRpdu)
     ON_CALL(objMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(0);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDelivered)
@@ -1138,7 +1138,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(IMS_NULL);
 }
@@ -1174,7 +1174,7 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDelivered)
             .WillByDefault(Return(nullptr));
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }
@@ -1208,7 +1208,7 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     ON_CALL(objMockPageMessage, Destroy()).WillByDefault(Return());
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(_, _, _)).Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(IMS_NULL);
 }
@@ -1249,7 +1249,7 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsUserFailure)
             .WillByDefault(Return(objArray));
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_GENERIC, _, _)).Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 }
@@ -1293,7 +1293,7 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
             .WillByDefault(Return(MO_ERROR_FALLBACK));
 
     EXPECT_CALL(objMockMtsService, ReportMoStatus(MO_ERROR_FALLBACK, _, _)).Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 }
@@ -1325,7 +1325,7 @@ TEST_F(MtsMessageControllerTest, DataConnectionLostThenRemoveAllMessages)
     ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
 
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     EXPECT_EQ(pMtsMessageController->GetMessageCount(), 1);
 
@@ -1409,7 +1409,7 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
     EXPECT_CALL(
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 
@@ -1420,7 +1420,7 @@ TEST_F(MtsMessageControllerTest, ErrorResponseReceivedWithRetryAfterHeader)
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 
     EXPECT_CALL(objMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
 }
 
 TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxDuration)
@@ -1476,7 +1476,7 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxDuration)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
 }
@@ -1534,7 +1534,7 @@ TEST_F(MtsMessageControllerTest, ReachRetryAfterMaxCount)
     EXPECT_CALL(objMockMtsService,
             ReportMoStatus(MO_ERROR_RETRY, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(1);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDeliveryFailed(&objMockPageMessage);
     pMtsMessageController->Timer_TimerExpired(&objTimer);
@@ -1605,14 +1605,14 @@ TEST_F(MtsMessageControllerTest, ProcessPendingRpDataFromNetwork)
             objMockMtsService, ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, SEQ_ID))
             .Times(2);
 
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
-    pMtsMessageController->NotifyMtSms(&objMockPageMessage);
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMtSms(&objMockPageMessage);
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pFirstRpAck, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
     ImsMessage objMsg(0, 0, 0);
     EXPECT_TRUE(pMtsMessageController->SendMessage(objMsg));
-    pMtsMessageController->NotifyMoSms(
+    pMtsMessageController->ProcessMoSms(
             SmsFormatType::SMSFORMAT_3GPP, pSecondRpAck, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }

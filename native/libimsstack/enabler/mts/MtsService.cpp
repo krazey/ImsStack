@@ -102,7 +102,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
     if (piMtsTraffic->IsRadioGuardTimerActive())
     {
         piMtsTraffic->StartRadioGuardTimer();
-        m_objContext.GetMessageController().NotifyMoSms(
+        m_objContext.GetMessageController().ProcessMoSms(
                 eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
     }
     else
@@ -183,7 +183,7 @@ void MtsService::CoreService_PageMessageReceived(
                 nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MT, piMtsTraffic);
         piMtsTraffic->StartRadioGuardTimer();
     }
-    m_objContext.GetMessageController().NotifyMtSms(piMessage);
+    m_objContext.GetMessageController().ProcessMtSms(piMessage);
 }
 
 PUBLIC
@@ -261,7 +261,7 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
             if (piMtsTraffic->IsRadioGuardTimerActive())
             {
                 piMtsTraffic->StartRadioGuardTimer();
-                m_objContext.GetMessageController().NotifyMoSms(m_pSmsInfo->eSmsFormat,
+                m_objContext.GetMessageController().ProcessMoSms(m_pSmsInfo->eSmsFormat,
                         m_pSmsInfo->pContent, m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId,
                         m_pSmsInfo->bEmergency);
 
@@ -388,7 +388,7 @@ void MtsService::Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_U
     }
 
     piMtsTraffic->StartRadioGuardTimer();
-    m_objContext.GetMessageController().NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->pContent,
+    m_objContext.GetMessageController().ProcessMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->pContent,
             m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergency);
 
     delete m_pSmsInfo;
