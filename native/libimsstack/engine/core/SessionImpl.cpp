@@ -495,6 +495,23 @@ PRIVATE VIRTUAL void SessionImpl::OnSession_UpdateReceived(IN Session* pSession)
     m_piListener->SessionUpdateReceived(this);
 }
 
+PRIVATE VIRTUAL void SessionImpl::OnSession_CanceledOnAccepted(IN Session* pSession)
+{
+    if (m_pSession != pSession)
+    {
+        IMS_TRACE_E(0, "SESSION MISMATCHED", 0, 0, 0);
+        return;
+    }
+
+    if (m_piListener == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
+        return;
+    }
+
+    m_piListener->SessionCanceledOnAccepted(this);
+}
+
 PRIVATE VIRTUAL void SessionImpl::OnSession_CancelDelivered(IN Session* pSession)
 {
     if (m_pSession != pSession)

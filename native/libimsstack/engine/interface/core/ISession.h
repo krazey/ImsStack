@@ -693,6 +693,18 @@ public:
      */
     virtual ISdpReader* GetRemoteMediaCapabilities() const = 0;
 
+    /**
+     * @brief Checks whether this session received the CANCEL request while the session is in
+     *        STATE_ESTABLISHING state (i.e. user accepts the call - 200 OK sent).
+     *
+     * NOTE: Basically, the remote endpoint will terminate the session using BYE request
+     *       after receiving 200 OK for CANCEL request.
+     *
+     * @return IMS_TRUE if the CANCEL request is received while the session is
+     *         in STATE_ESTABLISHING state, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsSessionCanceledOnAccepted() const = 0;
+
 public:
     /// States of ISession
     enum

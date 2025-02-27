@@ -75,6 +75,7 @@ Session::Session(IN Service* pService) :
         m_bTerminateMethodBye(IMS_FALSE),
         m_bSessionUpdateNotificationInProgress(IMS_FALSE),
         m_bImplicitRoutingRequired(IMS_TRUE),
+        m_bSessionCanceledOnAccepted(IMS_FALSE),
         m_nConfigValue(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE),
         m_nCompletedListenerCalls(0),
         m_nTerminationReason(TERMINATION_REASON_UNKNOWN),
@@ -267,7 +268,7 @@ IMS_RESULT Session::Accept()
         }
 
         // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
-        // When INVITE_TXN_HANDLING_CORRECTION is disabled:
+        // INVITE_TXN_HANDLING_CORRECTION
         // CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
@@ -365,7 +366,7 @@ IMS_RESULT Session::Accept()
         }
 
         // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
-        // When INVITE_TXN_HANDLING_CORRECTION is disabled:
+        // INVITE_TXN_HANDLING_CORRECTION
         // CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
         // Update the call state
@@ -2186,6 +2187,12 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
                 m_piSessionListener->OnSession_UpdateReceived(this);
             }
             return IMS_TRUE;
+        case AMSG_SESSION_CANCELED_ON_ACCEPTED:
+            if (m_piSessionListener != IMS_NULL)
+            {
+                m_piSessionListener->OnSession_CanceledOnAccepted(this);
+            }
+            return IMS_TRUE;
         case AMSG_SESSION_CANCEL_DELIVERED:
             if (m_piSessionListener != IMS_NULL)
             {
@@ -3161,7 +3168,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_Compare(IN ISipServerConnection*
     // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
     else
     {
-        // When INVITE_TXN_HANDLING_CORRECTION is enabled:
+        // INVITE_TXN_HANDLING_CORRECTION
         if (nState == STATE_ESTABLISHING)
         {
             if (IsMobileOriginated())
@@ -3232,13 +3239,15 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConne
             (nCallState != CallState::STATE_REINVITE_RECEIVED) &&
             (nCallState != CallState::STATE_REINVITE_1XX_SENT))
     {
-        IMS_TRACE_D("Ignore the CANCEL request and maintain the session state ...", 0, 0, 0);
+        IMS_TRACE_D("Ignore the CANCEL request and maintain the session state", 0, 0, 0);
 
-        // If it supports draft
-        // "Correct transaction handling for 200 responses to SIP INVITE request",
-        // then send 200 OK to CANCEL.
-        // Then, UAC will send BYE request...
-        // When INVITE_TXN_HANDLING_CORRECTION is enabled:
+        // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
+        // RFC 5407, Appendix C.  UA's Behavior for CANCEL.
+        // After receiving 200 OK for CANCEL request,
+        // UAC will send BYE request to terminate this session.
+        m_bSessionCanceledOnAccepted = IMS_TRUE;
+        PostMessage(AMSG_SESSION_CANCELED_ON_ACCEPTED, 0, 0);
+
         (void)CreateResponse(piSscCancel, SipStatusCode::SC_200);
         (void)piSscCancel->Send();
         piSscCancel->Close();
@@ -5163,7 +5172,7 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
     ISipMessage* piSipMsg = piSsc->GetMessage();
 
     // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
-    // When INVITE_TXN_HANDLING_CORRECTION is enabled:
+    // INVITE_TXN_HANDLING_CORRECTION
     CancellableMethodManager::GetInstance()->RemoveMethod(GetName());
 
     UpdateRequestOnReceived(IMessage::SESSION_ACK, piSsc);

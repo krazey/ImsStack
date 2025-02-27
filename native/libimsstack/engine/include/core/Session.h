@@ -139,6 +139,7 @@ public:
         m_piReasonHeaderSetter = piSetter;
     }
     inline SdpReader* GetRemoteMediaCapabilities() const { return m_pRemoteMediaCapabilities; }
+    inline IMS_BOOL IsSessionCanceledOnAccepted() const { return m_bSessionCanceledOnAccepted; }
 
 protected:
     // Activity class
@@ -449,6 +450,7 @@ protected:
         AMSG_SESSION_UPDATED,
         AMSG_SESSION_UPDATE_FAILED,
         AMSG_SESSION_UPDATE_RECEIVED,
+        AMSG_SESSION_CANCELED_ON_ACCEPTED,
         AMSG_SESSION_CANCEL_DELIVERED,
         AMSG_SESSION_CANCEL_DELIVERY_FAILED,
         AMSG_SESSION_FORKED_RESPONSE_RECEIVED,
@@ -484,6 +486,9 @@ private:
     IMS_BOOL m_bSessionUpdateNotificationInProgress;
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
     IMS_BOOL m_bImplicitRoutingRequired;
+    // Flag specifying whether the incoming session received CANCEL request
+    // while the session is in STATE_ESTABLISHING state.
+    IMS_BOOL m_bSessionCanceledOnAccepted;
     // Runtime configuration for session control
     IMS_SINT32 m_nConfigValue;
     // Manages completed listener calls
