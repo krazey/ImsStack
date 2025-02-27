@@ -93,6 +93,7 @@ protected:
                 &objEmergencyCoreService);
 
         pMtsService = new MtsService(objContext);
+        pMtsService->Init();
         pMtsService->SetIImsAos(&objMockIImsAos);
         pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
         pMtsService->InitMtsServiceState();

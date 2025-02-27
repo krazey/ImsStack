@@ -43,6 +43,8 @@ public:
     MtsService(IN const MtsService&) = delete;
     MtsService& operator=(IN const MtsService&) = delete;
 
+    void Init();
+
     // ICoreServiceListener
     void CoreService_PageMessageReceived(
             IN ICoreService* piService, IN IPageMessage* piMessage) override;
@@ -102,7 +104,6 @@ private:
     IJniMtsServiceThread* GetJniThread();
     void StartRadioTraffic(IN IMtsTraffic* piMtsTraffic);
 
-    void Init();
     void DeInit();
 
     IMtsContext& m_objContext;
