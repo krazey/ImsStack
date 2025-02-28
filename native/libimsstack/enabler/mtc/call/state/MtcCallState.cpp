@@ -251,6 +251,11 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SessionUpdateReceived(IN ISession* /*
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionCanceledOnAccepted(IN ISession* /* piSession */)
+{
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName MtcCallState::SessionCancelDelivered(IN ISession* /* piSession */)
 {
     return GetStateName();

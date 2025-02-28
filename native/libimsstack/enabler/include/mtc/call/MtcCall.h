@@ -271,6 +271,7 @@ public:
     void SessionUpdated(IN ISession* piSession) override;
     void SessionUpdateFailed(IN ISession* piSession) override;
     void SessionUpdateReceived(IN ISession* piSession) override;
+    void SessionCanceledOnAccepted(IN ISession* piSession) override;
     void SessionCancelDelivered(IN ISession* piSession) override;
     void SessionCancelDeliveryFailed(IN ISession* piSession) override;
     void SessionEarlyMediaUpdated(IN ISession* piSession) override;

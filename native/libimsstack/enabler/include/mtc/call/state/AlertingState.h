@@ -53,6 +53,7 @@ public:
     CallStateName UssiStarted(IN ISession* piSession) override;
     CallStateName SessionStarted(IN ISession* piSession) override;
     CallStateName SessionTerminated(IN ISession* piSession) override;
+    CallStateName SessionCanceledOnAccepted(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;

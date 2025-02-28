@@ -41,6 +41,7 @@ public:
     MOCK_METHOD(void, SessionUpdated, (IN ISession*), (override));
     MOCK_METHOD(void, SessionUpdateFailed, (IN ISession*), (override));
     MOCK_METHOD(void, SessionUpdateReceived, (IN ISession*), (override));
+    MOCK_METHOD(void, SessionCanceledOnAccepted, (IN ISession*), (override));
     MOCK_METHOD(void, SessionCancelDelivered, (IN ISession*), (override));
     MOCK_METHOD(void, SessionCancelDeliveryFailed, (IN ISession*), (override));
     MOCK_METHOD(void, SessionEarlyMediaUpdated, (IN ISession*), (override));

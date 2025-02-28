@@ -17,7 +17,6 @@
 #ifndef MTC_CALL_STATE_H_
 #define MTC_CALL_STATE_H_
 
-#include "ISessionListener.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
@@ -103,6 +102,7 @@ public:
     CallStateName SessionUpdated(IN ISession* piSession) override;
     CallStateName SessionUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionUpdateReceived(IN ISession* piSession) override;
+    CallStateName SessionCanceledOnAccepted(IN ISession* piSession) override;
     CallStateName SessionCancelDelivered(IN ISession* piSession) override;
     CallStateName SessionCancelDeliveryFailed(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;

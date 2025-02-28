@@ -96,6 +96,7 @@ public:
     MOCK_METHOD(CallStateName, SessionUpdated, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionUpdateFailed, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionUpdateReceived, (IN ISession* piSession), (override));
+    MOCK_METHOD(CallStateName, SessionCanceledOnAccepted, (IN ISession * piSession), (override));
     MOCK_METHOD(CallStateName, SessionCancelDelivered, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionCancelDeliveryFailed, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionEarlyMediaUpdated, (IN ISession* piSession), (override));

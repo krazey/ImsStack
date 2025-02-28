@@ -431,6 +431,12 @@ TEST_F(AlertingStateTest, SessionTerminatedTransitsStateToTerminated)
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionTerminated(&objISession));
 }
 
+TEST_F(AlertingStateTest, SessionCanceledOnAcceptedTransitsStateToTerminated)
+{
+    EXPECT_CALL(objUiNotifier, SendTerminated(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE)));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionCanceledOnAccepted(&objISession));
+}
+
 TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
 {
     ON_CALL(objISession, GetPreviousResponse(_)).WillByDefault(Return(&objIMessage));

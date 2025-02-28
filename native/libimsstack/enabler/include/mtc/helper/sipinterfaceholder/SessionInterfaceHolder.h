@@ -45,6 +45,7 @@ public:
     inline void SessionUpdated(IN ISession*) override {}
     inline void SessionUpdateFailed(IN ISession*) override {}
     inline void SessionUpdateReceived(IN ISession*) override {}
+    inline void SessionCanceledOnAccepted(IN ISession*) override {}
     inline void SessionCancelDelivered(IN ISession*) override {}
     inline void SessionCancelDeliveryFailed(IN ISession*) override {}
     inline void SessionEarlyMediaUpdated(IN ISession*) override {}
