@@ -302,7 +302,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
 PROTECTED VIRTUAL CallStateName IdleState::HandleAosConnected()
 {
-    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
 

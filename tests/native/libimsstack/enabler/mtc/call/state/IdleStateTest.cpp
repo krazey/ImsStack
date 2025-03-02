@@ -1433,7 +1433,7 @@ TEST_F(IdleStateTest, HandleAosConnectedDoesNothingIfNoEpsFallbackOngoing)
 
 TEST_F(IdleStateTest, HandleAosConnectedNotifiesEpsFallbackCompletedIfEpsFallbackOngoing)
 {
-    ON_CALL(*pEpsfbTrigger, IsWaitingEpsFallbackForNoTrigger()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsfbTrigger, IsWaitingEpsFallbackForNoResponse()).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
