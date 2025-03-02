@@ -27,6 +27,7 @@ struct CallReasonInfo;
 
 enum class EpsFallbackReason
 {
+    NONE,
     /** EPS-FB is not triggered by network. e.g. Verizon's watchdog timer is expired. */
     NO_NETWORK_TRIGGER,
     /** There's no response from the network or connection fails. */
@@ -49,29 +50,19 @@ public:
     virtual void StartWatchdog();
     virtual void OnEpsFallbackCompleted();
     void Timer_TimerExpired(IN ITimer* piTimer) override;
-    virtual void TriggerEpsFallback(IN EpsFallbackReason eReason, IN IMS_BOOL bStartTimer);
-    inline virtual IMS_BOOL IsWaitingEpsFallbackForNoResponse() const
-    {
-        return m_bWaitingEpsFallbackForNoResponse;
-    }
-    inline virtual IMS_BOOL IsWaitingEpsFallbackForNoTrigger() const
-    {
-        return m_bWaitingEpsFallbackForNoTrigger;
-    }
+    virtual void TriggerEpsFallback(IN EpsFallbackReason eReason);
+
+    inline virtual EpsFallbackReason GetTriggerReason() const { return m_eTriggerReason; }
+    inline virtual IMS_BOOL IsWaitingEpsFallback() const { return m_bWaitingEpsFallback; }
 
 private:
-    inline IMS_BOOL IsWaitingEpsFallback() const
-    {
-        return m_bWaitingEpsFallbackForNoResponse || m_bWaitingEpsFallbackForNoTrigger;
-    }
-
     IMS_BOOL IsEpsFallbackTriggeredByNetwork() const;
 
     IMtcCallContext& m_objContext;
     ITimer* m_piTimerWatchdogWait;
     ITimer* m_piTimerEpsFallbackWait;
-    IMS_BOOL m_bWaitingEpsFallbackForNoResponse;
-    IMS_BOOL m_bWaitingEpsFallbackForNoTrigger;
+    EpsFallbackReason m_eTriggerReason;
+    IMS_BOOL m_bWaitingEpsFallback;
     static const IMS_UINT32 EPS_FALLBACK_COMPLETE_INTERVAL = 20000;
 };
 

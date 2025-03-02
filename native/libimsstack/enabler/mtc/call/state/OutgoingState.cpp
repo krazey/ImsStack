@@ -655,15 +655,15 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
                         : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
     }
 
-    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        return HandleSilentRedial(
-                CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
-    }
-    else if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
-    {
-        m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
+        if (m_objContext.GetEpsFallbackTrigger().GetTriggerReason() ==
+                EpsFallbackReason::NO_NETWORK_RESPONSE)
+        {
+            return HandleSilentRedial(
+                    CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
+        }
     }
 
     return GetStateName();
@@ -719,7 +719,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
                 ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
+                EpsFallbackReason::NO_NETWORK_RESPONSE);
     }
 
     return GetStateName();
@@ -809,7 +809,7 @@ CallStateName OutgoingState::HandleSilentRedial(IN const CallReasonInfo& objReas
     if (objReason.nExtraCode == EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK)
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
+                EpsFallbackReason::NO_NETWORK_RESPONSE);
         return GetStateName();
     }
 

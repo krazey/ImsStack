@@ -367,7 +367,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackTriggersEpsFallback)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE));
 
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 
     // call terminated without OnEpsFallbackCompleted() case.
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED));
@@ -379,7 +379,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoTriggerEpsFallbackTriggersEpsFallback)
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER));
 
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER);
 
     // call terminated without OnEpsFallbackCompleted() case.
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED)).Times(0);
@@ -387,18 +387,18 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoTriggerEpsFallbackTriggersEpsFallback)
 
 TEST_F(EpsFallbackTriggerTest, OnEpsFallbackCompletedAfterTriggerEpsfbStopsTimer)
 {
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 
     EXPECT_CALL(objTimer, KillTimer);
 
     pEpsFbTrigger->OnEpsFallbackCompleted();
 
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
 }
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTerminatesCall)
 {
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 
     MockIMtcCall objCall;
     ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objCall));
@@ -412,65 +412,37 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTermin
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
 }
 
-TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkResponseSetsStatus)
-{
-    EXPECT_CALL(objTimer, SetTimer(_, pEpsFbTrigger)).Times(0);
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_FALSE);
-    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
-
-    pEpsFbTrigger->OnEpsFallbackCompleted();
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
-}
-
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkResponseSetsTimer)
 {
     EXPECT_CALL(objTimer, SetTimer(20000, pEpsFbTrigger));
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
-    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
+    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallback());
 
     pEpsFbTrigger->OnEpsFallbackCompleted();
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
 }
 
-TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerSetsStatus)
+TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerDoesNotSetTimer)
 {
     EXPECT_CALL(objTimer, SetTimer(_, pEpsFbTrigger)).Times(0);
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_FALSE);
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER);
+    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallback());
 
     pEpsFbTrigger->OnEpsFallbackCompleted();
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
-}
-
-TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerSetsTimer)
-{
-    EXPECT_CALL(objTimer, SetTimer(20000, pEpsFbTrigger));
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
-
-    pEpsFbTrigger->OnEpsFallbackCompleted();
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoResponse());
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
 }
 
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackDoesNothingIfAlreadyTriggeredByNoNetworkResponse)
 {
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(1);
 
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_FALSE);
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_FALSE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 }
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackDoesNothingIfAlreadyTriggeredByNoNetworkTrigger)
 {
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(1);
 
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_FALSE);
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_FALSE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER);
 }
