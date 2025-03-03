@@ -50,7 +50,7 @@ TEST_F(MtsAppTest, StartAndStop)
     pMtsApp->Start();
 
     pMtsApp->Stop();
-    EXPECT_EQ(pMtsApp->GetService()->GetIMtsServiceState()->GetImsRegConnected(), IMS_FALSE);
+    EXPECT_EQ(pMtsApp->GetService().GetIMtsServiceState()->GetImsRegConnected(), IMS_FALSE);
 }
 
 }  // namespace android

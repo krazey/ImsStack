@@ -56,7 +56,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetService).WillByDefault(Return(&objMockMtsService));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMockMtsService));
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);

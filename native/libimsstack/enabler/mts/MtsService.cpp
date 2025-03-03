@@ -56,7 +56,6 @@ MtsService::MtsService(IN IMtsContext& objContext) :
         m_pSmsInfo(IMS_NULL)
 {
     IMS_TRACE_I("+MtsService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
-    Init();
 }
 
 PUBLIC
@@ -68,6 +67,27 @@ MtsService::~MtsService()
             m_objContext.GetSlotId(), EnablerType::MTS_SERVICE, IMS_NULL);
 
     DeInit();
+}
+
+PUBLIC
+void MtsService::Init()
+{
+    IMS_TRACE_I("Init", 0, 0, 0);
+
+    AttachJni();
+    AttachAos();
+    AttachCoreService();
+    InitMtsServiceState();
+    m_piNetWatcherInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
+    m_objMtsTraffics.Append(
+            new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_SMS, *this));
+    m_objMtsTraffics.Append(
+            new MtsTraffic(IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_SMS, *this));
+    m_objMtsTraffics.Append(
+            new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
+    m_objMtsTraffics.Append(
+            new MtsTraffic(IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
 }
 
 PUBLIC
@@ -652,27 +672,6 @@ void MtsService::StartRadioTraffic(IN IMtsTraffic* piMtsTraffic)
         delete m_pSmsInfo;
         m_pSmsInfo = IMS_NULL;
     }
-}
-
-PRIVATE
-void MtsService::Init()
-{
-    IMS_TRACE_I("Init", 0, 0, 0);
-
-    AttachJni();
-    AttachAos();
-    AttachCoreService();
-    InitMtsServiceState();
-    m_piNetWatcherInfo =
-            PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_SMS, *this));
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_SMS, *this));
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
 }
 
 PRIVATE

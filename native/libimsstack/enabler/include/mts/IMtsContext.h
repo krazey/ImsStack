@@ -40,7 +40,7 @@ public:
      *
      * @return Reference to the IMtsService instance.
      */
-    virtual IMtsService* GetService() = 0;
+    virtual IMtsService& GetService() = 0;
 
     /**
      * @brief Gets the IMtsMessageController instance associated with this context.
