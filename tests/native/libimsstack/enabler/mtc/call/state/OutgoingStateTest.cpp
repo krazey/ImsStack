@@ -434,6 +434,18 @@ TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback
 
 TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesAndRedialsIfWaitingEpsFallbackForNoResponse)
 {
+    // Sets up for creating SilentRedialHelper.
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(IMS_NULL));
+
+    pOutgoingState->SessionStartFailed(&objSession);
+
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
@@ -441,8 +453,7 @@ TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesAndRedialsIfWaitingEpsFallba
             .WillByDefault(Return(EpsFallbackReason::NO_NETWORK_RESPONSE));
 
     const CallReasonInfo objReasonByEpsfb(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
-    EXPECT_CALL(objController, GetRedialHelper(Ref(objCallContext), objReasonByEpsfb))
-            .WillOnce(ReturnRef(objRedialHelper));
+    EXPECT_CALL(objController, GetRedialHelper(Ref(objCallContext), objReasonByEpsfb)).Times(0);
     EXPECT_CALL(objRedialHelper, Redial).WillOnce(Return(CallReasonInfo(CODE_NONE)));
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));

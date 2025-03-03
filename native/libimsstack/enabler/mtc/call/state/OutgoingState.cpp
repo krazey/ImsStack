@@ -62,6 +62,7 @@ PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
         m_pUdpKeepAliveSender(IMS_NULL),
+        m_pSilentRedialHelper(IMS_NULL),
         m_bWaitingServiceConnectedForRedial(IMS_FALSE)
 {
 }
@@ -207,15 +208,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
     {
         StopTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
         StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
-
-        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF ||
-                objReason.nExtraCode == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
-        {
-            m_bWaitingServiceConnectedForRedial = IMS_TRUE;
-            return GetStateName();
-        }
-
-        return HandleSilentRedial(objReason);
+        return HandleSilentRedialReason(objReason);
     }
 
     OnStartFailed(objReason, IMS_TRUE);
@@ -269,13 +262,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
     if (objReason.nCode == CODE_INTERNAL_REDIAL)
     {
-        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF)
-        {
-            m_bWaitingServiceConnectedForRedial = IMS_TRUE;
-            return GetStateName();
-        }
-
-        return HandleSilentRedial(objReason);
+        return HandleSilentRedialReason(objReason);
     }
 
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
@@ -649,10 +636,7 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
     if (m_bWaitingServiceConnectedForRedial)
     {
         m_bWaitingServiceConnectedForRedial = IMS_FALSE;
-        return HandleSilentRedial(CallReasonInfo(CODE_INTERNAL_REDIAL,
-                m_objContext.GetCallInfo().IsEmergency()
-                        ? EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF
-                        : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
+        return PerformSilentRedial();
     }
 
     if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
@@ -661,8 +645,7 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
         if (m_objContext.GetEpsFallbackTrigger().GetTriggerReason() ==
                 EpsFallbackReason::NO_NETWORK_RESPONSE)
         {
-            return HandleSilentRedial(
-                    CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
+            return PerformSilentRedial();
         }
     }
 
@@ -802,19 +785,35 @@ CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SI
 }
 
 PRIVATE
-CallStateName OutgoingState::HandleSilentRedial(IN const CallReasonInfo& objReason)
+CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("HandleSilentRedial", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentRedialReason", 0, 0, 0);
+
+    m_pSilentRedialHelper =
+            &m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason);
+
+    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF ||
+            objReason.nExtraCode == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
+    {
+        m_bWaitingServiceConnectedForRedial = IMS_TRUE;
+        return GetStateName();
+    }
 
     if (objReason.nExtraCode == EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK)
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE);
+                EpsFallbackReason::NO_NETWORK_RESPONSE);  // TODO: move into StartErrorHandler
         return GetStateName();
     }
 
-    CallReasonInfo objResult =
-            m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason).Redial();
+    return PerformSilentRedial();
+}
+
+PRIVATE
+CallStateName OutgoingState::PerformSilentRedial()
+{
+    IMS_ASSERT(m_pSilentRedialHelper);
+    CallReasonInfo objResult = m_pSilentRedialHelper->Redial();
     if (objResult.nCode != CODE_NONE)
     {
         OnStartFailed(objResult);
