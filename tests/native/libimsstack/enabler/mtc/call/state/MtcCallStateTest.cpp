@@ -542,8 +542,7 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfSrvccStarted)
 {
     IMS_UINT32 nAnyAosReason = 1;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::STARTED));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
                     nAnyAosReason))
@@ -564,15 +563,7 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfEpsFallbackOngoing)
                     nAnyAosReason))
             .WillByDefault(Return(IMS_FALSE));
 
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
-
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
@@ -583,8 +574,7 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsNotTerm
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
                     nAnyAosReason))
@@ -600,8 +590,7 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsTermina
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
                     nAnyAosReason))

@@ -562,7 +562,7 @@ TEST_F(IncomingStateTest, SendUpdateBySrvccByFailed)
 TEST_F(IncomingStateTest, OnAosConnectedInvokesPreconditionManagerIpCanChanged)
 {
     IMS_UINT32 nAnyAosReason = 1;
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(CallStateName::INCOMING,
             pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
@@ -577,7 +577,7 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
 
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(6000));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
     SetParamsForIncomingCallReceived();
 

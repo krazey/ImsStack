@@ -87,7 +87,7 @@ private:
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
 
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
-    IMS_BOOL m_bWaitingRedial;
+    IMS_BOOL m_bWaitingServiceConnectedForRedial;
 };
 
 #endif
