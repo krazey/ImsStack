@@ -25,7 +25,6 @@
 #include "MockINetworkWatcher.h"
 #include "PlatformContext.h"
 #include "TestImsRadioService.h"
-#include "TestPhoneInfoService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallManager.h"
@@ -59,7 +58,6 @@ public:
             m_objIMtcRadioCheckerListener(),
             m_objSipInterfaceFactory(),
             m_objSessionInterfaceHolder(),
-            m_objPhoneInfoService(),
             m_objImsRadioService(),
             m_piImsRadioConnectionListener(IMS_NULL),
             m_pMtcRadioChecker(IMS_NULL)
@@ -75,7 +73,6 @@ public:
     MockIMtcCallManager m_objCallManager;
     MockIMtcCall m_objCall;
     MockSessionInterfaceHolder m_objSessionInterfaceHolder;
-    TestPhoneInfoService m_objPhoneInfoService;
     TestImsRadioService m_objImsRadioService;
     IImsRadioConnectionListener* m_piImsRadioConnectionListener;
     MtcRadioChecker* m_pMtcRadioChecker;
@@ -90,21 +87,19 @@ protected:
     virtual void SetUp() override
     {
         PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
-        PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &m_objImsRadioService);
 
         ON_CALL(m_objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
 
-        ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-                .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-
         ON_CALL(m_objContext, GetServiceByType(ServiceType::NORMAL))
                 .WillByDefault(Return(&m_objNormalService));
         ON_CALL(m_objNormalService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objNormalService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
         ON_CALL(m_objContext, GetServiceByType(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&m_objEmergencyService));
         ON_CALL(m_objEmergencyService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(m_objEmergencyService, GetServiceType)
+                .WillByDefault(Return(ServiceType::EMERGENCY));
 
         ON_CALL(m_objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(m_objSipInterfaceFactory));
@@ -152,15 +147,15 @@ TEST_F(MtcRadioCheckerTest, CheckTrafficPreparedReturnsUnblocked)
             IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
 
     EXPECT_EQ(CheckResult::UNBLOCKED,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckMtReturnsUnblocked)
 {
     EXPECT_EQ(CheckResult::UNBLOCKED,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckNotTrafficAllowedReturnsBlocked)
@@ -170,8 +165,8 @@ TEST_F(MtcRadioCheckerTest, CheckNotTrafficAllowedReturnsBlocked)
             .WillOnce(Return(IMS_FALSE));
 
     EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_TRUE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_TRUE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckTrafficAllowedReturnsPending)
@@ -181,8 +176,8 @@ TEST_F(MtcRadioCheckerTest, CheckTrafficAllowedReturnsPending)
             .WillOnce(Return(IMS_TRUE));
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckTrafficAllowedReturnsUnblockedIfUssi)
@@ -190,8 +185,8 @@ TEST_F(MtcRadioCheckerTest, CheckTrafficAllowedReturnsUnblockedIfUssi)
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_)).Times(0);
 
     EXPECT_EQ(CheckResult::UNBLOCKED,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_TRUE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_TRUE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckStartTrafficChecking)
@@ -206,8 +201,8 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficChecking)
             .Times(1);
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingAddCallKey)
@@ -222,8 +217,8 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingAddCallKey)
             .Times(1);
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
@@ -245,8 +240,8 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingExistsMtcTrafficInfoWithCal
             .Times(1);
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 
     // To check that not adding same call key
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
@@ -268,8 +263,8 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingEmergency)
             .Times(1);
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_TRUE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_TRUE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, OnAosStateChangedDoesNothing)
@@ -277,14 +272,18 @@ TEST_F(MtcRadioCheckerTest, OnAosStateChangedDoesNothing)
     m_pMtcRadioChecker->OnAosStateChanged(m_objNormalService, MtcAosState::CONNECTED, 0);
 }
 
-TEST_F(MtcRadioCheckerTest, OnIpcanChangedNoStartImsTrafficBecauseEmptyCallKey)
+TEST_F(MtcRadioCheckerTest, OnRatChangedNoStartImsTrafficBecauseEmptyCallKey)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _, _)).Times(0);
 
-    m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_WLAN);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
             IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
@@ -293,13 +292,17 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedNoStartImsTrafficBecauseEmptyCallKey)
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
             IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
 
-    m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_WLAN);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
-TEST_F(MtcRadioCheckerTest, OnIpcanChangedNoStartImsTrafficBecauseNotActive)
+TEST_F(MtcRadioCheckerTest, OnRatChangedNoStartImsTrafficBecauseNotActive)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _, _)).Times(0);
 
@@ -310,13 +313,17 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedNoStartImsTrafficBecauseNotActive)
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MO, IMS_FALSE, CALL_KEY1);
 
-    m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_WLAN);
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
-TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficNormalLte)
+TEST_F(MtcRadioCheckerTest, OnRatChangedStartImsTrafficNormalLte)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
@@ -338,10 +345,11 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficNormalLte)
                     IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, IImsRadio::DIRECTION_MT, _))
             .Times(0);
 
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
 }
 
-TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficNormalNr)
+TEST_F(MtcRadioCheckerTest, OnRatChangedStartImsTrafficNormalNr)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
@@ -349,10 +357,6 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficNormalNr)
             IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
-
-    EXPECT_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .Times(2)
-            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN,
@@ -367,10 +371,11 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficNormalNr)
                     IImsRadio::DIRECTION_MT, _))
             .Times(0);
 
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_NR);
 }
 
-TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficNormalWifi)
+TEST_F(MtcRadioCheckerTest, OnRatChangedStartImsTrafficNormalWifi)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
@@ -392,10 +397,11 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficNormalWifi)
                     IImsRadio::DIRECTION_MT, _))
             .Times(0);
 
-    m_pMtcRadioChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
+    m_pMtcRadioChecker->OnRatChanged(m_objNormalService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_LTE, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
-TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficEmergency)
+TEST_F(MtcRadioCheckerTest, OnRatChangedStartImsTrafficEmergency)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT, IMS_TRUE, CALL_KEY1);
@@ -417,7 +423,8 @@ TEST_F(MtcRadioCheckerTest, OnIpcanChangedStartImsTrafficEmergency)
                     IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, IImsRadio::DIRECTION_MT, _))
             .Times(1);
 
-    m_pMtcRadioChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcRadioChecker->OnRatChanged(m_objEmergencyService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_LTE);
 }
 
 TEST_F(MtcRadioCheckerTest, OnSessionInterfaceReleasedInvokesStopImsTraffic)
@@ -506,8 +513,8 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyExistsMtcTrafficInfoWit
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyExistsMtcTrafficInfoWithOutCallKey)
@@ -549,8 +556,8 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedTemporarily)
 
     // To check that those reasons are not impacting on traffic availability
     EXPECT_EQ(CheckResult::UNBLOCKED,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPrepared)
@@ -645,8 +652,8 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionFailedNotifies)
                     Invoke(this, &MtcRadioCheckerTest::CaptureIImsRadioConnectionListener)));
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(3);
 
@@ -677,8 +684,8 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionSetupPreparedNotif
                     Invoke(this, &MtcRadioCheckerTest::CaptureIImsRadioConnectionListener)));
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY1));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(1);
     EXPECT_CALL(m_objIMtcRadioCheckerListener2, OnConnectionSetupPrepared).Times(1);
@@ -698,8 +705,8 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedInvokesTrafficDeactivating)
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY2));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2));
 }
 
 TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesTrafficDeactivating)
@@ -711,8 +718,8 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesTrafficDeactivating)
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _, _)).Times(0);
     EXPECT_EQ(CheckResult::UNBLOCKED,
-            m_pMtcRadioChecker->Check(
-                    CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, IMS_FALSE, CALL_KEY2));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY2));
 }
 
 }  // namespace android

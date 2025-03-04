@@ -18,7 +18,6 @@
 #define MTC_RADIO_CHECKER_H_
 
 #include "IImsRadio.h"
-#include "INetworkWatcher.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
@@ -97,11 +96,10 @@ public:
     void RemoveTrafficCheckerListener(IN IMtcRadioCheckerListener& objListener) override;
     void OnTerminatedBeforeCreatingSession(IN CallKey nCallKey) override;
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey) override;
+            IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey) override;
 
     // IMtcAosStateListener
     inline void OnAosStateChanged(IN IMtcService&, IN MtcAosState, IN IMS_UINT32) override {}
-    void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
     // IInterfaceHolderListener
     void OnSessionInterfaceReleased(IN CallKey nKey) override;
@@ -126,7 +124,7 @@ public:
 private:
     void DeInit();
     static TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency);
-    IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
+    IMS_UINT32 ConvertRatType(IN IMS_SINT32 eRatType) const;
     void AddCallKey(IN MtcTrafficInfo& objMtcTrafficInfo, IN CallKey nCallKey);
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
     MtcTrafficInfo* GetCallTrafficInfo(
@@ -137,13 +135,12 @@ private:
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const;
     IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi, IN CallKey nCallKey);
+            IN IMS_SINT32 eRatType, IN CallKey nCallKey);
     void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);
     IMS_BOOL IsCallTerminated(IN CallKey nKey);
 
 private:
     IMtcContext& m_objContext;
-    INetworkWatcher* m_piNetworkWatcher;
     IImsRadio* m_piImsRadio;
     ImsList<IMtcRadioCheckerListener*> m_objMtcRadioCheckerListeners;
     ImsList<MtcTrafficInfo*> m_objMtcTrafficInfos;

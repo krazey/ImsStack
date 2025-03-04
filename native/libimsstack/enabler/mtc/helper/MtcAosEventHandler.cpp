@@ -33,7 +33,6 @@ MtcAosEventHandler::MtcAosEventHandler(
         IN IMtcService& objService, IN MtcConfigurationProxy& objConfiguration) :
         m_objService(objService),
         m_objConfiguration(objConfiguration),
-        m_nIpcan(IIpcan::CATEGORY_MOBILE),
         m_objListeners(ImsList<IMtcAosStateListener*>())
 {
     IMS_TRACE_I("+MtcAosEventHandler", 0, 0, 0);
@@ -73,10 +72,9 @@ void MtcAosEventHandler::RemoveListener(IN IMtcAosStateListener* piListener)
 }
 
 PUBLIC
-void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
+void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures)
 {
-    IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
-            nIpcan, 0);
+    IMS_TRACE_I("OnConnected emergency[%s]", _TRACE_B_(m_objService.IsEmergency()), 0, 0);
 
     if (!m_objService.IsEmergency())
     {
@@ -89,11 +87,6 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
         m_objConfiguration.OnRegistrationRefreshed();
     }
 
-    if (m_nIpcan != nIpcan)
-    {
-        NotifyIpcanChanged(nIpcan);
-    }
-    m_nIpcan = nIpcan;
     NotifyStateChanged(MtcAosState::CONNECTED, ImsAosReason::NONE);
 }
 
@@ -159,15 +152,6 @@ void MtcAosEventHandler::NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); i++)
     {
         m_objListeners.GetAt(i)->OnAosStateChanged(m_objService, eState, eAosReason);
-    }
-}
-
-PRIVATE
-void MtcAosEventHandler::NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const
-{
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); i++)
-    {
-        m_objListeners.GetAt(i)->OnIpcanChanged(m_objService, eIpcan);
     }
 }
 

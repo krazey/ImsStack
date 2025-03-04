@@ -26,6 +26,7 @@
 #include "dialogevent/IMultiEndpointManager.h"
 #include "dialogevent/MultiEndpointFactory.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/IMtcNetworkWatcherListener.h"
 #include <memory>
 
 class AString;
@@ -37,7 +38,8 @@ class MultiEndpointManager final :
         public IMultiEndpointManager,
         public IMtcAosStateListener,
         public ICarrierConfigListener,
-        public IDialogSubscriptionListener
+        public IDialogSubscriptionListener,
+        public IMtcNetworkWatcherListener
 {
 public:
     explicit MultiEndpointManager(
@@ -52,7 +54,6 @@ public:
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;
-    void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
@@ -60,6 +61,9 @@ public:
     void OnSubscriptionStartFailed() override;
     void OnSubscriptionTerminated() override;
     void OnSubscriptionNotified(IN const AString& strBody) override;
+
+    void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
+            IN IMS_SINT32 eRatType) override;
 
     // Visible for test.
     IMS_BOOL IsRunning() const;

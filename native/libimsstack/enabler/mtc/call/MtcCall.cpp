@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "IIpcan.h"
 #include "IMediaManager.h"
 #include "IMessage.h"
 #include "INetworkWatcher.h"
@@ -1255,18 +1256,6 @@ PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, IN IMS_UINT32 eIpcan)
-{
-    IMS_TRACE_I("%s - OnIpcanChanged : IpCan[%s]", ToString().GetStr(),
-            MtcCallStringUtils::ConvertIpcanType(eIpcan), 0);
-
-    m_objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
-            {
-                return pState->OnIpcanChanged(eIpcan);
-            });
-}
-
 PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServiceType,
         IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
@@ -1275,6 +1264,18 @@ PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServi
 
     m_objPreconditionManager.OnRatChanged(eRatType);
     m_objUiNotifier.SendRatChanged(eRatType);
+
+    if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN ||
+            eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN)
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](IMtcCallState* pState)
+                {
+                    return pState->OnIpcanChanged(eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN
+                                    ? IIpcan::CATEGORY_WLAN
+                                    : IIpcan::CATEGORY_MOBILE);
+                });
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::OnConnectionFailed(

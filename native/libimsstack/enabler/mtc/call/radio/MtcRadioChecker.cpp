@@ -35,8 +35,6 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext) :
         m_objContext(objContext),
-        m_piNetworkWatcher(PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
-                m_objContext.GetSlotId())),
         m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
         m_objMtcRadioCheckerListeners(ImsList<IMtcRadioCheckerListener*>()),
         m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>())
@@ -100,7 +98,7 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnTerminatedBeforeCreatingSession(IN CallKe
 }
 
 PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_BOOL bEmergency,
-        IN PeerType ePeerType, IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey)
+        IN PeerType ePeerType, IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey)
 {
     if (bUssi)
     {
@@ -116,7 +114,7 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
 
     if (ePeerType == PeerType::MT)
     {
-        StartTrafficChecking(eCallType, bEmergency, ePeerType, bWifi, nCallKey);
+        StartTrafficChecking(eCallType, bEmergency, ePeerType, eRatType, nCallKey);
         return CheckResult::UNBLOCKED;
     }
 
@@ -126,36 +124,9 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
         return CheckResult::BLOCKED;
     }
 
-    StartTrafficChecking(eCallType, bEmergency, ePeerType, bWifi, nCallKey);
+    StartTrafficChecking(eCallType, bEmergency, ePeerType, eRatType, nCallKey);
     IMS_TRACE_D("Check pending", 0, 0, 0);
     return CheckResult::PENDING;
-}
-
-PUBLIC VIRTUAL void MtcRadioChecker::OnIpcanChanged(
-        IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan)
-{
-    for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
-    {
-        MtcTrafficInfo* pMtcTrafficInfo = m_objMtcTrafficInfos.GetAt(nIndex);
-
-        if (pMtcTrafficInfo->m_objCallKeys.IsEmpty() || !(pMtcTrafficInfo->m_bTrafficActive))
-        {
-            continue;
-        }
-
-        TrafficType eTrafficType = pMtcTrafficInfo->m_eTrafficType;
-
-        IMS_BOOL bEmergency = objMtcService.IsEmergency();
-        if ((bEmergency && eTrafficType != IImsRadio::TRAFFIC_TYPE_EMERGENCY) ||
-                (!bEmergency && eTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY))
-        {
-            continue;
-        }
-
-        m_piImsRadio->StartImsTraffic(eTrafficType,
-                ConvertNetworkType(eIpcan == IIpcan::CATEGORY_WLAN),
-                pMtcTrafficInfo->m_eCallDirection, pMtcTrafficInfo);
-    }
 }
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnSessionInterfaceReleased(IN CallKey nKey)
@@ -209,23 +180,35 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
     }
 }
 
-PUBLIC VIRTUAL void MtcRadioChecker::OnRatChanged(IN ServiceType eServiceType,
-        IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN [[maybe_unused]] IMS_SINT32 eRatType)
+PUBLIC VIRTUAL void MtcRadioChecker::OnRatChanged(
+        IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
     {
         MtcTrafficInfo* pMtcTrafficInfo = m_objMtcTrafficInfos.GetAt(nIndex);
 
+        if (pMtcTrafficInfo->m_objCallKeys.IsEmpty() || !pMtcTrafficInfo->m_bTrafficActive)
+        {
+            continue;
+        }
+
+        const TrafficType eTrafficType = pMtcTrafficInfo->m_eTrafficType;
         if ((eServiceType == ServiceType::NORMAL &&
-                    pMtcTrafficInfo->m_eTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY) ||
+                    eTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY) ||
                 (eServiceType == ServiceType::EMERGENCY &&
-                        pMtcTrafficInfo->m_eTrafficType != IImsRadio::TRAFFIC_TYPE_EMERGENCY))
+                        eTrafficType != IImsRadio::TRAFFIC_TYPE_EMERGENCY))
         {
             continue;
         }
 
         pMtcTrafficInfo->m_bTrafficActive = IMS_FALSE;
-        IMS_TRACE_D("OnRatChanged ServiceType[%d] traffic initialized", eServiceType, 0, 0);
+
+        if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN ||
+                eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN)
+        {
+            m_piImsRadio->StartImsTraffic(eTrafficType, ConvertRatType(eRatType),
+                    pMtcTrafficInfo->m_eCallDirection, pMtcTrafficInfo);
+        }
     }
 }
 
@@ -314,18 +297,15 @@ PRIVATE TrafficType MtcRadioChecker::ConvertCallTypeToTrafficType(
     }
 }
 
-PRIVATE IMS_UINT32 MtcRadioChecker::ConvertNetworkType(IN IMS_BOOL bWifi) const
+PRIVATE IMS_UINT32 MtcRadioChecker::ConvertRatType(IN IMS_SINT32 eRatType) const
 {
-    if (bWifi)
+    switch (eRatType)
     {
-        return IImsRadio::ACCESS_NETWORK_TYPE_IWLAN;
-    }
-
-    switch (m_piNetworkWatcher->GetNetRadioTechType())
-    {
-        case NW_REPORT_RADIO_NR:
+        case INetworkWatcher::RADIOTECH_TYPE_IWLAN:
+            return IImsRadio::ACCESS_NETWORK_TYPE_IWLAN;
+        case INetworkWatcher::RADIOTECH_TYPE_NR:
             return IImsRadio::ACCESS_NETWORK_TYPE_NGRAN;
-        case NW_REPORT_RADIO_LTE:
+        case INetworkWatcher::RADIOTECH_TYPE_LTE:
             return IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN;
         default:
             return IImsRadio::ACCESS_NETWORK_TYPE_UNKNOWN;
@@ -425,7 +405,7 @@ PRIVATE IMS_BOOL MtcRadioChecker::IsTrafficAllowed(
 }
 
 PRIVATE void MtcRadioChecker::StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency,
-        IN PeerType ePeerType, IN IMS_BOOL bWifi, IN CallKey nCallKey)
+        IN PeerType ePeerType, IN IMS_SINT32 eRatType, IN CallKey nCallKey)
 {
     TrafficType eTrafficType = ConvertCallTypeToTrafficType(eCallType, bEmergency);
     const IMS_UINT32 eCallDirection =
@@ -441,7 +421,7 @@ PRIVATE void MtcRadioChecker::StartTrafficChecking(IN CallType eCallType, IN IMS
     AddCallKey(*pMtcTrafficInfo, nCallKey);
 
     m_piImsRadio->StartImsTraffic(
-            eTrafficType, ConvertNetworkType(bWifi), eCallDirection, pMtcTrafficInfo);
+            eTrafficType, ConvertRatType(eRatType), eCallDirection, pMtcTrafficInfo);
 
     IMS_TRACE_I("StartTrafficChecking TrafficType[%d] CallDirection[%d] CallKey[%d]", eTrafficType,
             eCallDirection, nCallKey);

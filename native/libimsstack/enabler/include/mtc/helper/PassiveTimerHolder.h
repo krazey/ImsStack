@@ -49,7 +49,6 @@ public:
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;
-    inline void OnIpcanChanged(IN IMtcService&, IN IMS_UINT32) override {}
 
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 

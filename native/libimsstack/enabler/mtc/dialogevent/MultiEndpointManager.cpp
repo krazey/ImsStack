@@ -21,6 +21,7 @@
 #include "IJniMtcServiceThread.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
@@ -60,6 +61,7 @@ MultiEndpointManager::MultiEndpointManager(
     if (piNormalService)
     {
         piNormalService->AddAosStateListener(this);
+        piNormalService->AddNetworkWatcherListener(this);
     }
 
     ICarrierConfig* piCc =
@@ -80,6 +82,7 @@ MultiEndpointManager::~MultiEndpointManager()
     if (piNormalService)
     {
         piNormalService->RemoveAosStateListener(this);
+        piNormalService->RemoveNetworkWatcherListener(this);
     }
 
     ICarrierConfig* piCc =
@@ -131,12 +134,6 @@ VIRTUAL PUBLIC void MultiEndpointManager::OnAosStateChanged(
     HandleConditionChanged();
 }
 
-VIRTUAL PUBLIC void MultiEndpointManager::OnIpcanChanged(
-        IN IMtcService& /*objMtcService*/, IN IMS_UINT32 /*eIpcan*/)
-{
-    HandleConditionChanged();
-}
-
 VIRTUAL PUBLIC void MultiEndpointManager::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_objContext.GetSlotId() != nSlotId)
@@ -177,6 +174,16 @@ VIRTUAL PUBLIC void MultiEndpointManager::OnSubscriptionNotified(IN const AStrin
     if (m_piDialogInfoManager->Update(strBody) == IMS_SUCCESS)
     {
         NotifyExternalCalls();
+    }
+}
+
+VIRTUAL PUBLIC void MultiEndpointManager::OnRatChanged(IN [[maybe_unused]] ServiceType eServiceType,
+        IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
+{
+    if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN ||
+            eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN)
+    {
+        HandleConditionChanged();
     }
 }
 

@@ -380,10 +380,9 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosConnecting)
 TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 {
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
-    IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpcan)).Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature)).Times(1);
 
-    pNormalMtcService->ImsAos_Connected(nFeature, nIpcan);
+    pNormalMtcService->ImsAos_Connected(nFeature, IIpcan::CATEGORY_MOBILE);
     EXPECT_EQ(pNormalMtcService->IsActive(), IMS_TRUE);
 }
 
@@ -817,9 +816,9 @@ TEST_F(MtcServiceTest, StopEmergencyServiceInvokesStopOpenService)
 TEST_F(MtcServiceTest, ProcessTestCommandChangesInternalAosState)
 {
     const IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
-    const IMS_UINT32 nIpCanType = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpCanType)).Times(1);
-    pNormalMtcService->ProcessTestCommand(0 /* TestCommand::AOS_CONNECTED */, nFeature, nIpCanType);
+    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature)).Times(1);
+    pNormalMtcService->ProcessTestCommand(
+            0 /* TestCommand::AOS_CONNECTED */, nFeature, IIpcan::CATEGORY_MOBILE);
 
     const IMS_UINT32 nReason = ImsAosReason::NONE;
     EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason)).Times(1);

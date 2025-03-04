@@ -40,7 +40,7 @@ public:
     virtual void AddListener(IN IMtcAosStateListener* piListener);
     virtual void RemoveListener(IN IMtcAosStateListener* piListener);
 
-    virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan);
+    virtual void OnConnected(IN IMS_UINT32 nFeatures);
     virtual void OnDisconnecting(IN IMS_UINT32 nReason);
     virtual void OnDisconnected(IN IMS_UINT32 nReason);
     virtual void OnSuspended(IN IMS_UINT32 nReason);
@@ -51,12 +51,10 @@ public:
 
 private:
     void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const;
-    void NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const;
     IuMtcService::ServiceState ConvertAosFeatureToServiceState(IMS_UINT32 nFeatures) const;
 
     IMtcService& m_objService;
     MtcConfigurationProxy& m_objConfiguration;
-    IMS_UINT32 m_nIpcan;
     ImsList<IMtcAosStateListener*> m_objListeners;
 };
 

@@ -35,7 +35,7 @@ public:
     MOCK_METHOD(void, OnTerminatedBeforeCreatingSession, (IN CallKey), (override));
     MOCK_METHOD(CheckResult, Check,
             (IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-                    IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey),
+                    IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey),
             (override));
 };
 

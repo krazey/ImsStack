@@ -15,6 +15,7 @@
  */
 
 #include "AString.h"
+#include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsList.h"
 #include "ImsMap.h"
@@ -485,13 +486,13 @@ TEST_F(MultiEndpointManagerTest, OnAosStateChangedChecksCondition)
     pMultiEndpointManager->OnAosStateChanged(objService, MtcAosState::CONNECTED, nAnyReason);
 }
 
-TEST_F(MultiEndpointManagerTest, OnIpcanChangedChecksCondition)
+TEST_F(MultiEndpointManagerTest, OnRatChangedChecksCondition)
 {
     CreateManager(IMS_TRUE);
     EXPECT_CALL(objAosConnector, GetFeatures).WillOnce(Return(ImsAosFeature::VIDEO));
 
-    IMS_UINT32 nAnyIpcan = 0;
-    pMultiEndpointManager->OnIpcanChanged(objService, nAnyIpcan);
+    pMultiEndpointManager->OnRatChanged(objService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
 TEST_F(MultiEndpointManagerTest, NotifyConfigChangedChecksCondition)

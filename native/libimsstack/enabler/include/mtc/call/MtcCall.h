@@ -317,7 +317,6 @@ public:
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;
-    void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
     void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
             IN IMS_SINT32 eRatType) override;

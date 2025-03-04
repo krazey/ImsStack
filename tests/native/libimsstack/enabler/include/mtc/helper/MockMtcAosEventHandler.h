@@ -38,7 +38,7 @@ public:
 
     MOCK_METHOD(void, AddListener, (IN IMtcAosStateListener*), (override));
     MOCK_METHOD(void, RemoveListener, (IN IMtcAosStateListener*), (override));
-    MOCK_METHOD(void, OnConnected, (IN IMS_UINT32, IN IMS_UINT32), (override));
+    MOCK_METHOD(void, OnConnected, (IN IMS_UINT32), (override));
     MOCK_METHOD(void, OnDisconnecting, (IN IMS_UINT32), (override));
     MOCK_METHOD(void, OnDisconnected, (IN IMS_UINT32), (override));
     MOCK_METHOD(void, OnSuspended, (IN IMS_UINT32), (override));

@@ -137,13 +137,6 @@ TEST_F(PassiveTimerHolderTest, SetNormalServiceAddsAosStateListener)
     EXPECT_CALL(objService, RemoveAosStateListener(pPassiveTimerHolder));
 }
 
-TEST_F(PassiveTimerHolderTest, OnIpcanChangedDoesNothing)
-{
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
-    pPassiveTimerHolder->OnIpcanChanged(objService, 0);
-    EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
-}
-
 TEST_F(PassiveTimerHolderTest, TimerExpiredReleasesTimer)
 {
     pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);

@@ -15,6 +15,8 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IIpcan.h"
+#include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "MockIMessage.h"
 #include "MockIMtcCallController.h"
@@ -2231,13 +2233,13 @@ TEST_F(MtcCallTest, OnAosStateChangedCallsState)
 
 TEST_F(MtcCallTest, OnIpcanChangedCallsState)
 {
-    IMS_UINT32 eAnyType = 0;
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, OnIpcanChanged(eAnyType)).Times(1);
+    EXPECT_CALL(*pState, OnIpcanChanged(IIpcan::CATEGORY_WLAN)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
 
-    objCall.OnIpcanChanged(objService, eAnyType);
+    objCall.OnRatChanged(objService.GetServiceType(), INetworkWatcher::RADIOTECH_TYPE_IWLAN,
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
 TEST_F(MtcCallTest, OnConnectionFailedCallsState)

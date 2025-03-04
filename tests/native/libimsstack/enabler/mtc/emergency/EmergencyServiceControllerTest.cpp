@@ -537,14 +537,6 @@ TEST_F(EmergencyServiceControllerTest,
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
 }
 
-TEST_F(EmergencyServiceControllerTest, OnIpcanChangedDoesNothing)
-{
-    const IMS_UINT32 ANY_VALUE = 0;
-    pController->OnIpcanChanged(objNormalService, ANY_VALUE);
-    pController->OnIpcanChanged(objEmergencyService, ANY_VALUE);
-    // Nothing to be checked.
-}
-
 TEST_F(EmergencyServiceControllerTest, OnTotalCallStateChangedDoesNothing)
 {
     const IMtcCall::State ANY_STATE = IMtcCall::State::IDLE;

@@ -59,13 +59,13 @@ public:
      * @param bEmergency {@code IMS_TRUE} if the call is an emergency call,
      *                   {@code IMS_FALSE} otherwise
      * @param ePeerType the peer type
-     * @param bWifi {@code IMS_TRUE} if the call is over Wi-Fi, {@code IMS_FALSE} otherwise
+     * @param eRatType the RAT type for this call
      * @param bUssi {@code IMS_TRUE} if the call is a USSI call, {@code IMS_FALSE} otherwise
      * @param nCallKey the call key
      * @return the check result. Refer {@code CheckResult}
      */
     virtual CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi, IN IMS_BOOL bUssi, IN CallKey nCallKey) = 0;
+            IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey) = 0;
 };
 
 class IMtcRadioCheckerListener

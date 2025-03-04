@@ -45,7 +45,7 @@ PUBLIC VIRTUAL RadioBlockRule::Result RadioBlockRule::Check(
 
     CheckResult eCheckResult = m_objContext.GetRadioChecker().Check(m_eCallType,
             m_objContext.GetCallInfo().IsEmergency(), m_objContext.GetCallInfo().ePeerType,
-            m_objContext.GetService().IsWlanIpCanType(), m_objContext.GetCallInfo().bUssi,
+            m_objContext.GetService().GetRatType(), m_objContext.GetCallInfo().bUssi,
             m_objContext.GetCallKey());
 
     switch (eCheckResult)

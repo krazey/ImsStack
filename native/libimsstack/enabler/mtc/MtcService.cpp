@@ -371,7 +371,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
 
     m_pNetworkWatcher->OnServiceConnected(nIpcan);
 
-    m_pAosEventHandler->OnConnected(nFeatures, nIpcan);
+    m_pAosEventHandler->OnConnected(nFeatures);
     SetAosReady(IMS_TRUE);
 }
 

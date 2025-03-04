@@ -49,7 +49,6 @@ public:
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;
-    inline void OnIpcanChanged(IN IMtcService&, IN IMS_UINT32) override {}
 
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
