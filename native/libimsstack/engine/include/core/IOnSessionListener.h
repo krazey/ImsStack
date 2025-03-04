@@ -103,6 +103,18 @@ public:
     virtual void OnSession_UpdateReceived(IN Session* pSession) = 0;
 
     /**
+     * @brief Notifies the application that the CANCEL request is received after 200 OK for INVITE
+     *        request is already sent.
+     *
+     * This is only called when the session is in STATE_ESTABLISHING or STATE_ESTABLISHED.
+     * If the CANCEL request is received during the session initiation or session update is
+     * in progress (1xx sent), the SessionTerminated or SessionUpdateFailed will be called.
+     *
+     * @param pSession The Session object
+     */
+    virtual void OnSession_CanceledOnAccepted(IN Session* pSession) = 0;
+
+    /**
      * @brief Notifies the application that the CANCEL operation is successfully done
      *        during an active call.
      *

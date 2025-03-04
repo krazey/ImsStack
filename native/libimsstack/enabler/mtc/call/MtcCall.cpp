@@ -735,6 +735,23 @@ PUBLIC VIRTUAL void MtcCall::SessionUpdateReceived(IN ISession* piSession)
             });
 }
 
+PUBLIC VIRTUAL void MtcCall::SessionCanceledOnAccepted(IN ISession* piSession)
+{
+    IMS_TRACE_I("%s - SessionCanceledOnAccepted", ToString().GetStr(), 0, 0);
+
+    if (piSession == IMS_NULL)
+    {
+        OnInternalFailure();
+        return;
+    }
+
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->SessionCanceledOnAccepted(piSession);
+            });
+}
+
 PUBLIC VIRTUAL void MtcCall::SessionCancelDelivered(IN ISession* piSession)
 {
     IMS_TRACE_I("%s - SessionCancelDelivered", ToString().GetStr(), 0, 0);

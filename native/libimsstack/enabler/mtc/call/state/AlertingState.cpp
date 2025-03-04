@@ -224,6 +224,14 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionTerminated(IN ISession* piSes
     return CallStateName::TERMINATING;
 }
 
+PUBLIC VIRTUAL CallStateName AlertingState::SessionCanceledOnAccepted(
+        IN [[maybe_unused]] ISession* piSession)
+{
+    m_objContext.GetUiNotifier().SendTerminated(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE));
+
+    return CallStateName::TERMINATING;
+}
+
 PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);

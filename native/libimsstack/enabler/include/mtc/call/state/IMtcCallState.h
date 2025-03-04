@@ -362,6 +362,14 @@ public:
     virtual CallStateName SessionUpdateReceived(IN ISession* piSession) = 0;
 
     /**
+     * @brief Handles {@link ISessionListener#SessionCanceledOnAccepted} event.
+     *
+     * @param piSession Subject {@link ISession}.
+     * @return Next state to transition.
+     */
+    virtual CallStateName SessionCanceledOnAccepted(IN ISession* piSession) = 0;
+
+    /**
      * @brief Sessions
      *
      * @param piSession
