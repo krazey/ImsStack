@@ -156,6 +156,12 @@ public class DcApn implements IDcApn {
             return false;
         }
 
+        if (apnType == EApnType.EMERGENCY.getType() && mSubId == MSimUtils.INVALID_SUB_ID) {
+            TelephonyManagerProxy tmp = AppContext.getInstance()
+                    .getSystemServiceProxy(TelephonyManagerProxy.class);
+            mPreciseDcStateListener.register(tmp);
+        }
+
         return iApn.connect();
     }
 
