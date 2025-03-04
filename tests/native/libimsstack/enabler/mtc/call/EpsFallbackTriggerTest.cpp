@@ -363,11 +363,23 @@ TEST_F(EpsFallbackTriggerTest, InvalidTimerExpiredDoesNotTriggerEpsFallback)
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackTriggersEpsFallback)
 {
-    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START));
+    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START)).Times(0);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE));
 
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
+
+    // call terminated without OnEpsFallbackCompleted() case.
+    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED)).Times(0);
+}
+
+TEST_F(EpsFallbackTriggerTest, TriggerNoResponseRequiringRegEpsFallbackTriggersEpsFallbackAndReg)
+{
+    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START));
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE));
+
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG);
 
     // call terminated without OnEpsFallbackCompleted() case.
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED));
@@ -385,15 +397,27 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoTriggerEpsFallbackTriggersEpsFallback)
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED)).Times(0);
 }
 
-TEST_F(EpsFallbackTriggerTest, OnEpsFallbackCompletedAfterTriggerEpsfbStopsTimer)
+TEST_F(EpsFallbackTriggerTest, OnEpsFallbackCompletedAfterTriggerEpsfbWithRegStopsTimer)
 {
-    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG);
 
     EXPECT_CALL(objTimer, KillTimer);
 
     pEpsFbTrigger->OnEpsFallbackCompleted();
 
-    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingRegistration());
+}
+
+TEST_F(EpsFallbackTriggerTest,
+        OnEpsFallbackCompletedAfterTriggerByNoNetworkTriggerEpsfbDoesNotStopTimer)
+{
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER);
+
+    EXPECT_CALL(objTimer, KillTimer).Times(0);
+
+    pEpsFbTrigger->OnEpsFallbackCompleted();
+
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingRegistration());
 }
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTerminatesCall)
@@ -407,7 +431,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTermin
             Terminate(CallReasonInfo(
                     CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL)));
 
-    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED));
+    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED)).Times(0);
 
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
 }
@@ -439,6 +463,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackDoesNothingIfAlreadyTriggeredBy
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 }
+
 TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackDoesNothingIfAlreadyTriggeredByNoNetworkTrigger)
 {
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(1);

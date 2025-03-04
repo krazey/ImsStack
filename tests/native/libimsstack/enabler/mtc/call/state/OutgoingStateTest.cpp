@@ -19,6 +19,7 @@
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "INetworkWatcher.h"
 #include "IImsRadio.h"
 #include "ISession.h"
 #include "ISipHeader.h"
@@ -359,7 +360,7 @@ TEST_F(OutgoingStateTest, OnConnectionFailedTriggersEpsfbIfRequired)
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
-    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE));
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK));
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 2));
 }
@@ -424,7 +425,7 @@ TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(6000));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objRedialHelper, Redial).Times(0);
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted).Times(0);
@@ -440,15 +441,14 @@ TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesAndRedialsIfWaitingEpsFallba
             .WillByDefault(Return(1000));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(IMS_NULL));
-
     pOutgoingState->SessionStartFailed(&objSession);
 
+    // Test the case.
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(6000));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pEpsFbTrigger, GetTriggerReason)
             .WillByDefault(Return(EpsFallbackReason::NO_NETWORK_RESPONSE));
 
@@ -463,13 +463,38 @@ TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesIfWaitingEpsFallbackForNoTri
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(6000));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objController, GetRedialHelper(_, _)).WillByDefault(ReturnRef(objRedialHelper));
 
     EXPECT_CALL(objRedialHelper, Redial).Times(0);
-    EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
+    EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted).Times(0);
     EXPECT_EQ(
             CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+}
+
+TEST_F(OutgoingStateTest, OnRatChangedPerformsSilentRedialIfWaitingEpsFallback)
+{
+    // Sets up for creating SilentRedialHelper.
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(IMS_NULL));
+    pOutgoingState->SessionStartFailed(&objSession);
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
+            .WillByDefault(Return(6000));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objController, GetRedialHelper(_, _)).WillByDefault(ReturnRef(objRedialHelper));
+
+    CallReasonInfo objReason(CODE_NONE);
+    EXPECT_CALL(objRedialHelper, Redial).WillOnce(Return(objReason));
+    EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
+    EXPECT_EQ(CallStateName::IDLE,
+            pOutgoingState->OnRatChanged(
+                    INetworkWatcher::RADIOTECH_TYPE_NR, INetworkWatcher::RADIOTECH_TYPE_LTE));
 }
 
 TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)

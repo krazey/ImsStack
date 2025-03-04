@@ -175,9 +175,19 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
     if (EpsFallbackTrigger::ShouldTriggerByMoRequestTimeout(m_objContext))
     {
-        m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE);
-        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
+        if (m_objContext.GetConfigurationProxy().GetBoolean(ConfigVoice::
+                            KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL))
+        {
+            m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
+                    EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG);
+            return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG);
+        }
+        else
+        {
+            m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
+                    EpsFallbackReason::NO_NETWORK_RESPONSE);
+            return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
+        }
     }
 
     const IMS_CHAR* pszKey = m_objContext.GetService().IsWlanIpCanType()
@@ -496,7 +506,7 @@ CallReasonInfo StartErrorHandler::HandleTriggerEpsfb(IN const IMessage& /*objMes
     if (m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE);
+                EpsFallbackReason::FAILURE_RESPONSE);
         return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
     }
     return CallReasonInfo(CODE_NONE);

@@ -19,6 +19,7 @@
 #include "IImsRadio.h"
 #include "IMessage.h"
 #include "IMtcCallController.h"
+#include "INetworkWatcher.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -631,6 +632,24 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName OutgoingState::OnRatChanged(
+        IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
+{
+    if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_NR &&
+            (eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE ||
+                    eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE_CA))
+    {
+        IMS_TRACE_I("OnRatChanged : EPS-FB", 0, 0, 0);
+        if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
+        {
+            m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
+            return PerformSilentRedial();
+        }
+    }
+
+    return GetStateName();
+}
+
 PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
 {
     if (m_bWaitingServiceConnectedForRedial)
@@ -639,14 +658,10 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
         return PerformSilentRedial();
     }
 
-    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingRegistration())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        if (m_objContext.GetEpsFallbackTrigger().GetTriggerReason() ==
-                EpsFallbackReason::NO_NETWORK_RESPONSE)
-        {
-            return PerformSilentRedial();
-        }
+        return PerformSilentRedial();
     }
 
     return GetStateName();
@@ -702,7 +717,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
                 ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE);
+                EpsFallbackReason::RADIO_CHECK_BLOCK);
     }
 
     return GetStateName();
@@ -799,7 +814,8 @@ CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& o
         return GetStateName();
     }
 
-    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_BY_EPS_FALLBACK)
+    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_BY_EPS_FALLBACK ||
+            objReason.nExtraCode == EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG)
     {
         return GetStateName();
     }
@@ -810,6 +826,7 @@ CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& o
 PRIVATE
 CallStateName OutgoingState::PerformSilentRedial()
 {
+    IMS_TRACE_D("PerformSilentRedial", 0, 0, 0);
     IMS_ASSERT(m_pSilentRedialHelper);
     CallReasonInfo objResult = m_pSilentRedialHelper->Redial();
     if (objResult.nCode != CODE_NONE)

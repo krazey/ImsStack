@@ -223,6 +223,22 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithByEpsfbType)
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_EPS_FALLBACK);
 }
 
+TEST_F(SilentRedialHelperTest, CreateHelperWithByEpsfbAfterRegType)
+{
+    EXPECT_CALL(
+            *pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))
+            .Times(0);
+    EXPECT_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT))
+            .Times(0);
+
+    const CallReasonInfo objReason(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG);
+    pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG);
+}
+
 TEST_F(SilentRedialHelperTest, CreateHelperWithRedialNormalType)
 {
     EXPECT_CALL(

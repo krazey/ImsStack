@@ -1418,13 +1418,13 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsfbIfRequired)
             IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
 
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
-    EXPECT_CALL(*pEpsfbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE));
+    EXPECT_CALL(*pEpsfbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK));
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
 }
 
 TEST_F(IdleStateTest, HandleAosConnectedDoesNothingIfNoEpsFallbackOngoing)
 {
-    ON_CALL(*pEpsfbTrigger, IsWaitingEpsFallback()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsfbTrigger, IsWaitingRegistration()).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pEpsfbTrigger, OnEpsFallbackCompleted()).Times(0);
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
@@ -1432,7 +1432,7 @@ TEST_F(IdleStateTest, HandleAosConnectedDoesNothingIfNoEpsFallbackOngoing)
 
 TEST_F(IdleStateTest, HandleAosConnectedNotifiesEpsFallbackCompletedIfEpsFallbackOngoing)
 {
-    ON_CALL(*pEpsfbTrigger, IsWaitingEpsFallback()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsfbTrigger, IsWaitingRegistration()).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(

@@ -334,13 +334,36 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfbWithReg)
 {
     SetTransactionTimeout();
     ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
             .WillByDefault(Return(1000));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objEpsFbTrigger,
+            TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG));
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG));
+}
+
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfbWithoutReg)
+{
+    SetTransactionTimeout();
+    ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE));
@@ -1155,7 +1178,7 @@ TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbInNr)
 
     ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE));
+    EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::FAILURE_RESPONSE));
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
 }
 
