@@ -245,6 +245,8 @@
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="20000"/>
+    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="20000"/>
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="false"/>
     <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
         <int name="imsrtt.t140_payload_type_int" value="111"/>
@@ -661,7 +663,7 @@
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
-    <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="false"/>
     <boolean name="media_anbr_capability_in_modem_bool" value="false"/>
     <int name="imsvoice.audio_ptime_millis_int" value="20"/>
