@@ -1127,8 +1127,8 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_C
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "use_emergency_number_translation_in_roaming_status_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "ignore_prack_delivery_failure_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT[] =
+        KEY_IMS_VOICE_PREFIX "policy_for_prack_delivery_failure_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL[] =
         KEY_IMS_VT_PREFIX "support_video_call_only_in_vops_off_status_bool";
 const IMS_CHAR

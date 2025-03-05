@@ -588,7 +588,7 @@
         <item value="488"/>
     </int-array>
     <boolean name="imsemergency.use_emergency_number_translation_in_roaming_status_bool" value="false"/>
-    <boolean name="imsvoice.ignore_prack_delivery_failure_bool" value="false"/>
+    <int name="imsvoice.policy_for_prack_delivery_failure_int" value="0"/>
     <boolean name="imsvt.support_video_call_only_in_vops_off_status_bool" value="false"/>
     <boolean name="imsemergency.block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
     <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">
