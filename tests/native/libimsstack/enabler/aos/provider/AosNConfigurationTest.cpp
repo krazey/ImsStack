@@ -540,6 +540,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::KEY_BLOCK_NR_RAT_WHEN_RECEIVE_403_FOR_REG_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
@@ -881,6 +885,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     EXPECT_FALSE(m_pAosNConfiguration->IsCdmalessFeatureTagRequired());
     EXPECT_TRUE(m_pAosNConfiguration->IsB2cCallComposerFeatureTagInRegContact());
+    EXPECT_FALSE(m_pAosNConfiguration->IsBlockNrRatWhenReceive403ForReg());
     EXPECT_TRUE(m_pAosNConfiguration->IsBlockPcscfOnRegFailure());
     EXPECT_TRUE(m_pAosNConfiguration->IsBlockRegOnCsCall());
     EXPECT_FALSE(m_pAosNConfiguration->IsCallEndAndPdnReactivationByRegTerminated());

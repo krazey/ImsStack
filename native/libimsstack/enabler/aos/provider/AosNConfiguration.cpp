@@ -262,6 +262,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsB2cCallComposerFeatureTagInRegConta
     return m_objAsset.bB2cCallComposerFeatureTagInRegContact;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsBlockNrRatWhenReceive403ForReg() const
+{
+    return m_objAsset.bBlockNrRatWhenReceive403ForReg;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsBlockPcscfOnRegFailure() const
 {
     return m_objAsset.bBlockPcscfOnRegFailure;
@@ -1401,6 +1406,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
     m_objAsset.bB2cCallComposerFeatureTagInRegContact = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONTACT_BOOL);
+    m_objAsset.bBlockNrRatWhenReceive403ForReg =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_BLOCK_NR_RAT_WHEN_RECEIVE_403_FOR_REG_BOOL);
     m_objAsset.bBlockPcscfOnRegFailure =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL);
     m_objAsset.bBlockRegOnCsCall =
