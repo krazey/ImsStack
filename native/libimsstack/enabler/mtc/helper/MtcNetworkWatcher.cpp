@@ -26,6 +26,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MtcNetworkWatcher::MtcNetworkWatcher(IN IMtcService& objService, IN IMS_SINT32 nSlotId) :
         m_eServiceType(objService.GetServiceType()),
+        m_bServiceConnected(objService.IsActive()),
         m_piNetWatcher(PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId)),
         m_eIpcanType(
                 objService.IsWlanIpCanType() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE),
@@ -71,36 +72,53 @@ PUBLIC void MtcNetworkWatcher::RemoveListener(IN IMtcNetworkWatcherListener& obj
 
 PUBLIC IMS_SINT32 MtcNetworkWatcher::GetRatType() const
 {
-    return GetCurrentRat();
+    if (!m_bServiceConnected)
+    {
+        return INetworkWatcher::RADIOTECH_TYPE_INVALID;
+    }
+    if (m_eIpcanType == IIpcan::CATEGORY_WLAN)
+    {
+        return INetworkWatcher::RADIOTECH_TYPE_IWLAN;
+    }
+    return m_eMobileRatType;
 }
 
 PUBLIC IMS_SINT32 MtcNetworkWatcher::GetMobileRatType() const
 {
+    if (!m_bServiceConnected)
+    {
+        return INetworkWatcher::RADIOTECH_TYPE_INVALID;
+    }
     return m_eMobileRatType;
 }
 
-PUBLIC void MtcNetworkWatcher::OnServiceConnected(IN IMS_UINT32 eIpcan)
+PUBLIC void MtcNetworkWatcher::OnConnected(IN IMS_UINT32 eIpcan)
 {
-    if (m_eIpcanType == eIpcan)
-    {
-        return;
-    }
+    m_eOldRatType = GetRatType();
 
-    m_eOldRatType = GetCurrentRat();
+    m_bServiceConnected = IMS_TRUE;
+    m_eMobileRatType = ConvertCellularRatType(m_piNetWatcher->GetNetRadioTechType());
     m_eIpcanType = eIpcan;
-    Notify();
+    NotifyIfChanged();
 }
 
-PUBLIC VIRTUAL void MtcNetworkWatcher::SetTestRatChanged(IN IMS_SINT32 eRatType)
+PUBLIC void MtcNetworkWatcher::OnDisconnected()
 {
-    IMS_TRACE_D("SetTestRatChanged", eRatType, 0, 0);
-    m_eOldRatType = m_eMobileRatType;
-    m_eMobileRatType = eRatType;
+    m_eOldRatType = GetRatType();
 
-    if (m_eIpcanType != IIpcan::CATEGORY_WLAN)
-    {
-        Notify();
-    }
+    m_bServiceConnected = IMS_FALSE;
+    m_eMobileRatType = INetworkWatcher::RADIOTECH_TYPE_INVALID;
+    m_eIpcanType = IIpcan::CATEGORY_MOBILE;
+    NotifyIfChanged();
+}
+
+PUBLIC VIRTUAL void MtcNetworkWatcher::UpdateMobileRat(IN IMS_SINT32 eRatType)
+{
+    IMS_TRACE_D("UpdateMobileRat", eRatType, 0, 0);
+    m_eOldRatType = GetRatType();
+
+    m_eMobileRatType = eRatType;
+    NotifyIfChanged();
 }
 
 PUBLIC VIRTUAL void MtcNetworkWatcher::NetworkWatcher_NotifyStatus(
@@ -111,34 +129,28 @@ PUBLIC VIRTUAL void MtcNetworkWatcher::NetworkWatcher_NotifyStatus(
         return;
     }
 
-    IMS_SINT32 eConvertedMobileRatType =
-            ConvertCellularRatType(m_piNetWatcher->GetNetRadioTechType());
-    if (m_eMobileRatType == eConvertedMobileRatType)
+    IMS_SINT32 eNewMobileRatType = ConvertCellularRatType(m_piNetWatcher->GetNetRadioTechType());
+    if (m_eMobileRatType != eNewMobileRatType)
     {
-        return;
+        UpdateMobileRat(eNewMobileRatType);
     }
-
-    m_eOldRatType = m_eMobileRatType;
-    m_eMobileRatType = eConvertedMobileRatType;
-
-    if (m_eIpcanType == IIpcan::CATEGORY_WLAN)
-    {
-        return;
-    }
-
-    Notify();
 }
 
-PRIVATE void MtcNetworkWatcher::Notify()
+PRIVATE void MtcNetworkWatcher::NotifyIfChanged()
 {
     if (m_objListeners.IsEmpty())
     {
         return;
     }
 
-    IMS_SINT32 eCurrentRat = GetCurrentRat();
-    IMS_TRACE_D("Notify serviceType=%d, old RAT=%d, new RAT=%d", m_eServiceType, m_eOldRatType,
-            eCurrentRat);
+    IMS_SINT32 eCurrentRat = GetRatType();
+    if (m_eOldRatType == eCurrentRat)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("NotifyIfChanged : serviceType=%d, old RAT=%d, new RAT=%d", m_eServiceType,
+            m_eOldRatType, eCurrentRat);
 
     for (IMS_SINT32 nIndex = static_cast<IMS_SINT32>(m_objListeners.GetSize()) - 1; nIndex >= 0;
             nIndex--)
@@ -162,14 +174,4 @@ PRIVATE GLOBAL IMS_SINT32 MtcNetworkWatcher::ConvertCellularRatType(
         default:
             return INetworkWatcher::RADIOTECH_TYPE_UNKNOWN;
     }
-}
-
-PRIVATE IMS_SINT32 MtcNetworkWatcher::GetCurrentRat() const
-{
-    if (m_eIpcanType == IIpcan::CATEGORY_WLAN)
-    {
-        return INetworkWatcher::RADIOTECH_TYPE_IWLAN;
-    }
-
-    return m_eMobileRatType;
 }
