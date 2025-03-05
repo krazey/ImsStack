@@ -47,6 +47,7 @@ public:
     MOCK_METHOD(void, RemoveNetworkWatcherListener, (IN IMtcNetworkWatcherListener*), (override));
     MOCK_METHOD(IMS_SINT32, GetRatType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetMobileRatType, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetLastConnectedRatType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergency, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsNr, (), (const, override));

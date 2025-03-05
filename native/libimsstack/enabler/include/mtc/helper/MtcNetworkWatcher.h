@@ -62,6 +62,20 @@ public:
     virtual IMS_SINT32 GetMobileRatType() const;
 
     /**
+     * @brief Returns the last connected RAT type.
+     *
+     * One of the following is returned.
+     * - {@code INetworkWatcher::RADIOTECH_TYPE_NR}
+     * - {@code INetworkWatcher::RADIOTECH_TYPE_LTE}
+     * - {@code INetworkWatcher::RADIOTECH_TYPE_IWLAN}
+     * - {@code INetworkWatcher::RADIOTECH_TYPE_UNKNOWN}: Other RATs
+     *
+     * @return Last connected RAT type.
+     *         Never be {@code INetworkWatcher::RADIOTECH_TYPE_INVALID} if connected once.
+     */
+    virtual IMS_SINT32 GetLastConnectedRatType() const { return m_eLastConnectedRatType; }
+
+    /**
      * @brief Updates internal states when the service is connected and notifies listeners
      *        if there's a change.
      *
@@ -97,6 +111,7 @@ private:
     IMS_SINT32 m_eMobileRatType;
     /** RAT type before receiving an last RAT changing event. */
     IMS_SINT32 m_eOldRatType;
+    IMS_SINT32 m_eLastConnectedRatType;
 
     ImsList<IMtcNetworkWatcherListener*> m_objListeners;
 };

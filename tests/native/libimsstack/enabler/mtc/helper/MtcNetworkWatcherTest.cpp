@@ -101,6 +101,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedOnMobileIpcan)
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatDoesNotChangedOnMobileIpcan)
@@ -113,6 +114,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatDoesNotChangedOnMobileIpcan)
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedOnWlanIpcan)
@@ -125,6 +127,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedOnWlanIpcan)
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatDoesNotChangedOnWlanIpcan)
@@ -137,6 +140,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatDoesNotChangedOnWlanIpcan)
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedDuringServiceDisconnected)
@@ -149,6 +153,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedDuringServiceDisconnect
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedDuringServiceDisconnectedAndConnected)
@@ -164,6 +169,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedDuringServiceDisconnect
     pNetworkWatcher->OnConnected(IIpcan::CATEGORY_MOBILE);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceConnectedWithDifferentIpcan)
@@ -176,6 +182,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceConnectedWithDifferentIpcan)
     pNetworkWatcher->OnConnected(IIpcan::CATEGORY_MOBILE);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetLastConnectedRatType());
 
     EXPECT_CALL(objNetworkWatcherListener,
             OnRatChanged(
@@ -183,6 +190,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceConnectedWithDifferentIpcan)
     pNetworkWatcher->OnConnected(IIpcan::CATEGORY_WLAN);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetLastConnectedRatType());
 
     EXPECT_CALL(objNetworkWatcherListener,
             OnRatChanged(
@@ -190,6 +198,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceConnectedWithDifferentIpcan)
     pNetworkWatcher->OnConnected(IIpcan::CATEGORY_MOBILE);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceConnectedWithSameIpcan)
@@ -200,6 +209,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceConnectedWithSameIpcan)
     pNetworkWatcher->OnConnected(IIpcan::CATEGORY_WLAN);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceDisconnectedOnWlan)
@@ -212,6 +222,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceDisconnectedOnWlan)
     pNetworkWatcher->OnDisconnected();
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceDisconnectedOnLte)
@@ -224,6 +235,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceDisconnectedOnLte)
     pNetworkWatcher->OnDisconnected();
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceDisconnectedAndConnectedOnMobileIpcan)
@@ -237,6 +249,7 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenServiceDisconnectedAndConnectedOnMobile
     pNetworkWatcher->OnConnected(IIpcan::CATEGORY_MOBILE);
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetLastConnectedRatType());
 }
 
 }  // namespace android

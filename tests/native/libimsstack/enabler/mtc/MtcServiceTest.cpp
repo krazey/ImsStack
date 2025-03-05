@@ -372,6 +372,17 @@ TEST_F(MtcServiceTest, GetMobileRatTypeReturnsCorrectValue)
     EXPECT_EQ(0, pNormalMtcService->GetMobileRatType());
 }
 
+TEST_F(MtcServiceTest, GetLastConnectedRatTypeReturnsCorrectValue)
+{
+    EXPECT_CALL(*pNetworkWatcher, GetLastConnectedRatType())
+            .Times(2)
+            .WillOnce(Return(0))
+            .WillOnce(Return(1));
+
+    EXPECT_EQ(0, pNormalMtcService->GetLastConnectedRatType());
+    EXPECT_EQ(1, pNormalMtcService->GetLastConnectedRatType());
+}
+
 TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosConnecting)
 {
     pNormalMtcService->ImsAos_Connecting();
