@@ -23,8 +23,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.util.Log;
 
+import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.MediaInfo;
@@ -33,7 +36,6 @@ import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
-import com.android.imsstack.imsservice.mmtel.ImsCallUtils;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.MessageExecutor;
 
@@ -41,12 +43,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
-public class ConferenceProxyTest {
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
+public class ConferenceProxyTest extends ImsStackTest {
     private static final String LOG_TAG = "ConferenceProxyTest";
     ConferenceProxyWrapperClass mConfProxyWrapper = null;
 
@@ -119,11 +121,12 @@ public class ConferenceProxyTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
         ImsCallContext mCallContext = Mockito.mock(ImsCallContext.class);
 
-        MessageExecutor mExecutor = new MessageExecutor(ImsCallUtils.class.getSimpleName());
+        MessageExecutor mExecutor = new MessageExecutor(mTestableLooper.getLooper());
         when(mCallContext.getExecutor()).thenReturn(mExecutor);
 
         mConfProxyWrapper = new ConferenceProxyWrapperClass(mCallContext);
@@ -133,7 +136,8 @@ public class ConferenceProxyTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        super.tearDown();
         mConfProxyWrapper = null;
     }
 
@@ -279,12 +283,12 @@ public class ConferenceProxyTest {
 
         /* hold operation */
         mConfProxyWrapper.executeHoldWrapper(call);
-        sleep(50);
+        processAllMessages();
         assertEquals(mConfProxyWrapper.mHoldListenerCalled, true);
 
         /* unhold operation */
         mConfProxyWrapper.executeUnholdWrapper(call);
-        sleep(50);
+        processAllMessages();
         assertEquals(mConfProxyWrapper.mUnholdListenerCalled, true);
     }
 
@@ -305,15 +309,7 @@ public class ConferenceProxyTest {
 
         mConfProxyWrapper.notifySessionTerminatedWrapper(call);
 
-        sleep(50);
+        processAllMessages();
         assertEquals(mConfProxyWrapper.mCallTerminatedrCalled, true);
-    }
-
-    private void sleep(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (Exception e) {
-            Log.d(LOG_TAG, "InterruptedException");
-        }
     }
 }
