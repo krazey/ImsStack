@@ -94,4 +94,7 @@
     </int-array>
     <!-- Timer value is not in requirement. It is from previous solution -->
     <int name="imsss.ut_temporary_block_timer_min_int" value="5"/>
+
+    <!-- Mts -->
+    <boolean name="imssms.sms_support_content_transfer_encoding_header_bool" value="true"/>
 </carrier_config>

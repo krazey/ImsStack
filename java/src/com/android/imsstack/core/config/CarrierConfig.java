@@ -867,6 +867,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "sms_retry_policy_for_expiry_timer_f_int";
         public static final String KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL =
                 KEY_PREFIX + "sms_in_reply_to_validation_bool";
+        public static final String KEY_SMS_SUPPORT_CONTENT_TRANSFER_ENCODING_HEADER_BOOL =
+                KEY_PREFIX + "sms_support_content_transfer_encoding_header_bool";
 
         private ImsSms() {}
     }
