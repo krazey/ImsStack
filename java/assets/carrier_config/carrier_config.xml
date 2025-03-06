@@ -293,6 +293,7 @@
     <int name="imsss.ut_uri_type_for_cf_target_number_int" value="0"/>
     <string name="imsss.ut_naf_fqdn_string"></string>
     <int name="imsss.ut_transaction_timer_sec_int" value="0"/>
+    <boolean name="imsss.ut_sync_with_cs_for_tb_ss_bool" value="true"/>
 
     <!-- Uce -->
     <int name="imsuce.expire_value_publish_sec_int" value="0"/>

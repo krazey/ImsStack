@@ -29,6 +29,8 @@ import android.telephony.ims.ImsSsInfo;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.enabler.ssc.data.CbServiceData;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
@@ -73,6 +75,7 @@ public class SscServiceImpl implements IUtInterface {
     private Context mContext = null;
     private IUtListener mUtListener = null;
     private IUtServiceStateListener mUtServiceStateListener = null;
+    private SscPreferenceHelper mSscPreferenceHelper = null;
     private SscTransactionFactory mSscTransactionFactory = null;
     private SscTransaction mSscTransaction = null;
 
@@ -83,11 +86,18 @@ public class SscServiceImpl implements IUtInterface {
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
         mSscRequestQueue = new ConcurrentLinkedDeque<SscRequestData>();
+        setSscPreferenceHelper(new SscPreferenceHelper(mSlotId));
         setSscTransactionFactory(new SscTransactionFactory());
     }
 
     @Override
     public boolean isUtAvailable() {
+        if (SscConfig.isUtSupported(mSlotId)
+                && isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB SS is enabled");
+            return true;
+        }
+
         return SscServiceStateAgent.getInstance().isUtAvailable(mSlotId);
     }
 
@@ -201,6 +211,11 @@ public class SscServiceImpl implements IUtInterface {
     }
 
     @VisibleForTesting
+    protected void setSscPreferenceHelper(SscPreferenceHelper preferenceHelper) {
+        mSscPreferenceHelper = preferenceHelper;
+    }
+
+    @VisibleForTesting
     protected void setSscTransactionFactory(SscTransactionFactory transactionFactory) {
         mSscTransactionFactory = transactionFactory;
     }
@@ -310,6 +325,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCLIR(int tId) {
+        if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB OIR request");
+            handleQueryClirTb(tId);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
@@ -546,6 +567,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCLIR(int tId, int clirMode) {
+        if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB OIR request");
+            handleUpdateClirTb(tId, clirMode);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
@@ -657,7 +684,7 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        if (!isUtAvailable()) {
+        if (!SscServiceStateAgent.getInstance().isUtAvailable(mSlotId)) {
             ImsLog.w(mSlotId, "Clear pending data due to Ut is not available");
             postFailResponseMessage(sscData);
         } else if (sscData.getSsType() != ESsType.NONE
@@ -735,6 +762,66 @@ public class SscServiceImpl implements IUtInterface {
         }
     }
 
+    private void handleQueryClirTb(int tId) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int clirMode = mSscPreferenceHelper.queryClir();
+        if (clirMode < 0) {
+            clirMode = SscConstant.OIR_DEFAULT;
+        }
+
+        int outgoingState = clirMode; // 3GPP 27.007 7.7 m
+        int provisionStatus = switch (clirMode) { // 3GPP 27.007 7.7 n
+            case SscConstant.OIR_DEFAULT -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+            case SscConstant.OIR_INVOCATION ->
+                    SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED;
+            case SscConstant.OIR_SUPPRESSION -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+            default -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+        };
+
+        int state = (provisionStatus == SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED)
+                ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+
+        postAndRunTask(() -> mUtListener.lineIdentificationSupplementaryServiceResponse(tId,
+                new ImsSsInfo.Builder(state).setClirInterrogationStatus(provisionStatus)
+                .setClirOutgoingState(outgoingState).build()));
+    }
+
+    private void handleUpdateClirTb(int tId, int clirMode) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        boolean result = mSscPreferenceHelper.updateClir(clirMode);
+        if (result) {
+            if (SscConfig.isSyncWithCsForTbSs(mSlotId)) {
+                // Invokes utConfigurationUpdateFailed() with CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+                // to trigger CSFB, then the modem will handle the request as well. It should
+                // always be handled successfully in the modem side because it's a terminal-based
+                // service request. The CSFB will be requested only when UE is in the CS voice
+                // available network, or the Telephony will sync the state when UE camps in the CS
+                // voice available network later.
+                if (isCsVoiceNetworkRegistered()) {
+                    ImsLog.d(mSlotId, "Sync CLIR");
+                    ImsReasonInfo ri = new ImsReasonInfo(
+                            ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                            ImsReasonInfo.CODE_UNSPECIFIED, null);
+                    postAndRunTask(() -> mUtListener.utConfigurationUpdateFailed(tId, ri));
+                    return;
+                }
+            }
+
+            postAndRunTask(() -> mUtListener.utConfigurationUpdated(tId));
+        } else {
+            ImsLog.d(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
+            ImsReasonInfo ri = new ImsReasonInfo(ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR,
+                    ImsReasonInfo.CODE_UNSPECIFIED, null);
+            postAndRunTask(() -> mUtListener.utConfigurationUpdateFailed(tId, ri));
+        }
+    }
+
     private boolean isServerBasedService(ESsType ssType, int condition) {
         int carrierConfigServiceType =
                 SscUtils.getSupplementaryServiceTypeForCarrierConfig(ssType, condition);
@@ -743,6 +830,28 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         return SscConfig.isServerBasedService(mSlotId, carrierConfigServiceType);
+    }
+
+    private boolean isTerminalBasedService(ESsType ssType, int condition) {
+        int carrierConfigServiceType =
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ssType, condition);
+        if (carrierConfigServiceType == SscConfig.SERVICE_TYPE_INVALID) {
+            return false;
+        }
+
+        return SscConfig.isTerminalBasedService(mSlotId, carrierConfigServiceType);
+    }
+
+    private boolean isCsVoiceNetworkRegistered() {
+        PhoneStateInterface phoneState = AgentFactory.getInstance()
+                .getAgent(PhoneStateInterface.class, mSlotId);
+        if (phoneState == null) {
+            return false;
+        }
+
+        int regState = phoneState.getCsNetworkRegistrationState();
+        return (regState == android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING)
+                || (regState == android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
     }
 
     private final class SscRequestHandler extends Handler {

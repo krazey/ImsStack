@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.os.Looper;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
+import android.telephony.NetworkRegistrationInfo.RegistrationState;
 
 /**
  * An interface for monitoring the phone states such as {@link ServiceState}, call state,
@@ -63,6 +64,11 @@ public interface PhoneStateInterface extends IAgent {
      * Returns the data network type(TelephonyManager#NETWORK_TYPE_XXX) of the cellular network.
      */
     @NetworkType int getCellularDataNetworkType();
+
+    /**
+     * Returns the CS network registration state(NetworkRegistrationInfo#REGISTRATION_STATE_XXX).
+     */
+    @RegistrationState int getCsNetworkRegistrationState();
 
     /**
      * Returns the current CS call state.

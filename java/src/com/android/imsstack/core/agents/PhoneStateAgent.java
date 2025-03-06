@@ -70,6 +70,8 @@ public class PhoneStateAgent implements PhoneStateInterface,
     private int mCsCallState = TelephonyManager.CALL_STATE_IDLE;
     private final AtomicInteger mImsCallState = new AtomicInteger(TelephonyManager.CALL_STATE_IDLE);
     private int mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    private int mCsNetworkRegistrationState =
+            NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
 
     public PhoneStateAgent(int slotId) {
         mSlotId = slotId;
@@ -115,6 +117,9 @@ public class PhoneStateAgent implements PhoneStateInterface,
         mCsCallState = TelephonyManager.CALL_STATE_IDLE;
         mImsCallState.set(TelephonyManager.CALL_STATE_IDLE);
         mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        mCsNetworkRegistrationState =
+                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+
     }
 
     @Override
@@ -153,6 +158,11 @@ public class PhoneStateAgent implements PhoneStateInterface,
     @Override
     public @NetworkType int getCellularDataNetworkType() {
         return mCellularDataNetworkType;
+    }
+
+    @Override
+    public @NetworkRegistrationInfo.RegistrationState int getCsNetworkRegistrationState() {
+        return mCsNetworkRegistrationState;
     }
 
     @Override
@@ -438,6 +448,8 @@ public class PhoneStateAgent implements PhoneStateInterface,
             mBarringInfo = null;
             mCallState = TelephonyManager.CALL_STATE_IDLE;
             mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+            mCsNetworkRegistrationState =
+                    NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
         }
 
         public int getSubId() {
@@ -527,6 +539,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 // Store the most recent service state
                 mServiceState = serviceState;
                 updateCellularDataNetworkType(serviceState);
+                updateCsNetworkRegistrationState(serviceState);
                 notifyServiceState(serviceState);
             }
         }
@@ -621,6 +634,16 @@ public class PhoneStateAgent implements PhoneStateInterface,
                         ? TelephonyManager.NETWORK_TYPE_UNKNOWN
                         : nri.getAccessNetworkTechnology();
             }
+        }
+
+        private void updateCsNetworkRegistrationState(ServiceState serviceState) {
+            final NetworkRegistrationInfo nri =
+                    serviceState.getNetworkRegistrationInfo(
+                            NetworkRegistrationInfo.DOMAIN_CS,
+                            AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+            mCsNetworkRegistrationState = (nri != null) ? nri.getNetworkRegistrationState()
+                    : NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
         }
     }
 }

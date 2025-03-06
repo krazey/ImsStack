@@ -21,6 +21,7 @@ import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPa
 import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_WIFI_TEST;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -40,6 +41,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
@@ -49,7 +51,9 @@ import android.text.TextUtils;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
@@ -93,10 +97,12 @@ public class SscServiceImplTest {
     @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SharedPreferences mMockSharedPreferences;
     @Mock private SscServiceState mMockSscServiceState;
+    @Mock private SscPreferenceHelper mMockSscPreferenceHelper;
     @Mock private SscTransactionFactory mMockSscTransactionFactory;
     @Mock private SscTransaction mMockSscTransaction;
     @Mock private IUtListener mMockUtListener;
     @Mock private IUtServiceStateListener mMockUtServiceStateListener;
+    @Mock private PhoneStateInterface mMockPhoneStateInterface;
 
     @Captor ArgumentCaptor<SscServiceQueryData> captorQueryData;
     @Captor ArgumentCaptor<SscServiceData> captorUpdateData;
@@ -149,6 +155,9 @@ public class SscServiceImplTest {
         mContext = new ContextFixture().getTestDouble();
         AppContext.init(mContext);
 
+        AgentFactory.getInstance()
+                .setAgent(PhoneStateInterface.class, mMockPhoneStateInterface, SLOT_0);
+
         mQueryCount = 1;
         mUpdateCount = 1;
         mSscServiceImpl = new SscServiceImpl(SLOT_0);
@@ -187,6 +196,8 @@ public class SscServiceImplTest {
         mLooper.destroy();
         SscConfig.clear(SLOT_0);
 
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT_0);
+
         AppContext.deinit();
     }
 
@@ -218,6 +229,50 @@ public class SscServiceImplTest {
         mSscServiceImpl.onServiceStateChanged();
 
         verify(mMockUtServiceStateListener).onServiceStateChanged();
+    }
+
+    @Test
+    public void testIsUtAvailable_utNotAvailableAndTbOirNotEnabled_returnFalse() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(true);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {});
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(false);
+
+        boolean result = mSscServiceImpl.isUtAvailable();
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsUtAvailable_utNotAvailableButTbOirEnabled_returnTrue() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(true);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(false);
+
+        boolean result = mSscServiceImpl.isUtAvailable();
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsUtAvailable_tbOirEnabledButTtNotEnabled_returnFalse() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(false);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(false);
+
+        boolean result = mSscServiceImpl.isUtAvailable();
+
+        assertFalse(result);
     }
 
     @Test
@@ -619,6 +674,78 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testQueryClir_terminalBasedService_default() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_DEFAULT);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener)
+                .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
+
+        ImsSsInfo ssInfo = captorSsInfo.getValue();
+        assertNotNull(ssInfo);
+        assertEquals(SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED,
+                ssInfo.getClirInterrogationStatus());
+        assertEquals(SscConstant.OIR_DEFAULT, ssInfo.getClirOutgoingState());
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testQueryClir_terminalBasedService_invocation() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_INVOCATION);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener)
+                .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
+
+        ImsSsInfo ssInfo = captorSsInfo.getValue();
+        assertNotNull(ssInfo);
+        assertEquals(SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED,
+                ssInfo.getClirInterrogationStatus());
+        assertEquals(SscConstant.OIR_INVOCATION, ssInfo.getClirOutgoingState());
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testQueryClir_terminalBasedService_suppression() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_SUPPRESSION);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener)
+                .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
+
+        ImsSsInfo ssInfo = captorSsInfo.getValue();
+        assertNotNull(ssInfo);
+        assertEquals(SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED,
+                ssInfo.getClirInterrogationStatus());
+        assertEquals(SscConstant.OIR_SUPPRESSION, ssInfo.getClirOutgoingState());
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -1272,6 +1399,112 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testUpdateClir_terminalBasedService_success() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[]{
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateClir_terminalBasedServiceAndCsInServiceHome_successAndSyncWithCs() {
+        when(mMockPhoneStateInterface.getCsNetworkRegistrationState())
+                .thenReturn(NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[]{
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL))).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateClir_terminalBasedServiceAndCsInServiceRoaming_successAndSyncWithCs() {
+        when(mMockPhoneStateInterface.getCsNetworkRegistrationState())
+                .thenReturn(NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[]{
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL))).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateClir_terminalBasedServiceAndCsNotInService_successAndNotSyncWithCs() {
+        when(mMockPhoneStateInterface.getCsNetworkRegistrationState())
+                .thenReturn(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[]{
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL))).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateClir_terminalBasedService_failure() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[]{
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(false);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
