@@ -60,6 +60,7 @@ public:
     void RemoveNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener) override;
     IMS_SINT32 GetRatType() const override;
     IMS_SINT32 GetMobileRatType() const override;
+    IMS_SINT32 GetLastConnectedRatType() const override;
 
     inline IMS_BOOL IsActive() const override { return m_eStatus == ServiceStatus::SERVICE_ACTIVE; }
     inline IMS_BOOL IsEmergency() const override { return m_eType == ServiceType::EMERGENCY; }

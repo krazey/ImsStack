@@ -32,6 +32,7 @@ MtcNetworkWatcher::MtcNetworkWatcher(IN IMtcService& objService, IN IMS_SINT32 n
                 objService.IsWlanIpCanType() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE),
         m_eMobileRatType(ConvertCellularRatType(m_piNetWatcher->GetNetRadioTechType())),
         m_eOldRatType(INetworkWatcher::RADIOTECH_TYPE_UNKNOWN),
+        m_eLastConnectedRatType(GetRatType()),
         m_objListeners(ImsList<IMtcNetworkWatcherListener*>())
 {
     m_piNetWatcher->RegisterObserver(this);
@@ -147,6 +148,11 @@ PRIVATE void MtcNetworkWatcher::NotifyIfChanged()
     if (m_eOldRatType == eCurrentRat)
     {
         return;
+    }
+
+    if (eCurrentRat != INetworkWatcher::RADIOTECH_TYPE_INVALID)
+    {
+        m_eLastConnectedRatType = eCurrentRat;
     }
 
     IMS_TRACE_D("NotifyIfChanged : serviceType=%d, old RAT=%d, new RAT=%d", m_eServiceType,

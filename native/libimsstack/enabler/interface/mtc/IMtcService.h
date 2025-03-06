@@ -102,6 +102,13 @@ public:
     virtual IMS_SINT32 GetMobileRatType() const = 0;
 
     /**
+     * @brief Gets the last connected RAT type.
+     *
+     * @return The last connected RAT type.
+     */
+    virtual IMS_SINT32 GetLastConnectedRatType() const = 0;
+
+    /**
      * @brief Checks if the service is active.
      *
      * @return True if the service is active.

@@ -168,6 +168,11 @@ PUBLIC VIRTUAL IMS_SINT32 MtcService::GetMobileRatType() const
     return m_pNetworkWatcher->GetMobileRatType();
 }
 
+PUBLIC VIRTUAL IMS_SINT32 MtcService::GetLastConnectedRatType() const
+{
+    return m_pNetworkWatcher->GetLastConnectedRatType();
+}
+
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsNr() const
 {
     if (IsWlanIpCanType())
