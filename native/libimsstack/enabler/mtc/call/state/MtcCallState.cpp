@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "IMessage.h"
+#include "INetworkWatcher.h"
 #include "ISipClientConnection.h"
 #include "ISipConnection.h"
 #include "ISipServerConnection.h"
@@ -520,13 +521,13 @@ CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
 {
     if (m_objContext.GetService().GetSrvccState() == SrvccState::STARTED)
     {
-        IMS_TRACE_I("HandleAosDisconnected ignore during srvcc", 0, 0, 0);
+        IMS_TRACE_I("HandleAosDisconnected : Ignore during SRVCC", 0, 0, 0);
         return GetStateName();
     }
 
     if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
     {
-        IMS_TRACE_I("HandleAosDisconnected ignore during EPS Fallback", 0, 0, 0);
+        IMS_TRACE_I("HandleAosDisconnected : Ignore during EPS fallback", 0, 0, 0);
         return GetStateName();
     }
 
@@ -1008,12 +1009,20 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) con
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
+IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const
 {
     switch (nAosReason)
     {
         case ImsAosReason::POWER_OFF:
             return CODE_LOCAL_POWER_OFF;
+        case ImsAosReason::AIRPLANE_MODE:
+            // TODO: b/397825528 - Need to return CODE_OEM_CAUSE_3 when using CST.
+            return m_objContext.GetService().GetLastConnectedRatType() ==
+                            INetworkWatcher::RADIOTECH_TYPE_IWLAN
+                    ? CODE_WIFI_LOST
+                    : CODE_RADIO_OFF;
+        case ImsAosReason::WIFI_OFF:
+            return CODE_WIFI_LOST;
         case ImsAosReason::SERVICE_POLICY:
         case ImsAosReason::REG_TERMINATING:
             return CODE_LOCAL_SERVICE_UNAVAILABLE;

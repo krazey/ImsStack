@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "IIpcan.h"
+#include "INetworkWatcher.h"
 #include "ISipClientConnection.h"
 #include "ImsTypeDef.h"
 #include "MediaNego.h"
@@ -111,6 +112,7 @@ public:
     MockIMtcCallManager objMockIMtcCallManager;
     MockISipClientConnection objMockISipClientConnection;
     MockUssiController* pMockUssiController;
+    MockEpsFallbackTrigger* pEpsFbTrigger;
 
 protected:
     virtual void SetUp() override
@@ -156,6 +158,9 @@ protected:
         pMockUssiController = new MockUssiController(objMockCallContext, new UssiDataParser());
         ON_CALL(objMockCallContext, GetUssiController).WillByDefault(Return(pMockUssiController));
 
+        pEpsFbTrigger = new MockEpsFallbackTrigger(objMockCallContext);
+        ON_CALL(objMockCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
+
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
 
@@ -166,6 +171,7 @@ protected:
         delete pEstablishedState;
         delete pSupplementaryService;
         delete pMockUssiController;
+        delete pEpsFbTrigger;
     }
 
     MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag, IN const IMS_BOOL& bSupoort)
@@ -892,8 +898,6 @@ TEST_F(EstablishedStateTest, UpdateDoesNotRefreshConvertRemoteResponseTimer)
 TEST_F(EstablishedStateTest,
         HandleAosDisconnectedWithRegTerminatingInvokesTerminateWithLocalServiceUnavailable)
 {
-    IMS_UINT32 nAosReason = ImsAosReason::REG_TERMINATING;
-
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
 
     MockEpsFallbackTrigger* pEpsFbTrigger = new MockEpsFallbackTrigger(objMockCallContext);
@@ -901,17 +905,76 @@ TEST_F(EstablishedStateTest,
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
-                    nAosReason))
+                    ImsAosReason::REG_TERMINATING))
             .WillByDefault(Return(IMS_FALSE));
 
     const CallReasonInfo objReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE);
-    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo)).Times(1);
-    EXPECT_CALL(objUiNotifier, SendTerminated(objReasonInfo)).Times(1);
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReasonInfo));
 
     EXPECT_EQ(CallStateName::TERMINATING,
-            pEstablishedState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAosReason));
+            pEstablishedState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, ImsAosReason::REG_TERMINATING));
+}
 
-    delete pEpsFbTrigger;
+TEST_F(EstablishedStateTest,
+        HandleAosDisconnectedWithAirplaneModeInvokesTerminateWithWifiLostIfIwlan)
+{
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    ImsAosReason::WIFI_OFF))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, GetLastConnectedRatType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_IWLAN));
+
+    const CallReasonInfo objReasonInfo(CODE_WIFI_LOST);
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, ImsAosReason::WIFI_OFF));
+}
+
+TEST_F(EstablishedStateTest,
+        HandleAosDisconnectedWithAirplaneModeInvokesTerminateWithRadioOffIfNotIwlan)
+{
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    ImsAosReason::AIRPLANE_MODE))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, GetLastConnectedRatType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
+
+    const CallReasonInfo objReasonInfo(CODE_RADIO_OFF);
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, ImsAosReason::AIRPLANE_MODE));
+}
+
+TEST_F(EstablishedStateTest, HandleAosDisconnectedWithWifiOffInvokesTerminateWithWifiLost)
+{
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    ImsAosReason::WIFI_OFF))
+            .WillByDefault(Return(IMS_FALSE));
+
+    const CallReasonInfo objReasonInfo(CODE_WIFI_LOST);
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, ImsAosReason::WIFI_OFF));
 }
 
 TEST_F(EstablishedStateTest, HoldPushesPendingOperation)
