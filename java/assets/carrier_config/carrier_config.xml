@@ -633,6 +633,7 @@
     <int-array name="imsvoice.location_based_number_list_int_array" num="0">
     </int-array>
     <boolean name="imsvoice.call_mergeable_on_conference_on_hold_bool" value="false"/>
+    <boolean name="imsemergency.release_emergency_pdn_on_failure_after_100_bool" value="false"/>
     <boolean name="imsemergency.emergency_call_current_location_discovery_supported_bool" value="true"/>
     <boolean name="imsvoice.check_ui_condition_for_incoming_resume_bool" value="false"/>
     <int-array name="imsvoice.registration_to_18x_timer_millis_int_array" num="2">
