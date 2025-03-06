@@ -609,6 +609,20 @@ PUBLIC VIRTUAL void AosService::NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32
     }
 }
 
+PUBLIC VIRTUAL void AosService::NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyCrossSimStatus :: nIsConnected(%d)", nIsConnected, 0, 0);
+    for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
+    {
+        IAosServicePhoneListener* piListener = m_objAosServicePhoneListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->ServicePhone_CrossSimStatusChanged(TO_BOOLEAN(nIsConnected));
+        }
+    }
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN IMS_SINT32 nRegType,
         IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
         IN const ImsList<AString>& objFeatureTags)

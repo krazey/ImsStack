@@ -37,6 +37,8 @@ public:
     MOCK_METHOD(
             void, ServicePhone_PreciseCallStateChanged, (IN PreciseCallState eState), (override));
     MOCK_METHOD(void, ServicePhone_PcoValueChanged, (IN IMS_SINT32 nValue), (override));
+    MOCK_METHOD(
+            void, ServicePhone_CrossSimStatusChanged, (IN IMS_BOOL bCrossSimConnected), (override));
 };
 
 #endif  // MOCK_I_AOS_SERVICE_PHONE_LISTENER_H_

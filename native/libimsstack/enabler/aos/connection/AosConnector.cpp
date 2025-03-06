@@ -51,6 +51,7 @@ AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
         m_nReadyRecoveryCount(0),
         m_bPcscfConfigured(IMS_FALSE),
         m_bDataConnected(IMS_FALSE),
+        m_bCrossSimConnected(IMS_FALSE),
         m_bEmergencyType(IMS_FALSE),
         m_bIsTerminating(IMS_FALSE),
         m_bIsPcscfChangeIgnored(IMS_FALSE)
@@ -166,6 +167,11 @@ PUBLIC VIRTUAL void AosConnector::ResetReadyRecovery()
     {
         ProcessReadyRecoveryTimerExpired();
     }
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosConnector::IsCrossSimConnected() const
+{
+    return m_bCrossSimConnected;
 }
 
 PROTECTED
@@ -932,6 +938,17 @@ PROTECTED VIRTUAL void AosConnector::ServicePhone_PcoValueChanged(IN IMS_SINT32 
     {
         Notify(LISTENER_TYPE_DEACTIVATED, REASON_LIMITED_SERVICE_PCO);
     }
+}
+
+PROTECTED VIRTUAL void AosConnector::ServicePhone_CrossSimStatusChanged(
+        IN IMS_BOOL bCrossSimConnected)
+{
+    if (IsEmergencyType())
+    {
+        return;
+    }
+
+    m_bCrossSimConnected = bCrossSimConnected;
 }
 
 PROTECTED VIRTUAL void AosConnector::Timer_TimerExpired(IN ITimer* piTimer)

@@ -63,9 +63,10 @@ public:
     static const IMS_SINT32 J2N_NOTIFY_POWER_OFF = EVENT_J2N_INFO + 18;
     static const IMS_SINT32 J2N_NOTIFY_PRECISE_CALL_STATE = EVENT_J2N_INFO + 19;
     static const IMS_SINT32 J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED = EVENT_J2N_INFO + 20;
-
     /// IAosInfo(Java) -> IAosEmergencyListener(Native)
     static const IMS_SINT32 J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED = EVENT_J2N_INFO + 21;
+    /// IAosInfo(Java) -> IAosServicePhoneListener(Native)
+    static const IMS_SINT32 J2N_NOTIFY_CROSS_SIM_STATUS = EVENT_J2N_INFO + 22;
 
     /**
      * Messages from native layer to java layer

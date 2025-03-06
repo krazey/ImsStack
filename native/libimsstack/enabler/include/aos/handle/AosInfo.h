@@ -44,6 +44,7 @@ private:
     IMS_UINT32 GetRegistrationMode() override;
     AString GetSupportedHeaderValue() override;
     AString GetServiceRouteHeaderValue() override;
+    IMS_BOOL IsCrossSimConnected() override;
     void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override;
     void NotifyPublishState(IN IMS_BOOL bIsStarted) override;
     void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) override;

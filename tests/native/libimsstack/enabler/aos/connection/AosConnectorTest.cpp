@@ -43,28 +43,30 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SetArgPointee;
 
-#define DECLARE_USING(Base)                      \
-    using Base::SetState;                        \
-    using Base::SetDataConnected;                \
-    using Base::SetEmergencyType;                \
-    using Base::IsDataConnected;                 \
-    using Base::IsTimerRunning;                  \
-    using Base::CheckIpChangedForEmergency;      \
-    using Base::CheckIpaAndProcessReadyRecovery; \
-    using Base::HandleInvalidPcscfAddress;       \
-    using Base::SelectIpVersion;                 \
-    using Base::Notify;                          \
-    using Base::ProcessCheckingPcscfAndIpa;      \
-    using Base::StartTimer;                      \
-    using Base::StopTimer;                       \
-    using Base::AosConnection_StateChanged;      \
-    using Base::AosConnection_IpChanged;         \
-    using Base::AosConnection_IpcanCatChanged;   \
-    using Base::AosConnection_PcscfChanged;      \
-    using Base::AosConnection_ConnectionFailed;  \
-    using Base::Pcscf_NotifyResult;              \
-    using Base::ServicePhone_PcoValueChanged;    \
-    using Base::CleanUp;                         \
+#define DECLARE_USING(Base)                         \
+    using Base::IsCrossSimConnected;                \
+    using Base::SetState;                           \
+    using Base::SetDataConnected;                   \
+    using Base::SetEmergencyType;                   \
+    using Base::IsDataConnected;                    \
+    using Base::IsTimerRunning;                     \
+    using Base::CheckIpChangedForEmergency;         \
+    using Base::CheckIpaAndProcessReadyRecovery;    \
+    using Base::HandleInvalidPcscfAddress;          \
+    using Base::SelectIpVersion;                    \
+    using Base::Notify;                             \
+    using Base::ProcessCheckingPcscfAndIpa;         \
+    using Base::StartTimer;                         \
+    using Base::StopTimer;                          \
+    using Base::AosConnection_StateChanged;         \
+    using Base::AosConnection_IpChanged;            \
+    using Base::AosConnection_IpcanCatChanged;      \
+    using Base::AosConnection_PcscfChanged;         \
+    using Base::AosConnection_ConnectionFailed;     \
+    using Base::Pcscf_NotifyResult;                 \
+    using Base::ServicePhone_PcoValueChanged;       \
+    using Base::ServicePhone_CrossSimStatusChanged; \
+    using Base::CleanUp;                            \
     using Base::TimerToString;
 
 const IMS_SINT32 SLOT_ID = 0;
@@ -323,6 +325,22 @@ TEST_F(AosConnectorTest, ClearCountAndTimerWhenResettingReadyRecovery)
 
     EXPECT_EQ(m_pAosConnector->GetReadyRecoveryCount(), 0);
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
+}
+
+TEST_F(AosConnectorTest, UpdateCrossSimStatusWhenCrossSimStatusChanged)
+{
+    m_pAosConnector->ServicePhone_CrossSimStatusChanged(IMS_TRUE);
+
+    EXPECT_TRUE(m_pAosConnector->IsCrossSimConnected());
+}
+
+TEST_F(AosConnectorTest, NotUpdateCrossSimStatusForEmergencyTypeWhenCrossSimStatusChanged)
+{
+    m_pAosConnector->SetEmergencyType(IMS_TRUE);
+
+    m_pAosConnector->ServicePhone_CrossSimStatusChanged(IMS_TRUE);
+
+    EXPECT_FALSE(m_pAosConnector->IsCrossSimConnected());
 }
 
 TEST_F(AosConnectorTest, DoNothingIfAlreadyInReadyStateWhenStateChangedToActive)

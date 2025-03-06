@@ -120,6 +120,15 @@ public:
      * @param nValue is value of carrier signal PCO.
      */
     virtual void ServicePhone_PcoValueChanged(IN IMS_SINT32 nValue) = 0;
+
+    /**
+     * Called to notify the change of cross sim status.
+     * Called by AosService (Java).
+     *
+     * @param bCrossSimConnected {@code IMS_TRUE} if cross sim connected, {@code IMS_FALSE} if not
+     * connected.
+     */
+    virtual void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bCrossSimConnected) = 0;
 };
 
 /**
@@ -192,6 +201,7 @@ public:
     inline void ServicePhone_PowerOff() override{};
     inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override{};
     inline void ServicePhone_PcoValueChanged(IN IMS_SINT32 /*nValue*/) override{};
+    inline void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL /*bCrossSimConnected*/) override {};
 };
 
 #endif  // INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_

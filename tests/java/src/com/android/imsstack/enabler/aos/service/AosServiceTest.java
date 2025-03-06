@@ -56,6 +56,7 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.aos.IAosInfo.CrossSimStatus;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
 import com.android.imsstack.enabler.aos.IAosInfo.RoamingPreferredVoiceNetwork;
@@ -811,6 +812,9 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToIwlan() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_DISCONNECTED.getValue());
+
         mAosService.addListener(mMockAosRegistrationListener);
         mAosService.setConnectedOverCrossSim(true);
         mAosService.setRegisteredNetworkType(NetworkType.CROSS_SIM);
@@ -820,10 +824,14 @@ public class AosServiceTest extends ImsStackTest {
         assertEquals(NetworkType.IWLAN, mAosService.getRegisteredNetworkType());
         verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
                 NetworkType.IWLAN, mAosService.getFeatureTagBits(), mAosService.getFeatureTags());
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
     }
 
     @Test
     public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToCrossSim() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_CONNECTED.getValue());
+
         mAosService.addListener(mMockAosRegistrationListener);
         mAosService.setConnectedOverCrossSim(false);
         mAosService.setRegisteredNetworkType(NetworkType.IWLAN);
@@ -834,6 +842,7 @@ public class AosServiceTest extends ImsStackTest {
         verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
                 NetworkType.CROSS_SIM, mAosService.getFeatureTagBits(),
                 mAosService.getFeatureTags());
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
     }
 
     @Test
