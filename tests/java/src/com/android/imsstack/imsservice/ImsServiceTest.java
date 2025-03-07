@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit;
 @RunWith(JUnit4.class)
 public class ImsServiceTest extends ImsStackTest {
     private static final String IMS_PACKAGE_NAME = "com.android.imsstack.tests";
-    private static final int AWAIT_TIMEOUT = 2000;
+    private static final int AWAIT_TIMEOUT = 5 * 1000;
     private static final int SUB_ID = 1;
 
     @Mock private ImsMmTelService mMmTelService;

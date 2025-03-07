@@ -33,7 +33,6 @@
             android:name = "com.android.imsstack.imsservice.ImsServiceTest$TestImsService"
             android:exported="true"
             android:persistent="true"
-            android:singleUser="true"
             android:permission="android.permission.BIND_IMS_SERVICE">
             <meta-data android:name="android.telephony.ims.MMTEL_FEATURE"
                        android:value="true"/>
