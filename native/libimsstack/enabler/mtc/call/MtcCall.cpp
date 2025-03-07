@@ -1257,10 +1257,11 @@ PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
 }
 
 PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServiceType,
-        IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
+        IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
 {
-    IMS_TRACE_I("%s - OnRatChanged : RAT[%s]", ToString().GetStr(),
-            MtcCallStringUtils::ConvertRatType(eRatType), 0);
+    IMS_TRACE_I("%s - OnRatChanged : RAT[%s]->[%s]", ToString().GetStr(),
+            MtcCallStringUtils::ConvertRatType(eOldRatType),
+            MtcCallStringUtils::ConvertRatType(eRatType));
 
     m_objPreconditionManager.OnRatChanged(eRatType);
     m_objUiNotifier.SendRatChanged(eRatType);
@@ -1271,9 +1272,18 @@ PUBLIC VIRTUAL void MtcCall::OnRatChanged(IN [[maybe_unused]] ServiceType eServi
         m_objStateMachine.RunStateOperation(
                 [&](IMtcCallState* pState)
                 {
+                    // TODO: replace this by OnRatChanged.
                     return pState->OnIpcanChanged(eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN
                                     ? IIpcan::CATEGORY_WLAN
                                     : IIpcan::CATEGORY_MOBILE);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](IMtcCallState* pState)
+                {
+                    return pState->OnRatChanged(eOldRatType, eRatType);
                 });
     }
 }

@@ -19,6 +19,7 @@
 #include "IImsRadio.h"
 #include "IMessage.h"
 #include "IMtcCallController.h"
+#include "INetworkWatcher.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -62,6 +63,7 @@ PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
         m_pUdpKeepAliveSender(IMS_NULL),
+        m_pSilentRedialHelper(IMS_NULL),
         m_bWaitingServiceConnectedForRedial(IMS_FALSE)
 {
 }
@@ -207,15 +209,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
     {
         StopTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
         StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
-
-        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF ||
-                objReason.nExtraCode == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
-        {
-            m_bWaitingServiceConnectedForRedial = IMS_TRUE;
-            return GetStateName();
-        }
-
-        return HandleSilentRedial(objReason);
+        return HandleSilentRedialReason(objReason);
     }
 
     OnStartFailed(objReason, IMS_TRUE);
@@ -269,13 +263,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
     if (objReason.nCode == CODE_INTERNAL_REDIAL)
     {
-        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF)
-        {
-            m_bWaitingServiceConnectedForRedial = IMS_TRUE;
-            return GetStateName();
-        }
-
-        return HandleSilentRedial(objReason);
+        return HandleSilentRedialReason(objReason);
     }
 
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
@@ -647,26 +635,36 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName OutgoingState::OnRatChanged(
+        IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
+{
+    if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_NR &&
+            (eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE ||
+                    eRatType == INetworkWatcher::RADIOTECH_TYPE_LTE_CA))
+    {
+        IMS_TRACE_I("OnRatChanged : EPS-FB", 0, 0, 0);
+        if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
+        {
+            m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
+            return PerformSilentRedial();
+        }
+    }
+
+    return GetStateName();
+}
+
 PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
 {
     if (m_bWaitingServiceConnectedForRedial)
     {
         m_bWaitingServiceConnectedForRedial = IMS_FALSE;
-        return HandleSilentRedial(CallReasonInfo(CODE_INTERNAL_REDIAL,
-                m_objContext.GetCallInfo().IsEmergency()
-                        ? EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF
-                        : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
+        return PerformSilentRedial();
     }
 
-    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingRegistration())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        if (m_objContext.GetEpsFallbackTrigger().GetTriggerReason() ==
-                EpsFallbackReason::NO_NETWORK_RESPONSE)
-        {
-            return HandleSilentRedial(
-                    CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
-        }
+        return PerformSilentRedial();
     }
 
     return GetStateName();
@@ -722,7 +720,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
                 ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE);
+                EpsFallbackReason::RADIO_CHECK_BLOCK);
     }
 
     return GetStateName();
@@ -805,19 +803,35 @@ CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SI
 }
 
 PRIVATE
-CallStateName OutgoingState::HandleSilentRedial(IN const CallReasonInfo& objReason)
+CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("HandleSilentRedial", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentRedialReason", 0, 0, 0);
 
-    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK)
+    m_pSilentRedialHelper =
+            &m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason);
+
+    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF ||
+            objReason.nExtraCode == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
     {
-        m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE);
+        m_bWaitingServiceConnectedForRedial = IMS_TRUE;
         return GetStateName();
     }
 
-    CallReasonInfo objResult =
-            m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason).Redial();
+    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_BY_EPS_FALLBACK ||
+            objReason.nExtraCode == EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG)
+    {
+        return GetStateName();
+    }
+
+    return PerformSilentRedial();
+}
+
+PRIVATE
+CallStateName OutgoingState::PerformSilentRedial()
+{
+    IMS_TRACE_D("PerformSilentRedial", 0, 0, 0);
+    IMS_ASSERT(m_pSilentRedialHelper);
+    CallReasonInfo objResult = m_pSilentRedialHelper->Redial();
     if (objResult.nCode != CODE_NONE)
     {
         OnStartFailed(objResult);

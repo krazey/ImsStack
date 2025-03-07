@@ -28,10 +28,39 @@ struct CallReasonInfo;
 enum class EpsFallbackReason
 {
     NONE,
-    /** EPS-FB is not triggered by network. e.g. Verizon's watchdog timer is expired. */
+
+    /**
+     * EPS fallback was not triggered by the network.
+     * Example: A watchdog timer (e.g., Verizon's) expired.
+     * No data buffer flush is performed by the modem.
+     */
     NO_NETWORK_TRIGGER,
-    /** There's no response from the network or connection fails. */
+
+    /**
+     * No response was received from the network.
+     * Data buffer flush is performed by the modem.
+     */
     NO_NETWORK_RESPONSE,
+
+    /**
+     * No response was received from the network, and it requests IMS registration to AoS.
+     * Data buffer flush is performed by the modem.
+     */
+    NO_NETWORK_RESPONSE_REQUIRING_REG,
+
+    /**
+     * The call was blocked due to a radio check failure.
+     * Example: OnConnectionFailed() by AC Barring or RRC Reject.
+     * Data buffer flush is performed by the modem.
+     */
+    RADIO_CHECK_BLOCK,
+
+    /**
+     * The call was explicitly rejected by the network with a specific status code.
+     * See {@CarrierConfig::ImsVoice::START_ERROR_ACTION_TRIGGER_EPSFB}.
+     * No data buffer flush is performed by the modem.
+     */
+    FAILURE_RESPONSE,
 };
 
 class EpsFallbackTrigger : public ITimerListener
@@ -53,7 +82,15 @@ public:
     virtual void TriggerEpsFallback(IN EpsFallbackReason eReason);
 
     inline virtual EpsFallbackReason GetTriggerReason() const { return m_eTriggerReason; }
-    inline virtual IMS_BOOL IsWaitingEpsFallback() const { return m_bWaitingEpsFallback; }
+    inline virtual IMS_BOOL IsWaitingEpsFallback() const
+    {
+        return m_eTriggerReason != EpsFallbackReason::NONE &&
+                m_eTriggerReason != EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG;
+    }
+    inline virtual IMS_BOOL IsWaitingRegistration() const
+    {
+        return m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG;
+    }
 
 private:
     IMS_BOOL IsEpsFallbackTriggeredByNetwork() const;
@@ -62,8 +99,7 @@ private:
     ITimer* m_piTimerWatchdogWait;
     ITimer* m_piTimerEpsFallbackWait;
     EpsFallbackReason m_eTriggerReason;
-    IMS_BOOL m_bWaitingEpsFallback;
-    static const IMS_UINT32 EPS_FALLBACK_COMPLETE_INTERVAL = 20000;
+    static const IMS_UINT32 EPS_FALLBACK_COMPLETE_TIMEOUT = 20000;
 };
 
 #endif

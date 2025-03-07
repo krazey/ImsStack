@@ -902,7 +902,7 @@ TEST_F(EstablishedStateTest,
 
     MockEpsFallbackTrigger* pEpsFbTrigger = new MockEpsFallbackTrigger(objMockCallContext);
     ON_CALL(objMockCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
                     ImsAosReason::REG_TERMINATING))

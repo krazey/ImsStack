@@ -2231,7 +2231,7 @@ TEST_F(MtcCallTest, OnAosStateChangedCallsState)
     objCall.OnAosStateChanged(objService, eAnyState, eAnyReason);
 }
 
-TEST_F(MtcCallTest, OnIpcanChangedCallsState)
+TEST_F(MtcCallTest, OnRatChangedCallsState)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState, OnIpcanChanged(IIpcan::CATEGORY_WLAN)).Times(1);
@@ -2240,6 +2240,18 @@ TEST_F(MtcCallTest, OnIpcanChangedCallsState)
 
     objCall.OnRatChanged(objService.GetServiceType(), INetworkWatcher::RADIOTECH_TYPE_IWLAN,
             INetworkWatcher::RADIOTECH_TYPE_IWLAN);
+}
+
+TEST_F(MtcCallTest, OnRatChangedCallsStateOnRatChangedIfNoIpcanChanged)
+{
+    IMS_SINT32 eOldRat = INetworkWatcher::RADIOTECH_TYPE_NR;
+    IMS_SINT32 eNewRat = INetworkWatcher::RADIOTECH_TYPE_LTE;
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, OnRatChanged(eOldRat, eNewRat)).Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
+
+    objCall.OnRatChanged(objService.GetServiceType(), eOldRat, eNewRat);
 }
 
 TEST_F(MtcCallTest, OnConnectionFailedCallsState)

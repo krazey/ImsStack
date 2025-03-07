@@ -190,6 +190,7 @@ void SilentRedialHelper::SetRedialDetail()
         case EXTRA_CODE_REDIAL_FOR_REDIRECTION:
         case EXTRA_CODE_REDIAL_FOR_SDP_CHANGE:
         case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK:
+        case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG:
         case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF:
         case EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION:
             m_nInterval = 0;

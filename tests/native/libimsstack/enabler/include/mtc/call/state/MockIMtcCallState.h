@@ -146,6 +146,8 @@ public:
     MOCK_METHOD(CallStateName, OnAosStateChanged, (IN MtcAosState eState, IN IMS_UINT32 eAosReason),
             (override));
     MOCK_METHOD(CallStateName, OnIpcanChanged, (IN IMS_UINT32 eIpcan), (override));
+    MOCK_METHOD(CallStateName, OnRatChanged, (IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType),
+            (override));
     MOCK_METHOD(CallStateName, OnConnectionFailed,
             (IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis), (override));
 };

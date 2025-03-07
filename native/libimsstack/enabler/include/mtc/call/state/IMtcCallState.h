@@ -648,6 +648,15 @@ public:
     virtual CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) = 0;
 
     /**
+     * @brief Reports OnRatChanged information received from the IMtcNetworkWatcherListener.
+     *
+     * @param eOldRatType The type of the old RAT.
+     * @param eRatType The type of the new RAT. It can't be same as an old RAT.
+     * @return The CallStateName after handling this event.
+     */
+    virtual CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) = 0;
+
+    /**
      * Reports the OnConnectionFailed information received from the IMtcRadioCheckerListener.
      * <p>
      * This method forwards the connection failure details, including the reason and

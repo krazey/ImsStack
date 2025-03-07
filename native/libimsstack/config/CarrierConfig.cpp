@@ -1190,6 +1190,10 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_IN
         KEY_IMS_VOICE_PREFIX "eps_fallback_watchdog_time_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL[] =
         KEY_IMS_VOICE_PREFIX "eps_fallback_trigger_by_rrc_reject_wait_time_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL[] =
+                KEY_IMS_VOICE_PREFIX
+        "require_registration_after_eps_fallback_trigger_for_silent_redial_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "send_udp_keep_alive_interval_time_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[] =

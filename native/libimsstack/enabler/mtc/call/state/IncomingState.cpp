@@ -267,7 +267,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
 
 PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
 {
-    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback() &&
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingRegistration() &&
             !m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();

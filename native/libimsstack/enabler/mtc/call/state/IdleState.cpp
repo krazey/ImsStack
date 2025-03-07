@@ -238,7 +238,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
             if (EpsFallbackTrigger::ShouldTriggerByReasonInfo(m_objContext, objResult.objReason))
             {
                 m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                        EpsFallbackReason::NO_NETWORK_RESPONSE);
+                        EpsFallbackReason::RADIO_CHECK_BLOCK);
                 return GetStateName();
             }
 
@@ -302,7 +302,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
 PROTECTED VIRTUAL CallStateName IdleState::HandleAosConnected()
 {
-    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallback())
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingRegistration())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
 

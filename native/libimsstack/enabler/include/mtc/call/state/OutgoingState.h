@@ -26,6 +26,7 @@ class AString;
 class IMessage;
 class IMtcCalContext;
 class IMtcSession;
+class ISilentRedialHelper;
 class SuppService;
 class UdpKeepAliveSender;
 enum class QosLossPolicy;
@@ -68,6 +69,7 @@ public:
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
+    CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) override;
     CallStateName OnConnectionFailed(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) override;
 
@@ -78,7 +80,8 @@ private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
     CallStateName MaySendPreconditionConfirmation(IN ISession& objSession);
     CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode);
-    CallStateName HandleSilentRedial(IN const CallReasonInfo& objReason);
+    CallStateName HandleSilentRedialReason(IN const CallReasonInfo& objReason);
+    CallStateName PerformSilentRedial();
     IMS_BOOL HasNotRespondedQosConfirmation(IN ISession& objISession) const;
     void OnStarted(IN IMtcSession& objMtcSession);
     void OnStartFailed(
@@ -87,6 +90,7 @@ private:
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
 
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
+    ISilentRedialHelper* m_pSilentRedialHelper;
     IMS_BOOL m_bWaitingServiceConnectedForRedial;
 };
 

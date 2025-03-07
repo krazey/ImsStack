@@ -150,6 +150,7 @@ public:
     CallStateName OnSrvccStateUpdated(IN SrvccState eState) override;
     CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
+    CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) override;
     CallStateName OnConnectionFailed(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) override;
 

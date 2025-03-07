@@ -38,8 +38,7 @@ EpsFallbackTrigger::EpsFallbackTrigger(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_piTimerWatchdogWait(IMS_NULL),
         m_piTimerEpsFallbackWait(IMS_NULL),
-        m_eTriggerReason(EpsFallbackReason::NONE),
-        m_bWaitingEpsFallback(IMS_FALSE)
+        m_eTriggerReason(EpsFallbackReason::NONE)
 {
     IMS_TRACE_D("+EpsFallbackTrigger[%d]", m_objContext.GetCallKey(), 0, 0);
 }
@@ -59,7 +58,7 @@ PUBLIC VIRTUAL EpsFallbackTrigger::~EpsFallbackTrigger()
         TimerService::GetTimerService()->DestroyTimer(m_piTimerEpsFallbackWait);
     }
 
-    if (m_bWaitingEpsFallback && m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE)
+    if (m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG)
     {
         m_objContext.GetService().GetAosConnector()->NotifyEpsfbCallState(
                 IImsAosInfo::EPSFB_CALL_FAILED);
@@ -140,7 +139,7 @@ void EpsFallbackTrigger::OnEpsFallbackCompleted()
         m_piTimerEpsFallbackWait = IMS_NULL;
     }
 
-    m_bWaitingEpsFallback = IMS_FALSE;
+    m_eTriggerReason = EpsFallbackReason::NONE;
 }
 
 PUBLIC VIRTUAL void EpsFallbackTrigger::Timer_TimerExpired(IN ITimer* piTimer)
@@ -166,13 +165,13 @@ PUBLIC VIRTUAL void EpsFallbackTrigger::Timer_TimerExpired(IN ITimer* piTimer)
 
         m_objContext.GetCall().Terminate(CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-        if (m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE)
+        if (m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG)
         {
             m_objContext.GetService().GetAosConnector()->NotifyEpsfbCallState(
                     IImsAosInfo::EPSFB_CALL_FAILED);
         }
 
-        m_bWaitingEpsFallback = IMS_FALSE;
+        m_eTriggerReason = EpsFallbackReason::NONE;
     }
     else
     {
@@ -187,16 +186,20 @@ PUBLIC
 void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason)
 {
     IMS_TRACE_D("TriggerEpsFallback Reason[%d]", eReason, 0, 0);
-    if (IsWaitingEpsFallback())
+    if (m_eTriggerReason != EpsFallbackReason::NONE)
     {
         IMS_TRACE_D("TriggerEpsFallback : Already triggered", 0, 0, 0);
         return;
     }
 
     m_eTriggerReason = eReason;
-    m_bWaitingEpsFallback = IMS_TRUE;
     IMS_UINT32 eRadioReason;
     if (m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE)
+    {
+        eRadioReason = IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE;
+    }
+    else if (m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG ||
+            m_eTriggerReason == EpsFallbackReason::RADIO_CHECK_BLOCK)
     {
         eRadioReason = IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE;
         m_objContext.GetService().GetAosConnector()->NotifyEpsfbCallState(
@@ -207,10 +210,10 @@ void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason)
         eRadioReason = IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER;
     }
 
-    if (m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE)
+    if (m_eTriggerReason != EpsFallbackReason::NO_NETWORK_TRIGGER)
     {
         m_piTimerEpsFallbackWait = TimerService::GetTimerService()->CreateTimer();
-        m_piTimerEpsFallbackWait->SetTimer(EPS_FALLBACK_COMPLETE_INTERVAL, this);
+        m_piTimerEpsFallbackWait->SetTimer(EPS_FALLBACK_COMPLETE_TIMEOUT, this);
     }
 
     ImsRadioService::GetImsRadioService()

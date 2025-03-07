@@ -32,6 +32,7 @@
 #include "PlatformContext.h"
 #include "SipStatusCode.h"
 #include "TestConfigService.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCall.h"
@@ -59,6 +60,26 @@ namespace android
 class StartErrorHandlerTest : public ::testing::Test
 {
 public:
+    inline StartErrorHandlerTest() :
+            objCallContext(),
+            objMtcService(),
+            objAosConnector(),
+            pMessage(new MockIMessage()),
+            pConfigurationProxy(new MockMtcConfigurationProxy()),
+            objCallInfo(),
+            objMessageUtils(),
+            objMtcSession(),
+            objSession(),
+            objImsEventReceiver(),
+            objIms3gppData(),
+            m_pConfigService(new TestConfigService()),
+            objCallManager(),
+            objEpsFbTrigger(objCallContext),
+            objActionSets(ImsVector<AString>()),
+            pHandler(IMS_NULL)
+    {
+    }
+
     MockIMtcCallContext objCallContext;
     MockIMtcService objMtcService;
     MockIMtcAosConnector objAosConnector;
@@ -72,6 +93,7 @@ public:
     Ims3gppData objIms3gppData;
     TestConfigService* m_pConfigService;
     MockIMtcCallManager objCallManager;
+    MockEpsFallbackTrigger objEpsFbTrigger;
     ImsVector<AString> objActionSets;
 
     StartErrorHandler* pHandler;
@@ -79,7 +101,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_pConfigService = new TestConfigService();
         m_pConfigService->SetCarrierConfig(&(m_pConfigService->GetMockCarrierConfig()));
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, m_pConfigService);
@@ -89,7 +110,6 @@ protected:
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objMtcService));
         ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
-        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -102,9 +122,9 @@ protected:
                 .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
         ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
 
-        pMessage = new MockIMessage();
         ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(objEpsFbTrigger));
 
         objCallInfo.eEmergencyType = EmergencyType::NONE;
         pHandler = new StartErrorHandler(objCallContext, objSession);
@@ -314,16 +334,40 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfbWithReg)
 {
     SetTransactionTimeout();
     ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
             .WillByDefault(Return(1000));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK));
+    EXPECT_CALL(objEpsFbTrigger,
+            TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG));
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG));
+}
+
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfbWithoutReg)
+{
+    SetTransactionTimeout();
+    ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE));
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
 }
 
 TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfiguration)
@@ -1123,6 +1167,7 @@ TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbInNonNr)
 
     ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(_)).Times(0);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
 }
 
@@ -1133,7 +1178,8 @@ TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbInNr)
 
     ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK));
+    EXPECT_CALL(objEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::FAILURE_RESPONSE));
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
 }
 
 TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
