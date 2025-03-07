@@ -77,6 +77,7 @@ public:
     virtual void NotifyVideoSetting(IN IMS_UINT32 nIsOn) = 0;
     virtual void NotifyVolteSetting(IN IMS_UINT32 nIsOn) = 0;
     virtual void NotifyWfcSetting(IN IMS_UINT32 nIsOn) = 0;
+    virtual void NotifyWifiSetting(IN IMS_UINT32 nIsOn) = 0;
 
     /**
      * AosService(Java) -> IAosServicePhoneListener(Native)

@@ -42,6 +42,7 @@ import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -114,6 +115,14 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         public void onInstantRequestedLocationUpdated() {
             sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO,
                     LocationInfo.FIXED.getValue());
+        }
+    };
+    final WifiInterface.Listener mWifiListener = new WifiInterface.Listener() {
+        @Override
+        public void onWifiStateChanged() {
+            WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+            sendRequest(IIAosService.J2N_NOTIFY_WIFI_SETTING,
+                    (wifi != null) ? wifi.isWifiEnabled() : false);
         }
     };
 
@@ -201,12 +210,22 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         if (apn != null) {
             apn.addListener(this);
         }
+
+        WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+        if (wifi != null) {
+            wifi.addListener(mWifiListener);
+        }
     }
 
     /**
      * Stop the necessary information that was previously initialized for AoS service.
      */
     public void stop() {
+        WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+        if (wifi != null) {
+            wifi.removeListener(mWifiListener);
+        }
+
         IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
         IApn apn = (dcApn != null) ? dcApn.getApnControl(EApnType.IMS.getType()) : null;
         if (apn != null) {

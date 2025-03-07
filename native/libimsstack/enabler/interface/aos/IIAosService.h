@@ -67,6 +67,8 @@ public:
     static const IMS_SINT32 J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED = EVENT_J2N_INFO + 21;
     /// IAosInfo(Java) -> IAosServicePhoneListener(Native)
     static const IMS_SINT32 J2N_NOTIFY_CROSS_SIM_STATUS = EVENT_J2N_INFO + 22;
+    /// IAosInfo(Java) -> IAosServiceSettingListener(Native)
+    static const IMS_SINT32 J2N_NOTIFY_WIFI_SETTING = EVENT_J2N_INFO + 23;
 
     /**
      * Messages from native layer to java layer

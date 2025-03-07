@@ -65,6 +65,7 @@ public:
     void NotifyVideoSetting(IN IMS_UINT32 nIsOn) override;
     void NotifyVolteSetting(IN IMS_UINT32 nIsOn) override;
     void NotifyWfcSetting(IN IMS_UINT32 nIsOn) override;
+    void NotifyWifiSetting(IN IMS_UINT32 nIsOn) override;
 
     void NotifyAosStart() override;
     void NotifyIpcanHandoverFailure(
