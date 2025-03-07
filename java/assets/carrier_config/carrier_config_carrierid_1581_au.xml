@@ -97,6 +97,7 @@
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
 
     <!-- Mtc -->
+    <int name="imsvoice.policy_for_prack_delivery_failure_int" value="1"/>
     <int name="imsvoice.18x_timer_millis_int" value="10000"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="5"/> <!-- MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF -->
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>

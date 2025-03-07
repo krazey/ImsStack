@@ -392,15 +392,18 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* p
 
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISession* piSession)
 {
-    if (m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
+    IMS_SINT32 ePolicy = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT);
+    IMS_TRACE_D("SessionPrackDeliveryFailed : Policy[%d]", ePolicy, 0, 0);
+
+    if (ePolicy == ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_IGNORE)
     {
-        IMS_TRACE_D("SessionPrackDeliveryFailed : Ignore", 0, 0, 0);
         return GetStateName();
     }
 
-    if (MultipleDialogHandler().OnDialogRequestFailed(m_objContext,
-                *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
+    if (ePolicy == ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG &&
+            MultipleDialogHandler().OnDialogRequestFailed(m_objContext,
+                    *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
     {
         return GetStateName();
     }

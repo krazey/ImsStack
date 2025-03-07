@@ -275,14 +275,6 @@ TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
     pOutgoingState->OnExit();
 }
 
-TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedIgnoredIfConfigOn)
-{
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
-}
-
 TEST_F(OutgoingStateTest, ResponseWaitTimeoutForReasonExpirationUpdatesReason)
 {
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
@@ -1510,16 +1502,16 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredInvokesSessionStartedIfEstablishe
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedDoesNothingIfNeedToIgnoreByConfig)
 {
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
+            .WillByDefault(Return(ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_IGNORE));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedByErrorResponseTerminatesCall)
 {
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
+            .WillByDefault(Return(ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_PRACK, -1))
             .WillByDefault(Return(SipStatusCode::SC_488));
 
@@ -1533,8 +1525,8 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedByErrorResponseTerminatesCal
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedByNoResponseTerminatesCall)
 {
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
+            .WillByDefault(Return(ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_PRACK, -1))
             .WillByDefault(Return(SipStatusCode::SC_INVALID));
 
@@ -1548,8 +1540,8 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedByNoResponseTerminatesCall)
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedTerminatesSessionAndKeepsCurrentState)
 {
-    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
+            .WillByDefault(Return(ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG));
 
     MockIMtcSession objMtcSession2;
     objSessions.Append(&objMtcSession2);
@@ -1561,6 +1553,25 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedTerminatesSessionAndKeepsCur
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession2))).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedTerminatesCallOnMultiDialog)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
+            .WillByDefault(Return(ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_CALL));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_PRACK, -1))
+            .WillByDefault(Return(SipStatusCode::SC_504));
+
+    MockIMtcSession objMtcSession2;
+    objSessions.Append(&objMtcSession2);
+    ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+
+    EXPECT_CALL(objMtcSession,
+            Terminate(_, CallReasonInfo(CODE_SIP_METHOD_NOT_ALLOWED, EXTRA_CODE_METHOD_PRACK)));
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(CODE_SIP_METHOD_NOT_ALLOWED, EXTRA_CODE_METHOD_PRACK)));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionPrackDeliveryFailed(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStopsTimersIfNot100)
