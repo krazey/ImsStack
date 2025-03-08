@@ -15,7 +15,7 @@
  */
 package com.android.imsstack.imsservice.uce;
 
-import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -93,7 +93,7 @@ public class RcsCapExchangeImplTest {
         Collection<Uri> uris = new ArrayList<>();
         uris.add(Uri.parse(TEST_PHONE_NUMBER));
         mRcsCapExchangeImpl.subscribeForCapabilities(uris, mSubscribeResponseCallback);
-        verify(mUceApi).setListener(anyObject());
+        verify(mUceApi).setListener(any());
         verify(mUceApi).subscribeCapabilities(uris, mRcsCapSubscribeResponseCallback);
     }
 
@@ -102,7 +102,7 @@ public class RcsCapExchangeImplTest {
     public void publishCapabilitiesTest() {
         String pidf = getpidf();
         mRcsCapExchangeImpl.publishCapabilities(pidf, mPublishResponseCallback);
-        verify(mUceApi).setListener(anyObject());
+        verify(mUceApi).setListener(any());
         verify(mUceApi).publishCapabilities(pidf, mRcsCapPublishResponseCallback);
     }
 
@@ -114,7 +114,7 @@ public class RcsCapExchangeImplTest {
         myCapabilities.add(VIDEO);
         mRcsCapExchangeImpl.sendOptionsCapabilityRequest(
                 contactUri, myCapabilities, mOptionCallback);
-        verify(mUceApi).setListener(anyObject());
+        verify(mUceApi).setListener(any());
         verify(mUceApi, times(1))
                 .sendOptionsCapabilityRequest(
                         contactUri, myCapabilities, mRcsCapOptionsResponseCallback);

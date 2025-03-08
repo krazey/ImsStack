@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -232,7 +231,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession = createImsCallSession("2");
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, false);
         mImsCallSession.start(null, mImsCallProfile);
-        verify(mMockMtcCall, times(1)).start(anyInt(), anyObject(), anyObject(),
+        verify(mMockMtcCall, times(1)).start(anyInt(), any(), any(),
                 any(MediaInfo.class), any(SuppInfo.class));
 
         //verify setGttInfo
@@ -241,7 +240,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mCallFeaturemap.put(ImsCallSessionImpl.CF_TTY, true);
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
         mImsCallSession.start(null, mImsCallProfile);
-        verify(mMockMtcCall, times(2)).start(anyInt(), anyObject(), anyObject(),
+        verify(mMockMtcCall, times(2)).start(anyInt(), any(), any(),
                 any(MediaInfo.class), any(SuppInfo.class));
     }
 
@@ -268,7 +267,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 new MtcServiceState(IUMtcService.SERVICE_VOIP, IUMtcService.ES_OPENED, 0));
         mTestableLooper.processAllMessages();
 
-        verify(mMockMtcCall, times(0)).start(anyInt(), anyObject(), anyObject(),
+        verify(mMockMtcCall, times(0)).start(anyInt(), any(), any(),
                 any(MediaInfo.class), any(SuppInfo.class));
     }
 
@@ -295,7 +294,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 new MtcServiceState(IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_OPENED, 0));
         mTestableLooper.processAllMessages();
 
-        verify(mMockMtcCall, times(1)).start(anyInt(), anyObject(), anyObject(),
+        verify(mMockMtcCall, times(1)).start(anyInt(), any(), any(),
                 any(MediaInfo.class), any(SuppInfo.class));
     }
 
