@@ -272,32 +272,37 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS
 
     if (IsReinitiationRequested())
     {
-        A_IMS_TRACE_I(REGID,
-                "ProcessDefaultFlowRecovery_Start :: ignore because reg is re-initiated", 0, 0, 0);
+        A_IMS_TRACE_I(
+                REGID, "ProcessDefaultFlowRecovery_Start :: Ignore due to re-initiation", 0, 0, 0);
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->IsRegRetryRuleForERegUsed() &&
-            ProcessNormalDefaultFlowRecovery_Start(nStatusCode))
+    IMS_BOOL bRequiredERegRetry = GET_N_CONFIG(m_nSlotId)->IsRegRetryRuleForERegUsed() &&
+            !m_piContext->GetNetTracker()->IsRoaming();
+    if (bRequiredERegRetry && ProcessNormalDefaultFlowRecovery_Start(nStatusCode))
     {
         A_IMS_TRACE_I(
-                REGID, "ProcessDefaultFlowRecovery_Start :: follow  normal retry flow", 0, 0, 0);
+                REGID, "ProcessDefaultFlowRecovery_Start :: Follow normal retry flow", 0, 0, 0);
         return;
     }
 
     if (IsFakeRegistration())
     {
-        A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: fake E-REG is failed", 0, 0, 0);
+        A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: Fake E-REG is failed", 0, 0, 0);
         ProcessUnpredictableFailure();
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
+    if (GetPreferredRegScheme() ==
             CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
     {
-        A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: try the fake E-REG", 0, 0, 0);
-        ProcessFakeMode();
-        return;
+        if (!GET_N_CONFIG(m_nSlotId)->IsAnonymousECallActionSupported() ||
+                IsAnonymousECallActionPresent(nStatusCode))
+        {
+            A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: Try fake E-REG", 0, 0, 0);
+            ProcessFakeMode();
+            return;
+        }
     }
 
     SetState(STATE_REGSTOP);
@@ -964,6 +969,12 @@ PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
         default:
             return m_nConsecutiveFailure <= nMaxRetryCnt;
     }
+}
+
+PROTECTED IMS_BOOL AosERegistration::IsAnonymousECallActionPresent(IN IMS_SINT32 nStatusCode) const
+{
+    return (nStatusCode == SipStatusCode::SC_403) &&
+            m_pUtil->IsAnonymousECallActionPresent(m_piRegistration->GetPreviousResponse());
 }
 
 PROTECTED void AosERegistration::ProcessReRegStart()
