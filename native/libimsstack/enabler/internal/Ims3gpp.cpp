@@ -133,6 +133,7 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
     // Value of action
     const IMS_CHAR VALUE_EMERGENCY_REGISTRATION[] = "emergency-registration";
     const IMS_CHAR VALUE_INITIAL_REGISTRATION[] = "initial-registration";
+    const IMS_CHAR VALUE_ANONYMOUS_EMERGENCYCALL[] = "anonymous-emergencycall";
 
     if (piNode == IMS_NULL)
     {
@@ -180,6 +181,11 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
                 {
                     m_objAlternativeService.m_nAction =
                             AlternativeService::ACTION_INITIAL_REGISTRATION;
+                }
+                else if (m_objAlternativeService.m_strAction.Equals(VALUE_ANONYMOUS_EMERGENCYCALL))
+                {
+                    m_objAlternativeService.m_nAction =
+                            AlternativeService::ACTION_ANONYMOUS_EMERGENCYCALL;
                 }
             }
         }

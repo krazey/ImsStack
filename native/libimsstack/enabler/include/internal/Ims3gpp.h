@@ -63,7 +63,8 @@ public:
         {
             ACTION_UNKNOWN = 0,
             ACTION_EMERGENCY_REGISTRATION = 1,
-            ACTION_INITIAL_REGISTRATION = 2
+            ACTION_INITIAL_REGISTRATION = 2,
+            ACTION_ANONYMOUS_EMERGENCYCALL = 3
         };
 
     private:
