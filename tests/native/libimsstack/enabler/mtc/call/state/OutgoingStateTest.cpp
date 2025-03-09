@@ -1818,6 +1818,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedTerminatesCallIfRequiredExtensionIsN
     ON_CALL(objMessageUtils, GetHeaders(&objMessage, ISipHeader::REQUIRE, _))
             .WillByDefault(Return(lstRequiredExtensions));
 
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE));
     EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE)));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE)));
 
@@ -1850,6 +1851,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedTerminatesCallIfSdpOaFails)
 
     SetSdpOaFailure(objMessage);
 
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE));
     EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionRprReceived(&objSession, 0));
@@ -1885,6 +1887,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedTerminatesCallIfRemoteAudioPortIsZer
 
     ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(0));
 
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE));
     EXPECT_CALL(objMtcSession,
             Terminate(_,
                     CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
