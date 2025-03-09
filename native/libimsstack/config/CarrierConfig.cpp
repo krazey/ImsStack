@@ -539,6 +539,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT[] =
                 KEY_IMS_EMERGENCY_PREFIX "call_periodic_location_discovery_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_NUMBER_NEED_OIP_STRING_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "number_need_oip_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "number_need_oir_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::

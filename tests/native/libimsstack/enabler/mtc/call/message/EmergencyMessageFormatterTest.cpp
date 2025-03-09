@@ -146,8 +146,55 @@ protected:
 TEST_F(EmergencyMessageFormatterTest, FormStartMessageNormalCase)
 {
     const ImsVector<AString> objEmptyNumbers;
+    ON_CALL(*pConfigurationProxy, GetStringArray(ConfigEmergency::KEY_NUMBER_NEED_OIP_STRING_ARRAY))
+            .WillByDefault(Return(objEmptyNumbers));
     ON_CALL(*pConfigurationProxy, GetStringArray(ConfigEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY))
             .WillByDefault(Return(objEmptyNumbers));
+
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
+
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
+TEST_F(EmergencyMessageFormatterTest, FormStartMessageSetsOipIfConfigured)
+{
+    // Set ParticipantInfo
+    MockIMtcDialingPlan objDialingPlan;
+    ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(AString::ConstEmpty()));
+    objParticipantInfo.UpdateFromRemoteNumber("186110");
+
+    ImsVector<AString> objConfigNumbers;
+    objConfigNumbers.Push("186");
+    ON_CALL(*pConfigurationProxy, GetStringArray(ConfigEmergency::KEY_NUMBER_NEED_OIP_STRING_ARRAY))
+            .WillByDefault(Return(objConfigNumbers));
+
+    // To skip other 'SetHeader' invocations.
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, AString::ConstNull())).Times(2);
+
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, AString(MessageUtil::STR_NONE), ISipHeader::PRIVACY,
+                    AString::ConstNull()))
+            .Times(1);
+
+    pFormatter->FormStartMessage(CallType::VOIP);
+}
+
+TEST_F(EmergencyMessageFormatterTest, FormStartMessageDoesNotSetOipIfConfiguredButNotContains)
+{
+    ImsVector<AString> objConfigNumbers;
+    AString strNotContainedNumber("1111");
+    objConfigNumbers.Push(strNotContainedNumber);
+    ON_CALL(*pConfigurationProxy, GetStringArray(ConfigEmergency::KEY_NUMBER_NEED_OIP_STRING_ARRAY))
+            .WillByDefault(Return(objConfigNumbers));
+
+    // To skip other 'SetHeader' invocations.
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, AString::ConstNull())).Times(2);
+
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, AString(MessageUtil::STR_NONE), ISipHeader::PRIVACY,
+                    AString::ConstNull()))
+            .Times(0);
 
     IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
 
