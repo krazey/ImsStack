@@ -171,6 +171,42 @@ TEST_F(AosUtilTest, ReturnTrueWhenBodyHasActionWithInitialRegistration)
     EXPECT_TRUE(m_pAosUtil->IsInitialRegistrationRequired(&m_objMockISipMsg));
 }
 
+/// IsAnonymousECallActionPresent()
+TEST_F(AosUtilTest, ReturnFalseWhenSipMsgIsNullInIsAnonymousECallActionPresent)
+{
+    EXPECT_FALSE(m_pAosUtil->IsAnonymousECallActionPresent(IMS_NULL));
+}
+
+TEST_F(AosUtilTest, ReturnFalseWhenThereIsNoBodyInIsAnonymousECallActionPresent)
+{
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    ON_CALL(m_objMockISipMsg, GetBodyParts()).WillByDefault(Return(objBodyParts));
+
+    EXPECT_FALSE(m_pAosUtil->IsAnonymousECallActionPresent(&m_objMockISipMsg));
+}
+
+TEST_F(AosUtilTest, ReturnTrueWhenBodyHasActionWithIsAnonymousECallActionPresent)
+{
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    SipMessageBodyPart objBodyPart;
+    ISipMessageBodyPart* piBodyPart = &objBodyPart;
+
+    AString strContent = "";
+    strContent.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    strContent.Append("<ims-3gpp version=\"1\"><alternative-service>");
+    strContent.Append("<type>restoration</type>");
+    strContent.Append("<reason></reason>");
+    strContent.Append("<action>anonymous-emergencycall</action>");
+    strContent.Append("</alternative-service></ims-3gpp>");
+    ByteArray objContent(strContent);
+    piBodyPart->SetContent(objContent);
+    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, "application/3gpp-ims+xml");
+    objBodyParts.Append(piBodyPart);
+    ON_CALL(m_objMockISipMsg, GetBodyParts()).WillByDefault(Return(objBodyParts));
+
+    EXPECT_TRUE(m_pAosUtil->IsAnonymousECallActionPresent(&m_objMockISipMsg));
+}
+
 /// IsParameterIncluded() - three factors
 TEST_F(AosUtilTest, ReturnFalseWhenSipMsgIsNullInThreeFactorsParameterChecked)
 {

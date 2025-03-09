@@ -43,6 +43,8 @@ public:
     IMS_SINT32 GetMinExpiresValue(IN const ISipMessage* piSipMsg);
 
     IMS_BOOL IsInitialRegistrationRequired(IN const ISipMessage* piSipMsg);
+    IMS_BOOL IsAnonymousECallActionPresent(IN const ISipMessage* piSipMsg);
+
     // Check whether some extension is unsupported (included in "Unsupported" header)
     IMS_BOOL IsParameterIncluded(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nHeaderType,
             IN const AString& strParameter);
