@@ -96,7 +96,10 @@ public:
     {
         return m_objImsAosInfo.GetServiceRouteHeaderValue();
     }
-
+    inline IMS_BOOL IsCrossSimConnected() const override
+    {
+        return m_objImsAosInfo.IsCrossSimConnected();
+    }
     inline void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) const override
     {
         return m_objImsAosInfo.NotifyEmergencyCallState(bIsInitialized);

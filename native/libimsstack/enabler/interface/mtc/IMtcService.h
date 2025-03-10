@@ -174,6 +174,13 @@ public:
     virtual IMS_BOOL IsCsfbAvailable() const = 0;
 
     /**
+     * @brief Checks if the service is connected using CST(Cross-SIM calling Tech).
+     *
+     * @return True if CST.
+     */
+    virtual IMS_BOOL IsCrossSimConnected() const = 0;
+
+    /**
      * @brief Gets the old service status.
      *
      * @return The old service status.

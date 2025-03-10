@@ -187,6 +187,11 @@ public:
     virtual AString GetServiceRouteHeaderValue() const = 0;
 
     /**
+     * See {@link IImsAosInfo#IsCrossSimConnected}.
+     */
+    virtual IMS_BOOL IsCrossSimConnected() const = 0;
+
+    /**
      * @brief Notifys
      *
      * @param bIsInitialized

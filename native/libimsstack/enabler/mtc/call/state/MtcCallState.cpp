@@ -1022,7 +1022,10 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) cons
         case ImsAosReason::POWER_OFF:
             return CODE_LOCAL_POWER_OFF;
         case ImsAosReason::AIRPLANE_MODE:
-            // TODO: b/397825528 - Need to return CODE_OEM_CAUSE_3 when using CST.
+            if (m_objContext.GetService().IsCrossSimConnected())
+            {
+                return CODE_OEM_CAUSE_3;
+            }
             return m_objContext.GetService().GetLastConnectedRatType() ==
                             INetworkWatcher::RADIOTECH_TYPE_IWLAN
                     ? CODE_WIFI_LOST

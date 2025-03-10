@@ -959,6 +959,26 @@ TEST_F(EstablishedStateTest,
                     MtcAosState::DISCONNECTED, ImsAosReason::AIRPLANE_MODE));
 }
 
+TEST_F(EstablishedStateTest,
+        HandleAosDisconnectedWithAirplaneModeInvokesTerminateWithOemCause3IfCst)
+{
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
+                    ImsAosReason::AIRPLANE_MODE))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsCrossSimConnected).WillByDefault(Return(IMS_TRUE));
+
+    const CallReasonInfo objReasonInfo(CODE_OEM_CAUSE_3);
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, ImsAosReason::AIRPLANE_MODE));
+}
+
 TEST_F(EstablishedStateTest, HandleAosDisconnectedWithWifiOffInvokesTerminateWithWifiLost)
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));

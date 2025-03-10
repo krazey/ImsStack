@@ -689,6 +689,16 @@ TEST_F(MtcServiceTest, ImsAosConnectedEmergencyServiceInvokesSetReady)
     pEmergencyMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
 }
 
+TEST_F(MtcServiceTest, ImsAosConnectedUpdatesCrossSimConnected)
+{
+    ON_CALL(*pMockAosConnector, IsCrossSimConnected).WillByDefault(Return(IMS_TRUE));
+
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
+
+    EXPECT_TRUE(pNormalMtcService->IsCrossSimConnected());
+}
+
 TEST_F(MtcServiceTest, ImsAosConnectedWithCallComposerFeatureAddsFeature)
 {
     MockIFeatureCaps objFeatureCaps;

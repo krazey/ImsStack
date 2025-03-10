@@ -67,6 +67,7 @@ PUBLIC
 MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         ImsService(AString::ConstNull()),
         m_bFeatureAddedForCallComposer(IMS_FALSE),
+        m_bCrossSimConnected(IMS_FALSE),
         m_eType(eType),
         m_objContext(objContext),
         m_strServiceName(GetServiceName(eType)),
@@ -369,6 +370,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
 {
     IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
     SetStatus(ServiceStatus::SERVICE_ACTIVE);
+    m_bCrossSimConnected = m_pAosConnector ? m_pAosConnector->IsCrossSimConnected() : IMS_FALSE;
     if (!IsEmergency())
     {
         UpdateCallComposerFeature(nFeatures);

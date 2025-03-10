@@ -108,6 +108,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED = 1403;
     public static final int CODE_REMOTE_CALL_DECLINE = 1404;
     public static final int CODE_WIFI_LOST = 1407;
+    public static final int CODE_RADIO_OFF = 1500;
     public static final int CODE_RADIO_INTERNAL_ERROR = 1502;
     public static final int CODE_NETWORK_RESP_TIMEOUT = 1503;
     public static final int CODE_ACCESS_CLASS_BLOCKED = 1512;
@@ -129,6 +130,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_REJECT_ONGOING_CONFERENCE_CALL = 1618;
     public static final int CODE_REJECT_ONGOING_CS_CALL = 1621;
     public static final int CODE_EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE = 1622;
+    public static final int CODE_OEM_CAUSE_3 = 61443;
 
     // CODE_LOCAL_CALL_CS_RETRY_REQUIRED
     public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 0;

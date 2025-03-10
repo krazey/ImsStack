@@ -257,6 +257,13 @@ TEST_F(MtcAosConnectorTest, GetServiceRouteHeaderValueInvokesImsAosInfoApi)
     EXPECT_STREQ(pConnector->GetServiceRouteHeaderValue().GetStr(), strSrHeader.GetStr());
 }
 
+TEST_F(MtcAosConnectorTest, IsCrossSimConnectedInvokesImsAosInfoApi)
+{
+    ON_CALL(objMockIImsAosInfo, IsCrossSimConnected()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_EQ(pConnector->IsCrossSimConnected(), IMS_TRUE);
+}
+
 TEST_F(MtcAosConnectorTest, NotifyEmergencyCallStateInvokesImsAosInfoApi)
 {
     EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencyCallState(IMS_TRUE)).Times(1);

@@ -56,6 +56,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRoaming, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWlanIpCanType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCsfbAvailable, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCrossSimConnected, (), (const, override));
     MOCK_METHOD(ServiceStatus, GetOldStatus, (), (const, override));
     MOCK_METHOD(ServiceStatus, GetStatus, (), (const, override));
     MOCK_METHOD(ICoreService*, GetICoreService, (), (const, override));

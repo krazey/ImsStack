@@ -1208,6 +1208,8 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REMOTE_CALL_DECLINE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_WIFI_LOST,
                 ImsReasonInfo.CODE_WIFI_LOST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_RADIO_OFF,
+                ImsReasonInfo.CODE_RADIO_OFF);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_RADIO_INTERNAL_ERROR,
                 ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_RESP_TIMEOUT,
@@ -1250,6 +1252,7 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REJECT_ONGOING_CS_CALL);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE,
                 ImsReasonInfo.CODE_EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_OEM_CAUSE_3, ImsReasonInfo.CODE_OEM_CAUSE_3);
 
         // User's status: from user status (int) to user status (string)
         sUserStatusToString = new LinkedHashMap<Integer, String>();
