@@ -708,9 +708,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
     }
 }
 
-PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
-        [[maybe_unused]] IMS_UINT32 nFailureReason,
-        IN [[maybe_unused]] IMS_UINT32 nWaitTimeMillis)
+PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(
+        IN IMS_UINT32 nFailureReason, IMS_UINT32 nWaitTimeMillis)
 {
     if (m_objContext.GetMessageUtils().GetPreviousResponse(
                 GetISession(), IMessage::SESSION_START) != IMS_NULL)
@@ -719,14 +718,42 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(IN
         return GetStateName();
     }
 
-    if (EpsFallbackTrigger::ShouldTriggerByReasonInfo(m_objContext,
-                ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
+    if (m_objContext.GetService().IsNr())
     {
-        m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::RADIO_CHECK_BLOCK);
+        if (EpsFallbackTrigger::ShouldTriggerByReasonInfo(m_objContext,
+                    ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
+        {
+            m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
+                    EpsFallbackReason::NO_NETWORK_RESPONSE);
+            return GetStateName();
+        }
+
+        return GetStateName();
     }
 
-    return GetStateName();
+    if (nFailureReason == IImsRadio::REASON_RRC_REJECT)
+    {
+        IMS_TRACE_D("OnConnectionFailed : Wait Transaction timeout for RRC reject in a LTE network",
+                0, 0, 0);
+        return GetStateName();
+    }
+
+    IMS_SINT32 eCode;
+    IMS_SINT32 eExtraCode;
+    if (m_objContext.GetService().IsCsfbAvailable())
+    {
+        eCode = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+        eExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
+    }
+    else
+    {
+        eCode = CODE_CALL_BARRED;
+        eExtraCode = -1;
+    }
+    CallReasonInfo objReason(eCode, eExtraCode);
+    HandleCancel(GetISession(), objReason);
+    OnStartFailed(objReason);
+    return CallStateName::TERMINATING;
 }
 
 PRIVATE
