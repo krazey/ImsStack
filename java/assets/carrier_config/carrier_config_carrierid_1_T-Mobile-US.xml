@@ -284,6 +284,7 @@
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="25000"/>
     <boolean name="imsemergency.silent_redial_with_voip_by_rtt_rejection_bool" value="true"/>
+    <boolean name="imsemergency.release_emergency_pdn_on_failure_after_100_bool" value="true"/>
 
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">

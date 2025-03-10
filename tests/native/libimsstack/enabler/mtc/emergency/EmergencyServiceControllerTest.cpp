@@ -21,9 +21,14 @@
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
 #include "PlatformContext.h"
 #include "TestPhoneInfoService.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcSession.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "emergency/EmergencyServiceController.h"
@@ -31,6 +36,7 @@
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIPassiveTimerHolder.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -51,6 +57,12 @@ protected:
     MockIJniMtcServiceThread objJniMtcServiceThread;
     MockIMtcEmergencyServiceManager objEsm;
     TestPhoneInfoService objPhoneInfoService;
+    MockIMessageUtils objMessageUtils;
+    MockIMtcCallManager objMockCallManager;
+    MockIMtcCall objMockMtcCall;
+    MockIMtcCallContext objMockCallContext;
+    MockIMtcSession objMockMtcSession;
+    MockISession objMockSession;
 
     MockMtcConfigurationProxy* pConfigurationProxy;
     EmergencyServiceController* pController;
@@ -69,6 +81,13 @@ protected:
         ON_CALL(objContext, GetAosConnector(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&objAosConnector));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+
+        ON_CALL(objMockCallManager, GetCallByCallKey(_)).WillByDefault(Return(&objMockMtcCall));
+        ON_CALL(objMockMtcCall, GetCallContext).WillByDefault(ReturnRef(objMockCallContext));
+        ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
+        ON_CALL(objMockMtcSession, GetISession).WillByDefault(ReturnRef(objMockSession));
 
         ON_CALL(objNormalService, GetJniServiceThread)
                 .WillByDefault(Return(&objJniMtcServiceThread));
@@ -374,12 +393,51 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallNormallyEndsDoesNothing)
     pController->OnCallSessionReleased(1, IMS_TRUE, IMS_TRUE);
 }
 
-TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailDoesNothing)
+TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailDoesNothingByConfig)
 {
     pController->Start();
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
 
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
+}
+
+TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailWithout100DoesNothing)
+{
+    pController->Start();
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsResponseExist(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallStateChanged(
+            1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
+}
+
+TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailRegisterStop)
+{
+    pController->Start();
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsResponseExist(_, _)).WillByDefault(Return(IMS_TRUE));
 
     pController->OnCallStateChanged(
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);

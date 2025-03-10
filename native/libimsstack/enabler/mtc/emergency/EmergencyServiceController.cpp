@@ -16,13 +16,19 @@
 
 #include "CarrierConfig.h"
 #include "IJniMtcServiceThread.h"
+#include "IMessage.h"
 #include "IMtcCallController.h"
 #include "IMtcContext.h"
 #include "INetworkWatcher.h"
+#include "ISession.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
+#include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
+#include "call/IMtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationResolver.h"
@@ -30,6 +36,7 @@
 #include "helper/ICallStateProxy.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/IPassiveTimerHolder.h"
+#include "utility/IMessageUtils.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -140,7 +147,7 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallStateChanged(IN CallKey nC
 }
 
 PUBLIC VIRTUAL void EmergencyServiceController::OnCallSessionReleased(
-        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN [[maybe_unused]] IMS_BOOL bEstablished)
+        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished)
 {
     if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) || m_eState != State::OPENED)
     {
@@ -148,6 +155,22 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallSessionReleased(
     }
 
     m_nEmergencyCallKey = IMtcCall::CALL_KEY_INVALID;
+
+    if (!bEstablished &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL))
+    {
+        IMtcSession* piMtcSession = m_objContext.GetCallManager()
+                                            .GetCallByCallKey(nCallKey)
+                                            ->GetCallContext()
+                                            .GetSession();
+        if (piMtcSession &&
+                m_objContext.GetMessageUtils().IsResponseExist(
+                        &piMtcSession->GetISession(), SipStatusCode::SC_100))
+        {
+            Close();
+        }
+    }
 }
 
 PUBLIC void EmergencyServiceController::OnPassiveTimerExpired(
