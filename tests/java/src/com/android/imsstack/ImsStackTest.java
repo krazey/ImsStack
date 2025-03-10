@@ -44,6 +44,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.provider.BlockedNumberContract;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -79,23 +80,6 @@ public abstract class ImsStackTest {
     protected static String sLogTag;
 
     private static final int MAX_INIT_WAIT_MS = 30000; // 30 seconds
-
-    private static final Field MESSAGE_QUEUE_FIELD;
-    private static final Field MESSAGE_WHEN_FIELD;
-    private static final Field MESSAGE_NEXT_FIELD;
-
-    static {
-        try {
-            MESSAGE_QUEUE_FIELD = MessageQueue.class.getDeclaredField("mMessages");
-            MESSAGE_QUEUE_FIELD.setAccessible(true);
-            MESSAGE_WHEN_FIELD = Message.class.getDeclaredField("when");
-            MESSAGE_WHEN_FIELD.setAccessible(true);
-            MESSAGE_NEXT_FIELD = Message.class.getDeclaredField("next");
-            MESSAGE_NEXT_FIELD.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Failed to initialize ImsStackTest", e);
-        }
-    }
 
     // Mocked classes
     protected ServiceState mServiceState;
@@ -545,36 +529,12 @@ public abstract class ImsStackTest {
     }
 
     /**
-     * @return The longest delay from all the message queues.
-     */
-    private long getLongestDelay() {
-        long delay = 0;
-        for (TestableLooper looper : mTestableLoopers) {
-            MessageQueue queue = looper.getLooper().getQueue();
-            try {
-                Message msg = (Message) MESSAGE_QUEUE_FIELD.get(queue);
-                while (msg != null) {
-                    delay = Math.max(msg.getWhen(), delay);
-                    msg = (Message) MESSAGE_NEXT_FIELD.get(msg);
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Access failed in ImsStackTest", e);
-            }
-        }
-        return delay;
-    }
-
-    /**
      * @return {@code true} if there are any messages in the queue.
      */
     private boolean messagesExist() {
         for (TestableLooper looper : mTestableLoopers) {
-            MessageQueue queue = looper.getLooper().getQueue();
-            try {
-                Message msg = (Message) MESSAGE_QUEUE_FIELD.get(queue);
-                if (msg != null) return true;
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Access failed in ImsStackTest", e);
+            if (looper.peekWhen() > 0) {
+                return true;
             }
         }
         return false;
@@ -584,8 +544,14 @@ public abstract class ImsStackTest {
      * Handle all messages including the delayed messages.
      */
     public void processAllFutureMessages() {
+        final long now = SystemClock.uptimeMillis();
         while (messagesExist()) {
-            moveTimeForward(getLongestDelay());
+            for (TestableLooper looper : mTestableLoopers) {
+                long nextDelay = looper.peekWhen() - now;
+                if (nextDelay > 0) {
+                    looper.moveTimeForward(nextDelay);
+                }
+            }
             processAllMessages();
         }
     }
@@ -610,20 +576,7 @@ public abstract class ImsStackTest {
      */
     public void moveTimeForward(long milliSeconds) {
         for (TestableLooper looper : mTestableLoopers) {
-            MessageQueue queue = looper.getLooper().getQueue();
-            try {
-                Message msg = (Message) MESSAGE_QUEUE_FIELD.get(queue);
-                while (msg != null) {
-                    long updatedWhen = msg.getWhen() - milliSeconds;
-                    if (updatedWhen < 0) {
-                        updatedWhen = 0;
-                    }
-                    MESSAGE_WHEN_FIELD.set(msg, updatedWhen);
-                    msg = (Message) MESSAGE_NEXT_FIELD.get(msg);
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Access failed in ImsStackTest", e);
-            }
+            looper.moveTimeForward(milliSeconds);
         }
     }
 }
