@@ -458,6 +458,20 @@ PUBLIC VIRTUAL void AosService::NotifyWfcSetting(IN IMS_UINT32 nIsOn)
     }
 }
 
+PUBLIC VIRTUAL void AosService::NotifyWifiSetting(IN IMS_UINT32 nIsOn)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyWifiSetting :: nIsOn(%d)", nIsOn, 0, 0);
+    for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
+    {
+        IAosServiceSettingListener* piListener = m_objAosServiceSettingListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->ServiceSetting_WifiChanged(TO_BOOLEAN(nIsOn));
+        }
+    }
+}
+
 PUBLIC VIRTUAL void AosService::NotifyAosStart()
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyAosStart", 0, 0, 0);

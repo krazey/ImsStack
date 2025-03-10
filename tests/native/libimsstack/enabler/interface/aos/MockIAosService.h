@@ -60,6 +60,7 @@ public:
     MOCK_METHOD(void, NotifyVideoSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyVolteSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyWfcSetting, (IN IMS_UINT32 nIsOn), (override));
+    MOCK_METHOD(void, NotifyWifiSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyAosStart, (), (override));
     MOCK_METHOD(void, NotifyIpcanHandoverFailure,
             (IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode), (override));

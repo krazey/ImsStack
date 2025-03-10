@@ -54,6 +54,7 @@ private:
     void NotifyVideoSetting(IN const android::Parcel& objParcel);
     void NotifyVolteSetting(IN const android::Parcel& objParcel);
     void NotifyWfcSetting(IN const android::Parcel& objParcel);
+    void NotifyWifiSetting(IN const android::Parcel& objParcel);
 
     void NotifyAosStart(IN const android::Parcel& objParcel);
     void NotifyIpcanHandoverFailure(IN const android::Parcel& objParcel);

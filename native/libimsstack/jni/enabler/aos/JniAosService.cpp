@@ -171,6 +171,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyWfcSetting(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_WIFI_SETTING:
+            NotifyWifiSetting(objParcel);
+            break;
+
         case IIAosService::J2N_NOTIFY_AOS_START:
             NotifyAosStart(objParcel);
             break;
@@ -403,6 +407,16 @@ void JniAosService::NotifyWfcSetting(IN const android::Parcel& objParcel)
     if (piAosService)
     {
         piAosService->NotifyWfcSetting(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyWifiSetting(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyWifiSetting(objParcel.readInt32());
     }
 }
 

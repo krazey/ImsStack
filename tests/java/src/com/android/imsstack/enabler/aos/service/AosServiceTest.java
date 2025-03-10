@@ -51,6 +51,7 @@ import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -139,6 +140,7 @@ public class AosServiceTest extends ImsStackTest {
     @Mock CarrierConfig mMockCarrierConfig;
     @Mock ConfigInterface mMockConfigInterface;
     @Mock LocationInterface mMockLocationInterface;
+    @Mock WifiInterface mMockWifiInterface;
     @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock IDcNetWatcher mMockDcNetWatcher;
 
@@ -166,6 +168,7 @@ public class AosServiceTest extends ImsStackTest {
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 LocationInterface.class, mMockLocationInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
 
         DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
 
@@ -181,6 +184,7 @@ public class AosServiceTest extends ImsStackTest {
 
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
 
+        AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
@@ -752,6 +756,20 @@ public class AosServiceTest extends ImsStackTest {
         byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
                 LocationInfo.FIXED.getValue());
         verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
+    }
+
+    @Test
+    public void onWifiStateChanged_notifyWifiSettingChanged() {
+        byte[] wifiSettingData = createBytes(IIAosService.J2N_NOTIFY_WIFI_SETTING, true);
+        when(mMockWifiInterface.isWifiEnabled()).thenReturn(true);
+        ArgumentCaptor<WifiInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(WifiInterface.Listener.class);
+        verify(mMockWifiInterface).addListener(listenerCaptor.capture());
+
+        WifiInterface.Listener listener = listenerCaptor.getValue();
+        listener.onWifiStateChanged();
+
+        verify(mMockJniIms).sendData(mNativeObject, wifiSettingData);
     }
 
     @Test

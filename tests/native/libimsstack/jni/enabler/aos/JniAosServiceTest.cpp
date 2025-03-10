@@ -271,6 +271,20 @@ TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyWfcSetting)
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyWifiSetting)
+{
+    // GIVEN
+    m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_WIFI_SETTING);
+    m_objParcel.setDataPosition(0);
+
+    EXPECT_CALL(m_objMockIAosService, NotifyWifiSetting(_));
+
+    // WHEN
+    m_pJniAosService->SendData(m_objParcel);
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyAosStart)
 {
     // GIVEN
