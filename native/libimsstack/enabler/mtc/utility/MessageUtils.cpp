@@ -1074,8 +1074,8 @@ PUBLIC AString MessageUtils::GenerateContentId(IN const AString& strHost)
 }
 
 PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
-        IN IMtcContext& objContext, IN const AString& strContentId,
-        IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart)
+        IN IMtcContext& objContext, IN const ImsList<ConfUser*>& lstConfUser,
+        IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart)
 {
     ImsList<std::tuple<AString, AString, AString>> objEntries;
     for (IMS_UINT32 i = 0; i < lstConfUser.GetSize(); i++)
@@ -1112,8 +1112,7 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
         objEntries.Append(std::make_tuple(strEntry, strCc, strAnonymize));
     }
 
-    return SetResourceListWithHeaders(
-            piMessage, strContentId, bMultiPart, CreateResourceListXml(objEntries));
+    return SetResourceListWithHeaders(piMessage, bMultiPart, CreateResourceListXml(objEntries));
 }
 
 PUBLIC IMS_BOOL MessageUtils::IsVideoFeatureIncluded(IN const IMessage* piMessage)
@@ -1371,8 +1370,8 @@ PRIVATE IMS_RESULT MessageUtils::GetUrnValue(IN const IMessage* piMessage, IN co
     return IMS_SUCCESS;
 }
 
-PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(IN_OUT IMessage* piMessage,
-        IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN const AString& strXml)
+PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(
+        IN_OUT IMessage* piMessage, IN IMS_BOOL bMultiPart, IN const AString& strXml)
 {
     if (piMessage == IMS_NULL)
     {
@@ -1395,18 +1394,6 @@ PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(IN_OUT IMessage* piM
         AString strContentLength;
         strContentLength.SetNumber(strXml.GetLength());
         piBodyPart->SetHeader(SipHeaderName::CONTENT_LENGTH, strContentLength);
-
-        // TODO: Need to check the requirement of Content-ID
-        if (strContentId.GetLength() < 1)
-        {
-            AString strHost = GetHost(piMessage, ISipHeader::CONTACT_NORMAL);
-            AString strGeneratedContentId = GenerateContentId(strHost);
-            piBodyPart->SetHeader(MessageUtil::STR_CONTENT_ID, strGeneratedContentId);
-        }
-        else
-        {
-            piBodyPart->SetHeader(MessageUtil::STR_CONTENT_ID, strContentId);
-        }
     }
 
     return piBodyPart->SetContent(ByteArray(strXml));

@@ -501,7 +501,7 @@ void IdleState::SetResourceListForConference(IN_OUT IMessage& objMessage)
 
     // TODO: LGU needs to set false the 5th param.
     m_objContext.GetMessageUtils().SetResourceList(
-            &objMessage, m_objContext, AString::ConstNull(), objUsers, IMS_TRUE, IMS_TRUE);
+            &objMessage, m_objContext, objUsers, IMS_TRUE, IMS_TRUE);
 }
 
 PRIVATE

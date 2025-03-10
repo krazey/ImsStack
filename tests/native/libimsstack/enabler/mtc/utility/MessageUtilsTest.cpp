@@ -1087,15 +1087,13 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
     lstConfUser.Append(&objUser2);
     lstConfUser.Append(&objUser3);
 
-    const AString strAnyContentId("any content id");
-
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      IMS_NULL, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(
+            objMessageUtils.SetResourceList(IMS_NULL, objContext, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
     EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
+                      piMessage, objContext, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
@@ -1111,7 +1109,6 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
     EXPECT_CALL(objMessageBodyPart, SetHeader(strContentType, strResourceList));
     EXPECT_CALL(objMessageBodyPart, SetHeader(strDisposition, strRecipientList));
     EXPECT_CALL(objMessageBodyPart, SetHeader(strLength, _));
-    EXPECT_CALL(objMessageBodyPart, SetHeader(strContentId, strAnyContentId));
 
     ImsList<AString> objResourceList;
     objResourceList.Append("entry uri=\"sip:user1Target\" cp:copyControl=\"to\"");
@@ -1121,7 +1118,7 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
     EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
+                      piMessage, objContext, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_SUCCESS);
 }
 
@@ -1192,14 +1189,13 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::SESSION_ID, _))
             .WillByDefault(Return(objSessionIdHeaders));
 
-    AString strEmptyContentId;
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      IMS_NULL, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(
+            objMessageUtils.SetResourceList(IMS_NULL, objContext, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(
+            objMessageUtils.SetResourceList(piMessage, objContext, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
@@ -1215,8 +1211,8 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
 
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(
+            objMessageUtils.SetResourceList(piMessage, objContext, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_SUCCESS);
 }
 

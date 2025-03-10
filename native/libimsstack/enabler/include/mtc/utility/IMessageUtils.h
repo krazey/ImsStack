@@ -460,15 +460,14 @@ public:
      *
      * @param piMessage
      * @param objContext
-     * @param strContentId
      * @param lstConfUser
      * @param bWithDialogId
      * @param bMultiPart
      * @return
      */
     virtual IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
-            IN const AString& strContentId, IN const ImsList<ConfUser*>& lstConfUser,
-            IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart) = 0;
+            IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId,
+            IN IMS_BOOL bMultiPart) = 0;
 
     /**
      * @brief Checks

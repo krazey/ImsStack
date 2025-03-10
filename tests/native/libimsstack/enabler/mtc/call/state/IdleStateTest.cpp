@@ -922,7 +922,7 @@ TEST_F(IdleStateTest, StartConferenceUsesCopiedConfUsers)
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
 
     EXPECT_CALL(objMessageUtils,
-            SetResourceList(&objMessage, _, _, IsCopiedUser(objOriginalUser), IMS_TRUE, IMS_TRUE));
+            SetResourceList(&objMessage, _, IsCopiedUser(objOriginalUser), IMS_TRUE, IMS_TRUE));
 
     pIdleState->StartConference(CallType::VOIP, strTarget, lstUsers);
 }

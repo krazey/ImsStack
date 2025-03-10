@@ -123,8 +123,8 @@ public:
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GenerateContentId(IN const AString& strHost) override;
     IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
-            IN const AString& strContentId, IN const ImsList<ConfUser*>& lstConfUser,
-            IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart) override;
+            IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId,
+            IN IMS_BOOL bMultiPart) override;
     IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
     IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) override;
     CallType GetCallType(IN const IMessage* piMessage, IN ISession* piSession,
@@ -145,8 +145,8 @@ private:
     IMS_RESULT GetUrnValue(IN const IMessage* piMessage, IN const AString& strId,
             IN IMS_SINT32 eHeaderType, OUT AString& strValue,
             IN const AString& strHeaderName = AString::ConstNull());
-    IMS_RESULT SetResourceListWithHeaders(IN_OUT IMessage* piMessage,
-            IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN const AString& strXml);
+    IMS_RESULT SetResourceListWithHeaders(
+            IN_OUT IMessage* piMessage, IN IMS_BOOL bMultiPart, IN const AString& strXml);
     AString CreateResourceListXml(
             IN const ImsList<std::tuple<AString, AString, AString>>& objEntries);
     AString CreateEntryUri(

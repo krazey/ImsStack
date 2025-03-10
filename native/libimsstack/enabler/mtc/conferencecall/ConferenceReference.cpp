@@ -307,7 +307,7 @@ IMS_RESULT ConferenceReference::SendInviteForMultipleUser(OUT AString& strReferT
     piReferMessage->AddHeader(SipHeaderName::CONTENT_DISPOSITION, strContentDisposition);
 
     m_objContext.GetMessageUtils().SetResourceList(
-            piReferMessage, m_objContext, strReferToUri, m_objConfUsers, IMS_FALSE, IMS_FALSE);
+            piReferMessage, m_objContext, m_objConfUsers, IMS_FALSE, IMS_FALSE);
 
     // 4. Set Referred-By header
     SetReferredByHeader();

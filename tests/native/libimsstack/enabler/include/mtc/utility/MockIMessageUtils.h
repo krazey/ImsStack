@@ -103,8 +103,8 @@ public:
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GenerateContentId, (IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, SetResourceList,
-            (IN_OUT IMessage*, IN IMtcContext&, IN const AString&, IN const ImsList<ConfUser*>&,
-                    IN IMS_BOOL, IN IMS_BOOL),
+            (IN_OUT IMessage*, IN IMtcContext&, IN const ImsList<ConfUser*>&, IN IMS_BOOL,
+                    IN IMS_BOOL),
             (override));
     MOCK_METHOD(IMS_BOOL, IsVideoFeatureIncluded, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsTextFeatureIncluded, (IN const IMessage*), (override));
