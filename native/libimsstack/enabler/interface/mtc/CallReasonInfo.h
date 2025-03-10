@@ -136,6 +136,7 @@ enum
     CODE_INTERNAL_REDIAL = 10002,
     CODE_INTERNAL_RRC_REJECT = 10003,
     CODE_INTERNAL_RETRY_UPDATE = 10004,
+    CODE_INTERNAL_TERMINATE_EARLYDIALOG = 10005,
 };
 
 // CODE_LOCAL_CALL_BUSY
@@ -295,6 +296,8 @@ public:
                 return CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE);
             case CODE_INTERNAL_RRC_REJECT:
                 return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
+            case CODE_INTERNAL_TERMINATE_EARLYDIALOG:
+                return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR);
             default:
                 break;
         }

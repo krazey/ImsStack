@@ -123,6 +123,10 @@
         <item value="491:2"/> <!-- UPDATE_ERROR_ACTION_GLARE_CONDITION -->
         <item value="503:3"/> <!-- UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER -->
     </string-array>
+    <string-array name="imsvoice.early_update_reject_code_and_action_set_string_array" num="2">
+        <item value="491:2"/> <!-- EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION -->
+        <item value="503:3"/> <!-- EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER -->
+    </string-array>
     <int-array name="imsvoice.csfb_block_condition_int_array" num="2">
         <item value="0"/> <!-- CSFB_BLOCK_CONDITION_EPS_ONLY_ATTACH -->
         <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->

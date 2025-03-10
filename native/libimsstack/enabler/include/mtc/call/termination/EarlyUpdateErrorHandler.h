@@ -19,6 +19,7 @@
 
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
+#include <unordered_map>
 
 class IMessage;
 class IMtcCallContext;
@@ -45,10 +46,16 @@ public:
 
 private:
     static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
-    CallReasonInfo Handle503Response(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleTerminateDialog(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleTerminateCall(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleGlareCondition(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleBlockCallByTimer(IN const IMessage& objMessage) const;
     IMS_BOOL RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
     IMS_BOOL IsRegisterWithNextPcscfAndRedialRequiredFor503(IN IMS_SINT32 nRetryAfter) const;
     void SetTimerForImsCallBlocking(IN IMS_SINT32 nRetryAfterInMillis) const;
+
+    typedef CallReasonInfo (EarlyUpdateErrorHandler::* ActionFunc)(IN const IMessage&) const;
+    static const std::unordered_map<IMS_SINT32, ActionFunc> objActionFuncMap;
 
     IMtcCallContext& m_objContext;
 };

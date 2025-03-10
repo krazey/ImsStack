@@ -285,14 +285,15 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
         return GetStateName();
     }
 
-    if (MultipleDialogHandler().OnDialogRequestFailed(m_objContext,
-                *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
+    if (objReason.nCode == CODE_INTERNAL_TERMINATE_EARLYDIALOG &&
+            MultipleDialogHandler().OnDialogRequestFailed(m_objContext,
+                    *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
     {
         return GetStateName();
     }
 
-    HandleCancel(piSession, objReason);
-    OnStartFailed(objReason);
+    HandleCancel(piSession, objReason.ConvertFromInternal());
+    OnStartFailed(objReason.ConvertFromInternal());
 
     return CallStateName::TERMINATING;
 }

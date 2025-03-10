@@ -1046,6 +1046,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reject_code_and_action_set_string_array";
         public static final String KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY =
                 KEY_PREFIX + "update_reject_code_and_action_set_string_array";
+        public static final String KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY =
+                KEY_PREFIX + "early_update_reject_code_and_action_set_string_array";
         public static final String KEY_CSFB_BLOCK_CONDITION_INT_ARRAY =
                 KEY_PREFIX + "csfb_block_condition_int_array";
         public static final String KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT =

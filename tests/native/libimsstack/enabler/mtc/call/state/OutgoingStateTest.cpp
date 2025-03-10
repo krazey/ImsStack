@@ -221,7 +221,8 @@ protected:
         }
     }
 
-    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    void SetActionConfigs(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nStatusCode,
+            IN std::initializer_list<IMS_SINT32> objActions)
     {
         AString strActionSet;
         strActionSet.SetNumber(nStatusCode);
@@ -241,9 +242,7 @@ protected:
         }
 
         objActionSets.Add(strActionSet);
-        ON_CALL(*pConfigurationProxy,
-                GetStringArray(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
-                .WillByDefault(Return(objActionSets));
+        ON_CALL(*pConfigurationProxy, GetStringArray(pszKey)).WillByDefault(Return(objActionSets));
     }
 
     MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag)
@@ -823,7 +822,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsSipNotAcceptableReasonIfSilentRe
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_488, IMS_FALSE, 0, IMS_FALSE);
-    SetActionConfigs(SipStatusCode::SC_488,
+    SetActionConfigs(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_488,
             {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT});
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
@@ -846,7 +846,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsSipRedirectedReasonIfSilentRedia
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_301, IMS_FALSE, 0, IMS_FALSE);
-    SetActionConfigs(
+    SetActionConfigs(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
             SipStatusCode::SC_301, {ConfigVoice::START_ERROR_ACTION_REDIRECTION_BY_CONTACT});
     AString strContactToRedirect("sip:contactToRedirect");
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
@@ -868,7 +868,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedInvokesStartFailed)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_600, IMS_TRUE, 0, IMS_FALSE);
-    SetActionConfigs(SipStatusCode::SC_600, {ConfigVoice::START_ERROR_ACTION_CSFB});
+    SetActionConfigs(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_600, {ConfigVoice::START_ERROR_ACTION_CSFB});
 
     EXPECT_CALL(objUiNotifier,
             SendStartFailed(CallReasonInfo(
@@ -887,7 +888,8 @@ TEST_F(OutgoingStateTest,
     ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(_, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC));
     SetUpStartErrorHandler(&objMessage, SipStatusCode::SC_380, IMS_FALSE, 0, IMS_FALSE);
-    SetActionConfigs(SipStatusCode::SC_380,
+    SetActionConfigs(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_380,
             {ConfigVoice::START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL});
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigEmergency::
@@ -1004,7 +1006,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
             .WillByDefault(Return(&objMessage));
 
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
-    SetActionConfigs(SipStatusCode::SC_503, {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
+    SetActionConfigs(ConfigVoice::KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_503, {ConfigVoice::START_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
 
@@ -1124,6 +1127,8 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareConditi
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, _))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+    SetActionConfigs(ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_491, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION});
 
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
@@ -1142,6 +1147,8 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503WaitsRedial)
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+    SetActionConfigs(ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_503, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
 
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
@@ -1166,6 +1173,8 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)
             .WillByDefault(Return(&objMessage));
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+    SetActionConfigs(ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_503, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
 
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
@@ -1191,12 +1200,35 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedTerminatesSessionAndKeeps
     objSessions.Append(&objMtcSession2);
     ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
 
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_481));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    SetActionConfigs(ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_481, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG});
+
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_SIP_SERVER_ERROR)));
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession))).Times(1);
     EXPECT_CALL(objCallContext, RemoveSession(Ref(objMtcSession2))).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedTerminatesCallWhenOnlyOneDialogExists)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_481));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    SetActionConfigs(ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            SipStatusCode::SC_481, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG});
+
+    EXPECT_CALL(objMtcSession, Terminate(IMS_FALSE, CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(1);
+
+    EXPECT_EQ(
+            CallStateName::TERMINATING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedRejectsRequestIfSdpOaFails)
