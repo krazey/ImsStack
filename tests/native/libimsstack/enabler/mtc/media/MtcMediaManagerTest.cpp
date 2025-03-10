@@ -488,8 +488,7 @@ TEST_F(MtcMediaManagerTest, FormSdpReturnsSuccessAndContainsVideo)
     EXPECT_CALL(objMediaSession, FormSdp(NEGO_ID, &objISession, MEDIA_TYPE_AUDIOVIDEO, _, _, _, _))
             .WillOnce(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIO)).Times(1);
-    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_VIDEO)).Times(1);
+    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIOVIDEO)).Times(1);
 
     EXPECT_EQ(IMS_SUCCESS, pMediaManager->FormSdp(&objISession, CallType::VT));
 }
@@ -571,8 +570,7 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsVideo)
     MEDIA_CONTENT_TYPE eContentType = MEDIA_TYPE_AUDIOVIDEO;
     ON_CALL(objMediaSession, GetNegotiatedMediaType(NEGO_ID)).WillByDefault(Return(eContentType));
 
-    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIO)).Times(1);
-    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_VIDEO)).Times(1);
+    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIOVIDEO)).Times(1);
 
     pMediaManager->NegotiateSdp(&objISession);
 }
@@ -589,8 +587,7 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsText)
     MEDIA_CONTENT_TYPE eContentType = MEDIA_TYPE_AUDIOTEXT;
     ON_CALL(objMediaSession, GetNegotiatedMediaType(NEGO_ID)).WillByDefault(Return(eContentType));
 
-    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIO)).Times(1);
-    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_TEXT)).Times(1);
+    EXPECT_CALL(objMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_AUDIOTEXT)).Times(1);
 
     pMediaManager->NegotiateSdp(&objISession);
 }

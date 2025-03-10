@@ -308,7 +308,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
     }
     else if (GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
     {
-        RequestToRegisterQosCallback(nNegoId, eContents);
+        m_piMediaSession->RequestQos(nNegoId, eContents);
     }
 
     return (bResult) ? IMS_SUCCESS : IMS_FAILURE;
@@ -342,7 +342,7 @@ PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSe
 
     if (GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
     {
-        RequestToRegisterQosCallback(nNegoId, m_piMediaSession->GetNegotiatedMediaType(nNegoId));
+        m_piMediaSession->RequestQos(nNegoId, m_piMediaSession->GetNegotiatedMediaType(nNegoId));
     }
 
     return eErrorReason;
@@ -864,29 +864,6 @@ void MtcMediaManager::HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceive
     else
     {
         m_pMediaReportListener->OnReceivingNetworkToneFailed();
-    }
-}
-
-PRIVATE
-void MtcMediaManager::RequestToRegisterQosCallback(
-        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents)
-{
-    IMS_TRACE_D("RequestToRegisterQosCallback [%s]",
-            MtcMediaStringUtils::ConvertContentType(eContents), 0, 0);
-
-    if (eContents & MEDIA_TYPE_AUDIO)
-    {
-        m_piMediaSession->RequestQos(nNegoId, MEDIA_TYPE_AUDIO);
-    }
-
-    if (eContents & MEDIA_TYPE_VIDEO)
-    {
-        m_piMediaSession->RequestQos(nNegoId, MEDIA_TYPE_VIDEO);
-    }
-
-    if (eContents & MEDIA_TYPE_TEXT)
-    {
-        m_piMediaSession->RequestQos(nNegoId, MEDIA_TYPE_TEXT);
     }
 }
 
