@@ -225,9 +225,11 @@
         <item value="sip:#IMSI#@#IP#:#PORT#"/> <!-- REG_MODE_INTERNAL and roaming -->
         <item value=""/> <!-- REG_MODE_NOUICC and roaming -->
     </string-array>
-    <string-array name="imsemergency.number_need_oir_string_array" num="2">
-        <item value="184"/>
+    <string-array name="imsemergency.number_need_oip_string_array" num="1">
         <item value="186"/>
+    </string-array>
+    <string-array name="imsemergency.number_need_oir_string_array" num="1">
+        <item value="184"/>
     </string-array>
 
     <!-- Mts -->

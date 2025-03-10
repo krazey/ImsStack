@@ -106,15 +106,28 @@ PROTECTED VIRTUAL void EmergencyMessageFormatter::SetAcceptHeader()
 
 PROTECTED VIRTUAL void EmergencyMessageFormatter::SetCallerIdHeader()
 {
-    const ImsVector<AString> objConfigNumbers = m_objContext.GetConfigurationProxy().GetStringArray(
-            ConfigEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY);
-    for (IMS_UINT32 i = 0; i < objConfigNumbers.GetSize(); i++)
+    const ImsVector<AString> objOipString = m_objContext.GetConfigurationProxy().GetStringArray(
+            ConfigEmergency::KEY_NUMBER_NEED_OIP_STRING_ARRAY);
+    for (IMS_UINT32 i = 0; i < objOipString.GetSize(); i++)
     {
-        if (m_objContext.GetParticipantInfo().GetRemoteNumber().Contains(objConfigNumbers.GetAt(i)))
+        if (m_objContext.GetParticipantInfo().GetRemoteNumber().Contains(objOipString.GetAt(i)))
+        {
+            IMS_TRACE_I("SetCallerIdHeader - OIP is required for emergency call", 0, 0, 0);
+            m_objContext.GetMessageUtils().SetHeader(
+                    m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
+            return;
+        }
+    }
+
+    const ImsVector<AString> objOirString = m_objContext.GetConfigurationProxy().GetStringArray(
+            ConfigEmergency::KEY_NUMBER_NEED_OIR_STRING_ARRAY);
+    for (IMS_UINT32 i = 0; i < objOirString.GetSize(); i++)
+    {
+        if (m_objContext.GetParticipantInfo().GetRemoteNumber().Contains(objOirString.GetAt(i)))
         {
             IMS_TRACE_I("SetCallerIdHeader - OIR is required for emergency call", 0, 0, 0);
             SetOirHeaders();
-            break;
+            return;
         }
     }
 }

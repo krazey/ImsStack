@@ -188,6 +188,8 @@
     <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_provisional_to_final_response_timer_millis_int" value="15000"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
+    <string-array name="imsemergency.number_need_oip_string_array" num="0">
+    </string-array>
     <string-array name="imsemergency.number_need_oir_string_array" num="0">
     </string-array>
     <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_int_array" num="0">
