@@ -509,6 +509,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(
                 *piMessage, strNotSupportedExtension))
     {
+        pSession->SendPrack(IMS_FALSE);
         CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(objReason);
@@ -532,6 +533,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
     {
+        pSession->SendPrack(IMS_FALSE);
         if (MultipleDialogHandler().OnUnavailableDialogCreated(m_objContext,
                     *m_objContext.GetSession(piSession)) == MultipleDialogHandler::Result::HANDLED)
         {
@@ -546,6 +548,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     if (objMediaManager.GetRemoteRtpPort(piSession, MEDIATYPE_AUDIO) == 0)
     {
+        pSession->SendPrack(IMS_FALSE);
         CallReasonInfo objReason(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
         HandleCancel(piSession, objReason);
