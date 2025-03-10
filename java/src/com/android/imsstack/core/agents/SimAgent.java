@@ -67,6 +67,61 @@ public final class SimAgent implements SimInterface {
         }
     }
 
+    /**
+     * A holder for ISIM LOADED state notification.
+     * Even if SIM LOADED state is received in ImsStack, since the framework dispatches SIM events
+     * without guaranteeing that the ISIM application has fully loaded, it can't guarantee that
+     * all the ISIM records are available at that time.
+     * So, we need to wait for all ISIM records to be completely loaded.
+     */
+    final class IsimLoadedState implements Runnable {
+        @VisibleForTesting
+        public static final int MAX_RETRY_COUNTER = 5;
+        @VisibleForTesting
+        public static final int MAX_DELAY_MS = 1 * 1000; // 1s
+        private static final int START_DELAY_MS = 100; // 100ms
+        private final int mState;
+        private int mRetryCounter = 0;
+
+        IsimLoadedState(int state) {
+            mState = state;
+        }
+
+        @Override
+        public void run() {
+            loadIsimRecords();
+
+            if (isMandatoryIsimRecordsLoaded()) {
+                if (mRetryCounter > 0) {
+                    logi(this, "IsimRecords: Mandatory ISIM records are fully loaded (retry:"
+                            + mRetryCounter + ")");
+                }
+                notifyIsimStateChanged(mState);
+                clearIsimLoadedState();
+            } else {
+                if (mRetryCounter < MAX_RETRY_COUNTER) {
+                    long delay = Math.min(MAX_DELAY_MS,
+                            (long) (START_DELAY_MS * Math.pow(2, mRetryCounter)));
+                    mSimHandler.postDelayed(this, delay);
+                    mRetryCounter++;
+                } else {
+                    logw(this, "IsimRecords: Mandatory ISIM records are not fully loaded");
+                    // Notify the current loaded state regardless of the ISIM records.
+                    // This may trigger USIM fallback based on the carrier configuration.
+                    notifyIsimStateChanged(mState);
+                    clearIsimLoadedState();
+                }
+            }
+        }
+
+        public void processPendingState() {
+            logi(this, "Pending LOADED state is processing");
+            mSimHandler.removeCallbacks(this);
+            notifyIsimStateChanged(mState);
+            clearIsimLoadedState();
+        }
+    }
+
     /** Services in ISIM Service Table (please refer to the 3GPP TS 31.103) */
     private static final byte ISIM_SERVICE_P_CSCF_ADDRESS = 0x01;
     private static final byte ISIM_SERVICE_GBA = 0x02;
@@ -90,6 +145,7 @@ public final class SimAgent implements SimInterface {
     private final List<String> mIsimImpu = new ArrayList<>();
     private final Set<Sim.IsimListener> mIsimListeners = new CopyOnWriteArraySet<>();
     private final List<String> mIsimPcscf = new ArrayList<>();
+    private IsimLoadedState mIsimLoadedState;
     private NativeStateInterface.Listener mNativeStateListener;
 
     public SimAgent(int slotId) {
@@ -490,12 +546,23 @@ public final class SimAgent implements SimInterface {
         }
     }
 
+    private void clearIsimLoadedState() {
+        if (mIsimLoadedState != null) {
+            logd(this, "Clear IsimLoadedState");
+            mIsimLoadedState = null;
+        }
+    }
+
     private void clearIsimRecords() {
         mIsimIst = new byte[0];
         mIsimImpi = null;
         mIsimDomain = null;
         mIsimImpu.clear();
         mIsimPcscf.clear();
+    }
+
+    private boolean isMandatoryIsimRecordsLoaded() {
+        return mIsimDomain != null && mIsimImpi != null && !mIsimImpu.isEmpty();
     }
 
     private void loadIsimRecords() {
@@ -552,6 +619,19 @@ public final class SimAgent implements SimInterface {
         }
     }
 
+    private void notifyIsimStateChanged(int state) {
+        ISystem system = getSystem(getSlotId());
+
+        if (system != null) {
+            system.notifyIsimState(
+                    NOTIFICATION_ISIM_STATE_CHANGED,
+                    isimStateToString(state));
+        }
+
+        // Notifies the applications that the ISIM state is changed.
+        notifyIsimStateChanged();
+    }
+
     private void setIsimState(int state) {
         if (mIsimState != state) {
             int newIsimState = state;
@@ -566,24 +646,25 @@ public final class SimAgent implements SimInterface {
             mIsimState = newIsimState;
 
             if (isIsimLoaded()) {
-                loadIsimRecords();
-            } else if (mIsimState == Sim.ISIM_STATE_UNKNOWN
+                mIsimLoadedState = new IsimLoadedState(state);
+                mIsimLoadedState.run();
+                return;
+            }
+
+            if (mIsimState == Sim.ISIM_STATE_UNKNOWN
                     || mIsimState == Sim.ISIM_STATE_NOT_PRESENT
                     || mIsimState == Sim.ISIM_STATE_NOT_READY
                     || mIsimState == Sim.ISIM_STATE_REFRESH_STARTED) {
                 clearIsimRecords();
             }
 
-            ISystem system = getSystem(getSlotId());
-
-            if (system != null) {
-                system.notifyIsimState(
-                        NOTIFICATION_ISIM_STATE_CHANGED,
-                        isimStateToString(state));
+            // If there is a pending LOADED state, process it first
+            // before next state change notification.
+            if (mIsimLoadedState != null) {
+                mIsimLoadedState.processPendingState();
             }
 
-            // Notifies the applications that the ISIM state is changed.
-            notifyIsimStateChanged();
+            notifyIsimStateChanged(state);
         }
     }
 

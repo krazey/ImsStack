@@ -76,6 +76,7 @@ public class SimAgentTest {
             List.of(Uri.parse("sip:1234@test.ims.com"), Uri.parse("tel:1234"));
     private static final String[] PCSCF_ARRAY = { "test.pcscf.com", "11.22.33.44" };
     private static final List<String> PCSCF_LIST = List.of("test.pcscf.com", "11.22.33.44");
+    private static final String ISIM_LOADED = "LOADED";
 
     @Mock private Sim.Listener mSimListener;
     @Mock private Sim.IsimListener mIsimListener;
@@ -287,6 +288,97 @@ public class SimAgentTest {
 
     @Test
     @SmallTest
+    public void testIsimLoadedWithRetry() {
+        when(mTelephonyManagerProxy.getSimCardState())
+                .thenReturn(TelephonyManager.SIM_STATE_PRESENT);
+        when(mTelephonyManagerProxy.getSimApplicationState())
+                .thenReturn(TelephonyManager.SIM_STATE_LOADED);
+        // "domain" record is null
+        when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(null);
+
+        // ISIM_STATE_LOADED
+        mSimAgent.updateSimState();
+
+        assertEquals(IMPI, mSimAgent.getIsimImpi());
+        assertNull(mSimAgent.getIsimDomain());
+        assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
+        assertArrayEquals(PCSCF_ARRAY, mSimAgent.getIsimPcscf().toArray(new String[0]));
+        assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
+
+        // Wait for "domain" record.
+        when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(DOMAIN);
+        processAllMessages(SimAgent.IsimLoadedState.MAX_DELAY_MS);
+
+        assertEquals(IMPI, mSimAgent.getIsimImpi());
+        assertEquals(DOMAIN, mSimAgent.getIsimDomain());
+        assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
+        assertArrayEquals(PCSCF_ARRAY, mSimAgent.getIsimPcscf().toArray(new String[0]));
+        assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
+        verify(mSystem)
+                .notifyIsimState(eq(SimAgent.NOTIFICATION_ISIM_STATE_CHANGED), eq(ISIM_LOADED));
+    }
+
+    @Test
+    @SmallTest
+    public void testIsimLoadedWithMaxRetryCounter() {
+        when(mTelephonyManagerProxy.getSimCardState())
+                .thenReturn(TelephonyManager.SIM_STATE_PRESENT);
+        when(mTelephonyManagerProxy.getSimApplicationState())
+                .thenReturn(TelephonyManager.SIM_STATE_LOADED);
+        // "domain" record is null
+        when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(null);
+
+        // ISIM_STATE_LOADED
+        mSimAgent.updateSimState();
+
+        assertEquals(IMPI, mSimAgent.getIsimImpi());
+        assertNull(mSimAgent.getIsimDomain());
+        assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
+        assertArrayEquals(PCSCF_ARRAY, mSimAgent.getIsimPcscf().toArray(new String[0]));
+        assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
+
+        for (int i = 0; i < SimAgent.IsimLoadedState.MAX_RETRY_COUNTER; ++i) {
+            processAllMessages(SimAgent.IsimLoadedState.MAX_DELAY_MS + 100);
+        }
+
+        assertEquals(IMPI, mSimAgent.getIsimImpi());
+        // Domain is still null and notify ISIM LOADED state as is.
+        assertNull(mSimAgent.getIsimDomain());
+        assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
+        assertArrayEquals(PCSCF_ARRAY, mSimAgent.getIsimPcscf().toArray(new String[0]));
+        assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
+        verify(mSystem)
+                .notifyIsimState(eq(SimAgent.NOTIFICATION_ISIM_STATE_CHANGED), eq(ISIM_LOADED));
+    }
+
+    @Test
+    @SmallTest
+    public void testIsimLoadedWithPendingStateProcessing() {
+        when(mTelephonyManagerProxy.getSimCardState())
+                .thenReturn(TelephonyManager.SIM_STATE_PRESENT, TelephonyManager.SIM_STATE_ABSENT);
+        when(mTelephonyManagerProxy.getSimApplicationState())
+                .thenReturn(TelephonyManager.SIM_STATE_LOADED, TelephonyManager.SIM_STATE_ABSENT);
+        // "domain" record is null
+        when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(null);
+
+        // ISIM_STATE_LOADED
+        mSimAgent.updateSimState();
+
+        assertEquals(IMPI, mSimAgent.getIsimImpi());
+        assertNull(mSimAgent.getIsimDomain());
+        assertArrayEquals(IMPU_ARRAY, mSimAgent.getIsimImpu().toArray(new String[0]));
+        assertArrayEquals(PCSCF_ARRAY, mSimAgent.getIsimPcscf().toArray(new String[0]));
+        assertArrayEquals(IST_BYTES, mSimAgent.getIsimServiceTable());
+
+        // ISIM_STATE_ABSENT
+        mSimAgent.updateSimState();
+
+        verify(mSystem)
+                .notifyIsimState(eq(SimAgent.NOTIFICATION_ISIM_STATE_CHANGED), eq(ISIM_LOADED));
+    }
+
+    @Test
+    @SmallTest
     public void testGetIsimState() {
         when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_ABSENT, TelephonyManager.SIM_STATE_PRESENT);
@@ -322,7 +414,7 @@ public class SimAgentTest {
 
         assertEquals(Sim.ISIM_STATE_LOADED, mSimAgent.getIsimState());
         assertTrue(mSimAgent.isIsimLoaded());
-        assertEquals("LOADED", mSimAgent.getIsimStateString());
+        assertEquals(ISIM_LOADED, mSimAgent.getIsimStateString());
         verify(mSystem, times(3))
                 .notifyIsimState(eq(SimAgent.NOTIFICATION_ISIM_STATE_CHANGED), anyString());
     }
@@ -573,6 +665,15 @@ public class SimAgentTest {
     }
 
     private void processAllMessages() {
+        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
+            mTestableLooper.processAllMessages();
+        }
+    }
+
+    private void processAllMessages(long moveTimeMillis) {
+        if (moveTimeMillis > 0) {
+            mTestableLooper.moveTimeForward(moveTimeMillis);
+        }
         while (!mTestableLooper.getLooper().getQueue().isIdle()) {
             mTestableLooper.processAllMessages();
         }
