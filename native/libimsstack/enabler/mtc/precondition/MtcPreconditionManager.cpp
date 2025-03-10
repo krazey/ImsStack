@@ -217,14 +217,20 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequi
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToSendLocalResourceConfirmation(
         IN ISession* piSession) const
 {
-    IMS_BOOL bResult;
+    QosTimer* pQosTimer = GetQosTimer(piSession);
+    if (pQosTimer)
+    {
+        if (IsLocalResourceReserved(piSession, !IsConfirmedDialog(piSession)) &&
+                !pQosTimer->IsQosTimerActivated(QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE))
+        {
+            return IMS_TRUE;
+        }
 
-    bResult = IsLocalResourceReserved(piSession, !IsConfirmedDialog(piSession)) ||
-            GetQosTimer(piSession)->IsQosTimerActivated(
-                    QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER);
+        return pQosTimer->IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER);
+    }
 
-    IMS_TRACE_D("IsAvailableToSendLocalResourceConfirmation (%s)", _TRACE_B_(bResult), 0, 0);
-    return bResult;
+    IMS_TRACE_D("IsAvailableToSendLocalResourceConfirmation : not available", 0, 0, 0);
+    return IMS_FALSE;
 }
 
 PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(

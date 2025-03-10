@@ -597,6 +597,40 @@ TEST_F(MtcPreconditionManagerTest,
         IsAvailableToSendLocalResourceConfirmationReturnsTrueIfLocalResourceIsReserved)
 {
     SetUpMockQosInfo();
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
+    SetUpNothingOnDefaultBearerSupported();
+
+    // In early-dialog, bAtLeastOneReserved is true so it returns true even if only one media is
+    // available.
+    EXPECT_CALL(*pInfo, GetAudioStatus())
+            .Times(3)
+            .WillOnce(Return(QosStatus::AVAILABLE))
+            .WillRepeatedly(Return(QosStatus::IDLE));
+    EXPECT_CALL(*pInfo, GetVideoStatus())
+            .Times(2)
+            .WillOnce(Return(QosStatus::AVAILABLE))
+            .WillOnce(Return(QosStatus::IDLE));
+    EXPECT_CALL(*pInfo, GetTextStatus()).Times(1).WillOnce(Return(QosStatus::AVAILABLE));
+    // by Audio
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    // by Video
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    // by Text
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsAvailableToSendLocalResourceConfirmationReturnsFalseIfWaitingNonAudioMediaQoSAvailable)
+{
+    SetUpMockQosInfo();
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
@@ -613,9 +647,9 @@ TEST_F(MtcPreconditionManagerTest,
             .WillOnce(Return(QosStatus::AVAILABLE))
             .WillOnce(Return(QosStatus::IDLE));
     EXPECT_CALL(*pInfo, GetTextStatus()).Times(1).WillOnce(Return(QosStatus::AVAILABLE));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
