@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,6 +85,12 @@ protected:
 TEST_F(VideoControllerTest, testCreateSessionFail)
 {
     EXPECT_EQ(m_pController->CreateSession(nullptr, nullptr), IMS_FALSE);
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, nullptr), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateRtpConfigWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testUpdateLocalAddressFail)
@@ -92,14 +98,85 @@ TEST_F(VideoControllerTest, testUpdateLocalAddressFail)
     EXPECT_EQ(m_pController->UpdateLocalAddress(nullptr), IMS_FALSE);
 }
 
+TEST_F(VideoControllerTest, testUpdateQualityThresholdWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
 TEST_F(VideoControllerTest, testOpenSessionFail)
 {
     EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
 }
 
+TEST_F(VideoControllerTest, testOpenSessionMultipleTimes)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateQualityThresholdBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_FALSE);
+}
+
 TEST_F(VideoControllerTest, testCloseSessionFail)
 {
     EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testCloseSessionWithSessionCreated)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testCloseSessionAfterOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateRtpConfigAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateQualityThresholdAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testModifySession)
@@ -126,10 +203,47 @@ TEST_F(VideoControllerTest, testModifySession)
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }
 
-TEST_F(VideoControllerTest, testUpdateQualityThreshold)
+TEST_F(VideoControllerTest, testSendMessageWithNoSession)
+{
+    ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();
+    pSetSurfaceParam->nValue = SURFACE_FAR;
+    EXPECT_EQ(m_pController->SendMessage(
+                      IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
+            IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testSendMessageWithInvalidCommand)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
 
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(nullptr), IMS_FALSE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_TRUE);
+    ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();
+    pSetSurfaceParam->nValue = SURFACE_FAR;
+    EXPECT_EQ(m_pController->SendMessage(-1, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
+            IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testSendMessageWithInvalidParameter)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+
+    EXPECT_EQ(m_pController->SendMessage(
+                      IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(nullptr)),
+            IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testSendMessageAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();
+    pSetSurfaceParam->nValue = SURFACE_FAR;
+    EXPECT_EQ(m_pController->SendMessage(
+                      IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
+            IMS_FALSE);
 }

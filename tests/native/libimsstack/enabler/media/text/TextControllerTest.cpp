@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -101,6 +101,7 @@ protected:
 TEST_F(TextControllerTest, testCreateSessionFail)
 {
     EXPECT_EQ(m_pController->CreateSession(nullptr, nullptr), IMS_FALSE);
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, nullptr), IMS_FALSE);
 }
 
 TEST_F(TextControllerTest, testUpdateLocalAddressFail)
@@ -113,9 +114,64 @@ TEST_F(TextControllerTest, testOpenSessionFail)
     EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
 }
 
+TEST_F(TextControllerTest, testCloseSessionWithSessionCreated)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testOpenSessionMultipleTimes)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
 TEST_F(TextControllerTest, testCloseSessionFail)
 {
     EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateQualityThresholdWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateSessionWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateSessionBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testUpdateQualityThresholdBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testCloseSessionAfterOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
 }
 
 TEST_F(TextControllerTest, testModifySession)
@@ -135,4 +191,31 @@ TEST_F(TextControllerTest, testUpdateQualityThreshold)
 
     EXPECT_EQ(m_pController->UpdateQualityThreshold(nullptr), IMS_FALSE);
     EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testUpdateSessionAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateQualityThresholdAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_FALSE);
 }

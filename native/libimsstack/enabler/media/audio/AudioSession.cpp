@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-#include "ISessionDescriptor.h"
-#include "ServiceTimer.h"
-
-#include "ServicePhoneInfo.h"
-#include "ServiceNetworkPolicy.h"
-#include "ServiceNetwork.h"
-#include "ServiceEvent.h"
-#include "ServiceSystemTime.h"
-#include "ServiceUtil.h"
 #include "IJniMedia.h"
 #include "IMediaSessionListener.h"
-#include "MediaManager.h"
+#include "ServiceTimer.h"
+#include "ServiceTrace.h"
 #include "config/AudioConfiguration.h"
 #include "audio/AudioSession.h"
 #include "audio/AudioProfileUtil.h"
 
 #include <AudioConfig.h>
+
 using namespace android::telephony::imsmedia;
 
 static const IMS_UINT32 IMS_MEDIA_TIMER_MARGIN = 500;
@@ -75,7 +68,7 @@ PUBLIC VIRTUAL void AudioSession::Timer_TimerExpired(IN ITimer* piTimer)
 
 PRIVATE void AudioSession::NetworkToneTimerExpired()
 {
-    IMS_TRACE_D("NetworkToneTimerExpired() - networktone time[%d]", m_nNetworkToneTimer, 0, 0);
+    IMS_TRACE_D("NetworkToneTimerExpired() - network tone time[%d]", m_nNetworkToneTimer, 0, 0);
 
     if (m_nNetworkToneTimer > 0)
     {

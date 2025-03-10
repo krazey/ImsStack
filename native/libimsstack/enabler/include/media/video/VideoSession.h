@@ -18,7 +18,6 @@
 #define VIDEO_SESSION_H_
 
 #include "BaseSession.h"
-#include "video/VideoDef.h"
 #include "video/VideoProfile.h"
 
 class VideoConfiguration;
@@ -29,9 +28,9 @@ public:
     enum
     {
         /** The state that video session created and no operation is on going */
-        STATE_IDLE = 0,
+        STATE_NONE = 0,
         /** The state that video session created and openSession is finished */
-        STATE_OPENED,
+        STATE_IDLE,
         /** The state that video session created and camera is running in preview mode and no
            rx/RTCP streaming is on going */
         STATE_PREVIEW,

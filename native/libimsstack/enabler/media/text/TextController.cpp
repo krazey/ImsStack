@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "text/TextController.h"
 #include "ServiceTrace.h"
+#include "text/TextController.h"
 #include "text/TextProfile.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -87,7 +87,7 @@ IMS_BOOL TextController::UpdateSession()
 {
     IMS_TRACE_D("UpdateSession()", 0, 0, 0);
 
-    if (m_pSession != IMS_NULL)
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != TextSession::STATE_NONE)
     {
         if (m_pSession->GetRemotePort() == 0 || m_pSession->GetLocalPort() == 0)
         {

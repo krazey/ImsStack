@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,6 +103,10 @@ TEST_F(AudioControllerTest, testCreateSessionFail)
     EXPECT_EQ(m_pController->CreateSession(nullptr, 10000, nullptr, MEDIA_SERVICE_DEFAULT),
             IMS_FALSE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 0);
+
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, 1000, nullptr, MEDIA_SERVICE_DEFAULT),
+            IMS_FALSE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 0);
 }
 
 TEST_F(AudioControllerTest, testDeleteSessionFail)
@@ -132,6 +136,16 @@ TEST_F(AudioControllerTest, testOpenSessionFail)
 TEST_F(AudioControllerTest, testCloseSessionFail)
 {
     EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(AudioControllerTest, testCloseSessionWithSessionCreated)
+{
+    IMS_UINTP negoId = 1000;
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
 }
 
 TEST_F(AudioControllerTest, testModifySessionSendDtmf)

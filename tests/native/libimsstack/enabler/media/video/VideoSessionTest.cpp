@@ -124,7 +124,7 @@ TEST_F(VideoSessionTest, testOpen)
             .WillOnce(Return(IMS_TRUE));
 
     EXPECT_TRUE(m_pSession->Open());
-    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_OPENED);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_IDLE);
 }
 
 TEST_F(VideoSessionTest, testModify)
@@ -134,7 +134,7 @@ TEST_F(VideoSessionTest, testModify)
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
-    m_pSession->SetState(VideoSession::STATE_OPENED);
+    m_pSession->SetState(VideoSession::STATE_IDLE);
     VideoConfig* pVideoConfig = reinterpret_cast<VideoConfig*>(m_pSession->GetRtpConfig());
     pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_PREVIEW);
     EXPECT_TRUE(m_pSession->Modify());
@@ -149,12 +149,12 @@ TEST_F(VideoSessionTest, testClose)
             .WillOnce(Return(IMS_TRUE));
 
     EXPECT_TRUE(m_pSession->Close());
-    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_IDLE);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_NONE);
 }
 
 TEST_F(VideoSessionTest, testSetMediaQuality)
 {
-    m_pSession->SetState(VideoSession::STATE_OPENED);
+    m_pSession->SetState(VideoSession::STATE_IDLE);
     EXPECT_CALL(m_objMockListener,
             MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_SET_MEDIA_QUALITY, _))
             .Times(1)
@@ -165,7 +165,7 @@ TEST_F(VideoSessionTest, testSetMediaQuality)
 
 TEST_F(VideoSessionTest, testOnSetSurfaceCmd)
 {
-    m_pSession->SetState(VideoSession::STATE_OPENED);
+    m_pSession->SetState(VideoSession::STATE_IDLE);
     EXPECT_CALL(m_objMockListener,
             MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_SET_DISPLAY_SURFACE, _))
             .Times(1)
@@ -185,7 +185,7 @@ TEST_F(VideoSessionTest, testOnSetSurfaceCmd)
 
 TEST_F(VideoSessionTest, testOnSelectCameraCmd)
 {
-    m_pSession->SetState(VideoSession::STATE_OPENED);
+    m_pSession->SetState(VideoSession::STATE_IDLE);
     CONST IMS_UINT32 CAMERA_ID_FRONT = 1;
     EXPECT_CALL(m_objMockListener,
             MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))

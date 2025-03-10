@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-#include "ISessionDescriptor.h"
-#include "ServicePhoneInfo.h"
-#include "ServiceNetworkPolicy.h"
-#include "ServiceNetwork.h"
-#include "ServiceEvent.h"
-#include "ServiceSystemTime.h"
-#include "ServiceUtil.h"
+#include "ServiceTrace.h"
 
 #include "IMediaSessionListener.h"
 #include "IJniMedia.h"
@@ -31,6 +25,7 @@
 #include "video/VideoProfileUtil.h"
 
 #include <VideoConfig.h>
+
 using namespace android::telephony::imsmedia;
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -360,7 +355,7 @@ IMS_BOOL VideoSession::OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 {
     IMS_TRACE_I("OnMessages() - Msg[%d, %s]", nMsg, IJniMedia::PrintMsg(nMsg), 0);
 
-    IMS_BOOL bRet = IMS_TRUE;
+    IMS_BOOL bRet = IMS_FALSE;
 
     switch (nMsg)
     {
@@ -400,7 +395,7 @@ IMS_BOOL VideoSession::Open()
         if (m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                     IJniMedia::REQUEST_OPEN_SESSION, pParam) == IMS_TRUE)
         {
-            m_nState = STATE_OPENED;
+            m_nState = STATE_IDLE;
             return IMS_TRUE;
         }
     }
@@ -419,7 +414,7 @@ IMS_BOOL VideoSession::Modify()
     VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
     IMS_TRACE_I("Modify() - state[%d], VideoMode[%d]", m_nState, pVideoConfig->getVideoMode(), 0);
 
-    if (m_piMediaSessionListener != IMS_NULL && m_nState >= STATE_OPENED)
+    if (m_piMediaSessionListener != IMS_NULL && m_nState >= STATE_IDLE)
     {
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_VIDEO);
         pParam->m_pConfig = new VideoConfig(REINTERPRET_CAST(VideoConfig*, m_pRtpConfig));
@@ -483,7 +478,7 @@ IMS_BOOL VideoSession::Close()
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IJniMedia::REQUEST_CLOSE_SESSION, pParam);
 
-        m_nState = STATE_IDLE;
+        m_nState = STATE_NONE;
     }
 
     return IMS_TRUE;
@@ -495,7 +490,7 @@ IMS_BOOL VideoSession::SetMediaQuality()
     IMS_TRACE_I("SetMediaQuality() - state[%d]", m_nState, 0, 0);
     IMS_BOOL bResult = IMS_FALSE;
 
-    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_IDLE)
+    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_NONE)
     {
         ImsMediaMsgSetMediaQualityParam* pParam =
                 new ImsMediaMsgSetMediaQualityParam(MEDIA_TYPE_VIDEO);
@@ -532,7 +527,7 @@ IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
                 {
                     m_bDisplaySurfaceSet = IMS_TRUE;
 
-                    if (m_nState == STATE_IDLE)
+                    if (m_nState == STATE_NONE)
                     {
                         return IMS_TRUE;
                     }
@@ -547,7 +542,7 @@ IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
                 {
                     m_bPreviewSurfaceSet = IMS_TRUE;
 
-                    if (m_nState == STATE_IDLE)
+                    if (m_nState == STATE_NONE)
                     {
                         return IMS_TRUE;
                     }
@@ -582,7 +577,7 @@ IMS_BOOL VideoSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
         {
             switch (m_nState)
             {
-                case STATE_OPENED:
+                case STATE_IDLE:
                     // start preview mode
                     pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_PREVIEW);
                     pVideoConfig->setCameraId(m_nCameraId);

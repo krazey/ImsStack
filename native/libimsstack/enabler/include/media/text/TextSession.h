@@ -18,7 +18,6 @@
 #define TEXT_SESSION_H_
 
 #include "BaseSession.h"
-#include "text/TextDef.h"
 #include "text/TextProfile.h"
 
 class TextConfiguration;
