@@ -1446,6 +1446,9 @@ TEST_F(AosHandleTest, SetReason_Test)
     m_pAosHandle->SetReason(AosReason::AIRPLANE_MODE);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::AIRPLANE_MODE);
 
+    m_pAosHandle->SetReason(AosReason::WIFI_OFF);
+    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::WIFI_OFF);
+
     m_pAosHandle->SetReason(AosReason::SERVICE_POLICY);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::SERVICE_POLICY);
 
@@ -1512,6 +1515,7 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::AIRPLANE_MODE), ImsAosReason::AIRPLANE_MODE);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::WIFI_OFF), ImsAosReason::WIFI_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_DISCONNECTED),
             ImsAosReason::DATA_DISCONNECTED);
     EXPECT_EQ(

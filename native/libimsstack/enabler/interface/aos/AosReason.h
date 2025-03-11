@@ -28,6 +28,7 @@ public:
         SERVICE_POLICY,
         IMS_DISABLED,
         TTYMODEON,
+        WIFI_OFF,
         NOT_SPECIFIED,
 
         IP_CHANGED = 20,

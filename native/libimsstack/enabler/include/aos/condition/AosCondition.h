@@ -76,7 +76,8 @@ public:
         REQUEST_DESTROY,
         REQUEST_RECOVER,
         REQUEST_PDN_DISCONNECT,
-        REQUEST_RESET_CONNECTION_RECOVERY
+        REQUEST_RESET_CONNECTION_RECOVERY,
+        REQUEST_REASON_UPDATE
     };
     // eReason : AosReason
 
@@ -153,6 +154,7 @@ protected:
     void ServiceSetting_ServiceChanged(
             IN ServiceSetting eState, IN IMS_UINT32 nServiceBits) override;
     void ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn) override;
+    void ServiceSetting_WifiChanged(IN IMS_BOOL bIsOn) override;
 
     void Init();
     void AddListener(IN IMS_UINT32 nType);
@@ -177,6 +179,7 @@ protected:
     void ProcessPhoneNumberAvailableEvent(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
     void ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 nServiceBits);
     void ProcessTtyEvent(IN IMS_BOOL bIsOn);
+    void ProcessWifiSettingEvent(IN IMS_BOOL bIsOn);
     void ProcessImsVopsEvent(IN IMS_UINT32 nState);
     void ProcessLocationInfo(IN LocationInfo eState);
     void ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
