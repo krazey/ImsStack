@@ -68,6 +68,7 @@ public:
     MtcSupplementaryService* pSupplementaryService;
     ParticipantInfo* pParticipantInfo;
     MediaInfo objMediaInfo;
+    ImsVector<AString> objActionSets;
 
 protected:
     virtual void SetUp() override
@@ -127,6 +128,32 @@ protected:
                 .WillByDefault(ReturnRef(*pSupplementaryService));
         pParticipantInfo = new ParticipantInfo(objCallContext);
         ON_CALL(objCallContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
+    }
+
+    void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += ":";
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += ",";
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
+        ON_CALL(*pConfigurationProxy,
+                GetStringArray(
+                        ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
     }
 };
 
@@ -222,6 +249,8 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareConditi
     ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
             .WillByDefault(Return(&objIMessage));
     ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+    SetActionConfigs(
+            SipStatusCode::SC_491, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION});
 
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objISession));
