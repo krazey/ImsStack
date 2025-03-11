@@ -26,31 +26,39 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+class TestAosHandleUce : public AosHandleUce
+{
+public:
+    inline TestAosHandleUce(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
+            AosHandleUce(piAppContext, strAppId, strServiceId, nServiceType)
+    {
+    }
+
+    inline IMS_BOOL IsRegFeatureTagRequired() { return m_bRegFeatureTagRequired; }
+};
+
 class AosHandleUceTest : public ::testing::Test
 {
 public:
-    AosHandleUce* m_pAosHandleUce;
+    TestAosHandleUce* m_pAosHandleUce;
 
     MockIAosAppContext m_objMockIAosAppContext;
 
 protected:
     void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
 
         const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(strValue));
 
         const AString strAppId = AString("ims.app.uce.test");
         const AString strServiceId = AString("ims.service.uce.test");
         const IMS_UINT32 nServiceType = -1;
 
-        m_pAosHandleUce = new AosHandleUce(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                strAppId, strServiceId, nServiceType);
+        m_pAosHandleUce = new TestAosHandleUce(
+                &m_objMockIAosAppContext, strAppId, strServiceId, nServiceType);
 
         ASSERT_TRUE(m_pAosHandleUce != nullptr);
     }
@@ -63,11 +71,9 @@ protected:
             m_pAosHandleUce = nullptr;
         }
     }
-
-    IMS_BOOL IsRegFeatureTagRequired() { return m_pAosHandleUce->m_bRegFeatureTagRequired; }
 };
 
 TEST_F(AosHandleUceTest, Constructor_Test)
 {
-    EXPECT_FALSE(IsRegFeatureTagRequired());
+    EXPECT_FALSE(m_pAosHandleUce->IsRegFeatureTagRequired());
 }
