@@ -1216,38 +1216,52 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
             IMS_SUCCESS);
 }
 
-TEST_F(MessageUtilsTest, IsVideoFeatureIncluded)
+TEST_F(MessageUtilsTest, IsMediaFeaturesIncludedReturnsNulloptIfNoContactHeader)
 {
-    AString strHeader;
     ImsList<AString> objHeaders;
-    objHeaders.Append(
-            "<sip:anyUri>;video;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
 
-    EXPECT_TRUE(objMessageUtils.IsVideoFeatureIncluded(piMessage));
-
-    objHeaders.SetAt("<sip:anyUri>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_FALSE(objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsMmtelFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsTextFeatureIncluded(piMessage));
 }
 
-TEST_F(MessageUtilsTest, IsTextFeatureIncluded)
+TEST_F(MessageUtilsTest, IsMmtelFeatureIncludedReturnsFalseIfNoMmtelTag)
 {
     AString strHeader;
     ImsList<AString> objHeaders;
-    objHeaders.Append(
-            "<sip:anyUri>;text;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
+    objHeaders.Append("<sip:anyUri>");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
 
-    EXPECT_TRUE(objMessageUtils.IsTextFeatureIncluded(piMessage));
+    EXPECT_EQ(IMS_FALSE, objMessageUtils.IsMmtelFeatureIncluded(piMessage));
+}
 
-    objHeaders.SetAt("<sip:anyUri>", 0);
+TEST_F(MessageUtilsTest, IsVideoTextFeatureIncludedReturnsNulloptIfNoMmtelTag)
+{
+    AString strHeader;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<sip:anyUri>;video;text");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
-    EXPECT_FALSE(objMessageUtils.IsTextFeatureIncluded(piMessage));
+
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsTextFeatureIncluded(piMessage));
+}
+
+TEST_F(MessageUtilsTest, IsMediaFeaturesIncludedReturnsTrueIfHasTag)
+{
+    AString strHeader;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<sip:anyUri>;video;text;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims."
+                      "icsi.mmtel\"");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_EQ(IMS_TRUE, objMessageUtils.IsMmtelFeatureIncluded(piMessage));
+    EXPECT_EQ(IMS_TRUE, objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(IMS_TRUE, objMessageUtils.IsTextFeatureIncluded(piMessage));
 }
 
 TEST_F(MessageUtilsTest, GetCallTypeReturnsUnknownIfNoSdp)

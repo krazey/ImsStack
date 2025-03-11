@@ -23,6 +23,7 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
+#include <optional>
 #include <gmock/gmock.h>
 
 class IMessage;
@@ -106,8 +107,9 @@ public:
             (IN_OUT IMessage*, IN IMtcContext&, IN const ImsList<ConfUser*>&, IN IMS_BOOL,
                     IN IMS_BOOL),
             (override));
-    MOCK_METHOD(IMS_BOOL, IsVideoFeatureIncluded, (IN const IMessage*), (override));
-    MOCK_METHOD(IMS_BOOL, IsTextFeatureIncluded, (IN const IMessage*), (override));
+    MOCK_METHOD(std::optional<IMS_BOOL>, IsMmtelFeatureIncluded, (IN const IMessage*), (override));
+    MOCK_METHOD(std::optional<IMS_BOOL>, IsVideoFeatureIncluded, (IN const IMessage*), (override));
+    MOCK_METHOD(std::optional<IMS_BOOL>, IsTextFeatureIncluded, (IN const IMessage*), (override));
     MOCK_METHOD(CallType, GetCallType, (IN const IMessage*, IN ISession*, IN IMS_BOOL), (override));
     MOCK_METHOD(CallType, GetCallTypeFromSdp, (IN ISession*, IN IMS_BOOL, IN IMS_BOOL, IN IMS_BOOL),
             (override));
