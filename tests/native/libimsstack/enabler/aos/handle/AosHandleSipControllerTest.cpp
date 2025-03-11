@@ -29,10 +29,26 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+#define DECLARE_USING(Base)             \
+    using Base::InitializeServiceBlock; \
+    using Base::IsBlocked;
+
+class TestAosHandleSipController : public AosHandleSipController
+{
+public:
+    DECLARE_USING(AosHandleSipController)
+
+    inline TestAosHandleSipController(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
+            AosHandleSipController(piAppContext, strAppId, strServiceId, nServiceType)
+    {
+    }
+};
+
 class AosHandleSipControllerTest : public ::testing::Test
 {
 public:
-    AosHandleSipController* m_pAosHandleSipController;
+    TestAosHandleSipController* m_pAosHandleSipController;
 
     MockIAosAppContext m_objMockIAosAppContext;
 
@@ -42,26 +58,20 @@ public:
 protected:
     void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
 
         const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(strValue));
 
         const AString strAppId = AString("ims.app.sipcontroller.test");
         const AString strServiceId = AString("ims.service.sipcontroller.test");
         const IMS_UINT32 nServiceType = -1;
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
 
-        m_pAosHandleSipController =
-                new AosHandleSipController(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                        strAppId, strServiceId, nServiceType);
+        m_pAosHandleSipController = new TestAosHandleSipController(
+                &m_objMockIAosAppContext, strAppId, strServiceId, nServiceType);
 
         ASSERT_TRUE(m_pAosHandleSipController != nullptr);
     }
@@ -76,10 +86,6 @@ protected:
 
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
     }
-
-    void InitializeServiceBlock() { m_pAosHandleSipController->InitializeServiceBlock(); }
-
-    IMS_BOOL IsBlocked() { return m_pAosHandleSipController->AosHandle::IsBlocked(); }
 };
 
 TEST_F(AosHandleSipControllerTest, InitializeServiceBlock_Test1)
@@ -91,9 +97,9 @@ TEST_F(AosHandleSipControllerTest, InitializeServiceBlock_Test1)
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
 
-    InitializeServiceBlock();
+    m_pAosHandleSipController->InitializeServiceBlock();
 
-    EXPECT_TRUE(IsBlocked());
+    EXPECT_TRUE(m_pAosHandleSipController->IsBlocked());
 }
 
 TEST_F(AosHandleSipControllerTest, InitializeServiceBlock_Test2)
@@ -105,7 +111,7 @@ TEST_F(AosHandleSipControllerTest, InitializeServiceBlock_Test2)
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
-    InitializeServiceBlock();
+    m_pAosHandleSipController->InitializeServiceBlock();
 
-    EXPECT_FALSE(IsBlocked());
+    EXPECT_FALSE(m_pAosHandleSipController->IsBlocked());
 }

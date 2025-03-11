@@ -28,8 +28,5 @@ public:
 
 protected:
     void InitializeServiceBlock() override;
-
-private:
-    friend class AosHandleSipControllerTest;
 };
 #endif  // AOS_HANDLE_SIP_CONTROLLER_H_
