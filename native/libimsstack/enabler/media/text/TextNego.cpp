@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,30 +22,29 @@
 #include "config/MediaSessionConfigFactory.h"
 #include "text/TextNego.h"
 #include "text/TextProfileGenerator.h"
-#include "text/TextSdpParser.h"
+#include "text/TextSdpGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         BaseNego(nSlotId, MEDIA_TYPE_TEXT),
-        m_pSdpParser(std::make_unique<TextSdpParser>())
+        m_pSdpParser(std::make_shared<TextSdpParser>()),
+        m_pProfileNegotiator(std::make_shared<TextProfileNegotiator>())
 {
-    IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
-
+    IMS_TRACE_I("+TextNego(): slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
-    m_pProfileNegotiator = std::make_shared<TextProfileNegotiator>();
     m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
 }
 
 PUBLIC
 TextNego::TextNego(IN const TextNego& obj) :
         BaseNego(obj),
-        m_pSdpParser(std::make_unique<TextSdpParser>())
+        m_pSdpParser(std::make_shared<TextSdpParser>()),
+        m_pProfileNegotiator(std::make_shared<TextProfileNegotiator>())
 {
-    IMS_TRACE_I("+TextNego() - slot[%d]", GetSlotId(), 0, 0);
+    IMS_TRACE_I("+TextNego(): slot[%d]", GetSlotId(), 0, 0);
 
     m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
-    m_pProfileNegotiator = std::make_shared<TextProfileNegotiator>();
     m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
     Copy(&obj);
 }
@@ -56,6 +55,7 @@ TextNego& TextNego::operator=(IN const TextNego& obj)
     if (this != &obj)
     {
         BaseNego::operator=(obj);
+        m_pSdpParser = std::make_shared<TextSdpParser>();
         m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
         m_pProfileNegotiator = std::make_shared<TextProfileNegotiator>();
         m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
@@ -77,32 +77,30 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
             m_pProfileNegotiator == IMS_NULL)
     {
+        IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): invalid arguments", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
-    IMS_TRACE_I("IsMediaCodecFromSdpSupported()", 0, 0, 0);
-
     OaModel objOaModel;
     objOaModel.pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT, m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
+    objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
-            IMS_TRUE)
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)))
     {
+        IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to parse SDP", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
     // Make a negotiated profile from the local and peer profile
-    objOaModel.pNegotiatedProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
+    objOaModel.pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (std::static_pointer_cast<TextProfileNegotiator>(m_pProfileNegotiator)
-                    ->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
-                            GetNegotiatedProfile(&objOaModel), m_pConfig) != IMS_TRUE)
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel),
+                IMS_TRUE, GetNegotiatedProfile(&objOaModel), m_pConfig))
     {
+        IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to negotiate SDP", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
@@ -122,7 +120,7 @@ TEXT_CODEC TextNego::GetNegotiatedCodec(void)
         return TEXT_CODEC_NONE;
     }
 
-    IMS_TRACE_D("GetNegotiatedCodec() - Negotiated Payload Type is [%s]",
+    IMS_TRACE_D("GetNegotiatedCodec(): Negotiated Payload Type is [%s]",
             pPayload->GetRtpMap().GetPayloadType().GetStr(), 0, 0);
 
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))
@@ -167,78 +165,93 @@ PROTECTED TextProfile* TextNego::GetNegotiatedProfile(IN OaModel* pOaModel)
     return ProfileCasting(BaseNego::GetNegotiatedProfile(pOaModel));
 }
 
+PROTECTED
+IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
+{
+    if (CheckArgument(pSessionDescriptor, pDescriptor, eDirection) && m_pSdpGenerator)
+    {
+        // Make the SDP from profile
+        return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
+                GetLocalProfile(CreateOaModel(eDirection, bDisable)));
+    }
+
+    return IMS_FALSE;
+}
+
 PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
 {
     // Handling exception case
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_pSdpGenerator == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FormAnswer(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (eDir == MEDIA_DIRECTION_INVALID && bDisable != IMS_TRUE)
+    if (eDirection == MEDIA_DIRECTION_INVALID && !bDisable)
     {
-        IMS_TRACE_E(0, "FormAnswer() - direction invalid", 0, 0, 0);
+        IMS_TRACE_E(0, "FormAnswer(): invalid direction", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (m_listOaModel.GetSize() == 0)
+    if (m_listOaModel.IsEmpty())
     {
+        IMS_TRACE_E(0, "FormAnswer(): empty OA model list", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("FormAnswer() - eDir[%d] - bDisable[%d]", eDir, bDisable, 0);
+    IMS_TRACE_D("FormAnswer(): direction[%d], disable[%d]", eDirection, bDisable, 0);
 
     // Getting OaModel from list
     OaModel* pNewOaModel = GetNegotiatedOaModel();
 
     if (pNewOaModel == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pNewOaModel->IsAllProfileExist() == IMS_FALSE)
+    if (!pNewOaModel->IsAllProfileExist())
     {
+        IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Modify a Rtp/RTCP port if text is not supported
-    if (bDisable == IMS_TRUE)
+    if (bDisable)
     {
-        IMS_TRACE_D("FormAnswer() - text session is not supported", 0, 0, 0);
-
         // copy the dest profile as nego profile
         if (pNewOaModel->pPeerProfile->GetPayloadList().GetSize() > 0)
         {
-            IMS_TRACE_D("FormAnswer() - use peer profile", 0, 0, 0);
+            IMS_TRACE_D("FormAnswer(): use peer profile", 0, 0, 0);
             *pNewOaModel->pNegotiatedProfile = *GetPeerProfile(pNewOaModel);
         }
         else
         {
-            // in case of no payload can be answer if there is no payload from dest profile
-            // it is a very exceptional case - received offer should have payloads
-            // use previous payload contained profile
+            // If the peer profile lacks payloads, try using previously negotiated ones. (Unusual
+            // case.)
             if (pNewOaModel->pLocalProfile->GetPayloadList().GetSize() == 0)
             {
                 OaModel* pPrevOaModel = IMS_NULL;
-                pPrevOaModel = GetNegotiatedOaModel();  // get negotiated OA model which is previous
-                                                        // nego result
+                // get negotiated OA model which is previou nego result
+                pPrevOaModel = GetNegotiatedOaModel();
 
                 if (pPrevOaModel != NULL &&
                         pPrevOaModel->pNegotiatedProfile->GetPayloadList().GetSize() > 0)
                 {
-                    IMS_TRACE_D("FormAnswer() use previous nego payloads", 0, 0, 0);
+                    IMS_TRACE_D("FormAnswer(): use previous nego payloads", 0, 0, 0);
                     *pNewOaModel->pNegotiatedProfile = *GetNegotiatedProfile(pPrevOaModel);
                 }
                 else
                 {
-                    IMS_TRACE_D("FormAnswer() use src payloads", 0, 0, 0);
+                    IMS_TRACE_D("FormAnswer(): use local payloads", 0, 0, 0);
                     *pNewOaModel->pNegotiatedProfile = *GetLocalProfile(pNewOaModel);
                 }
             }
             else
             {
-                IMS_TRACE_D("FormAnswer() use src payloads", 0, 0, 0);
+                IMS_TRACE_D("FormAnswer(): use local payloads", 0, 0, 0);
                 *pNewOaModel->pNegotiatedProfile = *GetLocalProfile(pNewOaModel);
             }
         }
@@ -253,49 +266,46 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
     }
 
     // Modify a direction
-    if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
+    if (eDirection > MEDIA_DIRECTION_INVALID && eDirection <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
-        IMS_TRACE_D("FormAnswer() - set direction[%d]", eDir, 0, 0);
-        pNewOaModel->pNegotiatedProfile->SetDirection(eDir);
+        pNewOaModel->pNegotiatedProfile->SetDirection(eDirection);
     }
 
     // Make the SDP from profile
-    return std::static_pointer_cast<TextSdpGenerator>(m_pSdpGenerator)
-            ->Generate(pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
+    return m_pSdpGenerator->Generate(
+            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
 }
 
 PROTECTED
 IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormReoffer() - pDescriptor[%" PFLS_x "], eDir[%d], OaModel Size(%d)", pDescriptor,
-            eDir, m_listOaModel.GetSize());
-
-    IMS_TRACE_D("TextNego - FormReoffer() - eDir[%d] bDisable[%d] EnforceReofferMode[%d]", eDir,
-            bDisable, bEnforceReofferMode);
-
     // Handling exception case
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
             m_pSdpGenerator == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FormReoffer(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (eDir == MEDIA_DIRECTION_INVALID && bDisable != IMS_TRUE)
+    if (eDirection == MEDIA_DIRECTION_INVALID && !bDisable)
     {
-        IMS_TRACE_E(0, "FormReoffer() - direction invalid", 0, 0, 0);
+        IMS_TRACE_E(0, "FormReoffer(): invalid direction", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    // Step 1. Make new Offer/Answer model, and copy source profile from previous negotiated profile
+    IMS_TRACE_I("FormReoffer(): direction[%d], OA model[%d], reOffer[%d]", eDirection,
+            m_listOaModel.GetSize(), bEnforceReofferMode);
+
+    // Make new Offer/Answer model, and copy source profile from previous negotiated profile
     OaModel* pNewOaModel = new OaModel();
     IMS_BOOL bIsFullCapability = IMS_FALSE;
 
-    if (m_listOaModel.GetSize() == 0)
+    if (m_listOaModel.IsEmpty())
     {
         pNewOaModel->pLocalProfile =
-                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT, m_pBaseProfile);
+                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
         bIsFullCapability = IMS_TRUE;
     }
     else
@@ -304,6 +314,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
         if (pPrevOaModel == IMS_NULL)
         {
+            IMS_TRACE_E(0, "FormReoffer(): invalid OA model", 0, 0, 0);
             delete pNewOaModel;
             return IMS_FALSE;
         }
@@ -318,38 +329,32 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         }
 
         if (pPrevOaModel->pNegotiatedProfile->GetPayloadList().GetSize() == 0 ||
-                bEnforceReofferMode == IMS_TRUE)
+                bEnforceReofferMode)
         {
-            pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                    MEDIA_TYPE_TEXT, m_pBaseProfile);
+            pNewOaModel->pLocalProfile =
+                    MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
             bIsFullCapability = IMS_TRUE;
-            IMS_TRACE_I("TextNego::FormReOffer() - Fullcapability - enforce reoffer[%d]",
-                    bEnforceReofferMode, 0, 0);
         }
         else
         {
-            if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
+            if (pMediaSessionConfig->IsSdpReofferFullCapability())
             {
                 if (m_pBaseProfile->GetPayloadList().GetSize() > 0)
                 {
-                    IMS_TRACE_I("FormReoffer() - Fullcapability", 0, 0, 0);
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            MEDIA_TYPE_TEXT, m_pBaseProfile);
+                            m_eType, m_pBaseProfile);
                     bIsFullCapability = IMS_TRUE;
                 }
                 else
                 {
-                    // this case is only for reoffer but no src profile payload existed
-                    IMS_TRACE_I("FormReoffer() - src profile is empty, use nego profile", 0, 0, 0);
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            MEDIA_TYPE_TEXT, GetNegotiatedProfile(pPrevOaModel));
+                            m_eType, GetNegotiatedProfile(pPrevOaModel));
                 }
             }
             else
             {
-                IMS_TRACE_I("FormReoffer() - use nego profile", 0, 0, 0);
                 pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                        MEDIA_TYPE_TEXT, GetNegotiatedProfile(pPrevOaModel));
+                        m_eType, GetNegotiatedProfile(pPrevOaModel));
             }
         }
     }
@@ -360,10 +365,9 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
+    if (eDirection > MEDIA_DIRECTION_INVALID && eDirection <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
-        IMS_TRACE_I("FormReoffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->SetDirection(eDir);
+        pNewOaModel->pLocalProfile->SetDirection(eDirection);
     }
 
     // Modify a Rtp/RTCP port if text is not supported
@@ -386,8 +390,6 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             // set default AS value when srcProfile AS value is 0 in ReOffer case
             if (pNewOaModel->pLocalProfile->GetBandwidthAs() <= 0)
             {
-                IMS_TRACE_I("FormReoffer() LocalProfile AS value is 0, change to default AS value",
-                        0, 0, 0);
                 pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
             }
 
@@ -399,8 +401,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    return std::static_pointer_cast<TextSdpGenerator>(m_pSdpGenerator)
-            ->Generate(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
+    return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
 PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
@@ -409,43 +410,37 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
             m_pProfileNegotiator == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateOffer(): invalid arguments", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
     pNewOaModel->pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT, m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
-            IMS_TRUE)
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)))
     {
-        IMS_TRACE_E(0, "NegotiateOffer() - Parse failed", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiateOffer(): failed to parse SDP", 0, 0, 0);
         delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
     }
 
     // Make a negotiated profile from Local & Peer profile
-    pNewOaModel->pNegotiatedProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
+    pNewOaModel->pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (std::static_pointer_cast<TextProfileNegotiator>(m_pProfileNegotiator)
-                    ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
-                            GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
+                IMS_TRUE, GetNegotiatedProfile(pNewOaModel), m_pConfig))
     {
-        IMS_TRACE_E(0, "NegotiateOffer() - Negotiate failed", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiateOffer(): failed to negotiate SDP", 0, 0, 0);
+        return MEDIA_DIRECTION_INVALID;
     }
 
-    // add sessionDesciptorkey key in NewOaModel
-    IMS_TRACE_D("NegotiateOffer() - add session key in NewOaModel [%" PFLS_x "]",
-            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
     pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
     m_listOaModel.Append(pNewOaModel);
-
-    // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
 
@@ -455,13 +450,13 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
             m_pProfileNegotiator == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAnswer(): invalid arguments", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
-    if (m_listOaModel.GetSize() < 1)
+    if (m_listOaModel.IsEmpty())
     {
-        IMS_TRACE_E(0, "NegotiateAnswer() - Failed. m_listOaModel.GetSize() [%d]",
-                m_listOaModel.GetSize(), 0, 0);
+        IMS_TRACE_E(0, "NegotiateAnswer(): empty OA model list", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
@@ -470,40 +465,33 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
 
     if (pNewOaModel == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NegotiateAnswer() - Failed. pNewOaModel is NULL ", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiateAnswer(): invalid OA model", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
-            IMS_TRUE)
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)))
     {
-        IMS_TRACE_E(0, "NegotiateAnswer() - Parse failed", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiateAnswer(): failed to parse SDP", 0, 0, 0);
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
     }
 
     // Make a negotiated profile from Local & Peer profile
-    pNewOaModel->pNegotiatedProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
+    pNewOaModel->pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (std::static_pointer_cast<TextProfileNegotiator>(m_pProfileNegotiator)
-                    ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
-                            IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
+                IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig))
     {
+        IMS_TRACE_E(0, "NegotiateAnswer(): failed to negotiate SDP", 0, 0, 0);
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // Add session key in NewOaModel
-    IMS_TRACE_D("NegotiateAnswer - add session key in NewOaModel [%" PFLS_x "]",
-            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
     pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
-
-    // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }

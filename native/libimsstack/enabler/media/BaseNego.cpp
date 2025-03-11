@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
  */
 
 #include "ISessionDescriptor.h"
+#include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 
 #include "BaseNego.h"
@@ -22,10 +23,6 @@
 #include "MediaProfileFactory.h"
 #include "MediaProfileGenerator.h"
 #include "MediaProfileUtil.h"
-
-#include "audio/AudioSdpGenerator.h"
-#include "text/TextSdpGenerator.h"
-#include "video/VideoSdpGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -37,7 +34,6 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
         m_pConfig(IMS_NULL),
         m_pEnvironment(IMS_NULL),
         m_pSdpGenerator(IMS_NULL),
-        m_pProfileNegotiator(IMS_NULL),
         m_pProfileGenerator(IMS_NULL)
 {
     IMS_TRACE_I("+BaseNego() - type[%d], slot[%d]", m_eType, nSlotId, 0);
@@ -60,7 +56,6 @@ BaseNego& BaseNego::operator=(IN const BaseNego& obj)
         m_pConfig = obj.m_pConfig;
         m_pEnvironment = obj.m_pEnvironment;
         m_pSdpGenerator = obj.m_pSdpGenerator;
-        m_pProfileNegotiator = obj.m_pProfileNegotiator;
         m_pProfileGenerator = obj.m_pProfileGenerator;
     }
 
@@ -88,7 +83,7 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(
 {
     if (pConfig == IMS_NULL || pEnvironment == IMS_NULL)
     {
-        IMS_TRACE_E(0, "CreateProfiles() - invalid configuration", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateProfiles(): type[%d], invalid arguments", m_eType, 0, 0);
         return;
     }
 
@@ -96,9 +91,8 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(
     {
         MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
     }
-    delete m_pBaseProfile;
 
-    IMS_TRACE_I("CreateProfiles()", 0, 0, 0);
+    delete m_pBaseProfile;
 
     m_pEnvironment = pEnvironment;
     m_pConfig = pConfig;
@@ -112,21 +106,22 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(
 
 PUBLIC VIRTUAL IMS_BOOL BaseNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-        IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
+        IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSdp() - State[%d], OaModel size[%d]", eNegoState, m_listOaModel.GetSize(), 0);
-    IMS_TRACE_D("FormSdp() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
+    IMS_TRACE_I("FormSdp(): type[%d], state[%d], OA model size[%d]", m_eType, eNegoState,
+            m_listOaModel.GetSize());
+    IMS_TRACE_D("FormSdp(): direction[%d], disable[%d], mode[%d]", eDirection, bDisable,
             bEnforceReofferMode);
 
     switch (eNegoState)
     {
         case STATE_IDLE:
-            return FormOffer(pSessionDescriptor, pDescriptor, eDir, bDisable);
+            return FormOffer(pSessionDescriptor, pDescriptor, eDirection, bDisable);
         case STATE_OFFER_RECEIVED:
-            return FormAnswer(pSessionDescriptor, pDescriptor, eDir, bDisable);
+            return FormAnswer(pSessionDescriptor, pDescriptor, eDirection, bDisable);
         case STATE_NEGOTIATED:
             return FormReoffer(
-                    pSessionDescriptor, pDescriptor, eDir, bDisable, bEnforceReofferMode);
+                    pSessionDescriptor, pDescriptor, eDirection, bDisable, bEnforceReofferMode);
         default:
             return IMS_FALSE;
     }
@@ -136,6 +131,8 @@ PUBLIC VIRTUAL void BaseNego::NegotiateSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)
 {
+    IMS_TRACE_I("NegotiateSdp(): type[%d], state[%d], OaModel size[%d]", m_eType, eNegoState,
+            m_listOaModel.GetSize());
     nDirection = MEDIA_DIRECTION_INVALID;
 
     switch (eNegoState)
@@ -178,11 +175,11 @@ PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
 
     if (pLatestOaModel != IMS_NULL)
     {
-        if ((pLatestOaModel->IsAllProfileExist() &&
-                    (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED)) == IMS_FALSE)
+        if (!pLatestOaModel->IsAllProfileExist() &&
+                (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED))
         {
-            IMS_TRACE_I("FinalizeSdp() - Incomplete OaModel[%d]. Delete profile",
-                    m_listOaModel.GetSize() - 1, 0, 0);
+            IMS_TRACE_I("FinalizeSdp(): type[%d], incomplete OA model index[%d]", m_eType,
+                    m_listOaModel.GetSize() - 1, 0);
             delete pLatestOaModel;
             m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         }
@@ -201,17 +198,15 @@ PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
             {
                 pTempOaModel->bConfirmedSession = IMS_TRUE;
                 bFoundOaModel = IMS_TRUE;
-                IMS_TRACE_D("FinalizeSdp() - find comfirmed Session OaModel [%d]",
-                        m_listOaModel.GetSize() - i, 0, 0);
                 break;
             }
         }
     }
 
     // SessionDescriptor key mismatch case handling, not select OaModel
-    if (bFoundOaModel != IMS_TRUE && m_listOaModel.GetSize() > 0)
+    if (!bFoundOaModel && !m_listOaModel.IsEmpty())
     {
-        IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
+        IMS_TRACE_D("FinalizeSdp(): type[%d], not found confirmed OA model", m_eType, 0, 0);
     }
 }
 
@@ -238,6 +233,7 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedLocalProfile()
         return GetLocalProfile(pOaModel);
     }
 
+    IMS_TRACE_E(0, "GetNegotiatedLocalProfile(): type[%d], invalid OA model", m_eType, 0, 0);
     return IMS_NULL;
 }
 
@@ -250,6 +246,7 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedNegoProfile()
         return GetNegotiatedProfile(pOaModel);
     }
 
+    IMS_TRACE_E(0, "GetNegotiatedNegoProfile(): type[%d], invalid OA model", m_eType, 0, 0);
     return IMS_NULL;
 }
 
@@ -262,6 +259,7 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedPeerProfile()
         return GetPeerProfile(pOaModel);
     }
 
+    IMS_TRACE_E(0, "GetNegotiatedPeerProfile(): type[%d], invalid OA model", m_eType, 0, 0);
     return IMS_NULL;
 }
 
@@ -275,14 +273,16 @@ MEDIA_DIRECTION BaseNego::GetNegotiatedDirection()
 
         if (pLatestOaModel == IMS_NULL)
         {
+            IMS_TRACE_E(0, "GetNegotiatedDirection(): type[%d], invalid OA model", m_eType, 0, 0);
             return MEDIA_DIRECTION_INVALID;
         }
 
-        if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE)
+        if (pLatestOaModel->IsAllProfileExist())
         {
             return pLatestOaModel->pNegotiatedProfile->GetDirection();
         }
     }
+
     return MEDIA_DIRECTION_INVALID;
 }
 
@@ -295,13 +295,11 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedRtpPort()
         OaModel* pLatestOaModel = IMS_NULL;
         pLatestOaModel = GetNegotiatedOaModel();
 
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
+        if (pLatestOaModel == IMS_NULL || !pLatestOaModel->IsAllProfileExist())
         {
+            IMS_TRACE_E(0, "GetNegotiatedRtpPort(): type[%d], invalid OA model", m_eType, 0, 0);
             return PORT_NONE;
         }
-
-        IMS_TRACE_I("GetNegotiatedRtpPort() - Previous negotiated port[%d] found",
-                pLatestOaModel->pNegotiatedProfile->GetDataPort(), 0, 0);
 
         return (IMS_SINT32)pLatestOaModel->pNegotiatedProfile->GetDataPort();
     }
@@ -317,6 +315,7 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedBandwidth()
 
         if (pLatestOaModel == IMS_NULL || GetLocalProfile(pLatestOaModel) == IMS_NULL)
         {
+            IMS_TRACE_E(0, "GetNegotiatedBandwidth(): type[%d], invalid OA model", m_eType, 0, 0);
             return -1;
         }
 
@@ -334,8 +333,9 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
     {
         OaModel* pLatestOaModel = GetNegotiatedOaModel();
 
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
+        if (pLatestOaModel == IMS_NULL || !pLatestOaModel->IsAllProfileExist())
         {
+            IMS_TRACE_E(0, "GetNegotiatedPayload(): type[%d], invalid OA model", m_eType, 0, 0);
             return IMS_NULL;
         }
 
@@ -343,17 +343,19 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
 
         if (pProfile == IMS_NULL)
         {
+            IMS_TRACE_E(0, "GetNegotiatedPayload(): type[%d], invalid profile", m_eType, 0, 0);
             return IMS_NULL;
         }
+
         if (pProfile->GetPayloadList().GetSize() == 0)
         {
             if (pProfile->GetDataPort() == 0)
             {
-                IMS_TRACE_D("GetNegotiatedPayload() - empty Payload list, zero port", 0, 0, 0);
                 pProfile->CopyPayloads(GetLocalProfile(pLatestOaModel)->GetPayloadList());
             }
             else
             {
+                IMS_TRACE_E(0, "GetNegotiatedPayload(): type[%d], empty payloads", m_eType, 0, 0);
                 return IMS_NULL;
             }
         }
@@ -364,6 +366,21 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
     }
 
     return IMS_NULL;
+}
+
+PUBLIC ImsList<BaseNego::OaModel*>& BaseNego::GetOaModelList()
+{
+    return m_listOaModel;
+}
+
+void BaseNego::SetSdpGenerator(std::shared_ptr<MediaSdpGenerator> pSdpGenerator)
+{
+    m_pSdpGenerator = pSdpGenerator;
+}
+
+void BaseNego::SetProfileGenerator(std::shared_ptr<MediaProfileGenerator> pProfileGenerator)
+{
+    m_pProfileGenerator = pProfileGenerator;
 }
 
 PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN OaModel* pOaModel)
@@ -383,22 +400,20 @@ PROTECTED
 BaseNego::OaModel* BaseNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
 {
     IMS_UINT32 nTempOaModelCount = m_listOaModel.GetSize();
-    IMS_TRACE_I("GetNegotiatedOaModel()", 0, 0, 0);
+
     while (nTempOaModelCount > 0)
     {
         OaModel* pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
 
         if (pLatestOaModel != IMS_NULL)
         {
-            if ((pLatestOaModel->IsAllProfileExist() == IMS_TRUE && bCheckConfirmed == IMS_FALSE) ||
-                    (pLatestOaModel->bConfirmedSession == IMS_TRUE && bCheckConfirmed == IMS_TRUE))
+            if ((pLatestOaModel->IsAllProfileExist() && !bCheckConfirmed) ||
+                    (pLatestOaModel->bConfirmedSession && bCheckConfirmed))
             {
                 return pLatestOaModel;
             }
-
-            IMS_TRACE_I("GetNegotiatedOaModel() - [%d/%d]th is not perfect. Try next",
-                    nTempOaModelCount, m_listOaModel.GetSize(), 0);
         }
+
         nTempOaModelCount--;
     }
 
@@ -409,12 +424,11 @@ PUBLIC IMS_BOOL BaseNego::SetPort(IN IMS_UINT32 nPort)
 {
     if (m_pBaseProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "SetPort(): type[%d], invalid profile", m_eType, 0, 0);
         return IMS_FALSE;
     }
 
     MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
-
-    IMS_TRACE_I("SetPort() - Changed Data Port[%d]->[%d]", m_pBaseProfile->GetDataPort(), nPort, 0);
 
     if (nPort != 0)
     {
@@ -425,8 +439,6 @@ PUBLIC IMS_BOOL BaseNego::SetPort(IN IMS_UINT32 nPort)
     {
         m_pBaseProfile->SetDataPort(0);
         m_pBaseProfile->SetControlPort(0);
-
-        IMS_TRACE_I("SetPort() - Data Port is 0!!!", 0, 0, 0);
     }
 
     return IMS_TRUE;
@@ -473,6 +485,7 @@ void BaseNego::Copy(IN const BaseNego* pNego)
     }
 
     OaModel* pNewOaModel = new OaModel();
+
     if (pNewOaModel != IMS_NULL)
     {
         pNewOaModel->pLocalProfile =
@@ -484,48 +497,26 @@ void BaseNego::Copy(IN const BaseNego* pNego)
 }
 
 PROTECTED
-IMS_BOOL BaseNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
+BaseNego::OaModel* BaseNego::CreateOaModel(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
 {
-    // Handling exception case
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pSdpGenerator == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (eDir == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_E(0, "FormOffer() - direction invalid", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_D("FormOffer() - media type[%d], eDir[%d], bDisable[%d]", m_eType, eDir, bDisable);
-
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
-
-    if (pNewOaModel == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
     pNewOaModel->pLocalProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
 
     if (pNewOaModel->pLocalProfile == IMS_NULL)
     {
-        return IMS_FALSE;
+        IMS_TRACE_E(0, "CreateOaModel(): type[%d], invalid profile", m_eType, 0, 0);
+        return IMS_NULL;
     }
 
     // Modify a direction by Enabler
-    if (IS_VALID_MEDIA_DIRECTION(eDir))
+    if (IS_VALID_MEDIA_DIRECTION(eDirection))
     {
-        IMS_TRACE_I("FormOffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->SetDirection(eDir);
+        pNewOaModel->pLocalProfile->SetDirection(eDirection);
     }
 
-    if (bDisable == IMS_TRUE)
+    if (bDisable)
     {
         pNewOaModel->pLocalProfile->SetDataPort(0);
         pNewOaModel->pLocalProfile->SetControlPort(0);
@@ -537,18 +528,27 @@ IMS_BOOL BaseNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         /* bDirHold is not proper for formoffer() */
         MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig, IMS_FALSE);
     }
+
     m_listOaModel.Append(pNewOaModel);
+    return pNewOaModel;
+}
 
-    // Make the SDP from profile
-
-    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
-
-    // Delete Session Level Direction Attribute
-    if (m_eType == MEDIA_TYPE_AUDIO)
+PROTECTED
+IMS_BOOL BaseNego::CheckArgument(IN ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection)
+{
+    // Handling exception case
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
     {
-        pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
+        IMS_TRACE_E(0, "CheckArgument(): type[%d], invalid arguments", m_eType, 0, 0);
+        return IMS_FALSE;
     }
 
-    return bSdpMade;
+    if (eDirection == MEDIA_DIRECTION_INVALID)
+    {
+        IMS_TRACE_E(0, "CheckArgument(): type[%d], invalid direction", m_eType, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
 }

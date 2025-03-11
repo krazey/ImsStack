@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,8 @@
 #define AUDIO_NEGO_H_
 
 #include "BaseNego.h"
-#include "MediaDef.h"
 #include "audio/AudioDef.h"
 #include "audio/AudioSdpParser.h"
-#include "audio/AudioProfileUtil.h"
-#include "audio/AudioSdpGenerator.h"
 #include "audio/AudioProfileNegotiator.h"
 #include "config/AudioConfiguration.h"
 
@@ -79,15 +76,30 @@ public:
      */
     AudioProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
 
+    /**
+     * @brief Set the SDP parser object
+     */
+    void SetSdpParser(std::shared_ptr<AudioSdpParser> pSdpParser) { m_pSdpParser = pSdpParser; }
+
+    /**
+     * @brief Set the profile negotiator object
+     */
+    void SetProfileNegotiator(std::shared_ptr<AudioProfileNegotiator> pNegotiator)
+    {
+        m_pProfileNegotiator = pNegotiator;
+    }
+
 protected:
     AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+            IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable) override;
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection,
             IN IMS_BOOL bDisable) override;
     IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
             IN IMS_BOOL bEnforceReofferMode) override;
     MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
@@ -95,7 +107,8 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    std::unique_ptr<AudioSdpParser> m_pSdpParser;
+    std::shared_ptr<AudioSdpParser> m_pSdpParser;
+    std::shared_ptr<AudioProfileNegotiator> m_pProfileNegotiator;
 };
 
 #endif

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,14 @@
  */
 
 #include "ISessionDescriptor.h"
+#include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
 #include "audio/AudioNego.h"
+#include "audio/AudioProfileUtil.h"
+#include "audio/AudioSdpGenerator.h"
 #include "audio/AudioProfileGenerator.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
@@ -30,24 +33,24 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC
 AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         BaseNego(nSlotId, MEDIA_TYPE_AUDIO),
-        m_pSdpParser(std::make_unique<AudioSdpParser>())
+        m_pSdpParser(std::make_shared<AudioSdpParser>()),
+        m_pProfileNegotiator(std::make_shared<AudioProfileNegotiator>())
 {
-    IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
+    IMS_TRACE_I("+AudioNego(): slot[%d]", nSlotId, 0, 0);
 
     m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
-    m_pProfileNegotiator = std::make_shared<AudioProfileNegotiator>();
     m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
 }
 
 PUBLIC
 AudioNego::AudioNego(IN const AudioNego& obj) :
         BaseNego(obj),
-        m_pSdpParser(std::make_unique<AudioSdpParser>())
+        m_pSdpParser(std::make_shared<AudioSdpParser>()),
+        m_pProfileNegotiator(std::make_shared<AudioProfileNegotiator>())
 {
-    IMS_TRACE_I("+AudioNego() - slot[%d]", GetSlotId(), 0, 0);
+    IMS_TRACE_I("+AudioNego(): slot[%d]", GetSlotId(), 0, 0);
 
     m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
-    m_pProfileNegotiator = std::make_shared<AudioProfileNegotiator>();
     m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
     Copy(&obj);
 }
@@ -58,6 +61,7 @@ AudioNego& AudioNego::operator=(IN const AudioNego& obj)
     if (this != &obj)
     {
         BaseNego::operator=(obj);
+        m_pSdpParser = std::make_shared<AudioSdpParser>();
         m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
         m_pProfileNegotiator = std::make_shared<AudioProfileNegotiator>();
         m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
@@ -77,34 +81,32 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
 {
     // Handling exception case
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pProfileNegotiator == IMS_NULL)
+            m_pProfileNegotiator == IMS_NULL || m_pSdpParser == IMS_NULL)
     {
+        IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): invalid arguments", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
-    IMS_TRACE_I("IsMediaCodecFromSdpSupported()", 0, 0, 0);
-
     OaModel objOaModel;
     objOaModel.pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
+    objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
-            IMS_TRUE)
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)))
     {
+        IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to parse SDP", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
     // Make a negotiated profile from the local and peer profile
-    objOaModel.pNegotiatedProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
+    objOaModel.pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (std::static_pointer_cast<AudioProfileNegotiator>(m_pProfileNegotiator)
-                    ->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
-                            GetNegotiatedProfile(&objOaModel), m_pConfig) != IMS_TRUE)
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel),
+                IMS_TRUE, GetNegotiatedProfile(&objOaModel), m_pConfig))
     {
+        IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to negotiate profile", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
@@ -200,9 +202,6 @@ PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
         return AUDIO_CODEC_NONE;
     }
 
-    IMS_TRACE_D("GetNegotiatedCodec() - Negotiated Payload Type is [%s]",
-            pPayload->GetRtpMap().GetPayloadType().GetStr(), 0, 0);
-
     if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
     {
         return AUDIO_CODEC_AMRWB;
@@ -257,10 +256,13 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
         pLatestOaModel = GetNegotiatedOaModel();
         if (pLatestOaModel == IMS_NULL)
         {
+            IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
             return IMS_FALSE;
         }
-        if (pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
+
+        if (!pLatestOaModel->IsAllProfileExist())
         {
+            IMS_TRACE_E(0, "FormAnswer(): invalid OA model", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -276,7 +278,6 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
 
             if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
             {
-                IMS_TRACE_I("HasNegotiatedDtmf() - Negotiated DTMF found[%d]", i, 0, 0);
                 return IMS_TRUE;
             }
         }
@@ -316,130 +317,98 @@ PROTECTED AudioProfile* AudioNego::GetNegotiatedProfile(IN OaModel* pOaModel)
 }
 
 PROTECTED
-IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
+IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
 {
-    IMS_TRACE_D("FormAnswer() - eDir[%d]", eDir, 0, 0);
-
-    // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_listOaModel.GetSize() == 0 ||
-            m_pSdpGenerator == IMS_NULL)
+    if (CheckArgument(pSessionDescriptor, pDescriptor, eDirection) && m_pSdpGenerator)
     {
+        // Make the SDP from profile
+        IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
+                GetLocalProfile(CreateOaModel(eDirection, bDisable)));
+
+        // Remove the session level direction
+        pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
+        return bSdpMade;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
+{
+    if (!CheckArgument(pSessionDescriptor, pDescriptor, eDirection) || m_pSdpGenerator == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "FormAnswer(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (eDir == MEDIA_DIRECTION_INVALID)
+    if (m_listOaModel.IsEmpty())
     {
-        IMS_TRACE_E(0, "FormAnswer() - direction invalid", 0, 0, 0);
+        IMS_TRACE_E(0, "FormAnswer(): empty OA model list", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Getting OaModel from list
     OaModel* pNewOaModel = GetNegotiatedOaModel();
 
-    if (pNewOaModel == IMS_NULL || pNewOaModel->IsAllProfileExist() == IMS_FALSE)
+    if (pNewOaModel == IMS_NULL || !pNewOaModel->IsAllProfileExist())
     {
+        IMS_TRACE_E(0, "FormAnswer(): no valid negotiated model", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    /** TODO: move this logic to session level
-    // Compare the media type between base and requested. If it not matched,
-    // re-create a negotiated profile
-    MEDIA_CONTENT_TYPE eBaseWithoutText =
-            (MEDIA_CONTENT_TYPE)MEDIA_TYPE_WITHOUT_TEXT(m_eSessionType);
-    MEDIA_CONTENT_TYPE eRequestedWithoutText = (MEDIA_CONTENT_TYPE)MEDIA_TYPE_WITHOUT_TEXT(eType);
-
-    if (eBaseWithoutText != eRequestedWithoutText)
-    {
-        IMS_TRACE_I("FormAnswer() Media type doesn't matched Base[%d], Requested[%d]",
-                eBaseWithoutText, eRequestedWithoutText, 0);
-
-        *pNewOaModel->pLocalProfile = m_pBaseProfile;
-
-        if (pNewOaModel->pNegotiatedProfile != IMS_NULL)
-        {
-            delete pNewOaModel->pNegotiatedProfile;
-        }
-
-        pNewOaModel->pNegotiatedProfile =
-    MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO); if
-    (Negotiate(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
-                    pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
-        {
-            delete pNewOaModel;
-            return IMS_FALSE;
-        }
-    }*/
-
     // Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID)
+    if (eDirection > MEDIA_DIRECTION_INVALID)
     {
-        pNewOaModel->pNegotiatedProfile->SetDirection(eDir);
-        IMS_TRACE_I("FormAnswer() - update audio direction[%d]", eDir, 0, 0);
+        pNewOaModel->pNegotiatedProfile->SetDirection(eDirection);
     }
 
-    if (bDisable == IMS_TRUE)
+    if (bDisable)
     {
         pNewOaModel->pNegotiatedProfile->SetDataPort(0);
         pNewOaModel->pNegotiatedProfile->SetControlPort(0);
     }
 
+    IMS_TRACE_D("FormAnswer(): direction[%d], disable[%d]", eDirection, bDisable, 0);
+
     // Make the SDP from profile
-    IMS_BOOL bSdpMade = IMS_FALSE;
+    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
+            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
 
-    bSdpMade =
-            std::static_pointer_cast<AudioSdpGenerator>(m_pSdpGenerator)
-                    ->Generate(pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
-
-    if (pSessionDescriptor->GetDirection() == MEDIA_DIRECTION_INVALID)
-    {
-        // Delete Session Level Direction Attribute
-        pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
-    }
-
+    // Remove the session level direction
+    pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
     return bSdpMade;
 }
 
 PROTECTED
 IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+        OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormReoffer() pDescriptor[%" PFLS_x "], eDir[%d], listOaModel Size[%d]",
-            pDescriptor, eDir, m_listOaModel.GetSize());
-    IMS_TRACE_D("FormReoffer() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
-
-    // Handling exception case
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pSdpGenerator == IMS_NULL)
+    if (!CheckArgument(pSessionDescriptor, pDescriptor, eDirection) || m_pSdpGenerator == IMS_NULL)
     {
-        return IMS_FALSE;
-    }
-
-    if (eDir == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_E(0, "FormReoffer() - direction invalid", 0, 0, 0);
+        IMS_TRACE_E(0, "FormReoffer(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (m_pConfig == NULL || m_pEnvironment == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FormReoffer() - config is not valid", 0, 0, 0);
+        IMS_TRACE_E(0, "FormReoffer(): config is not valid", 0, 0, 0);
         return IMS_FALSE;
     }
+
+    IMS_TRACE_I("FormReoffer(): direction[%d], OA model[%d], reOffer[%d]", eDirection,
+            m_listOaModel.GetSize(), bEnforceReofferMode);
 
     // Make new Offer/Answer model, and copy source profile from previous negotiated profile
     OaModel* pNewOaModel = new OaModel();
 
-    if (pNewOaModel == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_listOaModel.GetSize() == 0)
+    if (m_listOaModel.IsEmpty())
     {
         pNewOaModel->pLocalProfile =
-                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
+                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
     }
     else
     {
@@ -469,29 +438,29 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
                     pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0))
         {
             pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                    MEDIA_TYPE_AUDIO, GetNegotiatedProfile(pPrevOaModel));
+                    m_eType, GetNegotiatedProfile(pPrevOaModel));
         }
         else
         {
-            if (bEnforceReofferMode == IMS_TRUE)
+            if (bEnforceReofferMode)
             {
-                pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                        MEDIA_TYPE_AUDIO, m_pBaseProfile);
+                pNewOaModel->pLocalProfile =
+                        MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
             }
             else
             {
-                IMS_TRACE_I("FormReoffer() - reuse previous profile, SdpReofferFullCapability[%d]",
+                IMS_TRACE_I("FormReoffer(): reuse previous profile, capability[%d]",
                         pMediaSessionConfig->IsSdpReofferFullCapability(), 0, 0);
 
-                if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
+                if (pMediaSessionConfig->IsSdpReofferFullCapability())
                 {
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            MEDIA_TYPE_AUDIO, m_pBaseProfile);
+                            m_eType, m_pBaseProfile);
                 }
                 else if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
                 {
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            MEDIA_TYPE_AUDIO, GetNegotiatedProfile(pPrevOaModel));
+                            m_eType, GetNegotiatedProfile(pPrevOaModel));
                 }
             }
         }
@@ -507,23 +476,23 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     // set default AS value when localProfile AS value is 0 in ReOffer case
     if (pNewOaModel->pLocalProfile->GetBandwidthAs() <= 0)
     {
-        IMS_TRACE_I("FormReoffer() - use default AS value", 0, 0, 0);
+        IMS_TRACE_I("FormReoffer(): use default AS value", 0, 0, 0);
         pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
     }
 
     // Modify a direction by Enabler
-    if (eDir > MEDIA_DIRECTION_INVALID)
+    if (eDirection > MEDIA_DIRECTION_INVALID)
     {
-        IMS_TRACE_I("FormReoffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->SetDirection(eDir);
+        IMS_TRACE_I("FormReoffer(): direction[%d]", eDirection, 0, 0);
+        pNewOaModel->pLocalProfile->SetDirection(eDirection);
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
     MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel),
             MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType),
-            MEDIA_DIRECTION_IS_AUDIO_HOLD(eDir));
+            MEDIA_DIRECTION_IS_AUDIO_HOLD(eDirection));
 
-    if (bDisable == IMS_TRUE)
+    if (bDisable)
     {
         pNewOaModel->pLocalProfile->SetDataPort(0);
         pNewOaModel->pLocalProfile->SetControlPort(0);
@@ -535,7 +504,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // when reoffer case - recover rtcpxr to default in sendrecv case
-    if (ProfileCasting(m_pBaseProfile)->IsRtcpXrSupported() == IMS_TRUE &&
+    if (ProfileCasting(m_pBaseProfile)->IsRtcpXrSupported() &&
             pNewOaModel->pLocalProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
         GetLocalProfile(pNewOaModel)
@@ -547,10 +516,8 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    IMS_BOOL bSdpMade = IMS_FALSE;
-
-    bSdpMade = std::static_pointer_cast<AudioSdpGenerator>(m_pSdpGenerator)
-                       ->Generate(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
+    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
+            pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 
     // Delete Session Level Direction Attribute
     pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
@@ -563,47 +530,43 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
 {
     // Handling exception case
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
-            m_pProfileNegotiator == IMS_NULL)
+            m_pProfileNegotiator == IMS_NULL || m_pSdpParser == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateOffer(): invalid arguments", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
-    IMS_TRACE_I("NegotiateOffer() - local port[%d]", m_pBaseProfile->GetDataPort(), 0, 0);
+    IMS_TRACE_I("NegotiateOffer(): local port[%d]", m_pBaseProfile->GetDataPort(), 0, 0);
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
     pNewOaModel->pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
-            IMS_TRUE)
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)))
     {
+        IMS_TRACE_E(0, "NegotiateOffer(): failed to parse SDP", 0, 0, 0);
         delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
     }
 
     // Make a negotiated profile from the local and peer profile
-    pNewOaModel->pNegotiatedProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
+    pNewOaModel->pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (std::static_pointer_cast<AudioProfileNegotiator>(m_pProfileNegotiator)
-                    ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
-                            GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
+                IMS_TRUE, GetNegotiatedProfile(pNewOaModel), m_pConfig))
     {
+        IMS_TRACE_E(0, "NegotiateOffer(): failed to negotiate SDP", 0, 0, 0);
         delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // add session key in NewOaModel
-    IMS_TRACE_D("NegotiateOffer() - add session key in NewOaModel[%" PFLS_x "]",
-            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
-    pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
+    // add session key
     m_listOaModel.Append(pNewOaModel);
 
-    // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
 
@@ -619,13 +582,11 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    if (m_listOaModel.GetSize() < 1)
+    if (m_listOaModel.IsEmpty())
     {
         IMS_TRACE_E(0, "NegotiateAnswer(): empty OA model", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
-
-    IMS_TRACE_I("NegotiateAnswer()", 0, 0, 0);
 
     // Get the latest OAmodel from list
     OaModel* pNewOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
@@ -636,10 +597,9 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     }
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
-            IMS_TRUE)
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)))
     {
         IMS_TRACE_E(0, "NegotiateAnswer(): fail to parse SDP", 0, 0, 0);
         delete pNewOaModel;
@@ -648,12 +608,10 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     }
 
     // Make a negotiated profile with the local, peer profile
-    pNewOaModel->pNegotiatedProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
+    pNewOaModel->pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (std::static_pointer_cast<AudioProfileNegotiator>(m_pProfileNegotiator)
-                    ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
-                            IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
+                IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig))
     {
         IMS_TRACE_E(0, "NegotiateAnswer(): fail to negotiate SDP", 0, 0, 0);
         delete pNewOaModel;
@@ -661,11 +619,8 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    // add session key in NewOaModel
-    IMS_TRACE_D("NegotiateAnswer() - add session key in NewOaModel[%" PFLS_x "]",
-            reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
+    // add session key
     pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
 
-    // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->GetDirection();
 }

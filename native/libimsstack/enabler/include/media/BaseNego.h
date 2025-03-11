@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,6 @@
 #include "media/IMediaDescriptor.h"
 
 class MediaSdpGenerator;
-class MediaProfileNegotiator;
 class MediaProfileGenerator;
 
 class BaseNego : public ImsSlot
@@ -91,14 +90,14 @@ public:
      * list
      * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
      * @param pDescriptor The SDP descriptor instance to form the media level SDP
-     * @param eDir The media direction of the SDP
+     * @param eDirection The media direction of the SDP
      * @param bDisable if it is IMS_TRUE, set the port number to zero
      * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
      * it is failed to form
      */
     virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
             IN IMS_BOOL bEnforceReofferMode);
 
     /**
@@ -108,11 +107,11 @@ public:
      * list
      * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
      * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
-     * @param eDir The media direction of the SDP
+     * @param eDirection The media direction of the SDP
      */
     virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-            OUT IMS_SINT32& eDir);
+            OUT IMS_SINT32& eDirection);
 
     /**
      * @brief Get the local ip address
@@ -214,19 +213,39 @@ public:
      */
     virtual MediaBaseProfile::BasePayload* GetNegotiatedPayload();
 
+    /**
+     * @brief Set the SDP generator object
+     */
+    void SetSdpGenerator(std::shared_ptr<MediaSdpGenerator> pSdpGenerator);
+
+    /**
+     * @brief Set the media profile generator object
+     */
+    void SetProfileGenerator(std::shared_ptr<MediaProfileGenerator> pProfileGenerator);
+
+    /**
+     * @brief Get the OaModel list
+     */
+    ImsList<OaModel*>& GetOaModelList();
+
 protected:
     virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
-    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
+    BaseNego::OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
     void DestroyListOaModel();
     void Copy(IN const BaseNego* pNego);
+    virtual OaModel* CreateOaModel(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable);
+    virtual IMS_BOOL CheckArgument(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection);
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection,
+            IN IMS_BOOL bDisable) = 0;
     virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable) = 0;
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection,
+            IN IMS_BOOL bDisable) = 0;
     virtual IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
             IN IMS_BOOL bEnforceReofferMode) = 0;
     virtual MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) = 0;
@@ -240,7 +259,6 @@ protected:
     MediaConfiguration* m_pConfig;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;
     std::shared_ptr<MediaSdpGenerator> m_pSdpGenerator;
-    std::shared_ptr<MediaProfileNegotiator> m_pProfileNegotiator;
     std::shared_ptr<MediaProfileGenerator> m_pProfileGenerator;
 };
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +18,9 @@
 #define VIDEO_NEGO_H_
 
 #include "BaseNego.h"
-#include "MediaDef.h"
-#include "video/VideoDef.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoSdpParser.h"
-#include "video/VideoSdpGenerator.h"
 #include "video/VideoProfileNegotiator.h"
-#include "video/VideoProfileUtil.h"
 
 class VideoNego : public BaseNego
 {
@@ -69,10 +65,25 @@ public:
      */
     VideoProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
 
+    /**
+     * @brief Set the SDP parser object
+     */
+    void SetSdpParser(std::shared_ptr<VideoSdpParser> pSdpParser) { m_pSdpParser = pSdpParser; }
+
+    /**
+     * @brief Set the profile negotiator object
+     */
+    void SetProfileNegotiator(std::shared_ptr<VideoProfileNegotiator> pNegotiator)
+    {
+        m_pProfileNegotiator = pNegotiator;
+    }
+
 protected:
     VideoProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     VideoProfile* GetPeerProfile(IN OaModel* pOaModel) override;
     VideoProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+            IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable) override;
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
             IN IMS_BOOL bDisable) override;
@@ -91,7 +102,8 @@ private:
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
 
 private:
-    std::unique_ptr<VideoSdpParser> m_pSdpParser;
+    std::shared_ptr<VideoSdpParser> m_pSdpParser;
+    std::shared_ptr<VideoProfileNegotiator> m_pProfileNegotiator;
 };
 
 #endif

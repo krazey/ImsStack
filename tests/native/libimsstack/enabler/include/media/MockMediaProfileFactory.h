@@ -18,7 +18,8 @@
 #define MOCK_MEDIA_PROFILE_FACTORY_H_
 
 #include <gmock/gmock.h>
-#include "MediaProfileFactory.h"
+
+#include <MediaProfileFactory.h>
 
 class MockMediaProfileFactory : public MediaProfileFactory
 {

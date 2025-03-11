@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +18,9 @@
 #define TEXT_NEGO_H_
 
 #include "BaseNego.h"
-#include "MediaDef.h"
 #include "config/TextConfiguration.h"
 #include "text/TextDef.h"
-#include "text/TextProfileUtil.h"
 #include "text/TextSdpParser.h"
-#include "text/TextSdpGenerator.h"
 #include "text/TextProfileNegotiator.h"
 
 /**
@@ -69,15 +66,30 @@ public:
      */
     TextProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
 
+    /**
+     * @brief Set the SDP parser object
+     */
+    void SetSdpParser(std::shared_ptr<TextSdpParser> pSdpParser) { m_pSdpParser = pSdpParser; }
+
+    /**
+     * @brief Set the profile negotiator object
+     */
+    void SetProfileNegotiator(std::shared_ptr<TextProfileNegotiator> pNegotiator)
+    {
+        m_pProfileNegotiator = pNegotiator;
+    }
+
 protected:
     TextProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     TextProfile* GetPeerProfile(IN OaModel* pOaModel) override;
     TextProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+            IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable) override;
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection,
             IN IMS_BOOL bDisable) override;
     IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
             IN IMS_BOOL bEnforceReofferMode) override;
     MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
@@ -85,7 +97,8 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    std::unique_ptr<TextSdpParser> m_pSdpParser;
+    std::shared_ptr<TextSdpParser> m_pSdpParser;
+    std::shared_ptr<TextProfileNegotiator> m_pProfileNegotiator;
 };
 
 #endif
