@@ -168,6 +168,7 @@ enum
 
 #define DECLARE_USING(Base)                              \
     using Base::GetState;                                \
+    using Base::IsCrossSimConnected;                     \
     using Base::ClearOffReason;                          \
     using Base::ClearPending;                            \
     using Base::GetNetworkTypeForImsRegState;            \
@@ -1165,6 +1166,13 @@ TEST_F(AosApplicationTest, GetAndSet)
 
     // TEST_F : IsRegReconfigAvailable
     EXPECT_TRUE(m_pAosApplication->IsRegReconfigAvailable());
+}
+
+TEST_F(AosApplicationTest, GetCrossSimStatusFromConnectorWhenIsCrossSimConnectedCalled)
+{
+    ON_CALL(m_objMockAosConnector, IsCrossSimConnected()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pAosApplication->IsCrossSimConnected());
 }
 
 TEST_F(AosApplicationTest, ShouldNotSetBlockEpsfbStartWhenEmergencyTypeAndStart)

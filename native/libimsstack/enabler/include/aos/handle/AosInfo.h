@@ -27,7 +27,7 @@ public:
     explicit AosInfo(IN IAosAppContext* piContext);
     ~AosInfo() override;
 
-private:
+protected:
     // IImsAosInfo
     AString GetAssociatedUri() override;
     IMS_SINT32 GetConnectionType() override;
