@@ -724,7 +724,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(
                     ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)))
         {
             m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                    EpsFallbackReason::NO_NETWORK_RESPONSE);
+                    EpsFallbackReason::RADIO_CHECK_BLOCK);
             return GetStateName();
         }
 

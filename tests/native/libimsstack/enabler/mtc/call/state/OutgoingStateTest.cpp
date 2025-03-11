@@ -353,8 +353,7 @@ TEST_F(OutgoingStateTest, OnConnectionFailedDoesNothingIfAlreadyReceivedResponse
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
 
-    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE))
-            .Times(0);
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK)).Times(0);
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
@@ -368,13 +367,12 @@ TEST_F(OutgoingStateTest, OnConnectionFailedTriggersEpsfbIfRequired)
             .WillByDefault(Return(IMS_NULL));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE))
-            .Times(0);
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK));
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING,
-            pOutgoingState->OnConnectionFailed(IImsRadio::REASON_RACH_FAILURE, 2));
+            pOutgoingState->OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 2));
 }
 
 TEST_F(OutgoingStateTest, OnConnectionFailedDoesNothingIfEpsFallbackIsNotRequiredInNr)
@@ -383,12 +381,12 @@ TEST_F(OutgoingStateTest, OnConnectionFailedDoesNothingIfEpsFallbackIsNotRequire
             .WillByDefault(Return(IMS_NULL));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE));
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK)).Times(0);
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING,
-            pOutgoingState->OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 2));
+            pOutgoingState->OnConnectionFailed(IImsRadio::REASON_RACH_FAILURE, 2));
 }
 
 TEST_F(OutgoingStateTest, OnConnectionFailedDoesNothingIfReasonIsRrcRejectInNonNR)
@@ -407,7 +405,7 @@ TEST_F(OutgoingStateTest, OnConnectionFailedDoesNothingIfReasonIsRrcRejectInNonN
             pOutgoingState->OnConnectionFailed(IImsRadio::REASON_RRC_REJECT, 2));
 }
 
-TEST_F(OutgoingStateTest, OnConnectionInvokesCallTerminationIfReasonIsAccessDeniedInNonNR)
+TEST_F(OutgoingStateTest, OnConnectionInvokesCallTerminationIfReasonIsNotRrcRejectInNonNR)
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
