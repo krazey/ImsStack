@@ -51,11 +51,24 @@ class TestAosHandle : public AosHandle
     FRIEND_TEST(AosInfoTest, GetImsFeatures_Test1);
 };
 
+#define DECLARE_USING(Base) using Base::IsCrossSimConnected;
+
+class TestAosInfo : public AosInfo
+{
+public:
+    DECLARE_USING(AosInfo)
+
+    inline explicit TestAosInfo(IN IAosAppContext* piAppContext) :
+            AosInfo(piAppContext)
+    {
+    }
+};
+
 class AosInfoTest : public ::testing::Test
 {
 public:
     TestAosHandle* m_pTestAosHandle;
-    AosInfo* m_pAosInfo;
+    TestAosInfo* m_pAosInfo;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
 
@@ -80,7 +93,7 @@ protected:
         m_pTestAosHandle = new TestAosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
 
-        m_pAosInfo = new AosInfo(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pAosInfo = new TestAosInfo(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosInfo != nullptr);
     }
 
@@ -499,6 +512,13 @@ TEST_F(AosInfoTest, GetServiceRouteHeaderValue_Test)
             .Times(1);
 
     GetServiceRouteHeaderValue();
+}
+
+TEST_F(AosInfoTest, GetCrossSimStatusFromApplicationWhenIsCrossSimConnectedCalled)
+{
+    ON_CALL(m_objMockIAosApplication, IsCrossSimConnected()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pAosInfo->IsCrossSimConnected());
 }
 
 TEST_F(AosInfoTest, NotifyEmergencyCallState_Test)
