@@ -122,6 +122,8 @@ protected:
     IMS_BOOL OnMediaMtuChanged();
     IMS_SINT32 GetMtu();
     IMS_BOOL OnNotifyAnbrReceived(IN IMS_UINTP nParam);
+    void RequestQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
+    void ReleaseQosParam(IN MEDIA_CONTENT_TYPE eMediaType);
 
 private:
     IpAddress GetAndroidIP();
@@ -140,6 +142,7 @@ protected:
     TextController m_objTextController;
     IMS_BOOL m_bSessionConfirmed;
     std::mutex m_objMutex;
+    MEDIA_CONTENT_TYPE m_eCurMediaType;
 };
 
 #endif
