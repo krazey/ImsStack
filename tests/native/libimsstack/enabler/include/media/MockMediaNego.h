@@ -25,7 +25,7 @@ class MockMediaNego : public MediaNego
 {
 public:
     explicit MockMediaNego(IMS_SINT32 nSlotId) :
-            MediaNego(nSlotId){};
+            MediaNego(nSlotId) {};
     MOCK_METHOD(void, CreateProfile, (IN MediaEnvironment * pEnvironment), (const));
     MOCK_METHOD(IMS_BOOL, Forking, (IN MediaNego * pMediaNego), (const));
     MOCK_METHOD(IMS_BOOL, FormSdp,
@@ -46,11 +46,11 @@ public:
     MOCK_METHOD(NEGO_STATE, GetNegoState, (), (const));
 
     MOCK_METHOD(void, SetAudioNego, (AudioNego * pAudioNego), (const));
-    MOCK_METHOD(AudioNego*, GetAudioNego, (), (const));
+    MOCK_METHOD(std::shared_ptr<AudioNego>, GetAudioNego, (), (const));
     MOCK_METHOD(void, SetVideoNego, (VideoNego * pVideoNego), (const));
-    MOCK_METHOD(VideoNego*, GetVideoNego, (), (const));
+    MOCK_METHOD(std::shared_ptr<VideoNego>, GetVideoNego, (), (const));
     MOCK_METHOD(void, SetTextNego, (TextNego * pTextNego), (const));
-    MOCK_METHOD(TextNego*, GetTextNego, (), (const));
+    MOCK_METHOD(std::shared_ptr<TextNego>, GetTextNego, (), (const));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSessionType, (), (const));
 
     MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedAudioDirection, (), (const));

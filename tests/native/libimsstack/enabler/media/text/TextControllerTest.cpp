@@ -36,7 +36,7 @@ public:
     TextConfiguration* m_pConfig;
     FakeIMediaSessionListener m_objFakeListener;
     MockIMediaSessionListener m_objListener;
-    MockTextNego* m_pTextNego;
+    std::shared_ptr<MockTextNego> m_pTextNego;
 
     MockICarrierConfig* m_pMockICarrierConfig;
     MockICarrierConfig* m_pTextPayloads;
@@ -60,7 +60,7 @@ protected:
                 .WillByDefault(Return(m_pTextPayloads));
 
         m_pConfig->Create(m_pMockICarrierConfig);
-        m_pTextNego = new MockTextNego(DEFAULT_SLOT_ID);
+        m_pTextNego = std::make_shared<MockTextNego>(DEFAULT_SLOT_ID);
 
         m_objListener.SetDelegate(&m_objFakeListener);
         m_objListener.DelegateToFake();
@@ -92,7 +92,6 @@ protected:
         delete m_pConfig;
         delete m_pMockICarrierConfig;
         delete m_pTextPayloads;
-        delete m_pTextNego;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
         delete m_pNegoProfile;

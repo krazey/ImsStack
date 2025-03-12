@@ -34,7 +34,7 @@ public:
     VideoConfiguration* m_pConfig;
     FakeIMediaSessionListener m_objFakeListener;
     MockIMediaSessionListener m_objListener;
-    MockVideoNego* m_pVideoNego;
+    std::shared_ptr<MockVideoNego> m_pVideoNego;
 
     VideoProfile* m_pLocalProfile;
     VideoProfile* m_pPeerProfile;
@@ -47,7 +47,7 @@ protected:
         m_pController = new VideoController();
         m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
         m_pConfig->Create(ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID));
-        m_pVideoNego = new MockVideoNego(DEFAULT_SLOT_ID);
+        m_pVideoNego = std::make_shared<MockVideoNego>(DEFAULT_SLOT_ID);
 
         m_objListener.SetDelegate(&m_objFakeListener);
         m_objListener.DelegateToFake();
@@ -76,7 +76,6 @@ protected:
     {
         delete m_pController;
         delete m_pConfig;
-        delete m_pVideoNego;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
         delete m_pNegoProfile;

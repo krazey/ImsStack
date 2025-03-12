@@ -124,7 +124,7 @@ IMS_BOOL TextController::CloseSession()
 }
 
 PROTECTED
-IMS_BOOL TextController::UpdateLocalAddress(IN TextNego* pNego)
+IMS_BOOL TextController::UpdateLocalAddress(IN std::shared_ptr<TextNego> pNego)
 {
     IMS_TRACE_I("UpdateLocalAddress()", 0, 0, 0);
 
@@ -139,7 +139,7 @@ IMS_BOOL TextController::UpdateLocalAddress(IN TextNego* pNego)
 }
 
 PUBLIC
-IMS_BOOL TextController::UpdateRtpConfig(IN TextNego* pNego)
+IMS_BOOL TextController::UpdateRtpConfig(IN std::shared_ptr<TextNego> pNego)
 {
     IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
 
@@ -171,7 +171,7 @@ void TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
-IMS_BOOL TextController::UpdateQualityThreshold(IN TextNego* pNego)
+IMS_BOOL TextController::UpdateQualityThreshold(IN std::shared_ptr<TextNego> pNego)
 {
     IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
 

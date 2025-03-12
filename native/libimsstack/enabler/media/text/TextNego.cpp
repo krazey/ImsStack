@@ -16,11 +16,8 @@
 
 #include "ISessionDescriptor.h"
 #include "ServiceTrace.h"
-#include "offeranswer/SdpAvCodec.h"
 
-#include "MediaNegoUtil.h"
 #include "MediaProfileFactory.h"
-#include "config/MediaConfigUtil.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "text/TextNego.h"

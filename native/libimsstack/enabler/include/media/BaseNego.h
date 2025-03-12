@@ -56,7 +56,7 @@ public:
                 pPeerProfile(IMS_NULL),
                 pNegotiatedProfile(IMS_NULL),
                 nSessionDescriptorKey(0),
-                bConfirmedSession(IMS_FALSE){};
+                bConfirmedSession(IMS_FALSE) {};
         ~OaModel()
         {
             delete pLocalProfile;
@@ -147,7 +147,7 @@ public:
      * @param pEnvironment The MediaEnvironment
      * @param pConfig The configuration to create media profile
      */
-    void CreateProfiles(IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig);
+    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig);
 
     /**
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
@@ -155,7 +155,7 @@ public:
      * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
      * @param eNegoState The current negotiation state to decide to remove the OA model item
      */
-    void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
+    virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
     /**
      * @brief Get the negotiated remote ip address

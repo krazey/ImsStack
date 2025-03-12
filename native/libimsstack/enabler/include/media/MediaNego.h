@@ -128,32 +128,32 @@ public:
     /**
      * @brief Set the AudioNego instance
      */
-    void SetAudioNego(AudioNego* pAudioNego) { m_pAudioNego = pAudioNego; }
+    void SetAudioNego(std::shared_ptr<AudioNego> pAudioNego) { m_pAudioNego = pAudioNego; }
 
     /**
      * @brief Get the AudioNego instance
      */
-    AudioNego* GetAudioNego() { return m_pAudioNego; }
+    std::shared_ptr<AudioNego> GetAudioNego() { return m_pAudioNego; }
 
     /**
      * @brief Set the VideoNego instance
      */
-    void SetVideoNego(VideoNego* pVideoNego) { m_pVideoNego = pVideoNego; }
+    void SetVideoNego(std::shared_ptr<VideoNego> pVideoNego) { m_pVideoNego = pVideoNego; }
 
     /**
      * @brief Get the VideoNego instance
      */
-    VideoNego* GetVideoNego() { return m_pVideoNego; }
+    std::shared_ptr<VideoNego> GetVideoNego() { return m_pVideoNego; }
 
     /**
      * @brief Set the TextNego instance
      */
-    void SetTextNego(TextNego* pTextNego) { m_pTextNego = pTextNego; }
+    void SetTextNego(std::shared_ptr<TextNego> pTextNego) { m_pTextNego = pTextNego; }
 
     /**
      * @brief Get the TextNego instance
      */
-    TextNego* GetTextNego() { return m_pTextNego; }
+    std::shared_ptr<TextNego> GetTextNego() { return m_pTextNego; }
 
     /**
      * @brief Get the media session type
@@ -225,11 +225,10 @@ private:
     void SetSessionType(IN ISession* pSession);
     void SetMediaDescriptorAsNotSupported(IN IMediaDescriptor* pDescriptor, IN SdpMedia* pSDPMedia);
 
-protected:
     NEGO_STATE m_eNegoState;
-    AudioNego* m_pAudioNego;
-    VideoNego* m_pVideoNego;
-    TextNego* m_pTextNego;
+    std::shared_ptr<AudioNego> m_pAudioNego;
+    std::shared_ptr<VideoNego> m_pVideoNego;
+    std::shared_ptr<TextNego> m_pTextNego;
     MediaEnvironment* m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bForking;

@@ -23,8 +23,6 @@
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"
-#include "config/VideoConfiguration.h"
-#include "config/TextConfiguration.h"
 #include "MediaNego.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -41,50 +39,33 @@ MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :
         m_bForking(IMS_FALSE)
 {
     IMS_TRACE_I("MediaNego() - Slot[%d]", nSlotId, 0, 0);
+    m_pAudioNego = std::make_shared<AudioNego>(GetSlotId());
+    m_pVideoNego = std::make_shared<VideoNego>(GetSlotId());
+    m_pTextNego = std::make_shared<TextNego>(GetSlotId());
 }
 
 PUBLIC
 MediaNego::~MediaNego()
 {
     IMS_TRACE_I("~MediaNego()", 0, 0, 0);
-
-    if (m_pAudioNego != IMS_NULL)
-    {
-        delete m_pAudioNego;
-    }
-
-    if (m_pVideoNego != IMS_NULL)
-    {
-        delete m_pVideoNego;
-    }
-
-    if (m_pTextNego != IMS_NULL)
-    {
-        delete m_pTextNego;
-    }
 }
 
 PUBLIC
 void MediaNego::CreateProfile(IN MediaEnvironment* pMediaEnvironment)
 {
-    if (pMediaEnvironment == IMS_NULL)
+    if (pMediaEnvironment == IMS_NULL || m_pAudioNego == IMS_NULL || m_pVideoNego == IMS_NULL ||
+            m_pTextNego == IMS_NULL)
     {
         return;
     }
 
     m_pMediaEnvironment = pMediaEnvironment;
-
     IMS_TRACE_D("CreateProfile() - eServiceType[%d]", pMediaEnvironment->eServiceType, 0, 0);
-    m_pAudioNego = new AudioNego(GetSlotId());
-    m_pVideoNego = new VideoNego(GetSlotId());
-    m_pTextNego = new TextNego(GetSlotId());
 
     m_pAudioNego->CreateProfiles(m_pMediaEnvironment,
             MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
-
     m_pVideoNego->CreateProfiles(m_pMediaEnvironment,
             MediaConfigUtil::GetVideoConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
-
     m_pTextNego->CreateProfiles(m_pMediaEnvironment,
             MediaConfigUtil::GetTextConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
 }
@@ -102,22 +83,9 @@ IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
 
     m_eNegoState = STATE_OFFER_SENT;
     m_bForking = IMS_TRUE;
-
-    if (m_pAudioNego != IMS_NULL)
-    {
-        *m_pAudioNego = *pMediaNego->GetAudioNego();
-    }
-
-    if (m_pVideoNego != IMS_NULL)
-    {
-        *m_pVideoNego = *pMediaNego->GetVideoNego();
-    }
-
-    if (m_pTextNego != IMS_NULL)
-    {
-        *m_pTextNego = *pMediaNego->GetTextNego();
-    }
-
+    m_pAudioNego = std::make_shared<AudioNego>(*pMediaNego->m_pAudioNego);
+    m_pVideoNego = std::make_shared<VideoNego>(*pMediaNego->m_pVideoNego);
+    m_pTextNego = std::make_shared<TextNego>(*pMediaNego->m_pTextNego);
     return IMS_TRUE;
 }
 

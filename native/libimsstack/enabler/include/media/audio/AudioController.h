@@ -86,8 +86,8 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateSession(
-            const IN IMS_UINTP nNegoId, const IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego);
+    IMS_BOOL UpdateSession(const IN IMS_UINTP nNegoId, const IN IMS_UINT32 nAccessNetwork,
+            IN std::shared_ptr<AudioNego> pNego);
 
     /**
      * @brief Send AddConfig message
@@ -98,7 +98,8 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL AddSession(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego);
+    IMS_BOOL AddSession(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork,
+            IN std::shared_ptr<AudioNego> pNego);
 
     /**
      * @brief Send confirmConfig message to java
@@ -153,8 +154,8 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when there is the parameter to updates IMS_FALSE when there
      * are no parameters updated
      */
-    IMS_BOOL UpdateRtpConfig(
-            IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego);
+    IMS_BOOL UpdateRtpConfig(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork,
+            IN std::shared_ptr<AudioNego> pNego);
 
     /**
      * @brief Update local address from the parameters of the negotiation profile
@@ -163,7 +164,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
      * failed to update
      */
-    IMS_BOOL UpdateLocalAddress(IN AudioNego* pNego);
+    IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<AudioNego> pNego);
 
     /**
      * @brief Update AccessNetwork information in the RtpConfig and initiate modifySession
@@ -182,7 +183,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioNego* pNego);
+    IMS_BOOL UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN std::shared_ptr<AudioNego> pNego);
 
     /**
      * @brief Get the size of AudioSession list

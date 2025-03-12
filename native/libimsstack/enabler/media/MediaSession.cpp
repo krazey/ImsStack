@@ -139,7 +139,7 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 
     IMS_UINTP nMediaNego = reinterpret_cast<IMS_UINTP>(pMediaNego);
 
-    AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+    std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
 
     if (pAudioNego != IMS_NULL)
     {
@@ -148,7 +148,7 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
                 m_pEnvironment->eServiceType);
     }
 
-    VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+    std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
 
     if (pVideoNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
     {
@@ -156,7 +156,7 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
                 this, MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
     }
 
-    TextNego* pTextNego = pMediaNego->GetTextNego();
+    std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
 
     if (pTextNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
     {
@@ -594,7 +594,7 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetNegotiatedCodecBitrate(
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_AUDIO))
     {
-        AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+        std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
 
         if (pAudioNego == IMS_NULL)
         {
@@ -605,7 +605,7 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetNegotiatedCodecBitrate(
     }
     else if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_VIDEO))
     {
-        VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+        std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
 
         if (pVideoNego == IMS_NULL)
         {
@@ -637,17 +637,17 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetRemotePort(
     {
         case MEDIA_TYPE_AUDIO:
         {
-            AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+            std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
             return (pAudioNego) ? (IMS_SINT32)pAudioNego->GetRemotePort() : MEDIA_PORT_INVALID;
         }
         case MEDIA_TYPE_VIDEO:
         {
-            VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+            std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
             return (pVideoNego) ? (IMS_SINT32)pVideoNego->GetRemotePort() : MEDIA_PORT_INVALID;
         }
         case MEDIA_TYPE_TEXT:
         {
-            TextNego* pTextNego = pMediaNego->GetTextNego();
+            std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
             return (pTextNego) ? (IMS_SINT32)pTextNego->GetRemotePort() : MEDIA_PORT_INVALID;
         }
         default:
@@ -669,7 +669,7 @@ IMS_SINT32 MediaSession::GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
     }
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_AUDIO)) {
-        AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+        std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
         if (pAudioNego == IMS_NULL) return 0;
         return (IMS_SINT32)pAudioNego->GetNegotiatedBandwidth();
     }
@@ -692,7 +692,7 @@ PUBLIC VIRTUAL MEDIA_DIRECTION MediaSession::GetNegotiatedDirection(
     {
         case MEDIA_TYPE_AUDIO:
         {
-            AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+            std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
             if (pAudioNego != IMS_NULL)
             {
                 return pAudioNego->GetNegotiatedDirection();
@@ -701,7 +701,7 @@ PUBLIC VIRTUAL MEDIA_DIRECTION MediaSession::GetNegotiatedDirection(
         break;
         case MEDIA_TYPE_VIDEO:
         {
-            VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+            std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
             if (pVideoNego != IMS_NULL)
             {
                 return pVideoNego->GetNegotiatedDirection();
@@ -710,7 +710,7 @@ PUBLIC VIRTUAL MEDIA_DIRECTION MediaSession::GetNegotiatedDirection(
         break;
         case MEDIA_TYPE_TEXT:
         {
-            TextNego* pTextNego = pMediaNego->GetTextNego();
+            std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
             if (pTextNego != IMS_NULL)
             {
                 return pTextNego->GetNegotiatedDirection();
@@ -738,7 +738,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             {
                 if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO)
                 {
-                    AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+                    std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
 
                     if (pAudioNego != IMS_NULL)
                     {
@@ -747,7 +747,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
                 }
                 else if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_VIDEO)
                 {
-                    VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+                    std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
 
                     if (pVideoNego != IMS_NULL)
                     {
@@ -756,7 +756,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
                 }
                 else if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_TEXT)
                 {
-                    TextNego* pTextNego = pMediaNego->GetTextNego();
+                    std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
 
                     if (pTextNego != IMS_NULL)
                     {
@@ -956,7 +956,7 @@ PROTECTED QosRequestParam* MediaSession::createQosParam(
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO))
     {
-        AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+        std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
 
         if (pAudioNego == NULL)
         {
@@ -971,7 +971,7 @@ PROTECTED QosRequestParam* MediaSession::createQosParam(
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
     {
-        VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+        std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
 
         if (pVideoNego == NULL)
         {
@@ -986,7 +986,7 @@ PROTECTED QosRequestParam* MediaSession::createQosParam(
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
     {
-        TextNego* pTextNego = pMediaNego->GetTextNego();
+        std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
 
         if (pTextNego == NULL)
         {

@@ -85,7 +85,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
      * failed to update
      */
-    IMS_BOOL UpdateLocalAddress(IN VideoNego* pNego);
+    IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego);
 
     /**
      * @brief Update rtp config parameters from the negotiation profile
@@ -93,7 +93,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
      * failed to update
      */
-    IMS_BOOL UpdateRtpConfig(IN VideoNego* pNego);
+    IMS_BOOL UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego);
 
     /**
      * @brief Update AccessNetwork information in the RtpConfig
@@ -115,7 +115,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateQualityThreshold(IN VideoNego* pNego);
+    IMS_BOOL UpdateQualityThreshold(IN std::shared_ptr<VideoNego> pNego);
 
     /**
      * @brief Check there is a session opened

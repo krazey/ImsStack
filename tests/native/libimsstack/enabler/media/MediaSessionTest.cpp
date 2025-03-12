@@ -38,9 +38,8 @@ const IMS_UINT32 BRING_MOCKMEDIANEGO = 1234567;
 class FakeMediaSessionConfig : public MediaSessionConfig
 {
 public:
-    virtual IMS_BOOL Create(IN IMS_SINT32 nSlotId)
+    virtual IMS_BOOL Create(IN IMS_SINT32 /*nSlotId*/)
     {
-        (void)nSlotId;
         MockICarrierConfig* m_pMockICarrierConfig = new MockICarrierConfig();
         MockICarrierConfig* m_pAudioBundle = new MockICarrierConfig();
         MockICarrierConfig* m_pVideoBundle = new MockICarrierConfig();
@@ -176,7 +175,7 @@ public:
 
         IMS_UINTP nMediaNego = reinterpret_cast<IMS_UINTP>(pMediaNego);
 
-        AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+        std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
 
         if (pAudioNego != IMS_NULL)
         {
@@ -184,7 +183,7 @@ public:
                     m_pMediaSessionConfig->GetAudioConfiguration(), MEDIA_SERVICE_DEFAULT);
         }
 
-        VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+        std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
 
         if (pVideoNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
         {
@@ -192,7 +191,7 @@ public:
                     this, m_pMediaSessionConfig->GetVideoConfiguration());
         }
 
-        TextNego* pTextNego = pMediaNego->GetTextNego();
+        std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
 
         if (pTextNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
         {

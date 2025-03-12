@@ -107,7 +107,7 @@ IMS_BOOL AudioController::CreateSession(IN IMediaSessionListener* pListener, IN 
 
 PUBLIC
 IMS_BOOL AudioController::UpdateSession(
-        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego)
+        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN std::shared_ptr<AudioNego> pNego)
 {
     IMS_TRACE_I("UpdateSession() - nNegoId[%" PFLS_x "], nAccessNetwork[%d]", nNegoId,
             nAccessNetwork, 0);
@@ -174,7 +174,7 @@ IMS_BOOL AudioController::OpenSession(IN IMS_UINTP nNegoId)
 
 PUBLIC
 IMS_BOOL AudioController::AddSession(
-        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego)
+        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN std::shared_ptr<AudioNego> pNego)
 {
     IMS_TRACE_I("AddSession() - nNegoId[%" PFLS_x "], audio list size[%d]", nNegoId,
             m_listAudioSession.GetSize(), 0);
@@ -346,7 +346,7 @@ IMS_BOOL AudioController::CloseSession()
 
 PUBLIC
 IMS_BOOL AudioController::UpdateRtpConfig(
-        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego)
+        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN std::shared_ptr<AudioNego> pNego)
 {
     IMS_TRACE_D("UpdateRtpConfig() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
             m_listAudioSession.GetSize(), 0);
@@ -442,7 +442,7 @@ IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
 }
 
 PUBLIC
-IMS_BOOL AudioController::UpdateLocalAddress(IN AudioNego* pNego)
+IMS_BOOL AudioController::UpdateLocalAddress(IN std::shared_ptr<AudioNego> pNego)
 {
     if (pNego == IMS_NULL)
     {
@@ -456,7 +456,8 @@ IMS_BOOL AudioController::UpdateLocalAddress(IN AudioNego* pNego)
 }
 
 PUBLIC
-IMS_BOOL AudioController::UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioNego* pNego)
+IMS_BOOL AudioController::UpdateQualityThreshold(
+        IN IMS_UINTP nNegoId, IN std::shared_ptr<AudioNego> pNego)
 {
     IMS_TRACE_I("UpdateQualityThreshold() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
 

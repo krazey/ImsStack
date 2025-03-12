@@ -143,7 +143,7 @@ IMS_BOOL VideoController::CloseSession()
 }
 
 PUBLIC
-IMS_BOOL VideoController::UpdateLocalAddress(IN VideoNego* pNego)
+IMS_BOOL VideoController::UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego)
 {
     IMS_TRACE_I("UpdateLocalAddress()", 0, 0, 0);
 
@@ -158,7 +158,7 @@ IMS_BOOL VideoController::UpdateLocalAddress(IN VideoNego* pNego)
 }
 
 PUBLIC
-IMS_BOOL VideoController::UpdateRtpConfig(IN VideoNego* pNego)
+IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego)
 {
     IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
 
@@ -197,7 +197,7 @@ void VideoController::SetMtu(IN IMS_SINT32 nMtu)
 }
 
 PUBLIC
-IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
+IMS_BOOL VideoController::UpdateQualityThreshold(IN std::shared_ptr<VideoNego> pNego)
 {
     IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
 

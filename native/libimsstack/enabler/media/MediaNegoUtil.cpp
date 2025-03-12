@@ -41,7 +41,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMedi
 
         if (pMediaNego != IMS_NULL)
         {
-            AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+            std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
 
             if (pAudioNego != IMS_NULL)
             {
@@ -54,7 +54,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMedi
                 }
             }
 
-            VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+            std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
 
             if (pVideoNego != IMS_NULL)
             {
@@ -67,7 +67,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMedi
                 }
             }
 
-            TextNego* pTextNego = pMediaNego->GetTextNego();
+            std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
 
             if (pTextNego != IMS_NULL)
             {

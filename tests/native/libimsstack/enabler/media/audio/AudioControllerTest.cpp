@@ -53,7 +53,7 @@ public:
     AudioConfiguration* m_pConfig;
     FakeIMediaSessionListener m_objFakeListener;
     MockIMediaSessionListener m_objListener;
-    MockAudioNego* m_pAudioNego;
+    std::shared_ptr<MockAudioNego> m_pAudioNego;
 
     AudioProfile* m_pLocalProfile;
     AudioProfile* m_pPeerProfile;
@@ -66,7 +66,7 @@ protected:
         m_pController = new FakeAudioController();
         m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
         m_pConfig->Create(ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID));
-        m_pAudioNego = new MockAudioNego(DEFAULT_SLOT_ID);
+        m_pAudioNego = std::make_shared<MockAudioNego>(DEFAULT_SLOT_ID);
 
         m_objListener.SetDelegate(&m_objFakeListener);
         m_objListener.DelegateToFake();
@@ -91,7 +91,6 @@ protected:
     virtual void TearDown() override
     {
         delete m_pController;
-        delete m_pAudioNego;
         delete m_pConfig;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
