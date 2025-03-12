@@ -24,6 +24,7 @@
 #include "IImsRadio.h"
 #include "IIpcan.h"
 #include "PlatformContext.h"
+#include "SipMessageBodyPart.h"
 #include "SipStatusCode.h"
 #include "TestPhoneInfoService.h"
 #include "TestUtilService.h"
@@ -789,6 +790,23 @@ TEST_F(AosERegistrationTest, StartWithSpecifiedIntervalPolicytWhenRetryRuleForER
             1);
 }
 
+TEST_F(AosERegistrationTest, DoNotInvokedStartWithSpecifiedIntervalPolicytWhenIsRoaming)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryRuleForERegUsed())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL));
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount(
+                      "ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy"),
+            0);
+}
+
 TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenFakeRegistration)
 {
     m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
@@ -811,12 +829,95 @@ TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenConfiguredAsFallb
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
+    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
+            .WillByDefault(Return(IMS_FALSE));
 
     m_pAosERegistration->ProcessDefaultFlowRecovery_Start(400);
 
     EXPECT_TRUE(m_pAosERegistration->IsFakeRegistration());
     EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
     EXPECT_TRUE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest,
+        DefaultFlowRecoveryWhenPreferredEmergnecyRegistrationFallbackAndSupportAnonymousECallAction)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
+    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    SipMessageBodyPart objBodyPart;
+    ISipMessageBodyPart* piBodyPart = &objBodyPart;
+    AString strContent = "";
+    strContent.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    strContent.Append("<ims-3gpp version=\"1\"><alternative-service>");
+    strContent.Append("<type>restoration</type>");
+    strContent.Append("<reason></reason>");
+    strContent.Append("<action>anonymous-emergencycall</action>");
+    strContent.Append("</alternative-service></ims-3gpp>");
+    ByteArray objContent(strContent);
+    piBodyPart->SetContent(objContent);
+    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, "application/3gpp-ims+xml");
+    objBodyParts.Append(piBodyPart);
+    ON_CALL(m_objMockISipMessage, GetBodyParts()).WillByDefault(Return(objBodyParts));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
+
+    EXPECT_TRUE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_TRUE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenSupportAnonymousECallActionButNoXmlBody)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
+    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    ON_CALL(m_objMockISipMessage, GetBodyParts()).WillByDefault(Return(objBodyParts));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenSupportAnonymousECallActionButNot403)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
+    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    SipMessageBodyPart objBodyPart;
+    ISipMessageBodyPart* piBodyPart = &objBodyPart;
+    AString strContent = "";
+    strContent.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    strContent.Append("<ims-3gpp version=\"1\"><alternative-service>");
+    strContent.Append("<type>restoration</type>");
+    strContent.Append("<reason></reason>");
+    strContent.Append("<action>anonymous-emergencycall</action>");
+    strContent.Append("</alternative-service></ims-3gpp>");
+    ByteArray objContent(strContent);
+    piBodyPart->SetContent(objContent);
+    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, "application/3gpp-ims+xml");
+    objBodyParts.Append(piBodyPart);
+    ON_CALL(m_objMockISipMessage, GetBodyParts()).WillByDefault(Return(objBodyParts));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(500);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
 }
 
 TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringUpdateWhenNeitherEcbmNorScbm)
