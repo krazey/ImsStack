@@ -897,6 +897,14 @@ TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateReceivedRejectsIfResponseFailed
             CallStateName::UPDATING, pUpdatingState->SessionEarlyMediaUpdateReceived(&objSession));
 }
 
+TEST_F(UpdatingStateTest, SessionPrackDeliveredReturnsUpdatingAndDoesNothingIfNoMessageFound)
+{
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(nullptr));
+    EXPECT_CALL(objMtcSession, HandleResponse(_, _)).Times(0);
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionPrackDelivered(&objSession));
+}
+
 TEST_F(UpdatingStateTest, SessionPrackDeliveredInvokesSendEarlyUpdate)
 {
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))

@@ -377,6 +377,10 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateReceived(IN I
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDelivered(IN ISession* piSession)
 {
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
+    if (piMessage == IMS_NULL)
+    {
+        return GetStateName();
+    }
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleResponse(ResponseType::PRACK_RESPONSE, *piMessage);
 
