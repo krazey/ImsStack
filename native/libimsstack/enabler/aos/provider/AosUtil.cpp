@@ -196,6 +196,49 @@ IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN const ISipMessage* piSipMsg)
 }
 
 PUBLIC
+IMS_BOOL AosUtil::IsAnonymousECallActionPresent(IN const ISipMessage* piSipMsg)
+{
+    if (piSipMsg == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
+    if (objBodyParts.IsEmpty())
+    {
+        return IMS_FALSE;
+    }
+
+    const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
+    if (piBodyPart == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    AString strContentTypeHdr = piBodyPart->GetHeader(ISipMessageBodyPart::CONTENT_TYPE);
+    AString strType, strSubType;
+    TextParser::ParseMediaType(strContentTypeHdr, strType, strSubType);
+
+    if (strType.EqualsIgnoreCase(AosString::STR_APPLICATION) &&
+            strSubType.EqualsIgnoreCase(AosString::STR_3GPP_IMS_XML))
+    {
+        auto pIms3gpp = new Ims3gpp();
+        if (pIms3gpp->Parse(piBodyPart->GetContent().ToString()))
+        {
+            IMS_SINT32 nAction = pIms3gpp->GetAlternativeService().GetAction();
+            if (nAction == Ims3gpp::AlternativeService::ACTION_ANONYMOUS_EMERGENCYCALL)
+            {
+                delete pIms3gpp;
+                return IMS_TRUE;
+            }
+        }
+        delete pIms3gpp;
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC
 IMS_BOOL AosUtil::IsParameterIncluded(
         IN const ISipMessage* piSipMsg, IN IMS_SINT32 nHeaderType, IN const AString& strParameter)
 {
