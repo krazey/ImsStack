@@ -44,6 +44,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVolteTtySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVopsIgnoredForVolteEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsAvailableWithoutVoiceCapability, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsAnonymousECallActionSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySsac, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredWfcBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReregRetryWithChangedCountryOnWifi, (), (const, override));

@@ -496,6 +496,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_OF_UNAVAILABLE_NETW
         KEY_IMS_EMERGENCY_PREFIX "release_epdn_of_unavailable_network_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "stop_ereg_timer_on_epdn_connected_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL[] =
+        KEY_IMS_EMERGENCY_PREFIX "support_anonymous_ecall_action_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_erereg_on_ipcan_change_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_GIBA_FOR_EREG_IN_ROAMING_BOOL[] =

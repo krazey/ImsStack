@@ -688,6 +688,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "release_epdn_of_unavailable_network_bool";
         public static final String KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL =
                 KEY_PREFIX + "stop_ereg_timer_on_epdn_connected_bool";
+        public static final String KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL =
+                KEY_PREFIX + "support_anonymous_ecall_action_bool";
         public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
                 KEY_PREFIX + "support_erereg_on_ipcan_change_bool";
         public static final String KEY_SUPPORT_GIBA_FOR_EREG_IN_ROAMING_BOOL =

@@ -58,6 +58,7 @@ public:
             bReregWithChangedCountryOnWifi(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
+            bSupportAnonymousECallAction(IMS_FALSE),
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportGibaForERegInRoaming(IMS_FALSE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
@@ -153,6 +154,7 @@ public:
     IMS_BOOL bReregWithChangedCountryOnWifi;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
+    IMS_BOOL bSupportAnonymousECallAction;
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportGibaForERegInRoaming;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;

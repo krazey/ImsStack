@@ -174,6 +174,22 @@ public:
     virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const = 0;
 
     /**
+     * @brief Indicates whether the UE supports the anonymous emergency call action.
+     *
+     * If set to true, the UE supports and will check if the network requires an
+     * anonymous emergency call to be made using a specific action (e.g.,
+     * <action>:anonymous-emergencycall) after receiving a 403 Forbidden response to the emergency
+     * registration request. If set to false, the UE does not support or will not check for the
+     * presence of the required action in the 403 Forbidden response.
+     *
+     * @return IMS_BOOL Returns {@code IMS_TRUE} if the anonymous emergency call action is
+     * supported,
+     * {@code IMS_FALSE} otherwise.
+     * @see {@code imsemergency.support_anonymous_ecall_action_bool}
+     */
+    virtual IMS_BOOL IsAnonymousECallActionSupported() const = 0;
+
+    /**
      * @brief Check if VoLTE service block by SSAC is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.

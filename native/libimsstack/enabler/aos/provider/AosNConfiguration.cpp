@@ -186,6 +186,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsAvailableWithoutVoiceCapa
     return m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsAnonymousECallActionSupported() const
+{
+    return m_objAsset.bSupportAnonymousECallAction;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockBySsac() const
 {
     return m_objAsset.bRequiredVolteBlockBySsac;
@@ -1470,6 +1475,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa = piCc->GetBoolean(
             CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL);
+    m_objAsset.bSupportAnonymousECallAction =
+            piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL);
     m_objAsset.bSupportEmergencyReregOnIpcanChange =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportGibaForERegInRoaming = piCc->GetBoolean(
