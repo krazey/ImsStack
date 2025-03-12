@@ -123,7 +123,6 @@ private:
 
     static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
     void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);
-    void RequestToRegisterQosCallback(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents);
     IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
     void SetDirectionToActiveFromInactive(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
 
