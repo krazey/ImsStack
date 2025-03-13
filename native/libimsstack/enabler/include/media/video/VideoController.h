@@ -17,7 +17,6 @@
 #ifndef VIDEO_CONTROLLER_H_
 #define VIDEO_CONTROLLER_H_
 
-#include "MediaDef.h"
 #include "IMediaSessionListener.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoSession.h"

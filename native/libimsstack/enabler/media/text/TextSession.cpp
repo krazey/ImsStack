@@ -15,22 +15,15 @@
  */
 
 #include <stdio.h>
-#include "ISessionDescriptor.h"
-#include "ServicePhoneInfo.h"
-#include "ServiceNetworkPolicy.h"
-#include "ServiceNetwork.h"
-#include "ServiceEvent.h"
-#include "ServiceSystemTime.h"
-#include "ServiceUtil.h"
 
-#include "IMediaSessionListener.h"
 #include "IJniMedia.h"
-#include "MediaManager.h"
+#include "IMediaSessionListener.h"
+#include "ServiceTrace.h"
 #include "config/TextConfiguration.h"
 #include "text/TextSession.h"
-#include "text/TextProfileUtil.h"
 
 #include <TextConfig.h>
+
 using namespace android::telephony::imsmedia;
 
 __IMS_TRACE_TAG_MEDIA__;

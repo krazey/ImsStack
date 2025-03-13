@@ -22,7 +22,6 @@
 #include "ITimer.h"
 #include "BaseSession.h"
 #include "IJniMedia.h"
-#include "audio/AudioDef.h"
 #include "audio/AudioProfile.h"
 
 class AudioConfiguration;

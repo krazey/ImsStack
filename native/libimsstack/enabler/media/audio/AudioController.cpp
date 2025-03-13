@@ -15,7 +15,6 @@
  */
 
 #include "ServiceTrace.h"
-
 #include "audio/AudioController.h"
 #include "audio/AudioProfile.h"
 

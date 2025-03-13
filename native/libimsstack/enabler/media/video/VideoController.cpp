@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "video/VideoController.h"
 #include "ServiceTrace.h"
+#include "video/VideoController.h"
 #include "video/VideoProfile.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -84,7 +84,7 @@ IMS_BOOL VideoController::OpenSession()
     {
         IMS_TRACE_D("OpenSession() - state[%d]", m_pSession->GetState(), 0, 0);
 
-        if (m_pSession->GetState() == VideoSession::STATE_IDLE)
+        if (m_pSession->GetState() == VideoSession::STATE_NONE)
         {
             m_pSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
 
@@ -105,10 +105,10 @@ IMS_BOOL VideoController::OpenSession()
 PUBLIC
 IMS_BOOL VideoController::UpdateSession()
 {
-    IMS_TRACE_D("UpdateSession() - state[%d]", m_pSession->GetState(), 0, 0);
-
-    if (m_pSession != IMS_NULL)
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != VideoSession::STATE_NONE)
     {
+        IMS_TRACE_D("UpdateSession() - state[%d]", m_pSession->GetState(), 0, 0);
+
         if (m_pSession->GetRemotePort() == 0 || m_pSession->GetLocalPort() == 0)
         {
             return CloseSession();
@@ -130,7 +130,7 @@ IMS_BOOL VideoController::CloseSession()
 
     if (m_pSession != IMS_NULL)
     {
-        if (m_pSession->GetState() != VideoSession::STATE_IDLE)
+        if (m_pSession->GetState() != VideoSession::STATE_NONE)
         {
             m_pSession->Close();
             delete m_pSession;
@@ -201,12 +201,14 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN std::shared_ptr<VideoNego> p
 {
     IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
 
-    if (m_pSession == IMS_NULL || pNego == IMS_NULL)
+    if (m_pSession == IMS_NULL || pNego == IMS_NULL ||
+            m_pSession->GetState() == VideoSession::STATE_NONE)
     {
         return IMS_FALSE;
     }
 
     VideoProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
+
     if (pPeerProfile == IMS_NULL)
     {
         return IMS_FALSE;
