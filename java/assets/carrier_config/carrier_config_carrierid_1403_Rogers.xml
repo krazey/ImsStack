@@ -36,7 +36,6 @@
         <item value="3"/>
     </int-array>
     <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
-    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>

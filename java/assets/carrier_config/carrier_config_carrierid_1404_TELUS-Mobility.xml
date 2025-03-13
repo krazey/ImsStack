@@ -34,7 +34,6 @@
         <item value="2"/>
         <item value="3"/>
     </int-array>
-    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="3"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>

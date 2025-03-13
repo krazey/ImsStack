@@ -73,7 +73,6 @@
     <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="true"/>
     <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
     <boolean name="imsvoice.session_timer_supported_bool" value="true"/>
-    <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
     <int name="imsvoice.session_refresher_type_int" value="0"/>
     <int name="imsvoice.session_privacy_type_int" value="2"/>
     <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
@@ -96,7 +95,6 @@
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="imsvoice.enable_conference_subscribe_by_participant_bool" value="false"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
-    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <string-array name="imsvoice.reject_code_and_reason_code_set_string_array" num="2">
         <item value="403:336"/> <!-- CODE_SIP_TEMPRARILY_UNAVAILABLE -->
         <item value="503:336"/> <!-- CODE_SIP_TEMPRARILY_UNAVAILABLE -->

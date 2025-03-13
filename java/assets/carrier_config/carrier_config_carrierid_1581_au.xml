@@ -84,7 +84,6 @@
     <int name="ims.sip_timer_d_millis_int" value="128000"/>
     <int name="ims.sip_timer_h_millis_int" value="30000"/>
     <int name="imsvoice.session_refresh_method_int" value="1"/>
-    <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="90"/>
 
     <int name="imsvoice.session_privacy_type_int" value="2"/>

@@ -30,7 +30,6 @@
         <item value="3"/>
     </int-array>
     <int name="imsvoice.session_refresh_method_int" value="1"/>
-    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <string name="imsvoice.conference_factory_uri_string">sip:conf@mobilefrdm.ca</string>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">

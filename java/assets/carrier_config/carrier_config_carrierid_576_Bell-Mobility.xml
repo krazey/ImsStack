@@ -35,7 +35,6 @@
         <item value="1"/>
         <item value="3"/>
     </int-array>
-    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="18">
         <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
