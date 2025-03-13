@@ -62,6 +62,26 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="1">
+        <item value="2"/> <!-- GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI -->
+    </int-array>
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
+        <item value="0"/> <!-- INVITE -->
+    </int-array>
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
+        <item value="0"/> <!-- EMERGENCY_LTE -->
+        <item value="0"/> <!-- EMERGENCY_WIFI : GEOLOCATION_PIDF_INFO_LAT_AND_LONG -->
+        <item value="0"/> <!-- NORMAL_LTE -->
+        <item value="0"/> <!-- NORMAL_WIFI -->
+    </int-array>
+    <int name="ims.location_policy_update_type_int" value="1"/> <!-- LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED -->
+    <int name="ims.location_acquisition_policy_int" value="86672"/>
+    <int name="ims.location_address_resolution_time_millis_int" value="3000"/>
+    <int name="ims.location_validity_period_min_int" value="30"/>
+    <int name="ims.location_address_validity_period_min_int" value="30"/>
+    <int name="ims.location_tolerable_distance_int" value="150"/>
+    <int name="ims.location_gps_searching_duration_sec_int" value="20"/>
+    <int name="ims.location_geodetic_shape_int" value="0"/> <!-- GEODETIC_SHAPE_CIRCLE -->
 
     <!-- Mts -->
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="10000"/>
