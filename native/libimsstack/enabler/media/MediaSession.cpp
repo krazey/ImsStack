@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-#include "Configuration.h"
-#include "EnablerUtils.h"
 #include "ICoreService.h"
-#include "ISessionDescriptor.h"
-#include "ServiceMessage.h"
 #include "ServiceTrace.h"
 
 #include "IMediaSessionClientListener.h"
@@ -42,8 +38,8 @@ MediaSession::MediaSession(
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
-        m_eCurMediaType(MEDIA_TYPE_INVALID),
-        m_bSessionConfirmed(IMS_FALSE)
+        m_bSessionConfirmed(IMS_FALSE),
+        m_eCurMediaType(MEDIA_TYPE_INVALID)
 {
     IMS_TRACE_D(
             "+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType, nCallKey, 0);
