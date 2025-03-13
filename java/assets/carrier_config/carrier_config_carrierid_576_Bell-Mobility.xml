@@ -62,7 +62,8 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="1">
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="1"/> <!-- GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI -->
         <item value="2"/> <!-- GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI -->
     </int-array>
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
