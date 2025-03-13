@@ -17,6 +17,9 @@
 <carrier_config>
     <!-- Carrier configurations -->
 
+    <!-- Ut/Xcap AOSP -->
+    <boolean name="imsss.ut_requires_ims_registration_bool" value="true"/>
+
     <!-- Ut/Xcap -->
     <boolean name="imsss.ut_support_cf_action_erasure_bool" value="false"/>
 </carrier_config>
