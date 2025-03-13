@@ -39,6 +39,7 @@
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 #include <algorithm>
+#include <optional>
 #include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -329,10 +330,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
             break;
     }
 
-    if (eType != RequestType::ACK)
-    {
-        UpdateCapabilityFromMessage(objRequest);
-    }
+    UpdateCapabilityFromMessage(objRequest);
 }
 
 PUBLIC VIRTUAL void MtcSession::HandleResponse(
@@ -458,13 +456,18 @@ void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
     }
     else
     {
-        m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::VIDEO) &&
-                m_objContext.GetMessageUtils().IsVideoFeatureIncluded(&objMessage);
+        if (auto bFeature = m_objContext.GetMessageUtils().IsVideoFeatureIncluded(&objMessage))
+        {
+            m_bVideoCapable = *bFeature && IsRegisteredFeature(ImsAosFeature::VIDEO);
+        }
     }
-    m_bRttCapable = IsRegisteredFeature(ImsAosFeature::TEXT) &&
-            m_objContext.GetMessageUtils().IsTextFeatureIncluded(&objMessage);
 
-    IMS_TRACE_D("UpdateCapabilityFromMessage : Video[%s] Rtt[%s]", _TRACE_B_(m_bVideoCapable),
+    if (auto bFeature = m_objContext.GetMessageUtils().IsTextFeatureIncluded(&objMessage))
+    {
+        m_bRttCapable = *bFeature && IsRegisteredFeature(ImsAosFeature::TEXT);
+    }
+
+    IMS_TRACE_D("UpdateCapabilityFromMessage : Video[%s] RTT[%s]", _TRACE_B_(m_bVideoCapable),
             _TRACE_B_(m_bRttCapable), 0);
 }
 

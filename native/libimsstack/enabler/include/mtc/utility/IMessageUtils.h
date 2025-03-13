@@ -23,6 +23,7 @@
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
+#include <optional>
 
 class IMessage;
 class IMtcContext;
@@ -470,20 +471,37 @@ public:
             IN IMS_BOOL bMultiPart) = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if the Contact header of the message contains MMTel ICSI feature tag.
      *
-     * @param piMessage
-     * @return
+     * @param piMessage Message to be checked.
+     * @return True if the header contains the feature. False if it doesn't.
+     *         {@code std::nullopt} if no Contact header.
      */
-    virtual IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage) = 0;
+    virtual std::optional<IMS_BOOL> IsMmtelFeatureIncluded(IN const IMessage* piMessage) = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if the Contact header of the message contains "video" feature tag.
      *
-     * @param piMessage
-     * @return
+     * Contact headers without the "mmtel" feature tag are considered invalid, therefore,
+     * {@code std::nullopt} will be returned.
+     *
+     * @param piMessage Message to be checked.
+     * @return True if the header contains the feature. False if it doesn't.
+     *         {@code std::nullopt} if no Contact header.
      */
-    virtual IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) = 0;
+    virtual std::optional<IMS_BOOL> IsVideoFeatureIncluded(IN const IMessage* piMessage) = 0;
+
+    /**
+     * @brief Checks if the Contact header of the message contains "text" feature tag.
+     *
+     * Contact headers without the "mmtel" feature tag are considered invalid, therefore,
+     * {@code std::nullopt} will be returned.
+     *
+     * @param piMessage Message to be checked.
+     * @return True if the header contains the feature. False if it doesn't.
+     *         {@code std::nullopt} if no Contact header.
+     */
+    virtual std::optional<IMS_BOOL> IsTextFeatureIncluded(IN const IMessage* piMessage) = 0;
 
     /**
      * @brief Gets call type from the IMessage.

@@ -1115,18 +1115,35 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
     return SetResourceListWithHeaders(piMessage, bMultiPart, CreateResourceListXml(objEntries));
 }
 
-PUBLIC IMS_BOOL MessageUtils::IsVideoFeatureIncluded(IN const IMessage* piMessage)
+PUBLIC std::optional<IMS_BOOL> MessageUtils::IsMmtelFeatureIncluded(IN const IMessage* piMessage)
 {
     AString strContact = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
-    return ContainsTag(strContact, MessageUtil::STR_VIDEO) &&
-            ContainsTag(strContact, AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
+    if (strContact.GetLength() <= 0)
+    {
+        return std::nullopt;
+    }
+    return ContainsTag(
+            strContact, AString(Const3GPP::ICSI_MMTEL).Replace(TextParser::CHAR_COLON, "%3A"));
 }
 
-PUBLIC IMS_BOOL MessageUtils::IsTextFeatureIncluded(IN const IMessage* piMessage)
+PUBLIC std::optional<IMS_BOOL> MessageUtils::IsVideoFeatureIncluded(IN const IMessage* piMessage)
 {
+    if (!IsMmtelFeatureIncluded(piMessage).value_or(IMS_FALSE))
+    {
+        return std::nullopt;
+    }
     AString strContact = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
-    return ContainsTag(strContact, MessageUtil::STR_TEXT) &&
-            ContainsTag(strContact, AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
+    return ContainsTag(strContact, MessageUtil::STR_VIDEO);
+}
+
+PUBLIC std::optional<IMS_BOOL> MessageUtils::IsTextFeatureIncluded(IN const IMessage* piMessage)
+{
+    if (!IsMmtelFeatureIncluded(piMessage).value_or(IMS_FALSE))
+    {
+        return std::nullopt;
+    }
+    AString strContact = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
+    return ContainsTag(strContact, MessageUtil::STR_TEXT);
 }
 
 PUBLIC CallType MessageUtils::GetCallType(

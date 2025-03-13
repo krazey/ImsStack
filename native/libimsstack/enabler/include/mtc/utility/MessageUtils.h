@@ -23,6 +23,7 @@
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
+#include <optional>
 #include <tuple>
 
 class AStringBuffer;
@@ -125,8 +126,9 @@ public:
     IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
             IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId,
             IN IMS_BOOL bMultiPart) override;
-    IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
-    IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) override;
+    std::optional<IMS_BOOL> IsMmtelFeatureIncluded(IN const IMessage* piMessage) override;
+    std::optional<IMS_BOOL> IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
+    std::optional<IMS_BOOL> IsTextFeatureIncluded(IN const IMessage* piMessage) override;
     CallType GetCallType(IN const IMessage* piMessage, IN ISession* piSession,
             IN IMS_BOOL bCheckRemote) override;
     CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bActiveMediaOnly,
