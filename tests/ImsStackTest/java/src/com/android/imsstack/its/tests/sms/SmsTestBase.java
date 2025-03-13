@@ -73,7 +73,7 @@ public class SmsTestBase extends ImsStackTestBase {
             mConfig = new PersistableBundle();
         }
         mConfig.putInt(
-                CarrierConfig.ImsSms.KEY_SMS_REQUEST_URI_TYPE_INT, 0);
+                CarrierConfig.ImsSms.KEY_SMS_PREFERRED_PSI_URI_TYPE_INT, 0);
         mConfig.putBoolean(CarrierConfig.ImsSms.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL,
                 false);
     }

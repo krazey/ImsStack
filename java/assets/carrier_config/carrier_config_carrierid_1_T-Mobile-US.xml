@@ -460,7 +460,6 @@
     <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
 
     <!-- Mts -->
-    <int name="imssms.sms_request_uri_type_int" value="0"/>
     <boolean name="imssms.sms_geolocation_pidf_for_emergency_bool" value="true"/>
     <boolean name="imssms.sms_in_reply_to_validation_bool" value="false"/>
 

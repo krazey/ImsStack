@@ -756,7 +756,7 @@
     <boolean name="imsrtt.text_hold_with_direction_inactive_bool" value="false"/>
 
     <!-- Mts -->
-    <int name="imssms.sms_request_uri_type_int" value="-1"/>
+    <int name="imssms.sms_preferred_psi_uri_type_int" value="-1"/>
     <boolean name="imssms.sms_use_dialed_number_for_request_uri_bool" value="false"/>
     <boolean name="imssms.sms_allow_imsi_based_sip_uri_bool" value="false"/>
     <int-array name="imssms.sms_generic_error_codes_int_array" num="0">

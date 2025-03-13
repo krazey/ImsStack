@@ -445,5 +445,5 @@
     <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="20000"/>
 
     <!-- Mts -->
-    <int name="imssms.sms_request_uri_type_int" value="0"/>
+    <int name="imssms.sms_preferred_psi_uri_type_int" value="0"/>
 </carrier_config>

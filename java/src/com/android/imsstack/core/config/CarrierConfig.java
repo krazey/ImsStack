@@ -818,8 +818,8 @@ public class CarrierConfig {
         // Mts
         public static final String KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL =
                 KEY_PREFIX + "support_limited_admin_sms_mode_bool";
-        public static final String KEY_SMS_REQUEST_URI_TYPE_INT =
-                KEY_PREFIX + "sms_request_uri_type_int";
+        public static final String KEY_SMS_PREFERRED_PSI_URI_TYPE_INT =
+                KEY_PREFIX + "sms_preferred_psi_uri_type_int";
         public static final String KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL =
                 KEY_PREFIX + "sms_use_dialed_number_for_request_uri_bool";
         public static final String KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL =
