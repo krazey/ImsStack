@@ -210,12 +210,17 @@ PUBLIC VIRTUAL void MtcMediaManager::RestoreMediaInfo()
 
 PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
 {
-    ServiceType eServiceType = m_objContext.GetService().GetServiceType();
-    MEDIA_SERVICE_TYPE eMediaServiceType = MtcMediaUtil::GetMediaServiceType(eServiceType);
     IMS_TRACE_D("CreateMediaSession", 0, 0, 0);
 
-    m_piMediaSession =
-            m_objMediaManager.CreateSession(eMediaServiceType, m_objContext.GetCallKey());
+    ServiceType eServiceType = m_objContext.GetService().GetServiceType();
+    IMS_SINT32 eRadioType = PhoneInfoService::GetPhoneInfoService()
+                                    ->GetNetworkWatcher(m_objContext.GetSlotId())
+                                    ->GetNetworkType();
+
+    m_piMediaSession = m_objMediaManager.CreateSession(
+            MtcMediaUtil::GetMediaNetworkType(&m_objContext.GetService(), eRadioType),
+            MtcMediaUtil::GetMediaServiceType(eServiceType),
+            m_objContext.GetService().GetICoreService(), m_objContext.GetCallKey());
 
     if (m_piMediaSession == IMS_NULL)
     {
@@ -224,22 +229,6 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
     }
 
     m_piMediaSession->SetMtcListener(this);
-
-    std::shared_ptr<MediaEnvironment> pEnvironment = std::make_shared<MediaEnvironment>();
-
-    IMS_SINT32 eRadioType = PhoneInfoService::GetPhoneInfoService()
-                                    ->GetNetworkWatcher(m_objContext.GetSlotId())
-                                    ->GetNetworkType();
-
-    pEnvironment->eNetworkType =
-            MtcMediaUtil::GetMediaNetworkType(&m_objContext.GetService(), eRadioType);
-    pEnvironment->eServiceType = eMediaServiceType;
-    pEnvironment->pIService = m_objContext.GetService().GetICoreService();
-
-    if (!m_piMediaSession->SetEnvironment(pEnvironment))
-    {
-        IMS_TRACE_D("Setting media environment is failed.", 0, 0, 0);
-    }
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()

@@ -48,13 +48,6 @@ using ::testing::SetArgReferee;
 LOCAL CallKey DEFAULT_CALL_KEY = 1;
 LOCAL IMS_UINTP NEGO_ID = 100;
 
-// MediaEnvironment
-MATCHER_P(IsEqualMediaEnvironment, e, "")
-{
-    return arg->eNetworkType == e.eNetworkType && arg->eServiceType == e.eServiceType &&
-            arg->pIService == e.pIService;
-}
-
 class TestMtcMediaManager : public MtcMediaManager
 {
 public:
@@ -142,29 +135,17 @@ protected:
 
 TEST_F(MtcMediaManagerTest, CreateMediaSessionCreatesMediaSession)
 {
-    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
-
-    EXPECT_CALL(objMediaManager, CreateSession(MEDIA_SERVICE_DEFAULT, DEFAULT_CALL_KEY))
-            .WillOnce(Return(&objMediaSession));
-    EXPECT_CALL(objMediaSession, SetMtcListener(pMediaManager));
-
-    pMediaManager->CreateMediaSession();
-}
-
-TEST_F(MtcMediaManagerTest, CreateMediaSessionSetsMediaEnvironment)
-{
     MockICoreService objCoreService;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
-    ON_CALL(objMediaManager, CreateSession(_, _)).WillByDefault(Return(&objMediaSession));
 
-    MediaEnvironment objEnvironment;
-    objEnvironment.eNetworkType = MEDIA_NETWORK_WIFI;
-    objEnvironment.eServiceType = MEDIA_SERVICE_DEFAULT;
-    objEnvironment.pIService = &objCoreService;
-    EXPECT_CALL(objMediaSession, SetEnvironment(IsEqualMediaEnvironment(objEnvironment)));
+    EXPECT_CALL(objMediaManager,
+            CreateSession(
+                    MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &objCoreService, DEFAULT_CALL_KEY))
+            .WillOnce(Return(&objMediaSession));
+    EXPECT_CALL(objMediaSession, SetMtcListener(pMediaManager));
 
     pMediaManager->CreateMediaSession();
 }
@@ -176,9 +157,7 @@ TEST_F(MtcMediaManagerTest, CreateMediaSessionNotCrashesWhenInternalError)
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
-    ON_CALL(objMediaManager, CreateSession(_, _)).WillByDefault(Return(nullptr));
-
-    EXPECT_CALL(objMediaSession, SetEnvironment(_)).Times(0);
+    ON_CALL(objMediaManager, CreateSession(_, _, _, _)).WillByDefault(Return(nullptr));
 
     pMediaManager->CreateMediaSession();
 }
