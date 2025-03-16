@@ -822,8 +822,7 @@ void MediaNego::FinalizeSdp(IN ISession* pSession)
 PUBLIC
 AUDIO_CODEC MediaNego::GetNegotiatedAudioQuality()
 {
-    if (m_pAudioNego == IMS_NULL || m_pAudioNego->GetRemotePort() < 0 ||
-            (m_pAudioNego->GetRemotePort() == 0 && m_pAudioNego->GetLocalPort() != 0))
+    if (m_pAudioNego == IMS_NULL || m_pAudioNego->GetRemotePort() < 0)
     {
         return AUDIO_CODEC_NOT_USED;
     }
