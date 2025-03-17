@@ -152,6 +152,21 @@ public:
         }
     }
 
+    inline static IMS_SINT32 GetCallInitiationTo18xTimer(
+            IN const MtcConfigurationProxy& objProxy, IN IMS_BOOL bWifi)
+    {
+        if (!bWifi)
+        {
+            return objProxy.GetIntFromArray(
+                    ConfigVoice::KEY_CALL_INITIATION_TO_18X_TIMER_MILLIS_INT_ARRAY, 0);
+        }
+        else
+        {
+            return objProxy.GetIntFromArray(
+                    ConfigVoice::KEY_CALL_INITIATION_TO_18X_TIMER_MILLIS_INT_ARRAY, 1);
+        }
+    }
+
     inline static ImsVector<IMS_SINT32> LookupActionForStatusCode(
             IN const MtcConfigurationProxy& objProxy, IN const IMS_CHAR* pszConfigName,
             IN IMS_SINT32 nStatusCode)

@@ -169,8 +169,7 @@ TEST_F(TerminatingStateTest, OnTimerExpiredInvokesNotifyCallSessionReleased)
     EXPECT_CALL(objStateProxy, NotifyCallSessionReleased(ANY_CALL_KEY, IMS_TRUE, IMS_FALSE));
     EXPECT_CALL(objUiNotifier, OnCallSessionReleased);
 
-    // TIMER_E911_WAIT_SESSION_RELEASED = 12
-    objTerminatingState.OnTimerExpired(12);
+    objTerminatingState.OnTimerExpired(MtcCallState::TimerType::TIMER_E911_WAIT_SESSION_RELEASED);
     Mock::VerifyAndClearExpectations(&objStateProxy);
 }
 

@@ -109,14 +109,14 @@ TEST_F(MtcTimerWrapperTest, StopDoesNothingWithNotExistedType)
 {
     EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
 
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_E911_LTE_OPEN, nAnyDuration);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_NOANSWER, nAnyDuration);
 
-    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_NOANSWER));
     EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 
     pMtcTimerWrapper->Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
 
-    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_NOANSWER));
     EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 }
 
@@ -124,16 +124,16 @@ TEST_F(MtcTimerWrapperTest, StopAllRemovesAllTimer)
 {
     EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper)).Times(2);
 
-    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_E911_LTE_OPEN, nAnyDuration);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_NOANSWER, nAnyDuration);
     pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, nAnyDuration);
 
-    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_NOANSWER));
     EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
     EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer).Times(2);
 
     pMtcTimerWrapper->StopAll();
 
-    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_NOANSWER));
     EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 }
 

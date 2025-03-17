@@ -398,7 +398,14 @@ CallStateName IdleState::ContinueStart()
     }
 
     m_objContext.GetUiNotifier().SendInitiating();
-    StartTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    StartTimer(TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        if (!m_objContext.GetTimer().IsActive(TIMER_MO_CALL_INITIATION_TO_18X_WAIT))
+        {
+            StartTimer(TIMER_MO_CALL_INITIATION_TO_18X_WAIT);
+        }
+    }
 
     return CallStateName::OUTGOING;
 }
@@ -426,7 +433,7 @@ CallStateName IdleState::ContinueConference()
     }
 
     m_objContext.GetUiNotifier().SendInitiating();
-    StartTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    StartTimer(TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
 
     return CallStateName::OUTGOING;
 }
@@ -472,7 +479,7 @@ CallStateName IdleState::ContinueStartUssi()
     }
 
     m_objContext.GetUiNotifier().SendInitiating();
-    StartTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    StartTimer(TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
     return CallStateName::OUTGOING;
 }
 

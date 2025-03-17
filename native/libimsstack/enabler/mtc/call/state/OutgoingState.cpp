@@ -207,8 +207,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
 
     if (objReason.nCode == CODE_INTERNAL_REDIAL)
     {
-        StopTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
-        StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+        StopTimer(TIMER_MO_18X_WAIT);
+        StopTimer(TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
         return HandleSilentRedialReason(objReason);
     }
 
@@ -426,6 +426,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     }
 
     StopTimer(TIMER_MO_18X_WAIT);
+    StopTimer(TIMER_MO_CALL_INITIATION_TO_18X_WAIT);
     StartTimer(TIMER_MO_NOANSWER);
     m_objContext.GetPassiveTimerHolder().RemoveTimer(
             IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
@@ -484,6 +485,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     StopTimer(TIMER_MO_18X_WAIT);
+    StopTimer(TIMER_MO_CALL_INITIATION_TO_18X_WAIT);
     StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
     m_objContext.GetPassiveTimerHolder().RemoveTimer(
             IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
@@ -679,6 +681,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
     switch (nType)
     {
         case TIMER_MO_18X_WAIT:
+        case TIMER_MO_CALL_INITIATION_TO_18X_WAIT:
         {
             CallReasonInfo objReason(CODE_TIMEOUT_1XX_WAITING);
             HandleCancel(GetISession(), objReason);
@@ -768,8 +771,8 @@ PRIVATE
 void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("HandleCancel", 0, 0, 0);
-    StopTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
-    StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    StopTimer(TIMER_MO_18X_WAIT);
+    StopTimer(TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
 
     if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)
     {
