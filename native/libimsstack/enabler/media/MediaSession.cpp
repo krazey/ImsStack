@@ -57,16 +57,10 @@ PUBLIC VIRTUAL MediaSession::~MediaSession()
     m_objVideoController.CloseSession();
     m_objTextController.CloseSession();
     ClearQosParam();
-
-    if (m_pEnvironment != IMS_NULL)
-    {
-        delete m_pEnvironment;
-        m_pEnvironment = IMS_NULL;
-    }
 }
 
 PUBLIC
-MediaEnvironment* MediaSession::GetEnvironment()
+std::shared_ptr<MediaEnvironment> MediaSession::GetEnvironment()
 {
     return m_pEnvironment;
 }
@@ -88,7 +82,8 @@ PUBLIC VIRTUAL void MediaSession::SetMtcListener(
     m_pClientListener = piMediaSessionListener;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(IN MediaEnvironment* pEnvironment)
+PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(
+        IN std::shared_ptr<MediaEnvironment> pEnvironment)
 {
     if (pEnvironment == IMS_NULL)
     {
@@ -111,11 +106,6 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(IN MediaEnvironment* pEnvir
         {
             return IMS_FALSE;
         }
-    }
-
-    if (m_pEnvironment != IMS_NULL)
-    {
-        delete m_pEnvironment;
     }
 
     m_pEnvironment = pEnvironment;

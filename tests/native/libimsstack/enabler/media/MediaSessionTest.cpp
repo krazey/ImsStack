@@ -224,7 +224,7 @@ class MediaSessionTest : public ::testing::Test
 {
 public:
     FakeMediaSession* m_pSession;
-    MediaEnvironment* m_pEnvironment;
+    std::shared_ptr<MediaEnvironment> m_pEnvironment;
     MockISession* m_pIsession;
     MockICoreService m_objMockICoreService;
     MockIMediaSessionClientListener m_objClientListener;
@@ -260,11 +260,8 @@ protected:
         ON_CALL(m_objMockICoreService, GetIpAddress())
                 .WillByDefault(ReturnRef(m_objLocalIpAddress));
 
-        m_pEnvironment = new MediaEnvironment();
-        m_pEnvironment->eNetworkType = MEDIA_NETWORK_LTE;
-        m_pEnvironment->eServiceType = MEDIA_SERVICE_DEFAULT;
-        m_pEnvironment->pIService = &m_objMockICoreService;
-
+        m_pEnvironment = std::make_shared<MediaEnvironment>(
+                MEDIA_NETWORK_LTE, MEDIA_SERVICE_DEFAULT, &m_objMockICoreService);
         m_pSession = new FakeMediaSession(MEDIA_SERVICE_DEFAULT, 1, 0);
         m_pSession->SetEnvironment(m_pEnvironment);
         m_pSession->SetMtcListener(&m_objClientListener);

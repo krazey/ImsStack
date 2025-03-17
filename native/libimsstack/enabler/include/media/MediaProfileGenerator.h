@@ -17,11 +17,8 @@
 #ifndef MEDIA_PROFILE_GENERATOR_H_
 #define MEDIA_PROFILE_GENERATOR_H_
 
+#include "IService.h"
 #include "MediaBaseProfile.h"
-
-#include "audio/AudioProfile.h"
-#include "text/TextProfile.h"
-#include "video/VideoProfile.h"
 
 class CodecConfig;
 class MediaConfiguration;
@@ -41,13 +38,14 @@ public:
      * @brief Generate a MediaBaseProfile by using the MediaEnvironment and the
      * MediaConfiguration
      *
-     * @param pEnvironment The network connection parameter
+     * @param eServiceType The service type to access the session configuration
+     * @param pIService The object to get the network parameters
      * @param pConfig The carrier configuration for media
      * @param nSlotId The UICC slot id
      * @return MediaBaseProfile* The MediaBaseProfile to be created
      */
-    MediaBaseProfile* Generate(IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig,
-            IN IMS_SINT32 nSlotId);
+    MediaBaseProfile* Generate(MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
+            IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId);
 
 protected:
     /**
@@ -55,16 +53,16 @@ protected:
      *
      * @param pProfile if not null, this profile will be copied to the media profile just created
      * @param pConfig The carrier configuration for media
-     * @param pEnvironment The network connection parameter
+     * @param eServiceType The service type to access the session configuration
+     * @param pIService The object to get the network parameters
      * @param nSlotId The UICC slot id
      * @return MediaBaseProfile* The media profile created
      */
     virtual MediaBaseProfile* SetProfile(IN MediaBaseProfile* pProfile,
-            IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment,
+            IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
             IN IMS_SINT32 nSlotId) = 0;
-
     void SetCommonProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
-            IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId);
+            IN IService* pIService, IN IMS_SINT32 nSlotId);
     MediaBaseProfile* SetPayloads(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     virtual void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) = 0;

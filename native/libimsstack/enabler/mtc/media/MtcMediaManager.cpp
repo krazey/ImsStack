@@ -225,7 +225,7 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
 
     m_piMediaSession->SetMtcListener(this);
 
-    MediaEnvironment* pEnvironment = new MediaEnvironment();
+    std::shared_ptr<MediaEnvironment> pEnvironment = std::make_shared<MediaEnvironment>();
 
     IMS_SINT32 eRadioType = PhoneInfoService::GetPhoneInfoService()
                                     ->GetNetworkWatcher(m_objContext.GetSlotId())
@@ -239,7 +239,6 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
     if (!m_piMediaSession->SetEnvironment(pEnvironment))
     {
         IMS_TRACE_D("Setting media environment is failed.", 0, 0, 0);
-        delete pEnvironment;
     }
 }
 

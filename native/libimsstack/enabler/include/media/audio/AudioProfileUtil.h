@@ -17,7 +17,6 @@
 #ifndef AUDIO_PROFILE_UTIL_H_
 #define AUDIO_PROFILE_UTIL_H_
 
-#include "MediaEnvironment.h"
 #include "audio/AudioProfile.h"
 #include "config/AudioConfiguration.h"
 
@@ -45,11 +44,11 @@ public:
      * @brief Set Anbr on/off from the media session config
      *
      * @param pProfile target profile that anbr to be set
-     * @param pEnvironment The media environment for network connection parameter
+     * @param eServiceType The service type of the session
      * @param nSlotId The UICC slot id
      */
     static void SetAnbr(
-            OUT AudioProfile* pProfile, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId);
+            OUT AudioProfile* pProfile, IN MEDIA_SERVICE_TYPE eServiceType, IN IMS_SINT32 nSlotId);
 
     static const IMS_UINT32 EVS_BR_CNT = 12;
     static const IMS_UINT32 EVS_BW_CNT = 4;

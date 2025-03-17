@@ -41,10 +41,12 @@ public:
     std::shared_ptr<MockAudioNego> m_pMockAudioNego;
     std::shared_ptr<MockVideoNego> m_pMockVideoNego;
     std::shared_ptr<MockTextNego> m_pMockTextNego;
+    std::shared_ptr<MediaEnvironment> m_pMediaEnvironment;
 
 protected:
     virtual void SetUp() override
     {
+        m_pMediaEnvironment = std::make_shared<MediaEnvironment>();
         m_pMockAudioNego = std::make_shared<MockAudioNego>(DEFAULT_SLOT_ID);
         m_pMockVideoNego = std::make_shared<MockVideoNego>(DEFAULT_SLOT_ID);
         m_pMockTextNego = std::make_shared<MockTextNego>(DEFAULT_SLOT_ID);
@@ -52,6 +54,7 @@ protected:
         m_objMediaNego.SetVideoNego(m_pMockVideoNego);
         m_objMediaNego.SetTextNego(m_pMockTextNego);
     }
+
     virtual void TearDown() override {}
 };
 
@@ -110,12 +113,10 @@ TEST_F(MediaNegoTest, testGetSupportedMediaTypesFromSdp)
 
 TEST_F(MediaNegoTest, testCreateProfile)
 {
-    MediaEnvironment objMediaEnvironment;
-    EXPECT_CALL(*m_pMockAudioNego, CreateProfiles(&objMediaEnvironment, _)).Times(1);
-    EXPECT_CALL(*m_pMockVideoNego, CreateProfiles(&objMediaEnvironment, _)).Times(1);
-    EXPECT_CALL(*m_pMockTextNego, CreateProfiles(&objMediaEnvironment, _)).Times(1);
-
-    m_objMediaNego.CreateProfile(&objMediaEnvironment);
+    EXPECT_CALL(*m_pMockAudioNego, CreateProfiles(m_pMediaEnvironment, _)).Times(1);
+    EXPECT_CALL(*m_pMockVideoNego, CreateProfiles(m_pMediaEnvironment, _)).Times(1);
+    EXPECT_CALL(*m_pMockTextNego, CreateProfiles(m_pMediaEnvironment, _)).Times(1);
+    m_objMediaNego.CreateProfile(m_pMediaEnvironment);
 }
 
 TEST_F(MediaNegoTest, testForking)
@@ -133,8 +134,7 @@ TEST_F(MediaNegoTest, testFormSdp)
     ON_CALL(m_objIsession, GetSessionDescriptor()).WillByDefault(Return(&objSessionDescriptor));
     EXPECT_FALSE(m_objMediaNego.FormSdp(&m_objIsession, MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND,
             MEDIA_DIRECTION_SEND, MEDIA_DIRECTION_SEND, IMS_TRUE));
-    MediaEnvironment objMediaEnvironment;
-    m_objMediaNego.CreateProfile(&objMediaEnvironment);
+    m_objMediaNego.CreateProfile(m_pMediaEnvironment);
     EXPECT_TRUE(m_objMediaNego.FormSdp(&m_objIsession, MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND,
             MEDIA_DIRECTION_SEND, MEDIA_DIRECTION_SEND, IMS_TRUE));
 }
@@ -147,8 +147,7 @@ TEST_F(MediaNegoTest, testNegotiateSdp)
     IMS_SINT32 nTextDirection;
     EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
             &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
-    MediaEnvironment objMediaEnvironment;
-    m_objMediaNego.CreateProfile(&objMediaEnvironment);
+    m_objMediaNego.CreateProfile(m_pMediaEnvironment);
     EXPECT_FALSE(m_objMediaNego.NegotiateSdp(
             &m_objIsession, nAudioDirection, nVideoDirection, nTextDirection, errorReason));
 }
@@ -158,6 +157,5 @@ TEST_F(MediaNegoTest, testFinalizeSdp)
     EXPECT_CALL(*m_pMockAudioNego, FinalizeSdp(_, _)).Times(1);
     EXPECT_CALL(*m_pMockVideoNego, FinalizeSdp(_, _)).Times(1);
     EXPECT_CALL(*m_pMockTextNego, FinalizeSdp(_, _)).Times(1);
-
     m_objMediaNego.FinalizeSdp(&m_objIsession);
 }

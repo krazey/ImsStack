@@ -15,13 +15,11 @@
  */
 
 #include "ServiceTrace.h"
-#include "offeranswer/SdpAvCodec.h"
-#include "offeranswer/SdpMediaFormatParameter.h"
-#include "offeranswer/SdpRtcpFeedback.h"
 
 #include "MediaProfileUtil.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileNegotiator.h"
+#include "video/VideoProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

@@ -147,7 +147,8 @@ public:
      * @param pEnvironment The MediaEnvironment
      * @param pConfig The configuration to create media profile
      */
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig);
+    virtual void CreateProfiles(
+            IN std::shared_ptr<MediaEnvironment> pEnvironment, IN MediaConfiguration* pConfig);
 
     /**
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
@@ -230,7 +231,7 @@ protected:
     MediaBaseProfile* m_pBaseProfile;
     ImsList<OaModel*> m_listOaModel;
     MediaConfiguration* m_pConfig;
-    MediaEnvironment* m_pEnvironment;
+    std::shared_ptr<MediaEnvironment> m_pEnvironment;
     std::shared_ptr<MediaSdpGenerator> m_pSdpGenerator;
     std::shared_ptr<MediaProfileNegotiator> m_pProfileNegotiator;
     std::shared_ptr<MediaProfileGenerator> m_pProfileGenerator;

@@ -48,7 +48,7 @@ public:
     /**
      * @brief Destructor of IMediaSession
      */
-    virtual ~IMediaSession(){};
+    virtual ~IMediaSession() {};
 
     /**
      * @brief Set the mtc session listener
@@ -63,7 +63,7 @@ public:
      * @param pEnvironment The instance to set
      * @return IMS_BOOL Returns IMS_TRUE when parameter is valid, IMS_FALSE when it is invalid
      */
-    virtual IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment) = 0;
+    virtual IMS_BOOL SetEnvironment(IN std::shared_ptr<MediaEnvironment> pEnvironment) = 0;
 
     /**
      * @brief Create a session instance of the Audio/Video/TextSession. If the argument nego id is

@@ -43,9 +43,9 @@ public:
     /**
      * @brief Get the environment instance
      *
-     * @return MediaEnvironment*
+     * @return std::shared_ptr<MediaEnvironment>
      */
-    MediaEnvironment* GetEnvironment(void);
+    std::shared_ptr<MediaEnvironment> GetEnvironment(void);
 
     /**
      * @brief Get the current connected network type
@@ -62,7 +62,7 @@ public:
     IMS_SINTP GetCallKey() { return m_nCallKey; };
 
     void SetMtcListener(IN IMediaSessionClientListener* pISessionListener) override;
-    IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment) override;
+    IMS_BOOL SetEnvironment(IN std::shared_ptr<MediaEnvironment> pEnvironment) override;
     IMS_UINTP CreateProfile(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
     IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) override;
@@ -134,7 +134,7 @@ protected:
     IMS_UINT32 m_nSlotId;
     IMS_SINTP m_nCallKey;
     IMediaSessionClientListener* m_pClientListener;
-    MediaEnvironment* m_pEnvironment;
+    std::shared_ptr<MediaEnvironment> m_pEnvironment;
     ImsMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
     ImsList<QosRequestParam*> m_objListQosParams;
     AudioController m_objAudioController;

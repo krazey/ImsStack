@@ -19,7 +19,6 @@
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
 #include "MockISessionDescriptor.h"
-#include "config/MediaSessionConfigFactory.h"
 #include "media/MockIMediaDescriptor.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "text/TextNego.h"
@@ -48,7 +47,7 @@ class TextNegoTest : public ::testing::Test
 {
 public:
     FakeTextNego* m_pTextNego;
-    MediaEnvironment* m_pEnvironment;
+    std::shared_ptr<MediaEnvironment> m_pEnvironment;
     TextConfiguration* m_pConfig;
     MockICarrierConfig* m_pMockICarrierConfig;
     MockICarrierConfig* m_pTextBundle;
@@ -75,7 +74,7 @@ protected:
 
     void CreateEnvironment()
     {
-        m_pEnvironment = new MediaEnvironment();
+        m_pEnvironment = std::make_shared<MediaEnvironment>();
         m_pICoreService = new MockICoreService();
 
         m_objIpAddr = IpAddress(LOCAL_IP);
@@ -106,7 +105,6 @@ protected:
     virtual void TearDown() override
     {
         delete m_pTextNego;
-        delete m_pEnvironment;
         delete m_pICoreService;
         delete m_pMockICarrierConfig;
         delete m_pTextBundle;

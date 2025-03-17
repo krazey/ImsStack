@@ -18,7 +18,7 @@
 #define VIDEO_SDP_PARSER_H_
 
 #include "MediaSdpParser.h"
-#include "video/VideoProfileUtil.h"
+#include "video/VideoProfile.h"
 
 /**
  * This class is to generate a peer video profile by parsing SDP media attributes from the

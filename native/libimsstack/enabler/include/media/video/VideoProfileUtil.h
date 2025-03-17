@@ -17,8 +17,9 @@
 #ifndef VIDEO_PROFILE_UTIL_H_
 #define VIDEO_PROFILE_UTIL_H_
 
-#include "MediaEnvironment.h"
-#include "video/VideoProfile.h"
+#include "AString.h"
+#include "ImsTypeDef.h"
+#include "VideoDef.h"
 
 #define VIDEO_MAX_CONFIG_LEN 256
 
@@ -27,17 +28,6 @@ class VideoConfiguration;
 class VideoProfileUtil
 {
 public:
-    static VideoProfile* CreateProfile(IN MediaEnvironment* pEnvironment,
-            IN VideoConfiguration* pConfig, IN IMS_SINT32 nSlotId);
-    /**
-     * @brief UpdateAudioProfile for IP changes or IP setting latency
-     *
-     * @param pVideoProfile
-     * @param pEnvironment
-     * @return IMS_BOOL
-     */
-    static IMS_BOOL UpdateVideoProfile(
-            OUT VideoProfile* pVideoProfile, IN MediaEnvironment* pEnvironment);
     static void GetWidthHeightFromResolution(
             IN VIDEO_RESOLUTION eResolIc, IN IMS_UINT32* nWidth, IN IMS_UINT32* nHeight);
     static VIDEO_RESOLUTION GetResolutionFromWidthHeight(

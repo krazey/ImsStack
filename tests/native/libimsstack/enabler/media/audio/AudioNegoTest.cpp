@@ -16,12 +16,11 @@
 
 #include <gtest/gtest.h>
 
+#include "ImsStrLib.h"
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
 #include "MockISessionDescriptor.h"
-#include "ServiceConfig.h"
 #include "audio/AudioNego.h"
-#include "config/MediaSessionConfigFactory.h"
 #include "media/MockIMediaDescriptor.h"
 #include "offeranswer/SdpAvCodec.h"
 
@@ -55,7 +54,7 @@ class AudioNegoTest : public ::testing::Test
 {
 public:
     FakeAudioNego* m_pAudioNego;
-    MediaEnvironment* m_pEnvironment;
+    std::shared_ptr<MediaEnvironment> m_pEnvironment;
     AudioConfiguration* m_pConfig;
     MockICarrierConfig* m_pMockICarrierConfig;
     MockICarrierConfig* m_pAudioBundle;
@@ -98,7 +97,7 @@ protected:
 
     void CreateEnvironment()
     {
-        m_pEnvironment = new MediaEnvironment();
+        m_pEnvironment = std::make_shared<MediaEnvironment>();
         m_pICoreService = new MockICoreService();
 
         m_objIpAddr = IpAddress(LOCAL_IP);
@@ -186,7 +185,6 @@ protected:
     virtual void TearDown() override
     {
         delete m_pAudioNego;
-        delete m_pEnvironment;
         delete m_pICoreService;
         delete m_pMockICarrierConfig;
         delete m_pAudioBundle;

@@ -60,7 +60,7 @@ PUBLIC VIRTUAL BaseNego::~BaseNego()
 }
 
 PUBLIC VIRTUAL void BaseNego::CreateProfiles(
-        IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig)
+        IN std::shared_ptr<MediaEnvironment> pEnvironment, IN MediaConfiguration* pConfig)
 {
     if (pConfig == IMS_NULL || pEnvironment == IMS_NULL)
     {
@@ -81,7 +81,8 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(
 
     if (m_pProfileGenerator != IMS_NULL)
     {
-        m_pBaseProfile = m_pProfileGenerator->Generate(pEnvironment, m_pConfig, GetSlotId());
+        m_pBaseProfile = m_pProfileGenerator->Generate(
+                m_pEnvironment->eServiceType, m_pEnvironment->pIService, m_pConfig, GetSlotId());
     }
 }
 

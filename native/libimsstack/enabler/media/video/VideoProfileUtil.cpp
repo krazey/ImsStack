@@ -15,28 +15,9 @@
  */
 
 #include "ServiceTrace.h"
-#include "ServiceSystemTime.h"
-
-#include "MediaProfileUtil.h"
-#include "config/VideoConfiguration.h"
 #include "video/VideoProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
-
-PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::UpdateVideoProfile(
-        OUT VideoProfile* pVideoProfile, IN MediaEnvironment* pEnvironment)
-{
-    if (pEnvironment == IMS_NULL || pVideoProfile == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_D("UpdateVideoProfile()", 0, 0, 0);
-
-    pVideoProfile->SetIpAddress(pEnvironment->pIService->GetIpAddress());
-
-    return IMS_TRUE;
-}
 
 PUBLIC GLOBAL void VideoProfileUtil::GetWidthHeightFromResolution(
         VIDEO_RESOLUTION eResolution, IMS_UINT32* nWidth, IMS_UINT32* nHeight)

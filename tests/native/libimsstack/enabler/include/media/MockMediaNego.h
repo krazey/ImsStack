@@ -26,7 +26,7 @@ class MockMediaNego : public MediaNego
 public:
     explicit MockMediaNego(IMS_SINT32 nSlotId) :
             MediaNego(nSlotId) {};
-    MOCK_METHOD(void, CreateProfile, (IN MediaEnvironment * pEnvironment), (const));
+    MOCK_METHOD(void, CreateProfile, (IN std::shared_ptr<MediaEnvironment> pEnvironment), (const));
     MOCK_METHOD(IMS_BOOL, Forking, (IN MediaNego * pMediaNego), (const));
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (OUT ISession * pSession, IN MEDIA_CONTENT_TYPE eMediaType,

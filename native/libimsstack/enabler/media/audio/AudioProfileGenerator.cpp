@@ -22,6 +22,7 @@
 #include "config/CodecEvsConfig.h"
 #include "config/CodecPcmConfig.h"
 #include "config/CodecTelephoneEventConfig.h"
+#include "audio/AudioProfileUtil.h"
 
 static const IMS_SINT32 NOT_PRESENT = -1;
 
@@ -40,14 +41,15 @@ PUBLIC VIRTUAL AudioProfileGenerator::~AudioProfileGenerator()
 
 PROTECTED
 AudioProfile* AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
-        IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
+        IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
+        IN IMS_SINT32 nSlotId)
 {
-    if (pProfile == IMS_NULL || pConfig == IMS_NULL || pEnvironment == IMS_NULL)
+    if (pProfile == IMS_NULL || pConfig == IMS_NULL || pIService == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SetCommonProfile(pProfile, pConfig, pEnvironment, nSlotId);
+    SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
 
     AudioProfile* pAudioProfile = static_cast<AudioProfile*>(pProfile);
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
@@ -58,7 +60,7 @@ AudioProfile* AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
     pAudioProfile->SetMaxPtime(pAudioConfig->GetMaxPtime());
 
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
-    AudioProfileUtil::SetAnbr(pAudioProfile, pEnvironment, nSlotId);
+    AudioProfileUtil::SetAnbr(pAudioProfile, eServiceType, nSlotId);
 
     IMS_TRACE_D("SetProfile() - Ptime[%d], MaxPtime[%d]", pAudioProfile->GetPtime(),
             pAudioProfile->GetMaxPtime(), 0);

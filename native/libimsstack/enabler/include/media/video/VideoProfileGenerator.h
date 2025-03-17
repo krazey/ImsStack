@@ -18,7 +18,7 @@
 #define VIDEO_PROFILE_GENERATOR_H_
 
 #include "MediaProfileGenerator.h"
-#include "video/VideoProfileUtil.h"
+#include "video/VideoProfile.h"
 
 class CodecVideoConfig;
 class VideoConfiguration;
@@ -34,7 +34,8 @@ public:
 
 protected:
     VideoProfile* SetProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
-            IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId) override;
+            MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
+            IN IMS_SINT32 nSlotId) override;
     void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) override;
     VideoProfile::Payload* CreateAvcPayload(

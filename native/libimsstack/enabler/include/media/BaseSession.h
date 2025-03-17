@@ -20,7 +20,6 @@
 #include <RtpConfig.h>
 #include <MediaQualityThreshold.h>
 
-#include "ImsList.h"
 #include "MediaDef.h"
 #include "config/MediaConfiguration.h"
 
@@ -63,13 +62,6 @@ public:
      * @param pListener The listener instance to set
      */
     virtual void SetMediaSessionListener(IN IMediaSessionListener* pListener);
-
-    /**
-     * @brief Set the MediaEnvironment instance to get the common parameters of the call
-     *
-     * @param pEnvironment The instance to set
-     */
-    virtual void SetMediaEnvironment(MediaEnvironment* pEnvironment);
 
     /**
      * @brief Set the media direction
@@ -152,7 +144,6 @@ protected:
     IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     IMediaSessionListener* m_piMediaSessionListener;
-    MediaEnvironment* m_pEnvironment;
     MEDIA_SERVICE_TYPE m_eServiceType;
     RtpConfig* m_pRtpConfig;
     MEDIA_DIRECTION m_ePrevDirection;

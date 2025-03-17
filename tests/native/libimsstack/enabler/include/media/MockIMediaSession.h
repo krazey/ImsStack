@@ -32,8 +32,9 @@ public:
     MockIMediaSession() {}
     virtual ~MockIMediaSession() {}
     MOCK_METHOD(
-            void, SetMtcListener, (IN IMediaSessionClientListener* pISessionListener), (override));
-    MOCK_METHOD(IMS_BOOL, SetEnvironment, (IN MediaEnvironment* pEnvironment), (override));
+            void, SetMtcListener, (IN IMediaSessionClientListener * pISessionListener), (override));
+    MOCK_METHOD(IMS_BOOL, SetEnvironment, (IN std::shared_ptr<MediaEnvironment> pEnvironment),
+            (override));
     MOCK_METHOD(IMS_UINTP, CreateProfile, (IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType),
             (override));
     MOCK_METHOD(IMS_BOOL, DestroyProfile, (IN IMS_UINTP nNegoID), (override));

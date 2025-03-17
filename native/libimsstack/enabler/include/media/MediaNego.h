@@ -52,7 +52,7 @@ public:
      *
      * @param pMediaEnvironment The instance of network connection information
      */
-    void CreateProfile(IN MediaEnvironment* pMediaEnvironment);
+    void CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnvironment);
 
     /**
      * @brief Creates MediaNego object copied from the existing MediaNego instance
@@ -229,7 +229,7 @@ private:
     std::shared_ptr<AudioNego> m_pAudioNego;
     std::shared_ptr<VideoNego> m_pVideoNego;
     std::shared_ptr<TextNego> m_pTextNego;
-    MediaEnvironment* m_pMediaEnvironment;
+    std::shared_ptr<MediaEnvironment> m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bForking;
 };

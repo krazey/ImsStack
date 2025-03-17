@@ -16,8 +16,6 @@
 
 #include "ServiceTrace.h"
 #include "BaseSession.h"
-#include "MediaBaseProfile.h"
-#include "MediaEnvironment.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -29,7 +27,6 @@ BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
         m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0),
         m_piMediaSessionListener(IMS_NULL),
-        m_pEnvironment(IMS_NULL),
         m_pRtpConfig(IMS_NULL),
         m_ePrevDirection(MEDIA_DIRECTION_INVALID),
         m_nState(0)
@@ -56,11 +53,6 @@ PUBLIC VIRTUAL MEDIA_SERVICE_TYPE BaseSession::GetServiceType()
 PUBLIC VIRTUAL void BaseSession::SetMediaSessionListener(IN IMediaSessionListener* pListener)
 {
     m_piMediaSessionListener = pListener;
-}
-
-PUBLIC VIRTUAL void BaseSession::SetMediaEnvironment(MediaEnvironment* pEnvironment)
-{
-    m_pEnvironment = pEnvironment;
 }
 
 PUBLIC VIRTUAL void BaseSession::SetDirection(IN MEDIA_DIRECTION eDirection)

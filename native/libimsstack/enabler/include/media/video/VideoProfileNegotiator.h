@@ -18,7 +18,7 @@
 #define VIDEO_PROFILE_NEGOTIATOR_H_
 
 #include "MediaProfileNegotiator.h"
-#include "video/VideoProfileUtil.h"
+#include "video/VideoProfile.h"
 
 class MediaConfiguration;
 

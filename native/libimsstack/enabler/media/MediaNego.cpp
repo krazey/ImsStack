@@ -51,7 +51,7 @@ MediaNego::~MediaNego()
 }
 
 PUBLIC
-void MediaNego::CreateProfile(IN MediaEnvironment* pMediaEnvironment)
+void MediaNego::CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnvironment)
 {
     if (pMediaEnvironment == IMS_NULL || m_pAudioNego == IMS_NULL || m_pVideoNego == IMS_NULL ||
             m_pTextNego == IMS_NULL)

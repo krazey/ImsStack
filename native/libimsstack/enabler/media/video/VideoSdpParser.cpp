@@ -19,6 +19,7 @@
 #include "offeranswer/SdpRtcpFeedback.h"
 
 #include "video/VideoSdpParser.h"
+#include "video/VideoProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 

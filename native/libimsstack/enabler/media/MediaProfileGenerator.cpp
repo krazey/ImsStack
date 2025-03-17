@@ -16,7 +16,6 @@
 
 #include "ServiceTrace.h"
 
-#include "MediaEnvironment.h"
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
 #include "MediaProfileGenerator.h"
@@ -35,10 +34,10 @@ PUBLIC MediaProfileGenerator::MediaProfileGenerator(IN const MEDIA_CONTENT_TYPE 
 PUBLIC VIRTUAL MediaProfileGenerator::~MediaProfileGenerator() {}
 
 PUBLIC
-MediaBaseProfile* MediaProfileGenerator::Generate(
-        IN MediaEnvironment* pEnvironment, IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId)
+MediaBaseProfile* MediaProfileGenerator::Generate(MEDIA_SERVICE_TYPE eServiceType,
+        IN IService* pIService, IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId)
 {
-    if (pEnvironment == IMS_NULL || pConfig == IMS_NULL)
+    if (pIService == IMS_NULL || pConfig == IMS_NULL)
     {
         return IMS_NULL;
     }
@@ -46,10 +45,9 @@ MediaBaseProfile* MediaProfileGenerator::Generate(
     IMS_TRACE_I("Generate() media type[%d]", m_eType, 0, 0);
 
     MediaBaseProfile* pProfile = IMS_NULL;
-
     pProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
     pProfile = SetPayloads(pProfile, pConfig);
-    pProfile = SetProfile(pProfile, pConfig, pEnvironment, nSlotId);
+    pProfile = SetProfile(pProfile, pConfig, eServiceType, pIService, nSlotId);
 
     return pProfile;
 }
@@ -92,10 +90,9 @@ PRIVATE MediaBaseProfile* MediaProfileGenerator::SetPayloads(
 
 PROTECTED
 void MediaProfileGenerator::SetCommonProfile(IN MediaBaseProfile* pProfile,
-        IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
+        IN MediaConfiguration* pConfig, IN IService* pIService, IN IMS_SINT32 nSlotId)
 {
-    if (pProfile == IMS_NULL || pConfig == IMS_NULL || pEnvironment == IMS_NULL ||
-            pEnvironment->pIService == IMS_NULL)
+    if (pProfile == IMS_NULL || pConfig == IMS_NULL || pIService == IMS_NULL)
     {
         return;
     }
@@ -114,7 +111,7 @@ void MediaProfileGenerator::SetCommonProfile(IN MediaBaseProfile* pProfile,
         return;
     }
 
-    pProfile->SetIpAddress(pEnvironment->pIService->GetIpAddress());
+    pProfile->SetIpAddress(pIService->GetIpAddress());
     pProfile->SetDataPort(pResourceMngr->AcquireRtpPort(pConfig));
     pProfile->SetControlPort(pProfile->GetDataPort() + 1);
     pProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);

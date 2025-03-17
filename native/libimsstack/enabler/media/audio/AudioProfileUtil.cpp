@@ -61,11 +61,11 @@ const AString AudioProfileUtil::EVS_BW_LIST[EVS_BW_LIST_CNT] = {
 const AString AudioProfileUtil::AUDIO_CODEC_BANDWIDTH_STRING[EVS_BW_CNT] = {
         "NB", "WB", "SWB", "FB"};
 const AString AudioProfileUtil::AUDIO_CODEC_BITRATE_STRING[3][9] = {
-  // AMR NB
+        // AMR NB
         {"4.75", "5.15", "5.90",  "6.70",  "7.40",  "7.95",  "10.20", "12.20", "0"    },
- // AMR WB/EVS AMR IO
+        // AMR WB/EVS AMR IO
         {"6.60", "8.85", "12.65", "14.25", "15.85", "18.25", "19.85", "23.05", "23.85"},
- // EVS
+        // EVS
         {"5.90", "7.20", "8.00",  "9.60",  "13.20", "16.40", "24.40", "0",     "0"    }
 };
 
@@ -595,13 +595,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
 }
 
 PUBLIC GLOBAL void AudioProfileUtil::SetAnbr(
-        OUT AudioProfile* pProfile, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
+        OUT AudioProfile* pProfile, IN MEDIA_SERVICE_TYPE eServiceType, IN IMS_SINT32 nSlotId)
 {
     if (pProfile != IMS_NULL)
     {
         MediaSessionConfig* pMediaSessionConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                        nSlotId, pEnvironment->eServiceType);
+                        nSlotId, eServiceType);
 
         if (pMediaSessionConfig != IMS_NULL)
         {

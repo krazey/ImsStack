@@ -28,7 +28,8 @@ public:
     explicit MockVideoNego(IMS_SINT32 nSlotId) :
             VideoNego(nSlotId) {};
     MOCK_METHOD(void, CreateProfiles,
-            (IN MediaEnvironment * pEnvironment, IN MediaConfiguration* pConfig), (override));
+            (IN std::shared_ptr<MediaEnvironment> pEnvironment, IN MediaConfiguration* pConfig),
+            (override));
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,

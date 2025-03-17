@@ -36,14 +36,15 @@ PUBLIC VIRTUAL TextProfileGenerator::~TextProfileGenerator()
 
 PROTECTED
 TextProfile* TextProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
-        IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
+        IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE /*eServiceType*/, IN IService* pIService,
+        IN IMS_SINT32 nSlotId)
 {
-    if (pProfile == IMS_NULL || pConfig == IMS_NULL || pEnvironment == IMS_NULL)
+    if (pProfile == IMS_NULL || pConfig == IMS_NULL || pIService == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SetCommonProfile(pProfile, pConfig, pEnvironment, nSlotId);
+    SetCommonProfile(pProfile, pConfig, pIService, nSlotId);
 
     TextProfile* pTextProfile = static_cast<TextProfile*>(pProfile);
     TextConfiguration* pTextConfig = static_cast<TextConfiguration*>(pConfig);
