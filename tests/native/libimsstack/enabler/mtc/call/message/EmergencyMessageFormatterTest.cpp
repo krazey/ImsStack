@@ -336,13 +336,13 @@ TEST_F(EmergencyMessageFormatterTest, FormStartMessageAddsPeiHeaderWithImei)
             .WillByDefault(Invoke(
                     [](Unused, OUT AString& strImei)
                     {
-                        strImei = "imei-123-456";
+                        strImei = "123456789012345";
                         return IMS_TRUE;
                     }));
 
     EXPECT_CALL(objMessageUtils, AddValueIfNotExists(_, _, _, _)).Times(AnyNumber());
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, AString("WSS-Wi-Fi-KEY;generic-key=imei-123-456"),
+            AddValueIfNotExists(&objMessage, AString("WSS-Wi-Fi-KEY;generic-key=123456789012340"),
                     ISipHeader::UNKNOWN, HEADER_P_EMERGENCY_INFO));
     EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
@@ -540,7 +540,7 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderFormatsByTokens
             .WillByDefault(Invoke(
                     [](Unused, OUT AString& strImei)
                     {
-                        strImei = "imei";
+                        strImei = "123456789012345";
                         return IMS_TRUE;
                     }));
     ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return("ip"));
@@ -548,7 +548,8 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderFormatsByTokens
 
     EXPECT_CALL(objMessageUtils, SetHeader(_, _, _, _)).Times(AnyNumber());
     EXPECT_CALL(objMessageUtils,
-            SetHeader(_, AString("puid-imei-ip-5060"), ISipHeader::P_PREFERRED_IDENTITY, _));
+            SetHeader(_, AString("puid-123456789012340-ip-5060"), ISipHeader::P_PREFERRED_IDENTITY,
+                    _));
     EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 

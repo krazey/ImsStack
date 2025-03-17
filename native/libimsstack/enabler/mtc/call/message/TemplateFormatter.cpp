@@ -52,7 +52,14 @@ PRIVATE GLOBAL AString TemplateFormatter::GetImei(IN IMtcCallContext& objContext
     AString strDeviceId;
     PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(
             objContext.GetSlotId(), strDeviceId);
-    return strDeviceId;
+
+    if (strDeviceId.GetLength() < 14)
+    {
+        return strDeviceId;
+    }
+
+    AString strDeviceIdSpareDigit = strDeviceId.GetSubStr(0, 14).Append("0");
+    return strDeviceIdSpareDigit;
 }
 
 PRIVATE GLOBAL AString TemplateFormatter::GetImsi(IN IMtcCallContext& objContext)
