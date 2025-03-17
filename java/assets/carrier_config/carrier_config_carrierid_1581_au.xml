@@ -75,6 +75,7 @@
     <boolean name="imsemergency.support_anonymous_ecall_action_bool" value="true"/>
     <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="true"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="0"/>
+    <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
 
     <!-- Mtc public -->
     <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
