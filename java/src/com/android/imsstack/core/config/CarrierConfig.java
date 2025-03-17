@@ -443,6 +443,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "required_cdmaless_feature_tag_bool";
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
                 KEY_PREFIX + "required_init_reg_after_ims_call_end_on_reg_held_bool";
+        public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_ECALL_END_ON_REG_HELD_BOOL =
+                KEY_PREFIX + "required_init_reg_after_ims_ecall_end_on_reg_held_bool";
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 KEY_PREFIX + "sip_over_ipsec_enabled_in_roaming_bool";
         public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =

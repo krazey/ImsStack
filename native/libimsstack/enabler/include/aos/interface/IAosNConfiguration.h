@@ -628,14 +628,23 @@ public:
     virtual IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const = 0;
 
     /**
-     * @brief Flag indicating the initial registration is tried on not
-     *        right after IMS call is ended while registration is held because re-registration is
-     *        failed during active call.
+     * @brief Flag indicating the initial registration is tried on not right after IMS call is ended
+     *        while registration is held because re-registration is failed during active call.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
      * @see {@code ims.required_init_reg_after_ims_call_end_on_reg_held_bool}
      */
     virtual IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const = 0;
+
+    /**
+     * @brief Flag indicating the initial registration is tried on not right after IMS emergency
+     *        call is ended while registration is held because re-registration is failed during
+     *        active emergency call.
+     *
+     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     * @see {@code ims.required_init_reg_after_ims_ecall_end_on_reg_held_bool}
+     */
+    virtual IMS_BOOL IsRegRequiredAfterImsECallEndOnRegHeld() const = 0;
 
     /**
      * @brief Flag indicating reg includes feature tag even though the feature is not available.

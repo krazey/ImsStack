@@ -460,6 +460,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsCallEndOnRegHeld
     return m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsECallEndOnRegHeld() const
+{
+    return m_objAsset.bRequiredInitRegAfterImsECallEndOnRegHeld;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithFeatureTagUnavailableSupported() const
 {
     return m_objAsset.bSupportRegWithFeatureTagUnavailable;
@@ -1465,6 +1470,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
     m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
+    m_objAsset.bRequiredInitRegAfterImsECallEndOnRegHeld = piCc->GetBoolean(
+            CarrierConfig::Ims::KEY_REQUIRED_INIT_REG_AFTER_IMS_ECALL_END_ON_REG_HELD_BOOL);
     m_objAsset.bRequiredVolteBlockBySsac =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
