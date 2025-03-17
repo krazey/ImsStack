@@ -361,6 +361,8 @@ public:
 
     inline void SetAppTypeEmergency() { m_nAppType = TYPE_EMERGENCY; }
 
+    inline void SetEpdgEnabled(IN IMS_BOOL bEpdgEnabled) { m_bEpdgEnabled = bEpdgEnabled; }
+
 private:
     IMS_BOOL m_bRegReconfigAvailable;
 };
@@ -2170,6 +2172,40 @@ TEST_F(AosApplicationTest, SetAirplaneModeReasonWhenProcessConnectionDeactivated
             AosCondition::REQUEST_STOP, AosReason::AIRPLANE_MODE));
     m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
     EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::AIRPLANE_MODE);
+}
+
+TEST_F(AosApplicationTest,
+        SetWifiOffReasonWhenProcessConnectionDeactivatedAfterWifiOffWhenIsImsCall)
+{
+    m_pAosApplication->SetEpdgEnabled(IMS_TRUE);
+    m_pAosApplication->SetImsCall(IMS_TRUE);
+
+    m_pAosApplication->Condition_RequestCommand(
+            AosCondition::REQUEST_REASON_UPDATE, AosReason::WIFI_OFF);
+    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::WIFI_OFF);
+}
+
+TEST_F(AosApplicationTest, ShouldNotSetWifiOffReasonWhenProcessConnectionDeactivatedAfterWifiOff)
+{
+    m_pAosApplication->SetEpdgEnabled(IMS_TRUE);
+    m_pAosApplication->SetImsCall(IMS_FALSE);
+
+    m_pAosApplication->Condition_RequestCommand(
+            AosCondition::REQUEST_REASON_UPDATE, AosReason::WIFI_OFF);
+    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+}
+
+TEST_F(AosApplicationTest,
+        ShouldNotSetWifiOffReasonWhenProcessConnectionDeactivatedAfterWifiOffInCellular)
+{
+    m_pAosApplication->SetEpdgEnabled(IMS_FALSE);
+
+    m_pAosApplication->Condition_RequestCommand(
+            AosCondition::REQUEST_REASON_UPDATE, AosReason::WIFI_OFF);
+    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
 }
 
 TEST_F(AosApplicationTest, SetDataDisconnectedReasonWhenProcessConnectionDeactivated)

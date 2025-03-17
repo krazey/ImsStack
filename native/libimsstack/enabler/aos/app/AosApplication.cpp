@@ -1898,8 +1898,15 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT3
     }
     else
     {
-        CleanAll((GetOffReason() == AosReason::AIRPLANE_MODE) ? AosReason::AIRPLANE_MODE
-                                                              : AosReason::DATA_DISCONNECTED);
+        IMS_UINT32 nReason = GetOffReason();
+        if (nReason == AosReason::WIFI_OFF || nReason == AosReason::AIRPLANE_MODE)
+        {
+            CleanAll(nReason);
+        }
+        else
+        {
+            CleanAll(AosReason::DATA_DISCONNECTED);
+        }
     }
 
     Report_StateChanged(IMS_FALSE);
@@ -3086,6 +3093,14 @@ PROTECTED VIRTUAL void AosApplication::Condition_RequestCommand(
 
         case AosCondition::REQUEST_RECOVER:
             PostMessage(MSG_REG_RECOVER, 0, 0);
+            break;
+
+        case AosCondition::REQUEST_REASON_UPDATE:
+            if (nReason == AosReason::WIFI_OFF && m_bEpdgEnabled && IsImsCall())
+            {
+                A_IMS_TRACE_I(APPID, "WIFI_OFF is set only when connected by epdg", 0, 0, 0);
+                SetOffReason(nReason);
+            }
             break;
 
         default:

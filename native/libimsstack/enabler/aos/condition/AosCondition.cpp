@@ -562,6 +562,12 @@ PROTECTED VIRTUAL void AosCondition::ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn
     ProcessTtyEvent(bIsOn);
 }
 
+PROTECTED VIRTUAL void AosCondition::ServiceSetting_WifiChanged(IN IMS_BOOL bIsOn)
+{
+    A_IMS_TRACE_D(APPPROFILE, "ServiceSetting_WifiChanged() :: %s", _TRACE_B_(bIsOn), 0, 0);
+    ProcessWifiSettingEvent(bIsOn);
+}
+
 PROTECTED
 void AosCondition::Init()
 {
@@ -808,6 +814,15 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     else
     {
         ProcessBlockReason(IMS_FALSE, BLOCK_TTY_MODE_ON);
+    }
+}
+
+PROTECTED
+void AosCondition::ProcessWifiSettingEvent(IN IMS_BOOL bIsOn)
+{
+    if (!bIsOn)
+    {
+        RequestCommand(REQUEST_REASON_UPDATE, AosReason::WIFI_OFF);
     }
 }
 

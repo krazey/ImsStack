@@ -75,6 +75,7 @@ const AString PROFILE_ID = AString("test");
     using Base::ServiceSetting_AirplaneChanged;       \
     using Base::ServiceSetting_ServiceChanged;        \
     using Base::ServiceSetting_TtyChanged;            \
+    using Base::ServiceSetting_WifiChanged;           \
     using Base::Init;                                 \
     using Base::AddListener;                          \
     using Base::RemoveListener;                       \
@@ -1223,6 +1224,25 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
     EXPECT_FALSE(m_pAosCondition->IsHeld(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::OFF, 0);
+}
+
+TEST_F(AosConditionTest, ShouldNotInvokeReasonUpdateWhenServiceSetting_WifiChangedWithOn)
+{
+    MockIAosConditionListener objMockIAosConditionListener;
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
+    EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(0);
+
+    m_pAosCondition->ServiceSetting_WifiChanged(IMS_TRUE);
+}
+
+TEST_F(AosConditionTest, InvokeReasonUpdateWhenServiceSetting_WifiChangedWithOff)
+{
+    MockIAosConditionListener objMockIAosConditionListener;
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
+    EXPECT_CALL(objMockIAosConditionListener,
+            Condition_RequestCommand(AosCondition::REQUEST_REASON_UPDATE, AosReason::WIFI_OFF));
+
+    m_pAosCondition->ServiceSetting_WifiChanged(IMS_FALSE);
 }
 
 TEST_F(AosConditionTest, ShouldRequestRegStopAndSetBlockIfTtyIsTurnedOnWhenDeregIsRequired)
