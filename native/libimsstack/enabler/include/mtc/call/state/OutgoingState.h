@@ -77,6 +77,7 @@ protected:
     CallStateName HandleAosConnected() override;
 
 private:
+    CallStateName On100TryingReceived();
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
     CallStateName MaySendPreconditionConfirmation(IN ISession& objSession);
     CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode);

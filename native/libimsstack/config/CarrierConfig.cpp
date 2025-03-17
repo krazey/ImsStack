@@ -918,6 +918,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOPS_OFF_S
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_vops_off_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "registration_to_18x_timer_millis_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_INITIATION_TO_18X_TIMER_MILLIS_INT_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "call_initiation_to_18x_timer_millis_int_array";
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_QOS_ACQUISITION_AFTER_W2L_HANDOVER_WAIT_TIMER_MILLIS_INT[] =
                 KEY_IMS_VOICE_PREFIX "qos_acquisition_after_w2l_handover_wait_timer_millis_int";

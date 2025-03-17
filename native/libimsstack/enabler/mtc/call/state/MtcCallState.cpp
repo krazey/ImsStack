@@ -37,6 +37,7 @@
 #include "call/state/MtcCallState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationResolver.h"
 #include "emergency/CurrentLocationDiscoveryController.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/ISrvccStateListener.h"
@@ -886,6 +887,10 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
                         : ConfigEmergency::KEY_EMERGENCY_18X_TIMER_MILLIS_INT;
             }
             break;
+        case TIMER_MO_CALL_INITIATION_TO_18X_WAIT:
+            return MtcConfigurationResolver::GetCallInitiationTo18xTimer(
+                    m_objContext.GetConfigurationProxy(),
+                    m_objContext.GetService().IsWlanIpCanType());
         case TIMER_MO_NOANSWER:
             pszKey = bNormal ? ConfigVoice::KEY_RINGBACK_TIMER_MILLIS_INT
                              : ConfigEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT;

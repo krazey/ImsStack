@@ -103,7 +103,11 @@ TEST_F(MtcCallStringUtilsTest, ConvertUpdateType)
 
 TEST_F(MtcCallStringUtilsTest, ConvertTimerType)
 {
-    IMS_SINT32 nTimerType = MtcCallState::TIMER_MO_18X_WAIT;
+    IMS_SINT32 nTimerType = MtcCallState::TIMER_MO_CALL_INITIATION_TO_18X_WAIT;
+    EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType),
+            "TIMER_MO_CALL_INITIATION_TO_18X_WAIT");
+
+    nTimerType = MtcCallState::TIMER_MO_18X_WAIT;
     EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_MO_18X_WAIT");
 
     nTimerType = MtcCallState::TIMER_MO_NOANSWER;
@@ -128,18 +132,6 @@ TEST_F(MtcCallStringUtilsTest, ConvertTimerType)
     nTimerType = MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE;
     EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_CONVERT_REMOTE_RESPONSE");
 
-    nTimerType = MtcCallState::TIMER_E911_LTE_OPEN;
-    EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_E911_LTE_OPEN");
-
-    nTimerType = MtcCallState::TIMER_E911_WIFI_OPEN;
-    EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_E911_WIFI_OPEN");
-
-    nTimerType = MtcCallState::TIMER_E911_LTE_START;
-    EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_E911_LTE_START");
-
-    nTimerType = MtcCallState::TIMER_E911_WIFI_START;
-    EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_E911_WIFI_START");
-
     nTimerType = MtcCallState::TIMER_E911_WAIT_SESSION_RELEASED;
     EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_E911_WAIT_SESSION_RELEASED");
 
@@ -147,7 +139,7 @@ TEST_F(MtcCallStringUtilsTest, ConvertTimerType)
     EXPECT_EQ(
             MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_DELAY_UPDATE_AFTER_CONNECTED");
 
-    nTimerType = MtcCallState::TIMER_MO_18X_WAIT - 1;
+    nTimerType = MtcCallState::TIMER_MO_CALL_INITIATION_TO_18X_WAIT - 1;
     EXPECT_EQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "OUT_OF_RANGE");
 
     nTimerType = MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED + 1;

@@ -264,7 +264,10 @@
     </int-array>
     <boolean name="imsvoice.trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool" value="true"/>
     <boolean name="imsvoice.restart_dedicated_bearer_wait_timer_by_eps_fallback_bool" value="false"/>
-
+    <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
+        <item value="25000"/> <!-- EMERGENCY_LTE-->
+        <item value="25000"/> <!-- EMERGENCY_WIFI -->
+    </int-array>
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text="User ends call and SIP response time-out"</string>
@@ -277,12 +280,12 @@
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="false"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
-    <int name="imsemergency.emergency_18x_timer_millis_int" value="25000"/>
+    <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="1"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="true"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="180000"/>
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
-    <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="25000"/>
+    <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="imsemergency.silent_redial_with_voip_by_rtt_rejection_bool" value="true"/>
     <boolean name="imsemergency.release_emergency_pdn_on_failure_after_100_bool" value="true"/>
 

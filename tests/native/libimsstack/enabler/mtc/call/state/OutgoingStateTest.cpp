@@ -300,6 +300,15 @@ TEST_F(OutgoingStateTest, 18xTimerExpiredTerminatesCall)
             pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_18X_WAIT));
 }
 
+TEST_F(OutgoingStateTest, InviteTo18xTimerExpiredTerminatesCall)
+{
+    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_TIMEOUT_1XX_WAITING)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_TIMEOUT_1XX_WAITING)));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_CALL_INITIATION_TO_18X_WAIT));
+}
+
 TEST_F(OutgoingStateTest, MoNoAnswerTimerExpiredTerminatesCall)
 {
     EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_TIMEOUT_NO_ANSWER)));
@@ -1066,6 +1075,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationProxy,
             Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
                     ImsAosReason::REG_NEW_REQUIRED))
@@ -1083,6 +1094,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT))
+            .Times(0);
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
     EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
@@ -1690,8 +1703,25 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStopsTimersIfNot100)
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT));
 
     EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+}
+
+TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedDoesNotStart18xWaitTimerIfNot100)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_183));
+
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, _)).Times(0);
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_NOANSWER, _));
 
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 }
@@ -1713,6 +1743,19 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStops100WaitTimerIf1
 
     EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X))
             .Times(0);
+
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+}
+
+TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStarts18xWaitTimerIf100)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_100));
+
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, _));
 
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 }
@@ -1829,6 +1872,9 @@ TEST_F(OutgoingStateTest, SessionRprReceivedStopsTimers)
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT));
 
     EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
 
