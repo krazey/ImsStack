@@ -69,6 +69,7 @@ private:
     CallReasonInfo HandleTriggerEpsfb(IN const IMessage& objMessage) const;
     CallReasonInfo HandleTerminateByResponseSource(IN const IMessage& objMessage) const;
     CallReasonInfo HandleTerminateByReasonHeaderText(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleRegistrationToAlternatePcscf(IN const IMessage& objMessage) const;
 
     CallReasonInfo RegisterAfterMayPerformCsfb() const;
 

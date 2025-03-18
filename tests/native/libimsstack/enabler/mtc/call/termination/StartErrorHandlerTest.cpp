@@ -1141,6 +1141,16 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverWithoutPdnReconn
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
+TEST_F(StartErrorHandlerTest, Handle504ResponseWithoutXmlRegisterToAlternatePcscf)
+{
+    SetActionConfig(
+            SipStatusCode::SC_504, ConfigVoice::START_ERROR_ACTION_REGISTRATION_TO_ALTERNATE_PCSCF);
+    SetMessageCode(SipStatusCode::SC_504);
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+}
+
 TEST_F(StartErrorHandlerTest, Handle6xxResponses)
 {
     SetMessageCode(SipStatusCode::SC_600);
@@ -1189,6 +1199,25 @@ TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
 
     SetMessageCode(SipStatusCode::SC_603);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_USER_REJECTED, nAnyCause));
+}
+
+TEST_F(StartErrorHandlerTest, HandleActionsProcessOneMatchedAction)
+{
+    SetActionConfigs(SipStatusCode::SC_504,
+            {ConfigVoice::START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY,
+                    ConfigVoice::START_ERROR_ACTION_REGISTRATION_TO_ALTERNATE_PCSCF});
+    SetMessageCode(SipStatusCode::SC_504);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::
+                            KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT))
+            .WillByDefault(
+                    Return(ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
 }  // namespace android

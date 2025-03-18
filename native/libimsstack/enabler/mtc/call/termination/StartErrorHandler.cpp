@@ -84,7 +84,9 @@ const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
     {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_RESPONSE_SOURCE,
             &StartErrorHandler::HandleTerminateByResponseSource},
     {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_HEADER_TEXT,
-            &StartErrorHandler::HandleTerminateByReasonHeaderText}
+            &StartErrorHandler::HandleTerminateByReasonHeaderText},
+    {ConfigVoice::START_ERROR_ACTION_REGISTRATION_TO_ALTERNATE_PCSCF,
+            &StartErrorHandler::HandleRegistrationToAlternatePcscf}
 };
 // clang-format on
 
@@ -530,9 +532,11 @@ CallReasonInfo StartErrorHandler::HandleTerminateByResponseSource(
     return CallReasonInfo(CODE_NONE);
 }
 
+PRIVATE
 CallReasonInfo StartErrorHandler::HandleTerminateByReasonHeaderText(
         IN const IMessage& objMessage) const
 {
+    IMS_TRACE_I("HandleTerminateByReasonHeaderText", 0, 0, 0);
     ReasonHeaderValue objValue =
             m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
 
@@ -543,6 +547,16 @@ CallReasonInfo StartErrorHandler::HandleTerminateByReasonHeaderText(
     }
 
     return CallReasonInfo(CODE_NONE);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleRegistrationToAlternatePcscf(
+        IN const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleRegistrationToAlternatePcscf", 0, 0, 0);
+
+    ControlAos(ImsAosControl::PCSCF_NEXT);
+    return GetDefaultCallReasonInfo(m_objContext, objMessage);
 }
 
 PRIVATE
