@@ -78,6 +78,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsIpsecInitializedWithNewPcscf, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsKeepEPdnUponPcscfUnavailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsKeepERegRetryOnWlanRequired, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsKeepRegRetryCntUponPdnReconnect, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsStopERegTimerOnEpdnConnected, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsNoInitRegOnPcscfChange, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));

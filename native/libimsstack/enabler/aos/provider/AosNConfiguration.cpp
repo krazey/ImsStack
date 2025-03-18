@@ -361,6 +361,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepERegRetryOnWlanRequired() const
     return m_objAsset.bKeepERegRetryOnWlan;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepRegRetryCntUponPdnReconnect() const
+{
+    return m_objAsset.bKeepRegRetryCntUponPdnReconnect;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsStopERegTimerOnEpdnConnected() const
 {
     return m_objAsset.bStopERegTimerOnEpdnConnected;
@@ -1448,6 +1453,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL);
     m_objAsset.bKeepERegRetryOnWlan =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
+    m_objAsset.bKeepRegRetryCntUponPdnReconnect =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL);
     m_objAsset.bStopERegTimerOnEpdnConnected = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =

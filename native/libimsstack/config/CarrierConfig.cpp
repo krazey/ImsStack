@@ -260,6 +260,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_IMSI_BASED_URI_PRIORITIZED_BOOL[] =
         KEY_IMS_PREFIX "imsi_based_uri_prioritized_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL[] =
         KEY_IMS_PREFIX "init_ipsec_setting_with_new_pcscf_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL[] =
+        KEY_IMS_PREFIX "keep_reg_retry_cnt_upon_pdn_reconnect_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL[] =
         KEY_IMS_PREFIX "no_init_reg_on_pcscf_change_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_REG_CONTACT_VALIDATION_BOOL[] =

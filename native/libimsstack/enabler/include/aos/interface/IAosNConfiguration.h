@@ -473,6 +473,15 @@ public:
     virtual IMS_BOOL IsKeepERegRetryOnWlanRequired() const = 0;
 
     /**
+     * @brief Returns flag indicating whether to keep the count of IMS registrations retry
+     *        even when PDN is reconnected.
+     *
+     * @return IMS_TRUE if need to keep a count of registrations retry, else IMS_FALSE
+     * @see {@code ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool}
+     */
+    virtual IMS_BOOL IsKeepRegRetryCntUponPdnReconnect() const = 0;
+
+    /**
      * @brief Flag indicating whether to stop emergency registration timer on E-PDN connection.
      *
      * @return IMS_BOOL Return whether to stop on emergency registration timer on E-PDN connection

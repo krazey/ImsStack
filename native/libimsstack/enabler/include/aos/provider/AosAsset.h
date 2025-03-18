@@ -42,6 +42,7 @@ public:
             bInitializeIpsecWithNewPcscf(IMS_FALSE),
             bKeepEPdnUponPcscfUnavailable(IMS_FALSE),
             bKeepERegRetryOnWlan(IMS_FALSE),
+            bKeepRegRetryCntUponPdnReconnect(IMS_FALSE),
             bStopERegTimerOnEpdnConnected(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
             bPlmnBlockWithTimeoutOnFailureWithAllPcscfs(IMS_FALSE),
@@ -139,6 +140,7 @@ public:
     IMS_BOOL bInitializeIpsecWithNewPcscf;
     IMS_BOOL bKeepEPdnUponPcscfUnavailable;
     IMS_BOOL bKeepERegRetryOnWlan;
+    IMS_BOOL bKeepRegRetryCntUponPdnReconnect;
     IMS_BOOL bStopERegTimerOnEpdnConnected;
     IMS_BOOL bNoInitRegOnPcscfChange;
     IMS_BOOL bPlmnBlockWithTimeoutOnFailureWithAllPcscfs;
