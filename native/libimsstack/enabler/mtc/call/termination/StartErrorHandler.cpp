@@ -330,13 +330,13 @@ CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy
                 __IMS_FALLTHROUGH__
             case ConfigVoice::REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
                 ControlAos(ImsAosControl::PCSCF_NEXT);
-                break;
+                return GetDefaultCallReasonInfo(m_objContext, objMessage);
 
             case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION:
                 // If there is an operator that requires PDN reconnect, AoS I/F should be added.
             case ConfigVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
                 ControlAos(ImsAosControl::REGISTER_REINITIATE);
-                break;
+                return GetDefaultCallReasonInfo(m_objContext, objMessage);
         }
     }
 
@@ -392,7 +392,7 @@ CallReasonInfo StartErrorHandler::HandleNonUeDetectableEmergencyCall(
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& /*objMessage*/) const
+CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& objMessage) const
 {
     IMS_TRACE_I("HandleForbiddenByPolicy", 0, 0, 0);
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
@@ -404,11 +404,11 @@ CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& /*o
 
         case ConfigVoice::SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION:
             ControlAos(ImsAosControl::REGISTER_REINITIATE);
-            break;
+            return GetDefaultCallReasonInfo(m_objContext, objMessage);
 
         case ConfigVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION:
             ControlAos(ImsAosControl::REGISTER_REFRESH);
-            break;
+            return GetDefaultCallReasonInfo(m_objContext, objMessage);
 
         case ConfigVoice::SIP_403_POLICY_CSFB:
             if (m_objContext.GetService().IsCsfbAvailable())
