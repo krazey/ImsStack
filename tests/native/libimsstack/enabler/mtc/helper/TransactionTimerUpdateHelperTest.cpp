@@ -22,6 +22,7 @@
 #include "MockISipConfig.h"
 #include "MockISipConfigV.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MockMtcConfigurationProxy.h"
@@ -70,6 +71,7 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(IMS_SLOT_0));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(ImsList<IMtcCall*>()));
 
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
@@ -93,6 +95,29 @@ protected:
         ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
     }
 };
+
+TEST_F(TransactionTimerUpdateHelperTest, SetInviteTransactionTimerDoesNothingIfOtherCallExists)
+{
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(1));
+
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
+            .WillByDefault(Return(1));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    MockIMtcCall objCall;
+    ImsList<IMtcCall*> lstOtherCalls;
+    lstOtherCalls.Append(&objCall);
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
+    objUpdateHelper.SetInviteTransactionTimer();
+    objUpdateHelper.ResetInviteTransactionTimer();
+}
 
 TEST_F(TransactionTimerUpdateHelperTest,
         SetInviteTransactionTimerDoesNothingForEpsFallbackIfEpsfbTimerIsNotSet)
