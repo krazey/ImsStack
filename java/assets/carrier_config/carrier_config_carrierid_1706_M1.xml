@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <int name="ims.reg_retry_305_policy_int" value="2"/>
-    <int-array name="ims.permanent_pdn_failure_int_array" num="2">
-        <item value="28"/>
-        <item value="33"/>
-    </int-array>
     <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
         <item value="3"/>
         <item value="6"/>
