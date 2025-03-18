@@ -76,9 +76,9 @@ public:
                 m_nPacketizationMode(nPacketization),
                 m_strSpropParam(strSprop),
                 m_bShowPacketizationMode(IMS_FALSE),
-                m_bShowSpropParam(IMS_FALSE){};
+                m_bShowSpropParam(IMS_FALSE) {};
 
-        virtual ~VideoFmtp(){};
+        virtual ~VideoFmtp() {};
 
         inline void SetResolution(IN const VIDEO_RESOLUTION eResolution)
         {
@@ -151,9 +151,9 @@ public:
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
                 m_strProfileLevelId(strProfileLevelId),
-                m_bShowProfileLevelId(IMS_FALSE){};
+                m_bShowProfileLevelId(IMS_FALSE) {};
 
-        virtual ~AvcFmtp(){};
+        virtual ~AvcFmtp() {};
 
         inline void SetProfileLevelId(IN const AString strProfileLevelId)
         {
@@ -199,9 +199,9 @@ public:
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
                 m_bShowProfile(IMS_FALSE),
-                m_bShowLevel(IMS_FALSE){};
+                m_bShowLevel(IMS_FALSE) {};
 
-        virtual ~HevcFmtp(){};
+        virtual ~HevcFmtp() {};
 
         inline void SetShowProfile(IN const IMS_BOOL nShow) { m_bShowProfile = nShow; }
         inline IMS_BOOL IsProfileVisible() { return m_bShowProfile; }
@@ -224,7 +224,7 @@ public:
                 m_bTmmbrSupported(IMS_FALSE),
                 m_nTmmbrSmaxPr(-1),
                 m_bPliSupported(IMS_FALSE),
-                m_bFirSupported(IMS_FALSE){};
+                m_bFirSupported(IMS_FALSE) {};
 
         RtcpFbAttributes& operator=(IN const RtcpFbAttributes& obj)
         {
@@ -240,6 +240,18 @@ public:
             }
             return (*this);
         }
+
+        bool operator==(IN const RtcpFbAttributes& obj) const
+        {
+            return (m_bTrrSupported == obj.m_bTrrSupported && m_nTrrInt == obj.m_nTrrInt &&
+                    m_bNackSupported == obj.m_bNackSupported &&
+                    m_bTmmbrSupported == obj.m_bTmmbrSupported &&
+                    m_nTmmbrSmaxPr == obj.m_nTmmbrSmaxPr &&
+                    m_bPliSupported == obj.m_bPliSupported &&
+                    m_bFirSupported == obj.m_bFirSupported);
+        }
+
+        bool operator!=(IN const RtcpFbAttributes& obj) const { return !(*this == obj); }
 
         inline void SetTrrSupported(IN const IMS_BOOL nTrrSupported)
         {
@@ -296,7 +308,7 @@ public:
                 m_bIncludeImageAttr(IMS_FALSE),
                 m_bIncludeFrameSize(IMS_FALSE),
                 m_strImageAttr(AString::ConstNull()),
-                m_objRtcpFbAttr(){};
+                m_objRtcpFbAttr() {};
 
         Payload(IN const Payload& obj) :
                 BasePayload(obj),
@@ -324,6 +336,16 @@ public:
 
             return (*this);
         }
+
+        bool operator==(IN const Payload& obj) const
+        {
+            return (BasePayload::operator==(obj) &&
+                    m_bIncludeImageAttr == obj.m_bIncludeImageAttr &&
+                    m_bIncludeFrameSize == obj.m_bIncludeFrameSize &&
+                    m_strImageAttr == obj.m_strImageAttr && m_objRtcpFbAttr == obj.m_objRtcpFbAttr);
+        }
+
+        bool operator!=(IN const Payload& obj) const { return !(*this == obj); }
 
         inline void CreateVideoFmtp(IN const Payload& obj)
         {
@@ -374,7 +396,7 @@ public:
             m_nFrameRate(0),
             m_bSupportAvpf(IMS_FALSE),
             m_nCvoId(-1),
-            m_bSupportCapaNegoForAvpf(IMS_FALSE){};
+            m_bSupportCapaNegoForAvpf(IMS_FALSE) {};
 
     virtual ~VideoProfile() {}
 
@@ -400,6 +422,15 @@ public:
 
         return (*this);
     }
+
+    bool operator==(IN const VideoProfile& obj) const
+    {
+        return (MediaBaseProfile::operator==(obj) && m_nFrameRate == obj.m_nFrameRate &&
+                m_bSupportAvpf == obj.m_bSupportAvpf && m_nCvoId == obj.m_nCvoId &&
+                m_bSupportCapaNegoForAvpf == obj.m_bSupportCapaNegoForAvpf);
+    }
+
+    bool operator!=(IN const VideoProfile& obj) const { return !(*this == obj); }
 
     Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
     {

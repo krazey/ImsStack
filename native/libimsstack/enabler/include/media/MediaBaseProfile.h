@@ -88,12 +88,7 @@ public:
                     m_nSamplingRate == obj.m_nSamplingRate && m_nChannel == obj.m_nChannel);
         }
 
-        bool operator!=(IN const RtpMap& obj) const
-        {
-            return (m_nPayloadNumber != obj.m_nPayloadNumber ||
-                    !m_strPayloadType.EqualsIgnoreCase(obj.m_strPayloadType) ||
-                    m_nSamplingRate != obj.m_nSamplingRate || m_nChannel != obj.m_nChannel);
-        }
+        bool operator!=(IN const RtpMap& obj) const { return !(*this == obj); }
 
         inline void SetPayloadNumber(IN const IMS_UINT32 nPayloadNumber)
         {
@@ -151,6 +146,14 @@ public:
 
             return (*this);
         }
+
+        bool operator==(IN const BasePayload& obj) const
+        {
+            return (m_objRtpMap == obj.m_objRtpMap &&
+                    (m_pFmtp == obj.m_pFmtp || (m_pFmtp != IMS_NULL && obj.m_pFmtp)));
+        }
+
+        bool operator!=(IN const BasePayload& obj) const { return !(*this == obj); }
 
         void SetRtpMap(IN const IMS_UINT32& payloadNum, IN const AString& payloadType,
                 IN const IMS_UINT32 samplingRate, IN const IMS_SINT32 m_nChannel = 0)
@@ -310,18 +313,10 @@ public:
                 m_strTransportType == obj.m_strTransportType &&
                 m_nRtcpInterval == obj.m_nRtcpInterval && m_nBandwidthAs == obj.m_nBandwidthAs &&
                 m_nBandwidthRs == obj.m_nBandwidthRs && m_nBandwidthRr == obj.m_nBandwidthRr &&
-                m_eDirection == obj.m_eDirection);
+                m_eDirection == obj.m_eDirection && ComparePayloadList(obj.m_lstPayload));
     }
 
-    bool operator!=(IN const MediaBaseProfile& obj) const
-    {
-        return (m_objIpAddress != obj.m_objIpAddress || m_nDataPort != obj.m_nDataPort ||
-                m_nControlPort != obj.m_nControlPort ||
-                m_strTransportType != obj.m_strTransportType ||
-                m_nRtcpInterval != obj.m_nRtcpInterval || m_nBandwidthAs != obj.m_nBandwidthAs ||
-                m_nBandwidthRs != obj.m_nBandwidthRs || m_nBandwidthRr != obj.m_nBandwidthRr ||
-                m_eDirection != obj.m_eDirection);
-    }
+    bool operator!=(IN const MediaBaseProfile& obj) const { return !(*this == obj); }
 
     virtual BasePayload* GetPayloadAt(IN IMS_UINT32 nIndex)
     {
@@ -330,6 +325,7 @@ public:
 
     void DeletePayloads();
     void CopyPayloads(IN ImsList<BasePayload*> payloadList);
+    bool ComparePayloadList(const ImsList<BasePayload*>& payloadList) const;
 
     inline void SetIpAddress(IN const IpAddress objIpAddress) { m_objIpAddress = objIpAddress; }
     inline IpAddress& GetIpAddress() { return m_objIpAddress; }

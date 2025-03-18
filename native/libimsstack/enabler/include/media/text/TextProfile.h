@@ -35,17 +35,17 @@ public:
     public:
         RedFmtp() :
                 m_nRedLevel(-1),
-                m_nRedPayload(-1){};
+                m_nRedPayload(-1) {};
 
         RedFmtp(IN IMS_SINT32 nRed, IN IMS_SINT32 nRedPT) :
                 m_nRedLevel(nRed),
-                m_nRedPayload(nRedPT){};
+                m_nRedPayload(nRedPT) {};
 
         RedFmtp(IN const RedFmtp& obj) :
                 m_nRedLevel(obj.m_nRedLevel),
-                m_nRedPayload(obj.m_nRedPayload){};
+                m_nRedPayload(obj.m_nRedPayload) {};
 
-        virtual ~RedFmtp(){};
+        virtual ~RedFmtp() {};
 
         RedFmtp& operator=(IN const RedFmtp& obj)
         {
@@ -75,7 +75,7 @@ public:
     {
     public:
         Payload() :
-                BasePayload(){};
+                BasePayload() {};
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
@@ -109,7 +109,7 @@ public:
     TextProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
-            m_bKeepRedLevel(IMS_TRUE){};
+            m_bKeepRedLevel(IMS_TRUE) {};
 
     virtual ~TextProfile() {}
 
@@ -145,10 +145,7 @@ public:
         return (MediaBaseProfile::operator==(obj) && m_bKeepRedLevel == obj.m_bKeepRedLevel);
     }
 
-    bool operator!=(IN const TextProfile& obj) const
-    {
-        return (MediaBaseProfile::operator!=(obj) || m_bKeepRedLevel != obj.m_bKeepRedLevel);
-    }
+    bool operator!=(IN const TextProfile& obj) const { return !(*this == obj); }
 
     Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
     {

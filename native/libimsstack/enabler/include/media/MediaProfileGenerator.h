@@ -22,11 +22,9 @@
 
 class CodecConfig;
 class MediaConfiguration;
-class MediaEnvironment;
 
 /**
- * This class is to generate a MediaBaseProfile by using the MediaEnvironment and
- * the MediaConfiguration
+ * This class is to generate a MediaBaseProfile
  */
 class MediaProfileGenerator
 {
@@ -35,8 +33,7 @@ public:
     virtual ~MediaProfileGenerator();
 
     /**
-     * @brief Generate a MediaBaseProfile by using the MediaEnvironment and the
-     * MediaConfiguration
+     * @brief Generate a MediaBaseProfile
      *
      * @param eServiceType The service type to access the session configuration
      * @param pIService The object to get the network parameters

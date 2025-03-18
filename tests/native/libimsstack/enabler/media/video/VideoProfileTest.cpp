@@ -585,16 +585,7 @@ TEST_F(VideoProfileTest, testVideoPayloadAssign)
     VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
     *pPayload2 = *pPayload1;
 
-    EXPECT_EQ(pPayload2->IsImageAttrIncluded(), VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR);
-    EXPECT_EQ(pPayload2->IsFrameSizeIncluded(), VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE);
-    EXPECT_EQ(pPayload2->GetImageAttr(), VIDEO_PAYLOAD_IMAGE_ATTR);
-    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsTrrSupported(), RTCP_FB_TRR_SUPPORTED);
-    EXPECT_EQ(pPayload2->GetRtcpFbAttr().GetTrrInt(), RTCP_FB_TRR_INT);
-    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsNackSupported(), RTCP_FB_NACK_SUPPORTED);
-    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsTmmbrSupported(), RTCP_FB_TMMBR_SUPPORTED);
-    EXPECT_EQ(pPayload2->GetRtcpFbAttr().GetTmmbrSmaxPr(), RTCP_FB_TMMBR_SMAX);
-    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsPliSupported(), RTCP_FB_PLI_SUPPORTED);
-    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsFirSupported(), RTCP_FB_FIR_SUPPORTED);
+    EXPECT_EQ(*pPayload1, *pPayload2);
 
     delete pPayload1;
     delete pPayload2;
@@ -732,7 +723,7 @@ TEST_F(VideoProfileTest, testVideoProfileCreationDefault)
     delete pProfile;
 }
 
-TEST_F(VideoProfileTest, testVideoProfileCreationParameterizedObj)
+TEST_F(VideoProfileTest, testVideoProfileCopyConstructor)
 {
     VideoProfile* pProfile1 = new VideoProfile();
 
@@ -743,10 +734,7 @@ TEST_F(VideoProfileTest, testVideoProfileCreationParameterizedObj)
 
     VideoProfile* pProfile2 = new VideoProfile(*pProfile1);
 
-    EXPECT_EQ(pProfile2->GetFrameRate(), VIDEO_PROFILE_FRAMERATE);
-    EXPECT_EQ(pProfile2->IsAvpfSupported(), VIDEO_PROFILE_SUPPORT_AVPF);
-    EXPECT_EQ(pProfile2->GetCvoId(), VIDEO_PROFILE_SUPPORT_AVPF);
-    EXPECT_EQ(pProfile2->IsCapaNegoForAvpfSupported(), VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+    EXPECT_EQ(*pProfile1, *pProfile2);
 
     delete pProfile1;
     delete pProfile2;
@@ -764,10 +752,57 @@ TEST_F(VideoProfileTest, testVideoProfileAssign)
     VideoProfile* pProfile2 = new VideoProfile();
     *pProfile2 = *pProfile1;
 
-    EXPECT_EQ(pProfile2->GetFrameRate(), VIDEO_PROFILE_FRAMERATE);
-    EXPECT_EQ(pProfile2->IsAvpfSupported(), VIDEO_PROFILE_SUPPORT_AVPF);
-    EXPECT_EQ(pProfile2->GetCvoId(), VIDEO_PROFILE_SUPPORT_AVPF);
-    EXPECT_EQ(pProfile2->IsCapaNegoForAvpfSupported(), VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    delete pProfile1;
+    delete pProfile2;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileEqualNotEqual)
+{
+    VideoProfile* pProfile1 = new VideoProfile();
+    VideoProfile* pProfile2 = new VideoProfile();
+
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    pProfile1->SetFrameRate(VIDEO_PROFILE_FRAMERATE);
+    EXPECT_NE(*pProfile1, *pProfile2);
+
+    pProfile2->SetFrameRate(VIDEO_PROFILE_FRAMERATE);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    pProfile1->SetSupportAvpf(VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_NE(*pProfile1, *pProfile2);
+
+    pProfile2->SetSupportAvpf(VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    pProfile1->SetCvoId(VIDEO_PROFILE_CVO_ID);
+    EXPECT_NE(*pProfile1, *pProfile2);
+
+    pProfile2->SetCvoId(VIDEO_PROFILE_CVO_ID);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    pProfile1->SetSupportCapaNegoForAvpf(VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+    EXPECT_NE(*pProfile1, *pProfile2);
+
+    pProfile2->SetSupportCapaNegoForAvpf(VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    // Add Payload to test
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
+    pProfile1->GetPayloadList().Append(pPayload1);
+    EXPECT_NE(*pProfile1, *pProfile2);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
+    pPayload2->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
+    pProfile2->GetPayloadList().Append(pPayload2);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    // Change Payload
+    pPayload1->GetRtpMap().SetPayloadType(HEVC_PAYLOAD_TYPE);
+    EXPECT_NE(*pProfile1, *pProfile2);
 
     delete pProfile1;
     delete pProfile2;

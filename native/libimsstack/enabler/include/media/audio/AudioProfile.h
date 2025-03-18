@@ -78,7 +78,7 @@ public:
         {
         }
 
-        virtual ~AudioFmtp(){};
+        virtual ~AudioFmtp() {};
 
         inline void SetModeSetList(IN const IMS_UINT32 nModeSetList)
         {
@@ -176,7 +176,7 @@ public:
         {
         }
 
-        virtual ~AmrFmtp(){};
+        virtual ~AmrFmtp() {};
 
         inline void SetOctetAlign(IN const IMS_SINT32 nOctetAlign) { m_nOctetAlign = nOctetAlign; }
         inline IMS_SINT32 GetOctetAlign() { return m_nOctetAlign; }
@@ -257,7 +257,7 @@ public:
         {
         }
 
-        virtual ~EvsFmtp(){};
+        virtual ~EvsFmtp() {};
 
         inline void SetHfOnly(IN const IMS_UINT32 nHfOnly) { m_nHfOnly = nHfOnly; }
         inline IMS_UINT32 GetHfOnly() { return m_nHfOnly; }
@@ -338,15 +338,15 @@ public:
     {
     public:
         TelephoneEventFmtp() :
-                m_strEvents("0-15"){};
+                m_strEvents("0-15") {};
 
         explicit TelephoneEventFmtp(IN const AString& events) :
-                m_strEvents(events){};
+                m_strEvents(events) {};
 
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
-                m_strEvents(objFmtp.m_strEvents){};
+                m_strEvents(objFmtp.m_strEvents) {};
 
-        virtual ~TelephoneEventFmtp(){};
+        virtual ~TelephoneEventFmtp() {};
 
         TelephoneEventFmtp& operator=(IN const TelephoneEventFmtp& obj)
         {
@@ -363,10 +363,7 @@ public:
             return (m_strEvents == obj.m_strEvents);
         }
 
-        bool operator!=(IN const TelephoneEventFmtp& obj) const
-        {
-            return (m_strEvents != obj.m_strEvents);
-        }
+        bool operator!=(IN const TelephoneEventFmtp& obj) const { return !(*this == obj); }
 
         inline void SetEvents(IN const AString strEvents) { m_strEvents = strEvents; }
         inline AString& GetEvents() { return m_strEvents; }
@@ -383,7 +380,7 @@ public:
     {
     public:
         Payload() :
-                BasePayload(1){};
+                BasePayload(1) {};
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
@@ -435,7 +432,7 @@ public:
                 m_bSupportStatisticMetrics(IMS_FALSE),
                 m_bSupportVoipMetrics(IMS_FALSE),
                 m_bSupportPacketLossRle(IMS_FALSE),
-                m_bSupportPacketDuplicatedRle(IMS_FALSE){};
+                m_bSupportPacketDuplicatedRle(IMS_FALSE) {};
 
         RtcpXrAttributes& operator=(const RtcpXrAttributes& p)
         {
@@ -457,13 +454,7 @@ public:
                     m_bSupportPacketDuplicatedRle == obj.m_bSupportPacketDuplicatedRle);
         }
 
-        bool operator!=(IN const RtcpXrAttributes& obj) const
-        {
-            return (m_bSupportStatisticMetrics != obj.m_bSupportStatisticMetrics ||
-                    m_bSupportVoipMetrics != obj.m_bSupportVoipMetrics ||
-                    m_bSupportPacketLossRle != obj.m_bSupportPacketLossRle ||
-                    m_bSupportPacketDuplicatedRle != obj.m_bSupportPacketDuplicatedRle);
-        }
+        bool operator!=(IN const RtcpXrAttributes& obj) const { return !(*this == obj); }
 
         inline void SetSupportStatisticMetrics(IN const IMS_BOOL bSupportStatisticMetrics)
         {
@@ -509,9 +500,9 @@ public:
             m_objCandidateAttr(ImsVector<AString>()),
             m_bSupportRtcpXr(IMS_FALSE),
             m_objRtcpXrAttr(RtcpXrAttributes()),
-            m_bAnbr(IMS_FALSE){};
+            m_bAnbr(IMS_FALSE) {};
 
-    virtual ~AudioProfile(){};
+    virtual ~AudioProfile() {};
 
     AudioProfile(IN const AudioProfile& obj) :
             MediaBaseProfile(obj)
@@ -541,15 +532,13 @@ public:
 
     bool operator==(IN const AudioProfile& obj) const
     {
-        return (MediaBaseProfile::operator==(obj) && m_bSupportRtcpXr == obj.m_bSupportRtcpXr &&
+        return (MediaBaseProfile::operator==(obj) && m_nPtime == obj.m_nPtime &&
+                m_nMaxPtime == obj.m_nMaxPtime && m_objCandidateAttr == obj.m_objCandidateAttr &&
+                m_bSupportRtcpXr == obj.m_bSupportRtcpXr &&
                 m_objRtcpXrAttr == obj.m_objRtcpXrAttr && m_bAnbr == obj.m_bAnbr);
     }
 
-    bool operator!=(IN const AudioProfile& obj) const
-    {
-        return (MediaBaseProfile::operator!=(obj) || m_bSupportRtcpXr != obj.m_bSupportRtcpXr ||
-                m_objRtcpXrAttr != obj.m_objRtcpXrAttr || m_bAnbr != obj.m_bAnbr);
-    }
+    bool operator!=(IN const AudioProfile& obj) const { return !(*this == obj); }
 
     Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
     {

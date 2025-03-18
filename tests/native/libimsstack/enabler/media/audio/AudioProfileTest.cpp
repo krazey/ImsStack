@@ -1160,12 +1160,7 @@ TEST_F(AudioProfileTest, testAudioProfileCreation)
 
     AudioProfile* pProfile2 = new AudioProfile(*pProfile1);
 
-    EXPECT_EQ(pProfile2->GetPtime(), AUDIO_PROFILE_PTIME);
-    EXPECT_EQ(pProfile2->GetMaxPtime(), AUDIO_PROFILE_MAX_PTIME);
-    EXPECT_EQ(pProfile2->GetCandidateAttr(), objCandidateAttr);
-    EXPECT_EQ(pProfile2->IsRtcpXrSupported(), AUDIO_PROFILE_SUPPORT_RTXP_XR);
-    EXPECT_EQ(pProfile2->GetRtcpXrAttr(), objRtcpXrAttr);
-    EXPECT_EQ(pProfile2->IsAnbrSupported(), AUDIO_PROFILE_ANBR);
+    EXPECT_EQ(*pProfile1, *pProfile2);
 
     delete pProfile1;
     delete pProfile2;
@@ -1192,12 +1187,7 @@ TEST_F(AudioProfileTest, testAudioProfileAssign)
 
     *pProfile2 = *pProfile1;
 
-    EXPECT_EQ(pProfile2->GetPtime(), AUDIO_PROFILE_PTIME);
-    EXPECT_EQ(pProfile2->GetMaxPtime(), AUDIO_PROFILE_MAX_PTIME);
-    EXPECT_EQ(pProfile2->GetCandidateAttr(), objCandidateAttr);
-    EXPECT_EQ(pProfile2->IsRtcpXrSupported(), AUDIO_PROFILE_SUPPORT_RTXP_XR);
-    EXPECT_EQ(pProfile2->GetRtcpXrAttr(), objRtcpXrAttr);
-    EXPECT_EQ(pProfile2->IsAnbrSupported(), AUDIO_PROFILE_ANBR);
+    EXPECT_EQ(*pProfile1, *pProfile2);
 
     delete pProfile1;
     delete pProfile2;
@@ -1212,6 +1202,24 @@ TEST_F(AudioProfileTest, testAudioProfileEqualNotEqual)
     AudioProfile* pProfile1 = new AudioProfile();
     AudioProfile* pProfile2 = new AudioProfile();
 
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    pProfile1->SetPtime(AUDIO_PROFILE_PTIME);
+    EXPECT_NE(*pProfile1, *pProfile2);
+
+    pProfile2->SetPtime(AUDIO_PROFILE_PTIME);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    pProfile1->SetMaxPtime(AUDIO_PROFILE_MAX_PTIME);
+    EXPECT_NE(*pProfile1, *pProfile2);
+    pProfile2->SetMaxPtime(AUDIO_PROFILE_MAX_PTIME);
+    EXPECT_EQ(*pProfile1, *pProfile2);
+
+    ImsVector<AString> objCandidateAttr;
+    objCandidateAttr.Add(AUDIO_PROFILE_CANDIDATE_ATTR2);
+    pProfile1->SetCandidateAttr(objCandidateAttr);
+    EXPECT_NE(*pProfile1, *pProfile2);
+    pProfile2->SetCandidateAttr(objCandidateAttr);
     EXPECT_EQ(*pProfile1, *pProfile2);
 
     pProfile1->SetSupportRtcpXr(AUDIO_PROFILE_SUPPORT_RTXP_XR);

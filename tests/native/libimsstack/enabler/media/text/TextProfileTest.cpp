@@ -172,7 +172,8 @@ TEST_F(TextProfileTest, testTextProfileAssign)
 
     TextProfile* pProfile2 = new TextProfile();
     *pProfile2 = *pProfile1;
-    EXPECT_EQ(pProfile2->GetKeepRedundantLevel(), KEEP_REDUNDANT_LEVEL);
+
+    EXPECT_EQ(*pProfile1, *pProfile2);
 
     delete pProfile1;
     delete pProfile2;

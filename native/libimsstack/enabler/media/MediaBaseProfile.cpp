@@ -37,3 +37,29 @@ PUBLIC void MediaBaseProfile::CopyPayloads(IN ImsList<BasePayload*> payloadList)
         m_lstPayload.Append(pNewPayload);
     }
 }
+
+PUBLIC bool MediaBaseProfile::ComparePayloadList(const ImsList<BasePayload*>& payloadList) const
+{
+    if (m_lstPayload.GetSize() != payloadList.GetSize())
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_lstPayload.GetSize(); i++)
+    {
+        BasePayload* pPayload1 = m_lstPayload.GetAt(i);
+        BasePayload* pPayload2 = payloadList.GetAt(i);
+
+        if (pPayload1 == IMS_NULL || pPayload2 == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        if (!(*pPayload1 == *pPayload2))
+        {
+            return IMS_FALSE;
+        }
+    }
+
+    return IMS_TRUE;
+}
