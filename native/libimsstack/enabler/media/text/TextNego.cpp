@@ -38,10 +38,16 @@ PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
 }
 
 PUBLIC
-TextNego::TextNego(IN const TextNego& objTextNego) :
-        BaseNego(objTextNego.GetSlotId())
+TextNego::TextNego(IN const TextNego& obj) :
+        BaseNego(obj),
+        m_pSdpParser(std::make_unique<TextSdpParser>())
 {
-    Copy(&objTextNego);
+    IMS_TRACE_I("+TextNego() - slot[%d]", GetSlotId(), 0, 0);
+
+    m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
+    m_pProfileNegotiator = std::make_shared<TextProfileNegotiator>();
+    m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
+    Copy(&obj);
 }
 
 PUBLIC
@@ -49,8 +55,13 @@ TextNego& TextNego::operator=(IN const TextNego& obj)
 {
     if (this != &obj)
     {
+        BaseNego::operator=(obj);
+        m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
+        m_pProfileNegotiator = std::make_shared<TextProfileNegotiator>();
+        m_pProfileGenerator = std::make_shared<TextProfileGenerator>();
         Copy(&obj);
     }
+
     return (*this);
 }
 

@@ -20,6 +20,7 @@
 #include "ImsSlot.h"
 #include "MediaDef.h"
 #include "audio/AudioNego.h"
+#include "media/IMedia.h"
 #include "video/VideoNego.h"
 #include "text/TextNego.h"
 

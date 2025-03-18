@@ -123,9 +123,22 @@ TEST_F(MediaNegoTest, testForking)
 {
     EXPECT_FALSE(m_objMediaNego.Forking(IMS_NULL));
 
-    MediaNego objMediaNego(DEFAULT_SLOT_ID);
-    EXPECT_TRUE(m_objMediaNego.Forking(&objMediaNego));
-    EXPECT_EQ(m_objMediaNego.GetNegoState(), STATE_OFFER_SENT);
+    MediaNego* pMediaNego1 = new MediaNego(DEFAULT_SLOT_ID);
+    MediaNego* pMediaNego2 = new MediaNego(DEFAULT_SLOT_ID);
+    EXPECT_TRUE(pMediaNego2->Forking(pMediaNego1));
+    EXPECT_EQ(pMediaNego2->GetNegoState(), STATE_OFFER_SENT);
+
+    EXPECT_NE(pMediaNego2->GetAudioNego(), IMS_NULL);
+    EXPECT_NE(pMediaNego2->GetVideoNego(), IMS_NULL);
+    EXPECT_NE(pMediaNego2->GetTextNego(), IMS_NULL);
+
+    delete pMediaNego1;
+
+    EXPECT_NE(pMediaNego2->GetAudioNego(), IMS_NULL);
+    EXPECT_NE(pMediaNego2->GetVideoNego(), IMS_NULL);
+    EXPECT_NE(pMediaNego2->GetTextNego(), IMS_NULL);
+
+    delete pMediaNego2;
 }
 
 TEST_F(MediaNegoTest, testFormSdp)

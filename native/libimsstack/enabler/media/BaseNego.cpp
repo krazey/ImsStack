@@ -32,7 +32,7 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TYPE eType) :
         ImsSlot(nSlotId),
         m_eType(eType),
-        m_pBaseProfile(new MediaBaseProfile()),
+        m_pBaseProfile(IMS_NULL),
         m_listOaModel(ImsList<OaModel*>()),
         m_pConfig(IMS_NULL),
         m_pEnvironment(IMS_NULL),
@@ -40,12 +40,36 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
         m_pProfileNegotiator(IMS_NULL),
         m_pProfileGenerator(IMS_NULL)
 {
-    IMS_TRACE_I("+BaseNego() - slot[%d]", nSlotId, 0, 0);
+    IMS_TRACE_I("+BaseNego() - type[%d], slot[%d]", m_eType, nSlotId, 0);
+}
+
+BaseNego::BaseNego(IN const BaseNego& obj) :
+        ImsSlot(obj),
+        m_pBaseProfile(IMS_NULL),
+        m_listOaModel(ImsList<OaModel*>())
+{
+    *this = obj;
+}
+
+BaseNego& BaseNego::operator=(IN const BaseNego& obj)
+{
+    if (this != &obj)
+    {
+        ImsSlot::operator=(obj);
+        m_eType = obj.m_eType;
+        m_pConfig = obj.m_pConfig;
+        m_pEnvironment = obj.m_pEnvironment;
+        m_pSdpGenerator = obj.m_pSdpGenerator;
+        m_pProfileNegotiator = obj.m_pProfileNegotiator;
+        m_pProfileGenerator = obj.m_pProfileGenerator;
+    }
+
+    return *this;
 }
 
 PUBLIC VIRTUAL BaseNego::~BaseNego()
 {
-    IMS_TRACE_I("~BaseNego()", 0, 0, 0);
+    IMS_TRACE_I("~BaseNego(): type[%d]", m_eType, 0, 0);
 
     if (m_pBaseProfile != IMS_NULL)
     {
@@ -418,6 +442,7 @@ PROTECTED void BaseNego::DestroyListOaModel()
         {
             delete pOaModel;
         }
+
         m_listOaModel.RemoveAt(0);
     }
 }
@@ -427,10 +452,11 @@ void BaseNego::Copy(IN const BaseNego* pNego)
 {
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "Copy(): type[%d], invalid parameter", m_eType, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("Copy()", 0, 0, 0);
+    IMS_TRACE_I("Copy(): type[%d]", m_eType, 0, 0);
 
     if (m_pBaseProfile != IMS_NULL)
     {
@@ -439,15 +465,12 @@ void BaseNego::Copy(IN const BaseNego* pNego)
     }
 
     m_pBaseProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pNego->m_pBaseProfile);
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pNego->GetBaseProfile());
 
     if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->GetDataPort() != 0)
     {
         MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
     }
-
-    m_pEnvironment = pNego->m_pEnvironment;
-    m_pConfig = pNego->m_pConfig;
 
     OaModel* pNewOaModel = new OaModel();
     if (pNewOaModel != IMS_NULL)
@@ -456,7 +479,8 @@ void BaseNego::Copy(IN const BaseNego* pNego)
                 MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
         m_listOaModel.Append(pNewOaModel);
     }
-    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
+
+    IMS_TRACE_I("Copy(): type[%d], OA model list size[%d]", m_eType, m_listOaModel.GetSize(), 0);
 }
 
 PROTECTED

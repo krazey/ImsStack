@@ -15,10 +15,11 @@
  */
 
 #include "ServiceTrace.h"
-#include "ImsCore.h"
 #include "ICoreService.h"
 #include "ISdpReader.h"
+#include "ISession.h"
 #include "ISessionDescriptor.h"
+#include "ImsCore.h"
 
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
@@ -31,17 +32,14 @@ PUBLIC
 MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
         m_eNegoState(STATE_IDLE),
-        m_pAudioNego(IMS_NULL),
-        m_pVideoNego(IMS_NULL),
-        m_pTextNego(IMS_NULL),
+        m_pAudioNego(std::make_shared<AudioNego>(nSlotId)),
+        m_pVideoNego(std::make_shared<VideoNego>(nSlotId)),
+        m_pTextNego(std::make_shared<TextNego>(nSlotId)),
         m_pMediaEnvironment(IMS_NULL),
         m_eSessionType(MEDIA_TYPE_INVALID),
         m_bForking(IMS_FALSE)
 {
     IMS_TRACE_I("MediaNego() - Slot[%d]", nSlotId, 0, 0);
-    m_pAudioNego = std::make_shared<AudioNego>(GetSlotId());
-    m_pVideoNego = std::make_shared<VideoNego>(GetSlotId());
-    m_pTextNego = std::make_shared<TextNego>(GetSlotId());
 }
 
 PUBLIC
@@ -73,19 +71,22 @@ void MediaNego::CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnviron
 PUBLIC
 IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
 {
-    if (pMediaNego == IMS_NULL)
+    if (pMediaNego == IMS_NULL || this == pMediaNego)
     {
-        IMS_TRACE_E(0, "Forking() - incomming MediaNego is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Forking(): invalid MediaNego", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("Forking() - nNegoId[%" PFLS_x "]", (IMS_UINTP)pMediaNego, 0, 0);
-
+    IMS_TRACE_D("Forking(): Id[%" PFLS_x "]", (IMS_UINTP)pMediaNego, 0, 0);
     m_eNegoState = STATE_OFFER_SENT;
+    m_pMediaEnvironment = pMediaNego->m_pMediaEnvironment;
+    m_eSessionType = pMediaNego->m_eSessionType;
     m_bForking = IMS_TRUE;
-    m_pAudioNego = std::make_shared<AudioNego>(*pMediaNego->m_pAudioNego);
-    m_pVideoNego = std::make_shared<VideoNego>(*pMediaNego->m_pVideoNego);
-    m_pTextNego = std::make_shared<TextNego>(*pMediaNego->m_pTextNego);
+
+    m_pAudioNego = std::make_shared<AudioNego>(*pMediaNego->GetAudioNego());
+    m_pVideoNego = std::make_shared<VideoNego>(*pMediaNego->GetVideoNego());
+    m_pTextNego = std::make_shared<TextNego>(*pMediaNego->GetTextNego());
+
     return IMS_TRUE;
 }
 
@@ -518,10 +519,11 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
         OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
         OUT MediaNegoResult& errorReason)
 {
-    IMS_TRACE_I("NegotiateSdp(): pSession[%" PFLS_x "]", pSession, 0, 0);
+    IMS_TRACE_I("NegotiateSdp(): state[%d]", m_eNegoState, 0, 0);
 
     if (m_pMediaEnvironment == IMS_NULL || m_pMediaEnvironment->pIService == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateSdp(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -581,6 +583,7 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
             case (SdpMedia::TYPE_AUDIO):
                 if (m_pAudioNego == IMS_NULL)
                 {
+                    IMS_TRACE_E(0, "NegotiateSdp(): AudioNego is null", 0, 0, 0);
                     break;
                 }
 
@@ -598,6 +601,7 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
             case (SdpMedia::TYPE_VIDEO):
                 if (m_pVideoNego == IMS_NULL)
                 {
+                    IMS_TRACE_E(0, "NegotiateSdp(): VideoNego is null", 0, 0, 0);
                     break;
                 }
 
@@ -615,6 +619,7 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
             case (SdpMedia::TYPE_TEXT):
                 if (m_pTextNego == IMS_NULL)
                 {
+                    IMS_TRACE_E(0, "NegotiateSdp(): TextNego is null", 0, 0, 0);
                     break;
                 }
 
@@ -637,13 +642,14 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
     }
 
     m_bForking = IMS_FALSE;
-    // check the result of negitation
+    // check the result of negotiation
     MediaSessionConfig* pMediaSessionConfig =
             MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                     GetSlotId(), m_pMediaEnvironment->eServiceType);
 
     if (pMediaSessionConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateSdp(): invalid config", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -653,6 +659,7 @@ IMS_BOOL MediaNego::NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
         if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO) &&
                 GetNegotiatedAudioQuality() == AUDIO_CODEC_NOT_USED)
         {
+            IMS_TRACE_E(0, "NegotiateSdp(): audio disabled", 0, 0, 0);
             errorReason = ERROR_NO_CODEC_MATCHED;
             return IMS_FALSE;
         }

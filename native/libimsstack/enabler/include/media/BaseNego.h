@@ -19,11 +19,11 @@
 
 #include "ImsSlot.h"
 #include "ISession.h"
-#include "media/IMedia.h"
 
 #include "MediaBaseProfile.h"
 #include "MediaEnvironment.h"
 #include "config/MediaConfiguration.h"
+#include "media/IMediaDescriptor.h"
 
 class MediaSdpGenerator;
 class MediaProfileNegotiator;
@@ -80,6 +80,8 @@ public:
 
     explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0,
             IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
+    BaseNego(IN const BaseNego& obj);
+    BaseNego& operator=(IN const BaseNego& obj);
     virtual ~BaseNego();
 
     /**
@@ -157,6 +159,11 @@ public:
      * @param eNegoState The current negotiation state to decide to remove the OA model item
      */
     virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
+
+    /**
+     * @brief Get the MediaBaseProfile object
+     */
+    MediaBaseProfile* GetBaseProfile() const { return m_pBaseProfile; }
 
     /**
      * @brief Get the negotiated remote ip address

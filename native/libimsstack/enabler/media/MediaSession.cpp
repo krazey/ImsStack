@@ -869,8 +869,6 @@ MediaNego* MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
         return IMS_NULL;
     }
 
-    pMediaNego->CreateProfile(m_pEnvironment);
-
     // Copy Existed Media Nego with nego id
     if (nNegoId != 0)
     {
@@ -883,6 +881,10 @@ MediaNego* MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
         }
 
         pMediaNego->Forking(objExistingNego);
+    }
+    else
+    {
+        pMediaNego->CreateProfile(m_pEnvironment);
     }
 
     m_objMapMediaNego.Add(reinterpret_cast<IMS_UINTP>(pMediaNego), pMediaNego);

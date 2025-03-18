@@ -103,10 +103,6 @@ public:
     static void ReleaseInstance(MediaProfileFactory* pMediaProfileFactory);
 
 private:
-    AudioProfile* CreateAudioProfile();
-    VideoProfile* CreateVideoProfile();
-    TextProfile* CreateTextProfile();
-
     AudioProfile::Payload* CreateAudioPayload(IN AudioProfile::Payload* payload = IMS_NULL);
     TextProfile::Payload* CreateTextPayload(IN TextProfile::Payload* payload = IMS_NULL);
     VideoProfile::Payload* CreateVideoPayload(IN VideoProfile::Payload* payload = IMS_NULL);

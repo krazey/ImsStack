@@ -31,6 +31,7 @@ PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         m_pSdpParser(std::make_unique<VideoSdpParser>())
 {
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);
+
     m_pSdpGenerator = std::make_shared<VideoSdpGenerator>();
     m_pProfileNegotiator = std::make_shared<VideoProfileNegotiator>();
     m_pProfileGenerator = std::make_shared<VideoProfileGenerator>();
@@ -38,8 +39,14 @@ PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
 
 PUBLIC
 VideoNego::VideoNego(IN const VideoNego& obj) :
-        BaseNego(obj.GetSlotId())
+        BaseNego(obj),
+        m_pSdpParser(std::make_unique<VideoSdpParser>())
 {
+    IMS_TRACE_I("+VideoNego() - slot[%d]", GetSlotId(), 0, 0);
+
+    m_pSdpGenerator = std::make_shared<VideoSdpGenerator>();
+    m_pProfileNegotiator = std::make_shared<VideoProfileNegotiator>();
+    m_pProfileGenerator = std::make_shared<VideoProfileGenerator>();
     Copy(&obj);
 }
 
@@ -48,8 +55,13 @@ VideoNego& VideoNego::operator=(IN const VideoNego& obj)
 {
     if (this != &obj)
     {
+        BaseNego::operator=(obj);
+        m_pSdpGenerator = std::make_shared<VideoSdpGenerator>();
+        m_pProfileNegotiator = std::make_shared<VideoProfileNegotiator>();
+        m_pProfileGenerator = std::make_shared<VideoProfileGenerator>();
         Copy(&obj);
     }
+
     return (*this);
 }
 

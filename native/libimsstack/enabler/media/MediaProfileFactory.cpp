@@ -14,29 +14,10 @@
  * limitations under the License.
  */
 
-#include "IService.h"
 #include "ServiceTrace.h"
-
-#include "MediaEnvironment.h"
-#include "MediaManager.h"
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
-#include "MediaResourceManager.h"
-
-#include "audio/AudioDef.h"
-#include "audio/AudioProfileUtil.h"
-#include "config/CodecAvcConfig.h"
-#include "config/CodecAmrConfig.h"
-#include "config/CodecEvsConfig.h"
-#include "config/CodecHevcConfig.h"
-#include "config/CodecPcmConfig.h"
-#include "config/CodecT140Config.h"
-#include "config/CodecTelephoneEventConfig.h"
-#include "config/ImsCodec.h"
-#include "config/AudioConfiguration.h"
-#include "config/TextConfiguration.h"
-#include "config/VideoConfiguration.h"
-#include "video/VideoProfileUtil.h"
+#include "audio/AudioProfile.h"
 
 static const IMS_SINT32 NOT_PRESENT = -1;
 
@@ -53,36 +34,28 @@ PUBLIC
 MediaBaseProfile* MediaProfileFactory::CreateProfile(
         IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile)
 {
-    MediaBaseProfile* pNewProfile = IMS_NULL;
-
     switch (eType)
     {
         case MEDIA_TYPE_AUDIO:
-            pNewProfile = CreateAudioProfile();
-            if (pProfile != IMS_NULL)
-            {
-                *static_cast<AudioProfile*>(pNewProfile) = *static_cast<AudioProfile*>(pProfile);
-            }
-            break;
-        case MEDIA_TYPE_TEXT:
-            pNewProfile = CreateTextProfile();
-            if (pProfile != IMS_NULL)
-            {
-                *static_cast<TextProfile*>(pNewProfile) = *static_cast<TextProfile*>(pProfile);
-            }
-            break;
+        {
+            return pProfile != IMS_NULL ? new AudioProfile(*static_cast<AudioProfile*>(pProfile))
+                                        : new AudioProfile();
+        }
         case MEDIA_TYPE_VIDEO:
-            pNewProfile = CreateVideoProfile();
-            if (pProfile != IMS_NULL)
-            {
-                *static_cast<VideoProfile*>(pNewProfile) = *static_cast<VideoProfile*>(pProfile);
-            }
-            break;
+        {
+            return pProfile != IMS_NULL ? new VideoProfile(*static_cast<VideoProfile*>(pProfile))
+                                        : new VideoProfile();
+        }
+        case MEDIA_TYPE_TEXT:
+        {
+            return pProfile != IMS_NULL ? new TextProfile(*static_cast<TextProfile*>(pProfile))
+                                        : new TextProfile();
+        }
         default:
+            IMS_TRACE_I("CreateProfile(): invalid type[%d]", eType, 0, 0);
             break;
     }
-
-    return pNewProfile;
+    return IMS_NULL;
 }
 
 PUBLIC
@@ -104,6 +77,7 @@ MediaBaseProfile::BasePayload* MediaProfileFactory::CreatePayload(IN MEDIA_CONTE
         case MEDIA_TYPE_VIDEO:
             return CreateVideoPayload();
         default:
+            IMS_TRACE_I("CreatePayload(): invalid type[%d]", eType, 0, 0);
             return IMS_NULL;
     }
 }
@@ -171,19 +145,4 @@ PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateVideoPayload(
 {
     return (payload != IMS_NULL) ? new VideoProfile::Payload(*payload)
                                  : new VideoProfile::Payload();
-}
-
-PRIVATE AudioProfile* MediaProfileFactory::CreateAudioProfile()
-{
-    return new AudioProfile();
-}
-
-PRIVATE TextProfile* MediaProfileFactory::CreateTextProfile()
-{
-    return new TextProfile();
-}
-
-PRIVATE VideoProfile* MediaProfileFactory::CreateVideoProfile()
-{
-    return new VideoProfile();
 }

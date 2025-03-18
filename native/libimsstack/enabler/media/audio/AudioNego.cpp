@@ -33,16 +33,23 @@ AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         m_pSdpParser(std::make_unique<AudioSdpParser>())
 {
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
+
     m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
     m_pProfileNegotiator = std::make_shared<AudioProfileNegotiator>();
     m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
 }
 
 PUBLIC
-AudioNego::AudioNego(IN const AudioNego& objAudioNego) :
-        BaseNego(objAudioNego.GetSlotId())
+AudioNego::AudioNego(IN const AudioNego& obj) :
+        BaseNego(obj),
+        m_pSdpParser(std::make_unique<AudioSdpParser>())
 {
-    Copy(&objAudioNego);
+    IMS_TRACE_I("+AudioNego() - slot[%d]", GetSlotId(), 0, 0);
+
+    m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
+    m_pProfileNegotiator = std::make_shared<AudioProfileNegotiator>();
+    m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
+    Copy(&obj);
 }
 
 PUBLIC
@@ -50,8 +57,13 @@ AudioNego& AudioNego::operator=(IN const AudioNego& obj)
 {
     if (this != &obj)
     {
+        BaseNego::operator=(obj);
+        m_pSdpGenerator = std::make_shared<AudioSdpGenerator>();
+        m_pProfileNegotiator = std::make_shared<AudioProfileNegotiator>();
+        m_pProfileGenerator = std::make_shared<AudioProfileGenerator>();
         Copy(&obj);
     }
+
     return (*this);
 }
 
@@ -602,11 +614,13 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
             m_pProfileNegotiator == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAnswer(): invalid arguments", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
     if (m_listOaModel.GetSize() < 1)
     {
+        IMS_TRACE_E(0, "NegotiateAnswer(): empty OA model", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
@@ -626,6 +640,7 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     if (m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
             IMS_TRUE)
     {
+        IMS_TRACE_E(0, "NegotiateAnswer(): fail to parse SDP", 0, 0, 0);
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
@@ -639,6 +654,7 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
                     ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
                             IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
     {
+        IMS_TRACE_E(0, "NegotiateAnswer(): fail to negotiate SDP", 0, 0, 0);
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
