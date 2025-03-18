@@ -16,6 +16,7 @@
 -->
 <carrier_config>
     <!-- Aos -->
+    <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Ut/Xcap Config -->
