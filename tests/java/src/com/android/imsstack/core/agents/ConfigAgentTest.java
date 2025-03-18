@@ -167,6 +167,7 @@ public class ConfigAgentTest {
         mConfigAgent.init(mTestAppContext.getContext());
 
         when(am.list(eq(CarrierConfig.CARRIER_CONFIG))).thenReturn(new String[0]);
+        when(am.list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG))).thenReturn(new String[0]);
         SimCarrierId scid = new SimCarrierId.Builder()
                 .setCarrierId(1)
                 .setSpecificCarrierId(2)
@@ -177,6 +178,7 @@ public class ConfigAgentTest {
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
         verify(ccmp).getConfigForSubId(eq(SUB_ID_1), any());
         verify(am, times(2)).list(eq(CarrierConfig.CARRIER_CONFIG));
+        verify(am).list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG));
     }
 
     @Test

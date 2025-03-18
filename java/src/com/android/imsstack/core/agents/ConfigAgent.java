@@ -72,6 +72,7 @@ public class ConfigAgent implements ConfigInterface {
     private final IntentReceiver mIntentReceiver;
     private volatile boolean mConfigLoaded;
     private PersistableBundle mDefaultImsConfig;
+    private PersistableBundle mDefaultPublicConfig;
     private PersistableBundle mTestConfig;
     private XmlPullParserFactory mFactory;
 
@@ -85,6 +86,8 @@ public class ConfigAgent implements ConfigInterface {
     public void init(Context context) {
         mDefaultImsConfig = readCarrierConfigFromAsset(
                 CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, null);
+        mDefaultPublicConfig = readCarrierConfigFromAsset(
+                CarrierConfig.DEFAULT_PUBLIC_CARRIER_CONFIG_FILE, null);
         mIntentReceiver.register();
     }
 
@@ -185,18 +188,17 @@ public class ConfigAgent implements ConfigInterface {
      * @param id The SIM carrier identifier.
      */
     public void updateCarrierConfig(int subId, SimCarrierId id) {
-        // Loads IMS carrier configuration from CarrierConfigManager.
-        PersistableBundle config = getCarrierConfig(subId);
+        PersistableBundle config = new PersistableBundle();
 
-        // Sets a default configuration from assets.
+        // Sets a default internal configuration.
         config.putAll(mDefaultImsConfig);
 
-        // Loads IMS internal carrier configuration from asset.
+        // Sets the internal carrier configuration.
         // 1) Precedence: specific-carrier-id > carrier-id > carrier-id-from-sim-mcc-mnc.
         // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
         PersistableBundle internalConfig;
 
-        // Reads the parent carrier configuration first if present.
+        // Sets the parent carrier configuration first if present.
         if (id.getSpecificCarrierId() != SimCarrierId.UNKNOWN_ID
                 && id.getCarrierId() != id.getSpecificCarrierId()) {
             SimCarrierId parentId = new SimCarrierId.Builder()
@@ -215,6 +217,22 @@ public class ConfigAgent implements ConfigInterface {
         internalConfig = readCarrierConfigFromRes(R.xml.carrier_config_override, id);
         CarrierConfig.overrideNestedBundles(config, internalConfig);
         config.putAll(internalConfig);
+
+        // Sets the public carrier configuration from CarrierConfigManager.
+        PersistableBundle publicConfig = getCarrierConfig(subId);
+        config.putAll(publicConfig);
+
+        // Sets the internal public carrier configuration.
+        if (config.getBoolean(CarrierConfig.KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL, true)) {
+            ImsLog.d(this, mSlotId, "Overriding public configs...");
+            publicConfig = new PersistableBundle(mDefaultPublicConfig);
+            CarrierConfig.overrideNestedBundles(config, publicConfig);
+            config.putAll(publicConfig);
+
+            publicConfig = readCarrierConfig(subId, id, false);
+            CarrierConfig.overrideNestedBundles(config, publicConfig);
+            config.putAll(publicConfig);
+        }
 
         // Loads override configs in the hidden key of CarrierConfigManager
         overrideHiddenConfigs(subId, config);
@@ -307,7 +325,12 @@ public class ConfigAgent implements ConfigInterface {
 
     @VisibleForTesting
     protected PersistableBundle readCarrierConfig(int subId, SimCarrierId id) {
-        String fileName = getCarrierConfigFile(subId, id);
+        return readCarrierConfig(subId, id, true);
+    }
+
+    private PersistableBundle readCarrierConfig(int subId, SimCarrierId id, boolean isInternal) {
+        String fileName = getCarrierConfigFile(subId, id,
+                isInternal ? CarrierConfig.CARRIER_CONFIG : CarrierConfig.PUBLIC_CARRIER_CONFIG);
 
         if (TextUtils.isEmpty(fileName)) {
             ImsLog.d(this, mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
@@ -346,7 +369,7 @@ public class ConfigAgent implements ConfigInterface {
         }
     }
 
-    private String getCarrierConfigFile(int subId, SimCarrierId id) {
+    private String getCarrierConfigFile(int subId, SimCarrierId id, @NonNull String path) {
         String fileName = null;
 
         if (id.getCarrierId() == SimCarrierId.UNKNOWN_ID) {
@@ -360,7 +383,7 @@ public class ConfigAgent implements ConfigInterface {
             String[] files = null;
 
             try {
-                files = AppContext.getInstance().getAssets().list(CarrierConfig.CARRIER_CONFIG);
+                files = AppContext.getInstance().getAssets().list(path);
             } catch (IOException e) {
                 ImsLog.e(this, mSlotId, "getCarrierConfigFile: " + e);
                 return null;
@@ -399,7 +422,7 @@ public class ConfigAgent implements ConfigInterface {
             return null;
         }
 
-        return CarrierConfig.CARRIER_CONFIG + "/" + fileName;
+        return path + "/" + fileName;
     }
 
     private PersistableBundle readConfigFromXml(XmlPullParser parser, SimCarrierId id)
