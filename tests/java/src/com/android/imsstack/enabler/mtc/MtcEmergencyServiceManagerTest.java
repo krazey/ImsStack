@@ -38,6 +38,7 @@ import android.testing.TestableLooper;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 
@@ -49,6 +50,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -66,6 +70,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     @Mock private ICallStateTracker mICallStateTracker;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigInterface mMockConfigInterface;
+    @Mock private TelephonyInterface mMockTelephonyInterface;
     @Captor ArgumentCaptor<MtcEmergencyServiceManager.ECallStateListener> mECallStateListenerCaptor;
 
     private MtcEmergencyServiceManager mTestMtcEmergencyServiceManager;
@@ -75,6 +80,8 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class,
+                mMockTelephonyInterface, SLOT_ID);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         doReturn(mServiceStateTracker).when(mMockContext).getServiceStateTracker();
 
@@ -120,7 +127,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     public void testOpenEmergencyService() {
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "", mServiceStateTracker);
         processAllMessages();
 
         assertEquals(1, mNativeObject);
@@ -138,7 +145,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
                 .thenReturn(true);
 
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "", mServiceStateTracker);
         processAllMessages();
 
         assertEquals(1, mNativeObject);
@@ -150,9 +157,115 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
                 .thenReturn(false);
 
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "", mServiceStateTracker);
         processAllMessages();
 
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_NORMAL, mEmergencyRouting);
+    }
+
+    @Test
+    public void testOpenEmergencyServiceForDynamicRouting() {
+        mTestMtcEmergencyServiceManager.setNativeObject(1);
+        when(mMockMtcCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false))
+                .thenReturn(false);
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL))
+                .thenReturn(false);
+        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("us");
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn("55");
+
+        String[] dynamicNumbers = {"us,,555", "us,66,666", "us,,777"};
+        when(mMockCarrierConfig.getStringArray(
+                CarrierConfig.ImsEmergency.KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY))
+                .thenReturn(dynamicNumbers);
+
+        EmergencyNumber num555 = new EmergencyNumber("555", "us", "",
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE, new ArrayList<String>(),
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
+        EmergencyNumber num666 = new EmergencyNumber("666", "us", "",
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE, new ArrayList<String>(),
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
+        EmergencyNumber num777 = new EmergencyNumber("777", "us", "",
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE, new ArrayList<String>(),
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
+        List<EmergencyNumber> list = new ArrayList<>();
+        list.add(num555);
+        list.add(num666);
+        list.add(num777);
+        when(mMockTelephonyInterface.getEmergencyNumberList()).thenReturn(list);
+
+        // Non dynamic routing number by routing
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "555", mServiceStateTracker);
+        processAllMessages();
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, mEmergencyRouting);
+
+        // Non dynamic routing number by source
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "777", mServiceStateTracker);
+        processAllMessages();
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, mEmergencyRouting);
+
+        // Non dynamic routing number by country
+        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("kr");
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555", mServiceStateTracker);
+        processAllMessages();
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, mEmergencyRouting);
+
+        // Non dynamic routing number by number
+        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("us");
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "911", mServiceStateTracker);
+        processAllMessages();
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, mEmergencyRouting);
+
+        // Non dynamic routing number by mnc
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "666", mServiceStateTracker);
+        processAllMessages();
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, mEmergencyRouting);
+
+        // Dynamic routing number without IMS REG
+        when(mServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP))
+                .thenReturn(false);
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555", mServiceStateTracker);
+        processAllMessages();
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, mEmergencyRouting);
+
+        // Dynamic routing number with IMS REG
+        when(mServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP))
+                .thenReturn(true);
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555", mServiceStateTracker);
+        processAllMessages();
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+        assertEquals(IUMtcCall.SERVICETYPE_NORMAL, mEmergencyRouting);
+
+        // Dynamic routing number with IMS REG
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn("66");
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "666", mServiceStateTracker);
+        processAllMessages();
         assertEquals(1, mNativeObject);
         assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
         assertEquals(IUMtcCall.SERVICETYPE_NORMAL, mEmergencyRouting);
@@ -162,7 +275,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     public void testStopEmergencyService() {
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "", mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
 
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
@@ -202,7 +315,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "", mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
                 mECallStateListenerCaptor.getValue();
@@ -216,7 +329,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "", mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
                 mECallStateListenerCaptor.getValue();
@@ -238,7 +351,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "", mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
                 mECallStateListenerCaptor.getValue();

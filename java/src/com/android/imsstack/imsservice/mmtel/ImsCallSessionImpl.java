@@ -397,6 +397,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return;
         }
 
+        if (mCall.isEmergencyCall()) {
+            ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
+            callApp.getCallManager().getMtcApp().openEmergencyService(
+                    mCall, ImsCallUtils.getEmergencyRoutingFromCallProfile(profile), callee);
+        }
+
         int state = getState();
 
         if ((state != ImsCallSessionImplBase.State.IDLE)

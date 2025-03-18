@@ -234,11 +234,12 @@ public class ImsTestHelperTest extends ImsStackTest {
         intentSrv.setAction(INTENT_MTC_TEST);
         intentSrv.putExtra("slotid", SLOT0);
         intentSrv.putExtra("command", 100);
+        intentSrv.putExtra("callee", "911");
         intentSrv.putExtra("extras", extra);
 
         mBroadcastReceiver.onReceive(mContext, intentSrv);
         verify(mImsServiceManager).getCallApp(SLOT0);
-        verify(mtcApp).openEmergencyService(any(), anyInt());
+        verify(mtcApp).openEmergencyService(any(), anyInt(), anyString());
     }
 
     @Test

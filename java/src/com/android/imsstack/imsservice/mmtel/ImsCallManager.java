@@ -19,8 +19,6 @@ package com.android.imsstack.imsservice.mmtel;
 import android.os.PowerManager;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-import android.telephony.emergency.EmergencyNumber;
-import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
@@ -151,14 +149,10 @@ public class ImsCallManager {
     public ImsCallSessionImpl createSession(ImsCallProfile profile) {
         boolean offline = false;
         boolean ussi = false;
-        @EmergencyCallRouting int emergencyRouting =
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN;
-
         int sessionAttributes = MtcCall.FLAG_MO;
 
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
-            emergencyRouting = ImsCallUtils.getEmergencyRoutingFromCallProfile(profile);
 
             // ECBM
             checkAndExitEcbm();
@@ -204,9 +198,7 @@ public class ImsCallManager {
         callSession.setCallConnectionId(ccId);
         ImsCallConnectionIds.add(mCallContext.getSlotId(), ccId);
 
-        if (call.isEmergencyCall()) {
-            mMtcApp.openEmergencyService(call, emergencyRouting);
-        } else {
+        if (!call.isEmergencyCall()) {
             call.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE, offline, ussi);
         }
 
