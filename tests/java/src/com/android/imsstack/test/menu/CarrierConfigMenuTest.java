@@ -470,6 +470,11 @@ public class CarrierConfigMenuTest {
                 CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, true);
         PersistableBundle descPb = mCarrierConfig.getConfig().getPersistableBundle(
                 TEST_CONFIG_BUNDLE_PLAYLOAD_DESC);
+        if (descPb == null) {
+            descPb = new PersistableBundle();
+            mCarrierConfig.getConfig().putPersistableBundle(
+                    TEST_CONFIG_BUNDLE_PLAYLOAD_DESC, descPb);
+        }
         PersistableBundle payloadPb = descPb.getPersistableBundle(TEST_CONFIG_PAYLOAD_TYPE);
         if (payloadPb == null) {
             payloadPb = new PersistableBundle();

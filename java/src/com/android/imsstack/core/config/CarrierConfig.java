@@ -36,12 +36,20 @@ import java.util.StringTokenizer;
 public class CarrierConfig {
     // Assets path / files
     public static final String CARRIER_CONFIG = "carrier_config";
+    public static final String PUBLIC_CARRIER_CONFIG = "carrier_config/public";
     // A default configuration file.
     public static final String DEFAULT_CARRIER_CONFIG_FILE =
             CARRIER_CONFIG + "/carrier_config.xml";
+    public static final String DEFAULT_PUBLIC_CARRIER_CONFIG_FILE =
+            PUBLIC_CARRIER_CONFIG + "/carrier_config.xml";
     // Non-Assets file
     public static final String TEST_CARRIER_CONFIG_FILE =
             "test_carrier_config.xml";
+    // This key is a special carrier config value used to avoid overriding the public carrier
+    // config within Assets.
+    // The default value is true.
+    public static final String KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL =
+            "ims.override_public_config_bool";
 
     /** Configuration items for IMS common. */
     @SuppressWarnings("deprecation")
@@ -145,7 +153,8 @@ public class CarrierConfig {
         CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY,
         CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY,
         CarrierConfigManager.Ims.KEY_NR_SA_DISABLE_POLICY_INT,
-        CarrierConfigManager.Ims.KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL
+        CarrierConfigManager.Ims.KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL,
+        KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL
     };
 
     public static final String[] IMS_VOICE_PREFIX_KEYS = {
