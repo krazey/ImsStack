@@ -16,8 +16,6 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="support_emergency_sms_over_ims_bool" value="true"/>
-    <boolean name="carrier_wfc_ims_available_bool" value="true"/>
     <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="true"/>
     <boolean name="ims.allow_no_position_in_geolocation_pidf_bool" value="false"/>
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
@@ -28,7 +26,6 @@
     <boolean name="ims.support_local_session_timer_bool" value="true"/>
     <boolean name="imsemergency.support_ecbm_for_volte_bool" value="true"/>
     <boolean name="imsemergency.support_ecbm_for_vowifi_bool" value="true"/>
-    <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
     <int name="ims.hide_mac_address_in_pani_header_int" value="2"/>
     <int name="ims.location_policy_update_type_int" value="1"/>
     <int name="ims.location_acquisition_policy_int" value="131328"/>
@@ -42,7 +39,6 @@
     <boolean name="ims.reg_contact_validation_bool" value="true"/>
     <boolean name="ims.request_ims_pdn_without_mmtel_bool" value="true"/>
     <boolean name="ims.required_cdmaless_feature_tag_bool" value="true"/>
-    <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
     <boolean name="ims.use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
     <int name="ims.ims_establishment_time_sec_int" value="120"/>
@@ -173,24 +169,12 @@
     <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="true"/>
 
     <!-- MTC default -->
-    <int name="ims.request_uri_type_int" value="0"/>
     <boolean name="imsvoice.maintain_multiple_early_sessions_by_forking_bool" value="false"/>
     <boolean name="imsvoice.stop_ringback_timer_by_183_with_sdp_body_bool" value="true"/>
-    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
-    <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
-    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="-1"/>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="6000"/>
-    <int name="imsvoice.ringing_timer_millis_int" value="55000"/>
-    <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
     <int name="imsvoice.18x_timer_millis_int" value="32000"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="3"/>
-    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="600"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
-    <int name="imsvoice.session_refresher_type_int" value="0"/>
-    <int name="imsvoice.session_refresh_method_int" value="1"/>
-    <int name="imsvoice.session_expires_timer_sec_int" value="300"/>
-    <int name="imsvoice.minimum_session_expires_timer_sec_int" value="300"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="5"/>
     <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="2"/>
@@ -220,10 +204,6 @@
     <int-array name="imsvt.vilte_to_volte_retry_failure_response_code_int_array" num="0"></int-array>
     <boolean name="imswfc.enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
     <int name="imsvoice.policy_qos_precondition_mechanism_while_call_modification_int" value="0"/>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
-        <item value="2"/>
-        <item value="4"/>
-    </int-array>
     <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
         <item value="0"/> <!-- EMERGENCY_LTE-->
         <item value="0"/> <!-- EMERGENCY_WIFI -->
@@ -299,8 +279,6 @@
     <string name="imsvoice.call_reject_reason_phrase_vops_off_string">VOPS OFF</string>
 
     <!-- MTC conference call -->
-    <string name="imsvoice.conference_factory_uri_string">sip:confserver@vzims.com</string>
-    <int name="imsvoice.conference_subscribe_type_int" value="0"/>
     <boolean name="imsvoice.check_conference_event_package_version_bool" value="true"/>
     <boolean name="imsvoice.conference_refer_to_uri_source_paid_bool" value="true"/>
     <int name="imsvoice.conference_drop_refer_to_uri_source_type_int" value="1"/>
@@ -310,8 +288,6 @@
     <boolean name="imsvoice.incoming_resume_event_support_bool" value="true"/>
     <boolean name="imsvoice.support_conference_refer_subscribe_bool" value="true"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="0"/>
-
-    <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
 
     <!-- MTC emergency call -->
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
@@ -379,94 +355,6 @@
 
     <!-- Media -->
     <boolean name="imsvoice.media_anbr_capability_in_modem_bool" value="true"/>
-    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.evs_payload_type_int_array" num="2">
-            <item value="115"/>
-            <item value="109"/>
-        </int-array>
-        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
-            <item value="104"/>
-            <item value="110"/>
-        </int-array>
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="3">
-            <item value="102"/>
-            <item value="108"/>
-            <item value="106"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
-            <item value="105"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="100"/>
-        </int-array>
-    </pbundle>
-    <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="115">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
-            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-                <item value="0"/>
-                <item value="4"/>
-            </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="3"/>
-            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
-        </pbundle>
-        <pbundle name="109">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="2"/>
-            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-                <item value="4"/>
-                <item value="4"/>
-            </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="3"/>
-            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle name="104">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
-                <item value="2"/>
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-        </pbundle>
-        <pbundle name="110">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
-                <item value="2"/>
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle name="102">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
-                <item value="7"/>
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-        </pbundle>
-        <pbundle name="108">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
-                <item value="7"/>
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-        </pbundle>
-        <pbundle name="106">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
-        <int-array name="imsvt.hevc_payload_type_int_array" num="1">
-            <item value="115"/>
-        </int-array>
-        <int-array name="imsvt.h264_payload_type_int_array" num="3">
-            <item value="121"/>
-            <item value="122"/>
-            <item value="123"/>
-        </int-array>
-    </pbundle>
     <pbundle name="imsvt.hevc_payload_description_bundle">
         <pbundle name="115">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
@@ -479,40 +367,7 @@
             <int name="imsvt.hevc_level_int" value="93"/>
         </pbundle>
     </pbundle>
-    <pbundle name="imsvt.h264_payload_description_bundle">
-        <pbundle name="121">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">640C1F</string>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="480"/>
-                <item value="640"/>
-            </int-array>
-        </pbundle>
-        <pbundle name="122">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C01F</string>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="480"/>
-                <item value="640"/>
-            </int-array>
-        </pbundle>
-        <pbundle name="123">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="240"/>
-                <item value="320"/>
-            </int-array>
-        </pbundle>
-    </pbundle>
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
-    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
-        <int name="imsrtt.t140_payload_type_int" value="111"/>
-        <int name="imsrtt.red_payload_type_int" value="112"/>
-    </pbundle>
-    <int name="imsvt.video_as_bandwidth_kbps_int" value="425"/>
-    <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
-    <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
     <int name="imsvoice.audio_maxred_int" value="-1"/>
@@ -522,9 +377,6 @@
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
     <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="38"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="800"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2400"/>
     <boolean name="imsvoice.audio_rtcpxr_enable_bool" value="true"/>
     <boolean name="imsvoice.audio_rtcpxr_statistics_bool" value="true"/>
     <boolean name="imsvoice.audio_rtcpxr_voip_metrics_bool" value="true"/>
@@ -553,5 +405,4 @@
     </int-array>
     <int name="imsrtt.text_rtp_inactivity_timer_millis_int" value="-1"/>
     <int name="imsrtt.text_rtcp_inactivity_timer_millis_int" value="-1"/>
-
 </carrier_config>

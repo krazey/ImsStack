@@ -15,8 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
-
     <!-- Aos -->
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
@@ -25,10 +23,4 @@
 
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
-    <!-- Previous solution was using 80 as a port, but Bouygues' requirement is 4000 -->
-    <int name="imsss.ut_as_server_port_int" value="4000"/>
-
 </carrier_config>

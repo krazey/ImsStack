@@ -23,77 +23,6 @@
     <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
 
     <!-- MEDIA -->
-    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="127"/>
-        </int-array>
-        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
-            <item value="115"/>
-            <item value="114"/>
-        </int-array>
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
-            <item value="97"/>
-            <item value="96"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
-            <item value="103"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="105"/>
-        </int-array>
-    </pbundle>
-    <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="127">
-            <int name="imsvoice.codec_attribute_cmr_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
-            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-                <item value="0"/>
-                <item value="6"/>
-            </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="0"/>
-            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle name="115">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="114">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle name="97">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="96">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
-        <int-array name="imsvt.hevc_payload_type_int_array" num="1">
-            <item value="125"/>
-        </int-array>
-        <int-array name="imsvt.h264_payload_type_int_array" num="2">
-            <item value="119"/>
-            <item value="120"/>
-        </int-array>
-    </pbundle>
     <pbundle name="imsvt.hevc_payload_description_bundle">
         <pbundle name="125">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
@@ -105,26 +34,6 @@
             <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
             <int name="imsvt.hevc_profile_int" value="1"/>
             <int name="imsvt.hevc_level_int" value="93"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvt.h264_payload_description_bundle">
-        <pbundle name="119">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
-            <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="480"/>
-                <item value="640"/>
-            </int-array>
-        </pbundle>
-        <pbundle name="120">
-            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
-            <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="240"/>
-                <item value="320"/>
-            </int-array>
         </pbundle>
     </pbundle>
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
@@ -145,50 +54,12 @@
     <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
     <boolean name="imsvoice.media_session_level_bandwidth_bool" value="true"/>
 
-    <!-- Ut/Xcap AOSP -->
-    <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
-    <int-array name="imsss.ut_server_based_services_int_array" num="22">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="2"/>
-        <item value="3"/>
-        <item value="4"/>
-        <item value="5"/>
-        <item value="6"/>
-        <item value="7"/>
-        <item value="8"/>
-        <item value="9"/>
-        <item value="10"/>
-        <item value="11"/>
-        <item value="12"/>
-        <item value="13"/>
-        <item value="14"/>
-        <item value="15"/>
-        <item value="16"/>
-        <item value="17"/>
-        <item value="18"/>
-        <item value="19"/>
-        <item value="20"/>
-        <item value="21"/>
-    </int-array>
-    <int-array name="imsss.xcap_over_ut_supported_rats_int_array" num="5">
-        <item value="3"/>
-        <item value="6"/>
-        <item value="5"/>
-        <item value="1"/>
-        <item value="2"/>
-    </int-array>
-
     <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
     <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="false"/>
 
     <!-- MTC -->
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
-    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
-    <int name="imsvoice.session_refresher_type_int" value="0"/>
-    <int name="imsvoice.session_refresh_method_int" value="1"/>
-    <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
     <boolean name="imsvoice.add_replace_header_for_conference_bool" value="true"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">
         <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
@@ -209,14 +80,8 @@
         <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
-    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
-    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
-    <boolean name="imsvt.video_qos_precondition_supported_bool" value="true"/>
-    <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
-    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="8000"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="2"/>
     <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="true"/>
-    <string name="imsvoice.conference_factory_uri_string">sip:mmtel@conf-factory.test.3gpp.com</string>
     <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="4">
         <item value="1"/> <!-- EMERGENCY_LTE-->
         <item value="1"/> <!-- EMERGENCY_WIFI -->
@@ -225,9 +90,5 @@
     </int-array>
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
-    </int-array>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
-        <item value="2"/>
-        <item value="4"/>
     </int-array>
 </carrier_config>

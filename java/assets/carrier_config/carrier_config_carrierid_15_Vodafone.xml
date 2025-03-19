@@ -29,10 +29,4 @@
     </int-array>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
     <int name="imswfc.registration_private_header_int" value="1"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <!-- Previous solution was using 80 and TCP, but VDF AU requirements support both TCP and TLS,
-     and TLS is default -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
 </carrier_config>

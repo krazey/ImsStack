@@ -28,16 +28,8 @@
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->
-    <int name="ims.request_uri_type_int" value="1"/>
-    <int-array name="imsvoice.srvcc_type_int_array" num="4">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="2"/>
-        <item value="3"/>
-    </int-array>
     <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
-    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
@@ -45,10 +37,4 @@
 
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <int name="imsss.ut_as_server_port_int" value="80"/>
-    <int name="imsss.ut_transport_type_int" value="1"/>
 </carrier_config>

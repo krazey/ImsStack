@@ -16,9 +16,6 @@
 -->
 <carrier_config>
     <!-- Carrier configurations -->
-    <!-- Ims General -->
-    <string name="ims.ims_user_agent_string">#IMEISV#_suppfork</string>
-
     <!-- Aos -->
     <boolean name="ims.use_tcp_transport_for_register_bool" value="true"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
@@ -54,43 +51,15 @@
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="8000"/>
     <int name="imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int" value="3000"/>
 
-    <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <int-array name="imsss.ut_terminal_based_services_int_array" num="1">
-        <item value="10"/>
-    </int-array>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
-    <!-- Previous solution was using 8090, but for TLS, requirement is 443 -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
-
     <!-- Ut/Xcap -->
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
     </int-array>
     <string name="imsss.ut_target_address_country_code_replace_to_zero_string">+81</string>
 
     <!-- MTC -->
-    <int name="ims.request_uri_type_int" value="1"/>
-    <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="true"/>
-    <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
-    <boolean name="imsvoice.session_timer_supported_bool" value="true"/>
-    <int name="imsvoice.session_refresher_type_int" value="0"/>
-    <int name="imsvoice.session_privacy_type_int" value="2"/>
-    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
-    <int name="imsvoice.conference_subscribe_type_int" value="1"/>
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
-    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
-    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="4000"/>
-    <int name="imsvoice.ringing_timer_millis_int" value="330000"/>
-    <int name="imsvoice.ringback_timer_millis_int" value="600000"/>
-    <int name="imsvoice.session_refresh_method_int" value="1"/>
-    <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <int name="imsvoice.oip_type_for_unavailable_int" value="5"/>
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="10000"/>
-    <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="false"/>
-    <boolean name="imsemergency.emergency_callback_mode_supported_bool" value="true"/>
-    <boolean name="imsemergency.emergency_qos_precondition_supported_bool" value="true"/>
     <int name="imsvoice.18x_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="60000"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
@@ -151,80 +120,6 @@
         <item value="184"/>
     </string-array>
     <!-- Media -->
-    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.evs_payload_type_int_array" num="2">
-            <item value="106"/>
-            <item value="105"/>
-        </int-array>
-        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
-            <item value="104"/>
-            <item value="103"/>
-        </int-array>
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
-            <item value="102"/>
-            <item value="101"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
-            <item value="96"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="97"/>
-        </int-array>
-    </pbundle>
-    <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="106">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="2"/>
-            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-                <item value="3"/>
-                <item value="4"/>
-            </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
-            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
-        </pbundle>
-        <pbundle name="105">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="1"/>
-            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-                <item value="3"/>
-                <item value="4"/>
-            </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
-            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle name="104">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="103">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle name="102">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="101">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-    </pbundle>
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
     <int name="imsvoice.audio_maxred_int" value="0"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
@@ -234,9 +129,6 @@
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
     <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
     <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
         <item value="5"/>
         <item value="5"/>

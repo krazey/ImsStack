@@ -19,7 +19,6 @@
     <int name="ims.reg_retry_305_policy_int" value="3"/>
 
     <!-- MTC -->
-    <int name="ims.request_uri_type_int" value="1"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">
         <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
@@ -39,22 +38,10 @@
         <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
-    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
 
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <!-- fqdn is from previously solution. Currently, three types of UICCs are using carrier id 2008
-        for Videotron in AOSP, which are 302500, 302510, and 302520. So, it needs further
-        verification whether it's working with 510 and 520 UICCs for the FQDN of 500 .  -->
-    <string name="imsss.ut_as_server_fqdn_string">xcap.ims.mnc500.mcc302.pub.3gppnetwork.org</string>
-    <!-- Previous solution was using 8090, and there is no requirements -->
-    <int name="imsss.ut_as_server_port_int" value="8090"/>
-    <int name="imsss.ut_transport_type_int" value="1"/>
 </carrier_config>

@@ -15,19 +15,10 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
-
     <!-- Ims General -->
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
 
     <!-- Aos -->
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <!-- Previous solution was using 80 and TCP, but need to check actual operation with requirement
-    Mandatory TLS : Usage of encrypted communication, e.g. using TLS 1.2 or higher, is mandatory for
-    all vendor applications that are sending data to a remote party. -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
 </carrier_config>

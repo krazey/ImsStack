@@ -15,17 +15,8 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
-
     <!-- Aos -->
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <!-- Previous solution was using 80 and TCP, but O2 requirement is TLS -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
 
     <!-- Ut/Xcap Config -->
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">

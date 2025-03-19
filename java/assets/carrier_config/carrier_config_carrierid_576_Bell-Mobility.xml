@@ -29,12 +29,6 @@
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
     <!-- MTC -->
-    <int name="ims.request_uri_type_int" value="1"/>
-    <int-array name="imsvoice.srvcc_type_int_array" num="3">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="3"/>
-    </int-array>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="18">
         <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
@@ -56,14 +50,9 @@
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="600000"/>
-    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
-    </int-array>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
-        <item value="1"/> <!-- GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI -->
-        <item value="2"/> <!-- GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI -->
     </int-array>
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
@@ -89,13 +78,6 @@
 
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <string name="imsss.ut_as_server_fqdn_string">naf.ims.bell.ca</string>
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
 
     <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/MyService</string>
