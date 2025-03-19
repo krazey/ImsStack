@@ -75,8 +75,7 @@ private:
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
     void ReportMoStatus(
             IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
-    void ReportMtSms(IN SmsFormatType eSmsFormat, IN IMS_UINT32 nContentLength,
-            IN const IMS_BYTE* pbyContent);
+    void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent);
 
     IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objContent,
             IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency);

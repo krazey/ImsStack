@@ -19,6 +19,11 @@
 
 #include <gmock/gmock.h>
 #include "IMtsService.h"
+#include "MtsDef.h"
+
+class ICoreService;
+class IJniMtsServiceThread;
+class IMtsServiceState;
 
 class MockIMtsService : public IMtsService
 {
@@ -27,10 +32,7 @@ public:
 
     MOCK_METHOD(ICoreService*, GetICoreService, (IN IMS_BOOL bEmergency), (const, override));
     MOCK_METHOD(IMtsServiceState*, GetIMtsServiceState, (), (override));
-    MOCK_METHOD(void, ReportMoStatus,
-            (IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId), (override));
-    MOCK_METHOD(void, ReportMtSms, (IN SmsFormatType eSmsFormat, IN const ByteArray& objContent),
-            (override));
+    MOCK_METHOD(IJniMtsServiceThread*, GetJniServiceThread, (), (const, override));
     MOCK_METHOD(void, RequestRegistrationRecovery, (IN IMS_UINT32 nRecoveryType), (override));
     MOCK_METHOD(
             void, RequestRegisterWithNextPcscf, (IN const IMS_UINT32 nRetryAfterValue), (override));
