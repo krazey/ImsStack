@@ -46,6 +46,11 @@ TransactionTimerUpdateHelper::~TransactionTimerUpdateHelper()
 
 PUBLIC VIRTUAL void TransactionTimerUpdateHelper::SetInviteTransactionTimer()
 {
+    if (m_objContext.GetOtherCalls().GetSize() > 0)
+    {
+        return;
+    }
+
     m_bUpdated = MayUpdateForEpsFallbackTrigger() || MayUpdateForTcallTimerExpiry();
 }
 
@@ -130,15 +135,4 @@ IMS_BOOL TransactionTimerUpdateHelper::MayUpdateForTcallTimerExpiry()
             ? ConfigEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT
             : ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT;
     return UpdateTimer(IMS_TRUE, m_objConfiguration.GetInt(pszKey));
-}
-
-PRIVATE
-IMS_SINT32 TransactionTimerUpdateHelper::GetPolicyForTcallTimerExpiry(
-        IN const IMS_BOOL bEmergency, IN const IMS_BOOL bWifi) const
-{
-    const IMS_CHAR* pszKey = bEmergency
-            ? ConfigEmergency::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT
-            : (bWifi ? ConfigWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT
-                     : ConfigVoice::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT);
-    return m_objConfiguration.GetInt(pszKey);
 }
