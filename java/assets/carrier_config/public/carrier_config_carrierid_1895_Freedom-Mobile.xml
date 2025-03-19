@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<carrier_config>
+    <int name="ims.request_uri_type_int" value="1"/>
+    <int-array name="imsvoice.srvcc_type_int_array" num="4">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+    </int-array>
+    <int name="imsvoice.session_refresh_method_int" value="1"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:conf@mobilefrdm.ca</string>
+    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
+    <int name="gba_mode_int" value="1"/>
+    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
+    <!-- Previous solution was using 8090, but requirements is 80 -->
+    <int name="imsss.ut_as_server_port_int" value="8090"/>
+    <int name="imsss.ut_transport_type_int" value="1"/>
+</carrier_config>

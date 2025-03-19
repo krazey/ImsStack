@@ -24,10 +24,6 @@
     </int-array>
     <int name="imswfc.registration_private_header_int" value="2"/>
 
-    <!-- Ut/Xcap AOSP -->
-    <!-- Previous solution was using 7077, but requirement is 8080 -->
-    <int name="imsss.ut_as_server_port_int" value="8080"/>
-
     <!-- Media -->
     <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
 </carrier_config>
