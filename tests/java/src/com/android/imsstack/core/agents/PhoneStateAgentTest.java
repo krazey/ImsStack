@@ -419,6 +419,44 @@ public class PhoneStateAgentTest {
 
     @Test
     @SmallTest
+    public void testCallStateChangedWhenCallStateIsIdleWhileImsCallStateIsOffhook() {
+        int events = mPsAgent.getPhoneStateEvents().getEvents();
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, times(getEventCount(events)))
+                .registerTelephonyCallback(any(Executor.class), captor.capture());
+
+        TelephonyCallback.CallStateListener csListener = null;
+        for (TelephonyCallback callback : captor.getAllValues()) {
+            if (callback instanceof TelephonyCallback.CallStateListener) {
+                csListener = (TelephonyCallback.CallStateListener) callback;
+                break;
+            }
+        }
+
+        assertNotNull(csListener);
+
+        // Set IMS call state to OFFHOOK. And then Telephony call state is changed to IDLE. This may
+        // happen when ImsStack registers the CallStateListener when the call starts.
+        mPsAgent.setImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        // IMS call state should not be changed and there should be no notification at this time
+        // since the Telephony call state has not changed. IDLE ->IDLE.
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getImsCallState());
+        verify(mSystem, never()).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                eq(TelephonyManager.CALL_STATE_IDLE), eq(0));
+
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getImsCallState());
+        verify(mSystem, never()).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                eq(TelephonyManager.CALL_STATE_OFFHOOK), eq(0));
+    }
+
+    @Test
+    @SmallTest
     public void testCsCallStateChangedWhenSim1LoadedAndSim2Absent() {
         when(mSimInterface.getSimCardState()).thenReturn(Sim.STATE_PRESENT);
         when(mSimInterface.getSimState()).thenReturn(Sim.STATE_LOADED);

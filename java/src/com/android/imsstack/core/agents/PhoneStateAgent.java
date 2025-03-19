@@ -496,7 +496,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 ImsLog.i(this, mSlotId, "onCallStateChanged: "
                         + TelephonyInterface.callStateToString(mCallState) + " -> "
                         + TelephonyInterface.callStateToString(state));
-                if (state == TelephonyManager.CALL_STATE_IDLE) {
+                if (mCallState != state && state == TelephonyManager.CALL_STATE_IDLE) {
                     setImsCallState(state);
                 }
                 updateCsCallState(state);
