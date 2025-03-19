@@ -116,19 +116,7 @@ public class ImsRegistrationTracker {
 
         mRegImpl.setRegistrationTracker(this);
 
-        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
-        if (isr != null) {
-            ImsConfigImpl configImpl = isr.getConfig();
-            if (configImpl != null) {
-                mConfigListener = new ConfigListener();
-                configImpl.addListener(mConfigListener);
-            }
-        }
-
-        addNetWatcherListener();
-        if (!isIgnoreDataEnabledChangedForVideoCalls()) {
-            registerDataRoamingSettingObserver();
-        }
+        initialize();
     }
 
     public void dispose() {
@@ -138,19 +126,7 @@ public class ImsRegistrationTracker {
         mRegTracker.clear();
         mCapabilities.clear();
 
-        removeNetWatcherListener();
-        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
-        if (isr != null && mConfigListener != null) {
-            ImsConfigImpl configImpl = isr.getConfig();
-            if (configImpl != null) {
-                configImpl.removeListener(mConfigListener);
-            }
-        }
-
-        if (mDataRoamingSettingObserver != null) {
-            AppContext.getInstance().getContentProviderProxy().getGlobalSettings()
-                    .unregisterContentObserver(mDataRoamingSettingObserver);
-        }
+        cleanup();
     }
 
     public ImsRegistrationImpl getRegistration() {
@@ -205,6 +181,8 @@ public class ImsRegistrationTracker {
 
     public void refreshCallRegistrationState() {
         mRegTracker.clear();
+        cleanup();
+        initialize();
         mRegTracker.init();
     }
 
@@ -368,6 +346,40 @@ public class ImsRegistrationTracker {
         }
         logi("Final Capabilities" + capabilityPairs);
         return capabilityPairs;
+    }
+
+    protected void initialize() {
+        if (mConfigListener == null) {
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+            ImsConfigImpl configImpl = (isr != null) ? isr.getConfig() : null;
+            if (configImpl != null) {
+                mConfigListener = new ConfigListener();
+                configImpl.addListener(mConfigListener);
+            }
+        }
+
+        addNetWatcherListener();
+        if (!isIgnoreDataEnabledChangedForVideoCalls()) {
+            registerDataRoamingSettingObserver();
+        }
+    }
+
+    protected void cleanup() {
+        if (mConfigListener != null) {
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+            ImsConfigImpl config = (isr != null) ? isr.getConfig() : null;
+            if (config != null) {
+                config.removeListener(mConfigListener);
+            }
+            mConfigListener = null;
+        }
+
+        removeNetWatcherListener();
+        if (mDataRoamingSettingObserver != null) {
+            AppContext.getInstance().getContentProviderProxy().getGlobalSettings()
+                    .unregisterContentObserver(mDataRoamingSettingObserver);
+            mDataRoamingSettingObserver = null;
+        }
     }
 
     private CapabilityPairs createSmsCapabilityPairs() {
@@ -798,22 +810,7 @@ public class ImsRegistrationTracker {
                 return;
             }
 
-            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
-            if (isr != null) {
-                ImsConfigImpl configImpl = isr.getConfig();
-                if (configImpl != null) {
-                    if (mConfigListener == null) {
-                        mConfigListener = new ConfigListener();
-                    }
-                    configImpl.addListener(mConfigListener);
-                }
-            }
-
-            addNetWatcherListener();
-
-            if (!isIgnoreDataEnabledChangedForVideoCalls()) {
-                registerDataRoamingSettingObserver();
-            }
+            initialize();
 
             if (mAosReg == null) {
                 mAosReg = getIAosRegistration(mContext.getSlotId());
@@ -840,7 +837,7 @@ public class ImsRegistrationTracker {
             }
             mAosReg = null;
 
-            removeNetWatcherListener();
+            cleanup();
         }
 
         private int convertToTelephonyCapability(int capability) {
