@@ -94,12 +94,14 @@ public:
     MockIMtcRadioChecker objRadioChecker;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MessageUtils objMessageUtils;
+    MockIMtcCallManager objCallManager;
 
 protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
 
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
@@ -119,6 +121,8 @@ protected:
                             return std::make_unique<MockMtcTimerWrapper>();
                         }));
         ON_CALL(objContext, GetRadioChecker).WillByDefault(ReturnRef(objRadioChecker));
+
+        ON_CALL(objCallManager, GetCallsExcluding(_)).WillByDefault(Return(ImsList<IMtcCall*>()));
     }
 
     virtual void TearDown() override
@@ -143,6 +147,38 @@ protected:
     std::unique_ptr<MockIMtcCallStateFactory> CreateStateFactory()
     {
         return CreateStateFactory(new MockIMtcCallState());
+    }
+
+    void SetIsCsfbAvailable(IN IMS_BOOL bIfEpsOnlyAttachBlocked, IN IMS_BOOL bEpsOnlyAttach,
+            IN IMS_BOOL bInNrBlocked, IN IMS_BOOL bNr, IN IMS_BOOL bInWifiBlocked,
+            IN IMS_BOOL bWlanIpCanType, IN IMS_BOOL bInRoamingBlocked, IN IMS_BOOL bRoaming,
+            IN IMS_BOOL bInHomeBlocked)
+    {
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH))
+                .WillByDefault(Return(bIfEpsOnlyAttachBlocked));
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_NR))
+                .WillByDefault(Return(bInNrBlocked));
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_WIFI))
+                .WillByDefault(Return(bInWifiBlocked));
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_ROAMING))
+                .WillByDefault(Return(bInRoamingBlocked));
+        ON_CALL(*pConfigurationProxy,
+                Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                        ConfigVoice::CSFB_BLOCK_CONDITION_IN_HOME))
+                .WillByDefault(Return(bInHomeBlocked));
+
+        ON_CALL(objService, IsEpsOnlyAttach).WillByDefault(Return(bEpsOnlyAttach));
+        ON_CALL(objService, IsNr).WillByDefault(Return(bNr));
+        ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(bWlanIpCanType));
+        ON_CALL(objService, IsRoaming).WillByDefault(Return(bRoaming));
     }
 };
 
@@ -651,6 +687,123 @@ TEST_F(MtcCallTest, IsUssiReturnsTrueIfUssi)
     EXPECT_EQ(IMS_TRUE, objCall.IsUssi());
 }
 
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfOtherCallExists)
+{
+    MtcCall objExistingCall(objContext, objService, objCallInfo, CreateStateFactory());
+    ImsList<IMtcCall*> lstOtherCalls;
+    lstOtherCalls.Append(&objExistingCall);
+    ON_CALL(objCallManager, GetCallsExcluding(_)).WillByDefault(Return(lstOtherCalls));
+
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_TRUE, IMS_FALSE,
+            IMS_TRUE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfEpsOnlyAttachBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_TRUE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInNrBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInWifiBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_TRUE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInRoamingBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE,
+            IMS_TRUE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsFalseIfInHomeBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_TRUE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_FALSE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfNoBlockConditions)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfEpsOnlyAttachNotBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInNrNotBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInWifiNotBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE, IMS_FALSE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInRoamingNotBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_TRUE,
+            IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_TRUE, IMS_FALSE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+}
+
+TEST_F(MtcCallTest, IsCsfbAvailableReturnsTrueIfInHomeNotBlocked)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    SetIsCsfbAvailable(IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE, IMS_FALSE,
+            IMS_TRUE, IMS_TRUE);
+    EXPECT_EQ(objCall.IsCsfbAvailable(), IMS_TRUE);
+}
+
 TEST_F(MtcCallTest, GetCallInfoReturnsCallInfo)
 {
     objCallInfo.bConference = !objCallInfo.bConference;
@@ -767,12 +920,7 @@ TEST_F(MtcCallTest, GetPendingOperationHolderReturnsNotNull)
 TEST_F(MtcCallTest, GetOtherCallsReturnsExcludingMe)
 {
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
-
-    MockIMtcCallManager objCallManager;
     EXPECT_CALL(objCallManager, GetCallsExcluding(objCall.GetKey())).Times(1);
-
-    ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
-
     objCall.GetOtherCalls();
 }
 

@@ -50,7 +50,7 @@ PRIVATE CallReasonInfo ServiceBlockRule::GetBlockReason() const
 {
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
     {
-        if (m_objService.IsCsfbAvailable())
+        if (m_objContext.IsCsfbAvailable())
         {
             return CallReasonInfo(
                     CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);

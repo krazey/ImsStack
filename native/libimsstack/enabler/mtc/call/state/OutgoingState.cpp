@@ -118,7 +118,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
         HandleCancel(piSession, objReason);
 
         // change the reason code for CSFB in this case. discuss if extra code is needed for csfb.
-        if (m_objContext.GetService().IsCsfbAvailable())
+        if (m_objContext.IsCsfbAvailable())
         {
             objReason.nCode = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
         }
@@ -744,7 +744,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnConnectionFailed(
 
     IMS_SINT32 eCode;
     IMS_SINT32 eExtraCode;
-    if (m_objContext.GetService().IsCsfbAvailable())
+    if (m_objContext.IsCsfbAvailable())
     {
         eCode = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
         eExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;

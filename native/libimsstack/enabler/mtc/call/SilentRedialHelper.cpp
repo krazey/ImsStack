@@ -261,7 +261,7 @@ CallReasonInfo SilentRedialHelper::HandleFailure(IN IMtcSession& objMtcSession) 
     switch (eFailureAction)
     {
         case ConfigVoice::SILENT_REDIAL_FAILURE_ACTION_CSFB:
-            if (m_objContext.GetService().IsCsfbAvailable())
+            if (m_objContext.IsCsfbAvailable())
             {
                 return CallReasonInfo(
                         CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);

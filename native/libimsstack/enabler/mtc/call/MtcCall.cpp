@@ -384,6 +384,51 @@ PUBLIC VIRTUAL CallType MtcCall::GetCallType() const
     return pSession->GetCallType();
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcCall::IsCsfbAvailable()
+{
+    if (GetOtherCalls().GetSize() > 0)
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetConfigurationProxy().Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH) &&
+            GetService().IsEpsOnlyAttach())
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetConfigurationProxy().Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_NR) &&
+            GetService().IsNr())
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetConfigurationProxy().Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_WIFI) &&
+            GetService().IsWlanIpCanType())
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetConfigurationProxy().Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_ROAMING) &&
+            GetService().IsRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetConfigurationProxy().Contains(ConfigVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY,
+                ConfigVoice::CSFB_BLOCK_CONDITION_IN_HOME) &&
+            !GetService().IsRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
 PUBLIC VIRTUAL IMtcSession* MtcCall::GetSession(IN const ISession* piSession) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)

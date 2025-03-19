@@ -56,7 +56,7 @@ PUBLIC VIRTUAL RetryAfterBlockRule::Result RetryAfterBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (!m_objContext.GetService().IsCsfbAvailable())
+    if (!m_objContext.IsCsfbAvailable())
     {
         m_piMtcBlockRuleCheckListener = &objListener;
         m_objContext.GetPassiveTimerHolder().AddListener(

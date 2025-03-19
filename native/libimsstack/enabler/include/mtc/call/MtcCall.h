@@ -142,6 +142,7 @@ public:
     inline IMS_BOOL IsEstablished() const override { return m_bEstablished; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
     inline IMS_BOOL IsUssi() const override { return m_objCallInfo.bUssi; }
+    IMS_BOOL IsCsfbAvailable() override;
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
     inline ParticipantInfo& GetParticipantInfo() override { return m_objParticipantInfo; }
     IMtcSession* GetSession(IN const ISession* piSession) const override;

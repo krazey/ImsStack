@@ -120,7 +120,7 @@ protected:
         ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
                 .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
-        ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
 
         ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
@@ -324,11 +324,11 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
     SetTcallTimerConfig(
             ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE);
 
-    ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
-    ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
@@ -940,7 +940,7 @@ TEST_F(StartErrorHandlerTest,
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
 
-    ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
     MockIPassiveTimerHolder objPassiveTimer;
@@ -1124,7 +1124,7 @@ TEST_F(StartErrorHandlerTest, Handle504ResponseWithConfigRecoverByNetworkContext
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     // eps only attached case
-    ON_CALL(objMtcService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));

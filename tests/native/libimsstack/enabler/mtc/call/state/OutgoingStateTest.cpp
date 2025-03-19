@@ -207,7 +207,7 @@ protected:
         }
 
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(bWiFi));
-        ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(bCsfb));
+        ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(bCsfb));
         if (bWiFi)
         {
             ON_CALL(*pConfigurationProxy,
@@ -633,7 +633,7 @@ TEST_F(OutgoingStateTest, QosReserveFailedTerminatesCallIfNextActionIsReleaseWhe
     EXPECT_CALL(objMtcSession,
             Terminate(_, CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)));
 
-    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED)));
 
     EXPECT_EQ(CallStateName::TERMINATING,
@@ -645,7 +645,7 @@ TEST_F(OutgoingStateTest, QosReserveFailedTerminatesCallIfNextActionIsReleaseWhe
     EXPECT_CALL(objMtcSession,
             Terminate(_, CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)));
 
-    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objUiNotifier,
             SendStartFailed(CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)));
 
@@ -1271,7 +1271,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)
             GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
     Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
-    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(CallReasonInfo(CODE_NONE)));
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));

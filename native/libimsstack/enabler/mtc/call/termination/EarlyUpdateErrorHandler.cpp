@@ -144,7 +144,7 @@ CallReasonInfo EarlyUpdateErrorHandler::HandleBlockCallByTimer(IN const IMessage
         return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR);
     }
 
-    if (m_objContext.GetService().IsCsfbAvailable())
+    if (m_objContext.IsCsfbAvailable())
     {
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(

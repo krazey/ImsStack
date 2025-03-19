@@ -61,6 +61,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEstablished, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsHeldByMe, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUssi, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCsfbAvailable, (), (override));
     MOCK_METHOD(CallInfo&, GetCallInfo, (), (override));
     MOCK_METHOD(ParticipantInfo&, GetParticipantInfo, (), (override));
     MOCK_METHOD(IMtcSession*, GetSession, (IN const ISession* piSession), (const, override));

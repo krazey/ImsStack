@@ -425,11 +425,7 @@ TEST_F(SilentRedialHelperTest, HandleFailureTriggersCsfbByConfig)
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_SILENT_REDIAL_ULTIMATE_FAILURE_ACTION_INT))
             .WillByDefault(Return(ConfigVoice::SILENT_REDIAL_FAILURE_ACTION_CSFB));
-
-    MockIMtcService objService;
-    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
-
-    EXPECT_CALL(objService, IsCsfbAvailable).WillOnce(Return(IMS_TRUE)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objContext, IsCsfbAvailable).WillOnce(Return(IMS_TRUE)).WillOnce(Return(IMS_FALSE));
 
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT);
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT))

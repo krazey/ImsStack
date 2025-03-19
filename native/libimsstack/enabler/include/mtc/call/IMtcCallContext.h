@@ -77,6 +77,20 @@ public:
     virtual IMS_BOOL IsUssi() const = 0;
 
     /**
+     * @brief Checks if CSFB is available based on the UE's network status, carrier
+     *        configuration and call status.
+     *
+     * This method evaluates the UE's network conditions, including NR, EPS Attach Type, Roaming,
+     * and WiFi status, against the CSFB block conditions specified in the carrier configuration
+     * {@link ConfigVoice#KEY_CSFB_BLOCK_CONDITION_INT_ARRAY}.
+     *
+     * If there's an established call already, it returns false in order to maintain the call.
+     *
+     * @return True if CSFB is available based on conditions. False otherwise.
+     */
+    virtual IMS_BOOL IsCsfbAvailable() = 0;
+
+    /**
      * @brief Gets
      *
      * @return

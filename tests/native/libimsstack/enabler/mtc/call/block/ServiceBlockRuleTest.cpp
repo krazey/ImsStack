@@ -65,7 +65,7 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfb
             .WillByDefault(Return(IMS_FALSE));
     objCallInfo.ePeerType = PeerType::MO;
     ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
-    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -81,7 +81,7 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfb
             .WillByDefault(Return(IMS_FALSE));
     objCallInfo.ePeerType = PeerType::MO;
     ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
-    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -95,7 +95,7 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForMtCa
             .WillByDefault(Return(IMS_FALSE));
     objCallInfo.ePeerType = PeerType::MT;
     ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
-    ON_CALL(objService, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 
