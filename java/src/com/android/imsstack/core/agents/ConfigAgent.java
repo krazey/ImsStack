@@ -307,11 +307,13 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle getCarrierConfig(int subId) {
+        String[] internalConfigKeys = mDefaultImsConfig.keySet().toArray(new String[0]);
         String[] imsConfigKeys = Stream.of(CarrierConfig.IMS_COMMON_KEYS,
                 CarrierConfig.IMS_PREFIX_KEYS, CarrierConfig.IMS_VOICE_PREFIX_KEYS,
                 CarrierConfig.IMS_SMS_PREFIX_KEYS, CarrierConfig.IMS_RTT_PREFIX_KEYS,
                 CarrierConfig.IMS_EMERGENCY_PREFIX_KEYS, CarrierConfig.IMS_VT_PREFIX_KEYS,
                 CarrierConfig.IMS_WFC_PREFIX_KEYS, CarrierConfig.IMS_SS_PREFIX_KEYS,
+                internalConfigKeys,
                 new String[] {CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE})
                     .flatMap(Stream::of)
                     .toArray(String[]::new);
