@@ -1250,7 +1250,8 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfigu
                 pPeerProfile->GetDirection() != MEDIA_DIRECTION_SEND)
         {
             // 3.1 Hold Case
-            MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig);
+            /* bDirHold is not proper for video stream */
+            MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig, IMS_FALSE);
         }
         else
         {

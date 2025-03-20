@@ -340,7 +340,8 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
+    /* bDirHold is not proper for video stream */
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig, IMS_FALSE);
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile

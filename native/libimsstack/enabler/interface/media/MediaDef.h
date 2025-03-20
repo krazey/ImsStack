@@ -22,6 +22,8 @@
 #include <algorithm>
 
 inline constexpr IMS_UINTP UNDEFINED_NEGO_ID = 0;
+inline constexpr IMS_SINT32 MEDIA_DEFAULT_RS = 1250;
+inline constexpr IMS_SINT32 MEDIA_DEFAULT_RR = 3750;
 
 /** Service Type */
 typedef enum

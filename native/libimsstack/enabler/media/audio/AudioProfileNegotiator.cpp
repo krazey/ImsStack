@@ -863,7 +863,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
         if (pPeerProfile->GetDirection() != MEDIA_DIRECTION_SEND_RECEIVE)
         {  // Hold Case
             // 3.1 Hold Case
-            MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig);
+            MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig, IMS_TRUE);
         }
         else
         {

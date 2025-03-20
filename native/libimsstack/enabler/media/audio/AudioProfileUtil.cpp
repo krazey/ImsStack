@@ -400,8 +400,9 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
 
     pAudioProfile->SetBandwidthAs(pConfig->GetAsBandwidthKbps());
 
-    MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pConfig);
-    IMS_TRACE_D("UpdateAudioProfileBandwidth() - updatedAS[%d]", nAsMax, 0, 0);
+    /* bDirHold is not proper for formoffer() */
+    MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pConfig, IMS_FALSE);
+    IMS_TRACE_D("UpdateAudioProfileBandwidth(): updatedAS[%d]", nAsMax, 0, 0);
 
     return IMS_TRUE;
 }

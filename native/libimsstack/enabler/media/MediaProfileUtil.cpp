@@ -59,14 +59,22 @@ PUBLIC GLOBAL IMS_BOOL MediaProfileUtil::IsVideoType(IN const AString payloadTyp
 }
 
 PUBLIC GLOBAL void MediaProfileUtil::SetRtcpRsRr(
-        OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
+        OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig, IN IMS_BOOL bDirHold)
 {
     if (pProfile != IMS_NULL && pConfig != IMS_NULL)
     {
-        pProfile->SetBandwidthRr(pConfig->GetRrBandwidthBps());
-        pProfile->SetBandwidthRs(pConfig->GetRsBandwidthBps());
+        if (bDirHold && pConfig->GetRtcpIntervalOnHold() > 0 && pConfig->GetRrBandwidthBps() == 0)
+        {
+            pProfile->SetBandwidthRr(MEDIA_DEFAULT_RR);
+            pProfile->SetBandwidthRs(MEDIA_DEFAULT_RS);
+        }
+        else
+        {
+            pProfile->SetBandwidthRr(pConfig->GetRrBandwidthBps());
+            pProfile->SetBandwidthRs(pConfig->GetRsBandwidthBps());
+        }
 
-        IMS_TRACE_D("SetRtcpRsRr(), RS[%d], RR[%d]", pProfile->GetBandwidthRs(),
-                pProfile->GetBandwidthRr(), 0);
+        IMS_TRACE_D("SetRtcpRsRr(): RS[%d], RR[%d] rtcpIntHold[%d]", pProfile->GetBandwidthRs(),
+                pProfile->GetBandwidthRr(), pConfig->GetRtcpIntervalOnHold());
     }
 }

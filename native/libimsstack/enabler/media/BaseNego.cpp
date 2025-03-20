@@ -534,7 +534,8 @@ IMS_BOOL BaseNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     // Modify a RS/RR by conditions (for RTCP enable/disable)
     if (m_eType == MEDIA_TYPE_AUDIO || m_eType == MEDIA_TYPE_VIDEO)
     {
-        MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
+        /* bDirHold is not proper for formoffer() */
+        MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig, IMS_FALSE);
     }
     m_listOaModel.Append(pNewOaModel);
 

@@ -520,7 +520,8 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
     MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel),
-            MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType));
+            MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType),
+            MEDIA_DIRECTION_IS_AUDIO_HOLD(eDir));
 
     if (bDisable == IMS_TRUE)
     {

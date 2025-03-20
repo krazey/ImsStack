@@ -66,8 +66,11 @@ public:
      *
      * @param pProfile target profile that RS/RR to be set
      * @param pConfig media configuration
+     * @param bDirHold direction flag if the media direction is not sendrecv, this flag is IMS_TRUE,
+     * otherwise IMS_FALSE
      */
-    static void SetRtcpRsRr(OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
+    static void SetRtcpRsRr(
+            OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig, IN IMS_BOOL bDirHold);
 };
 
 #endif
