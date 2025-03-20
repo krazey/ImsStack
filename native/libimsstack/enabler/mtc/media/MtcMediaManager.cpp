@@ -246,7 +246,6 @@ PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
 {
     IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
 
-    DestroyAllMediaProfiles();
     m_objMediaManager.DestroySession(m_piMediaSession);
     m_piMediaSession = IMS_NULL;
 }

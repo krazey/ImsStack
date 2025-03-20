@@ -186,7 +186,7 @@ TEST_F(MtcMediaManagerTest, CreateMediaSessionNotCrashesWhenInternalError)
 TEST_F(MtcMediaManagerTest, DestroyMediaSessionDestroysMediaSession)
 {
     EXPECT_CALL(objMediaManager, DestroySession(&objMediaSession));
-    EXPECT_CALL(*pMediaProfileManager, DestroyAllMediaProfiles(&objMediaSession));
+
     pMediaManager->DestroyMediaSession();
 
     EXPECT_CALL(objMediaManager, DestroySession(nullptr));  // Destructor
