@@ -25,6 +25,10 @@
         <item value="5"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN -->
         <item value="6"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN -->
     </int-array>
+    <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->
