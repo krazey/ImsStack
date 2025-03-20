@@ -61,7 +61,7 @@ private:
     void ReStart();
     void SetRedialDetail();
     void LoadRetryLimitsFromConfiguration();
-    void ReleaseCallResources(IN IMtcSession& objMtcSession);
+    void ReleaseCallResources();
     void StopCallTimers();
     IMS_BOOL IsRedialAvailable() const;
     CallReasonInfo HandleFailure(IN IMtcSession& objMtcSession) const;

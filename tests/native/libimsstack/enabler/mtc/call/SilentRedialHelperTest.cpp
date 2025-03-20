@@ -344,7 +344,7 @@ TEST_F(SilentRedialHelperTest, RedialReleasesSessionResources)
 {
     EXPECT_CALL(objPreconditionManager, InitializeMobileRatInformation());
     EXPECT_CALL(objMediaManager, DestroyMediaSession());
-    EXPECT_CALL(objContext, RemoveSession(Ref(objMtcSession)));
+    EXPECT_CALL(objContext, RemoveAllSessions());
     EXPECT_CALL(objTimerWrapper, StopAll());
 
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);
@@ -356,7 +356,7 @@ TEST_F(SilentRedialHelperTest, RedialReleaseSessionResourceIfRedialEmergency)
 {
     EXPECT_CALL(objPreconditionManager, InitializeMobileRatInformation());
     EXPECT_CALL(objMediaManager, DestroyMediaSession());
-    EXPECT_CALL(objContext, RemoveSession(Ref(objMtcSession)));
+    EXPECT_CALL(objContext, RemoveAllSessions());
     EXPECT_CALL(objTimerWrapper, StopAll).Times(0);
 
     const CallReasonInfo objAnyReason(

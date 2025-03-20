@@ -86,15 +86,15 @@ PUBLIC VIRTUAL CallReasonInfo SilentRedialHelper::Redial(
 
     m_nTotalRetryDuration += m_nInterval;
 
-    IMtcSession* pSession = m_objContext.GetSession();
-    IMS_ASSERT(pSession != IMS_NULL);
-
     if (IsRedialAvailable() == IMS_FALSE)
     {
+        IMtcSession* pSession = m_objContext.GetSession();
+        IMS_ASSERT(pSession != IMS_NULL);
+
         return HandleFailure(*pSession);
     }
 
-    ReleaseCallResources(*pSession);
+    ReleaseCallResources();
     m_nCount += 1;
 
     IMS_TRACE_D("Redial count[%d] interval[%d]", m_nCount, m_nInterval, 0);
@@ -215,12 +215,13 @@ void SilentRedialHelper::LoadRetryLimitsFromConfiguration()
 }
 
 PRIVATE
-void SilentRedialHelper::ReleaseCallResources(IN IMtcSession& objMtcSession)
+void SilentRedialHelper::ReleaseCallResources()
 {
-    m_objContext.RemoveSession(objMtcSession);
-
-    m_objContext.GetPreconditionManager().InitializeMobileRatInformation();
+    // MediaSession must be destroyed first, then MtcSession should be destroyed
+    // to ensure for Media to send “closeSession” to ImsMedia before AudioSession is destroyed
     m_objContext.GetMediaManager().DestroyMediaSession();
+    m_objContext.RemoveAllSessions();
+    m_objContext.GetPreconditionManager().InitializeMobileRatInformation();
     StopCallTimers();
 }
 

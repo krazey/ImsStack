@@ -69,7 +69,6 @@ void MultipleDialogHandler::OnSessionForked(
     piOriginalMtcSession->Terminate(
             IMS_TRUE, CallReasonInfo(CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED));
 
-    objContext.GetMediaManager().DestroyMediaProfile(&piOriginalMtcSession->GetISession());
     objContext.RemoveSession(*piOriginalMtcSession);
 }
 

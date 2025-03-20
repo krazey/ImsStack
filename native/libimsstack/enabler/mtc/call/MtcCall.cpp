@@ -583,6 +583,16 @@ PUBLIC VIRTUAL void MtcCall::RemoveSession(IN IMtcSession& objSession)
     delete &objSession;
 }
 
+PUBLIC VIRTUAL void MtcCall::RemoveAllSessions()
+{
+    for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
+    {
+        IMtcSession* pSession = m_lstSessions.GetAt(nIndex);
+        delete pSession;
+    }
+    m_lstSessions.Clear();
+}
+
 PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 {
     delete m_pUpdatingInfo;
