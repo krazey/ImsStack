@@ -38,8 +38,8 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
-import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     private int mToken = 1;
     private int mMessageRef = 10;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
-    private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private byte[] mPdu = ImsUtils.hexStringToBytes("21110A81785634121000000666B2996C2603");
     private int mFormat = SmsUtils.FORMAT_INT_3GPP;
     private String mSmsc = "+919876543210";
 
@@ -213,7 +213,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
 
     @Test
     public void test_acknowledgeSmsWithPdu() {
-        byte[] smsAckPdu = HexDump.hexStringToByteArray("000700F6050001020304");
+        byte[] smsAckPdu = ImsUtils.hexStringToBytes("000700F6050001020304");
         mImsSmsImpl.acknowledgeSms(mToken, mMessageRef, mResult, smsAckPdu);
         verify(mMockSmsTransferLayer).sendReportTPdu(mToken, mMessageRef,
                 mResult, smsAckPdu);

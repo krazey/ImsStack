@@ -20,7 +20,7 @@ package com.android.imsstack.imsservice.mmtel.sms;
 import android.telephony.PhoneNumberUtils;
 
 import com.android.imsstack.util.ImsLog;
-import com.android.internal.util.HexDump;
+import com.android.imsstack.util.ImsUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -140,7 +140,7 @@ public final class SmsRPdu {
     private byte[] getRpDataPdu() {
         log("getRpDataPdu");
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
-        byte[] destinationAddress = HexDump.hexStringToByteArray(mDestAddr);
+        byte[] destinationAddress = ImsUtils.hexStringToBytes(mDestAddr);
         if (destinationAddress == null || destinationAddress.length == 0) {
             return null;
         }

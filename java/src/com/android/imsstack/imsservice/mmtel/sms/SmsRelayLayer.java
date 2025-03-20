@@ -25,9 +25,8 @@ import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.uicc.IccUtils;
-import com.android.internal.util.HexDump;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -139,7 +138,7 @@ public class SmsRelayLayer {
                         + " RP Message Type = " + rpType
                         + " Smsc = " + smsc
                         + " destinationAddress = " +  ImsLog.hiddenString(destinationAddress)
-                        + " tpdu = " + ImsLog.hiddenString(IccUtils.bytesToHexString(tpdu))
+                        + " tpdu = " + ImsLog.hiddenString(ImsUtils.bytesToHexString(tpdu))
                         + " statusResult = " + statusResult);
             }
             String targetAddress = null;
@@ -250,7 +249,7 @@ public class SmsRelayLayer {
     }
 
     private String decodeSmsc(String smsc) {
-        byte[] targetAddrBytes = HexDump.hexStringToByteArray(smsc);
+        byte[] targetAddrBytes = ImsUtils.hexStringToBytes(smsc);
         int len = targetAddrBytes[0];
         return PhoneNumberUtils.calledPartyBCDToString(targetAddrBytes, 1,
                             len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
@@ -290,7 +289,7 @@ public class SmsRelayLayer {
             byte[] encodedPdu = rpErrorPdu.getRpduByteArray();
             if (DBG) {
                 log("Sending Encoded RP-Error: "
-                            + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu)));
+                            + ImsLog.hiddenString(ImsUtils.bytesToHexString(encodedPdu)));
             }
             boolean res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
                                             encodedPdu,
@@ -367,10 +366,8 @@ public class SmsRelayLayer {
             try {
                 logi("notifyIncomingMessage");
                 if (DBG) {
-                    log("SmsFormat = " + smsFormat
-                                + " RPdu = "
-                                + ImsLog.hiddenString(IccUtils
-                                        .bytesToHexString(pduData)));
+                    log("SmsFormat = " + smsFormat + " RPdu = " + ImsLog.hiddenString(
+                            ImsUtils.bytesToHexString(pduData)));
                 }
                 int token = 0;
                 int result;

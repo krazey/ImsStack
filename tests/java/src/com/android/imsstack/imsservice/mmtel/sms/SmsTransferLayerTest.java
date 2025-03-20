@@ -33,7 +33,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
-import com.android.internal.util.HexDump;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -70,8 +70,8 @@ public class SmsTransferLayerTest {
     private String mSmsc = "0791190791700590";
     private String mDecodedSmsc = "+917019075009";
     private String mDestinationAddress = "900080006200";
-    private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
-    private byte[] mTpdu = HexDump.hexStringToByteArray("01060C81090008002600000006536A905A9D02");
+    private byte[] mPdu = ImsUtils.hexStringToBytes("21110A81785634121000000666B2996C2603");
+    private byte[] mTpdu = ImsUtils.hexStringToBytes("01060C81090008002600000006536A905A9D02");
     private String mTpduString = "01060A817856341200000006536A905A9D02";
     private String mDestAddr = "8765432100";
     private String mUsatTpDestAddr = "1234567890";
@@ -121,7 +121,7 @@ public class SmsTransferLayerTest {
         when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
         when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
-        byte[] tpdu = HexDump.hexStringToByteArray(mTpduString);
+        byte[] tpdu = ImsUtils.hexStringToBytes(mTpduString);
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP, mMessageRef, mSmsc, tpdu);
         verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
                                                              mTpAddrCaptor.capture(), anyInt(),
@@ -148,7 +148,7 @@ public class SmsTransferLayerTest {
         when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP,
                                              mMessageRef, mSmsc,
-                                             HexDump.hexStringToByteArray(mTpduString));
+                                             ImsUtils.hexStringToBytes(mTpduString));
         verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
                                                              mTpAddrCaptor.capture(), anyInt(),
                                                              mUsatListenerCaptor.capture());
@@ -166,7 +166,7 @@ public class SmsTransferLayerTest {
         when(mMockUsatCmdRes.getRpDestinationAddress()).thenReturn(mUsatRpDestAddr);
         when(mMockUsatCmdRes.getTpDestinationAddress()).thenReturn(mUsatTpDestAddr);
         usatListener.onCommandResponse(mMockUsatCmdRes);
-        byte[] usatTpdu = HexDump.hexStringToByteArray(mUsatTpduString);
+        byte[] usatTpdu = ImsUtils.hexStringToBytes(mUsatTpduString);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_DATA), eq(mEncodedRpDestAddr),
                              eq(mUsatTpDestAddr), eq(usatTpdu), eq(STATUS_RESULT_NA));
     }
@@ -176,7 +176,7 @@ public class SmsTransferLayerTest {
         when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_NOT_ALLOWED);
         when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
-        byte[] tpdu = HexDump.hexStringToByteArray(mTpduString);
+        byte[] tpdu = ImsUtils.hexStringToBytes(mTpduString);
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP, mMessageRef, mSmsc, tpdu);
         verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
                                                              mTpAddrCaptor.capture(), anyInt(),
@@ -202,12 +202,12 @@ public class SmsTransferLayerTest {
     @Test
     public void test_calculateTpDestAddrLengthByte() {
         //for odd number of digits
-        byte[] tpDestAddrBytes = HexDump.hexStringToByteArray("9112345678F9");
+        byte[] tpDestAddrBytes = ImsUtils.hexStringToBytes("9112345678F9");
         int len = mSmsTransferLayer.calculateTpDestAddrLengthByte(tpDestAddrBytes);
         assertEquals(len, 9);
 
         //for even number of Digits
-        tpDestAddrBytes = HexDump.hexStringToByteArray("911234567899");
+        tpDestAddrBytes = ImsUtils.hexStringToBytes("911234567899");
         len = mSmsTransferLayer.calculateTpDestAddrLengthByte(tpDestAddrBytes);
         assertEquals(len, 10);
     }
@@ -215,9 +215,9 @@ public class SmsTransferLayerTest {
     @Test
     public void test_calculateIndexAfterTpDestAddr() {
         //without padding in TP-DA
-        byte[] tpdu1 = HexDump.hexStringToByteArray("01060A817856341200000006536A905A9D02");
+        byte[] tpdu1 = ImsUtils.hexStringToBytes("01060A817856341200000006536A905A9D02");
         //with padding in TP-DA
-        byte[] tpdu2 = HexDump.hexStringToByteArray("01060781214365F7000006536A905A9D02");
+        byte[] tpdu2 = ImsUtils.hexStringToBytes("01060781214365F7000006536A905A9D02");
 
         int index1 = mSmsTransferLayer.calculateIndexAfterTpDestAddr(tpdu1);
         int index2 = mSmsTransferLayer.calculateIndexAfterTpDestAddr(tpdu2);
@@ -235,13 +235,13 @@ public class SmsTransferLayerTest {
     public void testCdmaPduGenerate() {
         String pduString = "00000210020102000002070282055950C840"
                          + "08100003101460010610268D2285000A0100";
-        byte[] pdu = HexDump.hexStringToByteArray(pduString);
+        byte[] pdu = ImsUtils.hexStringToBytes(pduString);
         byte[] cdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
         String expectedPduString = "0000000000001002000000000000"
                                  + "00000A4438313536353433323100"
                                  + "0000000000000000001000031014"
                                  + "60010610268D2285000A0100";
-        byte[] expectedPdu = HexDump.hexStringToByteArray(expectedPduString);
+        byte[] expectedPdu = ImsUtils.hexStringToBytes(expectedPduString);
         for (int i = 0; i < cdmaPdu.length; i++) {
             assertEquals(cdmaPdu[i], expectedPdu[i]);
         }
@@ -300,7 +300,7 @@ public class SmsTransferLayerTest {
     public void test_notifyRLDataIndication_3GPP2() {
         String pduString = "00000210020102000002070282055950C840"
                          + "08100003101460010610268D2285000A0100";
-        byte[] pdu = HexDump.hexStringToByteArray(pduString);
+        byte[] pdu = ImsUtils.hexStringToBytes(pduString);
         mProxyListener  = mSmsTransferLayer.getListener();
         mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
                                               SmsUtils.RP_DATA, pdu);
@@ -308,7 +308,7 @@ public class SmsTransferLayerTest {
                                  + "00000A4438313536353433323100"
                                  + "0000000000000000001000031014"
                                  + "60010610268D2285000A0100";
-        byte[] formattedTpdu = HexDump.hexStringToByteArray(formattedTpduString);
+        byte[] formattedTpdu = ImsUtils.hexStringToBytes(formattedTpduString);
         verify(mListener).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
                                             eq(SmsUtils.TP_SMS_DELIVER), eq(formattedTpdu));
     }
@@ -319,7 +319,7 @@ public class SmsTransferLayerTest {
         String invalidPduString = "00FF021002020702A848D159E24006010008"
                          + "2300031010D0011410A48CBB366F418F465C"
                          + "7AF4EECE819E7E1C19000306220707183319";
-        byte[] invalidPdu = HexDump.hexStringToByteArray(invalidPduString);
+        byte[] invalidPdu = ImsUtils.hexStringToBytes(invalidPduString);
         mProxyListener  = mSmsTransferLayer.getListener();
         int result = mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
                                               SmsUtils.RP_DATA, invalidPdu);

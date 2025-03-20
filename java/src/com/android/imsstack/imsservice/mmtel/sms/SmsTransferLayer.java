@@ -32,20 +32,10 @@ import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
-import com.android.internal.telephony.cdma.sms.CdmaSmsSubaddress;
-import com.android.internal.telephony.cdma.sms.SmsEnvelope;
-import com.android.internal.telephony.uicc.IccUtils;
-import com.android.internal.util.BitwiseInputStream;
-import com.android.internal.util.HexDump;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -197,7 +187,7 @@ public class SmsTransferLayer {
             log("token = " + token
                                 + "tpMessageRef = " + tpMessageRef
                                 + "smsc = " + ImsLog.hiddenString(smsc)
-                                + "pdu = " + ImsLog.hiddenString(IccUtils.bytesToHexString(pdu)));
+                                + "pdu = " + ImsLog.hiddenString(ImsUtils.bytesToHexString(pdu)));
         }
         try {
             /* Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
@@ -221,7 +211,7 @@ public class SmsTransferLayer {
                 logi("usat service available");
                 IDcNetWatcher dcnw = mCallContext.getDcNetWatcher();
                 int networkType =  TelephonyManager.NETWORK_TYPE_UNKNOWN;
-                byte[] smscAddrBytes = HexDump.hexStringToByteArray(smsc);
+                byte[] smscAddrBytes = ImsUtils.hexStringToBytes(smsc);
                 int len = smscAddrBytes[0];
                 String rpAddress = PhoneNumberUtils.calledPartyBCDToString(smscAddrBytes, 1,
                                     len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
@@ -285,7 +275,7 @@ public class SmsTransferLayer {
             }
             if (DBG) {
                 log("SMS-DELIVER-REPORT = "
-                        + ImsLog.hiddenString(IccUtils.bytesToHexString(deliverReportPdu)));
+                        + ImsLog.hiddenString(ImsUtils.bytesToHexString(deliverReportPdu)));
             }
             return mSmsRL.sendRPMessage(token, messageType, null, null, deliverReportPdu, result);
         } catch (RuntimeException e) {
@@ -386,7 +376,7 @@ public class SmsTransferLayer {
                 if (!TextUtils.isEmpty(rpDestAddr)) {
                     byte[] encodedSmscBytes = PhoneNumberUtils
                                               .networkPortionToCalledPartyBCDWithLength(rpDestAddr);
-                    encodedSmsc = IccUtils.bytesToHexString(encodedSmscBytes);
+                    encodedSmsc = ImsUtils.bytesToHexString(encodedSmscBytes);
                 }
                 if (TextUtils.isEmpty(tpDestAddr)) {
                     // Use the original dialed string if this is not present.
@@ -515,7 +505,7 @@ public class SmsTransferLayer {
                                     + ImsLog.hiddenString(tpduParameters.mSmsc)
                                     + " tpDestinationAddress = "
                                     + ImsLog.hiddenString(tpduParameters.mDestinationAddress)
-                                    + " tpdu = " + ImsLog.hiddenString(IccUtils
+                                    + " tpdu = " + ImsLog.hiddenString(ImsUtils
                                         .bytesToHexString(tpduParameters.mTpdu)));
                 }
                 mSendSmsQueue.add(tpduParameters.mToken);
@@ -560,7 +550,7 @@ public class SmsTransferLayer {
                                     + " encoded Smsc = " + ImsLog.hiddenString(tpduParameters.mSmsc)
                                     + " tpDestinationAddress = "
                                     + ImsLog.hiddenString(tpduParameters.mDestinationAddress)
-                                    + " tpdu = " + ImsLog.hiddenString(IccUtils
+                                    + " tpdu = " + ImsLog.hiddenString(ImsUtils
                                         .bytesToHexString(tpduParameters.mTpdu)));
                     }
                     mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
@@ -587,8 +577,7 @@ public class SmsTransferLayer {
             return new byte[0];
         }
         if (DBG) {
-            log("Incoming pdu = " + ImsLog.hiddenString(IccUtils
-                                        .bytesToHexString(pdu)));
+            log("Incoming pdu = " + ImsLog.hiddenString(ImsUtils.bytesToHexString(pdu)));
         }
         CdmaSmsMessageHelper cdmaMsg = new CdmaSmsMessageHelper();
         cdmaMsg.parseCdmaPdu(pdu);
@@ -604,7 +593,7 @@ public class SmsTransferLayer {
                 log("token = " + token  + " smsFormat = " + smsFormat
                                         + " rpMessageType = " + rpMessageType
                                         + " pdu = "
-                                        + ImsLog.hiddenString(IccUtils.bytesToHexString(pdu)));
+                                        + ImsLog.hiddenString(ImsUtils.bytesToHexString(pdu)));
             }
             int result = SmsUtils.SMSTL_RESULT_FAILURE;
             try {
@@ -623,7 +612,7 @@ public class SmsTransferLayer {
                     synchronized (mLock) {
                         logi("calling notifySmsReceived");
                         log("CdmaSmsMessage: tpdu= "
-                        + ImsLog.hiddenString(IccUtils.bytesToHexString(cdmaPdu)));
+                                + ImsLog.hiddenString(ImsUtils.bytesToHexString(cdmaPdu)));
                         return listener.notifySmsReceived(token, smsFormat,
                                                 SmsUtils.TP_SMS_DELIVER, cdmaPdu);
                     }
