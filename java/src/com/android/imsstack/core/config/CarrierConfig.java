@@ -1192,6 +1192,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "eps_fallback_watchdog_time_millis_int";
         public static final String KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL =
                 KEY_PREFIX + "eps_fallback_trigger_by_rrc_reject_wait_time_bool";
+        public static final String KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL =
+                KEY_PREFIX + "eps_fallback_trigger_by_ac_barring_bool";
         public static final String KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL =
                 KEY_PREFIX + "require_registration_after_eps_fallback_trigger_for_silent_redial_bool";
         public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =

@@ -1441,7 +1441,9 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsfbIfRequired)
 {
     objCallInfo.ePeerType = PeerType::MO;
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
-
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     const CallReasonInfo objReasonInfo(CODE_ACCESS_CLASS_BLOCKED);
     const IMtcBlockChecker::Result objBlockResult(
             IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
