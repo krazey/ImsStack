@@ -1198,6 +1198,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_IN
         KEY_IMS_VOICE_PREFIX "eps_fallback_watchdog_time_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL[] =
         KEY_IMS_VOICE_PREFIX "eps_fallback_trigger_by_rrc_reject_wait_time_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "eps_fallback_trigger_by_ac_barring_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL[] =
                 KEY_IMS_VOICE_PREFIX

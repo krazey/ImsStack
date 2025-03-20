@@ -73,7 +73,9 @@ PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByReasonInfo(
         return IMS_FALSE;
     }
 
-    if (objReason.nCode == CODE_ACCESS_CLASS_BLOCKED)
+    if (objReason.nCode == CODE_ACCESS_CLASS_BLOCKED &&
+            objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
     {
         return IMS_TRUE;
     }

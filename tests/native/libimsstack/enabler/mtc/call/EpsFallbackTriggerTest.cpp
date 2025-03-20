@@ -92,6 +92,9 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseIfMt)
 {
     objCallInfo.ePeerType = PeerType::MT;
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
             objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));
@@ -101,6 +104,21 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseIfNotInNr)
 {
     objCallInfo.ePeerType = PeerType::MO;
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
+            objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));
+}
+
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsFalseForAcBlockedIfConfigOff)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_FALSE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
             objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));
@@ -110,6 +128,9 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByReasonInfoReturnsTrueForAcBlocked)
 {
     objCallInfo.ePeerType = PeerType::MO;
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_TRUE(EpsFallbackTrigger::ShouldTriggerByReasonInfo(
             objContext, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)));

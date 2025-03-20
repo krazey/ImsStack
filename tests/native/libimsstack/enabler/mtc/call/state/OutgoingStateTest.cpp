@@ -374,6 +374,9 @@ TEST_F(OutgoingStateTest, OnConnectionFailedTriggersEpsfbIfRequired)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(IMS_NULL));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK));
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
