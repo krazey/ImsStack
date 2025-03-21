@@ -704,6 +704,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(
+                    CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::
                                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
                     IMS_FALSE))
@@ -957,6 +961,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInRegContactOfInitRegUsed());
     EXPECT_FALSE(m_pAosNConfiguration->UseWfcCountryCodeAvailabilityCheck());
     EXPECT_FALSE(m_pAosNConfiguration->IsVideoOverWifiSupportedWithoutVoice());
+    EXPECT_TRUE(m_pAosNConfiguration->IsUseRegInfoContactWithoutUriCheck());
     EXPECT_FALSE(m_pAosNConfiguration->IsTestModeEnabled(
             CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION));
 

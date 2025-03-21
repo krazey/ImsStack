@@ -69,6 +69,7 @@ public:
             bSupportVerstatBasedOnNetworkForReg(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
             bSupportVideoForEmergencyReg(IMS_FALSE),
+            bUseRegInfoContactWithoutUriCheck(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
             bUseRetryRuleForEReg(IMS_FALSE),
             bUseSecurityServerPortInInitReg(IMS_FALSE),
@@ -169,6 +170,7 @@ public:
     IMS_BOOL bSupportVerstatBasedOnNetworkForReg;
     IMS_BOOL bSupportVerstatForReg;
     IMS_BOOL bSupportVideoForEmergencyReg;
+    IMS_BOOL bUseRegInfoContactWithoutUriCheck;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMS_BOOL bUseRetryRuleForEReg;
     IMS_BOOL bUseSecurityServerPortInInitReg;

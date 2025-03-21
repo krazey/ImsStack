@@ -117,6 +117,7 @@ public:
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
     IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
     IMS_BOOL IsVideoSupportedForEmergencyReg() const override;
+    IMS_BOOL IsUseRegInfoContactWithoutUriCheck() const override;
     IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const override;
     IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const override;
     IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const override;

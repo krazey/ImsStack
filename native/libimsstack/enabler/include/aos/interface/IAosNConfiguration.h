@@ -728,6 +728,16 @@ public:
     virtual IMS_BOOL IsVideoSupportedForEmergencyReg() const = 0;
 
     /**
+     * @brief Returns flag indicating whether to allow use of contact information in RegInfo XML
+     *        without checking for URI matching. If it is allowed, URI verification will be skipped
+     *        during retrieving the "contact" element from RegInfo XML in the SIP Notify message.
+     *
+     * @return IMS_TRUE if use of contact element without URI check is allowed, else IMS_FALSE
+     * @see {@code ims.use_reginfo_contact_without_uri_check_bool}
+     */
+    virtual IMS_BOOL IsUseRegInfoContactWithoutUriCheck() const = 0;
+
+    /**
      * @brief Flag specifying if test mode is enabled.
      *
      * @param nType The test mode type to be enabled.\n

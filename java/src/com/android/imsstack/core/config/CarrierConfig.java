@@ -459,6 +459,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_verstat_based_on_network_for_reg_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
                 KEY_PREFIX + "support_verstat_for_reg_bool";
+        public static final String KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL =
+                KEY_PREFIX + "use_reginfo_contact_without_uri_check_bool";
         public static final String
                 KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
                 KEY_PREFIX

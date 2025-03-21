@@ -291,6 +291,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_BASED_ON_NETWORK_FOR_REG_
         KEY_IMS_PREFIX "support_verstat_based_on_network_for_reg_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
         KEY_IMS_PREFIX "support_verstat_for_reg_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL[] =
+        KEY_IMS_PREFIX "use_reginfo_contact_without_uri_check_bool";
 const IMS_CHAR
         CarrierConfig::Ims::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 KEY_IMS_PREFIX "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";

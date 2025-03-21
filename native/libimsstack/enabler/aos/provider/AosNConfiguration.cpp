@@ -526,6 +526,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVideoSupportedForEmergencyReg() con
     return m_objAsset.bSupportVideoForEmergencyReg;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUseRegInfoContactWithoutUriCheck() const
+{
+    return m_objAsset.bUseRegInfoContactWithoutUriCheck;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTestModeEnabled(IN IMS_SINT32 nType) const
 {
     return m_objAsset.objTestMode.Contains(nType);
@@ -1517,6 +1522,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
     m_objAsset.bSupportVideoForEmergencyReg =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL);
+    m_objAsset.bUseRegInfoContactWithoutUriCheck =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Ims::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
     m_objAsset.bUseRetryRuleForEReg =
