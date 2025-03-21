@@ -1808,6 +1808,17 @@ TEST_F(AosSubscriptionTest, OfflineStateWhenTerminated)
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
+    m_pAosSubscription->RegSubscription_Terminated(IRegSubscription::REASON_NO_EXPIRES);
+
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
+}
+
+TEST_F(AosSubscriptionTest, RequestRegRequiredWhenTerminatedIfInitSubUponSubTerminatedIsTrue)
+{
+    ON_CALL(m_objMockIAosConfig, IsInitSubUponSubTerminated()).WillByDefault(Return(IMS_TRUE));
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    m_pAosSubscription->SetTerminated(IMS_FALSE);
+
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(AosSubscription::CMD_SUB_REQUIRED, 0, IMS_FALSE));
 

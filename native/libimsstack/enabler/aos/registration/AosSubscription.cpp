@@ -1277,7 +1277,10 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Terminated(IN IMS_SINT32
     A_IMS_TRACE_I(AOSTAG, "RegSubscription_Terminated :: reason(%d)", nReason, 0, 0);
 
     SetState(STATE_OFFLINE);
-    ReportState(REASON_SUB_TERMINATED, CMD_SUB_REQUIRED);
+    ReportState(REASON_SUB_TERMINATED,
+            (GET_N_CONFIG(m_piContext->GetSlotId())->IsInitSubUponSubTerminated() == IMS_TRUE)
+                    ? CMD_SUB_REQUIRED
+                    : CMD_NONE);
 }
 
 PROTECTED VIRTUAL void AosSubscription::Transaction_OnConnectionFailed(
