@@ -144,4 +144,10 @@ enum
     STATE_NOTREADY
 };
 
+// SIP Header values
+enum
+{
+    CONTENT_TRANSFER_ENCODING_BINARY
+};
+
 #endif

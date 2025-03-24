@@ -37,6 +37,7 @@
 #include "IMtsContext.h"
 #include "IMessageBodyPart.h"
 #include "IuMtsService.h"
+#include "MtsDef.h"
 #include "MtsStringDef.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
@@ -652,6 +653,20 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
     {
         IMS_TRACE_E(0, "Failed to add the Request-Disposition header", 0, 0, 0);
         return IMS_FALSE;
+    }
+
+    if (ConfigService::GetConfigService()
+                    ->GetCarrierConfig(m_objContext.GetSlotId())
+                    ->GetBoolean(CarrierConfig::ImsSms::
+                                    KEY_SMS_SUPPORT_CONTENT_TRANSFER_ENCODING_HEADER_BOOL) ==
+            IMS_TRUE)
+    {
+        if (piMessage->AddHeader(AString(SipHeaderName::CONTENT_TRANSFER_ENCODING),
+                    AString(PS_SipHeaderValue(CONTENT_TRANSFER_ENCODING_BINARY))) == IMS_FAILURE)
+        {
+            IMS_TRACE_E(0, "Failed to add the Content-Transfer-Encoding header", 0, 0, 0);
+            return IMS_FALSE;
+        }
     }
 
     if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)

@@ -220,6 +220,17 @@ public:
                 return "__INVALID__";
         }
     }
+
+    inline static const IMS_CHAR* PS_SipHeaderValue(IN IMS_UINT32 nSipHeaderValue)
+    {
+        switch (nSipHeaderValue)
+        {
+            case CONTENT_TRANSFER_ENCODING_BINARY:
+                return "binary";
+            default:
+                return "__INVALID__";
+        }
+    }
 };
 
 #ifndef PS_AccessNetworkType
@@ -260,6 +271,10 @@ public:
 
 #ifndef PS_TrafficType
 #define PS_TrafficType(A) MtsStringDef::PS_TrafficType(A)
+#endif
+
+#ifndef PS_SipHeaderValue
+#define PS_SipHeaderValue(A) MtsStringDef::PS_SipHeaderValue(A)
 #endif
 
 #endif
