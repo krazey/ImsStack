@@ -92,6 +92,7 @@ public:
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
     IMS_BOOL IsKeepEPdnUponPcscfUnavailable() const override;
     IMS_BOOL IsKeepERegRetryOnWlanRequired() const override;
+    IMS_BOOL IsKeepRegRetryCntUponPdnReconnect() const override;
     IMS_BOOL IsStopERegTimerOnEpdnConnected() const override;
     IMS_BOOL IsNoInitRegOnPcscfChange() const override;
     IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const override;

@@ -2884,11 +2884,14 @@ PROTECTED VIRTUAL void AosRegistration::ClearPcscf()
 
 PROTECTED VIRTUAL void AosRegistration::ClearRetryCount(IN IMS_BOOL bForced /* = IMS_FALSE */)
 {
-    if (bForced == IMS_FALSE &&
-            (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() !=
-                    CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION))
+    if (bForced == IMS_FALSE)
     {
-        return;
+        if (GET_N_CONFIG(m_nSlotId)->IsKeepRegRetryCntUponPdnReconnect() ||
+                (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() !=
+                        CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION))
+        {
+            return;
+        }
     }
 
     A_IMS_TRACE_D(REGID, "ClearRetryCount :: (%d) -> (%d)", m_nConsecutiveFailure, 0, 0);

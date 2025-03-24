@@ -1615,6 +1615,17 @@ TEST_F(AosRegistrationTest, ResetRetryCountWhenRetryCntSharedRegAndSubIsSupporte
     m_pAosRegistration->ClearRetryCount(IMS_TRUE);
 }
 
+TEST_F(AosRegistrationTest, DoNotClearRetryCountIfConfiguredToKeep)
+{
+    m_pAosRegistration->IncreaseConsecutiveFailCount();
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepRegRetryCntUponPdnReconnect())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosRegistration->ClearRetryCount();
+
+    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 1);
+}
+
 TEST_F(AosRegistrationTest, AddSpecificOperationWhileInRoamingAddsIpsecBlockReason)
 {
     m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);

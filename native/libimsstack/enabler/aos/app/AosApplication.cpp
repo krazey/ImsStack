@@ -1353,7 +1353,8 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage_Connection(IN 
 {
     IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
 
-    if (nType == CONNECTION_DEACTIVATED)
+    if (nType == CONNECTION_DEACTIVATED &&
+            !GET_N_CONFIG(m_nSlotId)->IsKeepRegRetryCntUponPdnReconnect())
     {
         m_piRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_RETRY_COUNT);
     }

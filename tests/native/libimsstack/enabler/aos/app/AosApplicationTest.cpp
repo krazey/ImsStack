@@ -217,6 +217,7 @@ enum
     using Base::OnMessage;                               \
     using Base::ProcessMessage;                          \
     using Base::PreprocessStateMessage;                  \
+    using Base::PreprocessStateMessage_Connection;       \
     using Base::StateNotReady_Condition;                 \
     using Base::StateReady_Connection;                   \
     using Base::StateNotReady_Connection;                \
@@ -1776,6 +1777,18 @@ TEST_F(AosApplicationTest, StateMachinePreProcess)
     EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).Times(0);
     EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
     EXPECT_TRUE(m_pAosApplication->PreprocessStateMessage(objMessageCnd));
+}
+
+TEST_F(AosApplicationTest, DoNotClearRetryCountIfConfiguredToKeepWhenReceivedDeactivatedMessage)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepRegRetryCntUponPdnReconnect())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_CLEAR_RETRY_COUNT, 0))
+            .Times(0);
+
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_DEACTIVATED, 0);
+    m_pAosApplication->PreprocessStateMessage_Connection(objMessageCnx);
 }
 
 TEST_F(AosApplicationTest, StateMachine)
