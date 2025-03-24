@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 #define AUDIO_SDP_PARSER_H_
 
 #include "MediaSdpParser.h"
-#include "audio/AudioProfileUtil.h"
+#include "audio/AudioProfile.h"
 
 class SdpAvCodec;
 
@@ -32,8 +32,17 @@ public:
     explicit AudioSdpParser();
     virtual ~AudioSdpParser();
 
-    IMS_BOOL Parse(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-            OUT AudioProfile* pProfile);
+    /**
+     * @brief Parse the SDP from the session descriptor and the media descriptor and create the
+     * AudioProfile
+     *
+     * @param pSessionDescriptor The session descriptor to get the session level SDP attributes
+     * @param pDescriptor The media level descriptor to get the SDP attributes
+     * @param pProfile The AudioProfile to fill the parsed SDP attributes
+     * @return IMS_BOOL Return true when the parse without any error, false when there is an error
+     */
+    virtual IMS_BOOL Parse(IN ISessionDescriptor* pSessionDescriptor,
+            IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
 
 private:
     void ParsePayloads(IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);

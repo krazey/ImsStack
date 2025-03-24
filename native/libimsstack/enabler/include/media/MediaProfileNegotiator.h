@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,6 @@
 
 #ifndef MEDIA_PROFILE_NEGOTIATOR_H_
 #define MEDIA_PROFILE_NEGOTIATOR_H_
-
-#include "ISessionDescriptor.h"
-#include "media/IMediaDescriptor.h"
 
 #include "MediaBaseProfile.h"
 

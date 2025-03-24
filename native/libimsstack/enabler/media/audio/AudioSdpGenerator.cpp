@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,10 +41,11 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "Generate(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("Generate() - PayloadSize[%d]", pBaseProfile->GetPayloadList().GetSize(), 0, 0);
+    IMS_TRACE_I("Generate(): PayloadSize[%d]", pBaseProfile->GetPayloadList().GetSize(), 0, 0);
 
     GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile);
 
@@ -67,6 +68,7 @@ void AudioSdpGenerator::GeneratePayload(
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GeneratePayload(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -97,6 +99,7 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
 {
     if (pPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GenerateFmtp(): invalid payload", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -152,6 +155,7 @@ void AudioSdpGenerator::GeneratePtime(OUT IMediaDescriptor* pDescriptor, IN Audi
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GeneratePtime(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -160,7 +164,7 @@ void AudioSdpGenerator::GeneratePtime(OUT IMediaDescriptor* pDescriptor, IN Audi
     if (nPtime != AudioProfile::DEFAULT_PTIME)
     {
         pDescriptor->AddAttributeInt(SdpAttribute::PTIME, nPtime);
-        IMS_TRACE_D("GeneratePtime() - ptime[%d]", nPtime, 0, 0);
+        IMS_TRACE_D("GeneratePtime(): ptime[%d]", nPtime, 0, 0);
     }
 }
 
@@ -170,6 +174,7 @@ void AudioSdpGenerator::GenerateMaxPtime(
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GenerateMaxPtime(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -178,7 +183,7 @@ void AudioSdpGenerator::GenerateMaxPtime(
     if (nMaxPtime != AudioProfile::DEFAULT_MAXPTIME)
     {
         pDescriptor->AddAttributeInt(SdpAttribute::MAXPTIME, nMaxPtime);
-        IMS_TRACE_D("GenerateMaxPtime() - MaxPtime[%d]", nMaxPtime, 0, 0);
+        IMS_TRACE_D("GenerateMaxPtime(): MaxPtime[%d]", nMaxPtime, 0, 0);
     }
 }
 
@@ -188,6 +193,7 @@ void AudioSdpGenerator::GenerateCandidateAttribute(
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GenerateCandidateAttribute(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -198,7 +204,7 @@ void AudioSdpGenerator::GenerateCandidateAttribute(
         {
             strCandidateAttr.Sprintf("%d, %s", nIndex + 1, strCandidateAttr.GetStr());
             pDescriptor->AddAttribute(SdpAttribute::CANDIDATE, strCandidateAttr);
-            IMS_TRACE_D("GenerateCandidateAttribute() - [%s]", strCandidateAttr.GetStr(), 0, 0);
+            IMS_TRACE_D("GenerateCandidateAttribute(): [%s]", strCandidateAttr.GetStr(), 0, 0);
         }
     }
 }
@@ -207,6 +213,7 @@ void AudioSdpGenerator::GenerateRtcpXr(OUT IMediaDescriptor* pDescriptor, IN Aud
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GenerateRtcpXr(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -230,7 +237,7 @@ void AudioSdpGenerator::GenerateRtcpXr(OUT IMediaDescriptor* pDescriptor, IN Aud
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-dup-rle");
         }
 
-        IMS_TRACE_D("GenerateRtcpXr() - Support RtcpXr", 0, 0, 0);
+        IMS_TRACE_D("GenerateRtcpXr(): Support RtcpXr", 0, 0, 0);
     }
 }
 
@@ -239,24 +246,24 @@ void AudioSdpGenerator::GenerateAnbr(OUT IMediaDescriptor* pDescriptor, IN Audio
 {
     if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GenerateAnbr(): invalid arguments", 0, 0, 0);
         return;
     }
 
     if (pProfile->IsAnbrSupported())
     {
         pDescriptor->AddAttribute(SdpAttribute::ANBR, AString::ConstNull());
-        IMS_TRACE_D("GenerateAnbr() - Support Anbr", 0, 0, 0);
+        IMS_TRACE_D("GenerateAnbr(): Support Anbr", 0, 0, 0);
     }
 }
 
 PROTECTED AString AudioSdpGenerator::GenerateAmrFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp)
 {
-    IMS_TRACE_I("GenerateAmrFmtp()", 0, 0, 0);
-
     AString strFmtp = AString::ConstNull();
 
     if (pAmrFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GenerateAmrFmtp(): invalid fmtp", 0, 0, 0);
         return strFmtp;
     }
 
@@ -282,12 +289,11 @@ PROTECTED AString AudioSdpGenerator::GenerateAmrFmtp(IN AudioProfile::AmrFmtp* p
 
 PROTECTED AString AudioSdpGenerator::GenerateEvsFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp)
 {
-    IMS_TRACE_I("GenerateEvsFmtp()", 0, 0, 0);
-
     AString strFmtp = AString::ConstNull();
 
     if (pEvsFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GenerateEvsFmtp(): invalid fmtp", 0, 0, 0);
         return strFmtp;
     }
 
@@ -321,10 +327,11 @@ PROTECTED void AudioSdpGenerator::AddModeSetListToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddModeSetListToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddModeSetListToFmtp() - modeSetList[%d], visible modeSet[%d]",
+    IMS_TRACE_I("AddModeSetListToFmtp(): modeSetList[%d], visible modeSet[%d]",
             pFmtp->GetModeSetList(), pFmtp->IsModeSetVisible(), 0);
 
     if (pFmtp->GetModeSetList() != 0 && pFmtp->IsModeSetVisible() == IMS_TRUE)
@@ -354,10 +361,11 @@ PROTECTED void AudioSdpGenerator::AddModeChangeCapabilityToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddModeChangeCapabilityToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() - mode-change-capability[%d], visible[%d]",
+    IMS_TRACE_I("AddModeChangeCapabilityToFmtp(): mode-change-capability[%d], visible[%d]",
             pFmtp->GetModeChangeCapability(), pFmtp->IsModeChangeCapabilityVisible(), 0);
 
     if (pFmtp->IsModeChangeCapabilityVisible() == IMS_TRUE)
@@ -378,7 +386,7 @@ PROTECTED void AudioSdpGenerator::AddModeChangePeriodToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangePeriodToFmtp() - mode-change-period[%d], visible[%d]",
+    IMS_TRACE_I("AddModeChangePeriodToFmtp(): mode-change-period[%d], visible[%d]",
             pFmtp->GetModeChangePeriod(), pFmtp->IsModeChangePeriodVisible(), 0);
 
     if (pFmtp->IsModeChangePeriodVisible() == IMS_TRUE)
@@ -396,10 +404,11 @@ PROTECTED void AudioSdpGenerator::AddModeChangeNeighborToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddModeChangeNeighborToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeNeighborToFmtp() - mode-change-neighbor[%d], visible[%d]",
+    IMS_TRACE_I("AddModeChangeNeighborToFmtp(): mode-change-neighbor[%d], visible[%d]",
             pFmtp->GetModeChangeNeighbor(), pFmtp->IsModeChangeNeighborVisible(), 0);
 
     if (pFmtp->IsModeChangeNeighborVisible() == IMS_TRUE)
@@ -417,10 +426,11 @@ PROTECTED void AudioSdpGenerator::AddMaxRedToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddMaxRedToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddMaxRedToFmtp() - max-red[%d], visible[%d]", pFmtp->GetMaxRed(),
+    IMS_TRACE_I("AddMaxRedToFmtp(): max-red[%d], visible[%d]", pFmtp->GetMaxRed(),
             pFmtp->IsMaxRedVisible(), 0);
 
     if (pFmtp->IsMaxRedVisible() == IMS_TRUE)
@@ -438,10 +448,11 @@ PROTECTED void AudioSdpGenerator::AddOctetAlignToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddOctetAlignToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddOctetAlignToFmtp() - octet-align[%d], visible[%d]", pFmtp->GetOctetAlign(),
+    IMS_TRACE_I("AddOctetAlignToFmtp(): octet-align[%d], visible[%d]", pFmtp->GetOctetAlign(),
             pFmtp->IsOctetAlignVisible(), 0);
 
     if (pFmtp->IsOctetAlignVisible() == IMS_TRUE)
@@ -459,10 +470,11 @@ PROTECTED void AudioSdpGenerator::AddDtxToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddDtxToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddDtxToFmtp() - dtx[%d], visible[%d]", pFmtp->IsDtxEnabled(),
+    IMS_TRACE_I("AddDtxToFmtp(): dtx[%d], visible[%d]", pFmtp->IsDtxEnabled(),
             pFmtp->IsDtxVisible(), 0);
 
     if (pFmtp->IsDtxVisible() == IMS_TRUE)
@@ -483,7 +495,7 @@ PROTECTED void AudioSdpGenerator::AddHfOnlyToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddHfOnlyToFmtp() - hf-only[%d], visible[%d]", pFmtp->GetHfOnly(),
+    IMS_TRACE_I("AddHfOnlyToFmtp(): hf-only[%d], visible[%d]", pFmtp->GetHfOnly(),
             pFmtp->IsHfOnlyVisible(), 0);
 
     if (pFmtp->IsHfOnlyVisible() == IMS_TRUE)
@@ -504,7 +516,7 @@ PROTECTED void AudioSdpGenerator::AddEvsModeSwitchToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddEvsModeSwitchToFmtp() - evs-mode-switch[%d], visible[%d]",
+    IMS_TRACE_I("AddEvsModeSwitchToFmtp(): evs-mode-switch[%d], visible[%d]",
             pFmtp->GetEvsModeSwitch(), pFmtp->IsEvsModeSwitchVisible(), 0);
 
     if (pFmtp->IsEvsModeSwitchVisible() == IMS_TRUE)
@@ -521,10 +533,11 @@ PROTECTED void AudioSdpGenerator::AddBwToFmtp(IN AudioProfile::EvsFmtp* pFmtp, O
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddBwToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddBwToFmtp() - bw-list[%d], visible[%d]", pFmtp->GetBwList(),
+    IMS_TRACE_I("AddBwToFmtp(): bw-list[%d], visible[%d]", pFmtp->GetBwList(),
             pFmtp->IsBwListVisible(), 0);
 
     if (pFmtp->GetBwList() != 0 && pFmtp->IsBwListVisible())
@@ -576,10 +589,11 @@ PROTECTED void AudioSdpGenerator::AddBrToFmtp(IN AudioProfile::EvsFmtp* pFmtp, O
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddBrToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddBrToFmtp() - br-list[%d], visible[%d]", pFmtp->GetBrList(),
+    IMS_TRACE_I("AddBrToFmtp(): br-list[%d], visible[%d]", pFmtp->GetBrList(),
             pFmtp->IsBrListVisible(), 0);
 
     if (pFmtp->IsBrListVisible() == IMS_TRUE)
@@ -627,10 +641,11 @@ PROTECTED void AudioSdpGenerator::AddCmrToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddCmrToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddCmrToFmtp() - cmr[%d], visible[%d]", pFmtp->GetCmr(), pFmtp->IsCmrVisible(), 0);
+    IMS_TRACE_I("AddCmrToFmtp(): cmr[%d], visible[%d]", pFmtp->GetCmr(), pFmtp->IsCmrVisible(), 0);
 
     if (pFmtp->IsCmrVisible() == IMS_TRUE && pFmtp->GetEvsModeSwitch() != 1)
     {
@@ -647,10 +662,11 @@ PROTECTED void AudioSdpGenerator::AddChannelAwModeToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddChannelAwModeToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddChannelAwModeToFmtp() - ch-aw-recv[%d], visible[%d]", pFmtp->GetChAwRecv(),
+    IMS_TRACE_I("AddChannelAwModeToFmtp(): ch-aw-recv[%d], visible[%d]", pFmtp->GetChAwRecv(),
             pFmtp->IsChannelAwModeVisible(), 0);
 
     if (pFmtp->IsChannelAwModeVisible() == IMS_TRUE && pFmtp->GetEvsModeSwitch() != 1)
@@ -668,10 +684,11 @@ PROTECTED void AudioSdpGenerator::AddBwSendToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddBwSendToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddBwSendToFmtp() - bw-send[%d]", pFmtp->GetBwSend(), 0, 0);
+    IMS_TRACE_I("AddBwSendToFmtp(): bw-send[%d]", pFmtp->GetBwSend(), 0, 0);
 
     if (pFmtp->GetBwSend() != 0)
     {
@@ -718,10 +735,11 @@ PROTECTED void AudioSdpGenerator::AddBwRecvToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddBwRecvToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddBwRecvToFmtp() - bw-recv[%d]", pFmtp->GetBwRecv(), 0, 0);
+    IMS_TRACE_I("AddBwRecvToFmtp(): bw-recv[%d]", pFmtp->GetBwRecv(), 0, 0);
 
     if (pFmtp->GetBwRecv() != 0)
     {
@@ -768,10 +786,11 @@ PROTECTED void AudioSdpGenerator::AddBrSendToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddBrSendToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddBrSendToFmtp() - br-send[%d]", pFmtp->GetBwSend(), 0, 0);
+    IMS_TRACE_I("AddBrSendToFmtp(): br-send[%d]", pFmtp->GetBwSend(), 0, 0);
 
     if (pFmtp->GetBrSend() != 0)
     {
@@ -818,10 +837,11 @@ PROTECTED void AudioSdpGenerator::AddBrRecvToFmtp(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "AddBrRecvToFmtp(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("AddBrRecvToFmtp() - br-recv[%d]", pFmtp->GetBwRecv(), 0, 0);
+    IMS_TRACE_I("AddBrRecvToFmtp(): br-recv[%d]", pFmtp->GetBwRecv(), 0, 0);
 
     if (pFmtp->GetBrRecv() != 0)
     {
@@ -869,15 +889,17 @@ PROTECTED void AudioSdpGenerator::ForceToAddModeSetList(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "ForceToAddModeSetList(): invalid fmtp", 0, 0, 0);
         return;
     }
 
     IMS_TRACE_I("ForceToAddModeSetList()", 0, 0, 0);
 
-    IMS_BOOL pTempShowModeSet = pFmtp->IsModeSetVisible();
+    IMS_BOOL bShowModeSet = pFmtp->IsModeSetVisible();
     pFmtp->SetShowModeSet(IMS_TRUE);
     AddModeSetListToFmtp(pFmtp, strFmtp);
-    pFmtp->SetShowModeSet(pTempShowModeSet);
+    pFmtp->SetShowModeSet(bShowModeSet);
+    IMS_TRACE_I("ForceToAddModeSetList(): mode-set visible[%d]", bShowModeSet, 0, 0);
 }
 
 PROTECTED void AudioSdpGenerator::ForceToAddOctetAlign(
@@ -885,13 +907,14 @@ PROTECTED void AudioSdpGenerator::ForceToAddOctetAlign(
 {
     if (pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "ForceToAddOctetAlign(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_I("ForceToAddOctetAlign()", 0, 0, 0);
-
-    IMS_BOOL pTempShowOctetAlign = pFmtp->IsOctetAlignVisible();
+    IMS_BOOL bShowOctetAlign = pFmtp->IsOctetAlignVisible();
     pFmtp->SetShowOctetAlign(IMS_TRUE);
     AddOctetAlignToFmtp(pFmtp, strFmtp);
-    pFmtp->SetShowOctetAlign(pTempShowOctetAlign);
+    pFmtp->SetShowOctetAlign(bShowOctetAlign);
+
+    IMS_TRACE_I("ForceToAddOctetAlign(): octet-aligned visible[%d]", bShowOctetAlign, 0, 0);
 }

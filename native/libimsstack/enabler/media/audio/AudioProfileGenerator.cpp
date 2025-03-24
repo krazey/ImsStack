@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,6 +46,7 @@ AudioProfile* AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL || pIService == IMS_NULL)
     {
+        IMS_TRACE_E(0, "SetProfile(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -62,9 +63,9 @@ AudioProfile* AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
     AudioProfileUtil::SetAnbr(pAudioProfile, eServiceType, nSlotId);
 
-    IMS_TRACE_D("SetProfile() - Ptime[%d], MaxPtime[%d]", pAudioProfile->GetPtime(),
+    IMS_TRACE_D("SetProfile(): Ptime[%d], MaxPtime[%d]", pAudioProfile->GetPtime(),
             pAudioProfile->GetMaxPtime(), 0);
-    IMS_TRACE_D("SetProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->GetBandwidthAs(),
+    IMS_TRACE_D("SetProfile(): AS[%d], RR[%d], RS[%d]", pAudioProfile->GetBandwidthAs(),
             pAudioProfile->GetBandwidthRr(), pAudioProfile->GetBandwidthRs());
 
     return pAudioProfile;
@@ -76,10 +77,9 @@ void AudioProfileGenerator::CreateCodecPayloads(IN MediaBaseProfile* pProfile, I
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL || pCodecConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateCodecPayloads(): invalid arguments", 0, 0, 0);
         return;
     }
-
-    IMS_TRACE_D("CreateCodecPayloads() - codec[%s]", ImsCodec::CodecToString(nCodec), 0, 0);
 
     if (nCodec > ImsCodec::AUDIO_NONE && nCodec < ImsCodec::AUDIO_MAX)
     {
@@ -115,6 +115,7 @@ PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN CodecAudioConfig* pCo
 {
     if (pCodecConfig == IMS_NULL || pAudioConfig == IMS_NULL || pFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "SetAudioCodecFmtp(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -170,10 +171,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
 {
     if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateAmrPayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
-
-    IMS_TRACE_I("CreateAmrPayload()", 0, 0, 0);
 
     CodecAmrConfig* pAmrConfig = static_cast<CodecAmrConfig*>(pCodecConfig);
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
@@ -207,8 +207,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
             pAmrConfig->GetSamplingRate(), pAmrConfig->GetChannel());
     pAmrPayload->SetFmtp(pAmrFmtp);
 
-    IMS_TRACE_D("CreateAmrPayload() - Codec[%s], SamplingRate[%d]",
-            ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetSamplingRate(), 0);
+    IMS_TRACE_D("CreateAmrPayload(): Codec[%s], Payload[%d], SamplingRate[%d]",
+            ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetPayloadType(),
+            pAmrConfig->GetSamplingRate());
 
     return pAmrPayload;
 }
@@ -218,10 +219,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
 {
     if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateEvsPayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
-
-    IMS_TRACE_I("CreateEvsPayload()", 0, 0, 0);
 
     CodecEvsConfig* pEvsConfig = static_cast<CodecEvsConfig*>(pCodecConfig);
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
@@ -308,14 +308,15 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
         pEvsFmtp->SetChAwRecv(-1);
     }
 
-    IMS_TRACE_D("CreateEvsPayload() - ShowDtx[%d], ShowAmrModeSet[%d]", pEvsConfig->GetShowDtx(),
-            pEvsConfig->GetShowAmrModeSet(), 0);
-
     // set EVS codec fmtp
     AudioProfile::Payload* pEvsPayload = new AudioProfile::Payload();
     pEvsPayload->SetRtpMap(
             pEvsConfig->GetPayloadType(), strCodecName, 16000, pEvsConfig->GetChannel());
     pEvsPayload->SetFmtp(pEvsFmtp);
+
+    IMS_TRACE_D("CreateEvsPayload(): Payload[%d], ShowDtx[%d], ShowAmrModeSet[%d]",
+            pEvsConfig->GetPayloadType(), pEvsConfig->GetShowDtx(),
+            pEvsConfig->GetShowAmrModeSet());
 
     return pEvsPayload;
 }
@@ -325,10 +326,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
 {
     if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateTelephoneEventPayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
-
-    IMS_TRACE_I("CreateTelephoneEventPayload()", 0, 0, 0);
 
     CodecTelephoneEventConfig* pDtmfConfig = static_cast<CodecTelephoneEventConfig*>(pCodecConfig);
     AString strCodecName;
@@ -343,8 +343,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateTelephoneEventPayl
             pDtmfConfig->GetPayloadType(), strCodecName, pDtmfConfig->GetSamplingRate(), 0);
     pTelephoneEventPayload->SetFmtp(pTelephoneEventFmtp);
 
-    IMS_TRACE_D("CreateTelephoneEventPayload() - Codec[%s], SamplingRate[%d]",
-            ImsCodec::CodecToString(pDtmfConfig->GetCodec()), pDtmfConfig->GetSamplingRate(), 0);
+    IMS_TRACE_D("CreateTelephoneEventPayload(): Codec[%s], Payload[%d], SamplingRate[%d]",
+            ImsCodec::CodecToString(pDtmfConfig->GetCodec()), pDtmfConfig->GetPayloadType(),
+            pDtmfConfig->GetSamplingRate());
 
     return pTelephoneEventPayload;
 }
@@ -354,10 +355,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreatePcmPayload(
 {
     if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreatePcmPayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
-
-    IMS_TRACE_I("CreatePcmPayload()", 0, 0, 0);
 
     AudioProfile::Payload* pPcmPayload = new AudioProfile::Payload();
     AString strCodecName;
@@ -379,5 +379,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreatePcmPayload(
     CodecPcmConfig* pPcmConfig = static_cast<CodecPcmConfig*>(pCodecConfig);
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
 
+    IMS_TRACE_I(
+            "CreatePcmPayload(): Codec[%s], Payload[%d]", strCodecName.GetStr(), nPayloadNum, 0);
     return pPcmPayload;
 }

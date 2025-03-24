@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,8 @@
 #define AUDIO_PROFILE_NEGOTIATOR_H_
 
 #include "MediaProfileNegotiator.h"
-#include "audio/AudioProfileUtil.h"
+#include "audio/AudioProfile.h"
+#include "config/AudioConfiguration.h"
 
 class MediaConfiguration;
 
@@ -32,7 +33,18 @@ public:
     AudioProfileNegotiator();
     virtual ~AudioProfileNegotiator();
 
-    IMS_BOOL Negotiate(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
+    /**
+     * @brief Make the negotiated profile using the local and peer profiles
+     *
+     * @param pLocalProfile The local profile
+     * @param pPeerProfile The peer profile
+     * @param bIsOfferReceived The option to check that the case is in sdp offer received
+     * @param pNegotiatedProfile The negotiated profile to update
+     * @param pConfig The configuration set
+     * @return IMS_BOOL Return IMS_TRUE when there is no error in negotiation vise versa when there
+     * is invalid parameter and the negotiation is failed
+     */
+    virtual IMS_BOOL Negotiate(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile,
             IN MediaConfiguration* pConfig);
 
