@@ -272,6 +272,7 @@ protected:
     {
         if (m_pAosHandleMtc != nullptr)
         {
+            m_pAosHandleMtc->StopVolteHysTimer();
             delete m_pAosHandleMtc;
             m_pAosHandleMtc = nullptr;
         }
@@ -2524,6 +2525,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_TRUE);
     m_pAosHandleMtc->SetCapabilities(objCapabilities);
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_NETWORK);
@@ -3093,6 +3095,164 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_RefreshSsacInfoOnLte)
     EXPECT_TRUE(m_pAosHandleMtc->IsSsacBarred());
 }
 
+TEST_F(AosHandleMtcTest, NoCheckVopsStateOnRatsOtherThanNeitherLteNorNr)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).Times(0);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosHandleMtcTest, NoVopsStateChangeIfNewStateIsSameWithOldStateOnLte)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+}
+
+TEST_F(AosHandleMtcTest, NoVopsStateChangeIfProcessingIsHeldOnNr)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_NR);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+}
+
+TEST_F(AosHandleMtcTest, VopsStateIsChangedIfNewStateIsDifferentToOldStateAndNoActiveCallOnLte)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+}
+
+TEST_F(AosHandleMtcTest, VolteHysTimerIsStartedIfVopsIsSupportedOnNetworkChangeToLte)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOPS);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(60));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsVolteHysTimerRunning());
+}
+
+TEST_F(AosHandleMtcTest, VopsBlockIsReleasedIfVopsIsSupportedOnNetworkChangeToLteAndNoVolteHysTime)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOPS);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetVolteHysTime()).WillByDefault(Return(0));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOPS));
+}
+
+TEST_F(AosHandleMtcTest, VopsBlockIsSetIfVopsIsNotSupportedOnNetworkChangeToLte)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOPS));
+}
+
+TEST_F(AosHandleMtcTest, ShouldRequestPlmnBlockIfVopsIsNotSupportedOnNetworkChangeToLte)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT, 0));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosHandleMtcTest, ShouldStopVolteHysTimerIfVopsIsNotSupportedOnNetworkChangeToLte)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->StartVolteHysTimer(60);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
+}
+
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)
 {
     // Test1: call active
@@ -3611,6 +3771,19 @@ TEST_F(AosHandleMtcTest, VopsChangeWithPlmnChange_Plmn1_Off_Plmn1_On_Plmn2_Off)
     m_pAosHandleMtc->ServicePhone_PlmnChanged();  // nothing to do
 }
 
+TEST_F(AosHandleMtcTest, VopsStateIsNotUpdatedIfRatIsNeitherLteNorNr)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+
+    // THEN
+    EXPECT_EQ(m_pAosHandleMtc->GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+}
+
 TEST_F(AosHandleMtcTest, ShouldNotifyMtcIfB2cCallComposerCapabilityIsChanged)
 {
     // GIVEN
@@ -3710,11 +3883,11 @@ TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test3)
     // Expectation: Unavailable feature on 3G but LTE / No block network on 3G
     //              Notify to AosRegistration if unavailable feature is changed
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .WillByDefault(Return(IMS_TRUE));
 
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_HSPA);
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_TRUE);
 
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_UPDATE_FEATURE_WITHOUT_REG, 0))

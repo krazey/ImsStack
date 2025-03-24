@@ -588,15 +588,24 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
 
         ReevaluateCapabilities(IMS_TRUE);
 
-        if (GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
+        if (!m_bVopsIgnoredForVolteEnabled && IsSupportedNetworkTypeForCellular(m_nNetworkType))
         {
-            if (m_nNetworkType == NW_REPORT_RADIO_LTE)
+            IMS_BOOL bIsVopsSupported = m_piAppContext->GetNetTracker()->IsImsVoiceCallSupported();
+            IMS_UINT32 nNewVopsState = bIsVopsSupported ? IMS_VOICE_OVER_PS_SUPPORTED
+                                                        : IMS_VOICE_OVER_PS_NOT_SUPPORTED;
+            if (m_nVopsState != nNewVopsState)
             {
-                SsacInfo objSsacInfo = m_piImsRadio->GetSsacInfo();
-                if (m_bSsacBarred != (objSsacInfo.nBarringFactorForVoice == 0))
-                {
-                    ImsRadio_OnSsacChanged(objSsacInfo);
-                }
+                ProcessVopsStateChanged(nNewVopsState);
+            }
+        }
+
+        if (GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac() &&
+                m_nNetworkType == NW_REPORT_RADIO_LTE)
+        {
+            SsacInfo objSsacInfo = m_piImsRadio->GetSsacInfo();
+            if (m_bSsacBarred != (objSsacInfo.nBarringFactorForVoice == 0))
+            {
+                ImsRadio_OnSsacChanged(objSsacInfo);
             }
         }
     }
@@ -641,6 +650,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(
         A_IMS_TRACE_I(APPPROFILE,
                 "ProcessVopsStateChanged :: handled for holding state. m_nHoldingVopsState(%d)",
                 m_nHoldingVopsState, 0, 0);
+        return;
+    }
+
+    if (!IsSupportedNetworkTypeForCellular(m_nNetworkType))
+    {
         return;
     }
 
