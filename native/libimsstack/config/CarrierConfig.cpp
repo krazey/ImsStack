@@ -1362,6 +1362,8 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_IN
         KEY_IMS_SMS_PREFIX "sms_retry_policy_for_expiry_timer_f_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_IN_REPLY_TO_VALIDATION_BOOL[] =
         KEY_IMS_SMS_PREFIX "sms_in_reply_to_validation_bool";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_SUPPORT_CONTENT_TRANSFER_ENCODING_HEADER_BOOL[] =
+        KEY_IMS_SMS_PREFIX "sms_support_content_transfer_encoding_header_bool";
 
 PUBLIC GLOBAL IMS_BOOL CarrierConfig::IsVoLteEnabled(IN IMS_SINT32 nSlotId)
 {
