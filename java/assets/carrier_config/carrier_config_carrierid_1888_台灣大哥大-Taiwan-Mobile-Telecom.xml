@@ -25,6 +25,7 @@
 
     <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/MyService</string>
+    <boolean name="imsss.ut_network_query_for_tb_oir_network_default_bool" value="true"/>
 
     <!-- ImsMedia -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
