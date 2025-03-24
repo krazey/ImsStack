@@ -650,6 +650,12 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
 
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
+        if (m_objContext.GetUpdatingInfo().IsModifier())
+        {
+            m_objContext.GetUpdatingInfo().GetModifiedInfo() =
+                    m_objContext.GetMediaManager().GetMediaInfo();
+        }
+
         if (m_objContext.GetUpdatingInfo().GetTargetCallType() == CallType::UNKNOWN)
         {
             IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();

@@ -681,7 +681,7 @@ TEST_F(UpdatingStateTest, SessionUpdatedReturnsEstablishedStateIfResumedAsModifi
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
 }
 
-TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAsModifier)
+TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAsModifierWithSdp)
 {
     pUpdatingInfo->SetModifier();
     pUpdatingInfo->SetTargetCallType(CallType::VOIP);
@@ -693,6 +693,25 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAsModifier)
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::ACCEPT_UPDATE, _)).Times(1);
     EXPECT_CALL(objMtcSession, SendAck()).Times(1);
     EXPECT_CALL(objMediaManager, NegotiateSdp(_)).Times(1);
+    EXPECT_CALL(objMtcPreconditionManager, OnSdpReceived(_)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendUpdated()).Times(1);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAsModifierWithoutSdp)
+{
+    pUpdatingInfo->SetModifier();
+    pUpdatingInfo->SetTargetCallType(CallType::RTT);
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+
+    EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::ACCEPT_UPDATE, _)).Times(1);
+    EXPECT_CALL(objMtcSession, SendAck()).Times(1);
+    EXPECT_CALL(objMediaManager, NegotiateSdp(_)).Times(0);
+    EXPECT_CALL(objMtcPreconditionManager, OnSdpReceived(_)).Times(0);
     EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
     EXPECT_CALL(objUiNotifier, SendUpdated()).Times(1);
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
