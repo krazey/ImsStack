@@ -988,6 +988,8 @@ PROTECTED VIRTUAL IRegInfoContact* AosSubscription::GetRegInfoContact(
 {
     IRegInfoContact* piRegInfoContact = IMS_NULL;
 
+    IMS_BOOL bUseRegInfoContactWithoutUriCheck =
+            GET_N_CONFIG(m_piContext->GetSlotId())->IsUseRegInfoContactWithoutUriCheck();
     for (IMS_UINT32 i = 0; i < objContact.GetSize(); i++)
     {
         piRegInfoContact = objContact.GetAt(i);
@@ -997,15 +999,14 @@ PROTECTED VIRTUAL IRegInfoContact* AosSubscription::GetRegInfoContact(
             continue;
         }
 
-        if (CompareUriAssociatedWithContact(piRegInfoContact->GetUri()))
+        if (bUseRegInfoContactWithoutUriCheck ||
+                CompareUriAssociatedWithContact(piRegInfoContact->GetUri()))
         {
-            break;
+            return piRegInfoContact;
         }
-
-        piRegInfoContact = IMS_NULL;
     }
 
-    return piRegInfoContact;
+    return IMS_NULL;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosSubscription::CompareUriAssociatedWithContact(

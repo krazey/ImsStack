@@ -1506,6 +1506,30 @@ TEST_F(AosSubscriptionTest, TerminateAorStateWhenNotifyReceivedWithMismatchedCon
     EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
 }
 
+/// RegSubscription_NotifyReceived() - use contact of reg info even though uri is not matched
+TEST_F(AosSubscriptionTest,
+        ProcessContactIfConfiguredToSkipUriCheckWhenNotifyReceivedWithMismatchedUri)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    SipAddress objContactAddr = SipAddress(m_strAnonymousAddr);
+    m_pAosSubscription->SetContactAddress(objContactAddr);
+
+    ON_CALL(m_objMockIRegInfoContact, GetState())
+            .WillByDefault(Return(IRegInfoContact::STATE_ACTIVE));
+    ON_CALL(m_objMockIRegInfoContact, GetEvent())
+            .WillByDefault(Return(IRegInfoContact::EVENT_REGISTERED));
+    SipAddress objSipAddress = SipAddress(m_strSipAddrWithPort);
+    ON_CALL(m_objMockIRegInfoContact, GetUri()).WillByDefault(ReturnRef(objSipAddress));
+    m_objContact.Append(&m_objMockIRegInfoContact);
+    ON_CALL(m_objMockIRegInfoRegistration, GetContacts()).WillByDefault(Return(m_objContact));
+    ON_CALL(m_objMockIAosConfig, IsUseRegInfoContactWithoutUriCheck())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(m_pAosSubscription->GetState(), 0, IMS_TRUE);
+
+    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_ACTIVE);
+}
+
 /// RegSubscription_NotifyReceived() - ProcessNotifyState_Active() with m_strSipAddrWithPort
 TEST_F(AosSubscriptionTest, ActiveAorStateWhenWhenNotifyReceivedWithMatchedContactWithActiveState)
 {
