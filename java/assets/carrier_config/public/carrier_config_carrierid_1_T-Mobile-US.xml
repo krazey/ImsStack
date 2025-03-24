@@ -167,7 +167,16 @@
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
+    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="30000"/>
+    <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="3">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+    </int-array>
     <int name="imsvt.video_as_bandwidth_kbps_int" value="560"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="5200"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
+    <int name="imsvt.video_rtp_inactivity_timer_millis_int" value="30000"/>
+    <int name="imsvt.video_rtcp_inactivity_timer_millis_int" value="30000"/>
 </carrier_config>
