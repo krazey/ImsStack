@@ -108,4 +108,7 @@
     <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="2000"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
+    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
 </carrier_config>

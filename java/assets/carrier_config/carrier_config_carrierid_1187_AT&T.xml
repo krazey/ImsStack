@@ -32,6 +32,7 @@
 
     <!-- Aos -->
     <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="false"/>
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
     <boolean name="ims.no_init_reg_on_pcscf_change_bool" value="true"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
@@ -172,7 +173,7 @@
     <string name="imsvoice.call_reject_reason_phrase_no_answer_by_user_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
-    <int name="imsvt.convert_remote_response_timer_millis_int" value="15000"/>
+    <int name="imsvt.convert_remote_response_timer_millis_int" value="20000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="12000"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="1"/>
     <boolean name="imsvt.support_early_session_bool" value="false"/>
@@ -183,7 +184,7 @@
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
     <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="false"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="10000"/>
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="180000"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="210000"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="20000"/>
     <boolean name="imsvoice.check_conference_event_package_version_bool" value="true"/>
     <boolean name="imsvoice.conference_refer_to_uri_source_paid_bool" value="true"/>
@@ -285,4 +286,12 @@
 
     <!-- Mts -->
     <int name="imssms.sms_preferred_psi_uri_type_int" value="0"/>
+    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="5"/>
+    </int-array>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="5"/>
+    </int-array>
 </carrier_config>

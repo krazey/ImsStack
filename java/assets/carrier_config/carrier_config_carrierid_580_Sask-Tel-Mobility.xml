@@ -20,4 +20,7 @@
 
     <!-- Aos -->
     <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
+
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>

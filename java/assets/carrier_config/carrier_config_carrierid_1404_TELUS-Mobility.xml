@@ -21,6 +21,7 @@
 
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="2"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
@@ -29,6 +30,7 @@
         <item value="3"/>
         <item value="6"/>
     </int-array>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- MTC -->
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="3"/>
@@ -94,7 +96,9 @@
     </int-array>
     <!-- Timer value is not in requirement. It is from previous solution -->
     <int name="imsss.ut_temporary_block_timer_min_int" value="5"/>
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 
     <!-- Mts -->
     <boolean name="imssms.sms_support_content_transfer_encoding_header_bool" value="true"/>
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 </carrier_config>
