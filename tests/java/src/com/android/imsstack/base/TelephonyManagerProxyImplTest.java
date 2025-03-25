@@ -227,6 +227,9 @@ public class TelephonyManagerProxyImplTest {
 
         mTelephonyManagerProxy.getHalVersion(TelephonyManager.HAL_SERVICE_IMS);
         verify(mTelephonyManager).getHalVersion(eq(TelephonyManager.HAL_SERVICE_IMS));
+
+        mTelephonyManagerProxy.getEmergencyNumberList();
+        verify(mTelephonyManager).getEmergencyNumberList();
     }
 
     @Test
@@ -284,6 +287,7 @@ public class TelephonyManagerProxyImplTest {
         assertNull(mTelephonyManagerProxy.getAllCellInfo());
         assertEquals(TelephonyManager.HAL_VERSION_UNKNOWN,
                 mTelephonyManagerProxy.getHalVersion(TelephonyManager.HAL_SERVICE_IMS));
+        assertEquals(Collections.emptyMap(), mTelephonyManagerProxy.getEmergencyNumberList());
     }
 
     @Test

@@ -33,6 +33,7 @@ import android.telephony.TelephonyManager.BootstrapAuthenticationCallback;
 import android.telephony.TelephonyManager.CellInfoCallback;
 import android.telephony.TelephonyManager.HalService;
 import android.telephony.TelephonyManager.SimState;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.util.Pair;
 
@@ -44,6 +45,7 @@ import com.android.imsstack.util.MessageExecutor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -369,6 +371,16 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     public @NonNull Pair<Integer, Integer> getHalVersion(@HalService int halService) {
         TelephonyManager tm = getTelephonyManager();
         return (tm != null) ? tm.getHalVersion(halService) : TelephonyManager.HAL_VERSION_UNKNOWN;
+    }
+
+    @Override
+    public @NonNull Map<Integer, List<EmergencyNumber>> getEmergencyNumberList() {
+        TelephonyManager tm = getTelephonyManager();
+        try {
+            return (tm != null) ? tm.getEmergencyNumberList() : Collections.emptyMap();
+        } catch (UnsupportedOperationException | IllegalStateException e) {
+            return Collections.emptyMap();
+        }
     }
 
     private TelephonyManager getTelephonyManager() {

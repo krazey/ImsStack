@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.os.Bundle;
 import android.telephony.ServiceState;
-import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
@@ -205,8 +204,6 @@ public class ImsCallManagerTest {
         verify(mMockCallContext).getECallStateTracker();
         verify(mMockMtcApp).createMtcCallAndAttach((MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_MO));
         verify(mMockMtcCall).isEmergencyCall();
-        verify(mMockMtcApp).openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
         verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcCall);
@@ -219,8 +216,6 @@ public class ImsCallManagerTest {
         result = mImsCallManager.createSession(profile);
         verify(mMockMtcCall).isEmergencyCall();
         verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
-        verify(mMockMtcApp, never()).openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcCall);
 
@@ -276,8 +271,6 @@ public class ImsCallManagerTest {
         verify(mMockCallContext).getSrvccStateTracker();
         verify(mMockMtcCall).isEmergencyCall();
         verify(mMockMtcCall).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
-        verify(mMockMtcApp, never()).openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
         Assert.assertNotNull(result);
 
         // case2 Normal call voice and rtt

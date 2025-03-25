@@ -277,7 +277,7 @@ public final class ImsTestHelper {
                 // 1 : emergencyRouting type
                 ImsLog.d("sendMtcTestCommand :: open emergency service");
                 sTempCall = mtcApp.createMtcCallAndAttach(extras[0]);
-                mtcApp.openEmergencyService(sTempCall, extras[1]);
+                mtcApp.openEmergencyService(sTempCall, extras[1], callee);
                 return;
             } else if (command == 101) {
                 // 0 : callAttributes

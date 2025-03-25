@@ -623,6 +623,30 @@
     <string-array name="imsemergency.plmn_allowing_geolocation_pidf_in_sip_invite_no_uicc_string_array" num="1">
         <item value="311480"/>
     </string-array>
+    <string-array name="imsemergency.dynamic_routing_number_per_plmn_string_array" num="18">
+        <!-- b/393518741 -->
+        <item value="cz,01,156"/>
+        <item value="cz,03,156"/>
+        <!-- b/383915621 -->
+        <item value="gr,,100,108,166,199,1056"/>
+        <!-- b/379083664 -->
+        <item value="hr,,192,193,194,195,1987"/>
+        <item value="in,,101,102,103,108"/>
+        <item value="il,,101,102"/>
+        <item value="tw,,110,119"/>
+        <!-- b/343344830 -->
+        <item value="sg,01,995"/>
+        <item value="sg,02,995"/>
+        <item value="sg,03,995"/>
+        <item value="sg,10,995"/>
+        <item value="ch,,1414"/>
+        <item value="gp,,115,119,191,196,197,116000,116111,116117"/>
+        <item value="sk,,159"/>
+        <item value="pl,,984,985,986,987,989,991,992,993,994,995,996,997,998,999"/>
+        <item value="re,,115,119,191,196,197,116000,116111,116117"/>
+        <item value="si,,113"/>
+        <item value="ba,,122,123,124"/>
+    </string-array>
 
     <!-- Media -->
     <boolean name="imsvoice.support_multi_config_in_early_session_bool" value="false"/>

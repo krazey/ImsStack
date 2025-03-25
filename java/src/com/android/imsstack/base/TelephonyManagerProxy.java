@@ -28,6 +28,7 @@ import android.telephony.TelephonyManager.BootstrapAuthenticationCallback;
 import android.telephony.TelephonyManager.CellInfoCallback;
 import android.telephony.TelephonyManager.HalService;
 import android.telephony.TelephonyManager.SimState;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.util.Pair;
 
@@ -35,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -447,4 +449,13 @@ public interface TelephonyManagerProxy {
      *         or HAL_VERSION_UNSUPPORTED if unsupported.
      */
     @NonNull Pair<Integer, Integer> getHalVersion(@HalService int halService);
+
+    /**
+     * Get the emergency number list based on current locale, sim, default, modem and network.
+     *
+     * @return Map including the keys as the active subscription IDs (Note: if there is no active
+     * subscription, the key is {@link SubscriptionManager#getDefaultSubscriptionId}) and the value
+     * as the list of {@link EmergencyNumber}; empty Map if this information is not available;
+     */
+    @NonNull Map<Integer, List<EmergencyNumber>> getEmergencyNumberList();
 }

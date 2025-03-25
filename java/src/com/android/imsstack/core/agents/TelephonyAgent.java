@@ -22,7 +22,10 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.SimState;
+import android.telephony.emergency.EmergencyNumber;
 import android.util.SparseArray;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.DeviceConfig;
@@ -32,6 +35,9 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.ImsLog;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A class for accessing the Telephony or SIM states through {@link TelephonyManager} or
@@ -229,6 +235,13 @@ public class TelephonyAgent implements TelephonyInterface {
                 + " (number=" + number + ", eNumber=" + eNumber + ")");
 
         return isEmergencyNumber;
+    }
+
+    @Override
+    public @NonNull List<EmergencyNumber> getEmergencyNumberList() {
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getEmergencyNumberList().getOrDefault(
+                MSimUtils.getSubId(mSlotId), Collections.emptyList());
     }
 
     private @NetworkType int getCellularDataNetworkType() {

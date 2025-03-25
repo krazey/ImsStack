@@ -47,6 +47,7 @@ import android.telephony.TelephonyManager.BootstrapAuthenticationCallback;
 import android.telephony.TelephonyManager.CellInfoCallback;
 import android.telephony.TelephonyManager.HalService;
 import android.telephony.TelephonyManager.SimState;
+import android.telephony.emergency.EmergencyNumber;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -63,6 +64,7 @@ import com.android.imsstack.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -329,6 +331,12 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     @Override
     public @NonNull Pair<Integer, Integer> getHalVersion(@HalService int halService) {
         return mHalVersion;
+    }
+
+    @Override
+    public @NonNull Map<Integer, List<EmergencyNumber>> getEmergencyNumberList() {
+        // This is not supported yet in the test environment.
+        return Collections.emptyMap();
     }
 
     /**
