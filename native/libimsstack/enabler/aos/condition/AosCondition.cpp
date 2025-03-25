@@ -76,6 +76,7 @@ PUBLIC VIRTUAL void AosCondition::Start()
 {
     A_IMS_TRACE_I(APPPROFILE, "Start", 0, 0, 0);
 
+    AddConfigListener();
     AddServiceAvailable();
     AddAosServiceListener();
     AddEventListener();
@@ -163,6 +164,7 @@ PUBLIC VIRTUAL void AosCondition::Stop()
     RemoveEventListener();
     RemoveAosServiceListener();
     RemoveServiceAvailable();
+    RemoveConfigListener();
 }
 
 PUBLIC VIRTUAL void AosCondition::SetListener(IN IAosConditionListener* piListener)
@@ -259,6 +261,24 @@ PUBLIC VIRTUAL void AosCondition::PrintBlockReasons() const
     m_piBlock->PrintBlockReasons();
 }
 
+PROTECTED VIRTUAL void AosCondition::AddConfigListener()
+{
+    IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
+    if (piNConfig != IMS_NULL)
+    {
+        piNConfig->SetListener(this);
+    }
+}
+
+PROTECTED VIRTUAL void AosCondition::RemoveConfigListener()
+{
+    IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
+    if (piNConfig != IMS_NULL)
+    {
+        piNConfig->RemoveListener(this);
+    }
+}
+
 PROTECTED VIRTUAL void AosCondition::AddServiceAvailable()
 {
     A_IMS_TRACE_D(APPPROFILE, "AddServiceAvailable", 0, 0, 0);
@@ -315,23 +335,21 @@ PROTECTED VIRTUAL void AosCondition::RemoveAosServiceListener()
 
 PROTECTED VIRTUAL void AosCondition::AddEventListener()
 {
-    IMS_EVENT_AddListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
+    UpdateEventListener(IMS_EVENT_LTE_INFO, IMS_TRUE);
 
-    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
+    const IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
+    if (piNConfig == IMS_NULL)
     {
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->IsVoLteRoamingAvailable() == IMS_FALSE)
-    {
-        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
-    }
+    UpdateEventListener(IMS_EVENT_ROAMING_STATE, !piNConfig->IsVoLteRoamingAvailable());
 }
 
 PROTECTED VIRTUAL void AosCondition::RemoveEventListener()
 {
-    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
-    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
+    UpdateEventListener(IMS_EVENT_LTE_INFO, IMS_FALSE);
+    UpdateEventListener(IMS_EVENT_ROAMING_STATE, IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosCondition::Event_NotifyEvent(
@@ -497,11 +515,9 @@ PROTECTED VIRTUAL void AosCondition::NConfiguration_NotifyConfigChanged()
     }
 
     m_eServiceType = GetServiceType();
+    A_IMS_TRACE_D(APPPROFILE, "ServiceType[%d]", m_eServiceType, 0, 0);
 
-    if (!piNConfig->IsVoLteRoamingAvailable())
-    {
-        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
-    }
+    UpdateEventListener(IMS_EVENT_ROAMING_STATE, !piNConfig->IsVoLteRoamingAvailable());
 }
 
 // AosServicePhoneListener
@@ -913,6 +929,19 @@ void AosCondition::SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState
         {
             m_pAvailableWifi->HandleEvent(eEvent, nState, nStateEx);
         }
+    }
+}
+
+PROTECTED
+void AosCondition::UpdateEventListener(IN IMS_SINT32 nEvent, IN IMS_BOOL bAdd)
+{
+    if (bAdd)
+    {
+        IMS_EVENT_AddListenerForSlotId(nEvent, this, m_nSlotId);
+    }
+    else
+    {
+        IMS_EVENT_RemoveListenerForSlotId(nEvent, this, m_nSlotId);
     }
 }
 
