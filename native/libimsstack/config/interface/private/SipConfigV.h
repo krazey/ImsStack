@@ -36,6 +36,7 @@ private:
         IMS_BOOL bNoRefreshByReInvite;
         IMS_BOOL bSdpVersionCheckSupported;
         IMS_BOOL bSdpNonRprAllowed;
+        IMS_SINT32 nSessionRefreshSdpVersionIncrement;
 
         inline Session() :
                 bSessionTimerSupported(IMS_TRUE),
@@ -46,7 +47,8 @@ private:
                 nHeaders(SESSION_HEADER_ALL),
                 bNoRefreshByReInvite(IMS_FALSE),
                 bSdpVersionCheckSupported(IMS_TRUE),
-                bSdpNonRprAllowed(IMS_FALSE)
+                bSdpNonRprAllowed(IMS_FALSE),
+                nSessionRefreshSdpVersionIncrement(SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE)
         {
         }
     };
@@ -111,6 +113,10 @@ public:
     {
         return m_objSession.bSdpVersionCheckSupported;
     }
+    inline IMS_SINT32 GetSessionRefreshSdpVersionIncrement() const
+    {
+        return m_objSession.nSessionRefreshSdpVersionIncrement;
+    }
 
     // "capabilities"
     inline IMS_BOOL IsCapabilitiesRespByApp() const { return m_bRespByAppForCapabilities; }
@@ -168,6 +174,14 @@ public:
     {
         SESSION_REFRESH_INVITE = 0,
         SESSION_REFRESH_UPDATE_PREFERRED
+    };
+
+    enum
+    {
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE = 0,
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_AS_OFFERER,
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_AS_ANSWERER,
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_ALL
     };
 
     enum

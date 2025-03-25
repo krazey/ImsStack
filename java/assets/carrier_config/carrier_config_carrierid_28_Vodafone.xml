@@ -28,4 +28,5 @@
         </int-array>
     </pbundle>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <int name="imsvoice.session_refresh_sdp_session_version_increment_int" value="1"/>
 </carrier_config>
