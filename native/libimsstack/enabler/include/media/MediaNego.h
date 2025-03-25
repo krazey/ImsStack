@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,14 +52,16 @@ public:
      * @brief Creates MediaNego instance with given parameter
      *
      * @param pMediaEnvironment The instance of network connection information
+     * @return IMS_BOOL Return IMS_TRUE when it successes, IMS_FALSE when the arguments is
+     * invalid
      */
-    void CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnvironment);
+    IMS_BOOL CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnvironment);
 
     /**
      * @brief Creates MediaNego object copied from the existing MediaNego instance
      *
      * @param pMediaNego the instance of existing MediaNego
-     * @return IMS_BOOL Return IMS_TRUE whent the forking success, IMS_FALSE when the arguments is
+     * @return IMS_BOOL Return IMS_TRUE when the forking success, IMS_FALSE when the arguments is
      * invalid
      */
     IMS_BOOL Forking(IN MediaNego* pMediaNego);
@@ -221,10 +223,22 @@ public:
     IMS_BOOL IsForking();
 
 private:
-    ImsList<IMedia*> GetIMediaListFromSession(
+    ImsList<IMedia*> CreateIMediaListFromSession(
             IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType);
-    void SetSessionType(IN ISession* pSession);
+    void UpdateMediaTypeToNegotiate(IN ISession* pSession);
     void SetMediaDescriptorAsNotSupported(IN IMediaDescriptor* pDescriptor, IN SdpMedia* pSDPMedia);
+    void UpdateNegoState(IMS_BOOL bFormSdp);
+    void UpdateSessionLevelBandwidth(IN ISession* pSession, IMS_UINT32 nTotalAs);
+    IMS_BOOL ProcessMediaLine(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+            IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
+            IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode, OUT IMS_SINT32& nTotalAs,
+            OUT IMediaDescriptor*& pDescriptorForAudio, OUT IMediaDescriptor*& pDescriptorForVideo,
+            OUT IMediaDescriptor*& pDescriptorForText);
+    void UpdateMediaDescriptor(IN ISession* pSession, IN IMediaDescriptor* pDescriptor,
+            IN SdpMedia* pSDPMedia, OUT IMediaDescriptor*& pNegotiatedAudioDescriptor,
+            OUT IMediaDescriptor*& pNegotiatedVideoDescriptor,
+            OUT IMediaDescriptor*& pNegotiatedTextDescriptor, OUT IMS_SINT32& nAudioDirection,
+            OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection);
 
     NEGO_STATE m_eNegoState;
     std::shared_ptr<AudioNego> m_pAudioNego;
