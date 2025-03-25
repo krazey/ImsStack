@@ -90,6 +90,7 @@ public:
     MOCK_METHOD(ISipClientConnection*, CreateClientConnection, (IN SipMethod eMethod), (override));
     MOCK_METHOD(UdpKeepAliveSender*, CreateUdpKeepAliveSender, (), (override));
     MOCK_METHOD(void, RemoveSession, (IN IMtcSession & objSession), (override));
+    MOCK_METHOD(void, RemoveAllSessions, (), (override));
     MOCK_METHOD(void, DeleteUpdatingInfo, (), (override));
     MOCK_METHOD(void, RunPendingOperationIfPossible, (), (override));
 

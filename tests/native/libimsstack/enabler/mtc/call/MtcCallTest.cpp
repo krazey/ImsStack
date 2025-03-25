@@ -1154,6 +1154,22 @@ TEST_F(MtcCallTest, RemoveSessionRemovesMatchingSession)
     EXPECT_EQ(nullptr, objCall.GetSession(&objSession2));
 }
 
+TEST_F(MtcCallTest, RemoveAllSessionsRemovesAllSessions)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory());
+    IMtcSession* piMtcSession1 = objCall.CreateSession(&objSession1);
+    IMtcSession* piMtcSession2 = objCall.CreateSession(&objSession2);
+
+    objCall.RemoveAllSessions();
+
+    EXPECT_EQ(nullptr, objCall.GetSession(&objSession1));
+    EXPECT_EQ(nullptr, objCall.GetSession(&objSession2));
+    EXPECT_EQ(nullptr, objCall.GetSession());
+}
+
 TEST_F(MtcCallTest, DeleteUpdatingInfoDeletesPreviousOne)
 {
     const CallType eChangedCallType = CallType::VT;

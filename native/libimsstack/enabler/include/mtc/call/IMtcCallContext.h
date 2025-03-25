@@ -276,6 +276,12 @@ public:
     virtual void RemoveSession(IN IMtcSession& objSession) = 0;
 
     /**
+     * @brief Removes all the MtcSessions
+     *
+     */
+    virtual void RemoveAllSessions() = 0;
+
+    /**
      * @brief Deletes
      *
      */

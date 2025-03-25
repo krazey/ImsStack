@@ -175,6 +175,7 @@ public:
     ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) override;
     UdpKeepAliveSender* CreateUdpKeepAliveSender() override;
     void RemoveSession(IN IMtcSession& objSession) override;
+    void RemoveAllSessions() override;
     void DeleteUpdatingInfo() override;
     void RunPendingOperationIfPossible() override;
 

@@ -159,6 +159,14 @@ TEST_F(MtcSessionTest, CreateMtSessionaInvokesAddISessionInSessionHolder)
     CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
 }
 
+TEST_F(MtcSessionTest, DestructorDestroysMediaProfileAndQosInfo)
+{
+    CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+
+    EXPECT_CALL(objMediaManager, DestroyMediaProfile(_));
+    EXPECT_CALL(objPreconditionManager, DestroyQos(_));
+}
+
 TEST_F(MtcSessionTest, StartInvokesStartInMessageSender)
 {
     IMS_RESULT eResult = IMS_SUCCESS;

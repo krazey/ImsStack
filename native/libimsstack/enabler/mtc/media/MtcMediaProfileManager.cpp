@@ -109,7 +109,10 @@ void MtcMediaProfileManager::DestroyMediaProfile(
         return;
     }
 
-    piMediaSession->DestroyProfile(GetNegoId(piSession));
+    if (piMediaSession)
+    {
+        piMediaSession->DestroyProfile(GetNegoId(piSession));
+    }
 
     MediaProfile* pProfile = m_objMediaProfiles.GetValue(piSession);
     if (pProfile)
