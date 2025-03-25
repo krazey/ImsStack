@@ -31,6 +31,9 @@
         <item value="6"/>
     </int-array>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
+    <pbundle name="ims.extra_reg_err_bundle">
+        <int name="ims.extra_reg_err_final_type_int" value="2"/>
+    </pbundle>
 
     <!-- MTC -->
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="18">
