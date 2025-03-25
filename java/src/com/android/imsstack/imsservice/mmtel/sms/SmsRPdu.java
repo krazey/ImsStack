@@ -19,6 +19,7 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.telephony.PhoneNumberUtils;
 
+import com.android.imsstack.imsservice.mmtel.sms.SmsTPdu.Direction;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 
@@ -64,6 +65,7 @@ public final class SmsRPdu {
     private int mRpCause;
     private byte[] mRpUserData;
     private byte[] mRpdu;
+    private SmsTPdu mTpdu;
 
     public SmsRPdu(int messageRef, int messageType,
                    String destinationAddress, int cause,
@@ -74,11 +76,13 @@ public final class SmsRPdu {
         mRpCause = cause;
         mRpUserData = userData;
         encodeRpduByteArray();
+        parseTpdu(Direction.MS_TO_SC);
     }
 
     public SmsRPdu(byte[] pdu) {
         mRpdu = pdu;
         parsePdu();
+        parseTpdu(Direction.SC_TO_MS);
     }
 
     /**
@@ -132,6 +136,16 @@ public final class SmsRPdu {
                 loge("Unsupported message type");
                 break;
         }
+    }
+
+    private void parseTpdu(Direction direction) {
+        if (mRpUserData == null) {
+            log("RpUserData is null");
+            return;
+        }
+        mTpdu = new SmsTPdu(mRpUserData, direction);
+        mTpdu.parse();
+        log(" TPDU: " + mTpdu);
     }
 
     /**
