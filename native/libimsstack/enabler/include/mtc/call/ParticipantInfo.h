@@ -49,10 +49,7 @@ public:
 
 private:
     static const AString URI_SET_BY_IMS_ENGINE;
-    static const AString ANONYMOUS_ADDRESS;
-    static const AString ANONYMOUS_DISPLAY_NAME;
 
-    AString GetLocalUriForEmergencyCall() const;
     AString GetRemoteNumberFromMessage(IN const IMessage& objMessage) const;
 
     IMtcCallContext& m_objContext;

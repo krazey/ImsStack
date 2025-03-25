@@ -35,8 +35,6 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 const AString ParticipantInfo::URI_SET_BY_IMS_ENGINE = AString::ConstNull();
-const AString ParticipantInfo::ANONYMOUS_ADDRESS = "sip:anonymous@anonymous.invalid";
-const AString ParticipantInfo::ANONYMOUS_DISPLAY_NAME = "Anonymous";
 
 PUBLIC
 ParticipantInfo::ParticipantInfo(IN IMtcCallContext& objContext) :
@@ -65,10 +63,6 @@ AString ParticipantInfo::GetLocalNumber() const
 PUBLIC
 AString ParticipantInfo::GetLocalUri() const
 {
-    if (m_objContext.GetService().IsEmergency())
-    {
-        return GetLocalUriForEmergencyCall();
-    }
     return URI_SET_BY_IMS_ENGINE;
 }
 
@@ -182,23 +176,4 @@ PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& o
     }
 
     return strNumber;
-}
-
-PRIVATE
-AString ParticipantInfo::GetLocalUriForEmergencyCall() const
-{
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
-    IMS_UINT32 nAosRegistrationMode =
-            pAosConnector ? pAosConnector->GetRegistrationMode() : IImsAosInfo::REG_MODE_UNKNOWN;
-
-    if (nAosRegistrationMode == IImsAosInfo::REG_MODE_NOUICC ||
-            nAosRegistrationMode == IImsAosInfo::REG_MODE_ADMIN)
-    {
-        SipAddress objSipAddress;
-        objSipAddress.Create(ANONYMOUS_ADDRESS);
-        objSipAddress.SetDisplayName(ANONYMOUS_DISPLAY_NAME);
-        return objSipAddress.ToString();
-    }
-
-    return URI_SET_BY_IMS_ENGINE;
 }

@@ -90,58 +90,29 @@ TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfNotEmergency)
     EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
 }
 
-TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfEmergencyAndAosConnectorIsNull)
-{
-    MockIMtcService objService;
-    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector).WillByDefault(Return(nullptr));
-    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
-
-    EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
-}
-
-TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfEmergencyNormalRegistered)
+TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfEmergency)
 {
     MockIMtcAosConnector objAosConnector;
+    MockIMtcService objService;
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
     ON_CALL(objAosConnector, GetRegistrationMode)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
-
-    MockIMtcService objService;
-    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
-    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
-
     EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
-}
 
-TEST_F(ParticipantInfoTest, GetLocalUriReturnsAnonymousIfEmergencyNoUiccRegistered)
-{
-    MockIMtcAosConnector objAosConnector;
-    ON_CALL(objAosConnector, GetRegistrationMode)
-            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
-
-    MockIMtcService objService;
-    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
-    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
-
-    AString objAnonymousUri("Anonymous <sip:anonymous@anonymous.invalid>");
-    EXPECT_EQ(objAnonymousUri, pParticipantInfo->GetLocalUri());
-}
-
-TEST_F(ParticipantInfoTest, GetLocalUriReturnsAnonymousIfEmergencyAdminRegistered)
-{
-    MockIMtcAosConnector objAosConnector;
     ON_CALL(objAosConnector, GetRegistrationMode)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_ADMIN));
+    EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
 
-    MockIMtcService objService;
-    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
-    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+    EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
 
-    AString objAnonymousUri("Anonymous <sip:anonymous@anonymous.invalid>");
-    EXPECT_EQ(objAnonymousUri, pParticipantInfo->GetLocalUri());
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+    EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
 }
 
 TEST_F(ParticipantInfoTest, GetRemoteNumberReturnsNullInitially)
