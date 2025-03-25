@@ -933,6 +933,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ut_transaction_timer_sec_int";
         public static final String KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL =
                 KEY_PREFIX + "ut_sync_with_cs_for_tb_ss_bool";
+        public static final String KEY_UT_NETWORK_QUERY_FOR_TB_OIR_NETWORK_DEFAULT_BOOL =
+                KEY_PREFIX + "ut_network_query_for_tb_oir_network_default_bool";
 
         private ImsSs() {}
     }

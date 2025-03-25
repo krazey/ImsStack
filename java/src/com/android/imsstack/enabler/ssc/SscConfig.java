@@ -354,6 +354,11 @@ public final class SscConfig {
         return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL);
     }
 
+    static boolean isNetworkQueryForTbOirNetworkDefault(int slotId) {
+        return getBoolean(slotId,
+                CarrierConfig.ImsSs.KEY_UT_NETWORK_QUERY_FOR_TB_OIR_NETWORK_DEFAULT_BOOL);
+    }
+
     // Specific APIs
     static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);

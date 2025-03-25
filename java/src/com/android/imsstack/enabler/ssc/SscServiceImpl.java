@@ -772,8 +772,24 @@ public class SscServiceImpl implements IUtInterface {
             clirMode = SscConstant.OIR_DEFAULT;
         }
 
-        int outgoingState = clirMode; // 3GPP 27.007 7.7 m
-        int provisionStatus = switch (clirMode) { // 3GPP 27.007 7.7 n
+        if (clirMode == SscConstant.OIR_DEFAULT
+                && SscConfig.isNetworkQueryForTbOirNetworkDefault(mSlotId)) {
+            SscRequestData requestData = new SscRequestData(tId);
+
+            if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
+                requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
+                        SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
+            }
+
+            requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.OIR,
+                    SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT, tId, -1));
+
+            addRequestToQueue(requestData);
+            return;
+        }
+
+        int outgoingState = clirMode; // 3GPP 27.007 7.7 n
+        int provisionStatus = switch (clirMode) { // 3GPP 27.007 7.7 m
             case SscConstant.OIR_DEFAULT -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
             case SscConstant.OIR_INVOCATION ->
                     SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED;
@@ -1024,6 +1040,7 @@ public class SscServiceImpl implements IUtInterface {
                     case SscConstant.EVENT_SSC_QUERY_CF:
                     case SscConstant.EVENT_SSC_QUERY_CW:
                     case SscConstant.EVENT_SSC_QUERY_OIR:
+                    case SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT:
                     case SscConstant.EVENT_SSC_QUERY_OIP:
                     case SscConstant.EVENT_SSC_QUERY_TIR:
                     case SscConstant.EVENT_SSC_QUERY_TIP:
@@ -1227,9 +1244,15 @@ public class SscServiceImpl implements IUtInterface {
         private ImsSsInfo createLineIdentificationInfo(SscServiceData data) {
             if (data.getSsType() == ESsType.OIR) {
                 OirServiceData oirData = (OirServiceData)data;
-                return new ImsSsInfo.Builder(oirData.getState())
-                        .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
-                        .setClirOutgoingState(oirData.getOutgoingState()).build(); // n
+                if (data.getEventNumber() == SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT) {
+                    return new ImsSsInfo.Builder(oirData.getState())
+                            .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
+                            .setClirOutgoingState(SscConstant.OIR_DEFAULT).build(); // n
+                } else {
+                    return new ImsSsInfo.Builder(oirData.getState())
+                            .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
+                            .setClirOutgoingState(oirData.getOutgoingState()).build(); // n
+                }
             } else if (data.getSsType() == ESsType.TIR) {
                 TirServiceData tirData = (TirServiceData)data;
                 return new ImsSsInfo.Builder(tirData.getState())

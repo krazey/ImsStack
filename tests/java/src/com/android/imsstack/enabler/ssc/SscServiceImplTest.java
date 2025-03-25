@@ -701,6 +701,36 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testQueryClir_terminalBasedService_queryNetworkForDefault() {
+        mDefaultBehaviour = SscXmlFormat.PRESENTATION_RESTRICTED;
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+                .thenReturn(new int[] {
+                        CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.ImsSs.KEY_UT_NETWORK_QUERY_FOR_TB_OIR_NETWORK_DEFAULT_BOOL)))
+                .thenReturn(true);
+        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_DEFAULT);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
+        processEntireXmlDocQueryAsSuccess();
+        processGetTransactionAsSuccess(ESsType.OIR,
+                SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT, -1);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener)
+                .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
+
+        ImsSsInfo ssInfo = captorSsInfo.getValue();
+        assertNotNull(ssInfo);
+        assertEquals(SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED,
+                ssInfo.getClirInterrogationStatus());
+        assertEquals(SscConstant.OIR_DEFAULT, ssInfo.getClirOutgoingState());
+    }
+
+    @Test
     public void testQueryClir_terminalBasedService_invocation() {
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
