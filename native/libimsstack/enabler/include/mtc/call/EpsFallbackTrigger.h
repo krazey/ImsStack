@@ -84,12 +84,13 @@ public:
     inline virtual EpsFallbackReason GetTriggerReason() const { return m_eTriggerReason; }
     inline virtual IMS_BOOL IsWaitingEpsFallback() const
     {
-        return m_eTriggerReason != EpsFallbackReason::NONE &&
-                m_eTriggerReason != EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG;
+        return m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE ||
+                m_eTriggerReason == EpsFallbackReason::FAILURE_RESPONSE;
     }
     inline virtual IMS_BOOL IsWaitingRegistration() const
     {
-        return m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG;
+        return m_eTriggerReason == EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG ||
+                m_eTriggerReason == EpsFallbackReason::RADIO_CHECK_BLOCK;
     }
 
 private:

@@ -177,9 +177,9 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfNotInNr
     EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
 }
 
-TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfConfigIsZeroOrBelow)
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfInNrAndConfigIsZeroOrBelow)
 {
-    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(0));
@@ -190,13 +190,13 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfConfigI
     EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
 }
 
-TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsFalseIfConfigIsGreaterThanZero)
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByWatchdogTimerReturnsTrue)
 {
-    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT))
             .WillByDefault(Return(1000));
-    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
+    EXPECT_TRUE(pEpsFbTrigger->ShouldTriggerByWatchdogTimer(objContext));
 }
 
 TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfNotInNr)
@@ -208,9 +208,9 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfNotI
     EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
 }
 
-TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfConfigIsNegative)
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfInNrAndConfigIsNegative)
 {
-    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
@@ -218,14 +218,14 @@ TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfConf
     EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
 }
 
-TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsFalseIfConfigIsPositive)
+TEST_F(EpsFallbackTriggerTest, ShouldTriggerByMoRequestTimeoutReturnsTrue)
 {
-    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT))
             .WillByDefault(Return(1000));
-    EXPECT_FALSE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
+    EXPECT_TRUE(pEpsFbTrigger->ShouldTriggerByMoRequestTimeout(objContext));
 }
 
 TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)
@@ -361,13 +361,15 @@ TEST_F(EpsFallbackTriggerTest, InvalidTimerExpiredDoesNotTriggerEpsFallback)
     pEpsFbTrigger->Timer_TimerExpired(&objDifferentTimer);
 }
 
-TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackTriggersEpsFallback)
+TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackTriggersEpsFallbackWithoutReg)
 {
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START)).Times(0);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE));
 
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
+    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallback());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingRegistration());
 
     // call terminated without OnEpsFallbackCompleted() case.
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED)).Times(0);
@@ -380,9 +382,22 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseRequiringRegEpsFallbackTriggersE
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE));
 
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE_REQUIRING_REG);
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
+    EXPECT_TRUE(pEpsFbTrigger->IsWaitingRegistration());
 
     // call terminated without OnEpsFallbackCompleted() case.
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED));
+}
+
+TEST_F(EpsFallbackTriggerTest, TriggerRadioCheckBlockEpsFallbackTriggersEpsFallbackAndReg)
+{
+    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START));
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE));
+
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK);
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
+    EXPECT_TRUE(pEpsFbTrigger->IsWaitingRegistration());
 }
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoTriggerEpsFallbackTriggersEpsFallback)
@@ -392,6 +407,22 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoTriggerEpsFallbackTriggersEpsFallback)
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER));
 
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER);
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingRegistration());
+
+    // call terminated without OnEpsFallbackCompleted() case.
+    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED)).Times(0);
+}
+
+TEST_F(EpsFallbackTriggerTest, TriggerFailureResponseEpsFallbackTriggersEpsFallback)
+{
+    EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START)).Times(0);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER));
+
+    pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::FAILURE_RESPONSE);
+    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallback());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingRegistration());
 
     // call terminated without OnEpsFallbackCompleted() case.
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED)).Times(0);
@@ -450,7 +481,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerEpsFallbackWithNoNetworkTriggerDoesNotSetT
 {
     EXPECT_CALL(objTimer, SetTimer(_, pEpsFbTrigger)).Times(0);
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER);
-    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallback());
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
 
     pEpsFbTrigger->OnEpsFallbackCompleted();
     EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallback());
