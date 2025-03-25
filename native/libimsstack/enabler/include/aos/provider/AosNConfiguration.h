@@ -72,7 +72,6 @@ public:
     IMS_BOOL IsSecurityServerPortInInitRegUsed() const override;
     IMS_BOOL IsOldSaOnEstablishingSaRemoved() const override;
     IMS_BOOL IsB2cCallComposerFeatureTagInRegContact() const override;
-    IMS_BOOL IsBlockNrRatWhenReceive403ForReg() const override;
     IMS_BOOL IsBlockPcscfOnRegFailure() const override;
     IMS_BOOL IsBlockRegOnCsCall() const override;
     IMS_BOOL IsCallEndAndPdnReactivationByRegTerminated() const override;

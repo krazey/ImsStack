@@ -242,8 +242,6 @@ const IMS_CHAR CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_A
         KEY_IMS_PREFIX "update_registration_with_rat_change_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_B2C_CALL_COMPOSER_FEATURE_TAG_IN_REG_CONTACT_BOOL[] =
         KEY_IMS_PREFIX "b2c_call_composer_feature_tag_in_reg_contact_bool";
-const IMS_CHAR CarrierConfig::Ims::KEY_BLOCK_NR_RAT_WHEN_RECEIVE_403_FOR_REG_BOOL[] =
-        KEY_IMS_PREFIX "block_nr_rat_when_receive_403_for_reg_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_BLOCK_PCSCF_ON_REG_FAILURE_BOOL[] =
         KEY_IMS_PREFIX "block_pcscf_on_reg_failure_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_BLOCK_REG_ON_CS_CALL_BOOL[] =
