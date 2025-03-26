@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@
 #ifndef MOCK_MEDIA_MSG_HANDLER_H_
 #define MOCK_MEDIA_MSG_HANDLER_H_
 
-#include "ImsTypeDef.h"
-#include "MediaDef.h"
 #include <gmock/gmock.h>
+
+#include "MediaMsgHandler.h"
 
 class MockMediaMsgHandler : public MediaMsgHandler
 {

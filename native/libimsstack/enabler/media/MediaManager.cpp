@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
  */
 
 #include "EnablerUtils.h"
-#include "ServiceMessage.h"
 #include "ServiceTrace.h"
 
 #include "IJniMedia.h"
@@ -25,7 +24,6 @@
 #include "MediaMsgHandler.h"
 #include "MediaResourceManager.h"
 #include "JniEnablerConnector.h"
-#include "IJniEnabler.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -38,14 +36,9 @@ MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
         ImsActivityEx(strName),
         m_nSlotId(nSlotId),
         m_lstSessionNode(ImsList<MediaSessionNode*>()),
-        m_pResourceMngr(IMS_NULL)
+        m_pResourceMngr(new MediaResourceManager(nSlotId))
 {
     IMS_TRACE_D("+MediaManager() thread[%s], nSlotId[%d]", strName.GetStr(), nSlotId, 0);
-
-    if (m_pResourceMngr == IMS_NULL)
-    {
-        m_pResourceMngr = new MediaResourceManager(nSlotId);
-    }
 
     JniEnablerConnector::GetInstance().SetNativeEnabler(
             m_nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(INativeEnabler*, this));
@@ -60,11 +53,8 @@ PROTECTED VIRTUAL MediaManager::~MediaManager()
         m_objMapMediaManager.RemoveAt(nIndex);
     }
 
-    if (m_pResourceMngr)
-    {
-        delete m_pResourceMngr;
-        m_pResourceMngr = IMS_NULL;
-    }
+    delete m_pResourceMngr;
+    m_pResourceMngr = IMS_NULL;
 
     ClearMediaSessionNode();
 
@@ -122,21 +112,34 @@ MediaMsgHandler* MediaManager::GetHandler(IN IMS_SINTP nCallKey)
     return pSessionNode->pMessageHandler;
 }
 
-PUBLIC VIRTUAL IMediaSession* MediaManager::CreateSession(
-        IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey)
+PUBLIC VIRTUAL IMediaSession* MediaManager::CreateSession(IN MEDIA_NETWORK_TYPE eNetwork,
+        IN MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService, IN IMS_SINTP nCallKey)
 {
-    IMS_TRACE_D("CreateSession() - CallKey[%d], nService[%d]", nCallKey, nService, 0);
+    IMS_TRACE_D("CreateSession() - NetworkType[%d], ServiceType[%d], CallKey[%d]", eNetwork,
+            eServiceType, nCallKey);
 
-    MediaSession* pSession = new MediaSession(nService, nCallKey, m_nSlotId);
-
-    if (pSession == IMS_NULL)
+    if (pIService == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateSession() - invalid service interface", 0, 0, 0);
         return IMS_NULL;
     }
+
+    MediaSession* pSession =
+            new MediaSession(eNetwork, eServiceType, pIService, nCallKey, m_nSlotId);
 
     MediaMsgHandler* pHandler = new MediaMsgHandler(m_nSlotId, nCallKey);
     MediaSessionNode* pSessionNode = new MediaSessionNode(nCallKey, pSession, pHandler);
     m_lstSessionNode.Append(pSessionNode);
+
+    // update pdn
+    if (m_pResourceMngr == IMS_NULL ||
+            !m_pResourceMngr->UpdatePdn(eServiceType == MEDIA_SERVICE_EMERGENCY
+                            ? MediaResourceManager::PDN_EMERGENCY
+                            : MediaResourceManager::PDN_IMS,
+                    pIService->GetIpAddress()))
+    {
+        IMS_TRACE_E(0, "CreateSession() - fail to update pdn", 0, 0, 0);
+    }
 
     IMS_TRACE_D("CreateSession() - ListSize[%d]", m_lstSessionNode.GetSize(), 0, 0);
 
@@ -147,6 +150,7 @@ PUBLIC VIRTUAL void MediaManager::DestroySession(IN const IMediaSession* piSessi
 {
     if (piSession == IMS_NULL)
     {
+        IMS_TRACE_E(0, "DestroySession() - invalid session", 0, 0, 0);
         return;
     }
 
@@ -171,6 +175,7 @@ MediaSession* MediaManager::GetSession(IN IMS_SINTP nCallKey)
 
     if (pSessionNode == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GetSession() - cannot find matched session node", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -251,8 +256,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::HandleRequestMsg(
 PROTECTED
 void MediaManager::ClearMediaSessionNode()
 {
-    IMS_TRACE_D(
-            "ClearMediaSessionNode() m_lstSessionNode size=%d", m_lstSessionNode.GetSize(), 0, 0);
+    IMS_TRACE_D("ClearMediaSessionNode() - list size[%d]", m_lstSessionNode.GetSize(), 0, 0);
 
     while (m_lstSessionNode.GetSize() > 0)
     {

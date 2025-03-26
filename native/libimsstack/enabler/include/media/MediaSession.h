@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,35 +17,30 @@
 #ifndef MEDIA_SESSION_H_
 #define MEDIA_SESSION_H_
 
-#include "IMediaSession.h"
-#include "audio/AudioController.h"
-#include "video/VideoController.h"
-#include "text/TextController.h"
 #include <mutex>
 
-class IMediaSessionClientListener;
-class MediaNego;
+#include "IMediaSession.h"
+#include "MediaNego.h"
+#include "audio/AudioController.h"
+#include "text/TextController.h"
+#include "video/VideoController.h"
 
 class MediaSession : public IMediaSessionListener, public IMediaSession
 {
 public:
     /**
-     * @brief Construct
+     * @brief Constructor
      *
-     * @param nService The service type of the call session defined as the MEDIA_SERVICE_TYPE
+     * @param eNetwork The network type @link{MEDIA_NETWORK_TYPE}
+     * @param eServiceType The service type of the call session defined as the
+     * @link{MEDIA_SERVICE_TYPE}
+     * @param pIService The interface to access the IMS services
      * @param nCallKey The identification of the call session
      * @param nSlotId The UICC slot id
      */
-    explicit MediaSession(IN MEDIA_SERVICE_TYPE nService = MEDIA_SERVICE_DEFAULT,
-            IN IMS_SINTP nCallKey = 0, IN IMS_UINT32 nSlotId = 0);
+    explicit MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServiceType,
+            IService* pIService, IN IMS_SINTP nCallKey = 0, IN IMS_UINT32 nSlotId = 0);
     virtual ~MediaSession();
-
-    /**
-     * @brief Get the environment instance
-     *
-     * @return std::shared_ptr<MediaEnvironment>
-     */
-    std::shared_ptr<MediaEnvironment> GetEnvironment(void);
 
     /**
      * @brief Get the current connected network type
@@ -62,7 +57,6 @@ public:
     IMS_SINTP GetCallKey() { return m_nCallKey; };
 
     void SetMtcListener(IN IMediaSessionClientListener* pISessionListener) override;
-    IMS_BOOL SetEnvironment(IN std::shared_ptr<MediaEnvironment> pEnvironment) override;
     IMS_UINTP CreateProfile(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
     IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) override;
@@ -95,7 +89,6 @@ public:
     IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam) override;
 
 protected:
-    // for MediaNego
     MediaNego* CreateMediaNego(IN IMS_UINTP nNegoId);
     virtual MediaNego* FindMediaNego(IN IMS_UINTP nNegoId);
     void ConfirmMediaNego(IN IMS_UINTP nNegoId);

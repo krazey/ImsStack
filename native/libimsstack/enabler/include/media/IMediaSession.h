@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,15 +17,11 @@
 #ifndef INTERFACE_MEDIA_SESSION_H_
 #define INTERFACE_MEDIA_SESSION_H_
 
-#include "ImsMessage.h"
-#include "AString.h"
 #include "ISession.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MediaNego.h"
-
-class IMediaSessionClientListener;
-class MediaEnvironment;
+#include "IMediaSessionClientListener.h"
 
 class IMediaSession
 {
@@ -56,14 +52,6 @@ public:
      * @param pISessionListener The listener instance
      */
     virtual void SetMtcListener(IN IMediaSessionClientListener* pISessionListener) = 0;
-
-    /**
-     * @brief Set the MediaEnvironment instance for getting common parameter
-     *
-     * @param pEnvironment The instance to set
-     * @return IMS_BOOL Returns IMS_TRUE when parameter is valid, IMS_FALSE when it is invalid
-     */
-    virtual IMS_BOOL SetEnvironment(IN std::shared_ptr<MediaEnvironment> pEnvironment) = 0;
 
     /**
      * @brief Create a session instance of the Audio/Video/TextSession. If the argument nego id is

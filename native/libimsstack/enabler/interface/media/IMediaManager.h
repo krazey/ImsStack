@@ -17,6 +17,7 @@
 #ifndef INTERFACE_MEDIA_MANAGER_H_
 #define INTERFACE_MEDIA_MANAGER_H_
 
+#include "IService.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 
@@ -33,15 +34,18 @@ public:
     static IMediaManager* GetInstance(IN IMS_SINT32 nSlotId = 0);
 
     /**
-     * @brief Creates a MediaSession instacne with the service type and assign the jni thread
+     * @brief Creates a MediaSession instance with the service type and assign the jni thread
      * instance to communicate with jni thread to send and receive a message from java layer
      *
-     * @param nService service type, normal or emergency
+     * @param eNetwork The network type
+     * @param eServiceType The service type, normal or emergency
+     * @param pService The instance of the IMS service
      * @param nCallKey The key to identify the call session, each MediaSession has a unique key to
      * match with the call session
      * @return IMediaSession* created IMediaSession instance
      */
-    virtual IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey);
+    virtual IMediaSession* CreateSession(IN MEDIA_NETWORK_TYPE eNetwork,
+            IN MEDIA_SERVICE_TYPE eServiceType, IN IService* pService, IN IMS_SINTP nCallKey);
 
     /**
      * @brief Destroys the MediaSession instance

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,19 +17,17 @@
 #ifndef MEDIA_MANAGER_H_
 #define MEDIA_MANAGER_H_
 
-#include "ServiceEvent.h"
-#include "IEventListener.h"
-#include "ImsActivityEx.h"
-#include "ImsMap.h"
-#include "IJniMediaManager.h"
 #include "IMediaManager.h"
 #include "IJniMedia.h"
+#include "IJniMediaManager.h"
+#include "ImsActivityEx.h"
+#include "ImsMap.h"
 #include "MediaDef.h"
+#include "MediaResourceManager.h"
 
 class IMediaSession;
 class MediaMsgHandler;
 class MediaSession;
-class MediaResourceManager;
 
 class MediaManager : public ImsActivityEx, public IJniMediaManager, public IMediaManager
 {
@@ -45,13 +43,13 @@ public:
         MediaSessionNode() :
                 nCallKey(0),
                 pMediaSession(IMS_NULL),
-                pMessageHandler(IMS_NULL){};
+                pMessageHandler(IMS_NULL) {};
 
         MediaSessionNode(
                 IN IMS_SINTP callKey, IN MediaSession* pSession, IN MediaMsgHandler* pHandler) :
                 nCallKey(callKey),
                 pMediaSession(pSession),
-                pMessageHandler(pHandler){};
+                pMessageHandler(pHandler) {};
     };
 
 public:
@@ -64,16 +62,8 @@ public:
     virtual IMS_BOOL SendMessage(
             IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
 
-    /**
-     * @brief Creates a MediaSession instacne with the service type and assign the jni thread
-     * instance to communicate with jni thread to send and receive a message from java layer
-     *
-     * @param nService service type, normal or emergency
-     * @param nCallKey The key to identify the call session, each MediaSession has a unique key to
-     * match with the call session
-     * @return IMediaSession* created IMediaSession instance
-     */
-    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey) override;
+    IMediaSession* CreateSession(IN MEDIA_NETWORK_TYPE eNetwork, IN MEDIA_SERVICE_TYPE eServiceType,
+            IN IService* pService, IN IMS_SINTP nCallKey) override;
 
     /**
      * @brief Destroys the MediaSession instance

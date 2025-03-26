@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +17,9 @@
 #ifndef MOCK_I_MEDIA_SESSION_H_
 #define MOCK_I_MEDIA_SESSION_H_
 
-#include "IMediaSession.h"
-#include "IMediaSessionClientListener.h"
-#include "ISession.h"
-#include "ImsTypeDef.h"
-#include "MediaDef.h"
-#include "MediaEnvironment.h"
-#include "MediaNego.h"
 #include <gmock/gmock.h>
+
+#include "IMediaSession.h"
 
 class MockIMediaSession : public IMediaSession
 {
@@ -33,8 +28,6 @@ public:
     virtual ~MockIMediaSession() {}
     MOCK_METHOD(
             void, SetMtcListener, (IN IMediaSessionClientListener * pISessionListener), (override));
-    MOCK_METHOD(IMS_BOOL, SetEnvironment, (IN std::shared_ptr<MediaEnvironment> pEnvironment),
-            (override));
     MOCK_METHOD(IMS_UINTP, CreateProfile, (IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType),
             (override));
     MOCK_METHOD(IMS_BOOL, DestroyProfile, (IN IMS_UINTP nNegoID), (override));

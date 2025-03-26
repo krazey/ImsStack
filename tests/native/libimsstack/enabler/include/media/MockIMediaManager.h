@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,9 @@ class MockIMediaManager : public IMediaManager
 public:
     virtual ~MockIMediaManager() {}
     MOCK_METHOD(IMediaSession*, CreateSession,
-            (IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey), (override));
+            (IN MEDIA_NETWORK_TYPE eNetwork, IN MEDIA_SERVICE_TYPE eServiceType,
+                    IN IService* pService, IN IMS_SINTP nCallKey),
+            (override));
     MOCK_METHOD(void, DestroySession, (IN const IMediaSession* piSession), (override));
 };
 

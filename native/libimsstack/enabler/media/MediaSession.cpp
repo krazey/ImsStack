@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-#include "ICoreService.h"
 #include "ServiceTrace.h"
 
-#include "IMediaSessionClientListener.h"
-#include "MediaDef.h"
 #include "MediaManager.h"
-#include "MediaNego.h"
 #include "MediaNegoUtil.h"
 #include "MediaResourceManager.h"
 #include "MediaSession.h"
@@ -32,12 +28,12 @@ __IMS_TRACE_TAG_MEDIA__;
 using namespace android::telephony::imsmedia;
 
 PUBLIC
-MediaSession::MediaSession(
-        IN MEDIA_SERVICE_TYPE eServiceType, IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
+MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServiceType,
+        IService* pIService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
-        m_pEnvironment(IMS_NULL),
+        m_pEnvironment(std::make_shared<MediaEnvironment>(eNetwork, eServiceType, pIService)),
         m_bSessionConfirmed(IMS_FALSE),
         m_eCurMediaType(MEDIA_TYPE_INVALID)
 {
@@ -60,12 +56,6 @@ PUBLIC VIRTUAL MediaSession::~MediaSession()
 }
 
 PUBLIC
-std::shared_ptr<MediaEnvironment> MediaSession::GetEnvironment()
-{
-    return m_pEnvironment;
-}
-
-PUBLIC
 MEDIA_NETWORK_TYPE MediaSession::GetNetworkType()
 {
     if (m_pEnvironment != IMS_NULL)
@@ -80,36 +70,6 @@ PUBLIC VIRTUAL void MediaSession::SetMtcListener(
         IN IMediaSessionClientListener* piMediaSessionListener)
 {
     m_pClientListener = piMediaSessionListener;
-}
-
-PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(
-        IN std::shared_ptr<MediaEnvironment> pEnvironment)
-{
-    if (pEnvironment == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_I("SetEnvironment() - CallKey[%d], eServiceType[%d]", m_nCallKey,
-            pEnvironment->eServiceType, 0);
-
-    // update pdn
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-    if (pMediaManager != IMS_NULL && pEnvironment->pIService != IMS_NULL)
-    {
-        if (pMediaManager->GetResourceManager()->UpdatePdn(
-                    pEnvironment->eServiceType == MEDIA_SERVICE_EMERGENCY
-                            ? MediaResourceManager::PDN_EMERGENCY
-                            : MediaResourceManager::PDN_IMS,
-                    pEnvironment->pIService->GetIpAddress()) == IMS_FALSE)
-        {
-            return IMS_FALSE;
-        }
-    }
-
-    m_pEnvironment = pEnvironment;
-    return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
@@ -694,25 +654,6 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetRemotePort(
     return MEDIA_PORT_INVALID;
 }
 
-/* TODO: add implementation
-PUBLIC VIRTUAL
-IMS_SINT32 MediaSession::GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
-    IN MEDIA_CONTENT_TYPE type) {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-    if (pMediaNego == IMS_NULL) {
-        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidth() - Can't find nNegoId[%" PFLS_x "]",
-            nNegoId, 0, 0);
-        return 0;
-    }
-
-    if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_AUDIO)) {
-        std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
-        if (pAudioNego == IMS_NULL) return 0;
-        return (IMS_SINT32)pAudioNego->GetNegotiatedBandwidth();
-    }
-    return 0;
-}
-*/
 PUBLIC VIRTUAL MEDIA_DIRECTION MediaSession::GetNegotiatedDirection(
         IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type)
 {

@@ -17,13 +17,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "IMediaSession.h"
 #include "MediaManager.h"
-#include "MediaMsgHandler.h"
+#include "MockICoreService.h"
 #include "MediaResourceManager.h"
 #include "MediaSession.h"
 #include "MockIMediaSession.h"
-#include "MockIMediaManager.h"
 #include "MockMediaMsgHandler.h"
 
 using ::testing::Return;
@@ -36,6 +34,7 @@ const IMS_SINT32 CALL_KEY_2 = 2;
 const IMS_SINT32 CALL_KEY_3 = 3;
 const IMS_SINT32 CALL_KEY_4 = 4;
 const IMS_CHAR DEFAULT_THREAD_NAME[] = "ET00.MediaManager";
+const AString LOCAL_IP = "127.0.0.1";
 
 class FakeMediaManager : public MediaManager
 {
@@ -51,13 +50,13 @@ public:
         FakeMediaSessionNode() :
                 nCallKey(0),
                 pMediaSession(IMS_NULL),
-                pMessageHandler(IMS_NULL){};
+                pMessageHandler(IMS_NULL) {};
 
         FakeMediaSessionNode(IN IMS_SINTP callKey, IN MockIMediaSession* pSession,
                 IN MockMediaMsgHandler* pHandler) :
                 nCallKey(callKey),
                 pMediaSession(pSession),
-                pMessageHandler(pHandler){};
+                pMessageHandler(pHandler) {};
     };
 
 public:
@@ -240,11 +239,15 @@ class MediaManagerTest : public ::testing::Test
 {
 public:
     FakeMediaManager* m_pMediaManager;
+    MockICoreService m_objCoreService;
+    IpAddress m_objIpAddr;
 
 protected:
     virtual void SetUp() override
     {
         m_pMediaManager = new FakeMediaManager("MediaManager", DEFAULT_SLOT_ID);
+        m_objIpAddr = IpAddress(LOCAL_IP);
+        ON_CALL(m_objCoreService, GetIpAddress()).WillByDefault(ReturnRef(m_objIpAddr));
     }
 
     virtual void TearDown() override { delete m_pMediaManager; }
@@ -252,9 +255,10 @@ protected:
 
 TEST_F(MediaManagerTest, testMediaSessionCreateAndDestroy)
 {
-    IMediaSession* pIMediaSession =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
+    IMediaSession* pIMediaSession = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_1);
 
+    ASSERT_NE(pIMediaSession, IMS_NULL);
     EXPECT_EQ(m_pMediaManager->GetSession(CALL_KEY_1), static_cast<MediaSession*>(pIMediaSession));
     EXPECT_NE(m_pMediaManager->GetHandler(CALL_KEY_1), nullptr);
 
@@ -272,12 +276,12 @@ TEST_F(MediaManagerTest, testGetThreadName)
 
 TEST_F(MediaManagerTest, testDestroySession)
 {
-    IMediaSession* pIMediaSession1 =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
-    IMediaSession* pIMediaSession2 =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_2);
-    IMediaSession* pIMediaSession3 =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_3);
+    IMediaSession* pIMediaSession1 = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_1);
+    IMediaSession* pIMediaSession2 = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_2);
+    IMediaSession* pIMediaSession3 = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_3);
 
     EXPECT_EQ(m_pMediaManager->GetSession(CALL_KEY_1), static_cast<MediaSession*>(pIMediaSession1));
     EXPECT_EQ(m_pMediaManager->GetSession(CALL_KEY_2), static_cast<MediaSession*>(pIMediaSession2));
@@ -575,10 +579,10 @@ TEST_F(MediaManagerTest, testHandleRequestMsg_Video)
 
 TEST_F(MediaManagerTest, testClearMediaSessionNode)
 {
-    IMediaSession* pIMediaSession1 =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
-    IMediaSession* pIMediaSession2 =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_2);
+    IMediaSession* pIMediaSession1 = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_1);
+    IMediaSession* pIMediaSession2 = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_2);
 
     EXPECT_EQ(m_pMediaManager->GetSession(CALL_KEY_1), static_cast<MediaSession*>(pIMediaSession1));
     EXPECT_EQ(m_pMediaManager->GetSession(CALL_KEY_2), static_cast<MediaSession*>(pIMediaSession2));
@@ -591,7 +595,8 @@ TEST_F(MediaManagerTest, testClearMediaSessionNode)
 
 TEST_F(MediaManagerTest, testDeleteMediaSessionNode)
 {
-    m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
+    m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_1);
 
     IMS_UINT32 nIndex = 0;
 
@@ -608,10 +613,10 @@ TEST_F(MediaManagerTest, testDeleteMediaSessionNode)
 
 TEST_F(MediaManagerTest, testFindSessionNode)
 {
-    IMediaSession* pIMediaSession1 =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
-    IMediaSession* pIMediaSession2 =
-            m_pMediaManager->CreateSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_2);
+    IMediaSession* pIMediaSession1 = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_1);
+    IMediaSession* pIMediaSession2 = m_pMediaManager->CreateSession(
+            MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_2);
 
     FakeMediaManager::MediaSessionNode* pSessionNode1 = m_pMediaManager->FakeGetSessionNode(0);
     FakeMediaManager::MediaSessionNode* pSessionNode2 = m_pMediaManager->FakeGetSessionNode(1);

@@ -16,9 +16,6 @@
 
 #include <gtest/gtest.h>
 
-#include "IJniMedia.h"
-#include "MediaEnvironment.h"
-#include "MediaNego.h"
 #include "MediaSession.h"
 #include "MockICarrierConfig.h"
 #include "MockICoreService.h"
@@ -74,10 +71,11 @@ public:
     FakeMediaSessionConfig* m_pMediaSessionConfig;
     MockMediaNego* m_pMediaNego;
 
-    FakeMediaSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
-            MediaSession(nService, nCallKey, nSlotId)
+    FakeMediaSession(IN MEDIA_NETWORK_TYPE eNetwork, IN MEDIA_SERVICE_TYPE eServiceType,
+            IService* pService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
+            MediaSession(eNetwork, eServiceType, pService, nCallKey, nSlotId)
     {
-        CreateMediaConfig(nService);
+        CreateMediaConfig(eServiceType);
         m_pMediaNego = new MockMediaNego(nSlotId);
     }
 
@@ -201,10 +199,8 @@ public:
         return nMediaNego;
     }
 
-    virtual IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType) override
+    virtual IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE /*eServiceTyp*/) override
     {
-        (void)eServiceType;
-
         m_pMediaSessionConfig = new FakeMediaSessionConfig();
         if (m_pMediaSessionConfig == IMS_NULL)
         {
@@ -223,6 +219,7 @@ public:
 class MediaSessionTest : public ::testing::Test
 {
 public:
+    MockICoreService m_objMockService;
     FakeMediaSession* m_pSession;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;
     MockISession* m_pIsession;
@@ -259,11 +256,8 @@ protected:
         m_objRemoteIpAddress = IpAddress(REMOTE_IP);
         ON_CALL(m_objMockICoreService, GetIpAddress())
                 .WillByDefault(ReturnRef(m_objLocalIpAddress));
-
-        m_pEnvironment = std::make_shared<MediaEnvironment>(
-                MEDIA_NETWORK_LTE, MEDIA_SERVICE_DEFAULT, &m_objMockICoreService);
-        m_pSession = new FakeMediaSession(MEDIA_SERVICE_DEFAULT, 1, 0);
-        m_pSession->SetEnvironment(m_pEnvironment);
+        m_pSession = new FakeMediaSession(
+                MEDIA_NETWORK_LTE, MEDIA_SERVICE_DEFAULT, &m_objMockService, 1, 0);
         m_pSession->SetMtcListener(&m_objClientListener);
 
         m_pIsession = new MockISession();
