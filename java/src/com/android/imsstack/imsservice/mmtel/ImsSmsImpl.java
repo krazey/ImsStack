@@ -287,5 +287,16 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                 return SmsUtils.RESULT_FAILURE;
             }
         }
+
+        @Override
+        public void notifyMemoryAvailableResult(int token, int result, int cause) {
+            log("notifyMemoryAvailableResult: token = " + token + " result = " + result
+                    + " cause = " + cause);
+            try {
+                onMemoryAvailableResult(token, result, cause);
+            } catch (RuntimeException e) {
+                loge("notifyMemoryAvailableResult error: " + e.getMessage());
+            }
+        }
     }
 }
