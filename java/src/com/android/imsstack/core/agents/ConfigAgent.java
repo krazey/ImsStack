@@ -35,6 +35,7 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -70,9 +71,13 @@ public class ConfigAgent implements ConfigInterface {
     private final int mSlotId;
     private final CarrierConfig mCarrierConfig;
     private final IntentReceiver mIntentReceiver;
+    private SimCarrierId mCarrierId;
     private volatile boolean mConfigLoaded;
-    private PersistableBundle mDefaultImsConfig;
-    private PersistableBundle mDefaultPublicConfig;
+    private final PersistableBundle mDefaultInternalConfig = new PersistableBundle();
+    private final PersistableBundle mCarrierInternalConfig = new PersistableBundle();
+    private final PersistableBundle mCarrierInternalOverrideConfig = new PersistableBundle();
+    private final PersistableBundle mDefaultPublicConfig = new PersistableBundle();
+    private final PersistableBundle mCarrierPublicConfig = new PersistableBundle();
     private PersistableBundle mTestConfig;
     private XmlPullParserFactory mFactory;
 
@@ -84,10 +89,10 @@ public class ConfigAgent implements ConfigInterface {
 
     @Override
     public void init(Context context) {
-        mDefaultImsConfig = readCarrierConfigFromAsset(
-                CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, null);
-        mDefaultPublicConfig = readCarrierConfigFromAsset(
-                CarrierConfig.DEFAULT_PUBLIC_CARRIER_CONFIG_FILE, null);
+        mDefaultInternalConfig.putAll(readCarrierConfigFromAsset(
+                CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, null));
+        mDefaultPublicConfig.putAll(readCarrierConfigFromAsset(
+                CarrierConfig.DEFAULT_PUBLIC_CARRIER_CONFIG_FILE, null));
         mIntentReceiver.register();
     }
 
@@ -95,6 +100,31 @@ public class ConfigAgent implements ConfigInterface {
     public void cleanup() {
         mIntentReceiver.unregister();
         mListeners.clear();
+        mDefaultInternalConfig.clear();
+        mCarrierInternalConfig.clear();
+        mCarrierInternalOverrideConfig.clear();
+        mDefaultPublicConfig.clear();
+        mCarrierPublicConfig.clear();
+    }
+
+    @Override
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        if (mSlotId == 0) {
+            dumpCarrierConfig(pw, "DefaultInternalConfig", mDefaultInternalConfig);
+            dumpCarrierConfig(pw, "DefaultPublicConfig", mDefaultPublicConfig);
+            pw.flush();
+        }
+        pw.println("Slot" + mSlotId + ":");
+        pw.increaseIndent();
+        pw.println("configLoaded=" + mConfigLoaded);
+        pw.println("carrierId=" + (mCarrierId != null ? mCarrierId : "unknown"));
+        pw.println();
+        dumpCarrierConfig(pw, "CarrierInternalConfig", mCarrierInternalConfig);
+        dumpCarrierConfig(pw, "CarrierPublicConfig", mCarrierPublicConfig);
+        dumpCarrierConfig(pw, "CarrierInternalOverrideConfig", mCarrierInternalOverrideConfig);
+        dumpCarrierConfig(pw, "TestOverrideConfig", mTestConfig);
+        pw.decreaseIndent();
+        pw.println();
     }
 
     @Override
@@ -191,12 +221,13 @@ public class ConfigAgent implements ConfigInterface {
         PersistableBundle config = new PersistableBundle();
 
         // Sets a default internal configuration.
-        config.putAll(mDefaultImsConfig);
+        config.putAll(mDefaultInternalConfig);
 
         // Sets the internal carrier configuration.
         // 1) Precedence: specific-carrier-id > carrier-id > carrier-id-from-sim-mcc-mnc.
         // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
-        PersistableBundle internalConfig;
+        PersistableBundle tempConfig;
+        mCarrierInternalConfig.clear();
 
         // Sets the parent carrier configuration first if present.
         if (id.getSpecificCarrierId() != SimCarrierId.UNKNOWN_ID
@@ -204,46 +235,51 @@ public class ConfigAgent implements ConfigInterface {
             SimCarrierId parentId = new SimCarrierId.Builder()
                     .setCarrierId(id.getCarrierId())
                     .build();
-            internalConfig = readCarrierConfig(subId, parentId);
-            CarrierConfig.overrideNestedBundles(config, internalConfig);
-            config.putAll(internalConfig);
+            tempConfig = readCarrierConfig(subId, parentId);
+            mCarrierInternalConfig.putAll(tempConfig);
         }
 
-        internalConfig = readCarrierConfig(subId, id);
-        CarrierConfig.overrideNestedBundles(config, internalConfig);
-        config.putAll(internalConfig);
+        tempConfig = readCarrierConfig(subId, id);
+        CarrierConfig.overrideNestedBundles(mCarrierInternalConfig, tempConfig);
+        mCarrierInternalConfig.putAll(tempConfig);
+        tempConfig = new PersistableBundle(mCarrierInternalConfig);
+        CarrierConfig.overrideNestedBundles(config, tempConfig);
+        config.putAll(tempConfig);
 
         // Overrides the specific carrier configuration values if present.
-        internalConfig = readCarrierConfigFromRes(R.xml.carrier_config_override, id);
-        CarrierConfig.overrideNestedBundles(config, internalConfig);
-        config.putAll(internalConfig);
+        tempConfig = readCarrierConfigFromRes(R.xml.carrier_config_override, id);
+        mCarrierInternalConfig.putAll(tempConfig);
+        CarrierConfig.overrideNestedBundles(config, tempConfig);
+        config.putAll(tempConfig);
 
         // Sets the public carrier configuration from CarrierConfigManager.
-        PersistableBundle publicConfig = getCarrierConfig(subId);
-        config.putAll(publicConfig);
+        tempConfig = getCarrierConfig(subId);
+        config.putAll(tempConfig);
+
+        // Sets the internal carrier configuration from CarrierConfigManager.
+        mCarrierInternalOverrideConfig.clear();
+        tempConfig = getCarrierInternalConfig(subId);
+        mCarrierInternalOverrideConfig.putAll(tempConfig);
+        config.putAll(tempConfig);
 
         // Sets the internal public carrier configuration.
+        mCarrierPublicConfig.clear();
         if (config.getBoolean(CarrierConfig.KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL, true)) {
             ImsLog.d(this, mSlotId, "Overriding public configs...");
-            publicConfig = new PersistableBundle(mDefaultPublicConfig);
-            CarrierConfig.overrideNestedBundles(config, publicConfig);
-            config.putAll(publicConfig);
+            tempConfig = new PersistableBundle(mDefaultPublicConfig);
+            CarrierConfig.overrideNestedBundles(config, tempConfig);
+            config.putAll(tempConfig);
 
-            publicConfig = readCarrierConfig(subId, id, false);
-            CarrierConfig.overrideNestedBundles(config, publicConfig);
-            config.putAll(publicConfig);
+            tempConfig = readCarrierConfig(subId, id, false);
+            mCarrierPublicConfig.putAll(tempConfig);
+            CarrierConfig.overrideNestedBundles(config, tempConfig);
+            config.putAll(tempConfig);
         }
 
         // Loads override configs in the hidden key of CarrierConfigManager
         overrideHiddenConfigs(subId, config);
 
         ImsLog.d(this, mSlotId, "updateCarrierConfig: " + config.toString());
-
-        java.util.Set<String> keys = config.keySet();
-
-        for (String key : keys) {
-            ImsLog.d(this, mSlotId, key + "=" + CarrierConfig.getValue(config, key));
-        }
 
         overrideTestConfigs(config);
 
@@ -252,6 +288,7 @@ public class ConfigAgent implements ConfigInterface {
         if (!mConfigLoaded) {
             mConfigLoaded = true;
         }
+        mCarrierId = id;
 
         notifyCarrierConfigChanged(subId);
     }
@@ -307,13 +344,11 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle getCarrierConfig(int subId) {
-        String[] internalConfigKeys = mDefaultImsConfig.keySet().toArray(new String[0]);
-        String[] imsConfigKeys = Stream.of(CarrierConfig.IMS_COMMON_KEYS,
+        String[] configKeys = Stream.of(CarrierConfig.IMS_COMMON_KEYS,
                 CarrierConfig.IMS_PREFIX_KEYS, CarrierConfig.IMS_VOICE_PREFIX_KEYS,
                 CarrierConfig.IMS_SMS_PREFIX_KEYS, CarrierConfig.IMS_RTT_PREFIX_KEYS,
                 CarrierConfig.IMS_EMERGENCY_PREFIX_KEYS, CarrierConfig.IMS_VT_PREFIX_KEYS,
                 CarrierConfig.IMS_WFC_PREFIX_KEYS, CarrierConfig.IMS_SS_PREFIX_KEYS,
-                internalConfigKeys,
                 new String[] {CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE})
                     .flatMap(Stream::of)
                     .toArray(String[]::new);
@@ -322,7 +357,20 @@ public class ConfigAgent implements ConfigInterface {
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
 
         // If an invalid subId is used, this bundle will contain default values.
-        return ccmp.getConfigForSubId(subId, imsConfigKeys);
+        return ccmp.getConfigForSubId(subId, configKeys);
+    }
+
+    private PersistableBundle getCarrierInternalConfig(int subId) {
+        String[] configKeys = mDefaultInternalConfig.keySet().toArray(new String[0]);
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+
+        // If an invalid subId is used, this bundle will contain default values.
+        PersistableBundle config = ccmp.getConfigForSubId(subId, configKeys);
+        // Removes metadata keys.
+        config.remove(CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL);
+        config.remove(CarrierConfigManager.KEY_CARRIER_CONFIG_VERSION_STRING);
+        return config;
     }
 
     @VisibleForTesting
@@ -525,6 +573,27 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         return matchFound;
+    }
+
+    private static void dumpCarrierConfig(@NonNull IndentingPrintWriter pw,
+            @NonNull String tag, PersistableBundle config) {
+        pw.println(tag + ":");
+        if (config != null) {
+            pw.increaseIndent();
+            pw.increaseIndent();
+            for (String key : getKeys(config)) {
+                pw.println(key + "=" + CarrierConfig.getValue(config, key));
+            }
+            pw.decreaseIndent();
+            pw.decreaseIndent();
+        }
+        pw.println();
+    }
+
+    private static @NonNull String[] getKeys(@NonNull PersistableBundle b) {
+        String[] keys = b.keySet().toArray(new String[0]);
+        Arrays.sort(keys);
+        return keys;
     }
 
     private final class IntentReceiver extends BroadcastReceiver {

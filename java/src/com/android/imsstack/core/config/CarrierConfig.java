@@ -1711,7 +1711,9 @@ public class CarrierConfig {
                 newBundle.putAll(overrideBundle);
             }
 
-            overrideConfig.putPersistableBundle(key, newBundle);
+            if (!newBundle.isEmpty()) {
+                overrideConfig.putPersistableBundle(key, newBundle);
+            }
         }
 
         overridePayloadDescriptionBundles(defaultConfig, overrideConfig);
