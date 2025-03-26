@@ -248,7 +248,6 @@
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
-    <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="1"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="180000"/>
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>

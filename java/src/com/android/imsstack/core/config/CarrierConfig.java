@@ -734,8 +734,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_ringback_timer_millis_int";
         public static final String KEY_EMERGENCY_18X_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_18x_timer_millis_int";
-        public static final String KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT =
-                KEY_PREFIX + "policy_for_emergency_urn_escv_mapping_int";
         public static final String KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING =
                 KEY_PREFIX + "p_emergency_info_header_in_invite_string";
         public static final String KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY =
