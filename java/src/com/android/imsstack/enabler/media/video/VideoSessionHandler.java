@@ -222,9 +222,7 @@ public class VideoSessionHandler extends MediaState {
                     handleNotifyRtpReceptionStats((RtpReceptionStats) msg.obj);
                     break;
                 default:
-                {
                     ImsLog.e("Invalid RequestType");
-                }
                     break;
             }
         }
@@ -275,8 +273,8 @@ public class VideoSessionHandler extends MediaState {
         public void onFirstMediaPacketReceived(final VideoConfig videoConfig) {
             ImsLog.d("FirstMediaPacketReceived for SessionId[" + getVideoSessionId() + "]");
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_FIRST_PACKET,
-                    videoConfig).sendToTarget();
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_FIRST_PACKET, videoConfig)
+                    .sendToTarget();
         }
 
         @Override
@@ -306,25 +304,24 @@ public class VideoSessionHandler extends MediaState {
         public void notifyBitrate(final int bitrate) {
             ImsLog.d("notifyBitrate=" + bitrate);
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_BITRATE,
-                    bitrate, UNUSED).sendToTarget();
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_BITRATE, bitrate, UNUSED)
+                    .sendToTarget();
         }
 
         @Override
         public void notifyVideoDataUsage(final long bytes) {
             ImsLog.d("Video Data Usage in bytes: " + bytes);
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_VIDEO_DATA_USAGE,
-                    bytes).sendToTarget();
-
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_VIDEO_DATA_USAGE, bytes)
+                    .sendToTarget();
         }
 
         @Override
         public void notifyRtpReceptionStats(final RtpReceptionStats stats) {
             ImsLog.d("notifyRtpReceptionStats: stats=" + stats);
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS,
-                    stats).sendToTarget();
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS, stats)
+                    .sendToTarget();
         }
     }
 
@@ -337,8 +334,7 @@ public class VideoSessionHandler extends MediaState {
 
             if (mVideoSessionCallbackHandler != null) {
                 mVideoSessionCallbackHandler.onNotifyQosInfo(
-                        remoteAddress.getAddress().getHostAddress(),
-                        remoteAddress.getPort(), true);
+                        remoteAddress.getAddress().getHostAddress(), remoteAddress.getPort(), true);
             }
         }
 
@@ -349,7 +345,8 @@ public class VideoSessionHandler extends MediaState {
             if (mVideoSessionCallbackHandler != null) {
                 mVideoSessionCallbackHandler.onNotifyQosInfo(
                         remoteAddress.getAddress().getHostAddress(),
-                        remoteAddress.getPort(), false);
+                        remoteAddress.getPort(),
+                        false);
             }
         }
     }
@@ -519,8 +516,7 @@ public class VideoSessionHandler extends MediaState {
     private void handleVideoModifySession(VideoConfig videoConfig) {
         if (mVideoSession != null) {
             mVideoSession.modifySession(videoConfig);
-        }
-        else {
+        } else {
             handleVideoModifySessionResponse(videoConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
@@ -607,8 +603,7 @@ public class VideoSessionHandler extends MediaState {
                 Message.obtain(mVideoMessageHandler, MediaConstants.REQUEST_SET_DISPLAY_SURFACE)
                         .sendToTarget();
             }
-        }
-        else {
+        } else {
             setMediaState(MEDIA_STATE_IDLE);
         }
 
@@ -667,7 +662,7 @@ public class VideoSessionHandler extends MediaState {
         }
     }
 
-    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber)  {
+    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber) {
         if (remoteIpAddress != null) {
             InetSocketAddress remoteSocketAddress =
                     (InetSocketAddress) (mRtpSocket.first).getRemoteSocketAddress();

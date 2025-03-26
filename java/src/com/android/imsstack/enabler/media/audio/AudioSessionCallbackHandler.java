@@ -125,6 +125,7 @@ public class AudioSessionCallbackHandler {
 
     /**
      * Handles indication when the first Rtp media packet is received
+     *
      * @param audioConfig the remote config where media packet is received
      */
     public void firstMediaPacketReceived(AudioConfig audioConfig) {
@@ -146,12 +147,13 @@ public class AudioSessionCallbackHandler {
     public void headerExtensionReceived(List<RtpHeaderExtension> rtpExtensions) {
         ImsLog.d("headerExtensionReceived");
 
-        getMtcMediaInterface().rtpHeaderExtensionsReceived(
-                rtpExtensions.stream().collect(Collectors.toSet()));
+        getMtcMediaInterface()
+                .rtpHeaderExtensionsReceived(rtpExtensions.stream().collect(Collectors.toSet()));
     }
 
     /**
      * A notification is sent when an incoming audio dtmf is received.
+     *
      * @param dtmfDigit Received incoming dtmf digit
      * @param durationMs Dtmf tone playback time in milliseconds
      */
@@ -186,6 +188,7 @@ public class AudioSessionCallbackHandler {
 
     /**
      * Get the media threshold information for specific session type
+     *
      * @param mediaSessionType media session type for this Threshold info.
      * @return MediaThreshold media threshold information
      */
@@ -249,11 +252,12 @@ public class AudioSessionCallbackHandler {
 
     /**
      * Handles indication when triggerAnbrQuery is received
+     *
      * @param mediaType is used to identify media stream such as audio or video.
      * @param direction of this packet stream (e.g. uplink or downlink).
-     * @param bitsPerSecond This value is the bitrate requested by the other party UE
-     *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
-     *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE through RTP
+     *     CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate (defined in
+     *     TS36.321, range: 0 ~ 8000 kbit/s).
      */
     public void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
         ImsLog.d("triggerAnbrQuery");
@@ -263,11 +267,12 @@ public class AudioSessionCallbackHandler {
 
     /**
      * Notify received Anbr parameters to media logic
+     *
      * @param mediaType is used to identify media stream such as audio or video.
      * @param direction of this packet stream (e.g. uplink or downlink).
-     * @param bitsPerSecond This value is the bitrate requested by the other party UE
-     *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
-     *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE through RTP
+     *     CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate (defined in
+     *     TS36.321, range: 0 ~ 8000 kbit/s).
      */
     public void notifyAnbrReceived(int mediaType, int direction, int bitsPerSecond) {
         ImsLog.d("notifyAnbrReceived - NOTIFY_ANBR_RECEIVED");
@@ -284,6 +289,7 @@ public class AudioSessionCallbackHandler {
 
     /**
      * Handles the notification of the rtp reception stats
+     *
      * @param stats The object of the RtpReceptionStats
      */
     public void onNotifyRtpReceptionStats(final RtpReceptionStats stats) {

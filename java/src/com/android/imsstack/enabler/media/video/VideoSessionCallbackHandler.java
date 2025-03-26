@@ -169,6 +169,7 @@ public class VideoSessionCallbackHandler {
 
     /**
      * Handles the notification of the rtp reception stats
+     *
      * @param stats The object of the RtpReceptionStats
      */
     public void onNotifyRtpReceptionStats(final RtpReceptionStats stats) {

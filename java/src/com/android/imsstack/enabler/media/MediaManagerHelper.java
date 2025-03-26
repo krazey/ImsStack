@@ -71,15 +71,15 @@ public class MediaManagerHelper {
         }
     }
 
-    private void createImsMediaManagerInstance(){
+    private void createImsMediaManagerInstance() {
 
         if (sImsMediaManager == null) {
             ImsLog.d("ImsMediaManager instance created");
             sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
             sExecutor = Executors.newSingleThreadExecutor();
             setImsMediaConnected(false);
-            sImsMediaManager = new ImsMediaManager(mContext, sExecutor,
-                                    new ImsMediaManagerCallback());
+            sImsMediaManager =
+                    new ImsMediaManager(mContext, sExecutor, new ImsMediaManagerCallback());
             if (sMediaHandlerThread.getState() == Thread.State.NEW) {
                 sMediaHandlerThread.start();
             }
@@ -138,36 +138,36 @@ public class MediaManagerHelper {
     }
 
     /**
-     * Opens a RTP session based on the local sockets with the associated initial
-     * remote configuration if there is a valid {@link RtpConfig} passed. It starts
-     * the media flow if the media direction in the {@link RtpConfig} is set to any
-     * value other than {@link RtpConfig#NO_MEDIA_FLOW}. If the open session is
-     * successful then a new {@link ImsMediaSession} object will be returned using
-     * the {@link SessionCallback#onOpenSessionSuccess(ImsMediaSession)} API. If the
-     * open session is failed then an error code {@link SessionOperationResult} will
-     * be returned using {@link SessionCallback#onOpenSessionFailure(int)} API.
+     * Opens a RTP session based on the local sockets with the associated initial remote
+     * configuration if there is a valid {@link RtpConfig} passed. It starts the media flow if the
+     * media direction in the {@link RtpConfig} is set to any value other than {@link
+     * RtpConfig#NO_MEDIA_FLOW}. If the open session is successful then a new {@link
+     * ImsMediaSession} object will be returned using the {@link
+     * SessionCallback#onOpenSessionSuccess(ImsMediaSession)} API. If the open session is failed
+     * then an error code {@link SessionOperationResult} will be returned using {@link
+     * SessionCallback#onOpenSessionFailure(int)} API.
      *
      * @param rtpSocket local UDP socket to send and receive incoming RTP packets
      * @param rtcpSocket local UDP socket to send and receive incoming RTCP packets
-     * @param rtpConfig provides remote endpoint info and codec details.
-     *        This could be null initially and the application may update
-     *        this later using {@link ImsMediaSession#modifySession()} API.
+     * @param rtpConfig provides remote endpoint info and codec details. This could be null
+     *     initially and the application may update this later using {@link
+     *     ImsMediaSession#modifySession()} API.
      * @param callback callbacks to receive session specific notifications.
      */
-    public void openSession(@NonNull final DatagramSocket rtpSocket,
+    public void openSession(
+            @NonNull final DatagramSocket rtpSocket,
             @NonNull final DatagramSocket rtcpSocket,
             @NonNull final @ImsMediaSession.SessionType int sessionType,
             @Nullable final RtpConfig rtpConfig,
             @NonNull final ImsMediaManager.SessionCallback callback) {
-        getImsMediaManagerInstance().openSession(rtpSocket,
-                    rtcpSocket, sessionType, rtpConfig,
-                    getExecutor(), callback);
+        getImsMediaManagerInstance()
+                .openSession(
+                        rtpSocket, rtcpSocket, sessionType, rtpConfig, getExecutor(), callback);
     }
 
     /**
-     * Closes the RTP session including cleanup of all the resources
-     * associated with the session. This will also close the session object
-     * and associated callback.
+     * Closes the RTP session including cleanup of all the resources associated with the session.
+     * This will also close the session object and associated callback.
      *
      * @param session RTP session to be closed.
      */
@@ -209,8 +209,8 @@ public class MediaManagerHelper {
     }
 
     /**
-     * Implements Interface to receive callbacks when the ImsMediaManager is connected
-     * or disconnected.
+     * Implements Interface to receive callbacks when the ImsMediaManager is connected or
+     * disconnected.
      */
     private class ImsMediaManagerCallback implements ImsMediaManager.OnConnectedCallback {
 

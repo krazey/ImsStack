@@ -41,7 +41,8 @@ public class VideoConfigSpropGenerator {
     private static final HashMap<Integer, CarrierConfigChangeListener> sConfigListeners =
             new HashMap<>();
 
-    /** VideoConfigSpropGenerator is a pure static class. Default constructor is made private to
+    /**
+     * VideoConfigSpropGenerator is a pure static class. A default constructor is made private to
      * restrict instantiation.
      */
     private VideoConfigSpropGenerator() {
@@ -56,8 +57,8 @@ public class VideoConfigSpropGenerator {
     public static void init(int slotId) {
         ImsLog.i(slotId, "VideoConfigSpropGenerator: init");
         if (!hasConfigChangeListener(slotId)) {
-            ConfigInterface configInterface = AgentFactory.getInstance()
-                    .getAgent(ConfigInterface.class, slotId);
+            ConfigInterface configInterface =
+                    AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
             if (configInterface == null) {
                 ImsLog.e(slotId, "VideoConfigSpropGenerator: ConfigInterface is null. "
                         + "Listener for CarrierConfig change not added");
@@ -82,8 +83,8 @@ public class VideoConfigSpropGenerator {
         ImsLog.i(slotId, "VideoConfigSpropGenerator: cleanup");
 
         if (hasConfigChangeListener(slotId)) {
-            ConfigInterface configInterface = AgentFactory.getInstance()
-                    .getAgent(ConfigInterface.class, slotId);
+            ConfigInterface configInterface =
+                    AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
             if (configInterface != null) {
                 configInterface.removeListener(sConfigListeners.get(slotId));
                 ImsLog.i(slotId, "VideoConfigSpropGenerator: ConfigInterface listener removed");
@@ -127,8 +128,8 @@ public class VideoConfigSpropGenerator {
             }
 
             // 1. Read VideoConfig params from carrierConfig
-            ConfigInterface configInterface = AgentFactory.getInstance()
-                    .getAgent(ConfigInterface.class, mSlotId);
+            ConfigInterface configInterface =
+                    AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
             if (configInterface == null) {
                 ImsLog.e(mSlotId, "ConfigInterface is null");
                 return;
@@ -187,8 +188,8 @@ public class VideoConfigSpropGenerator {
                 return null;
             }
 
-            PersistableBundle videoPayloadTypes = carrierConfig.getBundle(
-                    ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+            PersistableBundle videoPayloadTypes =
+                    carrierConfig.getBundle(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
             if (videoPayloadTypes == null || videoPayloadTypes.isEmpty()) {
                 ImsLog.e(mSlotId, "readVideoConfigs: Unable to read video payload types from"
                         + "carrier config.");
@@ -338,12 +339,12 @@ public class VideoConfigSpropGenerator {
             if (hevcPayloadTypes != null) {
                 for (int hevcPayloadType : hevcPayloadTypes) {
                     if (hevcPayloadType == payloadType) {
-                        PersistableBundle hevcPayloadDescriptions = configBundle
-                                .getPersistableBundle(
-                                CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
+                        PersistableBundle hevcPayloadDescriptions =
+                                configBundle.getPersistableBundle(
+                                        CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
                         if (hevcPayloadDescriptions != null) {
-                            PersistableBundle hevcPayloadDesc = hevcPayloadDescriptions
-                                    .getPersistableBundle("" + payloadType);
+                            PersistableBundle hevcPayloadDesc =
+                                    hevcPayloadDescriptions.getPersistableBundle("" + payloadType);
                             if (hevcPayloadDesc != null) {
                                 hevcPayloadDesc.putString(
                                         CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
@@ -355,19 +356,20 @@ public class VideoConfigSpropGenerator {
                 }
             }
 
-            int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
-                    ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
+            int[] h264PayloadTypes =
+                    videoPayloadTypes.getIntArray(ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
             if (h264PayloadTypes != null) {
                 for (int h264PayloadType : h264PayloadTypes) {
                     if (h264PayloadType == payloadType) {
-                        PersistableBundle h264PayloadDescriptions = configBundle
-                                .getPersistableBundle(ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
+                        PersistableBundle h264PayloadDescriptions =
+                                configBundle.getPersistableBundle(
+                                        ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
                         if (h264PayloadDescriptions != null) {
-                            PersistableBundle h264PayloadDesc = h264PayloadDescriptions
-                                    .getPersistableBundle("" + payloadType);
+                            PersistableBundle h264PayloadDesc =
+                                    h264PayloadDescriptions.getPersistableBundle("" + payloadType);
                             if (h264PayloadDesc != null) {
-                                h264PayloadDesc.putString(CarrierConfig.ImsVt
-                                        .KEY_AVC_SPROP_PARAMETER_SETS_STRING,
+                                h264PayloadDesc.putString(
+                                        CarrierConfig.ImsVt.KEY_AVC_SPROP_PARAMETER_SETS_STRING,
                                         sprop);
                             }
                             return;

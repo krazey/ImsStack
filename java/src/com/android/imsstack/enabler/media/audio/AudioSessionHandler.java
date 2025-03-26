@@ -55,7 +55,9 @@ import java.util.List;
 public class AudioSessionHandler extends MediaState {
 
     enum EDirectionType {
-        DIRECTION_NONE(0), DIRECTION_UPLINK(1), DIRECTION_DOWNLINK(2);
+        DIRECTION_NONE(0),
+        DIRECTION_UPLINK(1),
+        DIRECTION_DOWNLINK(2);
 
         private final int mDirection;
 
@@ -69,14 +71,19 @@ public class AudioSessionHandler extends MediaState {
     }
 
     static final int UNUSED = -1;
+
     /** Adaptive Multi-Rate */
     static final int CODEC_AMR = AudioConfig.CODEC_AMR;
+
     /** Adaptive Multi-Rate Wide Band */
     static final int CODEC_AMR_WB = AudioConfig.CODEC_AMR_WB;
+
     /** Enhanced Voice Services */
     static final int CODEC_EVS = AudioConfig.CODEC_EVS;
+
     /** G.711 A-law i.e. Pulse Code Modulation using A-law */
     static final int CODEC_PCMA = AudioConfig.CODEC_PCMA;
+
     /** G.711 μ-law i.e. Pulse Code Modulation using μ-law */
     static final int CODEC_PCMU = AudioConfig.CODEC_PCMU;
 
@@ -268,8 +275,8 @@ public class AudioSessionHandler extends MediaState {
 
                 case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
                 {
-                    handleAudioSetMediaQualityThreshold((MediaQualityThreshold) msg.obj,
-                            msg.arg1 == 1);
+                    handleAudioSetMediaQualityThreshold(
+                            (MediaQualityThreshold) msg.obj, msg.arg1 == 1);
                 }
                     break;
 
@@ -443,8 +450,8 @@ public class AudioSessionHandler extends MediaState {
         public void onFirstMediaPacketReceived(final AudioConfig audioConfig) {
             ImsLog.d("FirstMediaPacketReceived for SessionId[" + getAudioSessionId() + "]");
 
-            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_FIRST_PACKET,
-                    audioConfig).sendToTarget();
+            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_FIRST_PACKET, audioConfig)
+                    .sendToTarget();
         }
 
         @Override
@@ -474,16 +481,16 @@ public class AudioSessionHandler extends MediaState {
         public void triggerAnbrQuery(final AudioConfig audioConfig) {
             ImsLog.d("triggerAnbrQuery for SessionId[" + getAudioSessionId() + "]");
 
-            Message.obtain(mAudioMessageHandler, MediaConstants.TRIGGER_ANBR_QUERY,
-                    audioConfig).sendToTarget();
+            Message.obtain(mAudioMessageHandler, MediaConstants.TRIGGER_ANBR_QUERY, audioConfig)
+                    .sendToTarget();
         }
 
         @Override
         public void notifyRtpReceptionStats(final RtpReceptionStats stats) {
             ImsLog.d("notifyRtpReceptionStats: stats=" + stats);
 
-            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS,
-                    stats).sendToTarget();
+            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS, stats)
+                    .sendToTarget();
         }
 
         @Override
@@ -662,7 +669,7 @@ public class AudioSessionHandler extends MediaState {
     public boolean isValidRequest(final int requestType) {
         return ((isIdle() && (requestType == MediaConstants.REQUEST_OPEN_SESSION))
                 || ((!isIdle() && (requestType != MediaConstants.REQUEST_OPEN_SESSION))
-                && !isClosed()));
+                        && !isClosed()));
     }
 
     private void createQosAgent(int slotId) {
@@ -691,7 +698,7 @@ public class AudioSessionHandler extends MediaState {
 
         mCodecType = UNUSED;
 
-        if(mAudioSession == null) {
+        if (mAudioSession == null) {
             if (mMediaManager.isImsMediaConnected()) {
 
                 Pair<DatagramSocket, DatagramSocket> rtpSocket =
@@ -707,7 +714,7 @@ public class AudioSessionHandler extends MediaState {
                     ImsLog.e("rtp socket creation failed");
                     if (mAudioSessionCallbackHandler != null) {
                         mAudioSessionCallbackHandler.openSessionResponse(
-                            ImsMediaSession.RESULT_PORT_UNAVAILABLE);
+                                ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
                     setMediaState(MEDIA_STATE_IDLE);
                     return;
@@ -771,7 +778,7 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private void handleAudioQos(String remoteIpAddress, int remotePortNumber)  {
+    private void handleAudioQos(String remoteIpAddress, int remotePortNumber) {
         if (isOpening() || isLive()) {
             synchronized (mRtpSocketList) {
                 if (remoteIpAddress != null && remotePortNumber != 0 && mLocalAddress != null) {
@@ -814,8 +821,7 @@ public class AudioSessionHandler extends MediaState {
 
             mAudioSession.addConfig(audioConfig);
             mMediaConfig.updateRtpConfig(audioConfig);
-        }
-        else {
+        } else {
             handleAddConfigResponse(audioConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
@@ -890,8 +896,8 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold mediaThreshold,
-            Boolean needFwkTimer) {
+    private void handleAudioSetMediaQualityThreshold(
+            MediaQualityThreshold mediaThreshold, Boolean needFwkTimer) {
         mMediaConfig.updateMediaQualityThreshold(mediaThreshold, needFwkTimer);
         setAudioQualityThreshold();
     }
@@ -928,8 +934,7 @@ public class AudioSessionHandler extends MediaState {
     private void handleAudioAnbrReceived(int mediayType, int direction, int bitsPerSecond) {
         ImsLog.d("handleAudioAnbrReceived: bitsPerSecond= " + bitsPerSecond);
         if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.notifyAnbrReceived(
-                    mediayType, direction, bitsPerSecond);
+            mAudioSessionCallbackHandler.notifyAnbrReceived(mediayType, direction, bitsPerSecond);
         }
     }
 
@@ -1055,25 +1060,25 @@ public class AudioSessionHandler extends MediaState {
     private int convertCodecModeToBitrate(int codecMode) {
         int convertedBitrate = -1;
 
-        switch(mCodecType) {
+        switch (mCodecType) {
             case CODEC_AMR:
             case CODEC_AMR_WB:
                 break;
             case CODEC_EVS:
                 if (codecMode == 9) {
-                    convertedBitrate = 10;  // 5.9 kbps (or 2.8)
-                } else if (codecMode == 10) {    //7.2kbps
+                    convertedBitrate = 10; // 5.9 kbps (or 2.8)
+                } else if (codecMode == 10) { // 7.2kbps
                     convertedBitrate = 12;
-                } else if (codecMode > 10 && codecMode <= 12) { //9.6kbps
+                } else if (codecMode > 10 && codecMode <= 12) { // 9.6kbps
                     convertedBitrate = 16;
-                } else if (codecMode == 13) { //13.2kbps
+                } else if (codecMode == 13) { // 13.2kbps
                     convertedBitrate = 20;
-                } else if (codecMode == 14) { //16.4kbps
+                } else if (codecMode == 14) { // 16.4kbps
                     convertedBitrate = 24;
-                } else if (codecMode == 15) { //24.4kbps
+                } else if (codecMode == 15) { // 24.4kbps
                     convertedBitrate = 28;
                 } else {
-                    convertedBitrate = 20;  //default valu
+                    convertedBitrate = 20; // default valu
                     ImsLog.d("convertCodecModeToBitrate: Error - set to 13.2kbps");
                 }
                 break;
@@ -1097,7 +1102,7 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber)  {
+    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber) {
         synchronized (mRtpSocketList) {
             if (remoteIpAddress != null) {
                 for (Pair<DatagramSocket, DatagramSocket> rtpSocket : mRtpSocketList) {
@@ -1118,12 +1123,12 @@ public class AudioSessionHandler extends MediaState {
     }
 
     private Pair<DatagramSocket, DatagramSocket> getRtpSocketFromList(
-            String remoteIpAddress, int remotePortNumber)  {
+            String remoteIpAddress, int remotePortNumber) {
         synchronized (mRtpSocketList) {
             if (remoteIpAddress != null) {
                 for (Pair<DatagramSocket, DatagramSocket> rtpSocket : mRtpSocketList) {
                     InetSocketAddress remoteSocketAddress =
-                        (InetSocketAddress) (rtpSocket.first).getRemoteSocketAddress();
+                            (InetSocketAddress) (rtpSocket.first).getRemoteSocketAddress();
                     if (remoteSocketAddress != null) {
                         InetAddress remoteInetAddress = remoteSocketAddress.getAddress();
                         if (remoteInetAddress != null

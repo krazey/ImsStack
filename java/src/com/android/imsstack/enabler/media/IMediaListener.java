@@ -19,8 +19,7 @@ package com.android.imsstack.enabler.media;
 import android.os.Parcel;
 
 /**
- * This is a Listener to handle requests from ImsStack (Media Enabler Native)
- * to ImsMedia
+ * This is a Listener to handle requests from ImsStack (Media Enabler Native) to ImsMedia
  */
 public interface IMediaListener {
     /**

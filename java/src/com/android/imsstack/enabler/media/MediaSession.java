@@ -82,6 +82,7 @@ public class MediaSession implements IMediaConnectionObserver {
     /**
      * Set the RtpReceptionStats from the ImsMedia to AudioVideoSync to compare the delay for the AV
      * synchronization
+     *
      * @param type The media type of the session
      * @param stats The RtpReceptionStats of the session
      */
@@ -122,8 +123,8 @@ public class MediaSession implements IMediaConnectionObserver {
             ImsMediaManager imsMediaManager, Executor executor) {
         mContext = context;
         mMtcMediaSession = mtcMediaSession;
-        mMediaManager = new MediaManagerHelper(context.getContext(), this,
-                imsMediaManager, executor);
+        mMediaManager =
+                new MediaManagerHelper(context.getContext(), this, imsMediaManager, executor);
         mMediaListener = new MediaListener();
         setMtcMediaListener(mtcMediaSession);
         ImsLog.d("MediaSession created");
@@ -156,8 +157,8 @@ public class MediaSession implements IMediaConnectionObserver {
 
     private void createAudioSession() {
         if (mAudioSessionHandler == null) {
-            mAudioSessionHandler = new AudioSessionHandler(mContext, mMediaManager,
-                    mMtcMediaSession);
+            mAudioSessionHandler =
+                    new AudioSessionHandler(mContext, mMediaManager, mMtcMediaSession);
         }
     }
 
@@ -173,8 +174,8 @@ public class MediaSession implements IMediaConnectionObserver {
 
     private void createTextSession() {
         if (mTextSessionHandler == null) {
-            mTextSessionHandler = new TextSessionHandler(mContext, mMediaManager,
-                    mMtcMediaSession);
+            mTextSessionHandler =
+                    new TextSessionHandler(mContext, mMediaManager, mMtcMediaSession);
         }
     }
 

@@ -99,6 +99,7 @@ public class TextSessionHandler extends MediaState {
     void setRtpSocket(@Nullable Pair<DatagramSocket, DatagramSocket> rtpSocket) {
         mRtpSocket = rtpSocket;
     }
+
     @VisibleForTesting
     TextSessionCallback getTextSessionCallback() {
         return mTextSessionCallback;
@@ -402,7 +403,7 @@ public class TextSessionHandler extends MediaState {
     public boolean isValidRequest(final int requestType) {
         return ((isIdle() && (requestType == MediaConstants.REQUEST_OPEN_SESSION))
                 || ((!isIdle() && (requestType != MediaConstants.REQUEST_OPEN_SESSION))
-                && !isClosed()));
+                        && !isClosed()));
     }
 
     private void createQosAgent(int slotId) {
@@ -453,8 +454,7 @@ public class TextSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_IDLE);
             }
         } else {
-            ImsLog.w("Text Session is already created: SessionId="
-                    + mTextSession.getSessionId());
+            ImsLog.w("Text Session is already created: SessionId=" + mTextSession.getSessionId());
             if (mTextSessionCallbackHandler != null) {
                 mTextSessionCallbackHandler.openSessionResponse(
                         ImsMediaSession.RESULT_NOT_SUPPORTED);
@@ -478,8 +478,7 @@ public class TextSessionHandler extends MediaState {
     private void handleTextModifySession(TextConfig textConfig) {
         if (mTextSession != null) {
             mTextSession.modifySession(textConfig);
-        }
-        else {
+        } else {
             handleModifySessionResponse(textConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
@@ -521,8 +520,7 @@ public class TextSessionHandler extends MediaState {
             mTextSessionId = mTextSession.getSessionId();
             setMediaState(MEDIA_STATE_LIVE);
             ImsLog.d("Text Session created: SessionId=" + mTextSessionId);
-        }
-        else {
+        } else {
             setMediaState(MEDIA_STATE_IDLE);
         }
 
@@ -557,7 +555,7 @@ public class TextSessionHandler extends MediaState {
         }
     }
 
-    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber)  {
+    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber) {
         if (remoteIpAddress != null) {
             InetSocketAddress remoteSocketAddress =
                     (InetSocketAddress) (mRtpSocket.first).getRemoteSocketAddress();

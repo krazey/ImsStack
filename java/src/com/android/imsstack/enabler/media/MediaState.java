@@ -26,23 +26,22 @@ import com.android.imsstack.util.ImsLog;
 public class MediaState {
 
     /**
-     * Session is idle and can process OpenSession request.
-     * Any other requests will be discarded.
+     * Session is idle and can process OpenSession request. Any other requests will be discarded.
      */
     protected static final int MEDIA_STATE_IDLE = 0;
+
     /**
-     * OpenSession requested to ImsMedia, waiting for response.
-     * Any further requests will be in queue till response is received.
+     * OpenSession requested to ImsMedia, waiting for response. Any further requests will be in
+     * queue till response is received.
      */
     protected static final int MEDIA_STATE_OPENING = 1;
-    /**
-     * Session is opened, queued requests will be processed.
-     */
+
+    /** Session is opened, queued requests will be processed. */
     protected static final int MEDIA_STATE_LIVE = 2;
+
     /**
-     * CloseSession requested to ImsMedia, waiting for response.
-     * Any further requests will be discarded. State will be moved to idle,
-     * when response to CloseSession is received.
+     * CloseSession requested to ImsMedia, waiting for response. Any further requests will be
+     * discarded. State will be moved to idle, when response to CloseSession is received.
      */
     protected static final int MEDIA_STATE_CLOSED = 3;
 
