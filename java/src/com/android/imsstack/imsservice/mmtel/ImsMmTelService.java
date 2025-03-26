@@ -34,6 +34,8 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
@@ -379,6 +381,24 @@ public class ImsMmTelService extends MmTelFeature
         mServiceRegistry.getMmTelMediaRegistry().setMediaThreshold(mediaSessionType, null);
     }
 
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("MmTelFeature:");
+        pw.increaseIndent();
+
+        pw.println("featureState=" + getFeatureState());
+
+        // Local logs
+        pw.println("Most recent logs:");
+        pw.increaseIndent();
+        mLocalLog.dump(pw);
+        pw.decreaseIndent();
+
+        pw.decreaseIndent();
+    }
+
     @VisibleForTesting
     protected ImsCallApp createCallApp() {
         ImsServiceManager sm = ImsServiceManager.getDefault();
@@ -485,22 +505,5 @@ public class ImsMmTelService extends MmTelFeature
                 multiEndpoint.updateDialogState(imsExternalCallState);
             }
         }
-    }
-
-    /** Dump this instance into a readable format for dumpsys usage. */
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("ImsMmTelService:");
-        pw.increaseIndent();
-
-        pw.println("slotId=" + mImsContext.getSlotId());
-        pw.println("featureState=" + getFeatureState());
-
-        // Local logs
-        pw.println("Most recent logs:");
-        pw.increaseIndent();
-        mLocalLog.dump(pw);
-        pw.decreaseIndent();
-
-        pw.decreaseIndent();
     }
 }

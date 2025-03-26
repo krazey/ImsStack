@@ -73,14 +73,23 @@ public final class LocalLog {
     }
 
     /**
-     * Dumps the content of local log to print writer with each log entry predeced with indent
+     * Dumps the content of local log to print writer with each log entry.
      *
-     * @param pw printer writer to write into
+     * @param pw A {@link PrintWriter} object used to write the formatted logs
      */
     public synchronized void dump(PrintWriter pw) {
+        dump("", pw);
+    }
+
+    /**
+     * Dumps the content of local log to print writer with each log entry predeced with indent.
+     *
+     * @param pw A {@link PrintWriter} object used to write the formatted logs
+     */
+    public synchronized void dump(String indent, PrintWriter pw) {
         Iterator<String> itr = mLog.iterator();
         while (itr.hasNext()) {
-            pw.printf("%s\n", itr.next());
+            pw.printf("%s%s\n", indent, itr.next());
         }
     }
 }

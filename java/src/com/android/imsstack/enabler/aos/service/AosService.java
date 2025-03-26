@@ -63,6 +63,7 @@ import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
@@ -1175,5 +1176,16 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 default -> ImsLog.d("Not handled");
             }
         }
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("Aos:");
+        pw.increaseIndent();
+        pw.println("state=" + mRegState);
+        pw.println("networkType=" + mRegisteredNetworkType);
+        pw.decreaseIndent();
     }
 }

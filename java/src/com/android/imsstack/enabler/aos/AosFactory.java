@@ -15,12 +15,14 @@
  */
 package com.android.imsstack.enabler.aos;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Map;
@@ -250,6 +252,19 @@ public class AosFactory {
             mAosDebugs.put(slotId, debug);
         } else {
             mAosDebugs.remove(slotId);
+        }
+    }
+
+    /**
+     * Dumps this instance into a readable format for dumpsys usage.
+     *
+     * @param slotId The slot ID
+     * @param pw A {@link PrintWriter} object used to write the formatted logs.
+     */
+    public void dump(int slotId, @NonNull IndentingPrintWriter pw) {
+        AosService aosService = mAosServices.get(slotId);
+        if (aosService != null) {
+            aosService.dump(pw);
         }
     }
 }

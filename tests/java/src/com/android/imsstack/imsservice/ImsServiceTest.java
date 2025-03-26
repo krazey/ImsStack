@@ -39,6 +39,7 @@ import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsFeatureConfiguration;
 import android.util.Singleton;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.imsstack.ImsStackTest;
@@ -55,6 +56,9 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -205,5 +209,16 @@ public class ImsServiceTest extends ImsStackTest {
     public void createMmTelFeatureWithOutBinderTest() throws RemoteException {
         MmTelFeature mmTelFeature = sImsService.createMmTelFeature(MSimUtils.DEFAULT_SLOT_ID);
         assertEquals(mMmTelService, mmTelFeature);
+    }
+
+    @Test
+    @SmallTest
+    public void testDump() {
+        StringWriter output = new StringWriter();
+        sImsService.dump(new FileDescriptor(), new PrintWriter(output), new String[0]);
+
+        assertTrue(output.getBuffer().indexOf("### IMS Services") > 0);
+        assertTrue(output.getBuffer().indexOf("### Data Networks") > 0);
+        assertTrue(output.getBuffer().indexOf("### Core Agents") > 0);
     }
 }

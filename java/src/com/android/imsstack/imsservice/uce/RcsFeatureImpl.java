@@ -16,7 +16,6 @@
 
 package com.android.imsstack.imsservice.uce;
 
-import android.annotation.NonNull;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
@@ -25,6 +24,8 @@ import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
@@ -133,6 +134,16 @@ public class RcsFeatureImpl extends RcsFeature {
         }
     }
 
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("RcsFeature:");
+        pw.increaseIndent();
+        pw.println("featureState=" + getFeatureState());
+        pw.decreaseIndent();
+    }
+
     private int getCapabilities() {
         CarrierConfigManagerProxy ccmp =
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
@@ -156,16 +167,8 @@ public class RcsFeatureImpl extends RcsFeature {
         }
         return capabilities;
     }
+
     private static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
-    }
-
-    /** Dump this instance into a readable format for dumpsys usage. */
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("RcsFeatureImpl:");
-        pw.increaseIndent();
-        pw.println("slotId=" + mIContext.getSlotId());
-        pw.println("featureState=" + getFeatureState());
-        pw.decreaseIndent();
     }
 }

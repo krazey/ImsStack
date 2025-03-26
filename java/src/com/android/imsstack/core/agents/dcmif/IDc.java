@@ -18,6 +18,10 @@ package com.android.imsstack.core.agents.dcmif;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.util.IndentingPrintWriter;
+
 /**
  * This is interface for Data Connection agents.
 */
@@ -33,4 +37,12 @@ public interface IDc {
      * Clean up ojbejct
      */
     void cleanup();
+
+    /**
+     * Dumps this instance into a readable format for dumpsys usage.
+     *
+     * @param pw A {@link IndentingPrintWriter} object used to write the formatted logs.
+     */
+    default void dump(@NonNull IndentingPrintWriter pw) {
+    }
 }

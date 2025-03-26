@@ -18,10 +18,13 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -201,6 +204,19 @@ public class ImsServiceRecord {
 
     public void enableIms() {
         mImsServiceRegistry.setImsEnabled(true);
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        if (mRegTracker != null) {
+            mRegTracker.dump(pw);
+        }
+
+        if (mCallApp != null) {
+            mCallApp.dump(pw);
+        }
     }
 
     private static void log(String s) {

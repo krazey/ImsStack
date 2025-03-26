@@ -20,11 +20,14 @@ import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
@@ -236,6 +239,16 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
             mReady = true;
             log("Sms Ready");
         }
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("Sms:");
+        pw.increaseIndent();
+
+        pw.decreaseIndent();
     }
 
     private static void log(String s) {

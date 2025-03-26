@@ -26,10 +26,11 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.SipTransportImplBase;
 
 import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
-import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -223,26 +224,35 @@ public class ImsService extends android.telephony.ims.ImsService {
         return isr.getSipTransport();
     }
 
-    private static void logi(Object o, String s) {
-        Log.i(o, "[GII-IMPL] " + s);
-    }
-
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
-        super.dump(fd, printWriter, args);
-
-        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
-        pw.println("--------ImsService--------");
-
-        ImsServiceController isc = ImsServiceController.getInstance();
-        if (isc != null) {
-            isc.dump(pw);
-        }
-    }
-
     @Override
     public Executor getExecutor() {
         Executor executor = ImsServiceController.getInstance().getExecutor();
         return (executor != null) ? executor : Runnable::run;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
+        printWriter.println("supportedSimCount=" + DeviceConfig.getSupportedSimCount());
+        printWriter.println("activeSimCount=" + DeviceConfig.getActiveSimCount());
+        printWriter.println();
+
+        printWriter.println("### IMS Services");
+        ImsServiceController isc = ImsServiceController.getInstance();
+        if (isc != null) {
+            isc.dump(printWriter);
+        }
+        printWriter.println();
+
+        printWriter.println("### Data Networks");
+        DcFactory.dump(printWriter);
+        printWriter.println();
+
+        printWriter.println("### Core Agents");
+        AgentFactory.getInstance().dump(printWriter);
+        printWriter.println();
+    }
+
+    private static void logi(Object o, String s) {
+        Log.i(o, "[GII-IMPL] " + s);
     }
 }

@@ -19,6 +19,8 @@ package com.android.imsstack.imsservice;
 import android.content.Context;
 import android.telephony.ims.feature.RcsFeature;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.ImsMmTelService;
@@ -30,6 +32,7 @@ import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MessageExecutor;
 
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
 /**
@@ -182,16 +185,25 @@ public class ImsServiceController {
         return null;
     }
 
-    /** Dump this instance into a readable format for dumpsys usage. */
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("ImsServiceController:");
-        pw.increaseIndent();
-        for (ImsMmTelService mmTel : mMmTelServices) {
-            mmTel.dump(pw);
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull PrintWriter printWriter) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
+
+        for (int i = 0; i < mMmTelServices.length; ++i) {
+            pw.printf("Slot%d:\n", i);
+            pw.increaseIndent();
+
+            mMmTelServices[i].dump(pw);
+            mRcsFeature[i].dump(pw);
+
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(i);
+            if (isr != null) {
+                isr.dump(pw);
+            }
+
+            pw.decreaseIndent();
         }
-        for (RcsFeatureImpl rcs : mRcsFeature) {
-            rcs.dump(pw);
-        }
-        pw.decreaseIndent();
     }
 }

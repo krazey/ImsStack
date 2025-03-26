@@ -18,8 +18,6 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static android.provider.Settings.Global.DATA_ROAMING;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
@@ -32,6 +30,9 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.TelephonyManagerProxy;
@@ -56,6 +57,7 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationTyp
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -284,6 +286,18 @@ public class ImsRegistrationTracker {
         } else {
             mRegTracker.changeCapabilities(new CapabilityPairs());
         }
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("Registration:");
+        pw.increaseIndent();
+        pw.println("registered=" + FeatureTagMask.toString(mFeatures));
+        pw.println("networkType=" + getRegisteredNetworkType());
+        AosFactory.getInstance().dump(mContext.getSlotId(), pw);
+        pw.decreaseIndent();
     }
 
     @VisibleForTesting

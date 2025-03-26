@@ -22,6 +22,8 @@ import android.os.Message;
 import android.os.Parcel;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
@@ -31,6 +33,7 @@ import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.Closeable;
@@ -585,5 +588,15 @@ public class MtcApp implements Closeable {
         public void onImsServiceStopped(int slotId) {
             logi("onImsServiceStopped: slotId=" + slotId);
         }
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("Mtc:");
+        pw.increaseIndent();
+        pw.println("jniService=" + getJNIService());
+        pw.decreaseIndent();
     }
 }

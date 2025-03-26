@@ -21,9 +21,12 @@ import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcStateUtils;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
@@ -31,6 +34,7 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListene
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
@@ -327,6 +331,25 @@ public class ImsCallApp extends ImsApp {
         if (tmt != null) {
             tmt.setTtyMode(ttyMode);
         }
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("MmTel:");
+        pw.increaseIndent();
+
+        MtcApp mtcApp = mCallContext.getMtcApp();
+        if (mtcApp != null) {
+            mtcApp.dump(pw);
+        }
+
+        if (mSms != null) {
+            mSms.dump(pw);
+        }
+
+        pw.decreaseIndent();
     }
 
     private ImsCallProfile createCallProfileForVideoCall(int serviceType, int callType) {
