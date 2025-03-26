@@ -157,7 +157,8 @@ public class ConfigAgentTest {
 
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        verify(ccmp).getConfigForSubId(eq(SUB_ID_1), any());
+        // 1st: public carrier configs, 2nd: internal carrier configs
+        verify(ccmp, times(2)).getConfigForSubId(eq(SUB_ID_1), any());
     }
 
     @Test
@@ -176,7 +177,8 @@ public class ConfigAgentTest {
 
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        verify(ccmp).getConfigForSubId(eq(SUB_ID_1), any());
+        // 1st: public carrier configs, 2nd: internal carrier configs
+        verify(ccmp, times(2)).getConfigForSubId(eq(SUB_ID_1), any());
         verify(am, times(2)).list(eq(CarrierConfig.CARRIER_CONFIG));
         verify(am).list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG));
     }
