@@ -689,7 +689,8 @@ TEST_F(AosApplicationTest, FailsCreateAndGetInstanceWhenInitWithoutConfiguration
 TEST_F(AosApplicationTest, SucceedsSetListenerToConfigWhenInit)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_));
+    // It is also called once in AosCondition:Start()
+    EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(2);
 
     // WHEN
     m_pAosApplication->Init();

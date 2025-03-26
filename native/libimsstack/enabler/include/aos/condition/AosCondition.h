@@ -106,6 +106,9 @@ public:
     };
 
 protected:
+    virtual void AddConfigListener();
+    virtual void RemoveConfigListener();
+
     virtual void AddServiceAvailable();
     virtual void RemoveServiceAvailable();
 
@@ -189,6 +192,7 @@ protected:
     SERVICE_TYPE GetServiceType();
     void SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx = -1,
             IN SERVICE_TYPE eServiceType = SERVICE_WHOLE);
+    void UpdateEventListener(IN IMS_SINT32 nEvent, IN IMS_BOOL bAdd);
 
     IMS_BOOL RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) const;
 

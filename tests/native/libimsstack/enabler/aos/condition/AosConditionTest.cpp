@@ -232,6 +232,17 @@ protected:
     }
 };
 
+TEST_F(AosConditionTest, ShouldAddConfigurationListenerWhenStart)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_));
+
+    // WHEN
+    m_pAosCondition->Start();
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(AosConditionTest, ShouldCreateAvailableCellularWhenStart)
 {
     // GIVEN
@@ -264,6 +275,17 @@ TEST_F(AosConditionTest, ShouldSetStartBlockWhenStart)
 
     // WHEN
     m_pAosCondition->Start();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosConditionTest, ShouldRemoveConfigurationListenerWhenStop)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosNConfiguration, RemoveListener(_));
+
+    // WHEN
+    m_pAosCondition->Stop();
 
     // THEN : GIVEN conditions should be met.
 }

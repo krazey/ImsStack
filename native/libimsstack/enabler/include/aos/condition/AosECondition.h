@@ -27,6 +27,9 @@ public:
     IMS_BOOL IsReady() final;
 
 protected:
+    inline void AddConfigListener() final {};
+    inline void RemoveConfigListener() final {};
+
     inline void AddServiceAvailable() final{};
     inline void RemoveServiceAvailable() final{};
 
