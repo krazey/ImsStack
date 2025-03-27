@@ -4266,6 +4266,19 @@ TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenUpdateFailedWithRetryRequire
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
+TEST_F(AosRegistrationTest,
+        TriggerRegWithAvailableNextPcscfWhenUpdateFailedWithInitRegWithAvailablePcscfStatusCode)
+{
+    ImsVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
+    objReregErrCodeForInitRegWithAvailablePcscf.Add(SipStatusCode::SC_403);
+    ON_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForInitRegWithAvailablePcscf())
+            .WillByDefault(ReturnRef(objReregErrCodeForInitRegWithAvailablePcscf));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_403);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRegRequiredWithAvailableNextPcscf"), 1);
+}
+
 TEST_F(AosRegistrationTest, ReportFailureWhenUpdateFailedWithPdnReactivationRequiredStatusCode)
 {
     ImsVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;

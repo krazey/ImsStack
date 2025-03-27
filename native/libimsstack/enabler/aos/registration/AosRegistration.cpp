@@ -4654,6 +4654,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         }
     }
 
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeForInitRegWithAvailablePcscf(),
+                nStatusCode))
+    {
+        ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+        return;
+    }
+
     if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithoutIpsec(), nStatusCode))
     {
         ProcessIpsecFallback(IMS_FALSE);
