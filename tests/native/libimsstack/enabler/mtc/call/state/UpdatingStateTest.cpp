@@ -185,6 +185,23 @@ TEST_F(UpdatingStateTest, OnExitSendsUpdateIfPendingUpdateIsSet)
     pUpdatingState->OnExit();
 }
 
+TEST_F(UpdatingStateTest, OnExitStopsTimerWhenModifier)
+{
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE));
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_RETRY_UPDATE));
+
+    pUpdatingInfo->SetModifier();
+    pUpdatingState->OnExit();
+}
+
+TEST_F(UpdatingStateTest, OnExitStopsTimerWhenAlerted)
+{
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE));
+
+    pUpdatingInfo->SetAlerted();
+    pUpdatingState->OnExit();
+}
+
 TEST_F(UpdatingStateTest, HoldPushesPendingOperation)
 {
     EXPECT_CALL(objPendingOperationHolder.GetMock(), Hold(objMediaInfo));
