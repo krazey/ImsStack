@@ -51,6 +51,8 @@ PUBLIC VIRTUAL UpdatingState::~UpdatingState() {}
 
 PUBLIC VIRTUAL void UpdatingState::OnExit()
 {
+    StopTimer();
+
     if (m_objContext.GetUpdatingInfo().HasPendingUpdate())
     {
         m_objContext.GetSession()->Update(UpdateType::REFRESH, IMS_FALSE, SipMethod::INVALID);
@@ -208,8 +210,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectResume(IN const CallReasonInfo
 
 PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const CallReasonInfo& objReason)
 {
-    StopTimer();
-
     const CallReasonInfo objTerminateReason = GetAudioInactivityReasonOnTermination(objReason);
 
     HandleTerminate(objTerminateReason);
@@ -220,8 +220,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const CallReasonInfo& o
 
 PUBLIC VIRTUAL CallStateName UpdatingState::SessionTerminated(IN ISession* piSession)
 {
-    StopTimer();
-
     m_objContext.GetUiNotifier().SendTerminated(
             TerminationHandler(m_objContext).Handle(*piSession));
 
@@ -270,7 +268,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
     switch (objReason.nCode)
     {
         case CODE_UNSPECIFIED:
-            StopTimer();
             RecoverModificationFailure();
             NotifyFailure();
             return CallStateName::ESTABLISHED;
@@ -295,6 +292,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* p
 {
     if (m_objContext.GetTimer().IsActive(TIMER_RETRY_UPDATE))
     {
+        // Purge previous update operation and handles the received update
         IMS_TRACE_I("SessionUpdateReceived - waiting glare condition timer", 0, 0, 0);
 
         NotifyFailure();
