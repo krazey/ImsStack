@@ -390,6 +390,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "location_geodetic_shape_int";
         public static final String KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL =
                 KEY_PREFIX + "cellular_network_info_utc_offset_enabled_bool";
+        public static final String KEY_ALLOW_CELLULAR_NETWORK_INFO_HEADER_BOOL =
+                KEY_PREFIX + "allow_cellular_network_info_header_bool";
+        public static final String KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT =
+                KEY_PREFIX + "cellular_network_info_cache_expiration_sec_int";
         // Aos
         public static final String KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "ims_identity_priority_int_array";
