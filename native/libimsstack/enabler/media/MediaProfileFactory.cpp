@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 #include "ServiceTrace.h"
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
-#include "audio/AudioProfile.h"
 
 static const IMS_SINT32 NOT_PRESENT = -1;
 
@@ -25,7 +24,7 @@ static MediaProfileFactory* g_pMediaProfileFactory = IMS_NULL;
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PRIVATE
+PROTECTED
 MediaProfileFactory::MediaProfileFactory() {}
 
 PUBLIC VIRTUAL MediaProfileFactory::~MediaProfileFactory() {}
@@ -125,6 +124,12 @@ void MediaProfileFactory::ReleaseInstance(MediaProfileFactory* pMediaProfileFact
         delete pMediaProfileFactory;
         g_pMediaProfileFactory = IMS_NULL;
     }
+}
+
+PUBLIC
+void MediaProfileFactory::SetInstance(MediaProfileFactory* pMediaProfileFactory)
+{
+    g_pMediaProfileFactory = pMediaProfileFactory;
 }
 
 PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAudioPayload(

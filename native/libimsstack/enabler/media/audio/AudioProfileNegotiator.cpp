@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@
 #include "MediaProfileUtil.h"
 #include "audio/AudioDef.h"
 #include "audio/AudioProfileNegotiator.h"
+#include "audio/AudioProfileUtil.h"
 
 #define EVS_NEGO_RETRY_COUNT 2
 #define RETURN_MODE_MATCHED  IMS_FALSE
@@ -45,13 +46,13 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL ||
             pConfig == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Negotiate() invalid argument", 0, 0, 0);
+        IMS_TRACE_E(0, "Negotiate(): invalid argument", 0, 0, 0);
         return IMS_FALSE;
     }
 
     m_bIsOfferReceived = bIsOfferReceived;
 
-    IMS_TRACE_I("Negotiate() - IsOfferReceived[%d]", m_bIsOfferReceived, 0, 0);
+    IMS_TRACE_I("Negotiate(): IsOfferReceived[%d]", m_bIsOfferReceived, 0, 0);
 
     if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
@@ -60,7 +61,7 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
     if (pPeerProfile->GetPayloadList().GetSize() == 0)
     {
-        IMS_TRACE_I("Negotiate() - empty Payload list", 0, 0, 0);
+        IMS_TRACE_I("Negotiate(): empty payload list", 0, 0, 0);
         pNegotiatedProfile->CopyPayloads(pLocalProfile->GetPayloadList());
     }
     else
@@ -70,12 +71,12 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
         if (pNegotiatedPayload == IMS_NULL)
         {
-            IMS_TRACE_D("Negotiate() - Null negotiated payload", 0, 0, 0);
+            IMS_TRACE_D("Negotiate(): null negotiated payload", 0, 0, 0);
             return IMS_FALSE;
         }
         if (NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
         {
-            IMS_TRACE_D("Negotiate() - Direction negotiation fail", 0, 0, 0);
+            IMS_TRACE_D("Negotiate(): fail to negotiate the direction", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -93,7 +94,6 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
     if (pNegotiatedProfile->GetDataPort() == 0)
     {
-        IMS_TRACE_I("Negotiate() - Set Inactive Direction", 0, 0, 0);
         pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
     }
 
@@ -119,17 +119,16 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePayload(IN AudioProfile*
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiatePayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
-
-    IMS_TRACE_D("NegotiatePayload()", 0, 0, 0);
 
     AudioProfile::Payload* pNegotiatedPayload = IMS_NULL;
     pNegotiatedPayload = NegotiateAudioPayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
 
     if (pNegotiatedPayload == IMS_NULL)
     {
-        IMS_TRACE_D("NegotiatePayload() - No Negotiated Payload", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiatePayload(): invalid payload", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -158,10 +157,9 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAudioPayload(IN AudioPro
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAudioPayload(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
-
-    IMS_TRACE_D("NegotiateAudioPayload()", 0, 0, 0);
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
     {
@@ -189,7 +187,8 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAudioPayload(IN AudioPro
             IMS_UINT32 nBandwidthNegoList = 0;
             IMS_UINT32 nBitrateNegoList = 0;
             IMS_UINT32 nModeSetNegoList = 0;
-            // need to modify FindEvsInProfile() func..
+
+            // TODO: need to modify FindEvsInProfile() func..
             if (FindEvsInProfile(pLocalProfile, pDestPayload, &nBandwidthNegoList,
                         &nBitrateNegoList, &nModeSetNegoList) == IMS_TRUE)
             {
@@ -218,10 +217,11 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAmr(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("NegotiateAmr() - Payload Index[%d]", nPayloadIndex, 0, 0);
+    IMS_TRACE_D("NegotiateAmr(): payload index[%d]", nPayloadIndex, 0, 0);
 
     AudioProfile::Payload* pAmr = new AudioProfile::Payload();
     AudioProfile::Payload* pDestPayload = pPeerProfile->GetPayloadAt(nPayloadIndex);
@@ -246,8 +246,6 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
         pPeerProfile->SetNegotiatedPayloadIndex(nPayloadIndex);
         // Set remote payload index at local profile
         pLocalProfile->SetNegotiatedPayloadIndex(nSrcPayloadIndex);
-        IMS_TRACE_D("NegotiateAmr() - remote payload index[%d]",
-                pLocalProfile->GetNegotiatedPayloadIndex(), 0, 0);
 
         // MT case : change src PT# to dest PT#
         if (m_bIsOfferReceived == IMS_TRUE && pLocalProfile->GetNegotiatedPayloadIndex() != -1)
@@ -276,13 +274,14 @@ AudioProfile::AmrFmtp* AudioProfileNegotiator::NegotiateAmrFmtp(IN AudioProfile*
 {
     if (pLocalProfile == IMS_NULL || pDestPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAmrFmtp(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
 
     nSrcPayloadIndex = FindPayloadIndexFromProfile(
             pDestPayload->GetRtpMap().GetPayloadType(), pLocalProfile, pDestPayload);
 
-    IMS_TRACE_D("NegotiateAmrFmtp() - Src Payload Index[%d]", nSrcPayloadIndex, 0, 0);
+    IMS_TRACE_D("NegotiateAmrFmtp(): payload index[%d]", nSrcPayloadIndex, 0, 0);
 
     AudioProfile::AmrFmtp* pSrcFmtp =
             (AudioProfile::AmrFmtp*)pLocalProfile->GetPayloadAt(nSrcPayloadIndex)->GetFmtp();
@@ -312,16 +311,18 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateEvs(IN AudioProfile* pLo
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateEvs(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("NegotiateEvs() - Payload Index[%d]", nPayloadIndex, 0, 0);
+    IMS_TRACE_D("NegotiateEvs(): payload index[%d]", nPayloadIndex, 0, 0);
 
     AudioProfile::Payload* pEvs = new AudioProfile::Payload();
     AudioProfile::Payload* pDestPayload = pPeerProfile->GetPayloadAt(nPayloadIndex);
 
     if (pEvs == IMS_NULL || pDestPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateEvs(): invalid payload", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -367,10 +368,11 @@ AudioProfile::EvsFmtp* AudioProfileNegotiator::NegotiateEvsFmtp(IN AudioProfile*
 {
     if (pLocalProfile == IMS_NULL || pDestPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateEvs(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("NegotiateEvsFmtp() - Src Payload Index[%d]", nSrcPayloadIndex, 0, 0);
+    IMS_TRACE_D("NegotiateEvsFmtp(): payload index[%d]", nSrcPayloadIndex, 0, 0);
 
     nSrcPayloadIndex = FindPayloadIndexFromProfile(
             pDestPayload->GetRtpMap().GetPayloadType(), pLocalProfile, pDestPayload);
@@ -384,7 +386,7 @@ AudioProfile::EvsFmtp* AudioProfileNegotiator::NegotiateEvsFmtp(IN AudioProfile*
 
     if (pEvsFmtp->IsDtxEnabled() != pSrcFmtp->IsDtxEnabled())
     {
-        IMS_TRACE_D("NegotiateEvsFmtp() - DTX updated in the destination profile", 0, 0, 0);
+        IMS_TRACE_D("NegotiateEvsFmtp(): DTX updated in the destination profile", 0, 0, 0);
     }
 
     pEvsFmtp->SetShowModeChangeCapability(pSrcFmtp->IsModeChangeCapabilityVisible());
@@ -407,6 +409,7 @@ void AudioProfileNegotiator::NegotiateUniDirectionBrBw(OUT AudioProfile::EvsFmtp
 {
     if (pEvsFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateUniDirectionBrBw(): invalid fmtp", 0, 0, 0);
         return;
     }
 
@@ -434,6 +437,7 @@ void AudioProfileNegotiator::NegotiateCmr(
 {
     if (pSrcFmtp == IMS_NULL || pEvsFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateCmr(): invalid fmtp", 0, 0, 0);
         return;
     }
 
@@ -469,12 +473,12 @@ void AudioProfileNegotiator::NegotiateModeSet(OUT AudioProfile::EvsFmtp* pEvsFmt
 {
     if (pEvsFmtp == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateCmr(): invalid fmtp", 0, 0, 0);
         return;
     }
 
-    /** fixed for IR92 ver.12 newaly spec as below comment. If the selected EVS
-     * configuration is A1, B0 or B1 then"mode set = 0,1,2" must be included in the SDP
-     * answer.*/
+    /** fixed for IR92 ver.12 new spec as if the selected EVS configuration is A1, B0 or B1
+     * then"mode set = 0,1,2" must be included in the SDP answer.*/
     if (m_bIsOfferReceived == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() != 1)
     {
         // if max BR is 13.2kbps, then set a"mode-set" attribute
@@ -482,7 +486,7 @@ void AudioProfileNegotiator::NegotiateModeSet(OUT AudioProfile::EvsFmtp* pEvsFmt
         {
             pEvsFmtp->SetModeSetList(0x07);  // mode-set = 0,1,2;
             pEvsFmtp->SetShowModeSet(IMS_TRUE);
-            IMS_TRACE_D("NegotiateModeSet() - add EVS mode-set", 0, 0, 0);
+            IMS_TRACE_D("NegotiateModeSet(): add EVS mode-set", 0, 0, 0);
         }
     }
 }
@@ -494,10 +498,11 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePcm(IN AudioProfile* pLo
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiatePcm(): invalid arguments", 0, 0, 0);
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("NegotiatePcm() - Payload Index[%d]", nPayloadIndex, 0, 0);
+    IMS_TRACE_D("NegotiatePcm(): payload index[%d]", nPayloadIndex, 0, 0);
 
     AudioProfile::Payload* pPcm = new AudioProfile::Payload();
     AudioProfile::Payload* pDestPayload = pPeerProfile->GetPayloadAt(nPayloadIndex);
@@ -534,11 +539,12 @@ IMS_BOOL AudioProfileNegotiator::NegotiateTelephoneEventPayload(
 {
     if (nNegotiatedSamplingRate == 0 || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateTelephoneEventPayload(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
     IMS_TRACE_D(
-            "NegotiateTelephoneEventPayload() - sampling rate[%d]", nNegotiatedSamplingRate, 0, 0);
+            "NegotiateTelephoneEventPayload(): sampling rate[%d]", nNegotiatedSamplingRate, 0, 0);
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
     {
@@ -559,7 +565,7 @@ IMS_BOOL AudioProfileNegotiator::NegotiateTelephoneEventPayload(
                         *static_cast<AudioProfile::TelephoneEventFmtp*>(pDestPayload->GetFmtp())));
                 pNegotiatedProfile->GetPayloadList().Append(pTelephoneEvent);
 
-                IMS_TRACE_D("NegotiateTelephoneEventPayload() - payload[%d]",
+                IMS_TRACE_D("NegotiateTelephoneEventPayload(): payload[%d]",
                         pTelephoneEvent->GetRtpMap().GetPayloadNumber(), 0, 0);
 
                 return IMS_TRUE;
@@ -577,11 +583,12 @@ void AudioProfileNegotiator::NegotiateTelephoneEvent8000Payload(
 {
     if (pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateTelephoneEvent8000Payload(): invalid arguments", 0, 0, 0);
         return;
     }
 
     IMS_TRACE_D(
-            "NegotiateTelephoneEvent8000Payload() - need to accept 8K DTMF, no proper DTMF Payload",
+            "NegotiateTelephoneEvent8000Payload(): need to accept 8K DTMF, no proper DTMF Payload",
             0, 0, 0);
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
@@ -597,7 +604,7 @@ void AudioProfileNegotiator::NegotiateTelephoneEvent8000Payload(
             // for acceptable 8K DTMF when AMR-WB calling
             if (nNegotiatedSamplingRate > pDestPayload->GetRtpMap().GetSamplingRate())
             {
-                IMS_TRACE_D("NegotiateTelephoneEvent8000Payload() - Accept sampling rate[%d]->[%d]",
+                IMS_TRACE_D("NegotiateTelephoneEvent8000Payload(): Accept sampling rate[%d]->[%d]",
                         nNegotiatedSamplingRate, pDestPayload->GetRtpMap().GetSamplingRate(), 0);
                 AudioProfile::Payload* pTelephoneEvent = new AudioProfile::Payload();
                 pTelephoneEvent->SetRtpMap(pDestPayload->GetRtpMap());
@@ -617,13 +624,14 @@ IMS_BOOL AudioProfileNegotiator::NegotiateDirection(IN AudioProfile* pLocalProfi
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateDirection(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
     pNegotiatedProfile->SetDirection(
             UpdateDirectionToMine(pPeerProfile->GetDirection(), pLocalProfile->GetDirection()));
 
-    IMS_TRACE_D("NegotiateDirection() - direction[%d]", pNegotiatedProfile->GetDirection(), 0, 0);
+    IMS_TRACE_D("NegotiateDirection(): direction[%d]", pNegotiatedProfile->GetDirection(), 0, 0);
 
     if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
     {
@@ -639,6 +647,7 @@ void AudioProfileNegotiator::NegotiateRtcpXr(
 {
     if (pLocalProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateRtcpXr(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -649,7 +658,7 @@ void AudioProfileNegotiator::NegotiateRtcpXr(
         pNegotiatedProfile->SetRtcpXrAttr(pLocalProfile->GetRtcpXrAttr());
     }
 
-    IMS_TRACE_D("NegotiateRtcpXr() - support[%d]", pNegotiatedProfile->IsRtcpXrSupported(), 0, 0);
+    IMS_TRACE_D("NegotiateRtcpXr(): support[%d]", pNegotiatedProfile->IsRtcpXrSupported(), 0, 0);
 }
 
 PRIVATE
@@ -658,13 +667,14 @@ void AudioProfileNegotiator::NegotiatePtime(
 {
     if (pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiatePtime(): invalid arguments", 0, 0, 0);
         return;
     }
 
     IMS_SINT32 nPtime = (nLocalPtime < 20) ? 20 : nLocalPtime;
     pNegotiatedProfile->SetPtime(nPtime);
 
-    IMS_TRACE_D("NegotiatePtime() - Ptime[%d], Local Ptime[%d]", pNegotiatedProfile->GetPtime(),
+    IMS_TRACE_D("NegotiatePtime(): Ptime[%d], Local Ptime[%d]", pNegotiatedProfile->GetPtime(),
             nLocalPtime, 0);
 }
 
@@ -674,13 +684,14 @@ void AudioProfileNegotiator::NegotiateMaxPtime(
 {
     if (pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateMaxPtime(): invalid arguments", 0, 0, 0);
         return;
     }
 
     IMS_SINT32 nMaxPtime = (nLocalMaxPtime < 20) ? 240 : nLocalMaxPtime;
     pNegotiatedProfile->SetMaxPtime(nMaxPtime);
 
-    IMS_TRACE_D("NegotiateMaxPtime() - Max Ptime[%d], Local Ptime[%d]",
+    IMS_TRACE_D("NegotiateMaxPtime(): Max Ptime[%d], Local Ptime[%d]",
             pNegotiatedProfile->GetMaxPtime(), nLocalMaxPtime, 0);
 }
 
@@ -690,6 +701,7 @@ void AudioProfileNegotiator::NegotiateAnbr(IN IMS_BOOL nSupportAnbrLocal,
 {
     if (pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAnbr(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -698,7 +710,7 @@ void AudioProfileNegotiator::NegotiateAnbr(IN IMS_BOOL nSupportAnbrLocal,
 
     pNegotiatedProfile->SetAnbr(bEnableAnbr);
 
-    IMS_TRACE_D("NegotiateAnbr() - supported local[%d], peer[%d], nego[%d]", nSupportAnbrLocal,
+    IMS_TRACE_D("NegotiateAnbr(): supported local[%d], peer[%d], nego[%d]", nSupportAnbrLocal,
             nSupportAnbrPeer, pNegotiatedProfile->IsAnbrSupported());
 }
 
@@ -710,6 +722,7 @@ void AudioProfileNegotiator::NegotiateBandwidth(IN AudioProfile* pLocalProfile,
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL ||
             pNegotiatedPayload == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateBandwidth(): invalid arguments", 0, 0, 0);
         return;
     }
 
@@ -722,7 +735,7 @@ void AudioProfileNegotiator::NegotiateBandwidth(IN AudioProfile* pLocalProfile,
     MakeNegotiatedBandwidth(static_cast<AudioConfiguration*>(pConfig), pLocalProfile, pPeerProfile,
             nAsValueOfNegoticatedCodec, pNegotiatedProfile);
 
-    IMS_TRACE_D("NegotiateBandwidth() - AS[%d], RS[%d], RR[%d]",
+    IMS_TRACE_D("NegotiateBandwidth(): AS[%d], RS[%d], RR[%d]",
             pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
             pNegotiatedProfile->GetBandwidthRr());
 }
@@ -733,6 +746,7 @@ IMS_SINT32 AudioProfileNegotiator::NegotiateAs(
 {
     if (pNegotiatedPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateAs(): invalid arguments", 0, 0, 0);
         return 0;
     }
 
@@ -775,10 +789,10 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
         IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
         IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT AudioProfile* pNegotiatedProfile)
 {
-    IMS_TRACE_D("MakeNegotiatedBandwidth() - BW_NEGO_OPTION_VALUE[%d]",
-            pConfig->GetBandwidthNegoOption(), 0, 0);
+    IMS_TRACE_D(
+            "MakeNegotiatedBandwidth(): nego option[%d]", pConfig->GetBandwidthNegoOption(), 0, 0);
 
-    if (m_bIsOfferReceived == IMS_FALSE)
+    if (!m_bIsOfferReceived)
     {
         // MO's Bandwidth Setting
         //  1. Set AS Value
@@ -805,7 +819,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
             pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
             pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
-            IMS_TRACE_D("MakeNegotiatedBandwidth() - Nego AS[%d] RS[%d] RR[%d]",
+            IMS_TRACE_D("MakeNegotiatedBandwidth(): Nego AS[%d] RS[%d] RR[%d]",
                     pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
                     pLocalProfile->GetBandwidthRr());
             return IMS_TRUE;
@@ -861,7 +875,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
                 pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
                 pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
-                IMS_TRACE_D("MakeNegotiatedBandwidth() - AS[%d] RS[%d] RR[%d]",
+                IMS_TRACE_D("MakeNegotiatedBandwidth(): AS[%d] RS[%d] RR[%d]",
                         pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
                         pLocalProfile->GetBandwidthRr());
                 return IMS_TRUE;
@@ -871,7 +885,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
             if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE)
             {
                 // if RS/RR is used for RTCP remote  value
-                IMS_TRACE_D("MakeNegotiatedBandwidth() - use peer RS[%d] RR[%d]",
+                IMS_TRACE_D("MakeNegotiatedBandwidth(): use peer RS[%d] RR[%d]",
                         pPeerProfile->GetBandwidthRs(), pPeerProfile->GetBandwidthRr(), 0);
                 pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
                 pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
@@ -885,7 +899,7 @@ IMS_BOOL AudioProfileNegotiator::MakeNegotiatedBandwidth(IN AudioConfiguration* 
         }
     }
 
-    IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
+    IMS_TRACE_D("MakeNegotiatedBandwidth(): Negotiated Profile AS[%d] RS[%d] RR[%d]",
             pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
             pLocalProfile->GetBandwidthRr());
 
@@ -898,13 +912,14 @@ void AudioProfileNegotiator::NegotiateRtcpInterval(IN AudioProfile* pNegotiatedP
 {
     if (pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateRtcpInterval(): invalid arguments", 0, 0, 0);
         return;
     }
 
     if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
     {
         pNegotiatedProfile->SetRtcpInterval(0);
-        IMS_TRACE_D("NegotiateRtcpInterval() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
+        IMS_TRACE_D("NegotiateRtcpInterval(): negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
     }
     else
     {
@@ -917,8 +932,8 @@ void AudioProfileNegotiator::NegotiateRtcpInterval(IN AudioProfile* pNegotiatedP
         }
     }
 
-    IMS_TRACE_D("NegotiateRtcpInterval() - Rtcp Interval[%d]",
-            pNegotiatedProfile->GetRtcpInterval(), 0, 0);
+    IMS_TRACE_D("NegotiateRtcpInterval(): Rtcp Interval[%d]", pNegotiatedProfile->GetRtcpInterval(),
+            0, 0);
 }
 
 PRIVATE
@@ -928,6 +943,7 @@ IMS_BOOL AudioProfileNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile
 {
     if (pLocalProfile == IMS_NULL || pDstPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FindEvsInProfile(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1007,12 +1023,10 @@ IMS_BOOL AudioProfileNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile
                     }
                 }
 
-                // fixed for IR92 ver.12 newaly spec as below comment.
-                // If ther SDP parameter ch-aw-recv is present
-                // in the corresponding received and accepted SDP offer,
-                // then the SDP parameter ch-aw-recv must be included
-                // in the SDP answer with the same value as received.
-                // In Offered case, set ChAw Mode for mine.
+                // fixed for IR92 ver.12 newaly spec as below comment. If ther SDP parameter
+                // ch-aw-recv is present in the corresponding received and accepted SDP offer, then
+                // the SDP parameter ch-aw-recv must be included in the SDP answer with the same
+                // value as received. In Offered case, set ChAw Mode for mine.
                 if (((pReceivedFmtp->GetBwList() & 0x06) != 0 &&
                             (pReceivedFmtp->GetBrList() & 0x10) != 0) ||
                         ((*pBandwidthNegoList & 0x06) != 0 && (*pBitrateNegoList & 0x10) != 0))
@@ -1050,6 +1064,7 @@ IMS_BOOL AudioProfileNegotiator::FindAmrInProfile(IN AudioProfile* pProfile,
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FindAmrInProfile(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1116,8 +1131,8 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfi
                 continue;
             }
 
-            /** Fix for AMR Open Offer In case of MO, mode-set from MT could be mismatched Keep
-            negotiated mode-set and try to find exact one */
+            /** Fix for AMR Open Offer In case of MO, mode-set from MT could be mismatched, then
+            keep the negotiated mode-set and try to find exact one */
             IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp, bReturnMode,
                     pnNegoModeSetList, pnNegoDefaultRtpModeSet);
 
@@ -1157,7 +1172,7 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfi
         }
     }
 
-    // 20160517 Fix for AMR Open Offer
+    // for AMR Open Offer
     if (bModeSetFound == IMS_TRUE)
     {
         *pnNegoModeSetList = nTempNegoModeSetList;
@@ -1179,6 +1194,7 @@ IMS_BOOL AudioProfileNegotiator::FindPcmInProfile(
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FindPcmInProfile(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1213,9 +1229,6 @@ IMS_BOOL AudioProfileNegotiator::FindPcmInProfile(
         }
     }
 
-    // IMS_TRACE_D("FindPcmInProfile() Not Found G.711[%s], SamplingRate[%d]",
-    // pPayload->GetRtpMap().GetPayloadType().GetStr(), pPayload->GetRtpMap().GetSamplingRate(), 0);
-
     return IMS_FALSE;
 }
 
@@ -1224,9 +1237,9 @@ IMS_SINT32 AudioProfileNegotiator::CompareModeSet(IN AudioProfile::AmrFmtp* pSrc
         IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bReturnMode, OUT IMS_UINT32* nNegoModeSet,
         OUT IMS_UINT32* nNegoDefaultRtpModeSet)
 {
-    IMS_TRACE_I("CompareModeSet() - Src modeSet[0x%04x] Dest modeSet[0x%04x]",
+    IMS_TRACE_I("CompareModeSet(): Src modeSet[0x%04x] Dest modeSet[0x%04x]",
             pSrcFmtp->GetModeSetList(), pDestFmtp->GetModeSetList(), 0);
-    IMS_TRACE_I("CompareModeSet() - Src defaultmodeSet[0x%04x] Dest defaultmodeSet[0x%04x]",
+    IMS_TRACE_I("CompareModeSet(): Src defaultmodeSet[0x%04x] Dest defaultmodeSet[0x%04x]",
             pSrcFmtp->GetDefaultRtpModeSet(), pDestFmtp->GetDefaultRtpModeSet(), 0);
 
     IMS_SINT32 nResult = 1;  // -1 : no matched, 0 : similar, 1 : exactly matched
@@ -1266,16 +1279,16 @@ IMS_SINT32 AudioProfileNegotiator::CompareModeSet(IN AudioProfile::AmrFmtp* pSrc
             if (*nNegoModeSet == 0)
             {
                 IMS_TRACE_D(
-                        "CompareModeSet() - ModeSet Not Matched - isFinal: %d", bReturnMode, 0, 0);
+                        "CompareModeSet(): ModeSet Not Matched - isFinal: %d", bReturnMode, 0, 0);
                 if (bReturnMode == RETURN_MODE_SIMILAR)
                 {
                     *nNegoModeSet =
                             pDestFmtp->GetModeSetList();  // Copy Dest Mode-set to Nego Mode-set
-                    IMS_TRACE_D("CompareModeSet() - Copy Dest Mode-set", 0, 0, 0);
+                    IMS_TRACE_D("CompareModeSet(): Copy Dest Mode-set", 0, 0, 0);
                 }
                 else
                 {
-                    IMS_TRACE_E(0, "CompareModeSet() - ModeSet Not Matched...", 0, 0, 0);
+                    IMS_TRACE_E(0, "CompareModeSet(): ModeSet Not Matched...", 0, 0, 0);
                     return -1;
                 }
             }
@@ -1298,15 +1311,13 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
         IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
         OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
 {
-    IMS_TRACE_D("CompareEvsBwBrMode() - Src Bandwidth[0x%04x], Bitrate[0x%04x], modeSet[0x%04x]",
+    IMS_TRACE_D("CompareEvsBwBrMode(): Src Bandwidth[0x%04x], Bitrate[0x%04x], modeSet[0x%04x]",
             pSrcFmtp->GetBwList(), pSrcFmtp->GetBrList(), pSrcFmtp->GetModeSetList());
-    IMS_TRACE_D("CompareEvsBwBrMode() - Dest Bandwidth[0x%04x], Bitrate[0x%04x], modeSet[0x%04x]",
+    IMS_TRACE_D("CompareEvsBwBrMode(): Dest Bandwidth[0x%04x], Bitrate[0x%04x], modeSet[0x%04x]",
             pDestFmtp->GetBwList(), pDestFmtp->GetBrList(), pDestFmtp->GetModeSetList());
 
-    // check EVS ModeSwitch
     if (pDestFmtp->GetEvsModeSwitch() == 1)  // AMR IO Mode
     {
-        // Set AMR ModeSet lis.
         if ((pSrcFmtp->GetModeSetList() == 0) && (pDestFmtp->GetModeSetList() == 0))
         {
             *nNegoModeList = 0;
@@ -1317,7 +1328,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
 
             if (*nNegoModeList == 0)
             {
-                IMS_TRACE_D("CompareEvsBwBrMode() - AMR IO Mode - ModeSet Not Matched...", 0, 0, 0);
+                IMS_TRACE_D("CompareEvsBwBrMode(): AMR IO Mode - ModeSet Not Matched...", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
@@ -1333,7 +1344,6 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
     else  // Primary Mode
     {
         // Set Bandwidth/Bitrate list.
-        // 01. check Bandwidth
         if ((pSrcFmtp->GetBwList() == 0) && (pDestFmtp->GetBwList() == 0))
         {
             *nNegoBwList = 0;
@@ -1348,20 +1358,20 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
                 {
                     if (pDestFmtp->GetBrList() == 0x10)  // B0 received case.
                     {
-                        IMS_TRACE_D("CompareEvsBwBrMode() - Primary Mode - Config B0 Type Nego", 0,
+                        IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - Config B0 Type Nego", 0,
                                 0, 0);
                         *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
                     }
                     else if (pSrcFmtp->GetBwList() != 0x04)
                     {  // own EVS category is A. Do not negotiate with received category B.
-                        IMS_TRACE_D("CompareEvsBwBrMode() - Primary Mode - Not Config B Type Nego",
+                        IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - Not Config B Type Nego",
                                 0, 0, 0);
                         return IMS_FALSE;
                     }
                     else
                     {
-                        IMS_TRACE_D("CompareEvsBwBrMode() - Primary Mode - Config B Type Nego", 0,
-                                0, 0);
+                        IMS_TRACE_D(
+                                "CompareEvsBwBrMode(): Primary Mode - Config B Type Nego", 0, 0, 0);
                         *nNegoBwList = pDestFmtp->GetBwList();
                     }
                 }
@@ -1379,7 +1389,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
                         if (pSrcFmtp->GetBwList() == 0x04)
                         {
                             // this case, Do not negotiate with own category B. check next paylaod.
-                            IMS_TRACE_D("CompareEvsBwBrMode() - Primary Mode - \
+                            IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - \
                                     not support B Type Nego", 0, 0, 0);
                             return IMS_FALSE;
                         }
@@ -1392,7 +1402,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
                     if (pSrcFmtp->GetBwList() == 0x04)
                     {
                         // this case, Do not negotiate with own category B. check next paylaod.
-                        IMS_TRACE_D("CompareEvsBwBrMode() - Primary Mode - \
+                        IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - \
                                 not support B Type Nego",
                                 0, 0, 0);
                         return IMS_FALSE;
@@ -1415,14 +1425,14 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
                 {
                     if (pSrcFmtp->GetBwList() == 0x04 && pDestFmtp->GetBwList() != 0x04)
                     {
-                        IMS_TRACE_D("CompareEvsBwBrMode() - check next payload", 0, 0, 0);
+                        IMS_TRACE_D("CompareEvsBwBrMode(): check next payload", 0, 0, 0);
                         return IMS_FALSE;
                     }
                     *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
                 }*/
                 if (pSrcFmtp->GetBwList() == 0x04 && pDestFmtp->GetBwList() != 0x04)
                 {
-                    IMS_TRACE_D("CompareEvsBwBrMode() - check next payload", 0, 0, 0);
+                    IMS_TRACE_D("CompareEvsBwBrMode(): check next payload", 0, 0, 0);
                     return IMS_FALSE;
                 }
                 *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
@@ -1431,11 +1441,10 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
             if (*nNegoBwList == 0)
             {
                 IMS_TRACE_D(
-                        "CompareEvsBwBrMode() - Primary Mode - Bandwidth Not Matched...", 0, 0, 0);
+                        "CompareEvsBwBrMode(): Primary Mode - Bandwidth Not Matched...", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
-        // uni direction received case
         else if ((pSrcFmtp->GetBwList() != 0) &&
                 ((pDestFmtp->GetBwRecv() != 0) || (pDestFmtp->GetBwSend() != 0)))
         {
@@ -1454,7 +1463,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
             if (*nNegoBwList == 0)
             {
                 IMS_TRACE_D(
-                        "CompareEvsBwBrMode() - Primary Mode - Bandwidth Not Matched...", 0, 0, 0);
+                        "CompareEvsBwBrMode(): Primary Mode - Bandwidth Not Matched...", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
@@ -1462,8 +1471,6 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
         {
             *nNegoBwList = pSrcFmtp->GetBwList() | pDestFmtp->GetBwList();
         }
-
-        // 02. check Bitrate
 
         if ((pSrcFmtp->GetBrList() == 0) && (pDestFmtp->GetBrList() == 0))
         {
@@ -1477,8 +1484,8 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
                 *nNegoBrList = pSrcFmtp->GetBrList() & pDestFmtp->GetBrList();
                 if ((*nNegoBwList == 0x04) && (*nNegoBrList == 0x10))
                 {  // 13.2kbsp swb only case
-                    IMS_TRACE_D("CompareEvsBwBrMode() - Primary Mode - Config B0,B1 Type Nego", 0,
-                            0, 0);
+                    IMS_TRACE_D(
+                            "CompareEvsBwBrMode(): Primary Mode - Config B0,B1 Type Nego", 0, 0, 0);
                     *nNegoBrList = (pDestFmtp->GetBrList()) & 0x1f;  // negotiated ~13.2kbps
                 }
             }
@@ -1489,12 +1496,10 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
 
             if (*nNegoBrList == 0)
             {
-                IMS_TRACE_D(
-                        "CompareEvsBwBrMode() - Primary Mode - Bitrate Not Matched...", 0, 0, 0);
+                IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - Bitrate Not Matched...", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
-        // uni direction received case
         else if ((pSrcFmtp->GetBrList() != 0) &&
                 (pDestFmtp->GetBrRecv() != 0 || (pDestFmtp->GetBrSend() != 0)))
         {
@@ -1513,8 +1518,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
 
             if (*nNegoBrList == 0)
             {
-                IMS_TRACE_D(
-                        "CompareEvsBwBrMode() - Primary Mode - Bitrate Not Matched...", 0, 0, 0);
+                IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - Bitrate Not Matched...", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
@@ -1537,12 +1541,11 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
         IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
         OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
 {
-    IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Src BW[0x%04x], BR[0x%04x], modeSet[0x%04x]",
+    IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Src BW[0x%04x], BR[0x%04x], modeSet[0x%04x]",
             pSrcFmtp->GetBwList(), pSrcFmtp->GetBrList(), pSrcFmtp->GetModeSetList());
-    IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Dest BW[0x%04x], BR[0x%04x], modeSet[0x%04x]",
+    IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Dest BW[0x%04x], BR[0x%04x], modeSet[0x%04x]",
             pDestFmtp->GetBwList(), pDestFmtp->GetBrList(), pDestFmtp->GetModeSetList());
 
-    // check EVS ModeSwitch
     if (pDestFmtp->GetEvsModeSwitch() == 1)  // AMR IO Mode
     {
         // Set AMR ModeSet lis.
@@ -1556,7 +1559,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
 
             if (*nNegoModeList == 0)
             {
-                IMS_TRACE_D("CompareEvsBwBrModeLegacy() - AMR IO Mode - ModeSet Not Matched...", 0,
+                IMS_TRACE_D("CompareEvsBwBrModeLegacy(): AMR IO Mode - ModeSet Not Matched...", 0,
                         0, 0);
                 return IMS_FALSE;
             }
@@ -1575,7 +1578,6 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
     else  // Primary Mode
     {
         // Set Bandwidth/Bitrate list.
-        // 01. check Bandwidth
         if ((pSrcFmtp->GetBwList() == 0) && (pDestFmtp->GetBwList() == 0))
         {
             *nNegoBwList = 0;
@@ -1586,12 +1588,11 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
 
             if (*nNegoBwList == 0)
             {
-                IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Primary Mode - Bandwidth Not Matched...",
+                IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Primary Mode - Bandwidth Not Matched...",
                         0, 0, 0);
                 return IMS_FALSE;
             }
         }
-        // uni direction received case
         else if ((pSrcFmtp->GetBwList() != 0) &&
                 ((pDestFmtp->GetBwRecv() != 0) || (pDestFmtp->GetBwSend() != 0)))
         {
@@ -1609,7 +1610,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
             *nNegoBwList = pSrcFmtp->GetBwList() & nPeerBWList;
             if (*nNegoBwList == 0)
             {
-                IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Primary Mode - Bandwidth Not Matched...",
+                IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Primary Mode - Bandwidth Not Matched...",
                         0, 0, 0);
                 return IMS_FALSE;
             }
@@ -1618,8 +1619,6 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
         {
             *nNegoBwList = pSrcFmtp->GetBwList() | pDestFmtp->GetBwList();
         }
-
-        // 02. check Bitrate
 
         if ((pSrcFmtp->GetBrList() == 0) && (pDestFmtp->GetBrList() == 0))
         {
@@ -1631,12 +1630,11 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
 
             if (*nNegoBrList == 0)
             {
-                IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Primary Mode - Bitrate Not Matched...", 0,
+                IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Primary Mode - Bitrate Not Matched...", 0,
                         0, 0);
                 return IMS_FALSE;
             }
         }
-        // uni direction received case
         else if ((pSrcFmtp->GetBrList() != 0) &&
                 (pDestFmtp->GetBrRecv() != 0 || (pDestFmtp->GetBrSend() != 0)))
         {
@@ -1655,7 +1653,7 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
 
             if (*nNegoBrList == 0)
             {
-                IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Primary Mode - Bitrate Not Matched...", 0,
+                IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Primary Mode - Bitrate Not Matched...", 0,
                         0, 0);
                 return IMS_FALSE;
             }
@@ -1680,12 +1678,11 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindPayloadIndexFromProfile(
 {
     if (pLocalProfile == IMS_NULL || pDstPayload == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FindPayloadIndexFromProfile(): invalid arguments", 0, 0, 0);
         return -1;
     }
 
     IMS_SINT32 nRetIndex = -1;
-
-    IMS_TRACE_D("FindPayloadIndexFromProfile()", 0, 0, 0);
 
     nRetIndex = FindMatchedPayloadIndexFromProfile(
             strCodecName, pLocalProfile, pDstPayload, RETURN_MODE_MATCHED);
@@ -1769,10 +1766,9 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                         continue;
                     }
 
-                    // 20160517 Fix for AMR Open Offer
-                    // In case of MO, mode-set from MT could be mismatched
-                    // => Keep negotiated mode-set and try to find exact one
-
+                    // AMR Open Offer
+                    // In case of MO, mode-set from MT could be mismatched, then keep the negotiated
+                    // mode-set and try to find exact one
                     IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp,
                             bReturnMode, &pnNegoModeSetList, &pnNegoDefaultRtpModeSet);
                     if (nCompareResult == -1)
@@ -1913,8 +1909,6 @@ MEDIA_DIRECTION AudioProfileNegotiator::UpdateDirectionToMine(
     {
         return MEDIA_DIRECTION_INVALID;
     }
-
-    IMS_TRACE_D("UpdateDirectionToMine() ePeerDir[%d], eSrcDir[%d]", ePeerDir, eSrcDir, 0);
 
     MEDIA_DIRECTION eNegotiatedDir = MEDIA_DIRECTION_INVALID;
 

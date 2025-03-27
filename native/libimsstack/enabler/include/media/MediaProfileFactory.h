@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,28 +17,12 @@
 #ifndef MEDIA_PROFILE_FACTORY_H_
 #define MEDIA_PROFILE_FACTORY_H_
 
-class CodecConfig;
-class CodecAudioConfig;
-class CodecVideoConfig;
-class AudioConfiguration;
-class MediaConfiguration;
-class MediaEnvironment;
-class MediaResourceManager;
-class VideoConfiguration;
-
 #include "audio/AudioProfile.h"
 #include "text/TextProfile.h"
 #include "video/VideoProfile.h"
 
 class MediaProfileFactory
 {
-private:
-    /**
-     * @brief Construct a new media profile factory
-     *
-     */
-    MediaProfileFactory();
-
 public:
     /**
      * @brief Destroy the media profile factory
@@ -53,7 +37,7 @@ public:
      * @param pProfile if not null, this profile will be copied to the media profile just created
      * @return MediaBaseProfile* The media profile created
      */
-    MediaBaseProfile* CreateProfile(
+    virtual MediaBaseProfile* CreateProfile(
             IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile = IMS_NULL);
 
     /**
@@ -61,7 +45,7 @@ public:
      *
      * @param pProfile The media profile to be deleted
      */
-    void DeleteProfile(IN MediaBaseProfile* pProfile);
+    virtual void DeleteProfile(IN MediaBaseProfile* pProfile);
 
     /**
      * @brief Create a media(audio/text/video) codec payload
@@ -70,7 +54,7 @@ public:
      * @return MediaBaseProfile::BasePayload* The media(audio/text/video) codec payload created will
      * be returned as its parent class type
      */
-    MediaBaseProfile::BasePayload* CreatePayload(IN MEDIA_CONTENT_TYPE eType);
+    virtual MediaBaseProfile::BasePayload* CreatePayload(IN MEDIA_CONTENT_TYPE eType);
 
     /**
      * @brief Create a media(audio/text/video) codec payload
@@ -79,14 +63,14 @@ public:
      * @return MediaBaseProfile::BasePayload* The media(audio/text/video) codec payload created will
      * be returned as its parent class type
      */
-    MediaBaseProfile::BasePayload* CreatePayload(IN MediaBaseProfile::BasePayload* payload);
+    virtual MediaBaseProfile::BasePayload* CreatePayload(IN MediaBaseProfile::BasePayload* payload);
 
     /**
      * @brief Delete the payload
      *
      * @param pPayload The media codec payload to be deleted
      */
-    void DeletePayload(IN MediaBaseProfile::BasePayload* pPayload);
+    virtual void DeletePayload(IN MediaBaseProfile::BasePayload* pPayload);
 
     /**
      * @brief Get the instance of MediaProfileFactory
@@ -101,6 +85,17 @@ public:
      * @param pMediaProfileFactory the MediaProfileFactory instance
      */
     static void ReleaseInstance(MediaProfileFactory* pMediaProfileFactory);
+
+    /**
+     * @brief Set the MediaProfileFactory instance
+     */
+    static void SetInstance(MediaProfileFactory* pMediaProfileFactory);
+
+protected:
+    /**
+     * @brief Construct a new media profile factory
+     */
+    MediaProfileFactory();
 
 private:
     AudioProfile::Payload* CreateAudioPayload(IN AudioProfile::Payload* payload = IMS_NULL);

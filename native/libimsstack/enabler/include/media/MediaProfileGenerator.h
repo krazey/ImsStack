@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ public:
      * @param nSlotId The UICC slot id
      * @return MediaBaseProfile* The MediaBaseProfile to be created
      */
-    MediaBaseProfile* Generate(MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
+    virtual MediaBaseProfile* Generate(MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
             IN MediaConfiguration* pConfig, IN IMS_SINT32 nSlotId);
 
 protected:
@@ -58,9 +58,10 @@ protected:
     virtual MediaBaseProfile* SetProfile(IN MediaBaseProfile* pProfile,
             IN MediaConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType, IN IService* pIService,
             IN IMS_SINT32 nSlotId) = 0;
-    void SetCommonProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
+    virtual void SetCommonProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
             IN IService* pIService, IN IMS_SINT32 nSlotId);
-    MediaBaseProfile* SetPayloads(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
+    virtual MediaBaseProfile* SetPayloads(
+            IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     virtual void CreateCodecPayloads(IN MediaBaseProfile* pProfile, IN IMS_SINT32 nCodec,
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig) = 0;
 

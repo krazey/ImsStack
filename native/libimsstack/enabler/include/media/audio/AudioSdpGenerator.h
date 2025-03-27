@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,8 +30,8 @@ public:
     AudioSdpGenerator();
     virtual ~AudioSdpGenerator();
 
-    IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-            IN MediaBaseProfile* pBaseProfile) override;
+    virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 protected:
     void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);

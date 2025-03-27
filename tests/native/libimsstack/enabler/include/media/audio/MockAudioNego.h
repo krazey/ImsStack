@@ -19,7 +19,6 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsTypeDef.h"
 #include <audio/AudioNego.h>
 
 class MockAudioNego : public AudioNego
