@@ -269,7 +269,7 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void queryCallForward(int tId, int condition, String number) {
         queryCallForwardForServiceClass(tId, condition, number,
-                SscServiceClassUtil.SERVICE_CLASS_NONE);
+                SscServiceClassUtil.SERVICE_CLASS_VOICE);
     }
 
     //@Override
