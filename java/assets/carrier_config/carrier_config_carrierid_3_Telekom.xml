@@ -23,4 +23,7 @@
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
         <item value="403"/>
     </int-array>
+
+<!-- MTC -->
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
 </carrier_config>
