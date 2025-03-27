@@ -90,10 +90,10 @@
         <pbundle name="119">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
-            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="0"/>
             <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-                <item value="480"/>
-                <item value="640"/>
+                <item value="240"/>
+                <item value="320"/>
             </int-array>
         </pbundle>
         <pbundle name="120">

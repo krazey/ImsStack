@@ -24,7 +24,14 @@
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
     <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
 
-    <!-- MEDIA -->
+    <!-- Media -->
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int name="imsvoice.audio_ptime_millis_int" value="20"/>
+    <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
+    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
+    <boolean name="imsvoice.media_session_level_bandwidth_bool" value="true"/>
     <pbundle name="imsvt.hevc_payload_description_bundle">
         <pbundle name="125">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
@@ -41,20 +48,14 @@
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
     <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
-
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
     <boolean name="imsvt.video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>
-
-    <!-- Media common configuration -->
-    <int name="imsvoice.audio_maxred_int" value="220"/>
-    <int name="imsvoice.audio_ptime_millis_int" value="20"/>
-    <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
-    <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
-    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
-    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
-    <boolean name="imsvoice.media_session_level_bandwidth_bool" value="true"/>
+     <string-array name="imsvt.video_codec_frame_size_string_array" num="2">
+        <item value="119 240 320"/>
+        <item value="120 240 320"/>
+    </string-array>
 
     <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
