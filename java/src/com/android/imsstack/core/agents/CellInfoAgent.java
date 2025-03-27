@@ -83,7 +83,7 @@ public class CellInfoAgent implements CellInfoInterface {
     private static final int EVENT_UPDATE_ALL_CELL_INFO = 1001;
     private static final int EVENT_NETWORK_TYPE_CHANGED = 1002;
     private static final int EVENT_VOICE_NETWORK_TYPE_CHANGED = 1003;
-
+    private static final int DEFAULT_CELL_INFO_CACHE_EXPIRATION_SEC = 7200;
     private static final String DELIMETER = ",";
 
     // Mapping from the radio access network type to the telephony's network type.
@@ -141,6 +141,7 @@ public class CellInfoAgent implements CellInfoInterface {
         public void onCarrierConfigChanged(int slotId, int subId) {
             ImsLog.d(this, mSlotId, "onCarrierConfigChanged");
             mTimeOffsetEnabledForUtcTimeFormat = isTimeOffsetEnabledForUtcTimeFormat();
+            mCellInfoCacheExpirationDuration = getCellInfoCacheExpirationDuration();
         }
     };
 
@@ -159,6 +160,7 @@ public class CellInfoAgent implements CellInfoInterface {
             new ArrayMap<>(ACCESS_NETWORK_TYPE_TO_TELEPHONY_NETWORK_TYPE.size());
     private boolean mTimeOffsetEnabledForUtcTimeFormat;
     private IDcNetWatcher.Listener mNetWatcherListener;
+    private int mCellInfoCacheExpirationDuration;
 
     public CellInfoAgent(int slotId) {
         mSlotId = slotId;
@@ -177,6 +179,7 @@ public class CellInfoAgent implements CellInfoInterface {
         if (config != null) {
             config.addListener(mConfigListener);
         }
+        mCellInfoCacheExpirationDuration = getCellInfoCacheExpirationDuration();
     }
 
     @Override
@@ -277,7 +280,7 @@ public class CellInfoAgent implements CellInfoInterface {
 
         ani[ANI_INDEX_NETWORK_TYPE] = String.valueOf(networkType);
         ani[ANI_INDEX_UTC_TIME_FORMAT] = convertTimeToUtcFormat(imsCellInfo.getTimestamp());
-        ani[ANI_INDEX_CELL_INFO_AGE] = getCellInfoAge(imsCellInfo.getTimestamp());
+        ani[ANI_INDEX_CELL_INFO_AGE] = String.valueOf(getCellInfoAge(imsCellInfo.getTimestamp()));
         System.arraycopy(cellIdentity, 0, ani, 3, cellIdentity.length);
 
         return ani;
@@ -378,9 +381,15 @@ public class CellInfoAgent implements CellInfoInterface {
             return null;
         }
 
+        long cellInfoAge = getCellInfoAge(Long.parseLong(ani[ANI_INDEX_CELL_INFO_AGE]));
+
+        if (!isCellInfoValid(cellInfoAge)) {
+            ImsLog.d(this, mSlotId, "Cached CellInfo age expired.");
+            return null;
+        }
+
         // Update cell-info-age based on the current time.
-        ani[ANI_INDEX_CELL_INFO_AGE] = getCellInfoAge(
-                Long.parseLong(ani[ANI_INDEX_CELL_INFO_AGE]));
+        ani[ANI_INDEX_CELL_INFO_AGE] = String.valueOf(cellInfoAge);
         return ani;
     }
 
@@ -474,8 +483,8 @@ public class CellInfoAgent implements CellInfoInterface {
                 .orElse(TelephonyManager.NETWORK_TYPE_UNKNOWN);
     }
 
-    private static String getCellInfoAge(long timestamp) {
-        return String.valueOf((System.currentTimeMillis() - timestamp) / 1000);
+    private static long getCellInfoAge(long timestamp) {
+        return (System.currentTimeMillis() - timestamp) / 1000;
     }
 
     private static String[] formCellIdentity(CellInfo cellInfo, int slotId) {
@@ -588,6 +597,25 @@ public class CellInfoAgent implements CellInfoInterface {
                     CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL);
         }
         return false;
+    }
+
+    private boolean isCellInfoValid(long cellInfoAge) {
+        if (mCellInfoCacheExpirationDuration == 0) {
+            return true;
+        }
+
+        return (cellInfoAge >= 0) && (mCellInfoCacheExpirationDuration > cellInfoAge);
+    }
+
+    private int getCellInfoCacheExpirationDuration() {
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+            return cc.getInt(
+                    CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT,
+                    DEFAULT_CELL_INFO_CACHE_EXPIRATION_SEC);
+        }
+        return DEFAULT_CELL_INFO_CACHE_EXPIRATION_SEC;
     }
 
     private ConfigInterface getConfigInterface() {
