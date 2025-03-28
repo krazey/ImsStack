@@ -44,8 +44,7 @@ PUBLIC VIRTUAL VopsBlockRule::Result VopsBlockRule::Check(
             IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
         IMS_TRACE_I("Check : VoPS is not supported", 0, 0, 0);
-        return Result(Result::Status::BLOCKED,
-                CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_VOPS));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_CALL_TYPE_NOT_ALLOWED));
     }
 
     return Result(Result::Status::UNBLOCKED);
