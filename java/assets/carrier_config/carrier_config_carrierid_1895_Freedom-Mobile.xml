@@ -32,4 +32,6 @@
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
         <item value="400"/>
     </int-array>
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
 </carrier_config>

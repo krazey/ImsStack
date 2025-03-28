@@ -57,17 +57,17 @@
     <int name="imswfc.registration_private_header_int" value="0"/>
 
     <!-- Mtc -->
-    <int name="imsvoice.18x_timer_millis_int" value="32000"/>
+    <int name="imsvoice.18x_timer_millis_int" value="130000"/>
     <int name="imsvt.convert_remote_response_timer_millis_int" value="20000"/>
-    <int name="imsvt.convert_user_response_timer_millis_int" value="20000"/>
+    <int name="imsvt.convert_user_response_timer_millis_int" value="40000"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
     <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="false"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="10000"/>
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="100000"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="20000"/>
     <boolean name="imsvoice.support_conference_refer_subscribe_bool" value="true"/>
     <boolean name="imsvoice.enable_conference_subscribe_by_participant_bool" value="false"/>
-    <int name="imsvoice.conference_sip_flow_order_int" value="1"/>
+    <int name="imsvoice.conference_sip_flow_order_int" value="0"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="1"/>
     <int name="imsvoice.policy_qos_precondition_mechanism_while_call_modification_int" value="1"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="486"/>
@@ -84,7 +84,7 @@
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="true"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_int" value="0"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_in_roaming_int" value="0"/>
-    <int name="imsvoice.policy_of_local_numbers_int" value="2"/>
+    <int name="imsvoice.policy_of_local_numbers_int" value="0"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="30000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
@@ -234,12 +234,12 @@
     <int-array name="imsss.ut_http_temporary_error_code_int_array" num="0">
     </int-array>
     <int name="imsss.ut_max_retry_count_int" value="0"/>
-    <int name="imsss.ut_temporary_block_timer_min_int" value="1"/>
+    <int name="imsss.ut_temporary_block_timer_min_int" value="0"/>
     <boolean name="imsss.ut_support_cf_action_erasure_bool" value="true"/>
-    <boolean name="imsss.ut_support_cfnr_timer_bool" value="true"/>
+    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
     <boolean name="imsss.ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
     <int name="imsss.ut_oir_network_default_operation_int" value="0"/>
-    <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="true"/>
+    <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="false"/>
     <int name="imsss.ut_temporary_block_timer_with_any_reason_sec_int" value="10"/>
     <string name="imsss.ut_target_address_phone_context_string"></string>
     <string name="imsss.ut_target_address_country_code_replace_to_zero_string"></string>
@@ -252,7 +252,7 @@
     <boolean name="imsss.ut_insert_new_rule_bool" value="false"/>
     <int name="imsss.ut_uri_type_for_cf_target_number_int" value="0"/>
     <string name="imsss.ut_naf_fqdn_string"></string>
-    <int name="imsss.ut_transaction_timer_sec_int" value="0"/>
+    <int name="imsss.ut_transaction_timer_sec_int" value="12"/>
     <boolean name="imsss.ut_sync_with_cs_for_tb_ss_bool" value="true"/>
     <boolean name="imsss.ut_network_query_for_tb_oir_network_default_bool" value="false"/>
 
@@ -338,7 +338,7 @@
     <!-- Aos -->
     <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="true"/>
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="true"/>
-    <boolean name="ims.block_reg_on_cs_call_bool" value="true" />
+    <boolean name="ims.block_reg_on_cs_call_bool" value="true"/>
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
     <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
@@ -526,7 +526,7 @@
     <int name="imsvoice.delay_update_after_connected_timer_millis_int" value="0"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="0"/>
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
-    <int name="imsvoice.prealerting_timer_millis_int" value="0"/>
+    <int name="imsvoice.prealerting_timer_millis_int" value="-1"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="2"/>
     <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="2"/>
     <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="0"/>
@@ -664,7 +664,7 @@
     <boolean name="imsvoice.media_anbr_capability_in_modem_bool" value="false"/>
     <int name="imsvoice.audio_ptime_millis_int" value="20"/>
     <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
-    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int name="imsvoice.audio_maxred_int" value="0"/>
     <int name="imsvoice.audio_rtp_dscp_int" value="46"/>
     <boolean name="imsvoice.audio_show_codec_attribute_modeset_bool" value="false"/>
     <int-array name="imsvoice.audio_amrwb_codec_attribute_default_modeset_int_array" num="3">

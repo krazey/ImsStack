@@ -92,9 +92,9 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
+    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="41"/>
+    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="600"/>
+    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2000"/>
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="20000"/>
     <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="20000"/>
     <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="3">
@@ -106,4 +106,6 @@
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1300"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1300"/>
 </carrier_config>

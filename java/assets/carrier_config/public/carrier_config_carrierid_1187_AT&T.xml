@@ -35,6 +35,7 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
+    <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
     <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="true"/>
     <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
     <boolean name="imsvoice.session_timer_supported_bool" value="false"/>
@@ -53,7 +54,7 @@
     <int name="imsvoice.ringback_timer_millis_int" value="180000"/>
     <string name="imsvoice.conference_factory_uri_string">sip:n-way_voice@[DOMAIN]</string>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="-1"/>
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="0"/>
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="true"/>
     <boolean name="imsvt.video_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="true"/>
@@ -172,4 +173,6 @@
     <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1230"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1230"/>
 </carrier_config>

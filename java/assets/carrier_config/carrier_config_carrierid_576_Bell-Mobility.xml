@@ -56,7 +56,7 @@
         <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="600000"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="128000"/>
     <int name="imswfc.country_code_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
@@ -88,4 +88,9 @@
 
     <!-- Ut/Xcap -->
     <string name="imsss.xcap_auid_prefix_string">/MyService</string>
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 </carrier_config>

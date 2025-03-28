@@ -24,9 +24,11 @@
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
 
     <!-- MTC -->
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="120000"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="130000"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="20000"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
 </carrier_config>

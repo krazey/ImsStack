@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,6 @@
         <item value="25000"/> <!-- EMERGENCY_LTE-->
         <item value="25000"/> <!-- EMERGENCY_WIFI -->
     </int-array>
-    <int name="imsvt.convert_user_response_timer_millis_int" value="20000"/>
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text="User ends call and SIP response time-out"</string>
@@ -250,6 +249,7 @@
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
+    <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="1"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="180000"/>
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
@@ -305,5 +305,6 @@
     <!-- Mts -->
     <boolean name="imssms.sms_geolocation_pidf_for_emergency_bool" value="true"/>
     <boolean name="imssms.sms_in_reply_to_validation_bool" value="false"/>
-    <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="true"/>
+    <int name="imsvt.convert_user_response_timer_millis_int" value="20000"/>
+    <int name="imsvoice.eps_fallback_watchdog_time_millis_int" value="8000"/>
 </carrier_config>
