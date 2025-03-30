@@ -1383,6 +1383,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "dynamic_video_quality_supported_bool";
         public static final String KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL =
                 KEY_PREFIX + "video_codec_hevc_priority_order_bool";
+        public static final String KEY_VIDEO_INACTIVE_HOLD_BOOL =
+                KEY_PREFIX + "video_inactive_hold_bool";
 
                 // TODO Media - item in Bundle - added to change the internal xml for test
 

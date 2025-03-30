@@ -38,7 +38,8 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE eSessionType) :
         m_nChannel(DEFAULT_CHANNEL),
         m_nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE),
         m_bVideoBwNegoOptionEnabled(DEFAULT_BW_NEGO_OPTION),
-        m_nVideoLowestBitrateBps(DEFAULT_VIDEO_LOWEST_BITRATE)
+        m_nVideoLowestBitrateBps(DEFAULT_VIDEO_LOWEST_BITRATE),
+        m_bVideoHoldDirectionInactive(IMS_FALSE)
 {
     IMS_TRACE_I("+VideoConfiguration - SessionType[%d]", eSessionType, 0, 0);
 }
@@ -105,10 +106,10 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT, DEFAULT_I_FRAME_INTERVAL);
     m_bVideoBwNegoOptionEnabled = piCc->GetBoolean(
             CarrierConfig::ImsVt::KEY_VIDEO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
-    // m_nChannel = DEFAULT_CHANNEL; // already set by default at creator
-    // m_nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
     m_nVideoLowestBitrateBps = piCc->GetInt(
             CarrierConfig::ImsVt::KEY_VIDEO_LOWEST_BITRATE_BPS_INT, DEFAULT_VIDEO_LOWEST_BITRATE);
+    m_bVideoHoldDirectionInactive =
+            piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_INACTIVE_HOLD_BOOL, IMS_FALSE);
     if (!CreateCodecConfigs(piCc))
     {
         IMS_TRACE_E(0, "Create - CreateCodecConfigs failure ", 0, 0, 0);
@@ -312,4 +313,10 @@ PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoLowestBitrateBps() const
 {
     return m_nVideoLowestBitrateBps;
+}
+
+PUBLIC
+IMS_BOOL VideoConfiguration::isVideoDirectionHoldUsingInactive() const
+{
+    return m_bVideoHoldDirectionInactive;
 }

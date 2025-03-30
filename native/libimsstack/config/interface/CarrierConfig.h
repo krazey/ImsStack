@@ -1355,6 +1355,7 @@ public:
         static const IMS_CHAR KEY_VIDEO_BW_NEGO_OPTION_BOOL[];
         static const IMS_CHAR KEY_VIDEO_LOWEST_BITRATE_BPS_INT[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_PRIORITY_ORDER_BOOL[];
+        static const IMS_CHAR KEY_VIDEO_INACTIVE_HOLD_BOOL[];
 
         // Policy of supporting text and video media in a call
         enum

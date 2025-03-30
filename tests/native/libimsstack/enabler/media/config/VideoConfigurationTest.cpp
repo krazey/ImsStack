@@ -103,6 +103,7 @@ TEST_F(VideoConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetVideoSamplingRate(), DEFAULT_VIDEO_SAMPLING_RATE);
     EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(), DEFAULT_BW_NEGO_OPTION);
     EXPECT_EQ(m_pConfig->GetVideoLowestBitrateBps(), DEFAULT_VIDEO_LOWEST_BITRATE);
+    EXPECT_EQ(m_pConfig->isVideoDirectionHoldUsingInactive(), IMS_FALSE);
 }
 
 TEST_F(VideoConfigurationTest, GetVideoDscp)
@@ -342,4 +343,18 @@ TEST_F(VideoConfigurationTest, GetVideoLowestBitrateBps)
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetVideoLowestBitrateBps(), nVideoLowestBitrateBps);
+}
+
+TEST_F(VideoConfigurationTest, GetVideoHoldDirectionInactiveEnabled)
+{
+    IMS_BOOL bVideoHoldDirectionInactive = IMS_TRUE;
+
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_INACTIVE_HOLD_BOOL, IMS_FALSE))
+            .WillByDefault(Return(bVideoHoldDirectionInactive));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->isVideoDirectionHoldUsingInactive(), bVideoHoldDirectionInactive);
 }
