@@ -156,7 +156,7 @@
         <item value="491:2"/> <!-- EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION -->
         <item value="503:3"/> <!-- EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER -->
     </string-array>
-    <int-array name="imsemergency.reject_code_require_perm_failure_int_array" num="35">
+    <int-array name="imsemergency.reject_code_require_perm_failure_int_array" num="37">
         <item value="400"/>
         <item value="401"/>
         <item value="402"/>
@@ -174,6 +174,7 @@
         <item value="420"/>
         <item value="421"/>
         <item value="423"/>
+        <item value="433"/>
         <item value="480"/>
         <item value="481"/>
         <item value="482"/>
@@ -192,6 +193,7 @@
         <item value="504"/>
         <item value="505"/>
         <item value="513"/>
+        <item value="580"/>
     </int-array>
     <string-array name="imsemergency.contact_header_address_in_invite_string_array" num="8">
         <item value=""/> <!-- REG_MODE_NORMAL -->
