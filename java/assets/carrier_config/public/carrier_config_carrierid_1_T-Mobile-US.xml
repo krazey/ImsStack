@@ -40,7 +40,7 @@
         <item value="1"/>
         <item value="3"/>
     </int-array>
-    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="true"/>
+    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="false"/>
     <string name="imsvoice.conference_factory_uri_string">sip:8881112663@msg.pc.t-mobile.com</string>
