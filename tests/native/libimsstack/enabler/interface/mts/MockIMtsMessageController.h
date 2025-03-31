@@ -25,6 +25,7 @@ class MockIMtsMessageController : public IMtsMessageController
 public:
     virtual ~MockIMtsMessageController() {}
 
+    MOCK_METHOD(IMS_BOOL, HasPendingMoSms, (), (const, override));
     MOCK_METHOD(void, ProcessMoSms,
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
                     IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),

@@ -17,6 +17,8 @@
 #ifndef INTERFACE_MTS_TRAFFIC_H_
 #define INTERFACE_MTS_TRAFFIC_H_
 
+#include "MtsDef.h"
+
 class IMtsTraffic : public IImsRadioConnectionListener
 {
 public:
@@ -40,7 +42,7 @@ public:
     /**
      * @brief Checks whether the radio guard timer is currently active.
      *
-     * @return {@code IMS_TRUE} If the guard timer is active,
+     * @return {@code IMS_TRUE} If the radio guard timer is active,
      *         {@code IMS_FALSE} otherwise.
      */
     virtual IMS_BOOL IsRadioGuardTimerActive() = 0;
@@ -48,7 +50,7 @@ public:
     /**
      * @brief Starts the radio guard timer.
      */
-    virtual void StartRadioGuardTimer() = 0;
+    virtual void StartRadioGuardTimer(IN IMS_UINT32 nDuration = MTS_RADIO_GUARD_TIMER_MS) = 0;
 };
 
 #endif

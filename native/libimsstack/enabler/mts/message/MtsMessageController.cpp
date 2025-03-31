@@ -176,6 +176,21 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     return;
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtsMessageController::HasPendingMoSms() const
+{
+    IMS_TRACE_I("HasPendingMoSms : messageCount[%d]", m_objMsgList.GetSize(), 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_objMsgList.GetSize(); i++)
+    {
+        if (IsSentMessage(m_objMsgList.GetAt(i)))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
 PUBLIC void MtsMessageController::ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
         IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency)
 {
@@ -1290,6 +1305,12 @@ PRIVATE
 IMS_BOOL MtsMessageController::IsReceivedMessage(IN IMtsMessage* piMtsMessage)
 {
     return (piMtsMessage->GetTransactionType() == MtsTransactionType::MESSAGE_TYPE_RECEIVE);
+}
+
+PRIVATE
+IMS_BOOL MtsMessageController::IsSentMessage(IN IMtsMessage* piMtsMessage)
+{
+    return (piMtsMessage->GetTransactionType() == MtsTransactionType::MESSAGE_TYPE_SEND);
 }
 
 PRIVATE

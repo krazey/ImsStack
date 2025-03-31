@@ -1743,4 +1743,82 @@ TEST_F(MtsMessageControllerTest, ProcessPendingRpDataFromNetwork)
     pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
 }
 
+TEST_F(MtsMessageControllerTest, CheckMoSmsPendingStateWhenNoResponse)
+{
+    IMS_BOOL bEmergency = IMS_FALSE;
+    AString strTargetAddress = "tel:+12345678901";
+    SipAddress objSipAddress;
+    objSipAddress.Create(strTargetAddress);
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
+    const AString strCallId(SipHeaderName::CALL_ID);
+
+    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    pContent->Append((IMS_BYTE)0x03);                     // message reference
+    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtsService, GetICoreService(bEmergency))
+            .WillByDefault(Return(&objMockCoreService));
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, GetHeaders(strCallId)).WillByDefault(Return(objCallIdHeaders));
+    ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+
+    pMtsMessageController->ProcessMoSms(
+            SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
+
+    EXPECT_EQ(pMtsMessageController->HasPendingMoSms(), IMS_TRUE);
+}
+
+TEST_F(MtsMessageControllerTest, CheckMoSmsPendingStateWhenPageMessageDelivered)
+{
+    IMS_BOOL bEmergency = IMS_FALSE;
+    AString strTargetAddress = "tel:+12345678901";
+    SipAddress objSipAddress;
+    objSipAddress.Create(strTargetAddress);
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("0057f183b-245fdcb9@192.168.45.139");
+    const AString strCallId(SipHeaderName::CALL_ID);
+
+    ByteArray* pContent = new ByteArray((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    pContent->Append((IMS_BYTE)0x03);                     // message reference
+    pContent->Append((IMS_BYTE)0x0F);                     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtsService, GetICoreService(bEmergency))
+            .WillByDefault(Return(&objMockCoreService));
+    ON_CALL(objMockMtsService, GetIMtsServiceState())
+            .WillByDefault(Return(&objMockMtsServiceState));
+    ON_CALL(objMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(&objMockPageMessage));
+    ON_CALL(objMockPageMessage, GetNextRequest()).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockMessage, GetHeaders(strCallId)).WillByDefault(Return(objCallIdHeaders));
+    ON_CALL(objMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockPageMessage, SetListener(_)).WillByDefault(Return());
+    ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
+
+    pMtsMessageController->ProcessMoSms(
+            SmsFormatType::SMSFORMAT_3GPP, pContent, strTargetAddress, SEQ_ID, bEmergency);
+    pMtsMessageController->PageMessageDelivered(&objMockPageMessage);
+
+    EXPECT_EQ(pMtsMessageController->HasPendingMoSms(), IMS_FALSE);
+}
+
 }  // namespace android

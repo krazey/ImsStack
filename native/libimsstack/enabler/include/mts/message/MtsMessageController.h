@@ -50,6 +50,7 @@ public:
     void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
 
     // IMtsMessageController
+    IMS_BOOL HasPendingMoSms() const override;
     void ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void ProcessMtSms(IN IPageMessage* piPageMessage) override;
@@ -107,6 +108,8 @@ private:
     static void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri);
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
     static IMS_BOOL IsReceivedMessage(IN IMtsMessage* piMtsMessage);
+    // TODO(b/381001673): Remove `MESSAGE_TYPE_INVALID`.
+    static IMS_BOOL IsSentMessage(IN IMtsMessage* piMtsMessage);
     void SetMessageInfo(IN IPageMessage* piPageMessage, IN const ByteArray& objContent,
             IN SmsFormatType eSmsFormat, IN const AString& strDestination,
             IN MtsTransactionType eMessageType, OUT IMtsMessage* piMtsMessage);

@@ -80,14 +80,14 @@ void MtsService::Init()
     InitMtsServiceState();
     m_piNetWatcherInfo =
             PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_SMS, *this));
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_SMS, *this));
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
-    m_objMtsTraffics.Append(
-            new MtsTraffic(IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
+    m_objMtsTraffics.Append(new MtsTraffic(
+            m_objContext, IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_SMS, *this));
+    m_objMtsTraffics.Append(new MtsTraffic(
+            m_objContext, IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_SMS, *this));
+    m_objMtsTraffics.Append(new MtsTraffic(
+            m_objContext, IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
+    m_objMtsTraffics.Append(new MtsTraffic(
+            m_objContext, IImsRadio::DIRECTION_MT, IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, *this));
 }
 
 PUBLIC

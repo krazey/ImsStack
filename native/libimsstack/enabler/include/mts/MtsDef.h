@@ -104,7 +104,8 @@ enum
 
 enum
 {
-    MTS_RADIO_GUARD_TIME = 1000
+    MTS_RADIO_GUARD_TIMER_MS = 2000,
+    MTS_RADIO_EXTENDED_GUARD_TIMER_MS = 8000
 };
 
 // Call type

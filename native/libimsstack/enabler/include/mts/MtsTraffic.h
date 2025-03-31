@@ -20,11 +20,14 @@
 #include "IImsRadio.h"
 #include "IMtsTraffic.h"
 #include "ITimer.h"
+#include "MtsDef.h"
+
+class IMtsContext;
 
 class MtsTraffic final : public IMtsTraffic, public ITimerListener
 {
 public:
-    MtsTraffic(IN IMS_UINT32 nDirection, IN IMS_UINT32 nTrafficType,
+    MtsTraffic(IN IMtsContext& objContext, IN IMS_UINT32 nDirection, IN IMS_UINT32 nTrafficType,
             IN IMtsTrafficListener& objListener);
     ~MtsTraffic();
 
@@ -40,12 +43,14 @@ public:
     inline IMS_UINT32 GetDirection() override { return m_nDirection; }
     inline IMS_UINT32 GetTrafficType() override { return m_nTrafficType; }
     IMS_BOOL IsRadioGuardTimerActive() override;
-    void StartRadioGuardTimer() override;
+    void StartRadioGuardTimer(IN IMS_UINT32 nDuration = MTS_RADIO_GUARD_TIMER_MS) override;
 
 private:
     static IMS_BOOL IsReasonToIgnore(IN IMS_UINT32 nFailureReason);
 
 private:
+    IMtsContext& m_objContext;
+    IMS_BOOL m_bDefaultGuardTimerStarted;
     IMS_UINT32 m_nDirection;
     IMS_UINT32 m_nTrafficType;
     IMtsTrafficListener& m_objMtsTrafficListener;

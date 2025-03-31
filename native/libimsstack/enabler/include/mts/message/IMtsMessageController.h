@@ -27,6 +27,13 @@ public:
     virtual ~IMtsMessageController() {}
 
     /**
+     * @brief Verifies if an MO SMS request is awaiting network response.
+     *
+     * @return IMS_TRUE if there is a pending MO SMS request, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL HasPendingMoSms() const = 0;
+
+    /**
      * @brief Processes an MO SMS request.
      *
      * @param eSmsFormat The format of the SMS.
