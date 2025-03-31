@@ -48,6 +48,7 @@
         <item value="0"/>
     </int-array>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
+    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="8000"/>
 
     <!-- MTC -->
     <int name="imsvoice.oip_type_for_unavailable_int" value="5"/>
