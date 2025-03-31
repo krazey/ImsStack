@@ -484,6 +484,27 @@ public:
     virtual IMS_BOOL IsKeepRegRetryCntUponPdnReconnect() const = 0;
 
     /**
+     * @brief Indicates how to handle the emergency call as failure or to proceed it without
+     *        completing the normal registration after the timer as CarrierConfig::IMSEMERGENCY::
+     *        KEY_REG_TIMER_FOR_ECALL_MILLIS_INT setting value is expired.
+     *
+     * @return IMS_BOOL Returns whether to handle the emergency call as failure or not.
+     * @see {@code imsemergency.reg_timer_for_ecall_timeout_as_failure_bool}
+     */
+    virtual IMS_BOOL IsRegTimerForECallTimeoutAsFailure() const = 0;
+
+    /**
+     * @brief Indicates whether RAT is checked or not when E-PDN is requested. If RAT is not
+     *        IMS supported, the timer as CarrierConfig::IMSEMERGENCY::
+     *        KEY_REG_TIMER_FOR_ECALL_MILLIS_INT setting value is not started and the emergency call
+     *        is proceeded without that timer waiting for the normal registration.
+     *
+     * @return IMS_BOOL Returns whether to check RAT or not when E-PDN is requested.
+     * @see {@code imsemergency.reg_timer_for_ecall_with_rat_check_enabled_bool}
+     */
+    virtual IMS_BOOL IsRegTimerForECallWithRatCheckEnabled() const = 0;
+
+    /**
      * @brief Flag indicating whether to stop emergency registration timer on E-PDN connection.
      *
      * @return IMS_BOOL Return whether to stop on emergency registration timer on E-PDN connection

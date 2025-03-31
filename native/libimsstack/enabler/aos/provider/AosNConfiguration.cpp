@@ -366,6 +366,16 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepRegRetryCntUponPdnReconnect() c
     return m_objAsset.bKeepRegRetryCntUponPdnReconnect;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegTimerForECallTimeoutAsFailure() const
+{
+    return m_objAsset.bRegTimerForECallTimeoutAsFailure;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegTimerForECallWithRatCheckEnabled() const
+{
+    return m_objAsset.bRegTimerForECallWithRatCheckEnabled;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsStopERegTimerOnEpdnConnected() const
 {
     return m_objAsset.bStopERegTimerOnEpdnConnected;
@@ -1455,6 +1465,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
     m_objAsset.bKeepRegRetryCntUponPdnReconnect =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL);
+    m_objAsset.bRegTimerForECallTimeoutAsFailure = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_TIMEOUT_AS_FAILURE_BOOL);
+    m_objAsset.bRegTimerForECallWithRatCheckEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_WITH_RAT_CHECK_ENABLED_BOOL);
     m_objAsset.bStopERegTimerOnEpdnConnected = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =
