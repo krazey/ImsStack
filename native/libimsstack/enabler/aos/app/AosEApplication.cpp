@@ -31,6 +31,7 @@
 #include "connection/AosConnector.h"
 #include "provider/AosProvider.h"
 #include "provider/AosLog.h"
+#include "provider/AosUtil.h"
 #include "app/AosEApplication.h"
 
 __IMS_TRACE_TAG_AOS__;
@@ -530,8 +531,17 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegBlockedTimerExpired()
 
     if (!m_pConnector->IsReady())
     {
-        A_IMS_TRACE_I(APPID, "Emergency call fail since normal registration is not done", 0, 0, 0);
-        ProcessCleanAll(AosReason::REG_FAILURE);
+        if (GET_N_CONFIG(m_nSlotId)->IsRegTimerForECallTimeoutAsFailure())
+        {
+            A_IMS_TRACE_I(
+                    APPID, "Emergency call fail since normal registration is not done", 0, 0, 0);
+            ProcessCleanAll(AosReason::REG_FAILURE);
+        }
+        else
+        {
+            A_IMS_TRACE_I(APPID, "E-Call is proceeded even though normal reg is failed", 0, 0, 0);
+            m_pConnector->Start();
+        }
     }
 }
 
@@ -559,7 +569,27 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsWlanEmergencyBlocked()
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsRegWaitingRequired()
 {
-    return (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0);
+    if (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->IsRegTimerForECallWithRatCheckEnabled())
+    {
+        if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() && IsWifiConnected())
+        {
+            return IMS_TRUE;
+        }
+
+        INetworkWatcher* piNw =
+                PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
+        if (piNw != IMS_NULL)
+        {
+            return m_pUtil->IsSupportedNetworkTypeForCellular(piNw->GetNetRadioTechType());
+        }
+    }
+
+    return IMS_TRUE;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsECallConnectedNetworkUnavailable()
@@ -753,7 +783,7 @@ PROTECTED VIRTUAL void AosEApplication::NConfiguration_NotifyConfigChanged()
     AosApplication::NConfiguration_NotifyConfigChanged();
 
     IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
-    if (IsRegWaitingRequired())
+    if (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0)
     {
         piRsm->SetListener(this);
     }
@@ -790,7 +820,7 @@ PROTECTED VIRTUAL void AosEApplication::Init()
 {
     AosApplication::Init();
 
-    if (IsRegWaitingRequired())
+    if (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0)
     {
         IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
         piRsm->SetListener(this);
