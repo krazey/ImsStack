@@ -2178,16 +2178,6 @@ TEST_F(AosApplicationTest, SetBlockInvalidPcscfWhenStateReadyConnection)
     m_pAosApplication->StateReady_Connection(objMessage);
 }
 
-TEST_F(AosApplicationTest, SetAirplaneModeReasonWhenProcessConnectionDeactivatedAfterAirplaneModeOn)
-{
-    m_pAosApplication->SetImsCall(IMS_FALSE);
-
-    EXPECT_FALSE(m_pAosApplication->IsRequestCmdHeldByCondition(
-            AosCondition::REQUEST_STOP, AosReason::AIRPLANE_MODE));
-    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
-    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::AIRPLANE_MODE);
-}
-
 TEST_F(AosApplicationTest,
         SetWifiOffReasonWhenProcessConnectionDeactivatedAfterWifiOffWhenIsImsCall)
 {
@@ -3085,11 +3075,30 @@ TEST_F(AosApplicationTest, Callback)
     m_pAosApplication->ServicePhone_LocationInfoChanged(LocationInfo::AVAILABLE);
 }
 
+TEST_F(AosApplicationTest,
+        SetAirplaneModeReasonWhenControlRegistrationCalledWithStopIfAirplaneModeReasonIsPreviouslySet)
+{
+    m_pAosApplication->SetOffReason(AosReason::AIRPLANE_MODE);
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
+
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::AIRPLANE_MODE);
+}
+
 TEST_F(AosApplicationTest, InvokeResetReadyRecoveryWhenReceiveResetPcscfRecoveryRequest)
 {
     EXPECT_CALL(m_objMockAosConnector, ResetReadyRecovery());
 
     m_pAosApplication->Condition_RequestCommand(REQUEST_RESET_CONNECTION_RECOVERY, AosReason::NONE);
+}
+
+TEST_F(AosApplicationTest, SetAirplaneModeReasonWhenReceiveRequestReasonUpdateWithAirplaneMode)
+{
+    m_pAosApplication->Condition_RequestCommand(
+            AosCondition::REQUEST_REASON_UPDATE, AosReason::AIRPLANE_MODE);
+
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::AIRPLANE_MODE);
 }
 
 TEST_F(AosApplicationTest, UpdateConnectedServices)

@@ -1188,7 +1188,8 @@ TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_True_MatchedClearReason)
 {
     MockIAosConditionListener objMockIAosConditionListener;
     EXPECT_CALL(objMockIAosConditionListener,
-            Condition_RequestCommand(AosCondition::REQUEST_STOP, AosReason::AIRPLANE_MODE));
+            Condition_RequestCommand(
+                    AosCondition::REQUEST_REASON_UPDATE, AosReason::AIRPLANE_MODE));
     EXPECT_CALL(objMockIAosConditionListener,
             Condition_RequestCommand(
                     AosCondition::REQUEST_RESET_CONNECTION_RECOVERY, AosReason::NONE));
