@@ -1484,6 +1484,9 @@ TEST_F(AosHandleTest, SetReason_Test)
 
     m_pAosHandle->SetReason(AosReason::REG_TERMINATING);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::REG_TERMINATING);
+
+    m_pAosHandle->SetReason(AosReason::IP_CHANGED);
+    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::IP_CHANGED);
 }
 
 TEST_F(AosHandleTest, ClearSuspendedReason_Test)
@@ -1528,6 +1531,7 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
             ImsAosReason::REG_TERMINATING);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::IMS_DISABLED), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::TTYMODEON), ImsAosReason::NOT_SPECIFIED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::IP_CHANGED), ImsAosReason::IP_CHANGED);
 }
 
 TEST_F(AosHandleTest, GetImsAosReasonForSuspend_Test)

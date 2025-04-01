@@ -1049,6 +1049,8 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) cons
             return CODE_LOCAL_NETWORK_NO_SERVICE;
         case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
             return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
+        case ImsAosReason::IP_CHANGED:
+            return CODE_LOCAL_NETWORK_IP_CHANGED;
         default:  // NOT_SPECIFIED
             return CODE_LOCAL_NOT_REGISTERED;
     }

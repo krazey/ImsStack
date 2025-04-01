@@ -1060,6 +1060,8 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED,
+                ImsReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE,
                 ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NOT_REGISTERED,
