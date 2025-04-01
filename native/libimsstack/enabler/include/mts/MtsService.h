@@ -92,7 +92,7 @@ private:
     void DeInit();
     void InitMtsServiceState();
 
-    IMS_UINT32 ConvertToAccessNetworkType(IN IMS_SINT32 nReportedNetwork);
+    IMS_UINT32 GetCurrentAccessNetworkType() const;
     IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
     IMS_UINT32 GetTrafficTypeOfService() const;
     IMS_BOOL IsEmergencySmsReadyToSend() const;
