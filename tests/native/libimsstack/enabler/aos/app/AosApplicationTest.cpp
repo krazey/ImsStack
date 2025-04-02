@@ -2452,6 +2452,9 @@ TEST_F(AosApplicationTest, Process)
             .WillRepeatedly(Return(IMS_FALSE));
     m_pAosApplication->ProcessImsEstablishmentTimerExpired();
     EXPECT_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_TRAFFIC_PRIORITY_BLOCK, _, _))
+            .WillRepeatedly(DoAll(SetArgReferee<1>(AosProperty::AOS_FALSE), Return(0)));
+    EXPECT_CALL(m_objMockIAosRegistration,
             GetProperty(IAosRegistration::PROPERTY_REG_FAILURE_COUNT, _, _))
             .WillOnce(DoAll(SetArgReferee<1>(60), Return(0)))
             .WillOnce(DoAll(SetArgReferee<1>(0), Return(0)));
@@ -2548,6 +2551,28 @@ TEST_F(AosApplicationTest, ProcessImsEstTimerExpiredShouldNotInvokeNotifyDeregis
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED))
             .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentTimerExpired();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest,
+        ProcessImsEstTimerExpiredShouldNotInvokeNotifyDeregisteredWhenIsTrafficPriorityBlock)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetImsCall(IMS_FALSE);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_TRAFFIC_PRIORITY_BLOCK, _, _))
+            .WillOnce(DoAll(SetArgReferee<1>(AosProperty::AOS_TRUE), Return(0)));
 
     EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
 

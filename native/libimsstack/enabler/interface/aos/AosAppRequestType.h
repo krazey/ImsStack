@@ -197,4 +197,14 @@ public:
     };
 };
 
+class AosProperty
+{
+public:
+    enum
+    {
+        AOS_FALSE = 0,
+        AOS_TRUE
+    };
+};
+
 #endif  // AOS_APP_REQ_TYPE_H_

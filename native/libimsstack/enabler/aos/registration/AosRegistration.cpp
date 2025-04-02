@@ -536,6 +536,10 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
             nValue = m_nConsecutiveFailure;
             break;
 
+        case PROPERTY_TRAFFIC_PRIORITY_BLOCK:
+            nValue = (m_bIsTrafficPriorityBlocked) ? AosProperty::AOS_TRUE : AosProperty::AOS_FALSE;
+            break;
+
         default:
             break;
     }

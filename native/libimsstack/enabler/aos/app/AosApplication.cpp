@@ -2415,11 +2415,20 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
         return;
     }
 
+    AString strNa;
+    IMS_UINT32 nTrafficPriorityBlock;
+    m_piRegistration->GetProperty(
+            IAosRegistration::PROPERTY_TRAFFIC_PRIORITY_BLOCK, nTrafficPriorityBlock, strNa);
+    if (nTrafficPriorityBlock == AosProperty::AOS_TRUE)
+    {
+        A_IMS_TRACE_I(APPID, "ProcessImsEstablishmentTimerExpired :: traffic is blocked", 0, 0, 0);
+        return;
+    }
+
     A_IMS_TRACE_I(
             APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout", 0, 0, 0);
     NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
 
-    AString strNa;
     IMS_UINT32 nFailureCount;
     m_piRegistration->GetProperty(
             IAosRegistration::PROPERTY_REG_FAILURE_COUNT, nFailureCount, strNa);
