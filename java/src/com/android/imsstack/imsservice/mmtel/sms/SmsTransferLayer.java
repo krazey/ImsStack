@@ -132,6 +132,14 @@ public class SmsTransferLayer {
          * @return the result if handling incoming RP-Data received
          */
         int notifySmsReceived(int token, int format, int messageType, byte[] pdu);
+
+        /**
+         * notifies ImsSmsImpl about the report for SMMA
+         * @param token unique token generated to trigger callbacks for this message.
+         * @param result result of sending the SMS.
+         * @param cause cause for the Failure
+         */
+        void notifyMemoryAvailableResult(int token, int result, int cause);
     }
 
     public SmsTransferLayer(ImsCallContext callContext) {
@@ -647,10 +655,17 @@ public class SmsTransferLayer {
                     return;
                 }
                 synchronized (mLock) {
-                    listener.notifySmsResult(token, messageRef, result, reason, causeCode);
                     if (mTokenMessageMap.containsKey(token)) {
                         mSendSmsQueue.remove(token);
+                        tpduParameters = mTokenMessageMap.get(token);
+                        if (tpduParameters.mRpMessageType == SmsUtils.RP_SMMA) {
+                            listener.notifyMemoryAvailableResult(token, result, causeCode);
+                        } else {
+                            listener.notifySmsResult(token, messageRef, result, reason, causeCode);
+                        }
                         mTokenMessageMap.remove(token);
+                    } else {
+                        listener.notifySmsResult(token, messageRef, result, reason, causeCode);
                     }
                     if (!mSendSmsQueue.isEmpty()) {
                         nextToken = mSendSmsQueue.peek();

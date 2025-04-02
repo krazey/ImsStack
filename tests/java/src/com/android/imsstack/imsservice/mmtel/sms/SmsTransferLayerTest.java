@@ -107,6 +107,20 @@ public class SmsTransferLayerTest {
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc), eq(mSmsc),
                 eq(null), eq(STATUS_RESULT_NA));
     }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_fail() {
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mProxyListener  = mSmsTransferLayer.getListener();
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+    }
+
     @Test
     public void test_sendMoTPdu() {
         assertEquals(SmsUtils.RESULT_SUCCESS, mSmsTransferLayer.sendMoTPdu(mToken,

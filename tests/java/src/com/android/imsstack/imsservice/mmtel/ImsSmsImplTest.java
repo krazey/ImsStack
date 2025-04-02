@@ -262,6 +262,24 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     }
 
     @Test
+    public void test_notifyMemoryAvailableResult() throws RemoteException {
+        SmsTransferLayer.Listener listener = setupListener();
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        listener.notifyMemoryAvailableResult(mToken, mResult, 0);
+        verify(mListener).onMemoryAvailableResult(mToken, mResult, 0);
+    }
+
+    @Test
+    public void test_notifyMemoryAvailableResult_RuntimeException() throws RemoteException {
+        SmsTransferLayer.Listener listener = setupListener();
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        doThrow(mMockRuntimeException).when(mListener)
+            .onMemoryAvailableResult(mToken, mResult, 0);
+        listener.notifyMemoryAvailableResult(mToken, mResult, 0);
+        verify(mMockRuntimeException).getMessage();
+    }
+
+    @Test
     public void test_acknowledgeSmsReport_RuntimeException() {
         doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendReportTPdu(mToken,
                 mMessageRef, mResult, null);
