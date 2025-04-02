@@ -838,6 +838,18 @@ CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SI
         return CallReasonInfo(CODE_NONE);
     }
 
+    IMtcSession* pSession = m_objContext.GetSession();
+    if (pSession == IMS_NULL)
+    {
+        return CallReasonInfo(CODE_NONE);
+    }
+
+    if (m_objContext.GetMessageUtils().GetNumberOfPreviousResponses(
+                &pSession->GetISession(), IMessage::SESSION_START) > 0)
+    {
+        return CallReasonInfo(CODE_NONE);
+    }
+
     IMS_TRACE_D("MayGetUpdatedReasonByResponseWaitTimeout", 0, 0, 0);
 
     return CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);

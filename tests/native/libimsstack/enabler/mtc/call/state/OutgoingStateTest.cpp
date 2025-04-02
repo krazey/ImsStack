@@ -277,18 +277,49 @@ TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
 
 TEST_F(OutgoingStateTest, ResponseWaitTimeoutForReasonExpirationUpdatesReason)
 {
-    const CallReasonInfo objReason(CODE_USER_TERMINATED);
+    const CallReasonInfo objReasonNone(CODE_NONE);
+    const CallReasonInfo objReasonUserTerminated(CODE_USER_TERMINATED);
+    const CallReasonInfo objReasonSipTimeout(
+            CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonNone));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonNone));
+    pOutgoingState->Terminate(objReasonNone);
+
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(0));
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonUserTerminated));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonUserTerminated));
+    pOutgoingState->Terminate(objReasonUserTerminated);
 
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
             .WillByDefault(Return(8000));
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
-            .WillByDefault(Return(IMS_FALSE));
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonUserTerminated));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonUserTerminated));
+    pOutgoingState->Terminate(objReasonUserTerminated);
 
-    EXPECT_CALL(objMtcSession,
-            Terminate(_,
-                    CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT)));
-    pOutgoingState->Terminate(objReason);
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(nullptr));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonUserTerminated));
+    pOutgoingState->Terminate(objReasonUserTerminated);
+
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
+            .WillByDefault(Return(1));
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonUserTerminated));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonUserTerminated));
+    pOutgoingState->Terminate(objReasonUserTerminated);
+
+    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
+            .WillByDefault(Return(0));
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonSipTimeout));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonSipTimeout));
+    pOutgoingState->Terminate(objReasonUserTerminated);
 }
 
 TEST_F(OutgoingStateTest, 18xTimerExpiredTerminatesCall)
