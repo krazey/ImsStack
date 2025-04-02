@@ -24,6 +24,7 @@
 #include "media/MockIMediaDescriptor.h"
 #include "offeranswer/SdpAvCodec.h"
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -129,7 +130,7 @@ protected:
 
         m_objEvsPayloadType.Add(EVS_PAYLOAD);
         ON_CALL(*m_pAudioBundle,
-                GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_TYPE_INT_ARRAY))
+                GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objEvsPayloadType));
 
         m_pEvsBundle = new MockICarrierConfig();
@@ -148,7 +149,7 @@ protected:
     {
         m_objAmrWbPayloadType.Add(AMR_WB_PAYLOAD);
         ON_CALL(*m_pAudioBundle,
-                GetIntArray(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY))
+                GetIntArray(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objAmrWbPayloadType));
 
         m_pAmrWbBundle = new MockICarrierConfig();
@@ -167,7 +168,7 @@ protected:
     {
         m_objAmrNbPayloadType.Add(AMR_NB_PAYLOAD);
         ON_CALL(*m_pAudioBundle,
-                GetIntArray(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY))
+                GetIntArray(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objAmrNbPayloadType));
 
         m_pAmrNbBundle = new MockICarrierConfig();

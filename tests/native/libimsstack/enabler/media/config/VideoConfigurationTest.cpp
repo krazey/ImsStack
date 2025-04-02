@@ -24,6 +24,7 @@
 #include "MockICarrierConfig.h"
 #include "config/VideoConfiguration.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_VIDEO_DSCP = VideoConfiguration::DEFAULT_VIDEO_DSCP;
@@ -253,7 +254,7 @@ TEST_F(VideoConfigurationTest, GetVideoPort)
     objVideoPortRtp.Push(nVideoRtpEnd);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY, _))
             .WillByDefault(Return(objVideoPortRtp));
 
     GetReadyToCreate();
@@ -274,7 +275,7 @@ TEST_F(VideoConfigurationTest, GetVideoRtcpInterval)
     objVideoRtcpInterval.Push(nVideoRtcpIntervalOnHold);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY, _))
             .WillByDefault(Return(objVideoRtcpInterval));
 
     GetReadyToCreate();

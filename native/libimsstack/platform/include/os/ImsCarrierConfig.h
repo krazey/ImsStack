@@ -58,19 +58,23 @@ public:
     {
         return strDefaultValue;
     }
-    inline ImsVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* /*pszKey*/,
+            OUT IMS_BOOL& /*bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)*/) const override
     {
         return ImsVector<IMS_BOOL>();
     }
-    inline ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* /*pszKey*/,
+            OUT IMS_BOOL& /*bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)*/) const override
     {
         return ImsVector<IMS_SINT32>();
     }
-    inline ImsVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* /*pszKey*/,
+            OUT IMS_BOOL& /*bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)*/) const override
     {
         return ImsVector<IMS_SLONG>();
     }
-    inline ImsVector<AString> GetStringArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<AString> GetStringArray(IN const IMS_CHAR* /*pszKey*/,
+            OUT IMS_BOOL& /*bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)*/) const override
     {
         return ImsVector<AString>();
     }

@@ -1370,7 +1370,7 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsUserFailure)
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objArray));
 
     EXPECT_CALL(objJniMtsServiceThread, ReportMoStatus(MO_ERROR_GENERIC, _, _, SLOT_ID)).Times(1);
@@ -1410,7 +1410,7 @@ TEST_F(MtsMessageControllerTest, PageMessageDeliveryFailsAndReportsFallback)
     ON_CALL(objMockPageMessage, GetPreviousResponse(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(nullptr));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
             .WillByDefault(Return(objArray));
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT, _))

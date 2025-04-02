@@ -24,6 +24,7 @@
 #include "MockICarrierConfig.h"
 #include "config/TextConfiguration.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = TextConfiguration::DEFAULT_PAYLOAD_T140;
@@ -88,7 +89,7 @@ TEST_F(TextConfigurationTest, GetConfigTextPort)
     objTextPortRtp.Push(nTextRtpEnd);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY, _))
             .WillByDefault(Return(objTextPortRtp));
 
     GetReadyToCreate();
@@ -109,7 +110,7 @@ TEST_F(TextConfigurationTest, GetConfigTextRtcpInterval)
     objTextRtcpInterval.Push(nTextRtcpIntervalOnHold);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY, _))
             .WillByDefault(Return(objTextRtcpInterval));
 
     GetReadyToCreate();

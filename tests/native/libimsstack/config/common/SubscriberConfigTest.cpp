@@ -151,10 +151,10 @@ protected:
         ON_CALL(objCc, GetInt(Eq(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT), _))
                 .WillByDefault(Return(m_nImpuRefIndex));
 
-        ON_CALL(objCc, GetIntArray(Eq(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY)))
+        ON_CALL(objCc, GetIntArray(Eq(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY), _))
                 .WillByDefault(Return(m_objImsIdentityPriority));
 
-        ON_CALL(objCc, GetIntArray(Eq(CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY)))
+        ON_CALL(objCc, GetIntArray(Eq(CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY), _))
                 .WillByDefault(Return(m_objPcscfDiscoveryMethods));
     }
 

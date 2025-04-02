@@ -244,16 +244,19 @@ PUBLIC VIRTUAL AString OsCarrierConfig::GetString(IN const IMS_CHAR* pszKey,
     return AString(str8.c_str());
 }
 
-PUBLIC VIRTUAL ImsVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(
+        IN const IMS_CHAR* pszKey, OUT IMS_BOOL& bKeyExists /* = ByRef<IMS_BOOL>(IMS_TRUE)*/) const
 {
     const String16 strKey(pszKey);
     std::vector<bool> out;
 
     if (!m_objConfig.getBooleanVector(strKey, &out))
     {
+        bKeyExists = IMS_FALSE;
         return ImsVector<IMS_BOOL>();
     }
 
+    bKeyExists = IMS_TRUE;
     ImsVector<IMS_BOOL> objBooleanArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
@@ -264,16 +267,19 @@ PUBLIC VIRTUAL ImsVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS
     return objBooleanArray;
 }
 
-PUBLIC VIRTUAL ImsVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<IMS_SINT32> OsCarrierConfig::GetIntArray(
+        IN const IMS_CHAR* pszKey, OUT IMS_BOOL& bKeyExists /* = ByRef<IMS_BOOL>(IMS_TRUE)*/) const
 {
     const String16 strKey(pszKey);
     std::vector<int32_t> out;
 
     if (!m_objConfig.getIntVector(strKey, &out))
     {
+        bKeyExists = IMS_FALSE;
         return ImsVector<IMS_SINT32>();
     }
 
+    bKeyExists = IMS_TRUE;
     ImsVector<IMS_SINT32> objIntArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
@@ -284,16 +290,19 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_C
     return objIntArray;
 }
 
-PUBLIC VIRTUAL ImsVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<IMS_SLONG> OsCarrierConfig::GetLongArray(
+        IN const IMS_CHAR* pszKey, OUT IMS_BOOL& bKeyExists /* = ByRef<IMS_BOOL>(IMS_TRUE)*/) const
 {
     const String16 strKey(pszKey);
     std::vector<int64_t> out;
 
     if (!m_objConfig.getLongVector(strKey, &out))
     {
+        bKeyExists = IMS_FALSE;
         return ImsVector<IMS_SLONG>();
     }
 
+    bKeyExists = IMS_TRUE;
     ImsVector<IMS_SLONG> objLongArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
@@ -304,16 +313,19 @@ PUBLIC VIRTUAL ImsVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_C
     return objLongArray;
 }
 
-PUBLIC VIRTUAL ImsVector<AString> OsCarrierConfig::GetStringArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<AString> OsCarrierConfig::GetStringArray(
+        IN const IMS_CHAR* pszKey, OUT IMS_BOOL& bKeyExists /* = ByRef<IMS_BOOL>(IMS_TRUE)*/) const
 {
     const String16 strKey(pszKey);
     std::vector<String16> out;
 
     if (!m_objConfig.getStringVector(strKey, &out))
     {
+        bKeyExists = IMS_FALSE;
         return ImsVector<AString>();
     }
 
+    bKeyExists = IMS_TRUE;
     ImsVector<AString> objStrArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
