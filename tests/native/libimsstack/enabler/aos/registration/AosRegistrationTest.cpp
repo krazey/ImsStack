@@ -1342,6 +1342,12 @@ TEST_F(AosRegistrationTest, GetPropertyReturnsEachPropertyValue)
     // PROPERTY_REG_FAILURE_COUNT
     m_pAosRegistration->GetProperty(IAosRegistration::PROPERTY_REG_FAILURE_COUNT, nValue, strValue);
     EXPECT_EQ(nValue, m_pAosRegistration->GetConsecutiveFailureCount());
+
+    // PROPERTY_TRAFFIC_PRIORITY_BLOCK
+    m_pAosRegistration->SetTrafficPriorityBlocked(IMS_TRUE);
+    m_pAosRegistration->GetProperty(
+            IAosRegistration::PROPERTY_TRAFFIC_PRIORITY_BLOCK, nValue, strValue);
+    EXPECT_EQ(nValue, AosProperty::AOS_TRUE);
 }
 
 TEST_F(AosRegistrationTest, CheckBool)
