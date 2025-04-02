@@ -24,6 +24,7 @@
 #include "MockICarrierConfig.h"
 #include "config/AudioConfiguration.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_SUPPORT_EVS = AudioConfiguration::DEFAULT_SUPPORT_EVS;
@@ -209,7 +210,7 @@ TEST_F(AudioConfigurationTest, GetJitterBufferSize)
     objJitterArray.Push(nJitterBufferStepSize);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY, _))
             .WillByDefault(Return(objJitterArray));
 
     GetReadyToCreate();
@@ -280,7 +281,7 @@ TEST_F(AudioConfigurationTest, GetConfigCandidateAttr)
     objAudioCandidateAttribute.Push("2, UDP, 1119400811, 10.3.210.77, 7010, typ, host");
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetStringArray(CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY))
+            GetStringArray(CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY, _))
             .WillByDefault(Return(objAudioCandidateAttribute));
 
     GetReadyToCreate();
@@ -299,7 +300,7 @@ TEST_F(AudioConfigurationTest, GetAudioPort)
     objAudioPortRtp.Push(nAudioRtpEnd);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY, _))
             .WillByDefault(Return(objAudioPortRtp));
 
     GetReadyToCreate();
@@ -320,7 +321,7 @@ TEST_F(AudioConfigurationTest, GetAudioRtcpInterval)
     objAudioRtcpInterval.Push(nAudioRtcpIntervalOnHold);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY, _))
             .WillByDefault(Return(objAudioRtcpInterval));
 
     GetReadyToCreate();
@@ -383,7 +384,8 @@ TEST_F(AudioConfigurationTest, testIsAudioInactivityCallEndReason)
     objCallEndReasons.Push((IMS_SINT32)E911_RTP_INACTIVITY_ON_CONNECTED);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY))
+            GetIntArray(
+                    CarrierConfig::ImsVoice::KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY, _))
             .WillByDefault(Return(objCallEndReasons));
 
     GetReadyToCreate();

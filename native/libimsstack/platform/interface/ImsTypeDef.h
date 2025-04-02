@@ -328,4 +328,23 @@ extern void TraceService_Assert(IN const IMS_CHAR*, IN const IMS_CHAR*, IN IMS_U
             TraceService_Assert(#CONDITION, __IMS_FUNC__, __IMS_LINE__); \
     } while (0)
 
+// This template class is used to pass the reference with a default value
+// as an input argument of a method.
+template <typename T>
+class ByRef final
+{
+public:
+    inline ByRef() = default;
+    inline ByRef(IN const T value) :
+            mValue(value)
+    {
+    }
+    inline ByRef(IN const ByRef&) = delete;
+    inline ByRef& operator=(IN const ByRef&) = delete;
+    inline operator T&() const { return ((T&)mValue); }
+
+private:
+    T mValue;
+};
+
 #endif

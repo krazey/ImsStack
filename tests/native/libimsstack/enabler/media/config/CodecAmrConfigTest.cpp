@@ -25,6 +25,7 @@
 #include "config/MediaCarrierConfigBundle.h"
 #include "config/CodecAmrConfig.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecAmrConfig::DEFAULT_CHANNEL;
@@ -184,7 +185,7 @@ TEST_F(CodecAmrConfigTest, WB_GetConfigModeSetList)
     objCodecAttributeModesetWb.Push(2);
 
     ON_CALL(*m_pAudioSubBundle,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
             .WillByDefault(Return(objCodecAttributeModesetWb));
 
     GetReadyToCreateAmrWb();
@@ -203,7 +204,7 @@ TEST_F(CodecAmrConfigTest, NB_GetConfigModeSetList)
     objCodecAttributeModesetNb.Push(7);
 
     ON_CALL(*m_pAudioSubBundle,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
             .WillByDefault(Return(objCodecAttributeModesetNb));
     GetReadyToCreateAmrNb();
     EXPECT_TRUE(m_pConfig_AmrNb->Create(m_pMockICarrierConfig));

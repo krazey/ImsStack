@@ -84,14 +84,15 @@ protected:
 
         objIntArray.Push(VALID_INT_VALUE);
         objIntArray.Push(VALID_INT_VALUE2);
-        ON_CALL(*piCc, GetIntArray(VALID_KEY_INT_ARRAY)).WillByDefault(Return(objIntArray));
-        ON_CALL(*piCc, GetIntArray(VALID_KEY_STRING_ARRAY)).WillByDefault(Return(objEmptyIntArray));
+        ON_CALL(*piCc, GetIntArray(VALID_KEY_INT_ARRAY, _)).WillByDefault(Return(objIntArray));
+        ON_CALL(*piCc, GetIntArray(VALID_KEY_STRING_ARRAY, _))
+                .WillByDefault(Return(objEmptyIntArray));
 
         objStringArray.Push(VALID_STRING_VALUE);
         objStringArray.Push(VALID_STRING_VALUE2);
-        ON_CALL(*piCc, GetStringArray(VALID_KEY_STRING_ARRAY))
+        ON_CALL(*piCc, GetStringArray(VALID_KEY_STRING_ARRAY, _))
                 .WillByDefault(Return(objStringArray));
-        ON_CALL(*piCc, GetStringArray(VALID_KEY_INT_ARRAY))
+        ON_CALL(*piCc, GetStringArray(VALID_KEY_INT_ARRAY, _))
                 .WillByDefault(Return(objEmptyStringArray));
     }
 

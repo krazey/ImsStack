@@ -24,6 +24,7 @@
 #include "offeranswer/SdpAvCodec.h"
 #include "video/VideoNego.h"
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -117,7 +118,8 @@ protected:
     void PrepareHevcConfig()
     {
         m_objHevcPayloadType.Add(HEVC_PAYLOAD);
-        ON_CALL(*m_pVideoBundle, GetIntArray(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY))
+        ON_CALL(*m_pVideoBundle,
+                GetIntArray(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objHevcPayloadType));
 
         m_pHevcBundle = new MockICarrierConfig();
@@ -135,7 +137,8 @@ protected:
     void PrepareAvcConfig()
     {
         m_objAvcPayloadType.Add(AVC_PAYLOAD);
-        ON_CALL(*m_pVideoBundle, GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY))
+        ON_CALL(*m_pVideoBundle,
+                GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY, _))
                 .WillByDefault(Return(m_objAvcPayloadType));
 
         m_pAvcBundle = new MockICarrierConfig();

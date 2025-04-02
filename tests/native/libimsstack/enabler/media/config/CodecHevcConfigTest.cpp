@@ -24,6 +24,7 @@
 #include "MockICarrierConfig.h"
 #include "config/CodecHevcConfig.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecHevcConfig::DEFAULT_CHANNEL;
@@ -123,7 +124,7 @@ TEST_F(CodecHevcConfigTest, GetVideoResolution)
     objVideoResolution.Push(nVideoHeight);
 
     ON_CALL(*m_pVideoSubBundle,
-            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY, _))
             .WillByDefault(Return(objVideoResolution));
 
     GetReadyToCreate();
@@ -155,7 +156,7 @@ TEST_F(CodecHevcConfigTest, GetVideoBitrate)
     objVideoBitrate.Push(nVideoBitrate);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY, _))
             .WillByDefault(Return(objVideoBitrate));
 
     GetReadyToCreate();
@@ -226,7 +227,7 @@ TEST_F(CodecHevcConfigTest, GetImageAttr)
     objImageAttr.Push("send  [x=720,y=1280] recv [x=720,y=1280]");
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY))
+            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY, _))
             .WillByDefault(Return(objImageAttr));
 
     GetReadyToCreate();

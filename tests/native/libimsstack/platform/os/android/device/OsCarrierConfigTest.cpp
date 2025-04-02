@@ -302,15 +302,20 @@ TEST_F(OsCarrierConfigTest, GetBooleanArray)
                     }));
 
     OsCarrierConfig objOsCarrierConfig(IMS_SLOT_0);
+    IMS_BOOL bKeyExists = IMS_TRUE;
+    ImsVector<IMS_BOOL> objBooleanArray =
+            objOsCarrierConfig.GetBooleanArray(KEY_VALUE_BOOL_ARRAY, bKeyExists);
 
-    EXPECT_TRUE(objOsCarrierConfig.GetBooleanArray(KEY_VALUE_BOOL_ARRAY).IsEmpty());
+    EXPECT_TRUE(objBooleanArray.IsEmpty());
+    EXPECT_FALSE(bKeyExists);  // Key does not exist
     EXPECT_CALL(m_objSystem, GetCarrierConfig(_, _)).Times(1);
 
     objOsCarrierConfig.LoadConfig();
 
-    EXPECT_FALSE(objOsCarrierConfig.GetBooleanArray(KEY_VALUE_BOOL_ARRAY).IsEmpty());
-    EXPECT_TRUE(
-            arrBoolArray == objOsCarrierConfig.GetBooleanArray(KEY_VALUE_BOOL_ARRAY).GetVector());
+    objBooleanArray = objOsCarrierConfig.GetBooleanArray(KEY_VALUE_BOOL_ARRAY, bKeyExists);
+    EXPECT_FALSE(objBooleanArray.IsEmpty());
+    EXPECT_TRUE(bKeyExists);  // Key exists
+    EXPECT_TRUE(arrBoolArray == objBooleanArray.GetVector());
 }
 
 TEST_F(OsCarrierConfigTest, GetIntArray)
@@ -335,15 +340,20 @@ TEST_F(OsCarrierConfigTest, GetIntArray)
                     }));
 
     OsCarrierConfig objOsCarrierConfig(IMS_SLOT_0);
+    IMS_BOOL bKeyExists = IMS_TRUE;
+    ImsVector<IMS_SINT32> objIntArray =
+            objOsCarrierConfig.GetIntArray(KEY_VALUE_INT_ARRAY, bKeyExists);
 
-    EXPECT_EQ(ImsVector<IMS_SINT32>(), objOsCarrierConfig.GetIntArray(KEY_VALUE_INT_ARRAY));
-
+    EXPECT_TRUE(objIntArray.IsEmpty());
+    EXPECT_FALSE(bKeyExists);  // Key does not exist
     EXPECT_CALL(m_objSystem, GetCarrierConfig(_, _)).Times(1);
 
     objOsCarrierConfig.LoadConfig();
 
-    EXPECT_FALSE(objOsCarrierConfig.GetIntArray(KEY_VALUE_INT_ARRAY).IsEmpty());
-    EXPECT_TRUE(arrIntArray == objOsCarrierConfig.GetIntArray(KEY_VALUE_INT_ARRAY).GetVector());
+    objIntArray = objOsCarrierConfig.GetIntArray(KEY_VALUE_INT_ARRAY, bKeyExists);
+    EXPECT_FALSE(objIntArray.IsEmpty());
+    EXPECT_TRUE(bKeyExists);  // Key exists
+    EXPECT_TRUE(arrIntArray == objIntArray.GetVector());
 }
 
 TEST_F(OsCarrierConfigTest, GetLongArray)
@@ -366,18 +376,24 @@ TEST_F(OsCarrierConfigTest, GetLongArray)
 
                         return IMS_TRUE;
                     }));
+
     OsCarrierConfig objOsCarrierConfig(IMS_SLOT_0);
+    IMS_BOOL bKeyExists = IMS_TRUE;
+    ImsVector<IMS_SLONG> objLongArray =
+            objOsCarrierConfig.GetLongArray(KEY_VALUE_LONG_ARRAY, bKeyExists);
 
-    EXPECT_EQ(ImsVector<IMS_SLONG>(), objOsCarrierConfig.GetLongArray(KEY_VALUE_LONG_ARRAY));
-
+    EXPECT_TRUE(objLongArray.IsEmpty());
+    EXPECT_FALSE(bKeyExists);  // Key does not exist
     EXPECT_CALL(m_objSystem, GetCarrierConfig(_, _)).Times(1);
 
     objOsCarrierConfig.LoadConfig();
 
-    EXPECT_FALSE(objOsCarrierConfig.GetLongArray(KEY_VALUE_LONG_ARRAY).IsEmpty());
+    objLongArray = objOsCarrierConfig.GetLongArray(KEY_VALUE_LONG_ARRAY, bKeyExists);
+    EXPECT_FALSE(objLongArray.IsEmpty());
+    EXPECT_TRUE(bKeyExists);  // Key exists
 
     const std::vector<IMS_SLONG> arrLongArray = {123456789L, 987654321L};
-    EXPECT_TRUE(arrLongArray == objOsCarrierConfig.GetLongArray(KEY_VALUE_LONG_ARRAY).GetVector());
+    EXPECT_TRUE(arrLongArray == objLongArray.GetVector());
 }
 
 TEST_F(OsCarrierConfigTest, GetStringArray)
@@ -403,19 +419,23 @@ TEST_F(OsCarrierConfigTest, GetStringArray)
                     }));
 
     OsCarrierConfig objOsCarrierConfig(IMS_SLOT_0);
+    IMS_BOOL bKeyExists = IMS_TRUE;
+    ImsVector<AString> objStringArray =
+            objOsCarrierConfig.GetStringArray(KEY_VALUE_STRING_ARRAY, bKeyExists);
 
-    EXPECT_EQ(ImsVector<AString>(), objOsCarrierConfig.GetStringArray(KEY_VALUE_STRING_ARRAY));
-
+    EXPECT_TRUE(objStringArray.IsEmpty());
+    EXPECT_FALSE(bKeyExists);  // Key does not exist
     EXPECT_CALL(m_objSystem, GetCarrierConfig(_, _)).Times(1);
 
     objOsCarrierConfig.LoadConfig();
 
-    EXPECT_FALSE(objOsCarrierConfig.GetStringArray(KEY_VALUE_STRING_ARRAY).IsEmpty());
+    objStringArray = objOsCarrierConfig.GetStringArray(KEY_VALUE_STRING_ARRAY, bKeyExists);
+    EXPECT_FALSE(objStringArray.IsEmpty());
+    EXPECT_TRUE(bKeyExists);  // Key exists
 
     const std::vector<AString> arrStringArray = {
             AString("String1"), AString("String2"), AString("String3")};
-    EXPECT_TRUE(arrStringArray ==
-            objOsCarrierConfig.GetStringArray(KEY_VALUE_STRING_ARRAY).GetVector());
+    EXPECT_TRUE(arrStringArray == objStringArray.GetVector());
 }
 
 TEST_F(OsCarrierConfigTest, GetBundle)

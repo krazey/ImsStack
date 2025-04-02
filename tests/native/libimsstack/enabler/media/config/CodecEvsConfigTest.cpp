@@ -24,6 +24,7 @@
 #include "MockICarrierConfig.h"
 #include "config/CodecEvsConfig.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecEvsConfig::DEFAULT_CHANNEL;
@@ -260,7 +261,7 @@ TEST_F(CodecEvsConfigTest, GetConfigEvsBitrateList)
     objBitrateList.Push(4);
 
     ON_CALL(*m_pAudioSubBundle,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY, _))
             .WillByDefault(Return(objBitrateList));
 
     GetReadyToCreate();

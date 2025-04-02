@@ -71,33 +71,41 @@ public:
      * @brief Returns the boolean-array value for a specified key.
      *
      * @param pszKey The config key
+     * @param bKeyExists A flag used to check the presence or absence of a key in an empty vector
      * @return A boolean-array value if present. Otherwise, returns an empty vector.
      */
-    virtual ImsVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* pszKey,
+            OUT IMS_BOOL& bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)) const = 0;
 
     /**
      * @brief Returns the integer-array value for a specified key.
      *
      * @param pszKey The config key
+     * @param bKeyExists A flag used to check the presence or absence of a key in an empty vector
      * @return An integer-array value if present. Otherwise, returns an empty vector.
      */
-    virtual ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey,
+            OUT IMS_BOOL& bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)) const = 0;
 
     /**
      * @brief Returns the long-array value for a specified key.
      *
      * @param pszKey The config key
+     * @param bKeyExists A flag used to check the presence or absence of a key in an empty vector
      * @return A long-array value if present. Otherwise, returns an empty vector.
      */
-    virtual ImsVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* pszKey,
+            OUT IMS_BOOL& bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)) const = 0;
 
     /**
      * @brief Returns the string-array value for a specified key.
      *
      * @param pszKey The config key
+     * @param bKeyExists A flag used to check the presence or absence of a key in an empty vector
      * @return A string-array value if present. Otherwise, returns an empty vector.
      */
-    virtual ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey,
+            OUT IMS_BOOL& bKeyExists = ByRef<IMS_BOOL>(IMS_TRUE)) const = 0;
 
     /**
      * @brief Returns the bundle value for a specified key.
