@@ -20,6 +20,7 @@
 #include "ICarrierConfigListener.h"
 #include "IMtsServiceState.h"
 
+class ICarrierConfig;
 class IImsAos;
 
 class MtsServiceState final : public ICarrierConfigListener, public IMtsServiceState
