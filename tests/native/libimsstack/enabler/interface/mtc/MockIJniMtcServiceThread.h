@@ -29,7 +29,9 @@ public:
 
     MOCK_METHOD(void, OnServiceChanged, (IN IuMtcService::ServiceState, IN IMS_SINT32), (override));
     MOCK_METHOD(void, OnEmergencyServiceChanged,
-            (IN IuMtcService::EmergencyServiceState, IN IMS_SINT32, IN ServiceType), (override));
+            (IN IuMtcService::EmergencyServiceState,
+                    IN IuMtcService::EmergencyServiceUnavailableReason, IN ServiceType),
+            (override));
     MOCK_METHOD(void, OnPreIncomingCallReceived, (IN IMS_ULONG), (override));
     MOCK_METHOD(void, OnRejectedIncomingCall,
             (IN IMS_ULONG, IN const JniCallInfo&, IN const MediaInfo&,

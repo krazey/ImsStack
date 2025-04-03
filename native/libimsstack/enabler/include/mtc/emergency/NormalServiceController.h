@@ -26,6 +26,7 @@
 class IMtcContext;
 
 using EmergencyServiceState = IuMtcService::EmergencyServiceState;
+using EmergencyServiceUnavailableReason = IuMtcService::EmergencyServiceUnavailableReason;
 
 class NormalServiceController : public IEmergencyServiceController, public IMtcCallStateListener
 {
@@ -56,7 +57,9 @@ private:
     void AddListeners();
     void RemoveListeners();
 
-    void Notify(IN EmergencyServiceState eState, IN IMS_SINT32 eReason = REASON_UNSPECIFIED) const;
+    void Notify(IN EmergencyServiceState eState,
+            IN EmergencyServiceUnavailableReason eReason =
+                    EmergencyServiceUnavailableReason::UNKNOWN) const;
     void Finish();
 };
 

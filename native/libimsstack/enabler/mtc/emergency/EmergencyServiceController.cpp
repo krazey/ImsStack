@@ -29,6 +29,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
+#include "call/MtcCallStringUtils.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationResolver.h"
@@ -62,6 +63,7 @@ PUBLIC VIRTUAL EmergencyServiceController::~EmergencyServiceController()
 
 PUBLIC VIRTUAL void EmergencyServiceController::Start()
 {
+    IMS_TRACE_I("Start", 0, 0, 0);
     Start18xWaitingTimer();
 
     switch (m_eState)
@@ -86,6 +88,7 @@ PUBLIC VIRTUAL void EmergencyServiceController::Start()
 
 PUBLIC VIRTUAL void EmergencyServiceController::Close()
 {
+    IMS_TRACE_I("Close", 0, 0, 0);
     Stop18xWaitingTimer();
 
     ControlAos(ImsAosControl::REGISTER_STOP);
@@ -94,6 +97,10 @@ PUBLIC VIRTUAL void EmergencyServiceController::Close()
 PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
         IN IMtcService& /* objMtcService */, IN MtcAosState eState, IN IMS_UINT32 eAosReason)
 {
+    IMS_TRACE_I("OnAosStateChanged :: AosState[%s] Reason[%s]",
+            MtcCallStringUtils::ConvertAosState(eState),
+            MtcCallStringUtils::ConvertAosReason(eAosReason), 0);
+
     switch (m_eState)
     {
         case State::IDLE:
@@ -113,7 +120,7 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
         case State::OPENED:
             if (eState == MtcAosState::DISCONNECTED)
             {
-                Notify(EmergencyServiceState::IDLE, static_cast<IMS_SINT32>(eAosReason));
+                Notify(EmergencyServiceState::IDLE);
                 Finish();
             }
             break;
@@ -205,7 +212,7 @@ PRIVATE void EmergencyServiceController::HandleServiceUnavailable(IN IMS_UINT32 
     }
     else
     {
-        Notify(EmergencyServiceState::UNAVAILABLE, eAosReason);
+        Notify(EmergencyServiceState::UNAVAILABLE, ConvertToUnavailableReason(eAosReason));
         Finish();
     }
 }
@@ -240,7 +247,7 @@ PRIVATE void EmergencyServiceController::RemoveListeners()
 
 PRIVATE
 void EmergencyServiceController::Notify(
-        IN EmergencyServiceState eState, IN IMS_SINT32 eReason) const
+        IN EmergencyServiceState eState, IN EmergencyServiceUnavailableReason eReason) const
 {
     IMS_TRACE_D("Notify :: state=%d, reason=%d", eState, eReason, 0);
 
@@ -343,4 +350,20 @@ void EmergencyServiceController::Stop18xWaitingTimer()
 {
     m_objContext.GetPassiveTimerHolder().RemoveTimer(
             IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
+}
+
+PRIVATE
+EmergencyServiceUnavailableReason EmergencyServiceController::ConvertToUnavailableReason(
+        IN IMS_UINT32 eAosReason)
+{
+    if (eAosReason == ImsAosReason::DATA_PERMANENTLY_FAILED)
+    {
+        return EmergencyServiceUnavailableReason::DATA_PERMANENTLY_FAILED;
+    }
+    else if (eAosReason == ImsAosReason::NETWORK_ATTACH_REJECTED)
+    {
+        return EmergencyServiceUnavailableReason::NETWORK_ATTACH_REJECTED;
+    }
+
+    return EmergencyServiceUnavailableReason::NONE;
 }

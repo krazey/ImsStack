@@ -250,11 +250,13 @@ PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
 
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN ServiceType eServiceType)
 {
+    IMS_TRACE_I("OpenEmergencyService [%d]", eServiceType, 0, 0);
     m_objContext.GetEmergencyServiceManager().StartOpen(eServiceType);
 }
 
 PUBLIC VIRTUAL void MtcService::StopEmergencyService()
 {
+    IMS_TRACE_I("StopEmergencyService", 0, 0, 0);
     m_objContext.GetEmergencyServiceManager().StopOpen(IMS_TRUE);
 }
 

@@ -51,7 +51,7 @@ PUBLIC VIRTUAL void NormalServiceController::Start()
     }
     else
     {
-        Notify(EmergencyServiceState::UNAVAILABLE);
+        Notify(EmergencyServiceState::UNAVAILABLE, EmergencyServiceUnavailableReason::NONE);
         Finish();
     }
 }
@@ -84,7 +84,8 @@ PRIVATE void NormalServiceController::RemoveListeners()
 }
 
 PRIVATE
-void NormalServiceController::Notify(IN EmergencyServiceState eState, IN IMS_SINT32 eReason) const
+void NormalServiceController::Notify(
+        IN EmergencyServiceState eState, IN EmergencyServiceUnavailableReason eReason) const
 {
     IMS_TRACE_D("Notify :: state=%d, reason=%d", eState, eReason, 0);
 

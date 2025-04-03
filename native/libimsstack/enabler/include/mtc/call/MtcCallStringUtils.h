@@ -210,15 +210,17 @@ public:
     inline static const IMS_CHAR* ConvertAosReason(IN IMS_UINT32 eAosReason)
     {
         static const std::unordered_map<IMS_UINT32, const IMS_CHAR*> objAosReasonStrings = {
-                {ImsAosReason::NONE,              "none"                     },
-                {ImsAosReason::POWER_OFF,         "power off"                },
-                {ImsAosReason::SERVICE_POLICY,    "service policy"           },
-                {ImsAosReason::DATA_DISCONNECTED, "data disconnected"        },
-                {ImsAosReason::REG_TERMINATED,    "registration terminated"  },
-                {ImsAosReason::REG_NEW_REQUIRED,  "new registration required"},
-                {ImsAosReason::REG_TERMINATING,   "registration terminating" },
-                {ImsAosReason::IP_CHANGED,        "ip changed"               },
-                {ImsAosReason::NOT_SPECIFIED,     "not specified"            },
+                {ImsAosReason::NONE,                    "none"                     },
+                {ImsAosReason::POWER_OFF,               "power off"                },
+                {ImsAosReason::SERVICE_POLICY,          "service policy"           },
+                {ImsAosReason::DATA_DISCONNECTED,       "data disconnected"        },
+                {ImsAosReason::DATA_PERMANENTLY_FAILED, "data permanently failed"  },
+                {ImsAosReason::REG_TERMINATED,          "registration terminated"  },
+                {ImsAosReason::REG_NEW_REQUIRED,        "new registration required"},
+                {ImsAosReason::REG_TERMINATING,         "registration terminating" },
+                {ImsAosReason::IP_CHANGED,              "ip changed"               },
+                {ImsAosReason::NETWORK_ATTACH_REJECTED, "network attach rejected"  },
+                {ImsAosReason::NOT_SPECIFIED,           "not specified"            },
         };
 
         auto it = objAosReasonStrings.find(eAosReason);
