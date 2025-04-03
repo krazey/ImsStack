@@ -681,13 +681,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
     switch (nType)
     {
         case TIMER_MO_18X_WAIT:
-        case TIMER_MO_CALL_INITIATION_TO_18X_WAIT:
         {
             CallReasonInfo objReason(CODE_TIMEOUT_1XX_WAITING);
             HandleCancel(GetISession(), objReason);
             OnStartFailed(objReason);
             return CallStateName::TERMINATING;
         }
+        case TIMER_MO_CALL_INITIATION_TO_18X_WAIT:
         case TIMER_MO_NOANSWER:
         {
             CallReasonInfo objReason(CODE_TIMEOUT_NO_ANSWER);

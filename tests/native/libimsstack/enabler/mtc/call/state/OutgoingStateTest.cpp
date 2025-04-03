@@ -333,8 +333,8 @@ TEST_F(OutgoingStateTest, 18xTimerExpiredTerminatesCall)
 
 TEST_F(OutgoingStateTest, InviteTo18xTimerExpiredTerminatesCall)
 {
-    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_TIMEOUT_1XX_WAITING)));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_TIMEOUT_1XX_WAITING)));
+    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_TIMEOUT_NO_ANSWER)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER)));
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_CALL_INITIATION_TO_18X_WAIT));
