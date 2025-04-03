@@ -869,8 +869,6 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.RequestType.START_IMS_EST_TIMER.getValue(),
                 IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.DATA_CONNECTING.getValue());
-        when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
 
         mAosService.onPreciseDataConnectionStateChanged(EApnType.EMERGENCY.getType(),
                 TelephonyManager.DATA_CONNECTING, 0, TelephonyManager.NETWORK_TYPE_LTE);
@@ -884,8 +882,6 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.RequestType.START_IMS_EST_TIMER.getValue(),
                 IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.DATA_CONNECTING.getValue());
-        when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL)).thenReturn(true);
 
         mAosService.onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
                 TelephonyManager.DATA_CONNECTING, 0, TelephonyManager.NETWORK_TYPE_LTE);

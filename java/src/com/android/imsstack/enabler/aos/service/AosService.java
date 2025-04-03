@@ -557,15 +557,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         ImsLog.d(mSlotId, "AosService: onPreciseDataConnectionStateChanged");
         switch (state) {
             case TelephonyManager.DATA_CONNECTING -> {
-                ConfigInterface ci = AgentFactory.getInstance()
-                        .getAgent(ConfigInterface.class, mSlotId);
-                CarrierConfig cc = (ci == null) ? null : ci.getCarrierConfig();
-                boolean isCdmalessFeatureTagRequired = cc != null && cc.getBoolean(
-                        CarrierConfig.Ims.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
-                if (isCdmalessFeatureTagRequired) {
-                    controlRegistration(RequestType.START_IMS_EST_TIMER,
-                            Pcscf.CURRENT, Cause.DATA_CONNECTING);
-                }
+                controlRegistration(RequestType.START_IMS_EST_TIMER,
+                        Pcscf.CURRENT, Cause.DATA_CONNECTING);
             }
             case TelephonyManager.DATA_DISCONNECTING -> {
                 if (getRegisteredNetworkType() != NetworkType.NONE) {

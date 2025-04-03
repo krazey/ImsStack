@@ -282,7 +282,8 @@ enum
     using Base::RegistrationControl_ControlRegistration; \
     using Base::ServicePhone_LocationInfoChanged;        \
     using Base::ProcessRegTerminating;                   \
-    using Base::ProcessScscfRestoration;
+    using Base::ProcessScscfRestoration;                 \
+    using Base::GetImsEstablishmentTime;
 
 class TestAosApplication : public AosApplication
 {
@@ -2137,6 +2138,7 @@ TEST_F(AosApplicationTest, SetDataDisconnectedReasonWhenProcessConnectionDeactiv
 
 TEST_F(AosApplicationTest, ResetBlockInvalidPcscfWhenNetStatusChanged)
 {
+    m_pAosApplication->SetNetTrackerListener();
     m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
     m_pAosApplication->SetRat(NW_REPORT_RADIO_INVALID);
     ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
@@ -2709,10 +2711,13 @@ TEST_F(AosApplicationTest,
     EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
 }
 
-TEST_F(AosApplicationTest, NotStartImsEstablishmentTimerWhenImsEstablishmentStartIfEstTimeIsZero)
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenProcessImsEstablishmentStartIfEstTimeIsZero)
 {
     // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
     ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte()).WillByDefault(Return(0));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
 
     // WHEN
     m_pAosApplication->ProcessImsEstablishmentStart();
@@ -2724,6 +2729,7 @@ TEST_F(AosApplicationTest, NotStartImsEstablishmentTimerWhenImsEstablishmentStar
 TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfEpdgEnabled)
 {
     // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
     ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte())
             .WillByDefault(Return(120));
     ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
@@ -2739,6 +2745,7 @@ TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentS
 TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfImsRegistered)
 {
     // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
     ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte())
             .WillByDefault(Return(120));
     ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_TRUE));
@@ -2754,6 +2761,7 @@ TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentS
 TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfImsCallActive)
 {
     // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
     ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte())
             .WillByDefault(Return(120));
     ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
@@ -3198,6 +3206,7 @@ TEST_F(AosApplicationTest, Callback)
 
     // TEST_F : NetTracker_StatusChanged
     m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
+    m_pAosApplication->SetNetTrackerListener();
     m_pAosApplication->NetTracker_StatusChanged();
 
     // mobile network type is LTE while m_nLteAttachState is IMS_LTE_INFO_COMBINED_ATTACHED
@@ -3214,7 +3223,7 @@ TEST_F(AosApplicationTest, Callback)
 
     // mobile network type is neither LTE nor NR
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .WillOnce(Return(NW_REPORT_RADIO_HSPA));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_HSPA));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(
                     IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_DISABLE))
@@ -3223,7 +3232,7 @@ TEST_F(AosApplicationTest, Callback)
 
     // mobile network type is NR
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
             .Times(1);
@@ -3232,7 +3241,7 @@ TEST_F(AosApplicationTest, Callback)
     // mobile network type is NR again while m_nLteAttachState is IMS_LTE_INFO_COMBINED_ATTACHED
     m_pAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
             .Times(1);
@@ -3241,7 +3250,7 @@ TEST_F(AosApplicationTest, Callback)
     // mobile network type is NR again while m_nLteAttachState is not IMS_LTE_INFO_COMBINED_ATTACHED
     m_pAosApplication->SetLteAttachState(IMS_LTE_INFO_EPS_ONLY_ATTACHED);
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
             .Times(0);
@@ -3250,7 +3259,7 @@ TEST_F(AosApplicationTest, Callback)
     // IsOn true, IsRegUpdatedByNrLteRatChange true, TIMER_RECONFIG_GUARD running
     m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .WillOnce(Return(NW_REPORT_RADIO_LTE));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
             .Times(1);
@@ -3272,7 +3281,7 @@ TEST_F(AosApplicationTest, Callback)
 
     // IsOn true, IsRegUpdatedByNrLteRatChange true, TIMER_RECONFIG_GUARD not running
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
             .Times(1);
@@ -3451,6 +3460,7 @@ TEST_F(AosApplicationTest,
 {
     // GIVEN
     ImsMessage objMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
+    m_pAosApplication->SetNetTrackerListener();
     ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte()).WillByDefault(Return(0));
 
     // WHEN
@@ -3465,6 +3475,7 @@ TEST_F(AosApplicationTest,
 {
     // GIVEN
     ImsMessage objMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
+    m_pAosApplication->SetNetTrackerListener();
     m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte())
             .WillByDefault(Return(120));
@@ -3480,6 +3491,7 @@ TEST_F(AosApplicationTest, KeepImsEstablishmentTimerIfAlreadyStartedWhenImsEstab
 {
     // GIVEN
     ImsMessage objMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
+    m_pAosApplication->SetNetTrackerListener();
     ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte())
             .WillByDefault(Return(120));
     m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 12345);
@@ -3750,4 +3762,30 @@ TEST_F(AosApplicationTest, StartImsEstablishmentTimerByImsEstablishmentControlIf
 
     // Clean Up
     m_pAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
+}
+
+TEST_F(AosApplicationTest, ReturnImsEstablishmentTimeForLteIfRatIsLte)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte())
+            .WillRepeatedly(Return(120));
+
+    // WHEN & THEN
+    EXPECT_EQ(m_pAosApplication->GetImsEstablishmentTime(), 120);
+}
+
+TEST_F(AosApplicationTest, ReturnImsEstablishmentTimeForNrIfRatIsNr)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForNr())
+            .WillRepeatedly(Return(160));
+
+    // WHEN & THEN
+    EXPECT_EQ(m_pAosApplication->GetImsEstablishmentTime(), 160);
 }
