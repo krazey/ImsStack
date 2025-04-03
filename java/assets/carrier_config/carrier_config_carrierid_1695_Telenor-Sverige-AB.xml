@@ -38,4 +38,5 @@
     <int name="ims.location_geodetic_shape_int" value="0"/>
     <int name="imsemergency.call_periodic_location_discovery_method_int" value="1"/>
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="30000"/>
+    <int name="imsvoice.session_refresh_sdp_session_version_increment_int" value="1"/>
 </carrier_config>

@@ -239,7 +239,19 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
     m_objSession.bNoRefreshByReInvite = !piCc->GetBoolean(CarrierConfig::Ims::
                     KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL);
 
+    IMS_SINT32 nSessionRefreshSdpVersionIncrement = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_SDP_SESSION_VERSION_INCREMENT_INT,
+            SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE);
+
+    m_objSession.nSessionRefreshSdpVersionIncrement = nSessionRefreshSdpVersionIncrement;
+
     m_objSession.bSdpVersionCheckSupported = IMS_TRUE;
+
+    if (nSessionRefreshSdpVersionIncrement == SESSION_REFRESH_SDP_VERSION_INCREMENT_AS_ANSWERER ||
+            nSessionRefreshSdpVersionIncrement == SESSION_REFRESH_SDP_VERSION_INCREMENT_ALL)
+    {
+        m_objSession.bSdpVersionCheckSupported = IMS_FALSE;
+    }
 
     m_objSession.bSdpNonRprAllowed =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL);

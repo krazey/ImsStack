@@ -1291,6 +1291,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "sdp_answer_full_capability_bool";
         public static final String KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL =
                 KEY_PREFIX + "sdp_reoffer_full_capability_bool";
+        public static final String KEY_SESSION_REFRESH_SDP_SESSION_VERSION_INCREMENT_INT =
+                KEY_PREFIX + "session_refresh_sdp_session_version_increment_int";
         public static final String KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
                 KEY_PREFIX + "audio_amrwb_codec_attribute_default_modeset_int_array";
         public static final String KEY_AUDIO_AMRNB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY =
