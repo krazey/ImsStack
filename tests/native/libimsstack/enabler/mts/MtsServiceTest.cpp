@@ -499,14 +499,10 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsWhenTrafficIsAllowed)
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_FALSE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
-    EXPECT_CALL(objMessageController, ProcessMtSms(_)).Times(2);
+    EXPECT_CALL(objMessageController, ProcessMtSms(_)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
-            .Times(2);
-
-    pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
-    pMtsService->Traffic_OnConnectionSetupPrepared(
-            IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MT);
+            .Times(1);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
     pMtsService->Traffic_OnConnectionSetupPrepared(
@@ -518,18 +514,33 @@ TEST_F(MtsServiceTest, ReceivedE911MtSmsWhenTrafficIsAllowed)
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_TRUE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
 
-    EXPECT_CALL(objMessageController, ProcessMtSms(_)).Times(2);
+    EXPECT_CALL(objMessageController, ProcessMtSms(_)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, _, IImsRadio::DIRECTION_MT, _))
-            .Times(2);
+            .Times(1);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MT);
+}
+
+TEST_F(MtsServiceTest, ReceivedNormalMtSmsWhenGuardTimerIsActived)
+{
+    ICoreService* piCoreService = pMtsService->GetICoreService(IMS_FALSE);
+    IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
+
+    EXPECT_CALL(objMessageController, ProcessMtSms(_)).Times(2);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MT, _))
+            .Times(1);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
     pMtsService->Traffic_OnConnectionSetupPrepared(
-            IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MT);
+            IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MT);
+
+    pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
+    pMtsService->Traffic_OnConnectionSetupPrepared(
+            IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MT);
 }
 
 TEST_F(MtsServiceTest, ReceivedNormalMtSmsThroughIWLAN)

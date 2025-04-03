@@ -177,19 +177,23 @@ void MtsService::CoreService_PageMessageReceived(
         return;
     }
 
-    IMtsTraffic* piMtsTraffic = GetTraffic(nTrafficType, IImsRadio::DIRECTION_MT);
-    IMtsTraffic* piMoSideTraffic = GetTraffic(nTrafficType, IImsRadio::DIRECTION_MO);
+    IMtsTraffic* piMtTraffic = GetTraffic(nTrafficType, IImsRadio::DIRECTION_MT);
+    if (piMtTraffic == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "Can not get the matched traffic", 0, 0, 0);
+        return;
+    }
 
-    // Mts can skip `StartImsTraffic()` for MT SMS if the MO traffic guard timer is running
-    if (!piMoSideTraffic->IsRadioGuardTimerActive())
+    // In case of MT SMS, there's no need to check `IsImsTrafficAllowed()` and wait for
+    // `Traffic_OnConnectionSetupPrepared()`, as the SMS traffic has already been allowed.
+    if (!piMtTraffic->IsRadioGuardTimerActive())
     {
         IMS_UINT32 nAccessNetworkType =
                 ConvertToAccessNetworkType(nTrafficType, m_piNetWatcherInfo->GetNetworkType());
 
-        // In case of MT SMS, no need to check `IsImsTrafficAllowed()`
         m_piImsRadio->StartImsTraffic(
-                nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MT, piMtsTraffic);
-        piMtsTraffic->StartRadioGuardTimer();
+                nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MT, piMtTraffic);
+        piMtTraffic->StartRadioGuardTimer();
     }
     m_objContext.GetMessageController().ProcessMtSms(piMessage);
 }
