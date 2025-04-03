@@ -1192,6 +1192,31 @@ TEST_F(StartErrorHandlerTest, HandleTriggerEpsfbInNr)
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_EPS_FALLBACK));
 }
 
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfRegistersNextPcscf)
+{
+    SetActionConfig(SipStatusCode::SC_500,
+            ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF);
+    SetMessageCode(SipStatusCode::SC_500);
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY));
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
+}
+
+TEST_F(StartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfWithActiveCallReturnsServerError)
+{
+    SetActionConfig(SipStatusCode::SC_500,
+            ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF);
+    SetMessageCode(SipStatusCode::SC_500);
+
+    ImsList<IMtcCall*> objCalls;
+    MockIMtcCall objCall;
+    objCalls.Append(&objCall);
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
+}
+
 TEST_F(StartErrorHandlerTest, ExtraCodeIsSetByReasonHeader)
 {
     IMS_SINT32 nAnyCause = 12345;

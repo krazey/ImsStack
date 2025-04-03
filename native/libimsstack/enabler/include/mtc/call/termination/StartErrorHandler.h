@@ -70,6 +70,7 @@ private:
     CallReasonInfo HandleTerminateByResponseSource(IN const IMessage& objMessage) const;
     CallReasonInfo HandleTerminateByReasonHeaderText(IN const IMessage& objMessage) const;
     CallReasonInfo HandleRegistrationToAlternatePcscf(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleSilentReinviteToAlternatePcscf(IN const IMessage& objMessage) const;
 
     CallReasonInfo RegisterAfterMayPerformCsfb() const;
 
@@ -83,6 +84,7 @@ private:
     void ControlAos(IN IMS_UINT32 nCommand) const;
     IMS_BOOL RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
     IMS_BOOL IsRegisterWithNextPcscfAndRedialRequiredFor503(IN IMS_SINT32 nRetryAfter) const;
+    IMS_BOOL HasActiveCalls() const;
     AString GetPathHeader() const;
     AString GetServiceRouteHeader() const;
     AString GetSupported() const;

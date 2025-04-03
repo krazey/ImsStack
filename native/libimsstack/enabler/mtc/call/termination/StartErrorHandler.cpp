@@ -86,7 +86,9 @@ const std::unordered_map<IMS_SINT32, StartErrorHandler::ActionFunc>
     {ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_HEADER_TEXT,
             &StartErrorHandler::HandleTerminateByReasonHeaderText},
     {ConfigVoice::START_ERROR_ACTION_REGISTRATION_TO_ALTERNATE_PCSCF,
-            &StartErrorHandler::HandleRegistrationToAlternatePcscf}
+            &StartErrorHandler::HandleRegistrationToAlternatePcscf},
+    {ConfigVoice::START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF,
+            &StartErrorHandler::HandleSilentReinviteToAlternatePcscf},
 };
 // clang-format on
 
@@ -474,7 +476,7 @@ CallReasonInfo StartErrorHandler::HandleBlockCallByTimer(IN const IMessage& objM
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
-    if (!m_objContext.GetCallManager().GetCallsByState(IMtcCall::State::ESTABLISHED).IsEmpty())
+    if (HasActiveCalls())
     {
         return CallReasonInfo(CODE_NONE);
     }
@@ -557,6 +559,21 @@ CallReasonInfo StartErrorHandler::HandleRegistrationToAlternatePcscf(
 
     ControlAos(ImsAosControl::PCSCF_NEXT);
     return GetDefaultCallReasonInfo(m_objContext, objMessage);
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscf(
+        IN [[maybe_unused]] const IMessage& objMessage) const
+{
+    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscf", 0, 0, 0);
+
+    if (HasActiveCalls())
+    {
+        return CallReasonInfo(CODE_NONE);
+    }
+
+    ControlAos(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
 }
 
 PRIVATE
@@ -660,6 +677,12 @@ IMS_BOOL StartErrorHandler::IsRegisterWithNextPcscfAndRedialRequiredFor503(
                                          ->GetSipConfig(m_objContext.GetSlotId())
                                          ->GetSipConfigV()
                                          ->GetTimerValue(ISipConfigV::TIMER_B);
+}
+
+PRIVATE
+IMS_BOOL StartErrorHandler::HasActiveCalls() const
+{
+    return !m_objContext.GetCallManager().GetCallsByState(IMtcCall::State::ESTABLISHED).IsEmpty();
 }
 
 PRIVATE

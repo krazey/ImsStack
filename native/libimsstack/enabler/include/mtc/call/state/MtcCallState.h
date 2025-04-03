@@ -156,6 +156,7 @@ public:
 
     enum TimerType
     {
+        TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL,
         TIMER_MO_CALL_INITIATION_TO_18X_WAIT,
         TIMER_MO_18X_WAIT,
         TIMER_MO_NOANSWER,

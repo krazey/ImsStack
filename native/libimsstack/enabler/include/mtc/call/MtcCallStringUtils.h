@@ -82,21 +82,23 @@ public:
     inline static const IMS_CHAR* ConvertTimerType(IN IMS_SINT32 nTimerType)
     {
         static const std::unordered_map<IMS_SINT32, const IMS_CHAR*> objTimerTypeStrings = {
+                {MtcCallState::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL,
+                 "TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL"                                             },
                 {MtcCallState::TIMER_MO_CALL_INITIATION_TO_18X_WAIT,
-                 "TIMER_MO_CALL_INITIATION_TO_18X_WAIT"                                             },
-                {MtcCallState::TIMER_MO_18X_WAIT,                    "TIMER_MO_18X_WAIT"            },
-                {MtcCallState::TIMER_MO_NOANSWER,                    "TIMER_MO_NOANSWER"            },
+                 "TIMER_MO_CALL_INITIATION_TO_18X_WAIT"                                                },
+                {MtcCallState::TIMER_MO_18X_WAIT,                       "TIMER_MO_18X_WAIT"            },
+                {MtcCallState::TIMER_MO_NOANSWER,                       "TIMER_MO_NOANSWER"            },
                 {MtcCallState::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
-                 "TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON"                                             },
-                {MtcCallState::TIMER_MT_ALERTING,                    "TIMER_MT_ALERTING"            },
-                {MtcCallState::TIMER_MT_PRACK_WAIT,                  "TIMER_MT_PRACK_WAIT"          },
-                {MtcCallState::TIMER_RETRY_UPDATE,                   "TIMER_RETRY_UPDATE"           },
-                {MtcCallState::TIMER_CONVERT_USER_RESPONSE,          "TIMER_CONVERT_USER_RESPONSE"  },
-                {MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE,        "TIMER_CONVERT_REMOTE_RESPONSE"},
+                 "TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON"                                                },
+                {MtcCallState::TIMER_MT_ALERTING,                       "TIMER_MT_ALERTING"            },
+                {MtcCallState::TIMER_MT_PRACK_WAIT,                     "TIMER_MT_PRACK_WAIT"          },
+                {MtcCallState::TIMER_RETRY_UPDATE,                      "TIMER_RETRY_UPDATE"           },
+                {MtcCallState::TIMER_CONVERT_USER_RESPONSE,             "TIMER_CONVERT_USER_RESPONSE"  },
+                {MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE,           "TIMER_CONVERT_REMOTE_RESPONSE"},
                 {MtcCallState::TIMER_E911_WAIT_SESSION_RELEASED,
-                 "TIMER_E911_WAIT_SESSION_RELEASED"                                                 },
+                 "TIMER_E911_WAIT_SESSION_RELEASED"                                                    },
                 {MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED,
-                 "TIMER_DELAY_UPDATE_AFTER_CONNECTED"                                               },
+                 "TIMER_DELAY_UPDATE_AFTER_CONNECTED"                                                  },
         };
 
         auto it = objTimerTypeStrings.find(nTimerType);

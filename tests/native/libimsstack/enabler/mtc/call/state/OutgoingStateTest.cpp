@@ -68,6 +68,7 @@
 #include <initializer_list>
 
 using ::testing::_;
+using ::testing::AnyNumber;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -322,6 +323,14 @@ TEST_F(OutgoingStateTest, ResponseWaitTimeoutForReasonExpirationUpdatesReason)
     pOutgoingState->Terminate(objReasonUserTerminated);
 }
 
+TEST_F(OutgoingStateTest, RegistrationTimerExpiredTerminatesCall)
+{
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_SIP_SERVER_ERROR)));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
+}
+
 TEST_F(OutgoingStateTest, 18xTimerExpiredTerminatesCall)
 {
     EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_TIMEOUT_1XX_WAITING)));
@@ -487,6 +496,15 @@ TEST_F(OutgoingStateTest, SendUpdateBySrvccDoesNothingIfSessionIsNull)
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnSrvccStateUpdated(SrvccState::FAILED));
+}
+
+TEST_F(OutgoingStateTest, HandleAosConnectedStopsRegistrationTimers)
+{
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
+    pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0);
 }
 
 TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback)
@@ -1090,11 +1108,17 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
             GetStringArray(
                     ConfigEmergency::KEY_REJECT_CODE_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY))
             .WillByDefault(Return(objArray));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT))
+            .WillByDefault(Return(1000));
     ON_CALL(objService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
     ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
             .WillByDefault(Return(1));
 
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL, _))
+            .Times(0);
     EXPECT_CALL(objAosConnector, Control).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
 
@@ -1115,6 +1139,9 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
             Contains(ConfigVoice::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY,
                     ImsAosReason::REG_NEW_REQUIRED))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT))
+            .WillByDefault(Return(1000));
 
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
@@ -1130,6 +1157,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT))
             .Times(0);
+    EXPECT_CALL(objTimer,
+            Start(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL, 1000));
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
     EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
@@ -1270,6 +1299,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503WaitsRedial)
     EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objSession)).Times(0);
+    EXPECT_CALL(objTimer, Start(_, _)).Times(AnyNumber());
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_RETRY_UPDATE, _)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));

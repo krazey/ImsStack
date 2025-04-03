@@ -661,6 +661,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnRatChanged(
 
 PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
 {
+    StopTimer(TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL);
+
     if (m_bWaitingServiceConnectedForRedial)
     {
         m_bWaitingServiceConnectedForRedial = IMS_FALSE;
@@ -680,6 +682,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
+        case TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL:
+            OnStartFailed(CallReasonInfo(CODE_SIP_SERVER_ERROR));
+            return CallStateName::TERMINATING;
         case TIMER_MO_18X_WAIT:
         {
             CallReasonInfo objReason(CODE_TIMEOUT_1XX_WAITING);
@@ -859,24 +864,28 @@ PRIVATE
 CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("HandleSilentRedialReason", 0, 0, 0);
-
     m_pSilentRedialHelper =
             &m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason);
 
-    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF ||
-            objReason.nExtraCode == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
+    switch (objReason.nExtraCode)
     {
-        m_bWaitingServiceConnectedForRedial = IMS_TRUE;
-        return GetStateName();
+        case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF:
+            m_bWaitingServiceConnectedForRedial = IMS_TRUE;
+            m_objContext.GetTimer().Start(TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL,
+                    m_objContext.GetConfigurationProxy().GetInt(
+                            ConfigVoice::KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT));
+            break;
+        case EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF:
+            m_bWaitingServiceConnectedForRedial = IMS_TRUE;
+            break;
+        case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK:
+        case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG:
+            break;
+        default:
+            return PerformSilentRedial();
     }
 
-    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_BY_EPS_FALLBACK ||
-            objReason.nExtraCode == EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG)
-    {
-        return GetStateName();
-    }
-
-    return PerformSilentRedial();
+    return GetStateName();
 }
 
 PRIVATE
