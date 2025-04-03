@@ -4677,9 +4677,29 @@ IMS_BOOL Session::SetSdpBodyPartFromCurrentView(IN_OUT ISipMessage*& piSipMsg)
         return IMS_FALSE;
     }
 
+    IMS_SINT32 nSdpVersionIncrement;
+    const SipConfigV* pSipConfigV = GetService()->GetSipConfigV();
+
+    if (pSipConfigV != IMS_NULL)
+    {
+        nSdpVersionIncrement = pSipConfigV->GetSessionRefreshSdpVersionIncrement();
+    }
+    else
+    {
+        nSdpVersionIncrement = SipConfigV::SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE;
+    }
+
     if (!pCurrentView->IsLastSdpProvidedWithNegotiatedSdp())
     {
         pCurrentView->SetLastSdpProvidedWithNegotiatedSdp(IMS_TRUE);
+        m_pOaState->IncreaseSessionVersion();
+    }
+    else if ((piSipMsg->GetType() == ISipMessage::TYPE_REQUEST) &&
+            ((nSdpVersionIncrement ==
+                     SipConfigV::SESSION_REFRESH_SDP_VERSION_INCREMENT_AS_OFFERER) ||
+                    (nSdpVersionIncrement ==
+                            SipConfigV::SESSION_REFRESH_SDP_VERSION_INCREMENT_ALL)))
+    {
         m_pOaState->IncreaseSessionVersion();
     }
 
