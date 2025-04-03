@@ -38,6 +38,7 @@ import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.system.ISystem;
 
@@ -61,6 +62,7 @@ public class ApnEmergencyTest {
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
     @Mock private IDcApn mMockIDcApn;
+    @Mock private IDcSettings mMockIDcSettings;
     @Mock private IDcUtils mMockIDcUtils;
     @Mock private ISystem mMockISystem;
 
@@ -85,6 +87,7 @@ public class ApnEmergencyTest {
         mTestableLooper.processAllMessages();
 
         replaceInstance(Apn.class, "mSystem", mApnEmergency, mMockISystem);
+        replaceInstance(Apn.class, "mDcSettings", mApnEmergency, mMockIDcSettings);
     }
 
     @After
@@ -236,6 +239,23 @@ public class ApnEmergencyTest {
 
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_crossStackRedialCause() throws Exception {
+        int failureCause = 5;
+        when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, failureCause))
+                .thenReturn(true);
+        // only when the apn has been requested before, notify data connection state change
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        Message msg1 = Message.obtain();
+        msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg1.obj = failureCause;
+        mApnEmergency.sendMessage(msg1);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem).notifyDataConnectionFailed(EApnType.EMERGENCY.getType());
     }
 
     @Test

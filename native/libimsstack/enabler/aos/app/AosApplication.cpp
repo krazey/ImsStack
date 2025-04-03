@@ -590,6 +590,11 @@ IMS_BOOL AosApplication::IsRegStateUpdatedByNrLteRatChange() const
 
 PROTECTED IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
 {
+    if (IsEmergency())
+    {
+        return IMS_FALSE;
+    }
+
     if (m_pCondition && m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
     {
         return IMS_TRUE;

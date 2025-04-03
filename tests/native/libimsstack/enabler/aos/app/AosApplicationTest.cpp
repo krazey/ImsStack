@@ -1223,6 +1223,15 @@ TEST_F(AosApplicationTest, IsPdnDisconnectRequired)
     EXPECT_FALSE(m_pAosApplication->IsPdnDisconnectRequired());
 }
 
+TEST_F(AosApplicationTest, IsPdnDisconnectRequiredShouldReturnFalseForEmergencyType)
+{
+    m_pAosApplication->SetAppTypeEmergency();
+
+    // reason is DATA_PERMANENTLY_FAILED
+    m_pAosApplication->SetOffReason(AosReason::DATA_PERMANENTLY_FAILED);
+    EXPECT_FALSE(m_pAosApplication->IsPdnDisconnectRequired());
+}
+
 TEST_F(AosApplicationTest, RequestCmd)
 {
     EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())

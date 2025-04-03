@@ -40,11 +40,12 @@ public:
         AIRPLANE_MODE,
         /// Indicate that wifi is off.
         WIFI_OFF,
-        /// Indicate that IMS services are not available based on network feature
-        /// or something
+        /// Indicate that IMS services are not available based on network feature or something.
         SERVICE_POLICY,
         /// Indicate that data connection is disconnected.
         DATA_DISCONNECTED,
+        /// Indicate that the data connection is rejected permanently.
+        DATA_PERMANENTLY_FAILED,
         /// Indicate that registration is terminated with the specific causes.
         /// Indicate that the initial registration is tried soon.
         REG_TERMINATED,
