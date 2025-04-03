@@ -246,12 +246,20 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
         */
 
         // video
-        if (pMediaNego->GetVideoNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(*nVideoDirection))
+        if (pMediaNego->GetVideoNego() != IMS_NULL)
         {
-            m_objVideoController.CreateSession(
-                    this, MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
-            m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
-            m_objVideoController.OpenSession();
+            if (IS_VALID_MEDIA_DIRECTION(*nVideoDirection))
+            {
+                m_objVideoController.CreateSession(this,
+                        MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
+                m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
+                m_objVideoController.OpenSession();
+            }
+            else
+            {
+                IMS_TRACE_I("NegotiateSdp() - close videoSession", 0, 0, 0);
+                m_objVideoController.CloseSession();
+            }
         }
 
         // text
