@@ -150,11 +150,10 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
 
             if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_URI))
             {
-                if (!SetUri(piChildNode))
-                {
-                    piNode->DestroyNamedNodeMap(piNodeMap);
-                    return IMS_FALSE;
-                }
+                // The reason we don't perform error handling here is to allow the current parsing
+                // process to continue even if the "uri" element of "contact" element is malformed
+                // and leave related exception handling to the enabler.
+                SetUri(piChildNode);
             }
             else if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_DISPLAY_NAME))
             {
@@ -211,7 +210,7 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
             }
             else
             {
-                IMS_TRACE_D("Unknown element (%s)", strNodeName.GetStr(), 0, 0);
+                IMS_TRACE_D("Skip or unknown element (%s)", strNodeName.GetStr(), 0, 0);
             }
 
             piChildNode = piChildNode->GetNextSibling();

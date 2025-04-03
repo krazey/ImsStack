@@ -15,6 +15,7 @@
  */
 #include "IDigestAka.h"
 #include "NatHelper.h"
+#include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServicePhoneInfo.h"
@@ -86,7 +87,8 @@ Registration::Registration() :
         m_bIsBehindNat(IMS_FALSE),
         m_bIsWithinTrustDomain(IMS_TRUE),
         m_bActiveBindingsRestorationEnabled(IMS_FALSE),
-        m_nRefCountForScnErrorListener(0)
+        m_nRefCountForScnErrorListener(0),
+        m_bLenientToCheckContactUriOfRegInfo(IMS_FALSE)
 {
 }
 
@@ -199,6 +201,13 @@ IMS_BOOL Registration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor
 
     m_pStateTracker->SetAor(objAor);
     m_pStateTracker->SetSubscriberId(strSubsId);
+
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
+    if (piCc != IMS_NULL)
+    {
+        m_bLenientToCheckContactUriOfRegInfo = piCc->GetBoolean(
+                CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL, IMS_FALSE);
+    }
 
     return IMS_TRUE;
 }
@@ -1712,7 +1721,8 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
                     continue;
                 }
 
-                if (pContact->GetContactAddress().Equals(piRegInfoContact->GetUri()))
+                if (pContact->GetContactAddress().Equals(piRegInfoContact->GetUri()) ||
+                        m_bLenientToCheckContactUriOfRegInfo)
                 {
                     bUpdateRefreshTimer = IMS_TRUE;
 

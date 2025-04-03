@@ -364,9 +364,10 @@ private:
     IMS_BOOL m_bIsWithinTrustDomain;
     // REG_RESTORATION_FOR_ACTIVE_BINDING
     IMS_BOOL m_bActiveBindingsRestorationEnabled;
-
     // Reference count for ISipConnectionNotifierErrorListener
     IMS_SINT32 m_nRefCountForScnErrorListener;
+    // Lenient to check Contact URI field of "reginfo" package subscription
+    IMS_BOOL m_bLenientToCheckContactUriOfRegInfo;
 };
 
 #endif
