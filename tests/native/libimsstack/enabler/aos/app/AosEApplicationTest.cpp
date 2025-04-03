@@ -75,6 +75,7 @@ using ::testing::ReturnRef;
     using Base::Condition_RequestCommand;           \
     using Base::GetAppState;                        \
     using Base::GetState;                           \
+    using Base::IsRegWaitingRequired;               \
     using Base::IsECallConnectedNetworkUnavailable; \
     using Base::IsImsCall;                          \
     using Base::IsKeepEPdnWhenNoPcscf;              \
@@ -937,6 +938,46 @@ TEST_F(AosEApplicationTest, ProcessRegBlockedTimerExpired)
     EXPECT_CALL(m_objMockAosConnector, IsReady()).WillOnce(Return(IMS_FALSE));
     m_pTestAosEApplication->ProcessRegBlockedTimerExpired();
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_REG_BLOCKED));
+}
+
+TEST_F(AosEApplicationTest, IsRegWaitingRequiredShouldReturnFalseWhenRegTimerIsNotSet)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegTimerForEmcCall()).WillByDefault(Return(0));
+
+    EXPECT_FALSE(m_pTestAosEApplication->IsRegWaitingRequired());
+}
+
+TEST_F(AosEApplicationTest, IsRegWaitingRequiredShouldReturnTrueWhenWifiIsConnected)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegTimerForEmcCall()).WillByDefault(Return(1000));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegTimerForECallWithRatCheckEnabled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objPhoneInfoService.GetMockWifiWatcher(), GetState())
+            .WillByDefault(Return(IWifiWatcher::STATE_CONNECTED));
+
+    EXPECT_TRUE(m_pTestAosEApplication->IsRegWaitingRequired());
+}
+
+TEST_F(AosEApplicationTest, IsRegWaitingRequiredShouldReturnTrueWhenRatIsSupported)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegTimerForEmcCall()).WillByDefault(Return(1000));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegTimerForECallWithRatCheckEnabled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_TRUE(m_pTestAosEApplication->IsRegWaitingRequired());
+}
+
+TEST_F(AosEApplicationTest, IsRegWaitingRequiredShouldReturnTrueWhenRatCheckIsDisable)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegTimerForEmcCall()).WillByDefault(Return(1000));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegTimerForECallWithRatCheckEnabled())
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_TRUE(m_pTestAosEApplication->IsRegWaitingRequired());
 }
 
 TEST_F(AosEApplicationTest, IsECallConnectedNetworkUnavailableShouldReturnTrueIfIwlanIsNotAvailable)

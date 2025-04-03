@@ -29,6 +29,8 @@
         <item value="3"/>
         <item value="6"/>
     </int-array>
+    <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
+    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->

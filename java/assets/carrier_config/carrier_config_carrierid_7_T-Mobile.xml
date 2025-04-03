@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,7 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ims General -->
-    <int name="ims.registration_contact_user_info_part_int" value="1"/>
-
     <!-- Aos -->
-    <boolean name="ims.ims_dereg_on_3g_network_bool" value="true"/>
     <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
-
-    <!-- Ut/Xcap -->
-    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>

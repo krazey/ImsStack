@@ -701,6 +701,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "keep_epdn_upon_pcscf_unavailable_bool";
         public static final String KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL =
                 KEY_PREFIX + "keep_ereg_retry_on_wlan_bool";
+        public static final String KEY_REG_TIMER_FOR_ECALL_TIMEOUT_AS_FAILURE_BOOL =
+                KEY_PREFIX + "reg_timer_for_ecall_timeout_as_failure_bool";
+        public static final String KEY_REG_TIMER_FOR_ECALL_WITH_RAT_CHECK_ENABLED_BOOL =
+                KEY_PREFIX + "reg_timer_for_ecall_with_rat_check_enabled_bool";
         public static final String KEY_RELEASE_EPDN_OF_UNAVAILABLE_NETWORK_BOOL =
                 KEY_PREFIX + "release_epdn_of_unavailable_network_bool";
         public static final String KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL =
