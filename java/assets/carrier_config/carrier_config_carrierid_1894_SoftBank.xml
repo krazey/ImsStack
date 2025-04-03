@@ -45,6 +45,7 @@
     <boolean name="ims.session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
+    <int name="ims.ims_establishment_time_for_nr_sec_int" value="320"/>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="true"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
