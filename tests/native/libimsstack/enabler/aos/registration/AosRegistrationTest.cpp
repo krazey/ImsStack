@@ -3404,7 +3404,7 @@ TEST_F(AosRegistrationTest, ResetPcscfTriedIfAllPcscfTriedWhenStartWithSpecified
     ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(3));
     ON_CALL(m_objMockIAosPcscf, IsAllPcscfTried()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(10));
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte()).WillByDefault(Return(10));
 
     EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTried());
 

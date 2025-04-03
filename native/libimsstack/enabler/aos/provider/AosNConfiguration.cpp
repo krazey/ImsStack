@@ -561,9 +561,14 @@ PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetIsimIndexForImpu()
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nIsimIndexForImpu);
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsEstablishmentTime() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsEstablishmentTimeForLte() const
 {
-    return m_objAsset.nImsEstablishmentTimeSec;
+    return m_objAsset.nImsEstablishmentTimeForLteSec;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsEstablishmentTimeForNr() const
+{
+    return m_objAsset.nImsEstablishmentTimeForNrSec;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredImsDscp() const
@@ -1554,8 +1559,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EREG_RETRY_TIMER_MILLIS_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
             piCc->GetInt(CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
-    m_objAsset.nImsEstablishmentTimeSec =
-            piCc->GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT);
+    m_objAsset.nImsEstablishmentTimeForLteSec =
+            piCc->GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_LTE_SEC_INT);
+    m_objAsset.nImsEstablishmentTimeForNrSec =
+            piCc->GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT);
     m_objAsset.nImsPreferredIpType = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT);
     m_objAsset.nImsSignallingDscp = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT);
     m_objAsset.nRegActualWaitTimePolicy =

@@ -127,7 +127,8 @@ public:
     IMS_UINT32 GetRegistrationRetryBaseTime() override;
     IMS_UINT32 GetRegistrationRetryMaxTime() override;
     IMS_UINT32 GetIsimIndexForImpu() override;
-    IMS_SINT32 GetImsEstablishmentTime() const override;
+    IMS_SINT32 GetImsEstablishmentTimeForLte() const override;
+    IMS_SINT32 GetImsEstablishmentTimeForNr() const override;
     IMS_SINT32 GetPreferredImsDscp() const override;
     IMS_SINT32 GetRegistrationPreferredAccessTypeFeatureTag() const override;
     IMS_SINT32 GetUssdMethod() const override;

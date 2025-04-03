@@ -83,7 +83,8 @@ public:
             nEmcRegRetryMaxCnt(0),
             nEmcRegRetryTimerMillis(0),
             nGeolocationPidfFormingPolicy(CarrierConfig::Ims::GEOLOCATION_POLICY_WITHOUT_POSITION),
-            nImsEstablishmentTimeSec(0),
+            nImsEstablishmentTimeForLteSec(0),
+            nImsEstablishmentTimeForNrSec(180),
             nImsPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
             nImsSignallingDscp(46),
             nRegActualWaitTimePolicy(CarrierConfig::Ims::AWT_POLICY_RFC_RULE),
@@ -184,7 +185,8 @@ public:
     IMS_SINT32 nEmcRegRetryMaxCnt;
     IMS_SINT32 nEmcRegRetryTimerMillis;
     IMS_SINT32 nGeolocationPidfFormingPolicy;
-    IMS_SINT32 nImsEstablishmentTimeSec;
+    IMS_SINT32 nImsEstablishmentTimeForLteSec;
+    IMS_SINT32 nImsEstablishmentTimeForNrSec;
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
     IMS_SINT32 nRegActualWaitTimePolicy;

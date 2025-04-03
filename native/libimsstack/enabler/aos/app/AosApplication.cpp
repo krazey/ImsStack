@@ -1191,7 +1191,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentControl(IN IMSMSG&
 {
     if (IsRegTypeNormal())
     {
-        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() - 1;
+        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte() - 1;
 
         if (nEstTime <= 0)
         {
@@ -2264,7 +2264,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRoamingState(IN IMS_BOOL bRoaming)
 
         if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
         {
-            IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime();
+            IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte();
 
             if (nEstTime <= 0)
             {
@@ -2488,7 +2488,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 {
     if (IsRegTypeNormal())
     {
-        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime();
+        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte();
 
         if (nEstTime <= 0)
         {
@@ -3439,7 +3439,7 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
     if (eType == AosRegRequestType::START_IMS_EST_TIMER)
     {
-        if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() > 0)
+        if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte() > 0)
         {
             PostMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
         }

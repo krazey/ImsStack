@@ -813,12 +813,20 @@ public:
     virtual IMS_SINT32 GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const = 0;
 
     /**
-     * @brief Get the IMS establishment time.
+     * @brief Get the IMS establishment time for LTE.
      *
-     * @return IMS_SINT32 Returns IMS establishment time.
-     * @see {@code ims.ims_establishment_time_sec_int}
+     * @return IMS_SINT32 Returns IMS establishment time for LTE.
+     * @see {@code ims.ims_establishment_time_for_lte_sec_int}
      */
-    virtual IMS_SINT32 GetImsEstablishmentTime() const = 0;
+    virtual IMS_SINT32 GetImsEstablishmentTimeForLte() const = 0;
+
+    /**
+     * @brief Get the IMS establishment time for NR.
+     *
+     * @return IMS_SINT32 Returns IMS establishment time for NR.
+     * @see {@code ims.ims_establishment_time_for_nr_sec_int}
+     */
+    virtual IMS_SINT32 GetImsEstablishmentTimeForNr() const = 0;
 
     /**
      * @brief Indicate whether DSCP(Differentiated Services (Diffserv) Codepoint)

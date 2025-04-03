@@ -4003,7 +4003,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
                 if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() &&
                         piPcscf->GetPcscfCount() > 1 && piPcscf->IsAllPcscfTried() &&
                         piPcscf->IsFirstPcscf() &&
-                        GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() > 0)
+                        GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte() > 0)
                 {
                     A_IMS_TRACE_I(REGID, "StartWithSpecifiedIntervalPolicy :: all pcscfs are tried",
                             0, 0, 0);

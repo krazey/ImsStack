@@ -370,7 +370,8 @@
     <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>
     <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="1"/>
     <int name="ims.geolocation_pidf_forming_policy_int" value="1"/>
-    <int name="ims.ims_establishment_time_sec_int" value="0"/>
+    <int name="ims.ims_establishment_time_for_lte_sec_int" value="0"/>
+    <int name="ims.ims_establishment_time_for_nr_sec_int" value="180"/>
     <int name="ims.ims_preferred_iptype_int" value="1"/>
     <int name="ims.ims_signalling_dscp_int" value="46"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="0"/>
