@@ -198,6 +198,13 @@ public:
      * @return IMS_SINT32 video lowest Bitrate bps
      */
     IMS_SINT32 GetVideoLowestBitrateBps() const;
+    /**
+     * @brief Get the inactive media direction during video hold
+     *
+     * @return IMS_BOOL Return true if the media direction is inactive
+     * Return false if the media direction is not inactive
+     */
+    IMS_BOOL isVideoDirectionHoldUsingInactive() const;
 
 protected:
     /**
@@ -230,6 +237,7 @@ private:
     IMS_SINT32 m_nVideoSamplingRate;
     IMS_BOOL m_bVideoBwNegoOptionEnabled;
     IMS_SINT32 m_nVideoLowestBitrateBps;
+    IMS_BOOL m_bVideoHoldDirectionInactive;
 };
 
 #endif

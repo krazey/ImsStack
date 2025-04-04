@@ -155,6 +155,14 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         }
     }
 
+    if (GetConfiguration()->isVideoDirectionHoldUsingInactive() &&
+            (nVideoDirection == RtpConfig::MEDIA_DIRECTION_SEND_ONLY ||
+                    nVideoDirection == RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY))
+    {
+        nVideoDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+        IMS_TRACE_I("UpdateRtpConfig() - updated direction[%d]", nVideoDirection, 0, 0);
+    }
+
     pVideoConfig->setMediaDirection((int32_t)nVideoDirection);
 
     IMS_TRACE_D("UpdateRtpConfig() - MediaDirection[%d], TxPayload[%d], RxPayload[%d]",

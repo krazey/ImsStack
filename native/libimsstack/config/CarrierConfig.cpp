@@ -1028,6 +1028,8 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_PROFILE_INT_ARRAY[] =
         KEY_IMS_VT_PREFIX "video_codec_hevc_profile_int_array";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_LEVEL_INT_ARRAY[] =
         KEY_IMS_VT_PREFIX "video_codec_hevc_level_int_array";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_INACTIVE_HOLD_BOOL[] =
+        KEY_IMS_VT_PREFIX "video_inactive_hold_bool";
 
 //// ImsWfc
 #define KEY_IMS_WFC_PREFIX "imswfc."
