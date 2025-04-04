@@ -93,9 +93,10 @@ TEST_F(OsUtilTest, SystemProperty)
 {
     AString strUser("user");
     AString strUserDebug("userdebug");
+    AString strEng("eng");
 
     ISystemProperty* piSystemProperty = static_cast<ISystemProperty*>(m_pOsUtil);
-    EXPECT_THAT(piSystemProperty->Get("ro.build.type"), AnyOf(strUser, strUserDebug));
+    EXPECT_THAT(piSystemProperty->Get("ro.build.type"), AnyOf(strUser, strUserDebug, strEng));
 }
 
 TEST_F(OsUtilTest, Zlib)
