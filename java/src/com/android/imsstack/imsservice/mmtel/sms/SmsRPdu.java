@@ -143,7 +143,7 @@ public final class SmsRPdu {
             log("RpUserData is null");
             return;
         }
-        mTpdu = new SmsTPdu(mRpUserData, direction);
+        mTpdu = new SmsTPdu(this, direction);
         mTpdu.parse();
         log(" TPDU: " + mTpdu);
     }

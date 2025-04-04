@@ -64,6 +64,7 @@ public class SmsTPdu {
     private byte[] mOriginatingAddress;
     private byte[] mDestinationAddress; // Also used for RecipientAddress in StatusReport
     private Direction mDirection;
+    private int mRpMti;
 
     // Fields Parsed from User Data Header
     private int mUdhIei = -1; // IEI for concatenated SMS if present
@@ -76,9 +77,10 @@ public class SmsTPdu {
         SC_TO_MS
     }
 
-    public SmsTPdu(byte[] pdu, Direction direction) {
-        mPdu = pdu;
+    public SmsTPdu(SmsRPdu smsRpdu, Direction direction) {
+        mPdu = smsRpdu.getUserData();
         mDirection = direction;
+        mRpMti = smsRpdu.getMessageType();
     }
 
     /** Decodes of TPdu as per 3GPP TS 23.040 */
@@ -125,24 +127,156 @@ public class SmsTPdu {
         }
     }
 
+    private void parseParameterIndicator(PduParser parser) {
+        if (!parser.hasMoreData()) {
+            return;
+        }
+
+        // TP-PI
+        mParameterIndicator = parser.getOctet();
+
+        int currentPI = mParameterIndicator;
+        // Only parse first PI octet's flags for known parameters
+        while ((currentPI & 0x80) != 0) {
+            if (!parser.hasMoreData()) {
+                return;
+            }
+            currentPI = parser.getOctet();
+        }
+    }
+
+    private void parseOptionalParameters(PduParser parser) {
+        if (!parser.hasMoreData()) {
+            return; // No optional parameters
+        }
+
+        // Check if reserved bits (3-6) are non-zero; if so, ignore PI flags
+        if ((mParameterIndicator & 0x78) != 0) {
+            return;
+        }
+
+        // TP-PID (Optional)
+        if ((mParameterIndicator & 0x01) != 0) {
+            if (!parser.hasMoreData()) {
+                return;
+            }
+            mProtocolIdentifier = parser.getOctet();
+        }
+
+        // TP-DCS (Optional)
+        if ((mParameterIndicator & 0x02) != 0) {
+            if (!parser.hasMoreData()) {
+                return;
+            }
+            mDataCodingScheme = parser.getOctet();
+        }
+
+        // TP-UDL & TP-UD (Optional)
+        if ((mParameterIndicator & 0x04) != 0) {
+            if (!parser.hasMoreData()) {
+                return;
+            }
+            mUserDataLength = parser.getOctet();
+            if (mUserDataHeaderIndicator == USER_DATA_HEADER_PRESENT) {
+                mUserDataHeader = parser.parseUserDataHeader();
+            }
+            mUserData = parser.parseUserData();
+        }
+    }
+
     private void parseSmsSubmitReport(PduParser parser, int firstOctet) {
-        // TODO: add implementation
+        mUserDataHeaderIndicator = (firstOctet >> 6) & ONE_BIT; // TP-UDHI
+
+        if (!parser.hasMoreData()) {
+            return;
+        }
+
+        if (mRpMti == SmsUtils.RP_ERROR) {
+            mFailureCause = parser.getOctet(); // TP-FCS (not present in RP-ACK)
+        }
+
+        parseParameterIndicator(parser);
+
+        if (!parser.hasMoreData(PduParser.TIMESTAMPS_OCTETS)) {
+            return;
+        }
+        parser.getTimeStamp(); // TP-SCTS
+        parseOptionalParameters(parser);
     }
 
     private void parseSmsDeliverReport(PduParser parser, int firstOctet) {
-        // TODO: add implementation
+        mUserDataHeaderIndicator = (firstOctet >> 6) & ONE_BIT; // TP-UDHI
+
+        if (!parser.hasMoreData()) {
+            return;
+        }
+
+        if (mRpMti == SmsUtils.RP_ERROR) {
+            mFailureCause = parser.getOctet(); // TP-FCS (not present in RP-ACK)
+        }
+
+        parseParameterIndicator(parser);
+        parseOptionalParameters(parser);
     }
 
     private void parseSmsSubmit(PduParser parser, int firstOctet) {
-        // TODO: add implementation
+        mRejectDuplicate = (firstOctet >> 2) & ONE_BIT; // TP-RD
+        mValidityPeriodFormat = (firstOctet >> 3) & TWO_BITS; // TP-VPF
+        mStatusReportRequest = (firstOctet >> 5) & ONE_BIT; // TP-SRR
+        mUserDataHeaderIndicator = (firstOctet >> 6) & ONE_BIT; // TP-UDHI
+        mReplyPath = (firstOctet >> 7) & ONE_BIT; // TP-RP
+
+        mMessageRef = parser.getOctet(); // TP-MR
+        mDestinationAddress = parser.getAddress(); // TP-DA
+        mProtocolIdentifier = parser.getOctet(); // TP-PID
+        mDataCodingScheme = parser.getOctet(); // TP-DCS
+        parser.parseValidityPeriod(mValidityPeriodFormat); // TP-VP
+
+        mUserDataLength = parser.getOctet(); // TP-UDL
+        if (mUserDataHeaderIndicator == USER_DATA_HEADER_PRESENT) {
+            mUserDataHeader = parser.parseUserDataHeader(); // TP-UDH
+        }
+        mUserData = parser.parseUserData(); // TP-UD
     }
 
     private void parseSmsDeliver(PduParser parser, int firstOctet) {
-        // TODO: add implementation
+        mMoreMessageToSend = (firstOctet >> 2) & ONE_BIT; // TP-MMS
+        mLoopPrevention = (firstOctet >> 3) & ONE_BIT; // TP-LP
+        mStatusReportIndication = (firstOctet >> 5) & ONE_BIT; // TP-SRI
+        mUserDataHeaderIndicator = (firstOctet >> 6) & ONE_BIT; // TP-UDHI
+        mReplyPath = (firstOctet >> 7) & ONE_BIT; // TP-RP
+
+        mOriginatingAddress = parser.getAddress(); // TP-OA
+        mProtocolIdentifier = parser.getOctet(); // TP-PID
+        mDataCodingScheme = parser.getOctet(); // TP-DCS
+        parser.getTimeStamp(); // TP-SCTS
+
+        mUserDataLength = parser.getOctet(); // TP-UDL
+        if (mUserDataHeaderIndicator == USER_DATA_HEADER_PRESENT) {
+            mUserDataHeader = parser.parseUserDataHeader(); // TP-UDH
+        }
+        mUserData = parser.parseUserData(); // TP-UD
     }
 
     private void parseSmsStatusReport(PduParser parser, int firstOctet) {
-        // TODO: add implementation
+        mMoreMessageToSend = (firstOctet >> 2) & ONE_BIT; // TP-MMS
+        mLoopPrevention = (firstOctet >> 3) & ONE_BIT; // TP-LP
+        mStatusReportQualifier = (firstOctet >> 5) & ONE_BIT; // TP-SRQ
+        mUserDataHeaderIndicator = (firstOctet >> 6) & ONE_BIT; // TP-UDHI
+        // Bit 7 reserved (0)
+
+        mMessageRef = parser.getOctet(); // TP-MR
+        mDestinationAddress = parser.getAddress(); // TP-RA
+        parser.getTimeStamp(); // TP-SCTS
+        parser.getTimeStamp(); // TP-DT
+        mStatus = parser.getOctet(); // TP-ST
+
+        parseParameterIndicator(parser);
+        parseOptionalParameters(parser);
+    }
+
+    public String getDataCodingSchemeHex() {
+        return String.format("0x%02X", mDataCodingScheme);
     }
 
     // --- PduParser Inner Class ---
