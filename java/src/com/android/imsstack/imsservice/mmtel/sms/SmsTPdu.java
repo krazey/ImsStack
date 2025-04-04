@@ -19,6 +19,8 @@ package com.android.imsstack.imsservice.mmtel.sms;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 
+import java.util.Arrays;
+
 /** Implements the parser for TPDU as per 3GPP TS 23.040 */
 public class SmsTPdu {
     private static final String TAG = "[GII-SmsTPdu] ";
@@ -36,6 +38,8 @@ public class SmsTPdu {
     private static final int EIGHT_BITS = 0xFF;
     private static final int IEI_CONCATENATED_SMS_8BIT = 0x00;
     private static final int IEI_CONCATENATED_SMS_16BIT = 0x08;
+    private static final int IEI_CONCATENATED_SMS_8BIT_LENGTH = 3;
+    private static final int IEI_CONCATENATED_SMS_16BIT_LENGTH = 4;
 
     private int mMessageTypeIndicator = -1;
     private int mReplyPath;
@@ -163,6 +167,10 @@ public class SmsTPdu {
             return mCur < mPdu.length;
         }
 
+        boolean hasMoreData(int expectedOctets) {
+            return mCur + expectedOctets <= mPdu.length;
+        }
+
         int getOctet() {
             if (hasMoreData()) {
                 return mPdu[mCur++] & EIGHT_BITS;
@@ -170,6 +178,144 @@ public class SmsTPdu {
                 loge("Failed to get next octet, reached end of array");
                 return -1;
             }
+        }
+
+        byte[] getAddress() {
+            if (!hasMoreData(2)) { // Need at least length and type octets
+                loge("Failed to parse the address, not enough data for length/type");
+                mCur = mPdu.length;
+                return null;
+            }
+
+            byte[] address = null;
+            int addressLengthInDigits = mPdu[mCur] & EIGHT_BITS; // Length is number of digits
+            int bcdOctets = (addressLengthInDigits + 1) / 2;
+            int totalLength = 2 + bcdOctets; // Length octet + Type octet + BCD octets
+
+            if (hasMoreData(totalLength)) {
+                address = Arrays.copyOfRange(mPdu, mCur, mCur + totalLength);
+                mCur += totalLength;
+            } else {
+                loge("Failed to parse the address, not enough data for BCD part");
+                mCur = mPdu.length;
+            }
+            return address;
+        }
+
+        long getTimeStamp() {
+            long timestamp = 0;
+            if (hasMoreData(TIMESTAMPS_OCTETS)) {
+                // Skipped parsing logic for now, just consume bytes
+                mCur += TIMESTAMPS_OCTETS;
+            } else {
+                loge("Failed to parse the timestamp, not enough data");
+                mCur = mPdu.length;
+            }
+            return timestamp;
+        }
+
+        void parseValidityPeriod(int format) {
+            int validityPeriodLengthOctets = 0;
+            switch (format) {
+                case VALIDITY_PERIOD_FORMAT_NONE:
+                    validityPeriodLengthOctets = VALIDITY_PERIOD_FORMAT_NONE_OCTETS;
+                    break;
+                case VALIDITY_PERIOD_FORMAT_RELATIVE:
+                    validityPeriodLengthOctets = VALIDITY_PERIOD_FORMAT_RELATIVE_OCTETS;
+                    break;
+                default: // VALIDITY_PERIOD_FORMAT_ENHANCED or VALIDITY_PERIOD_FORMAT_ABSOLUTE
+                    validityPeriodLengthOctets = VALIDITY_PERIOD_FORMAT_ENHANCED_OCTETS;
+                    break;
+            }
+
+            if (hasMoreData(validityPeriodLengthOctets)) {
+                // Skipped actual value parsing logic for now, just consume bytes
+                mCur += validityPeriodLengthOctets;
+            } else if (validityPeriodLengthOctets > 0) {
+                loge("Failed to parse Validity Period, not enough data. ");
+                mCur = mPdu.length;
+            }
+        }
+
+        /**
+         * Parses the UDH including the length octet, saves it, decodes known IEs, and returns the
+         * full UDH including the length byte.
+         */
+        byte[] parseUserDataHeader() {
+            if (!hasMoreData()) {
+                loge("Failed to parse User Data Header length, reached end of the array");
+                return null;
+            }
+            int headerLength = mPdu[mCur] & EIGHT_BITS; // Length of header *data*
+            int totalHeaderLength = headerLength + 1;
+
+            if (hasMoreData(totalHeaderLength)) {
+                byte[] fullHeader = Arrays.copyOfRange(mPdu, mCur, mCur + totalHeaderLength);
+                decodeUdhData(fullHeader, 1, headerLength);
+                mCur += totalHeaderLength;
+                return fullHeader;
+            } else {
+                loge("Failed to parse User Data Header data, not enough data");
+                mCur = mPdu.length;
+            }
+            return null;
+        }
+
+        /**
+         * Decodes known Information Elements from the UDH data portion.
+         *
+         * @param fullHeader The full UDH byte array (including length byte).
+         * @param offset The starting offset of the header *data* within fullHeader (usually 1).
+         * @param length The length of the header *data* (UDHL value).
+         */
+        private void decodeUdhData(byte[] fullHeader, int offset, int length) {
+            if (fullHeader == null || length == 0 || offset + length > fullHeader.length) {
+                return;
+            }
+
+            int cursor = offset;
+            int end = offset + length;
+            while (cursor < end) {
+                if (cursor + 1 >= end) {
+                    loge("UDH Decode Error: Not enough bytes for IEI and IEIL");
+                    return;
+                }
+
+                int iei = fullHeader[cursor++] & EIGHT_BITS;
+                int ieil = fullHeader[cursor++] & EIGHT_BITS;
+
+                if (cursor + ieil > end) {
+                    loge("UDH Decode Error: Not enough bytes for IE data");
+                    return;
+                }
+
+                // --- Decode Concatenated SMS ---
+                if (iei == IEI_CONCATENATED_SMS_8BIT && ieil == IEI_CONCATENATED_SMS_8BIT_LENGTH) {
+                    mOuter.mUdhReference = fullHeader[cursor] & EIGHT_BITS;
+                    mOuter.mUdhMaxNum = fullHeader[cursor + 1] & EIGHT_BITS;
+                    mOuter.mUdhSeqNum = fullHeader[cursor + 2] & EIGHT_BITS;
+                    mOuter.mUdhIei = iei;
+                } else if (iei == IEI_CONCATENATED_SMS_16BIT
+                        && ieil == IEI_CONCATENATED_SMS_16BIT_LENGTH) {
+                    mOuter.mUdhReference =
+                            ((fullHeader[cursor] & EIGHT_BITS) << 8)
+                                    | (fullHeader[cursor + 1] & EIGHT_BITS);
+                    mOuter.mUdhMaxNum = fullHeader[cursor + 2] & EIGHT_BITS;
+                    mOuter.mUdhSeqNum = fullHeader[cursor + 3] & EIGHT_BITS;
+                    mOuter.mUdhIei = iei;
+                }
+
+                cursor += ieil;
+            }
+        }
+
+        byte[] parseUserData() {
+            if (!hasMoreData()) {
+                return null;
+            }
+            byte[] userData = Arrays.copyOfRange(mPdu, mCur, mPdu.length);
+            mCur = mPdu.length;
+            return userData;
         }
     }
 
