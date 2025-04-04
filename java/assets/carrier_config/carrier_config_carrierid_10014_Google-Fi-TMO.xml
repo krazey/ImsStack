@@ -231,9 +231,10 @@
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="7000"/>
     <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
-    <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_int_array" num="2">
+    <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_int_array" num="3">
         <item value="0"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_NR -->
         <item value="1"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK -->
+        <item value="2"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH -->
     </int-array>
     <boolean name="imsvoice.trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool" value="true"/>
     <boolean name="imsvoice.restart_dedicated_bearer_wait_timer_by_eps_fallback_bool" value="false"/>

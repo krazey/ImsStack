@@ -1414,6 +1414,14 @@ IMS_BOOL MtcPreconditionManager::IsNotUsingDedicatedWaitTimerByRatCondition() co
         return IMS_TRUE;
     }
 
+    if (m_objContext.GetConfigurationProxy().Contains(
+                ConfigVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY,
+                ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH) &&
+            m_objContext.GetService().IsEpsOnlyAttach())
+    {
+        return IMS_TRUE;
+    }
+
     return IMS_FALSE;
 }
 

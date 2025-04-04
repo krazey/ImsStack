@@ -1290,6 +1290,7 @@ public:
         {
             NO_WAIT_DEDICATED_BEARER_IN_NR = 0,
             NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK = 1,
+            NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH = 2,
         };
 
         enum

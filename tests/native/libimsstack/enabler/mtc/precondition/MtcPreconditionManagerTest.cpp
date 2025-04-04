@@ -1093,6 +1093,28 @@ TEST_F(MtcPreconditionManagerTest,
     pPreconditionManager->OnSdpSent(&objISession, IMS_FALSE);
 }
 
+TEST_F(MtcPreconditionManagerTest,
+        DoNotStartsQosTimerOnSdpSentIfDedicatedWaitTimerIsNotUsedByRatConditionEpsOnly)
+{
+    SetUpMockQosInfo();
+
+    pPreconditionManager->SetCurrentRatTypeForPrerequisite(INetworkWatcher::RADIOTECH_TYPE_LTE);
+
+    ON_CALL(objMediaManager, GetNegotiationState(&objISession))
+            .WillByDefault(Return(NEGO_STATE::STATE_NEGOTIATED));
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    SetUpNothingOnDefaultBearerSupported();
+
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY,
+                    ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsEpsOnlyAttach()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::WAIT_AUDIO_DEDICATED_BEARER, _)).Times(0);
+    pPreconditionManager->OnSdpSent(&objISession, IMS_FALSE);
+}
+
 TEST_F(MtcPreconditionManagerTest, DoNothingOnMessageReceivedIfPreconditionNotSupported)
 {
     SetUpMockQosInfo();
