@@ -20,11 +20,8 @@
 
 #include "AString.h"
 #include "AStringArray.h"
-#include "ImsEventDef.h"
 #include "ImsMap.h"
-#include "INetworkWatcher.h"
 #include "PlatformContext.h"
-#include "ServiceNetworkPolicy.h"
 #include "TestThreadService.h"
 #include "TestTimerService.h"
 #include "MockIThread.h"
@@ -33,10 +30,9 @@
 #include "../../../config/interface/CarrierConfig.h"
 #include "../../../config/interface/ImsServiceConfig.h"
 
-#include "../../interface/aos/MockIAosService.h"
 #include "../../interface/aos/MockIImsAosMonitor.h"
 
-#include "app/MockAosAppContext.h"
+#include "condition/MockAosCondition.h"
 #include "connection/MockAosConnector.h"
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlock.h"
@@ -169,32 +165,6 @@ enum
     REQUEST_PDN_DISCONNECT
 };
 
-class TestAosCondition : public AosCondition
-{
-    inline explicit TestAosCondition(IN IAosAppContext* piAppContext) :
-            AosCondition(piAppContext)
-    {
-    }
-
-    friend class AosEApplicationTest;
-
-public:
-private:
-};
-
-class AppTestAosRegistration : public AosRegistration
-{
-    inline AppTestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
-            AosRegistration(piAppContext, strRegId)
-    {
-    }
-
-    friend class AosEApplicationTest;
-
-public:
-private:
-};
-
 class TestAosEApplication : public AosEApplication
 {
 public:
@@ -234,13 +204,13 @@ class AosEApplicationTest : public ::testing::Test
 {
 public:
     TestAosEApplication* m_pTestAosEApplication;
-    TestAosCondition* m_pTestAosCondition;
     TestThreadService m_objThreadService;
     TestTimerService m_objTimerService;
     TestPhoneInfoService m_objPhoneInfoService;
     AosStaticProfile* m_pAosStaticProfile;
     IAosNConfiguration* m_piAosNConfiguration;
 
+    MockAosCondition m_objMockAosCondition;
     MockAosConnector m_objMockAosConnector;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosBlock m_objMockIAosBlock;
@@ -364,9 +334,7 @@ protected:
                 new TestAosEApplication(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                         m_pAosStaticProfile->GetId());
 
-        m_pTestAosCondition =
-                new TestAosCondition(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
-        m_pTestAosEApplication->SetAosCondition(m_pTestAosCondition);
+        m_pTestAosEApplication->SetAosCondition(&m_objMockAosCondition);
 
         m_pTestAosEApplication->SetAosConnector(&m_objMockAosConnector);
         EXPECT_CALL(m_objMockAosConnector, Stop()).Times(AnyNumber());
@@ -385,11 +353,6 @@ protected:
     {
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
-
-        if (m_pTestAosCondition)
-        {
-            delete m_pTestAosCondition;
-        }
 
         if (m_pTestAosEApplication)
         {
@@ -569,8 +532,7 @@ TEST_F(AosEApplicationTest, StateNotReady_Condition)
 {
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_NOTREADY);
     ImsMessage objMessageCnd(MSG_CONDITION, 0, 0);
-    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_AOS_INCOMPLETED, _, _))
-            .Times(AnyNumber())
+    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_AOS_INCOMPLETED))
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
@@ -716,8 +678,7 @@ TEST_F(AosEApplicationTest, StateReady_Condition)
 {
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
     ImsMessage objMessageCnd(MSG_CONDITION, 0, 0);
-    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_AOS_INCOMPLETED, _, _))
-            .Times(AnyNumber())
+    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_AOS_INCOMPLETED))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
 
@@ -918,10 +879,13 @@ TEST_F(AosEApplicationTest, ProcessAppTerminatedTimerExpired)
 TEST_F(AosEApplicationTest, ProcessReconfigTimerExpired)
 {
     m_pTestAosEApplication->StartTimer(TIMER_RECONFIG_GUARD, 1000);
-    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SERVICE_CONNECTING, _, _))
+
+    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_SERVICE_CONNECTING))
             .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_SERVICE_CONNECTING, _)).Times(1);
+    EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_SERVICE_CONNECTING, _)).Times(1);
+
     m_pTestAosEApplication->ProcessReconfigTimerExpired();
+
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
 }
 
