@@ -143,9 +143,15 @@ public final class SmsRPdu {
             log("RpUserData is null");
             return;
         }
-        mTpdu = new SmsTPdu(this, direction);
-        mTpdu.parse();
-        log(" TPDU: " + mTpdu);
+        try {
+            mTpdu = new SmsTPdu(this, direction);
+            mTpdu.parse();
+            if (DBG) {
+                log("DecodedSmsPdu: " + this);
+            }
+        } catch (RuntimeException e) {
+            loge("Error parsing pdu: " + e.getMessage());
+        }
     }
 
     /**
@@ -153,6 +159,7 @@ public final class SmsRPdu {
      */
     private byte[] getRpDataPdu() {
         log("getRpDataPdu");
+        mMessageTypeInd = MO_RP_DATA_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         byte[] destinationAddress = ImsUtils.hexStringToBytes(mDestAddr);
         if (destinationAddress == null || destinationAddress.length == 0) {
@@ -177,6 +184,7 @@ public final class SmsRPdu {
      */
     private byte[] getRpAckPdu() {
         log("getRpAckPdu");
+        mMessageTypeInd = MO_RP_ACK_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_ACK_MTI);
         bo.write((byte) mMessageRef);
@@ -195,6 +203,7 @@ public final class SmsRPdu {
      */
     private byte[] getRpErrorPdu() {
         log("getRpErrorPdu");
+        mMessageTypeInd = MO_RP_ERROR_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_ERROR_MTI);
         bo.write((byte) mMessageRef);
@@ -218,6 +227,7 @@ public final class SmsRPdu {
      */
     private byte[] getRpSmmaPdu() {
         log("getRpSmmaPdu");
+        mMessageTypeInd = MO_RP_SMMA_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_SMMA_MTI);
 
@@ -399,5 +409,63 @@ public final class SmsRPdu {
 
     private static void logi(String s) {
         ImsLog.i(TAG + s);
+    }
+
+    // For logging purpose
+    private String byteArrayToString(byte[] array) {
+        if (array == null) {
+            return "Not Present";
+        }
+        return ImsLog.hiddenString(ImsUtils.bytesToHexString(array));
+    }
+
+    private String getRpMessageTypeString() {
+        log("RP-MTI: " + mMessageTypeInd);
+        return switch (mMessageTypeInd) {
+            case MO_RP_DATA_MTI -> "RP-DATA MS_TO_SC";
+            case MT_RP_DATA_MTI -> "RP-DATA SC_TO_MS";
+            case MO_RP_ACK_MTI -> "RP-ACK MS_TO_SC";
+            case MT_RP_ACK_MTI -> "RP-ACK SC_TO_MS";
+            case MO_RP_ERROR_MTI -> "RP-ERROR MS_TO_SC";
+            case MT_RP_ERROR_MTI -> "RP-ERROR SC_TO MS";
+            case MO_RP_SMMA_MTI -> "RP-SMMA MS_TO_SC";
+            default -> "UNKNOWN (" + mMessageTypeInd + ")";
+        };
+    }
+
+    private String getMessageTypeIndicator() {
+        return String.format("%3s", Integer.toBinaryString(mMessageTypeInd)).replace(' ', '0');
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("\n  RP Message Type: ").append(getRpMessageTypeString());
+        builder.append("\n  RP-MTI (Message Type Indicator): ").append(getMessageTypeIndicator());
+        builder.append("\n  RP-MR (Message Reference): ").append(mMessageRef);
+
+        if (mOrigAddr != null) {
+            builder.append("\n  RP-OA (Origination Address): ")
+                    .append(ImsLog.hiddenString(mOrigAddr));
+        }
+        if (mDestAddr != null) {
+            builder.append("\n  RP-DA (Destination Address): ")
+                    .append(ImsLog.hiddenString(mDestAddr));
+        }
+        if (mRpMessageType == SmsUtils.RP_ERROR) {
+            builder.append("\n  RP-Cause: ").append(String.format("0x%02X", getRPCause()));
+        }
+
+        builder.append("\n  RP-UD (User Data): ").append(byteArrayToString(mRpUserData));
+        builder.append("\n  Raw R-PDU: ").append(byteArrayToString(mRpdu));
+
+        if (mTpdu != null) {
+            builder.append("\n").append(mTpdu.toString());
+        } else {
+            builder.append("\n  T-PDU: Not Present");
+        }
+        builder.append("\n");
+
+        return builder.toString();
     }
 }

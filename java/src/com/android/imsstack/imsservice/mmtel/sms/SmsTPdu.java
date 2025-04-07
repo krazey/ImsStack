@@ -454,9 +454,9 @@ public class SmsTPdu {
     }
 
     // For logging purpose
-    String byteArrayToString(byte[] array) {
+    private String byteArrayToString(byte[] array) {
         if (array == null) {
-            return "null";
+            return "Not Present";
         }
         return ImsLog.hiddenString(ImsUtils.bytesToHexString(array));
     }
@@ -471,9 +471,9 @@ public class SmsTPdu {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("SmsTPdu {");
+        StringBuilder builder = new StringBuilder();
         builder.append("\n  Direction: ").append(mDirection);
-        builder.append("\n  MTI: ").append(mMessageTypeIndicator);
+        builder.append("\n  TP-MTI: ").append(getMessageTypeIndicator());
         builder.append(" (").append(getMtiString()).append(")");
         builder.append("\n  TP-RP (Reply Path): ").append(mReplyPath);
         builder.append("\n  TP-UDHI (UDH Indicator): ").append(mUserDataHeaderIndicator);
@@ -491,8 +491,7 @@ public class SmsTPdu {
                         .append(String.format("0x%02X", mProtocolIdentifier));
                 builder.append("\n  TP-DCS (Data Coding Scheme): ")
                         .append(getDataCodingSchemeHex());
-                builder.append("\n  TP-UDL (User Data Length): ")
-                        .append(mUserDataLength);
+                builder.append("\n  TP-UDL (User Data Length): ").append(mUserDataLength);
             } else if (mMessageTypeIndicator == MTI_DELIVER_REPORT) {
                 builder.append("\n  TP-FCS (Failure Cause): ")
                         .append(String.format("0x%02X", mFailureCause));
@@ -540,12 +539,11 @@ public class SmsTPdu {
                 builder.append("\n    Concat Seq: ").append(mUdhSeqNum);
             }
         } else {
-            builder.append("\n  TP-UDH (User Data Header): null");
+            builder.append("\n  TP-UDH (User Data Header): Not Present");
         }
 
         builder.append("\n  TP-UD (User Data): ").append(byteArrayToString(mUserData));
-        builder.append("\n  Raw TPDU: ").append(byteArrayToString(mPdu));
-        builder.append("\n}");
+        builder.append("\n  Raw T-PDU: ").append(byteArrayToString(mPdu));
         return builder.toString();
     }
 
@@ -575,6 +573,11 @@ public class SmsTPdu {
             return mMessageTypeIndicator == MTI_SUBMIT_REPORT
                     || mMessageTypeIndicator == MTI_STATUS_REPORT;
         }
+    }
+
+    private String getMessageTypeIndicator() {
+        return String.format("%2s", Integer.toBinaryString(mMessageTypeIndicator))
+                .replace(' ', '0');
     }
 
     private String getMtiString() {
