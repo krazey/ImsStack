@@ -485,6 +485,7 @@
     <boolean name="imsemergency.release_epdn_of_unavailable_network_bool" value="true"/>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="false"/>
     <boolean name="imsemergency.support_anonymous_ecall_action_bool" value="false"/>
+    <boolean name="imsemergency.support_ereg_when_eattach_with_valid_sim_bool" value="false"/>
     <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="false"/>
     <boolean name="imsemergency.support_giba_for_ereg_in_roaming_bool" value="false"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="false"/>

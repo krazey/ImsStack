@@ -394,6 +394,16 @@ public:
     virtual IMS_BOOL IsERegUsingFirstImpuInIsim() const = 0;
 
     /**
+     * @brief Flag specifying if an IMS emergency registration procedure is initiated when there is
+     *        LTE emergency attach or NR emergency registration with valid SIM.
+     *
+     * @return IMS_BOOL Returns IMS_TRUE if an IMS emergency registration is required under
+     *         the specified conditions, otherwise returns IMS_FALSE.
+     * @see {@code imsemergency.support_ereg_when_eattach_with_valid_sim_bool}
+     */
+    virtual IMS_BOOL IsSupportERegWhenEAttachWithValidSim() const = 0;
+
+    /**
      * @brief Flag specifying if emergency re-registration is required after handover.
      *
      *        If this is set as TRUE, emergency re-registration will be conducted

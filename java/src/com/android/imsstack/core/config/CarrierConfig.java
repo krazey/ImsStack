@@ -713,6 +713,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "stop_ereg_timer_on_epdn_connected_bool";
         public static final String KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL =
                 KEY_PREFIX + "support_anonymous_ecall_action_bool";
+        public static final String KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL =
+                KEY_PREFIX + "support_ereg_when_eattach_with_valid_sim_bool";
         public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
                 KEY_PREFIX + "support_erereg_on_ipcan_change_bool";
         public static final String KEY_SUPPORT_GIBA_FOR_EREG_IN_ROAMING_BOOL =

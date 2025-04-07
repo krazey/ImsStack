@@ -201,6 +201,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredWfcBlockByAirplaneMode() co
     return m_objAsset.bRequiredWfcBlockByAirplaneMode;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSupportERegWhenEAttachWithValidSim() const
+{
+    return m_objAsset.bSupportERegWhenEAttachWithValidSim;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyReregSupportedOnIpcanChange() const
 {
     return m_objAsset.bSupportEmergencyReregOnIpcanChange;
@@ -1510,6 +1515,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL);
     m_objAsset.bSupportAnonymousECallAction =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL);
+    m_objAsset.bSupportERegWhenEAttachWithValidSim = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL);
     m_objAsset.bSupportEmergencyReregOnIpcanChange =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportGibaForERegInRoaming = piCc->GetBoolean(

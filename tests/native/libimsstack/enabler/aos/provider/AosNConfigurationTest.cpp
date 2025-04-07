@@ -573,6 +573,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     CarrierConfig::ImsEmergency::KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(
+                    CarrierConfig::ImsEmergency::KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -925,6 +930,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsEmcRegOnRandomPcscf());
     EXPECT_TRUE(m_pAosNConfiguration->IsERegWithOnlyTcpInRoaming());
     EXPECT_TRUE(m_pAosNConfiguration->IsERegUsingFirstImpuInIsim());
+    EXPECT_TRUE(m_pAosNConfiguration->IsSupportERegWhenEAttachWithValidSim());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
     EXPECT_TRUE(m_pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(m_pAosNConfiguration->IsDeregOn3gNetwork());

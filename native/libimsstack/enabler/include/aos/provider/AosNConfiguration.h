@@ -83,6 +83,7 @@ public:
     IMS_BOOL IsEmcRegOnRandomPcscf() const override;
     IMS_BOOL IsERegWithOnlyTcpInRoaming() const override;
     IMS_BOOL IsERegUsingFirstImpuInIsim() const override;
+    IMS_BOOL IsSupportERegWhenEAttachWithValidSim() const override;
     IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const override;
     IMS_BOOL IsGibaSupportedForERegInRoaming() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
