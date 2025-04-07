@@ -811,11 +811,6 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRequestCmdHeldByCondition(
         return IMS_FALSE;
     }
 
-    if (nReason == AosReason::AIRPLANE_MODE)
-    {
-        SetOffReason(nReason);
-    }
-
     if (IsImsCall() && (nCommand == AosCondition::REQUEST_STOP))
     {
         m_pUtil->AddFeature(PENDING_REG_STOP_HELD, m_nRegPending);
@@ -3106,9 +3101,10 @@ PROTECTED VIRTUAL void AosApplication::Condition_RequestCommand(
             break;
 
         case AosCondition::REQUEST_REASON_UPDATE:
-            if (nReason == AosReason::WIFI_OFF && m_bEpdgEnabled && IsImsCall())
+            if ((nReason == AosReason::WIFI_OFF && m_bEpdgEnabled && IsImsCall()) ||
+                    nReason == AosReason::AIRPLANE_MODE)
             {
-                A_IMS_TRACE_I(APPID, "WIFI_OFF is set only when connected by epdg", 0, 0, 0);
+                A_IMS_TRACE_I(APPID, "AosReason is set by condition", 0, 0, 0);
                 SetOffReason(nReason);
             }
             break;
@@ -3427,7 +3423,7 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
     if (eType == AosRegRequestType::STOP)
     {
-        ProcessDisconnectingState();
+        ProcessDisconnectingState(GetOffReason());
         PostMessage(MSG_REG_STOP, 0, 0);
         return;
     }

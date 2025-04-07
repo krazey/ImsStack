@@ -747,8 +747,7 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
 
     if (bIsOn)
     {
-        RequestCommand(REQUEST_STOP, AosReason::AIRPLANE_MODE);
-
+        RequestCommand(REQUEST_REASON_UPDATE, AosReason::AIRPLANE_MODE);
         ClearRegistrationAndDataFailureBlocks();
     }
 }
