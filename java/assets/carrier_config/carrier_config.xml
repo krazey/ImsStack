@@ -240,10 +240,10 @@
     <int name="imsss.ut_max_retry_count_int" value="0"/>
     <int name="imsss.ut_temporary_block_timer_min_int" value="0"/>
     <boolean name="imsss.ut_support_cf_action_erasure_bool" value="true"/>
-    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
+    <boolean name="imsss.ut_support_cfnr_timer_bool" value="true"/>
     <boolean name="imsss.ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
     <int name="imsss.ut_oir_network_default_operation_int" value="0"/>
-    <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="false"/>
+    <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="true"/>
     <int name="imsss.ut_temporary_block_timer_with_any_reason_sec_int" value="10"/>
     <string name="imsss.ut_target_address_phone_context_string"></string>
     <string name="imsss.ut_target_address_country_code_replace_to_zero_string"></string>
@@ -256,7 +256,7 @@
     <boolean name="imsss.ut_insert_new_rule_bool" value="false"/>
     <int name="imsss.ut_uri_type_for_cf_target_number_int" value="0"/>
     <string name="imsss.ut_naf_fqdn_string"></string>
-    <int name="imsss.ut_transaction_timer_sec_int" value="12"/>
+    <int name="imsss.ut_transaction_timer_sec_int" value="0"/>
     <boolean name="imsss.ut_sync_with_cs_for_tb_ss_bool" value="true"/>
     <boolean name="imsss.ut_network_query_for_tb_oir_network_default_bool" value="false"/>
 
@@ -619,8 +619,8 @@
         <item value="-1"/> <!-- EMERGENCY_WIFI -->
     </int-array>
     <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
-        <item value="-1"/> <!-- EMERGENCY_LTE-->
-        <item value="-1"/> <!-- EMERGENCY_WIFI -->
+        <item value="15000"/>
+        <item value="15000"/>
     </int-array>
     <int name="imsemergency.call_periodic_location_discovery_method_int" value="0"/>
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="0"/>
