@@ -15,13 +15,7 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
-        <item value="3"/>
-        <item value="6"/>
-    </int-array>
-    <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
-        <item value="5"/>
-    </int-array>
-    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1030"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1030"/>
+    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
 </carrier_config>
