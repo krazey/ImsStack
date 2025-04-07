@@ -94,4 +94,5 @@
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
         </pbundle>
     </pbundle>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="12000"/>
 </carrier_config>

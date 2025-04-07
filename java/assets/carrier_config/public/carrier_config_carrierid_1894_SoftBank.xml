@@ -118,4 +118,9 @@
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="10000"/>
+    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="10000"/>
+    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
 </carrier_config>

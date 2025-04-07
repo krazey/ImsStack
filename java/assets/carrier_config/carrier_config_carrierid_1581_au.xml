@@ -69,6 +69,7 @@
     <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="true"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="8000"/>
+    <int name="imsemergency.roaming_preferred_ereg_int" value="2"/>
     <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
         <item value="5"/>
     </int-array>
