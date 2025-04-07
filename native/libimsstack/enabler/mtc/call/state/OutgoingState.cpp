@@ -829,7 +829,8 @@ CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSes
 }
 
 PRIVATE
-CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode)
+CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(
+        IN IMS_SINT32 nReasonCode) const
 {
     if (nReasonCode != CODE_USER_TERMINATED)
     {
@@ -842,6 +843,15 @@ CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SI
     }
 
     IMS_TRACE_D("MayGetUpdatedReasonByResponseWaitTimeout", 0, 0, 0);
+
+    IMtcSession* pSession = m_objContext.GetSession();
+    if (pSession != IMS_NULL)
+    {
+        // only utilize the internal actions and ignore the return value
+        // since this case is limited to cases where the user explicitly terminates the call,
+        // as subsequent actions are limited
+        StartErrorHandler(m_objContext, pSession->GetISession()).Handle(IMS_NULL);
+    }
 
     return CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
 }

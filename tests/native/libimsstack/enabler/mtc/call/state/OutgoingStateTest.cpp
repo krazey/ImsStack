@@ -307,6 +307,63 @@ TEST_F(OutgoingStateTest, ResponseWaitTimeoutForReasonExpirationUpdatesReason)
     pOutgoingState->Terminate(objReasonUserTerminated);
 }
 
+TEST_F(OutgoingStateTest, ActAsIfTimerBExpiryWhenB1ExpiresAndCallEnds)
+{
+    const CallReasonInfo objReasonSipTimeout(
+            CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+
+    SetUpStartErrorHandler(IMS_NULL, SipStatusCode::SC_INVALID, IMS_FALSE,
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB,
+            IMS_FALSE);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(8000));
+    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonSipTimeout));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonSipTimeout));
+    pOutgoingState->Terminate(objReasonSipTimeout);
+}
+
+TEST_F(OutgoingStateTest, ActAsIfTimerBExpiryWhenB1ExpiresAndCallEndsSkipControlAos)
+{
+    const CallReasonInfo objReasonSipTimeout(
+            CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+
+    SetUpStartErrorHandler(IMS_NULL, SipStatusCode::SC_INVALID, IMS_FALSE,
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB,
+            IMS_FALSE);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(8000));
+    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonSipTimeout));
+    pOutgoingState->Terminate(objReasonSipTimeout);
+}
+
+TEST_F(OutgoingStateTest, ActAsIfTimerBExpiryWhenB1ExpiresAndCallEndsIgnoreCsfb)
+{
+    const CallReasonInfo objReasonSipTimeout(
+            CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+
+    SetUpStartErrorHandler(IMS_NULL, SipStatusCode::SC_INVALID, IMS_FALSE,
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB,
+            IMS_FALSE);
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(8000));
+    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonSipTimeout));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonSipTimeout));
+    pOutgoingState->Terminate(objReasonSipTimeout);
+}
+
 TEST_F(OutgoingStateTest, RegistrationTimerExpiredTerminatesCall)
 {
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_SIP_SERVER_ERROR)));

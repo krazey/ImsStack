@@ -80,7 +80,7 @@ private:
     CallStateName On100TryingReceived();
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
     CallStateName MaySendPreconditionConfirmation(IN ISession& objSession);
-    CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode);
+    CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode) const;
     CallStateName HandleSilentRedialReason(IN const CallReasonInfo& objReason);
     CallStateName PerformSilentRedial();
     IMS_BOOL HasNotRespondedQosConfirmation(IN ISession& objISession) const;
