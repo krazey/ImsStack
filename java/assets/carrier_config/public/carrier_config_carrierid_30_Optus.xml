@@ -22,4 +22,25 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
+    <int-array name="imsss.ut_server_based_services_int_array" num="19">
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+        <item value="4"/>
+        <item value="5"/>
+        <item value="6"/>
+        <item value="12"/>
+        <item value="17"/>
+        <item value="18"/>
+        <item value="19"/>
+        <item value="20"/>
+        <item value="21"/>
+        <item value="13"/>
+        <item value="14"/>
+        <item value="15"/>
+        <item value="16"/>
+        <item value="8"/>
+        <item value="11"/>
+        <item value="9"/>
+    </int-array>
 </carrier_config>
