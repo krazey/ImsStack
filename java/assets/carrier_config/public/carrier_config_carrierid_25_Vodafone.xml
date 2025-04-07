@@ -20,4 +20,7 @@
     all vendor applications that are sending data to a remote party. -->
     <int name="imsss.ut_as_server_port_int" value="443"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1080"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1080"/>
+    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
 </carrier_config>
