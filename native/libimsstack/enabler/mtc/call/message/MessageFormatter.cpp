@@ -753,8 +753,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_420;
             break;
         case CODE_SIP_NOT_ACCEPTABLE:
-            if (objReason.nExtraCode == EXTRA_CODE_NOT_ACCEPTABLE_SIP_488 ||
-                    objReason.nExtraCode == EXTRA_CODE_NOT_ACCEPTABLE_BY_VOPS)
+            if (objReason.nExtraCode == EXTRA_CODE_NOT_ACCEPTABLE_SIP_488)
             {
                 eStatusCode = SipStatusCode::SC_488;
             }
@@ -806,6 +805,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_603;
             break;
         case CODE_ACCESS_CLASS_BLOCKED:
+        case CODE_REJECT_CALL_TYPE_NOT_ALLOWED:
             eStatusCode = SipStatusCode::SC_488;
             break;
 
@@ -822,11 +822,8 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
 {
     switch (objReason.nCode)
     {
-        case CODE_SIP_NOT_ACCEPTABLE:
-            if (objReason.nExtraCode == EXTRA_CODE_NOT_ACCEPTABLE_BY_VOPS)
-            {
-                strPhrase = GetRejectPhrase(RejectType::VOPS_OFF);
-            }
+        case CODE_REJECT_CALL_TYPE_NOT_ALLOWED:
+            strPhrase = GetRejectPhrase(RejectType::VOPS_OFF);
             break;
         case CODE_USER_DECLINE:
             strPhrase = GetRejectPhrase(RejectType::USER_REJECT);
