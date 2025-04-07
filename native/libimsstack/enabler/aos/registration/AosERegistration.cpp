@@ -923,12 +923,17 @@ PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
 {
     if (m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED))
     {
+        A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: subscriber is incompleted", 0, 0, 0);
         return IMS_TRUE;
     }
 
     if (m_piContext->GetNetTracker()->IsEmergencyAttach())
     {
-        return IMS_TRUE;
+        A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: emergency attach", 0, 0, 0);
+        if (!GET_N_CONFIG(m_nSlotId)->IsSupportERegWhenEAttachWithValidSim())
+        {
+            return IMS_TRUE;
+        }
     }
 
     if (GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode())
