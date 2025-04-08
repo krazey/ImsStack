@@ -93,6 +93,7 @@ private:
     std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
     ISilentRedialHelper* m_pSilentRedialHelper;
     IMS_BOOL m_bWaitingServiceConnectedForRedial;
+    IMS_BOOL m_bMoResponseTimeoutForReasonTimerExpired;
 };
 
 #endif
