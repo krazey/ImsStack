@@ -494,6 +494,22 @@ TEST_F(AosConnectorTest, NotifyIpChangedIfAvailableAddressExistWhenIpChangedInRe
     m_pAosConnector->AosConnection_IpChanged();
 }
 
+TEST_F(AosConnectorTest, NotifyDeactivateIfIpVerisonChangedWhenIpChangedInReadyState)
+{
+    m_objPcscfs.AddElement(AString("1.1.1.1"));
+    m_pAosConnector->SetState(AosConnector::STATE_READY);
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
+            .WillByDefault(ReturnRef(IpAddress::IPv6LOOPBACK));
+
+    // notify Deactivated with IP changed
+    EXPECT_CALL(
+            m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_IP_CHANGED));
+
+    m_pAosConnector->AosConnection_IpChanged();
+
+    EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
+}
+
 TEST_F(AosConnectorTest, NotifyDeactivateIfNoAvailableAddressExistWhenIpChangedInReadyState)
 {
     m_pAosConnector->SetState(AosConnector::STATE_READY);
@@ -501,8 +517,9 @@ TEST_F(AosConnectorTest, NotifyDeactivateIfNoAvailableAddressExistWhenIpChangedI
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(objInvalidAddress));
 
-    // notify Deactivated
-    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_FAILED));
+    // notify Deactivated with IP changed
+    EXPECT_CALL(
+            m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_IP_CHANGED));
 
     m_pAosConnector->AosConnection_IpChanged();
 

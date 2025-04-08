@@ -215,6 +215,7 @@ public:
                 {ImsAosReason::REG_TERMINATED,    "registration terminated"  },
                 {ImsAosReason::REG_NEW_REQUIRED,  "new registration required"},
                 {ImsAosReason::REG_TERMINATING,   "registration terminating" },
+                {ImsAosReason::IP_CHANGED,        "ip changed"               },
                 {ImsAosReason::NOT_SPECIFIED,     "not specified"            },
         };
 

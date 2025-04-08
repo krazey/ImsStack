@@ -343,6 +343,9 @@ TEST_F(MtcCallStringUtilsTest, ConvertAosReason)
     eAosReason = ImsAosReason::REG_TERMINATING;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "registration terminating");
 
+    eAosReason = ImsAosReason::IP_CHANGED;
+    EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "ip changed");
+
     eAosReason = ImsAosReason::NOT_SPECIFIED;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "not specified");
 

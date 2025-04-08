@@ -653,6 +653,9 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AosReason::REG_TERMINATING:
             nImsAosReason = ImsAosReason::REG_TERMINATING;
             break;
+        case AosReason::IP_CHANGED:
+            nImsAosReason = ImsAosReason::IP_CHANGED;
+            break;
         default:
             break;
     }

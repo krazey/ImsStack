@@ -798,7 +798,7 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_IpChanged()
         else
         {
             SetState(STATE_IDLE);
-            Notify(LISTENER_TYPE_DEACTIVATED, REASON_FAILED);
+            Notify(LISTENER_TYPE_DEACTIVATED, REASON_IP_CHANGED);
         }
 
         return;

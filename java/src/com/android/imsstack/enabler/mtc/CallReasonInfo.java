@@ -34,6 +34,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_LOCAL_LOW_BATTERY = 112;
     public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 121;
     public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 122;
+    public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 124;
     public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 131;
     public static final int CODE_LOCAL_NOT_REGISTERED = 132;
     public static final int CODE_LOCAL_CALL_EXCEEDED = 141;

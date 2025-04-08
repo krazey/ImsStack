@@ -1892,12 +1892,16 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT3
         m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED, IMS_FALSE);
         CleanAll(AosReason::DATA_PERMANENTLY_FAILED);
     }
+    else if (nReason == AosConnector::AosConnector::REASON_IP_CHANGED)
+    {
+        CleanAll(AosReason::IP_CHANGED);
+    }
     else
     {
-        IMS_UINT32 nReason = GetOffReason();
-        if (nReason == AosReason::WIFI_OFF || nReason == AosReason::AIRPLANE_MODE)
+        IMS_UINT32 nOffReason = GetOffReason();
+        if (nOffReason == AosReason::WIFI_OFF || nOffReason == AosReason::AIRPLANE_MODE)
         {
-            CleanAll(nReason);
+            CleanAll(nOffReason);
         }
         else
         {

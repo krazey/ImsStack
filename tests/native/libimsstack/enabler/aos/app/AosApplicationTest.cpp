@@ -2178,6 +2178,13 @@ TEST_F(AosApplicationTest, SetBlockInvalidPcscfWhenStateReadyConnection)
     m_pAosApplication->StateReady_Connection(objMessage);
 }
 
+TEST_F(AosApplicationTest, SetIpChangedReasonWhenProcessConnectionUpdated)
+{
+    m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    m_pAosApplication->ProcessConnectionUpdated(AosConnector::REASON_IP_CHANGED);
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::IP_CHANGED);
+}
+
 TEST_F(AosApplicationTest,
         SetWifiOffReasonWhenProcessConnectionDeactivatedAfterWifiOffWhenIsImsCall)
 {
@@ -2210,6 +2217,12 @@ TEST_F(AosApplicationTest,
             AosCondition::REQUEST_REASON_UPDATE, AosReason::WIFI_OFF);
     m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_NONE);
     EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+}
+
+TEST_F(AosApplicationTest, SetIpChangedReasonWhenProcessConnectionDeactivated)
+{
+    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_IP_CHANGED);
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::IP_CHANGED);
 }
 
 TEST_F(AosApplicationTest, SetDataDisconnectedReasonWhenProcessConnectionDeactivated)
