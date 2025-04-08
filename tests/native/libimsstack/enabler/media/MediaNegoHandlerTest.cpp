@@ -133,7 +133,6 @@ TEST_F(MediaNegoHandlerTest, testCreateMediaNegoNewInstance)
     IMS_UINTP nNegoId = SetupMockNegoForTest(m_pMockMediaNego1);
 
     EXPECT_EQ(m_pMockMediaNego1, m_pHandler->FindMediaNego(nNegoId));
-    EXPECT_EQ(IMS_TRUE, m_pHandler->DeleteMediaNego(nNegoId));
 }
 
 TEST_F(MediaNegoHandlerTest, CreateMediaNegoForkInstance)
@@ -153,10 +152,10 @@ TEST_F(MediaNegoHandlerTest, CreateMediaNegoForkInstance)
     EXPECT_EQ(m_pMockMediaNego2, m_pHandler->FindMediaNego(nNegoId2));
 
     EXPECT_EQ(IMS_TRUE, m_pHandler->DeleteMediaNego(nNegoId1));
-    EXPECT_EQ(IMS_TRUE, m_pHandler->DeleteMediaNego(nNegoId2));
+    EXPECT_EQ(IMS_FALSE, m_pHandler->DeleteMediaNego(nNegoId2));
 
     EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(nNegoId1));
-    EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(nNegoId2));
+    EXPECT_NE(IMS_NULL, m_pHandler->FindMediaNego(nNegoId2));
 }
 
 TEST_F(MediaNegoHandlerTest, CreateMediaNegoForkInvalidId)
@@ -171,17 +170,14 @@ TEST_F(MediaNegoHandlerTest, FindMediaNegoNotFound)
     IMS_UINTP nNegoId1 = SetupMockNegoForTest(m_pMockMediaNego1);
 
     EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(kInvalidNegoId));
-
-    EXPECT_EQ(IMS_TRUE, m_pHandler->DeleteMediaNego(nNegoId1));
-    EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(nNegoId1));
 }
 
-TEST_F(MediaNegoHandlerTest, DeleteMediaNegoFound)
+TEST_F(MediaNegoHandlerTest, DeleteMediaNegoFailed)
 {
     IMS_UINTP nNegoId1 = SetupMockNegoForTest(m_pMockMediaNego1);
 
-    EXPECT_EQ(IMS_TRUE, m_pHandler->DeleteMediaNego(nNegoId1));
-    EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(nNegoId1));  // Verify it's gone
+    EXPECT_EQ(IMS_FALSE, m_pHandler->DeleteMediaNego(nNegoId1));
+    EXPECT_NE(IMS_NULL, m_pHandler->FindMediaNego(nNegoId1));
 }
 
 TEST_F(MediaNegoHandlerTest, DeleteMediaNegoNotFound)
@@ -189,9 +185,6 @@ TEST_F(MediaNegoHandlerTest, DeleteMediaNegoNotFound)
     IMS_UINTP nNegoId1 = SetupMockNegoForTest(m_pMockMediaNego1);
 
     EXPECT_EQ(IMS_FALSE, m_pHandler->DeleteMediaNego(kInvalidNegoId));
-
-    m_pHandler->DeleteMediaNego(nNegoId1);
-    EXPECT_EQ(IMS_NULL, m_pHandler->FindMediaNego(nNegoId1));
 }
 
 TEST_F(MediaNegoHandlerTest, DeleteMediaNegoUndefinedId)

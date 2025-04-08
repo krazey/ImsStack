@@ -319,6 +319,7 @@ IMS_BOOL AudioController::DeleteSession(IN IMS_UINTP nNegoId)
 
     if (nNegoId == UNDEFINED_NEGO_ID)
     {
+        IMS_TRACE_E(0, "DeleteSession() - invalid nego id", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -328,6 +329,12 @@ IMS_BOOL AudioController::DeleteSession(IN IMS_UINTP nNegoId)
 
         if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId))
         {
+            if (m_listAudioSession.GetSize() == 1 && m_eMediaState != AudioSession::STATE_NONE)
+            {
+                IMS_TRACE_E(0, "DeleteSession() - cannot delete the last session", 0, 0, 0);
+                return IMS_FALSE;
+            }
+
             delete pAudioSession;
             m_listAudioSession.RemoveAt(nIndex);
             return IMS_TRUE;
