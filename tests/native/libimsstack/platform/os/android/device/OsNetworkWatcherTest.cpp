@@ -331,6 +331,12 @@ TEST_F(OsNetworkWatcherTest, IsEmergencyAttachSupported)
     EXPECT_EQ(m_pOsNetworkWatcher->IsEmergencyAttachSupported(), IMS_TRUE);
 }
 
+TEST_F(OsNetworkWatcherTest, GetNetworkRegistrationRejectCause)
+{
+    EXPECT_CALL(m_objMockSystem, GetNetworkRegistrationRejectCause(_)).Times(1).WillOnce(Return(0));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetNetworkRegistrationRejectCause(), 0);
+}
+
 TEST_F(OsNetworkWatcherTest, NotifyEvent)
 {
     m_objPhoneInfoService.SetNetworkWatcher(m_pOsNetworkWatcher);

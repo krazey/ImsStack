@@ -927,6 +927,18 @@ public final class SystemCallAgent implements SystemCallInterface {
         }
     }
 
+    /**
+     * Returns the reject cause for the network registration.
+     *
+     * @return A reject cause.
+     */
+    @Override
+    public int getNetworkRegistrationRejectCause() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.getNetworkRegistrationRejectCause()
+                : IDcNetWatcher.REGISTRATION_REJECT_CAUSE_NONE;
+    }
+
     private IDcApn getDcApn() {
         return DcFactory.getDcAgent(IDcApn.class, mSlotId);
     }

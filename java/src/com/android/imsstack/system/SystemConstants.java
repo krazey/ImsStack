@@ -128,6 +128,7 @@ public interface SystemConstants {
     int IS_EMERGENCY_ATTACH_SUPPORTED = CATEGORY_BASE + 426;
     int BIND_SOCKET = CATEGORY_BASE + 427;
     int IS_IPV6_PREFERRED = CATEGORY_BASE + 428;
+    int GET_NETWORK_REGISTRATION_REJECT_CAUSE = CATEGORY_BASE + 429;
 
     /**
      * WiFi-related information

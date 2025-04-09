@@ -105,6 +105,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     private int mLteDuplexMode = ServiceState.DUPLEX_MODE_UNKNOWN;
     private int mNetworkRegistrationState =
             NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+    private int mNetworkRegistrationRejectCause = REGISTRATION_REJECT_CAUSE_NONE;
     private String mNetworkOperator = "";
     // mDataRoaming and mVoiceRoaming refer to the roamingType.
     // So they could be overridden by the carrier config
@@ -229,6 +230,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         mLteDuplexMode = ServiceState.DUPLEX_MODE_UNKNOWN;
         mNetworkRegistrationState =
                 NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+        mNetworkRegistrationRejectCause = REGISTRATION_REJECT_CAUSE_NONE;
         mNetworkOperator = "";
         mDataRoaming = false;
         mVoiceRoaming = false;
@@ -353,6 +355,11 @@ public class DcNetWatcher implements IDcNetWatcher {
     @Override
     public String getOperatorNumeric() {
         return mNetworkOperator;
+    }
+
+    @Override
+    public int getNetworkRegistrationRejectCause() {
+        return mNetworkRegistrationRejectCause;
     }
 
     @Override
@@ -683,6 +690,16 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         return (wwanRegInfo != null) ? wwanRegInfo.getNetworkRegistrationState()
                 : NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+    }
+
+    private static int getWwanNetworkRegistrationRejectCause(ServiceState ss) {
+        final NetworkRegistrationInfo wwanRegInfo =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        return (wwanRegInfo != null)
+                ? wwanRegInfo.getRejectCause() : REGISTRATION_REJECT_CAUSE_NONE;
     }
 
     private boolean is1xRttRequired() {
@@ -1091,6 +1108,16 @@ public class DcNetWatcher implements IDcNetWatcher {
 
             // WWAN network registration state
             mNetworkRegistrationState = getWwanNetworkRegistrationState(serviceState);
+
+            // WWAN network registration reject cause
+            if (mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_DENIED) {
+                mNetworkRegistrationRejectCause = getWwanNetworkRegistrationRejectCause(
+                        serviceState);
+            } else if (mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
+                    || mNetworkRegistrationState
+                            == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING) {
+                mNetworkRegistrationRejectCause = REGISTRATION_REJECT_CAUSE_NONE;
+            }
         }
 
         private int getCellularDataRAT() {

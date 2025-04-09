@@ -1100,6 +1100,14 @@ TEST_F(SystemTest, BindSocket)
     EXPECT_EQ(m_pSystem->BindSocket(NetworkPolicy::APN_IMS, 120, 0), 0);
 }
 
+TEST_F(SystemTest, GetNetworkRegistrationRejectCause)
+{
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(1));
+    EXPECT_EQ(m_pSystem->GetNetworkRegistrationRejectCause(0), 0);
+}
+
 TEST_F(SystemTest, IsImsEmergencyCallSupported)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))

@@ -20,6 +20,7 @@ import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+import static com.android.imsstack.core.agents.dcmif.IDcNetWatcher.REGISTRATION_REJECT_CAUSE_NONE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -768,6 +769,50 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnServiceStateChanged_handleNetworkRegistrationStateAndRejectCauseChanged()
+            throws Exception {
+        int rejectCause = 3;
+        NetworkRegistrationInfo wwanInfo1 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_DENIED,
+                TelephonyManager.NETWORK_TYPE_LTE, false, rejectCause);
+        NetworkRegistrationInfo wwanInfo2 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY,
+                TelephonyManager.NETWORK_TYPE_LTE, false, REGISTRATION_REJECT_CAUSE_NONE);
+        NetworkRegistrationInfo wwanInfo3 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_LTE, false, REGISTRATION_REJECT_CAUSE_NONE);
+
+        // Initially, no reject cause.
+        assertEquals(REGISTRATION_REJECT_CAUSE_NONE,
+                mDcNetWatcher.getNetworkRegistrationRejectCause());
+
+        // REGISTRATION_STATE_DENIED, update reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo1);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(rejectCause, mDcNetWatcher.getNetworkRegistrationRejectCause());
+
+        // REGISTRATION_STATE_EMERGENCY, keep previous reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo2);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(rejectCause, mDcNetWatcher.getNetworkRegistrationRejectCause());
+
+        // REGISTRATION_STATE_HOME, reset reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo3);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(REGISTRATION_REJECT_CAUSE_NONE,
+                mDcNetWatcher.getNetworkRegistrationRejectCause());
+    }
+
+    @Test
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenOn() throws Exception {
         when(mSettingsProxy.getInt(AIRPLANE_MODE_ON, -1)).thenReturn(1);
 
@@ -901,12 +946,19 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,
             int registrationState, int networkType, boolean isEmergencyOnly) {
+        return createNetworkRegistrationInfo(transportType, registrationState, networkType,
+                isEmergencyOnly, REGISTRATION_REJECT_CAUSE_NONE);
+    }
+
+    private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,
+            int registrationState, int networkType, boolean isEmergencyOnly, int rejectCause) {
         return new NetworkRegistrationInfo.Builder()
                 .setTransportType(transportType)
                 .setRegistrationState(registrationState)
                 .setAccessNetworkTechnology(networkType)
                 .setCellIdentity(createCellIdentity(networkType))
                 .setEmergencyOnly(isEmergencyOnly)
+                .setRejectCause(rejectCause)
                 .build();
     }
 

@@ -2081,6 +2081,24 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testSystemCallGetNetworkRegistrationRejectCause() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).getNetworkRegistrationRejectCause();
+    }
+
+    @Test
+    @SmallTest
     public void testSystemCallGetIsimState() {
         setUpSystemInterface();
         setUpSystem();
