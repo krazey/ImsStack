@@ -564,7 +564,7 @@
     <boolean name="imsvt.support_video_call_only_in_vops_off_status_bool" value="false"/>
     <boolean name="imsemergency.block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
     <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10006"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="imsvoice.use_carrier_specific_contact_header_for_options_response_bool" value="false"/>

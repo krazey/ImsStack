@@ -111,7 +111,7 @@
     <int name="imsvt.convert_user_response_timer_millis_int" value="40000"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>
     <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10006"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
     <int-array name="imsemergency.reject_code_require_temp_failure_int_array" num="1">
         <item value="403"/>

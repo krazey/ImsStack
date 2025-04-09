@@ -64,7 +64,7 @@
 
     <!-- Mtc -->
     <int-array name="imsvoice.registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10006"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
 
     <!-- Media -->
