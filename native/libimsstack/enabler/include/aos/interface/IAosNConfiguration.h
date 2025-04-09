@@ -1884,6 +1884,14 @@ public:
      */
     virtual ImsVector<IMS_SINT32>& GetERegErrCodeNotSupportedCommonPolicy() = 0;
 
+    /**
+     * @brief Indicate the network attach causes that requires the cross stack redial.
+     *
+     * @return vector error causes
+     * @see {@code imsemergency.network_attach_reject_causes_for_cross_stack_redial_int_array}
+     */
+    virtual ImsVector<IMS_SINT32>& GetNetworkAttachRejectCausesForCrossStackRedial() = 0;
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,

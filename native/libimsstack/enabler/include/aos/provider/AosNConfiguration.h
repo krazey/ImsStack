@@ -216,6 +216,7 @@ public:
     ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() override;
     ImsVector<IMS_SINT32>& GetUnavailableFeaturesInLimitedReg() override;
     ImsVector<IMS_SINT32>& GetERegErrCodeNotSupportedCommonPolicy() override;
+    ImsVector<IMS_SINT32>& GetNetworkAttachRejectCausesForCrossStackRedial() override;
 
 private:
     friend class AosBuildDirector;

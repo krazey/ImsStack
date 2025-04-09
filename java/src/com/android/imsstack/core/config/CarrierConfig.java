@@ -739,6 +739,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "epdn_reject_causes_for_cross_stack_redial_int_array";
         public static final String KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY =
                 KEY_PREFIX + "ereg_err_code_not_supported_common_policy_int_array";
+        public static final String KEY_NETWORK_ATTACH_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY =
+                KEY_PREFIX + "network_attach_reject_causes_for_cross_stack_redial_int_array";
         // Mtc
         public static final String KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL =
                 KEY_PREFIX + "emergency_call_over_emergency_pdn_on_cellular_bool";

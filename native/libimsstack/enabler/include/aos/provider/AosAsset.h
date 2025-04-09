@@ -120,6 +120,7 @@ public:
             objTestMode(ImsVector<IMS_SINT32>()),
             objUnavailableFeaturesInLimitedReg(ImsVector<IMS_SINT32>()),
             objERegErrCodeNotSupportedCommonPolicy(ImsVector<IMS_SINT32>()),
+            objNetworkAttachRejectCausesForCrossStackRedial(ImsVector<IMS_SINT32>()),
             objVowifiSubErrorCodeForInitReg(ImsVector<IMS_SINT32>())
     {
     }
@@ -221,6 +222,7 @@ public:
     ImsVector<IMS_SINT32> objTestMode;
     ImsVector<IMS_SINT32> objUnavailableFeaturesInLimitedReg;
     ImsVector<IMS_SINT32> objERegErrCodeNotSupportedCommonPolicy;
+    ImsVector<IMS_SINT32> objNetworkAttachRejectCausesForCrossStackRedial;
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
 };
 #endif  // AOS_ASSET_H_
