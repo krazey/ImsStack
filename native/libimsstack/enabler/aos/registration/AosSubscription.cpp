@@ -225,6 +225,16 @@ void AosSubscription::ClearThrottlingCount()
 }
 
 PROTECTED
+void AosSubscription::ClearSubConsecutiveRetryCnt()
+{
+    if (GET_N_CONFIG(m_piContext->GetSlotId())->GetSubConsecutiveRetryCntForRegForbiddenInWifi() >
+            0)
+    {
+        m_piListener->Subscription_Request(CMD_RESET_SUB_RETRY_CNT_FOR_WIFI);
+    }
+}
+
+PROTECTED
 IMS_BOOL AosSubscription::IsSubTrying() const
 {
     return (m_nState == STATE_SUBSCRIBING || m_nState == STATE_SUBREFRESHING);
@@ -312,7 +322,13 @@ void AosSubscription::ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRet
     if (IsWfcErrorMessageSupportedWithStateChecked(
                 CarrierConfig::ImsWfc::WFC_ERROR_NOTIFY_TERMINATED))
     {
-        m_piListener->Subscription_Request(CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG);
+        IMS_BOOL bIsAwtRequired = (nRetryAfter == 0) &&
+                (GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy() !=
+                        CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION) &&
+                (GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals().GetSize() == 0);
+
+        m_piListener->Subscription_Request(
+                CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI, nRetryAfter, bIsAwtRequired);
     }
     else
     {
@@ -699,7 +715,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
                 if (IsWfcErrorMessageSupportedWithStateChecked(
                             CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
                 {
-                    SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_SUB_403_MSG);
+                    SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI);
                 }
                 else
                 {
@@ -837,15 +853,16 @@ PROTECTED VIRTUAL void AosSubscription::RequestCommand(
     A_IMS_TRACE_I(AOSTAG, "RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
     SetState(STATE_OFFLINE);
 
-    IMS_BOOL bIsRegRequired =
-            (nCommand == CMD_REG_REQUIRED || nCommand == CMD_REG_REQUIRED_WITH_SUB_403_MSG ||
-                    nCommand == CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG);
+    IMS_BOOL bIsRegRequired = (nCommand == CMD_REG_REQUIRED ||
+            nCommand == CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI ||
+            nCommand == CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI);
 
-    ReportState(nReason, nCommand,
-            bIsRegRequired &&
-                    GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy() ==
-                            CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION,
-            nRetryAfter);
+    IMS_BOOL bIsAwtRequired = bIsRegRequired &&
+            (GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy() !=
+                    CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION) &&
+            (GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals().GetSize() == 0);
+
+    ReportState(nReason, nCommand, bIsAwtRequired, nRetryAfter);
 }
 
 PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
@@ -859,6 +876,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_StatusCode(IN IMS_SIN
         return;
     }
 
+    ClearSubConsecutiveRetryCnt();
     SetState(STATE_SUBSTOP);
     SetRetryTimer((nStatusCode != 0) ? IMS_TRUE : IMS_FALSE);
 }

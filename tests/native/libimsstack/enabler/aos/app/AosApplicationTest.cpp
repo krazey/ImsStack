@@ -171,6 +171,7 @@ enum
     using Base::IsCrossSimConnected;                     \
     using Base::ClearOffReason;                          \
     using Base::ClearPending;                            \
+    using Base::ClearWifiRegBlock;                       \
     using Base::GetNetworkTypeForImsRegState;            \
     using Base::SetOffReason;                            \
     using Base::SetImsCall;                              \
@@ -250,6 +251,7 @@ enum
     using Base::ProcessReconfigTimerExpired;             \
     using Base::ProcessRoamingState;                     \
     using Base::ProcessRegBlockedTimerExpired;           \
+    using Base::ProcessRegFailed_StateConnected;         \
     using Base::ProcessRegStopTimerExpired;              \
     using Base::ProcessPdnBlockedTimerExpired;           \
     using Base::ProcessImsEstablishmentTimerExpired;     \
@@ -1174,6 +1176,17 @@ TEST_F(AosApplicationTest, GetAndSet)
     EXPECT_TRUE(m_pAosApplication->IsRegReconfigAvailable());
 }
 
+TEST_F(AosApplicationTest, ResetWifiRegForbiddenWhenClearWifiRegBlockCalled)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSubConsecutiveRetryCntForRegForbiddenInWifi())
+            .WillByDefault(Return(3));
+
+    EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_WIFI_REG_FORBIDDEN, _));
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_CLEAR_RETRY_COUNT, _));
+
+    m_pAosApplication->ClearWifiRegBlock();
+}
+
 TEST_F(AosApplicationTest, GetCrossSimStatusFromConnectorWhenIsCrossSimConnectedCalled)
 {
     ON_CALL(m_objMockAosConnector, IsCrossSimConnected()).WillByDefault(Return(IMS_TRUE));
@@ -2081,6 +2094,17 @@ TEST_F(AosApplicationTest, SetBlockInvalidPcscfWhenStateReadyConnection)
     ImsMessage objMessage(
             MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_PCSCF_DISCOVERY_FAILED);
     m_pAosApplication->StateReady_Connection(objMessage);
+}
+
+TEST_F(AosApplicationTest, SetBlockWifiRegForbiddenWhenStateConnectedWithRegFailureForbiddenInWifi)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSubConsecutiveRetryCntForRegForbiddenInWifi())
+            .WillByDefault(Return(3));
+
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_WIFI_REG_FORBIDDEN, IMS_TRUE));
+
+    m_pAosApplication->ProcessRegFailed_StateConnected(
+            IAosRegistration::REASON_FAILURE_FORBIDDEN_IN_WIFI);
 }
 
 TEST_F(AosApplicationTest, SetIpChangedReasonWhenProcessConnectionUpdated)

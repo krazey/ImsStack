@@ -121,6 +121,7 @@ INSTANTIATE_TEST_SUITE_P(AosBlockTestInstantiation, AosBlockTest,
                 {BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, "WIFI_COUNTRY_CODE_UNAVAILABLE"},
                 {BLOCK_WIFI_AIRPLANE_MODE_ON,         "WIFI_AIRPLANE_MODE_ON"        },
                 {BLOCK_WIFI_NO_WIFI,                  "WIFI_NO_WIFI"                 },
+                {BLOCK_WIFI_REG_FORBIDDEN,            "WIFI_REG_FORBIDDEN"           },
                 {BLOCK_WIFI_TEMPORARILY_BLOCKED,      "WIFI_TEMPORARILY_BLOCKED"     }
 }));
 

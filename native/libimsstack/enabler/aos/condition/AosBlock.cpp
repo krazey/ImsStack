@@ -444,6 +444,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_WIFI_NO_WIFI:
             return "WIFI_NO_WIFI";
 
+        case BLOCK_WIFI_REG_FORBIDDEN:
+            return "WIFI_REG_FORBIDDEN";
+
         case BLOCK_WIFI_TEMPORARILY_BLOCKED:
             return "WIFI_TEMPORARILY_BLOCKED";
 
