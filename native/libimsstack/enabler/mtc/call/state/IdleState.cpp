@@ -538,8 +538,8 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new SsacBlockRule(m_objContext, eCallType));
-    lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
     lstRules.Append(new RetryAfterBlockRule(m_objContext));
+    lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
     return lstRules;
 }
 
@@ -547,9 +547,8 @@ PRIVATE
 ImsList<IMtcBlockRule*> IdleState::GetBlockRulesAfterEpsFallback()
 {
     ImsList<IMtcBlockRule*> lstRules;
-
     lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
-
+    lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     return lstRules;
 }
 
