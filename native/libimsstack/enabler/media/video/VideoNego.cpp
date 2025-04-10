@@ -167,7 +167,8 @@ IMS_BOOL VideoNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
 PROTECTED IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
 {
-    if (!CheckArgument(pSessionDescriptor, pDescriptor, eDirection) || m_pSdpGenerator == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_pSdpGenerator == IMS_NULL ||
+            m_pProfileNegotiator == IMS_NULL)
     {
         IMS_TRACE_E(0, "FormAnswer(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
@@ -176,12 +177,6 @@ PROTECTED IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescript
     if (m_listOaModel.IsEmpty())
     {
         IMS_TRACE_E(0, "FormAnswer(): empty OA model list", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (m_pProfileNegotiator == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "FormAnswer(): invalid negotiator", 0, 0, 0);
         return IMS_FALSE;
     }
 
