@@ -251,4 +251,5 @@
 
     <!-- Mts -->
     <int name="imssms.sms_preferred_psi_uri_type_int" value="0"/>
+    <boolean name="imssms.sms_in_reply_to_validation_bool" value="false"/>
 </carrier_config>
