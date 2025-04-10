@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,11 +72,13 @@ public:
      * @param eSessionType mediasession type
      */
     explicit VideoConfiguration(IN MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIOVIDEO);
+
     /**
      * @brief Destroy the video configuration
      *
      */
     virtual ~VideoConfiguration();
+
     /**
      * @brief Create codec using the configuration
      *
@@ -84,7 +86,8 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+
     /**
      * @brief Update codec using the configuration
      *
@@ -92,119 +95,136 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+
     /**
      * @brief Get the video dscp value
      *
      * @return IMS_SINT32 Return video dscp value
      */
-    IMS_SINT32 GetVideoDscp() const;
+    virtual IMS_SINT32 GetVideoDscp() const;
+
     /**
      * @brief Get the sps/pps sending perioid
      *
      * @return IMS_SINT32 Return the sps/pps sending perioid
      */
-    IMS_SINT32 GetVideoSendPeriodicSpsPps() const;
+    virtual IMS_SINT32 GetVideoSendPeriodicSpsPps() const;
+
     /**
      * @brief Get the cvo id
      *
      * @return IMS_SINT32 Return the cvo-id
      */
-    IMS_SINT32 GetCvoId() const;
+    virtual IMS_SINT32 GetCvoId() const;
+
     /**
      * @brief Get whether AVPF feature is enabled
      *
      * @return IMS_BOOL Return true if AVPF is enabled
      * Return false if AVPF is disabled
      */
-    IMS_BOOL IsVideoAvpfEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfEnabled() const;
+
     /**
      * @brief Get whether AVPF trr attribute is enabled
      *
      * @return IMS_BOOL Return true if AVPF trr is enabled
      * Return false if AVPF trr is disabled
      */
-    IMS_BOOL IsVideoAvpfTrrEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfTrrEnabled() const;
+
     /**
      * @brief Get whether AVPF nack attribute is enabled
      *
      * @return IMS_BOOL Return true if AVPF nack is enabled
      * Return false if AVPF nack is disabled
      */
-    IMS_BOOL IsVideoAvpfNackEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfNackEnabled() const;
+
     /**
      * @brief Get whether AVPF tmmbr attribute is enabled
      *
      * @return IMS_BOOL Return true if AVPF tmmbr is enabled
      * Return false if AVPF tmmbr is disabled
      */
-    IMS_BOOL IsVideoAvpfTmmbrEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfTmmbrEnabled() const;
+
     /**
      * @brief Get whether AVPF pli attribute is enabled
      *
      * @return IMS_BOOL Return true if AVPF pli is enabled
      * Return false if AVPF pli is disabled
      */
-    IMS_BOOL IsVideoAvpfPliEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfPliEnabled() const;
+
     /**
      * @brief Get whether AVPF fir attribute is enabled
      *
      * @return IMS_BOOL Return true if AVPF fir is enabled
      * Return false if AVPF fir is disabled
      */
-    IMS_BOOL IsVideoAvpfFirEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfFirEnabled() const;
+
     /**
      * @brief Get whether capability attribute is enabled
      *
      * @return IMS_BOOL Return true if AVPF capability negotiation attribute is enabled
      * Return false if AVPF capability negotiation attribute is disabled
      */
-    IMS_BOOL IsAvpfCapabilityNegotiationEnabled() const;
+    virtual IMS_BOOL IsAvpfCapabilityNegotiationEnabled() const;
+
     /**
      * @brief Get whether the sdp offer cap nego for avpf
      *
      * @return IMS_BOOL Return true if SdpOfferCapNegoForAvpf is enabled
      * Return false if SdpOfferCapNegoForAvpf is disabled
      */
-    IMS_SINT32 GetSdpOfferCapNegoForAvpf() const;
+    virtual IMS_SINT32 GetSdpOfferCapNegoForAvpf() const;
+
     /**
      * @brief Get the video iframe interval sec
      *
      * @return IMS_SINT32 Return the interval of the video iframe
      */
-    IMS_SINT32 GetVideoIframeIntervalSec() const;
+    virtual IMS_SINT32 GetVideoIframeIntervalSec() const;
+
     /**
      * @brief Get the channel id
      *
      * @return IMS_SINT32 Return the channel-id
      */
-    IMS_SINT32 GetChannel() const;
+    virtual IMS_SINT32 GetChannel() const;
+
     /**
      * @brief Get the video sampling rate
      *
      * @return IMS_SINT32 Return the video sampling rate
      */
-    IMS_SINT32 GetVideoSamplingRate() const;
+    virtual IMS_SINT32 GetVideoSamplingRate() const;
+
     /**
      * @brief Get whether the bandwidth nego option
      *
      * @return IMS_BOOL Return true if BandwidthNegoOption is enabled
      * Return false if BandwidthNegoOption is disabled
      */
-    IMS_BOOL GetBandwidthNegoOption() const;
+    virtual IMS_BOOL GetBandwidthNegoOption() const;
+
     /**
      * @brief Get the video lowest Bitrate bps
      *
      * @return IMS_SINT32 video lowest Bitrate bps
      */
-    IMS_SINT32 GetVideoLowestBitrateBps() const;
+    virtual IMS_SINT32 GetVideoLowestBitrateBps() const;
+
     /**
      * @brief Get the inactive media direction during video hold
      *
      * @return IMS_BOOL Return true if the media direction is inactive
      * Return false if the media direction is not inactive
      */
-    IMS_BOOL isVideoDirectionHoldUsingInactive() const;
+    virtual IMS_BOOL isVideoDirectionHoldUsingInactive() const;
 
 protected:
     /**

@@ -1145,7 +1145,7 @@ void MediaSession::UpdateMediaSessions(
                 pMediaNego->GetAudioNego()->GetNegotiatedDirection() !=
                         MEDIA_DIRECTION_SEND_RECEIVE);
         m_pVideoController->UpdateAccessNetwork(nAccessNetwork);
-        m_pVideoController->UpdateQualityThreshold(pMediaNego->GetVideoNego());
+        m_pVideoController->ApplyQualityThreshold();
         m_pVideoController->UpdateSession();
     }
 

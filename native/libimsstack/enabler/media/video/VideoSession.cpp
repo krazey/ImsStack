@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MediaDef.h"
 #include "ServiceTrace.h"
 
 #include "IMediaSessionListener.h"
@@ -318,36 +319,32 @@ void VideoSession::SetMtu(IN IMS_SINT32 nMtu)
 }
 
 PUBLIC
-IMS_BOOL VideoSession::UpdateMediaQualityThreshold(
-        IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp)
+IMS_BOOL VideoSession::UpdateMediaQualityThreshold()
 {
     if (GetConfiguration() == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateMediaQualityThreshold() - invalid configuration", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    /** TODO_MEDIA need to get real value when it's ready. */
-    if (bActiveSession)
+    if (GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
                 std::vector<int32_t>{GetConfiguration()->GetRtpInactivityTimerMillis()});
-
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                (bEnableRtcp) ? GetConfiguration()->GetRtcpInactivityTimerMillis() : 0);
         m_objMediaQualityThreshold.setVideoBitrateBps(
-                (bConfirmedSession) ? GetConfiguration()->GetVideoLowestBitrateBps() : 0);
+                GetConfiguration()->GetVideoLowestBitrateBps());
     }
     else
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{0});
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                GetConfiguration()->GetRtcpInactivityTimerMillis());
         m_objMediaQualityThreshold.setVideoBitrateBps(0);
     }
 
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - ActiveSession[%d], ConfirmedSession[%d], "
-                "EnableRtcp[%d]",
-            bActiveSession, bConfirmedSession, bEnableRtcp);
+    m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
+            m_pRtpConfig->getRtcpConfig().getIntervalSec() > 0
+                    ? GetConfiguration()->GetRtcpInactivityTimerMillis()
+                    : 0);
+
     IMS_TRACE_D("UpdateMediaQualityThreshold() - RtpInactivity[%d], RtcpInactivity[%d], "
                 "VideoLowestBitrate[%d]",
             (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
@@ -517,8 +514,25 @@ IMS_SINT32 VideoSession::GetCameraId()
     return m_nCameraId;
 }
 
-PRIVATE
-IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
+PUBLIC
+IMS_SINT32 VideoSession::GetVideoMode()
+{
+    if (m_pRtpConfig != IMS_NULL)
+    {
+        VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
+        return pVideoConfig->getVideoMode();
+    }
+
+    return -1;
+}
+
+PUBLIC
+MediaQualityThreshold* VideoSession::GetMediaQualityThreshold()
+{
+    return &m_objMediaQualityThreshold;
+}
+
+PRIVATE IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 

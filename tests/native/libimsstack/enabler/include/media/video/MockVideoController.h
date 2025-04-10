@@ -42,8 +42,7 @@ public:
             (override));
     MOCK_METHOD(void, UpdateAccessNetwork, (IN IMS_UINT32 nAccessNetwork), (override));
     MOCK_METHOD(void, SetMtu, (IN IMS_SINT32 nMtu), (override));
-    MOCK_METHOD(
-            IMS_BOOL, UpdateQualityThreshold, (IN std::shared_ptr<VideoNego> pNego), (override));
+    MOCK_METHOD(IMS_BOOL, ApplyQualityThreshold, (), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionOpened, (), (override));
 };
 

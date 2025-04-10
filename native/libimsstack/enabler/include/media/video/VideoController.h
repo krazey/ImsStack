@@ -129,7 +129,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    virtual IMS_BOOL UpdateQualityThreshold(IN std::shared_ptr<VideoNego> pNego);
+    virtual IMS_BOOL ApplyQualityThreshold();
 
     /**
      * @brief Check there is a session opened

@@ -75,15 +75,10 @@ public:
     /**
      * @brief Update the MediaQualityThreshold parameters and send it to the java
      *
-     * @param bActiveSession Set IMS_TRUE if this session is active
-     * @param bConfirmedSession Set IMS_TRUE if this session is confirmed session
-     * @param bEnableRtcp Set IMS_TRUE to enable monitoring the RTCP inactivity, IMS_FALSE to
-     * disable the RTCP monitoring
      * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
      * successfully, IMS_FALSE when it is failed with invalid arguments
      */
-    IMS_BOOL UpdateMediaQualityThreshold(
-            IN IMS_BOOL bActiveSession, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bEnableRtcp);
+    IMS_BOOL UpdateMediaQualityThreshold();
 
     /**
      * @brief Handles the message from the telecom
@@ -108,6 +103,12 @@ public:
 
     /** Get camera id */
     IMS_SINT32 GetCameraId();
+
+    /** Get the video mode */
+    IMS_SINT32 GetVideoMode();
+
+    /** Get the MediaQualityThreshold */
+    MediaQualityThreshold* GetMediaQualityThreshold();
 
 private:
     IMS_BOOL OnSetSurfaceCmd(IN IMS_UINTP pParam);

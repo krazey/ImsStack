@@ -100,7 +100,7 @@ TEST_F(VideoControllerTest, testUpdateLocalAddressFail)
 
 TEST_F(VideoControllerTest, testUpdateQualityThresholdWithNoSession)
 {
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testUpdateSessionWithNoSession)
@@ -130,7 +130,7 @@ TEST_F(VideoControllerTest, testUpdateSessionBeforeOpenSession)
 TEST_F(VideoControllerTest, testUpdateQualityThresholdBeforeOpenSession)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testCloseSessionFail)
@@ -176,7 +176,7 @@ TEST_F(VideoControllerTest, testUpdateQualityThresholdAfterCloseSession)
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
     EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testModifySession)
@@ -199,7 +199,7 @@ TEST_F(VideoControllerTest, testModifySession)
             IMS_TRUE);
 
     EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }
 

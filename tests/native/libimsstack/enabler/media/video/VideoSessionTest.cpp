@@ -15,13 +15,15 @@
  */
 
 #include <gtest/gtest.h>
+
 #include <IJniMedia.h>
 #include <MediaDef.h>
 #include <video/VideoSession.h>
 #include <video/VideoProfile.h>
 #include <config/VideoConfiguration.h>
 
-#include <MockIMediaSessionListener.h>
+#include "MockIMediaSessionListener.h"
+#include "config/MockVideoConfiguration.h"
 
 using namespace android::telephony::imsmedia;
 using ::testing::_;
@@ -100,13 +102,7 @@ TEST_F(VideoSessionTest, testSetAnbrMode)
     EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode(), objAnbrMode);
 }
 
-TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
-{
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_TRUE, IMS_TRUE, IMS_TRUE));
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE, IMS_FALSE, IMS_FALSE));
-}
-
-TEST_F(VideoSessionTest, testUpdateRtpConfigPortZero)
+TEST_F(VideoSessionTest, testUpdateRtpConfig)
 {
     m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     m_objNegoProfile.SetDataPort(0);
@@ -254,7 +250,7 @@ TEST_F(VideoSessionTest, testOnSetSurfaceCmd)
             IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(&objPreviewParam)));
 }
 
-TEST_F(VideoSessionTest, testOnSelectCameraCmd)
+TEST_F(VideoSessionTest, testOnSelectCameraCmdInIdleState)
 {
     m_pSession->SetState(VideoSession::STATE_IDLE);
     CONST IMS_UINT32 CAMERA_ID_FRONT = 1;
@@ -266,6 +262,103 @@ TEST_F(VideoSessionTest, testOnSelectCameraCmd)
     EXPECT_TRUE(m_pSession->OnMessages(
             IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(&objSelectCameraParam)));
     EXPECT_EQ(m_pSession->GetCameraId(), CAMERA_ID_FRONT);
+    EXPECT_EQ(m_pSession->GetVideoMode(), VideoConfig::VIDEO_MODE_PREVIEW);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_PREVIEW);
+}
+
+TEST_F(VideoSessionTest, testOnSelectCameraCmdInPreviewState)
+{
+    m_pSession->SetState(VideoSession::STATE_PREVIEW);
+    CONST IMS_UINT32 CAMERA_ID_FRONT = 1;
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(0);
+    ImsMediaVideoParam objSelectCameraParam(CAMERA_ID_FRONT);
+    EXPECT_TRUE(m_pSession->OnMessages(
+            IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(&objSelectCameraParam)));
+    EXPECT_EQ(m_pSession->GetCameraId(), CAMERA_ID_FRONT);
+    EXPECT_EQ(m_pSession->GetVideoMode(), VideoConfig::VIDEO_MODE_PREVIEW);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_PREVIEW);
+}
+
+TEST_F(VideoSessionTest, testOnSelectCameraCmdInRecordingStateSendRecv)
+{
+    // preset
+    m_pSession->SetState(VideoSession::STATE_RECORDING);
+    m_pSession->GetRtpConfig()->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+
+    CONST IMS_UINT32 CAMERA_ID = VideoSession::CAMERA_ID_NONE;
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    ImsMediaVideoParam objSelectCameraParam(CAMERA_ID);
+    EXPECT_TRUE(m_pSession->OnMessages(
+            IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(&objSelectCameraParam)));
+    EXPECT_EQ(m_pSession->GetCameraId(), CAMERA_ID);
+    EXPECT_EQ(m_pSession->GetVideoMode(), VideoConfig::VIDEO_MODE_PAUSE_IMAGE);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_PAUSE_IMAGE);
+}
+
+TEST_F(VideoSessionTest, testOnSelectCameraCmdInRecordingStateSendOnly)
+{
+    // preset
+    m_pSession->SetState(VideoSession::STATE_RECORDING);
+    m_pSession->GetRtpConfig()->setMediaDirection(VideoConfig::VIDEO_MODE_RECORDING);
+    m_pSession->GetRtpConfig()->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
+
+    CONST IMS_UINT32 CAMERA_ID = VideoSession::CAMERA_ID_NONE;
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    ImsMediaVideoParam objSelectCameraParam(CAMERA_ID);
+    EXPECT_TRUE(m_pSession->OnMessages(
+            IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(&objSelectCameraParam)));
+    EXPECT_EQ(m_pSession->GetCameraId(), CAMERA_ID);
+    EXPECT_EQ(m_pSession->GetVideoMode(), VideoConfig::VIDEO_MODE_PAUSE_IMAGE);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_PAUSE_IMAGE);
+}
+
+TEST_F(VideoSessionTest, testOnSelectCameraCmdInRecordingStateFlipCamera)
+{
+    // preset
+    m_pSession->SetState(VideoSession::STATE_RECORDING);
+    static_cast<VideoConfig*>(m_pSession->GetRtpConfig())
+            ->setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
+    m_pSession->GetRtpConfig()->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+
+    CONST IMS_UINT32 CAMERA_ID = 2;
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    ImsMediaVideoParam objSelectCameraParam(CAMERA_ID);
+    EXPECT_TRUE(m_pSession->OnMessages(
+            IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(&objSelectCameraParam)));
+    EXPECT_EQ(m_pSession->GetCameraId(), CAMERA_ID);
+    EXPECT_EQ(m_pSession->GetVideoMode(), VideoConfig::VIDEO_MODE_RECORDING);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_RECORDING);
+}
+
+TEST_F(VideoSessionTest, testOnSelectCameraCmdInPauseImageToRecording)
+{
+    // preset
+    m_pSession->SetState(VideoSession::STATE_PAUSE_IMAGE);
+    m_pSession->GetRtpConfig()->setMediaDirection(VideoConfig::VIDEO_MODE_PAUSE_IMAGE);
+    m_pSession->GetRtpConfig()->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+
+    CONST IMS_UINT32 CAMERA_ID = 1;
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    ImsMediaVideoParam objSelectCameraParam(CAMERA_ID);
+    EXPECT_TRUE(m_pSession->OnMessages(
+            IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(&objSelectCameraParam)));
+    EXPECT_EQ(m_pSession->GetCameraId(), CAMERA_ID);
+    EXPECT_EQ(m_pSession->GetVideoMode(), VideoConfig::VIDEO_MODE_RECORDING);
+    EXPECT_EQ(m_pSession->GetState(), VideoSession::STATE_RECORDING);
 }
 
 TEST_F(VideoSessionTest, testOnChangeCameraZoomCmd)
@@ -280,4 +373,73 @@ TEST_F(VideoSessionTest, testOnChangeOrientation)
     ImsMediaVideoParam objOrientationParam(90);
     EXPECT_TRUE(m_pSession->OnMessages(
             IJniMedia::CHANGE_ORIENTATION_CMD, reinterpret_cast<IMS_UINTP>(&objOrientationParam)));
+}
+
+TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
+{
+    MockVideoConfiguration objMockConfiguration(MEDIA_TYPE_VIDEO);
+    m_pSession->SetConfiguration(&objMockConfiguration);
+
+    const IMS_SINT32 BIT_RATE = 100000;
+    const IMS_SINT32 INACTIVITY_TIME_MS = 100000;
+
+    ON_CALL(objMockConfiguration, GetRtpInactivityTimerMillis())
+            .WillByDefault(Return(INACTIVITY_TIME_MS));
+    ON_CALL(objMockConfiguration, GetRtcpInactivityTimerMillis())
+            .WillByDefault(Return(INACTIVITY_TIME_MS));
+    ON_CALL(objMockConfiguration, GetVideoLowestBitrateBps()).WillByDefault(Return(BIT_RATE));
+
+    VideoConfig* pVideoConfig = reinterpret_cast<VideoConfig*>(m_pSession->GetRtpConfig());
+    RtcpConfig objRtcpConfig;
+    objRtcpConfig.setIntervalSec(0);
+
+    // Test with direction no flow
+    pVideoConfig->setRtcpConfig(objRtcpConfig);
+    pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_NO_FLOW);
+
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    MediaQualityThreshold* pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
+    EXPECT_EQ(pThreshold->getVideoBitrateBps(), 0);
+
+    // Test with enable rtcp, direction sendrecv
+    objRtcpConfig.setIntervalSec(5);
+    pVideoConfig->setRtcpConfig(objRtcpConfig);
+    pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), INACTIVITY_TIME_MS);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), INACTIVITY_TIME_MS);
+    EXPECT_EQ(pThreshold->getVideoBitrateBps(), BIT_RATE);
+
+    // Test with disable rtcp, direction sendrecv
+    objRtcpConfig.setIntervalSec(0);
+    pVideoConfig->setRtcpConfig(objRtcpConfig);
+    pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), INACTIVITY_TIME_MS);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
+    EXPECT_EQ(pThreshold->getVideoBitrateBps(), BIT_RATE);
+
+    // Test with disable rtcp, direction recvonly
+    objRtcpConfig.setIntervalSec(0);
+    pVideoConfig->setRtcpConfig(objRtcpConfig);
+    pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
+    EXPECT_EQ(pThreshold->getVideoBitrateBps(), 0);
+
+    // Test with enable rtcp, direction recvonly
+    objRtcpConfig.setIntervalSec(5);
+    pVideoConfig->setRtcpConfig(objRtcpConfig);
+    pVideoConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), INACTIVITY_TIME_MS);
+    EXPECT_EQ(pThreshold->getVideoBitrateBps(), 0);
 }
