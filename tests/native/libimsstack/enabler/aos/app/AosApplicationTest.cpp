@@ -2696,95 +2696,429 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotStopWhenTestModeEnabledW
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosApplicationTest, ImsEstablishmentStart)
+TEST_F(AosApplicationTest,
+        NotStartImsEstablishmentTimerWhenImsEstablishmentStartIfRegTypeIsEmergency)
 {
-    // TEST_F : ProcessImsEstablishmentStart
-    m_pAosApplication->SetNetTrackerListener();
-    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime())
-            .Times(AnyNumber())
-            .WillOnce(Return(0))
-            .WillRepeatedly(Return(10));
+    // GIVEN
+    m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
 
-    // ImsEstablishmentTime is 0
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
+    // WHEN
     m_pAosApplication->ProcessImsEstablishmentStart();
 
-    // Registered
-    EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
-    m_pAosApplication->ProcessImsEstablishmentStart();
-
-    // IMS call is active
-    EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_FALSE));
-    m_pAosApplication->SetImsCall(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
-    m_pAosApplication->ProcessImsEstablishmentStart();
-    m_pAosApplication->SetImsCall(IMS_FALSE);
-
-    // IsSupportedNetworkTypeForCellular is false
-    EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillOnce(Return(NW_REPORT_RADIO_INVALID))
-            .WillRepeatedly(Return(NW_REPORT_RADIO_NR));
-    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).Times(0);
-    m_pAosApplication->ProcessImsEstablishmentStart();
+    // THEN
     EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
 
-    // IsDataIn and IsSupportedNetworkTypeForCellular are true, IsPlmnBlockRequired returns false
-    EXPECT_CALL(m_objMockIAosNetTracker, IsDataIn())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+TEST_F(AosApplicationTest, NotStartImsEstablishmentTimerWhenImsEstablishmentStartIfEstTimeIsZero)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(0));
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfEpdgEnabled)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfImsRegistered)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfImsCallActive)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    m_pAosApplication->SetImsCall(IMS_TRUE);
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfDataOos)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_FALSE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfNotSupportedRat)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_WCDMA));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfLteCombinedAttach)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
     m_pAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
     m_pAosApplication->SetLteExtraInfo(IMS_LTE_INFO_EXTRA_NONE);
     m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
-    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).Times(0);
-    m_pAosApplication->ProcessImsEstablishmentStart();
-    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
-    m_pAosApplication->SetLteAttachState(IMS_LTE_INFO_EPS_ONLY_ATTACHED);
 
-    // IsImsVoiceCallSupported is false
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfVopsNotSupported)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_FALSE));
     m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
-    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(_)).Times(0);
-    m_pAosApplication->ProcessImsEstablishmentStart();
-    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
-    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
-            .WillRepeatedly(Return(IMS_TRUE));
 
-    // Blocked
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfAcIncompleted)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_AC_INCOMPLETED))
+            .WillByDefault(Return(IMS_TRUE));
     m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
-    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(_)).WillOnce(Return(IMS_TRUE));
-    m_pAosApplication->ProcessImsEstablishmentStart();
-    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
 
-    // timer already running
-    EXPECT_CALL(m_objMockAosCondition, IsReasonBlocked(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfAuthenticationFailed)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfUsimAuthenticationFailed)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfAosIncompleted)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_AOS_INCOMPLETED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfPermanentDataFailed)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfEnablerDetached)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_ENABLER_DETACHED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest, StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfImsDisabled)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_IMS_DISABLED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfPermanentRegFailed)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfSubscriberIncompleted)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfImsServiceDisabled)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        StopRunningImsEstablishmentTimerWhenImsEstablishmentStartIfInvalidConnection)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_INVALID_CONNECTION))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosApplicationTest,
+        KeepRunningImsEstablishmentTimerWhenImsEstablishmentStartIfRatIsNotChanged)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
     m_pAosApplication->SetRat(NW_REPORT_RADIO_LTE);
-    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
-    m_pAosApplication->ProcessImsEstablishmentStart();
-    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
-    m_pAosApplication->SetRat(NW_REPORT_RADIO_HSPA);
-    m_pAosApplication->ProcessImsEstablishmentStart();
-    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
-    m_pAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
 
-    // start TIMER_IMS_ESTABLISHMENT
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
     m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
     EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+
+    // Clean Up
+    m_pAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
+}
+
+TEST_F(AosApplicationTest,
+        KeepRunningImsEstablishmentTimerWhenImsEstablishmentStartIfOldRatIsNotSupportedType)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_HSPA);
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+    m_pAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+
+    // Clean Up
+    m_pAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
+}
+
+TEST_F(AosApplicationTest, StartImsEstablishmentTimerWhenImsEstablishmentStartIfNoBlockConditions)
+{
+    // GIVEN
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_HSPA);
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsDataIn()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosApplication->ProcessImsEstablishmentStart();
+
+    // THEN
+    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+
+    // Clean Up
+    m_pAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
 }
 
 TEST_F(AosApplicationTest, Callback)
