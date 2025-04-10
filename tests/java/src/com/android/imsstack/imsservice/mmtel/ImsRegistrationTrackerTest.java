@@ -550,11 +550,15 @@ public class ImsRegistrationTrackerTest {
                 .KEY_SMS_OVER_IMS_SUPPORTED_BOOL)))
                 .thenReturn(true);
 
+        // SMS over IMS is enabled, but no RAT is supported
+        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+
         int[] emptyArray = new int[0];
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY))
                 .thenReturn(emptyArray);
 
+        // SMS over IMS is enabled, but supported RAT array is empty
         assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
     }
 

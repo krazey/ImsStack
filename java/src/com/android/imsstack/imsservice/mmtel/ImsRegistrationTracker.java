@@ -460,12 +460,14 @@ public class ImsRegistrationTracker {
     private int[] getSmsSupportedRats() {
         ConfigInterface config = getConfigInterface(mContext.getSlotId());
         CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        int[] supportedRats = null;
 
         if (cc != null) {
-            return cc.getIntArray(
+            supportedRats = cc.getIntArray(
                     CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY);
         }
-        return new int[]{};
+
+        return supportedRats != null ? supportedRats : new int[0];
     }
 
     private boolean isSmsCapabilitySupportedInWifiRoaming() {
