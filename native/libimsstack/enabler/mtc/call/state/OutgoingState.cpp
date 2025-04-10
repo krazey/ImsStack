@@ -64,7 +64,8 @@ OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
         m_pUdpKeepAliveSender(IMS_NULL),
         m_pSilentRedialHelper(IMS_NULL),
-        m_bWaitingServiceConnectedForRedial(IMS_FALSE)
+        m_bWaitingServiceConnectedForRedial(IMS_FALSE),
+        m_bMoResponseTimeoutForReasonTimerExpired(IMS_FALSE)
 {
 }
 
@@ -712,6 +713,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
                 }
             }
             return GetStateName();
+        case TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON:
+            m_bMoResponseTimeoutForReasonTimerExpired = IMS_TRUE;
+            return GetStateName();
         default:
             return GetStateName();
     }
@@ -825,37 +829,29 @@ CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSes
 }
 
 PRIVATE
-CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode)
+CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(
+        IN IMS_SINT32 nReasonCode) const
 {
     if (nReasonCode != CODE_USER_TERMINATED)
     {
         return CallReasonInfo(CODE_NONE);
     }
 
-    if (m_objContext.GetConfigurationProxy().GetInt(
-                ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT) <= 0)
-    {
-        return CallReasonInfo(CODE_NONE);
-    }
-
-    if (m_objContext.GetTimer().IsActive(TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON))
-    {
-        return CallReasonInfo(CODE_NONE);
-    }
-
-    IMtcSession* pSession = m_objContext.GetSession();
-    if (pSession == IMS_NULL)
-    {
-        return CallReasonInfo(CODE_NONE);
-    }
-
-    if (m_objContext.GetMessageUtils().GetNumberOfPreviousResponses(
-                &pSession->GetISession(), IMessage::SESSION_START) > 0)
+    if (!m_bMoResponseTimeoutForReasonTimerExpired)
     {
         return CallReasonInfo(CODE_NONE);
     }
 
     IMS_TRACE_D("MayGetUpdatedReasonByResponseWaitTimeout", 0, 0, 0);
+
+    IMtcSession* pSession = m_objContext.GetSession();
+    if (pSession != IMS_NULL)
+    {
+        // only utilize the internal actions and ignore the return value
+        // since this case is limited to cases where the user explicitly terminates the call,
+        // as subsequent actions are limited
+        StartErrorHandler(m_objContext, pSession->GetISession()).Handle(IMS_NULL);
+    }
 
     return CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
 }
