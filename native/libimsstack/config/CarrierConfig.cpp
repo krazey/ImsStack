@@ -847,6 +847,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT[] 
         KEY_IMS_VOICE_PREFIX "silent_redial_max_retry_count_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_ULTIMATE_FAILURE_ACTION_INT[] =
         KEY_IMS_VOICE_PREFIX "silent_redial_ultimate_failure_action_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "silent_redial_registration_wait_time_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT[] =
         KEY_IMS_VOICE_PREFIX "call_type_after_audio_and_video_call_merged_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY[] =

@@ -89,6 +89,7 @@
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
     <int name="imsvoice.silent_redial_ultimate_failure_action_int" value="0"/>
+    <int name="imsvoice.silent_redial_registration_wait_time_millis_int" value="20000"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="1"/>
     <string-array name="imsvoice.caller_id_service_codes_for_restriction_string_array" num="1">
         <item value="*67"/>
