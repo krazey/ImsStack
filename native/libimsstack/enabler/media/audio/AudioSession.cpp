@@ -735,6 +735,8 @@ IMS_SINT32 AudioSession::ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT
 {
     IMS_SINT32 nConvertedCodecMode = -1;
 
+    IMS_TRACE_D(
+            "ConvertBitrateToCodecMode() - bitrate[%d], codectype[%d]", nBitRate, nCodecType, 0);
     switch (nCodecType)
     {
         case CodecType_ANBR::CODEC_AMR:
@@ -754,27 +756,27 @@ IMS_SINT32 AudioSession::ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT
             // TODO: need to add for EVS 24.4kbps
             break;
         case CodecType_ANBR::CODEC_EVS:
-            if (nBitRate >= 0 && nBitRate <= 10)
+            if (nBitRate >= 0 && nBitRate <= 5900)
             {
                 nConvertedCodecMode = 9;  // 5.9kbps
             }
-            else if (nBitRate <= 12)
+            else if (nBitRate <= 7200)
             {
                 nConvertedCodecMode = 10;  // 7.2kbps
             }
-            else if (nBitRate <= 16)
+            else if (nBitRate <= 9600)
             {
                 nConvertedCodecMode = 12;  // 9.6kbps
             }
-            else if (nBitRate <= 20)
+            else if (nBitRate <= 13200)
             {
                 nConvertedCodecMode = 13;  // 13.2kbps
             }
-            else if (nBitRate <= 24)
+            else if (nBitRate <= 16400)
             {
                 nConvertedCodecMode = 14;  // 16.4kbps
             }
-            else if (nBitRate <= 28)
+            else if (nBitRate <= 24400)
             {
                 nConvertedCodecMode = 15;  // 24.4kbps
             }
@@ -782,14 +784,12 @@ IMS_SINT32 AudioSession::ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT
             {
                 nConvertedCodecMode = 13;  // 13.2kbps
             }
-            // TODO: need to add for EVS 24.4kbps
             break;
         default:
-            IMS_TRACE_D("Invalid CodecType", 0, 0, 0);
+            IMS_TRACE_D("ConvertBitrateToCodecMode() - Invalid CodecType", 0, 0, 0);
             break;
     }
-    IMS_TRACE_D(
-            "ConvertBitrateToCodecMode() - converted codec mode [%d]", nConvertedCodecMode, 0, 0);
+    IMS_TRACE_D("ConvertBitrateToCodecMode() - converted codecMode[%d]", nConvertedCodecMode, 0, 0);
     return nConvertedCodecMode;
 }
 
@@ -877,7 +877,7 @@ IMS_SINT32 AudioSession::GetRtpInactivityTimer(IN IMS_BOOL bActiveSession)
 PRIVATE
 IMS_SINT32 AudioSession::GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession)
 {
-    IMS_TRACE_D("GetRtcpInactivityTimer() - ActiveSession[%d] ServiceType[%d]", bActiveSession,
+    IMS_TRACE_D("GetRtcpInactivityTimer() - ActiveSession[%d], ServiceType[%d]", bActiveSession,
             m_eServiceType, 0);
 
     if (GetConfiguration() == IMS_NULL)
