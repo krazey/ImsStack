@@ -635,14 +635,20 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AosReason::AIRPLANE_MODE:
             nImsAosReason = ImsAosReason::AIRPLANE_MODE;
             break;
+        case AosReason::SERVICE_POLICY:
+            nImsAosReason = ImsAosReason::SERVICE_POLICY;
+            break;
         case AosReason::WIFI_OFF:
             nImsAosReason = ImsAosReason::WIFI_OFF;
             break;
         case AosReason::DATA_DISCONNECTED:
             nImsAosReason = ImsAosReason::DATA_DISCONNECTED;
             break;
-        case AosReason::SERVICE_POLICY:
-            nImsAosReason = ImsAosReason::SERVICE_POLICY;
+        case AosReason::DATA_PERMANENTLY_FAILED:
+            if (IsEmergencyService())
+            {
+                nImsAosReason = ImsAosReason::DATA_PERMANENTLY_FAILED;
+            }
             break;
         case AosReason::REG_TERMINATED:
             nImsAosReason = ImsAosReason::REG_TERMINATED;

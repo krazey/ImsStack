@@ -22,7 +22,7 @@ package com.android.imsstack.core.agents.dcmif;
 public interface IDcSettings extends IDc {
 
     /**
-     * Returns whether VoLTE service is allowed in roaming state
+     * Returns whether VoLTE service is allowed in roaming state.
      */
     boolean isRoamingAllowed();
 
@@ -33,32 +33,37 @@ public interface IDcSettings extends IDc {
     boolean isVopsIgnored();
 
     /**
-     * Returns whether IMS PDN request without MMTEL capability is required
+     * Returns whether IMS PDN request without MMTEL capability is required.
      */
     boolean isImsPdnRequestWithoutMmtelRequired();
 
     /**
-     * Returns list of RAT technologies on which IMS is supported
+     * Returns list of RAT technologies on which IMS is supported.
      */
     int[] getImsSupportedRats();
 
     /**
-     * Returns a platform configuration for Cross SIM
+     * Returns a platform configuration for Cross SIM.
      */
     boolean isCrossSimEnabledByPlatform();
 
     /**
-     * Returns preferred IP version for connection
+     * Returns preferred IP version for connection.
      */
     int getPreferredIpVersion();
 
     /**
-     * Returns preferred IP version for emergency connection
+     * Returns preferred IP version for emergency connection.
      */
     int getEmergencyPreferredIpVersion();
 
     /**
-     * Returns whether the casueCode should be handled as permanent failure
+     * Returns whether the casueCode should be handled as permanent failure.
      */
     boolean isPermanentFailure(EApnType apnType, int causeCode);
+
+    /**
+     * Returns whether the causeCode requires a cross stack redial.
+     */
+    boolean isCrossStackRedialCause(EApnType apnType, int causeCode);
 }

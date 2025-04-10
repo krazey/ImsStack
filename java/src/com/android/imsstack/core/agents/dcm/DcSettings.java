@@ -152,6 +152,33 @@ public class DcSettings implements IDcSettings {
         return false;
     }
 
+    @Override
+    public boolean isCrossStackRedialCause(EApnType apnType, int causeCode) {
+        if (apnType != EApnType.EMERGENCY) {
+            return false;
+        }
+
+        CarrierConfig config = getCarrierConfig(mSlotId);
+        if (config == null) {
+            return false;
+        }
+
+        int[] crossStackRedialCauses = config.getIntArray(
+                CarrierConfig.ImsEmergency.KEY_EPDN_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY);
+        if (crossStackRedialCauses == null) {
+            return false;
+        }
+
+        for (int i = 0; i < crossStackRedialCauses.length; i++) {
+            if (crossStackRedialCauses[i] == causeCode) {
+                ImsLog.w(mSlotId, "crossStackRedialCause " + causeCode);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @VisibleForTesting
     protected IDcNetWatcher getDcNetWatcher(int slotId) {
         return DcFactory.getDcAgent(IDcNetWatcher.class, slotId);

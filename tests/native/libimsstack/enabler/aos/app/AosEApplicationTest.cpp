@@ -89,6 +89,7 @@ using ::testing::ReturnRef;
     using Base::ProcessRegBlockedTimerExpired;      \
     using Base::ProcessRegStart;                    \
     using Base::SetAppState;                        \
+    using Base::SetAppType;                         \
     using Base::SetImsCall;                         \
     using Base::SetKeepEPdnWhenNoPcscf;             \
     using Base::SetRegBlockInCbm;                   \
@@ -347,6 +348,8 @@ protected:
 
         m_pTestAosEApplication->SetAosCallTracker(
                 static_cast<IAosCallTracker*>(&m_objMockIAosCallTracker));
+
+        m_pTestAosEApplication->SetAppType(AosRegistrationType::EMERGENCY);
     }
 
     void TearDown() override
@@ -672,6 +675,37 @@ TEST_F(AosEApplicationTest, ConnectorStartWhenConnectionDeactivatedInReadyStateD
 
     // CONNECTION_DEACTIVATED
     m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
+}
+
+TEST_F(AosEApplicationTest, SetReasonDisconnectedWhenConnectionDeactivatedInReadyState)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    ImsMessage objMessageCnx(
+            MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_DISCONNECTED);
+
+    // WHEN
+    m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
+
+    // THEN
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+}
+
+TEST_F(AosEApplicationTest,
+        SetReasonDataPermanentlyFailedWhenConnectionDeactivatedByPermanentlyFailedInReadyState)
+{
+    // GIVEN
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    ImsMessage objMessageCnx(
+            MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_PERMANENTLY_FAILED);
+
+    // WHEN
+    m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
+
+    // THEN
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_PERMANENTLY_FAILED);
 }
 
 TEST_F(AosEApplicationTest, StateReady_Condition)

@@ -168,6 +168,27 @@ public class DcSettingsTest {
     }
 
     @Test
+    public void testIsCrossStackRedialCause() throws Exception {
+        int crossStackRedialCause = 5;
+        int[] emptyList = {}, availableList = {crossStackRedialCause};
+
+        when(mMockCarrierConfig.getIntArray(
+                eq(CarrierConfig.ImsEmergency
+                        .KEY_EPDN_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY)))
+                .thenReturn(emptyList)
+                .thenReturn(availableList);
+
+        assertFalse(
+                mDcSettingsUT.isCrossStackRedialCause(EApnType.EMERGENCY, crossStackRedialCause));
+        assertTrue(
+                mDcSettingsUT.isCrossStackRedialCause(EApnType.EMERGENCY, crossStackRedialCause));
+
+        assertFalse(
+                mDcSettingsUT.isCrossStackRedialCause(EApnType.INTERNET, crossStackRedialCause));
+        assertFalse(mDcSettingsUT.isCrossStackRedialCause(EApnType.IMS, crossStackRedialCause));
+    }
+
+    @Test
     public void testFailToGetCarrierConfig() throws Exception {
         int permanentFailureCause = 33;
 
@@ -183,6 +204,8 @@ public class DcSettingsTest {
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
                 CarrierConfig.Ims.IPV6_PREFERRED);
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
+        assertFalse(mDcSettingsUT.isCrossStackRedialCause(EApnType.EMERGENCY,
+                permanentFailureCause));
     }
 
     private class FakeDcSettings extends DcSettings {

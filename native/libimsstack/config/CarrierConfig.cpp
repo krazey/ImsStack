@@ -533,6 +533,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT[]
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_ROAMING_PREFERRED_EREG_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "roaming_preferred_ereg_int";
 const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_EPDN_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY[] =
+                KEY_IMS_EMERGENCY_PREFIX "epdn_reject_causes_for_cross_stack_redial_int_array";
+const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX "ereg_err_code_not_supported_common_policy_int_array";
 

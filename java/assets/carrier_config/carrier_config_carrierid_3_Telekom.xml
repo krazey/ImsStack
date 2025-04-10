@@ -20,6 +20,9 @@
     <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
+        <item value="5"/>
+    </int-array>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <int name="imsvoice.session_refresh_sdp_session_version_increment_int" value="2"/>
@@ -28,6 +31,6 @@
         <item value="403"/>
     </int-array>
 
-<!-- MTC -->
+    <!-- MTC -->
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
 </carrier_config>

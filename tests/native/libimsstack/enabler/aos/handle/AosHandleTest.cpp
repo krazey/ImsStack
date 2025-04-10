@@ -1518,11 +1518,11 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::AIRPLANE_MODE), ImsAosReason::AIRPLANE_MODE);
+    EXPECT_EQ(
+            m_pAosHandle->GetImsAosReason(AosReason::SERVICE_POLICY), ImsAosReason::SERVICE_POLICY);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::WIFI_OFF), ImsAosReason::WIFI_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_DISCONNECTED),
             ImsAosReason::DATA_DISCONNECTED);
-    EXPECT_EQ(
-            m_pAosHandle->GetImsAosReason(AosReason::SERVICE_POLICY), ImsAosReason::SERVICE_POLICY);
     EXPECT_EQ(
             m_pAosHandle->GetImsAosReason(AosReason::REG_TERMINATED), ImsAosReason::REG_TERMINATED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::INITIAL_REG_REQUESTED),
@@ -1532,6 +1532,14 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::IMS_DISABLED), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::TTYMODEON), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::IP_CHANGED), ImsAosReason::IP_CHANGED);
+
+    m_pAosHandle->SetServiceType(ImsAosService::MTC);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_PERMANENTLY_FAILED),
+            ImsAosReason::NOT_SPECIFIED);
+
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_PERMANENTLY_FAILED),
+            ImsAosReason::DATA_PERMANENTLY_FAILED);
 }
 
 TEST_F(AosHandleTest, GetImsAosReasonForSuspend_Test)

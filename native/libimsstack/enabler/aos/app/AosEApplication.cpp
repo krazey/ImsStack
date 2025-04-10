@@ -317,6 +317,7 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateNotReady_Condition(IN IMSMSG& /
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& objMsg)
 {
     IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
+    IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
 
     switch (nType)
     {
@@ -356,7 +357,14 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& obj
             }
             else
             {
-                ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+                if (nReason == AosConnector::REASON_PERMANENTLY_FAILED)
+                {
+                    ProcessCleanAll(AosReason::DATA_PERMANENTLY_FAILED);
+                }
+                else
+                {
+                    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+                }
             }
             break;
 

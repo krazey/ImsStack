@@ -733,6 +733,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reg_timer_for_ecall_millis_int";
         public static final String KEY_ROAMING_PREFERRED_EREG_INT =
                 KEY_PREFIX + "roaming_preferred_ereg_int";
+        public static final String KEY_EPDN_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY =
+                KEY_PREFIX + "epdn_reject_causes_for_cross_stack_redial_int_array";
         public static final String KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY =
                 KEY_PREFIX + "ereg_err_code_not_supported_common_policy_int_array";
         // Mtc

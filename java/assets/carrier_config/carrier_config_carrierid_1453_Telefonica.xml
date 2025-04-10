@@ -19,6 +19,9 @@
     <int name="ims.reg_out_of_service_policy_int" value="1"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
     <int name="imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int" value="2000"/>
+    <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
+        <item value="5"/>
+    </int-array>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Ut/Xcap -->
