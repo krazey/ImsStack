@@ -21,6 +21,7 @@
     <boolean name="ims.allow_unknown_country_element_in_geolocation_pidf_bool" value="false"/>
     <boolean name="ims.allow_no_position_in_geolocation_pidf_bool" value="false"/>
     <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
+    <int name="ims.cellular_network_info_cache_expiration_sec_int" value="0"/>
     <int name="ims.location_policy_update_type_int" value="2"/>
     <int name="ims.location_acquisition_policy_int" value="610432"/>
     <int name="ims.location_address_resolution_time_millis_int" value="1000"/>
