@@ -22,6 +22,8 @@
 #include "IMtsService.h"
 #include "ImsService.h"
 #include "IMtsTrafficListener.h"
+#include "MtsDef.h"
+#include <memory>
 
 class IImsAos;
 class IImsRadio;
@@ -99,8 +101,10 @@ private:
     IMS_UINT32 ConvertToAccessNetworkType(
             IN IMS_UINT32 nTrafficType, IN IMS_SINT32 nReportedNetwork);
     IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
-    IJniMtsServiceThread* GetJniThread();
-    void StartRadioTraffic(IN IMtsTraffic* piMtsTraffic);
+    IMS_BOOL IsEmergencySmsOverImsSupported() const;
+    IMS_BOOL IsEmergencySmsReadyToSend() const;
+    MtsTrafficStartResult StartMtTraffic(IN ICoreService* piService);
+    MtsTrafficStartResult StartMoTrafficIfNeeded(IN IMS_BOOL bEmergency);
 
     void DeInit();
 
@@ -114,7 +118,7 @@ private:
     IMtsServiceState* m_piMtsServiceState;
     IImsRadio* m_piImsRadio;
     ImsList<IMtsTraffic*> m_objMtsTraffics;
-    SmsSendRequestInfo* m_pSmsInfo;
+    std::unique_ptr<SmsSendRequestInfo> m_pSmsInfo;
 };
 
 #endif

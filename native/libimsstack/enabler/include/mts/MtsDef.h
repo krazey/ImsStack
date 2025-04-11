@@ -50,6 +50,15 @@ enum class MtsTimerType
     TIMER_RETRY_AFTER = 2,
 };
 
+enum class MtsTrafficStartResult
+{
+    TRAFFIC_READY = 0,
+    TRAFFIC_AWAITING_SETUP = 1,
+    TRAFFIC_NOT_ALLOWED = 2,
+    TRAFFIC_NOT_FOUND = 3,
+    TRAFFIC_UNKNOWN = 4,
+};
+
 enum class MtsTransactionType
 {
     MESSAGE_TYPE_SEND = 1,
