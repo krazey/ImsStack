@@ -439,7 +439,6 @@ public class ImsCallManager {
 
     private void addPendingSession(ImsCallSessionImpl session) {
         synchronized (mPendingSessions) {
-            removePendingSessions();
             mPendingSessions.put(session.getCallId(), session);
 
             log("pendingSessions=" + mPendingSessions.size() +

@@ -636,16 +636,18 @@ public class ImsCallManagerTest {
         verify(mMockMtcApp).getPendingCall(-1);
         Assert.assertEquals(0, mImsCallManager.getPendingSession().size());
 
+        // Verify function onPreIncomingCallReceived->onCallPreIncomingReceived()
+        ImsCallSessionImpl pendingSession = Mockito.mock(ImsCallSessionImpl.class);
+        mImsCallManager.getPendingSession().put(PENDING_CALL_ID, pendingSession);
         when(mMockMtcCall.getNativeCallId()).thenReturn(4L);
         MtcCall call = Mockito.mock(MtcCall.class);
         when(mMockMtcApp.getPendingCall(4L)).thenReturn(call);
         when(mMockImsCallSession.getCallId()).thenReturn("4");
-        mImsCallManager.getSession().put("4", mMockImsCallSession);
         mMtcAppCallListenerProxy.onPreIncomingCallReceived(mMockMtcApp, 4L);
         verify(mMockMtcApp).getPendingCall(4L);
         Assert.assertNotNull(mImsCallManager.getPendingSession().get("4"));
+        Assert.assertNotNull(mImsCallManager.getPendingSession().get(PENDING_CALL_ID));
 
-        // Verify function onPreIncomingCallReceived->onCallPreIncomingReceived()
         reset(mMockMtcApp);
         reset(mMockImsCallSession);
         when(mMockMtcCall.getNativeCallId()).thenReturn(12L);
