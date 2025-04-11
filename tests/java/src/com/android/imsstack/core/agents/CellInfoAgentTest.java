@@ -428,6 +428,27 @@ public class CellInfoAgentTest {
         assertNull(defaultAni);
     }
 
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWithInvalidCellInfoAge() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        // set the mCellInfoCacheExpirationDuration so that CellInfo is always invalid
+        when(mCarrierConfig.getInt(
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT), anyInt()))
+                .thenReturn(-1);
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo();
+        assertNull(defaultAni);
+    }
+
     private void testUpdateAllCellInfoWithInvalidCellIdentity(int networkType) {
         setUpVoNrEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
         setUpAllCellInfo(networkType, false);

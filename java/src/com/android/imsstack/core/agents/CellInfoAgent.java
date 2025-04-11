@@ -276,6 +276,11 @@ public class CellInfoAgent implements CellInfoInterface {
             return getAccessNetworkInfoFromPersistentStorage();
         }
 
+        if (!isCellInfoValid(getCellInfoAge(imsCellInfo.getTimestamp()))) {
+            ImsLog.d(this, mSlotId, "Cached CellInfo age expired.");
+            return null;
+        }
+
         String[] ani = new String[MAX_ACCESS_NETWORK_INFO];
 
         ani[ANI_INDEX_NETWORK_TYPE] = String.valueOf(networkType);
