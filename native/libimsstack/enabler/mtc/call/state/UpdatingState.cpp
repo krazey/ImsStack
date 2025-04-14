@@ -418,10 +418,11 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackReceived(IN ISession* pi
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
+    if (eCallReason != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
-        const CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
+        const CallReasonInfo objReason(eCallReason);
         RejectUpdate(objReason);
         RecoverModificationFailure();
         return CallStateName::ESTABLISHED;

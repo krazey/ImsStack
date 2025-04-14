@@ -685,6 +685,15 @@ void MessageFormatter::SetHeadersForReject(IN const CallReasonInfo& objReason)
             m_objContext.GetMessageUtils().AddValueIfNotExists(
                     m_piNextMessage, objReason.strExtraMessage, ISipHeader::UNSUPPORTED);
             break;
+        case CODE_REJECT_UNSUPPORTED_SDP_HEADERS:
+        {
+            IMS_TRACE_D("SetHeadersForReject : CODE_REJECT_UNSUPPORTED_SDP_HEADERS", 0, 0, 0);
+            // RFC 3261 20.43
+            AString strWarning = "305 IMS-client \"Incompatible media format\"";
+            m_objContext.GetMessageUtils().SetHeader(
+                    m_piNextMessage, strWarning, ISipHeader::WARNING);
+        }
+        break;
         case CODE_MEDIA_NOT_ACCEPTABLE:
         {
             IMS_TRACE_D("SetHeadersForReject : CODE_MEDIA_NOT_ACCEPTABLE", 0, 0, 0);
@@ -692,9 +701,6 @@ void MessageFormatter::SetHeadersForReject(IN const CallReasonInfo& objReason)
             AString strWarning;
             switch (objReason.nExtraCode)
             {
-                case MediaNego::ERROR_INVALID_DESCRIPTOR:
-                    strWarning = "305 IMS-client \"Incompatible media format\"";
-                    break;
                 case MediaNego::ERROR_IP_MISMATCH:
                     strWarning = "301 IMS-client \"Incompatible network address formats\"";
                     break;
@@ -788,6 +794,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_480;
             break;
         case CODE_MEDIA_NOT_ACCEPTABLE:
+        case CODE_REJECT_UNSUPPORTED_SDP_HEADERS:
             eStatusCode = SipStatusCode::SC_488;
             break;
         case CODE_TIMEOUT_NO_ANSWER:
@@ -847,6 +854,7 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
             strPhrase = GetRejectPhrase(RejectType::ON_CONVERTING);
             break;
         case CODE_MEDIA_NOT_ACCEPTABLE:
+        case CODE_REJECT_UNSUPPORTED_SDP_HEADERS:
             strPhrase = GetRejectPhrase(RejectType::NEGOTIATION_FAILURE);
             break;
         case CODE_ACCESS_CLASS_BLOCKED:

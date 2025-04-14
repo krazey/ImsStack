@@ -444,6 +444,43 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfOfferAnswerFails)
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
 }
 
+TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfNoCodecMatched)
+{
+    ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_ACK))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    ON_CALL(objMediaManager, NegotiateSdp(&objISession))
+            .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
+    ON_CALL(objPreconditionManager, OnSdpReceived(&objISession)).WillByDefault(Return());
+
+    SipMethod objMethod = SipMethod::ACK;
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
+}
+
+TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfInvalidSdpDescriptor)
+{
+    ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_ACK))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    ON_CALL(objMediaManager, NegotiateSdp(&objISession))
+            .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
+    ON_CALL(objPreconditionManager, OnSdpReceived(&objISession)).WillByDefault(Return());
+
+    SipMethod objMethod = SipMethod::ACK;
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+
+    EXPECT_CALL(
+            objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS)));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
+}
+
 TEST_F(AlertingStateTest, SessionTerminatedTransitsStateToTerminated)
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_TERMINATE))

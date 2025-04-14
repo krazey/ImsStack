@@ -423,7 +423,8 @@ TEST_F(MessageFormatterTest, FormRejectMessageWitMediaNotAcceptableWithInvalidDe
     IMS_SINT32 eStatusCode;
     AString strPhrase;
 
-    CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, MediaNego::ERROR_INVALID_DESCRIPTOR);
+    CallReasonInfo objReasonInfo(
+            CODE_REJECT_UNSUPPORTED_SDP_HEADERS, MediaNego::ERROR_INVALID_DESCRIPTOR);
     EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, strWarning, ISipHeader::WARNING, _));
 
     pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
@@ -835,6 +836,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_580);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_INIT_FAILED), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_MEDIA_NOT_ACCEPTABLE), SipStatusCode::SC_488);
+    EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_UNSUPPORTED_SDP_HEADERS), SipStatusCode::SC_488);
     ON_CALL(objConfigurationProxy,
             GetInt(ConfigVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT))
             .WillByDefault(Return(nTestStatusCode));
@@ -876,6 +878,7 @@ TEST_F(MessageFormatterTest, GetRejectPhrase)
     EXPECT_STREQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_UNSUPPORTED_SDP_HEADERS).GetStr(), pszTestPhrase);
     EXPECT_STREQ(GetRejectPhrase(CODE_ACCESS_CLASS_BLOCKED).GetStr(), pszTestPhrase);
 }
 

@@ -614,6 +614,26 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfMediaNegoFailed)
             CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
+TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfMediaNegoFailedWithInvalidDescriptor)
+{
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+
+    NegotiationResult eNegoFailReason = MediaNego::ERROR_INVALID_DESCRIPTOR;
+    CallReasonInfo objMediaNegoFailReason(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoFailReason);
+    ON_CALL(objMockMediaManager, NegotiateSdp).WillByDefault(Return(eNegoFailReason));
+    CallType eAnyCallType = CallType::VIDEO_RTT;
+    EXPECT_CALL(objMockMtcSession, GetPreviousCallType()).WillOnce(Return(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, SetCallType(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, Reject(objMediaNegoFailReason));
+    EXPECT_CALL(objMockMediaManager, FinalizeSdp(&objMockISession));
+
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
 TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
 {
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));

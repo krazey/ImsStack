@@ -634,11 +634,12 @@ IMS_SINT32 MtcCallState::HandleReceivedSdp(IN ISession* piSession, IN IMessage* 
         return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 
-    if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+    NegotiationResult negoResult = m_objContext.GetMediaManager().NegotiateSdp(piSession);
+    if (negoResult != NegotiationResult::NO_ERROR)
     {
         IMS_TRACE_D("HandleReceivedSdp - Nego SDP Failed", 0, 0, 0);
         // TODO: return fail reason? IMS_RESULT? it's always NEGOFAIL?
-        return CODE_MEDIA_NOT_ACCEPTABLE;
+        return GetCallReasonByNegotiationResult(negoResult);
     }
 
     m_objContext.GetPreconditionManager().OnSdpReceived(piSession);
@@ -1053,6 +1054,20 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) cons
             return CODE_LOCAL_NETWORK_IP_CHANGED;
         default:  // NOT_SPECIFIED
             return CODE_LOCAL_NOT_REGISTERED;
+    }
+}
+
+PROTECTED
+IMS_SINT32 MtcCallState::GetCallReasonByNegotiationResult(IN NegotiationResult eNegoResult)
+{
+    switch (eNegoResult)
+    {
+        case NegotiationResult::NO_ERROR:
+            return CODE_NONE;
+        case NegotiationResult::ERROR_INVALID_DESCRIPTOR:
+            return CODE_REJECT_UNSUPPORTED_SDP_HEADERS;
+        default:
+            return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 }
 

@@ -72,9 +72,10 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
             piSession, IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
+    if (eCallReason != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(eCallReason));
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();

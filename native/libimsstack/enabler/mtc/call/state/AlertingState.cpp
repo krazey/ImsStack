@@ -185,10 +185,11 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     pSession->HandleRequest(RequestType::ACK, *piMessage);
 
     // TODO: need to check NegotiationState::STATE_OFFER_SENT?
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
+    if (eCallReason != CODE_NONE)
     {
         // TODO TerminateAndToTerminating() ?
-        CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
+        CallReasonInfo objReason(eCallReason);
         pSession->Terminate(IMS_TRUE, objReason);
 
         m_objContext.GetUiNotifier().SendStartFailed(objReason);
@@ -240,9 +241,10 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     UpdateType eUpdateType = pSession->GetOngoingUpdateType();
     pSession->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (HandleReceivedSdp(piSession, piMessage) != CODE_NONE)
+    IMS_SINT32 eCallReason = HandleReceivedSdp(piSession, piMessage);
+    if (eCallReason != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(eCallReason));
     }
 
     if (eUpdateType == UpdateType::NORMAL)

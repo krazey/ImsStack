@@ -202,9 +202,54 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesRejectIncomingAndToTerm
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     const SipMethod objMethod(SipMethod::ACK);
     ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
 
-    EXPECT_CALL(objMtcSession, Reject(_));
-    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(_));
+    EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedWithNoCodecMatched)
+{
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objMtcSession, HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, Ref(objIMessage)))
+            .WillByDefault(Return());
+
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    const SipMethod objMethod(SipMethod::ACK);
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objMediaManager, NegotiateSdp(&objISession))
+            .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
+    const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
+
+    EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedWithInvalidDescriptor)
+{
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objMtcSession, HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, Ref(objIMessage)))
+            .WillByDefault(Return());
+
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    const SipMethod objMethod(SipMethod::ACK);
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objMediaManager, NegotiateSdp(&objISession))
+            .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
+    const CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
+
+    EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
 
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
 }

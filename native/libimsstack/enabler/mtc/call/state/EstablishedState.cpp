@@ -559,7 +559,7 @@ CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateN
     NegotiationResult eNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
     if (eNegoResult != NegotiationResult::NO_ERROR)
     {
-        return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult);
+        return CallReasonInfo(GetCallReasonByNegotiationResult(eNegoResult), eNegoResult);
     }
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =

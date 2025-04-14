@@ -1193,6 +1193,48 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSdpOaFailed)
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnAttached());
 }
 
+TEST_F(IdleStateTest, OnAttachedRejectsIfNoCodecMatched)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    SipMethod objMethod(SipMethod::ACK);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
+
+    const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
+    EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnAttached());
+}
+
+TEST_F(IdleStateTest, OnAttachedRejectsIfInvalidDescriptor)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    SipMethod objMethod(SipMethod::ACK);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
+
+    const CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
+    EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnAttached());
+}
+
 TEST_F(IdleStateTest, OnAttachedRejectsIfSendProvisionalResponseFailed)
 {
     MockIMessage objMessage;
@@ -1390,6 +1432,70 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfSdpOaFailed)
     ON_CALL(*pMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
+    EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnUssiAttached());
+
+    delete pMessage;
+}
+
+TEST_F(IdleStateTest, OnUssiAttachedRejectsIfNoCodecMatched)
+{
+    MockIMessage* pMessage = new MockIMessage();
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(pMessage));
+
+    EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
+
+    ImsList<AString> lstRequiredExtensions;
+    lstRequiredExtensions.Append(AString("supportedExtension"));
+    ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(lstRequiredExtensions));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    ON_CALL(objMessageUtils, HasSdp(pMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    SipMethod objMethod(SipMethod::ACK);
+    ON_CALL(*pMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::ERROR_NO_CODEC_MATCHED));
+
+    const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
+    EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnUssiAttached());
+
+    delete pMessage;
+}
+
+TEST_F(IdleStateTest, OnUssiAttachedRejectsIfInvalidDescriptor)
+{
+    MockIMessage* pMessage = new MockIMessage();
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(pMessage));
+
+    EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
+
+    ImsList<AString> lstRequiredExtensions;
+    lstRequiredExtensions.Append(AString("supportedExtension"));
+    ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(lstRequiredExtensions));
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    ON_CALL(objMessageUtils, HasSdp(pMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    SipMethod objMethod(SipMethod::ACK);
+    ON_CALL(*pMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objMediaManager, NegotiateSdp(&objSession))
+            .WillByDefault(Return(NegotiationResult::ERROR_INVALID_DESCRIPTOR));
+
+    const CallReasonInfo objReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 

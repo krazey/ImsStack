@@ -123,6 +123,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_REJECT_ONGOING_CALL_SETUP = 1607;
     public static final int CODE_REJECT_MAX_CALL_LIMIT_REACHED = 1608;
     public static final int CODE_REJECT_UNSUPPORTED_SIP_HEADERS = 1609;
+    public static final int CODE_REJECT_UNSUPPORTED_SDP_HEADERS = 1610;
     public static final int CODE_REJECT_ONGOING_CALL_TRANSFER = 1611;
     public static final int CODE_REJECT_INTERNAL_ERROR = 1612;
     public static final int CODE_REJECT_QOS_FAILURE = 1613;

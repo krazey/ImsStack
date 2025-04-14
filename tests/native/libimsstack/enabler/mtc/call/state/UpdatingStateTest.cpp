@@ -144,6 +144,17 @@ protected:
         ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(*pSipMethod));
     }
 
+    void SetNegotiateSdpFailure(
+            IN MockIMessage& objMessage, IN const NegotiationResult& eNegoResult)
+    {
+        ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+                .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+        const SipMethod objMethod(SipMethod::ACK);
+        ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+        ON_CALL(objMediaManager, NegotiateSdp(&objSession)).WillByDefault(Return(eNegoResult));
+    }
+
     void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
     {
         AString strActionSet;
@@ -1073,6 +1084,36 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNegoFailed)
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfNoCodecMatched)
+{
+    const NegotiationResult eNegoResult = NegotiationResult::ERROR_NO_CODEC_MATCHED;
+    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
+    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionPrackReceivedRejectsIfInvalidDescriptor)
+{
+    const NegotiationResult eNegoResult = NegotiationResult::ERROR_INVALID_DESCRIPTOR;
+    SetNegotiateSdpFailure(objMessage, eNegoResult);
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
+    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS)));
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionPrackReceived(&objSession));
 }

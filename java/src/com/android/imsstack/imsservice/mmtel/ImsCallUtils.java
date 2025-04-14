@@ -1244,6 +1244,8 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS,
                 ImsReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNSUPPORTED_SDP_HEADERS,
+                ImsReasonInfo.CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_TRANSFER,
                 ImsReasonInfo.CODE_REJECT_ONGOING_CALL_TRANSFER);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_INTERNAL_ERROR,

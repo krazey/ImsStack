@@ -27,6 +27,7 @@
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "helper/IMtcAosStateListener.h"
+#include "media/IMtcMediaManager.h"
 #include "ussi/UssiDef.h"
 
 class AString;
@@ -212,6 +213,7 @@ protected:
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
     IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
+    static IMS_SINT32 GetCallReasonByNegotiationResult(IN NegotiationResult eNegoResult);
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;
     IMS_BOOL IsRprRequired() const;
