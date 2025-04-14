@@ -232,6 +232,7 @@ public class ImsCallManager {
 
         if (newSession != null) {
             removePendingSession(newSession);
+            mMtcApp.onIncomingCallTaken(newSession.getMtcCall());
             return true;
         }
 

@@ -93,6 +93,7 @@ public class MtcApp implements Closeable {
     protected MmtelFeatureListener mMmtelFeatureListener = null;
     private NativeStateInterface.Listener mNativeStateListener;
     private long mPreIncomingNativeCallId = 0;
+    private long mIncomingCallKey = 0;
 
     public MtcApp(IBaseContext context) {
         mContext = context;
@@ -164,6 +165,9 @@ public class MtcApp implements Closeable {
             }
             mNativeStateListener = null;
         }
+
+        mPreIncomingNativeCallId = 0;
+        mIncomingCallKey = 0;
     }
 
     public IMtcCallManager getCallManager() {
@@ -254,6 +258,16 @@ public class MtcApp implements Closeable {
         }
 
         return call;
+    }
+
+    /**
+     * Clears information related to a incoming call.
+     */
+    public void onIncomingCallTaken(MtcCall mtcCall) {
+        if (mPreIncomingNativeCallId == mtcCall.getNativeCallId()) {
+            mPreIncomingNativeCallId = 0;
+            mIncomingCallKey = 0;
+        }
     }
 
     public void setCallListener(MtcApp.CallListener listener) {
@@ -480,6 +494,13 @@ public class MtcApp implements Closeable {
         private void onMessageForCallApp(int msg, Parcel parcel) {
             if (msg == IUMtcService.PRE_INCOMING_CALL) {
                 long nativeCallKey = parcel.readLong();
+
+                if (mIncomingCallKey != 0 && mIncomingCallKey != nativeCallKey) {
+                    loge("Only one incoming call can be processed at a time");
+                    return;
+                }
+
+                mIncomingCallKey = nativeCallKey;
                 parcel.readString();
 
                 MtcCall call = createMtcCallAndAttach(0);
@@ -494,8 +515,12 @@ public class MtcApp implements Closeable {
             } else if (msg == IUMtcService.AUTO_REJECTED_CALL) {
                 long nativeCallKey = parcel.readLong();
 
-                MtcCall call = getPendingCall(mPreIncomingNativeCallId);
-                if (call == null) {
+                MtcCall call;
+                if (mIncomingCallKey == nativeCallKey) {
+                    // PRE_INCOMING_CALL and AUTO_REJECTED_CALL for a same incoming call.
+                    call = getPendingCall(mPreIncomingNativeCallId);
+                } else {
+                    // only AUTO_REJECTED_CALL for a differencet incoming call.
                     call = createMtcCallAndAttach(0);
                     call.attach(nativeCallKey);
 
@@ -503,8 +528,6 @@ public class MtcApp implements Closeable {
                         mCallListener.onPreIncomingCallReceived(
                                 MtcApp.this, call.getNativeCallId());
                     }
-                } else {
-                    mPreIncomingNativeCallId = 0;
                 }
 
                 call.invokeIncomingCallReceivedForAutoRejecting(
