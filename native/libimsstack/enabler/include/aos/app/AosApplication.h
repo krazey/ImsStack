@@ -122,6 +122,10 @@ protected:
     IMS_BOOL IsPdnDisconnectRequired() const;
     IMS_BOOL IsPlmnBlockRequired() const;
     IMS_BOOL IsBlockRat(IN IMS_UINT32 nRat) const;
+    IMS_BOOL IsReasonBlockedForImsEstablishmentTimer() const;
+    IMS_BOOL IsImsEstablishmentTimerStopRequired() const;
+
+    IMS_SINT32 GetImsEstablishmentTime() const;
 
     // Create
     virtual void CreateAosCondition();

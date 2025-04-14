@@ -754,9 +754,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT, -1))
             .WillOnce(Return(1));
-    EXPECT_CALL(
-            objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT, -1))
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_LTE_SEC_INT, -1))
             .WillOnce(Return(120));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT, -1))
+            .WillOnce(Return(180));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT, -1))
@@ -976,7 +979,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(2, m_pAosNConfiguration->GetEmcRegRetryMaxCnt());
     EXPECT_EQ(3000, m_pAosNConfiguration->GetEmcRegRetryTimerMillis());
     EXPECT_EQ(1, m_pAosNConfiguration->GetGeolocationPidfFormingPolicy());
-    EXPECT_EQ(120, m_pAosNConfiguration->GetImsEstablishmentTime());
+    EXPECT_EQ(120, m_pAosNConfiguration->GetImsEstablishmentTimeForLte());
+    EXPECT_EQ(180, m_pAosNConfiguration->GetImsEstablishmentTimeForNr());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, m_pAosNConfiguration->GetImsSignallingDscp());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegActualWaitTimePolicy());

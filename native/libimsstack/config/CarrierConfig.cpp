@@ -304,8 +304,10 @@ const IMS_CHAR CarrierConfig::Ims::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESS
         KEY_IMS_PREFIX "contact_user_info_policy_for_non_reg_message_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] =
         KEY_IMS_PREFIX "geolocation_pidf_forming_policy_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT[] =
-        KEY_IMS_PREFIX "ims_establishment_time_sec_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_LTE_SEC_INT[] =
+        KEY_IMS_PREFIX "ims_establishment_time_for_lte_sec_int";
+const IMS_CHAR CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT[] =
+        KEY_IMS_PREFIX "ims_establishment_time_for_nr_sec_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT[] =
         KEY_IMS_PREFIX "ims_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT[] =

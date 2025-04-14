@@ -37,6 +37,8 @@
     <boolean name="ims.required_init_reg_after_ims_ecall_end_on_reg_held_bool" value="true"/>
     <boolean name="ims.use_tcp_transport_for_register_bool" value="true"/>
     <int name="ims.geolocation_pidf_forming_policy_int" value="3"/>
+    <int name="ims.ims_establishment_time_for_lte_sec_int" value="570"/>
+    <int name="ims.ims_establishment_time_for_nr_sec_int" value="570"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="2"/>
     <int name="ims.reg_retry_305_policy_int" value="0"/>

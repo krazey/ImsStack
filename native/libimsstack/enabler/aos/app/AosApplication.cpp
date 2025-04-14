@@ -633,6 +633,89 @@ IMS_BOOL AosApplication::IsBlockRat(IN IMS_UINT32 nRat) const
     return m_nBlockedRats & nRat;
 }
 
+PROTECTED
+IMS_BOOL AosApplication::IsReasonBlockedForImsEstablishmentTimer() const
+{
+    if (m_pCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
+            m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL AosApplication::IsImsEstablishmentTimerStopRequired() const
+{
+    if (m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - ePDG enabled", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (m_piRegistration->IsRegistered())
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - Registered", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (IsImsCall())
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - Ims call is active", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (!m_piNetTracker->IsDataIn())
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - Data OOS", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (!m_pUtil->IsSupportedNetworkTypeForCellular(m_piNetTracker->GetMobileNetworkType()))
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - Not supported mobile network", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (!IsPlmnBlockRequired())
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - LTE combined attached", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (!m_piNetTracker->IsImsVoiceCallSupported())
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - VoPS not supported", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (IsReasonBlockedForImsEstablishmentTimer())
+    {
+        A_IMS_TRACE_D(APPID, "Stop ImsEstablishmentTimer - Block reasons exist", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_SINT32 AosApplication::GetImsEstablishmentTime() const
+{
+    return (m_piNetTracker->GetMobileNetworkType() == NW_REPORT_RADIO_NR)
+            ? GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForNr()
+            : GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte();
+}
+
 PROTECTED VIRTUAL void AosApplication::CreateAosCondition()
 {
     if (m_nAppType == TYPE_NORMAL)
@@ -1189,45 +1272,36 @@ PROTECTED VIRTUAL void AosApplication::ProcessDestroy(IN IMSMSG& /* objMsg */)
 
 PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentControl(IN IMSMSG& /* objMsg */)
 {
-    if (IsRegTypeNormal())
+    if (!IsRegTypeNormal())
     {
-        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() - 1;
-
-        if (nEstTime <= 0)
-        {
-            return;
-        }
-
-        if (IsOn() || IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
-        {
-            return;
-        }
-
-        if (!IsPlmnBlockRequired() || !m_piNetTracker->IsImsVoiceCallSupported())
-        {
-            return;
-        }
-
-        if (m_pCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
-        {
-            return;
-        }
-
-        A_IMS_TRACE_D(
-                APPID, "ProcessImsEstablishmentControl :: ims est time (%d sec)", nEstTime, 0, 0);
-
-        StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
+        return;
     }
+
+    IMS_SINT32 nEstTime = GetImsEstablishmentTime() - 1;
+
+    if (nEstTime <= 0)
+    {
+        return;
+    }
+
+    if (IsOn() || IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
+    {
+        return;
+    }
+
+    if (!IsPlmnBlockRequired() || !m_piNetTracker->IsImsVoiceCallSupported())
+    {
+        return;
+    }
+
+    if (IsReasonBlockedForImsEstablishmentTimer())
+    {
+        return;
+    }
+
+    A_IMS_TRACE_D(APPID, "ProcessImsEstablishmentControl :: ims est time (%d sec)", nEstTime, 0, 0);
+
+    StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegExchange(IN IMSMSG& /* objMsg */) {}
@@ -2264,7 +2338,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRoamingState(IN IMS_BOOL bRoaming)
 
         if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
         {
-            IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime();
+            IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte();
 
             if (nEstTime <= 0)
             {
@@ -2486,73 +2560,31 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnBlockWithTime()
 
 PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 {
-    if (IsRegTypeNormal())
+    if (!IsRegTypeNormal())
     {
-        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime();
-
-        if (nEstTime <= 0)
-        {
-            return;
-        }
-
-        if (m_piContext->GetConnection()->IsEpdgEnabled() || m_piRegistration->IsRegistered() ||
-                IsImsCall())
-        {
-            StopTimer(TIMER_IMS_ESTABLISHMENT);
-            return;
-        }
-
-        IMS_UINT32 nNewRat = m_piNetTracker->GetMobileNetworkType();
-
-        if (m_piNetTracker->IsDataIn() && m_pUtil->IsSupportedNetworkTypeForCellular(nNewRat))
-        {
-            if (!IsPlmnBlockRequired())
-            {
-                StopTimer(TIMER_IMS_ESTABLISHMENT);
-                return;
-            }
-        }
-        else
-        {
-            StopTimer(TIMER_IMS_ESTABLISHMENT);
-            return;
-        }
-
-        if (!m_piNetTracker->IsImsVoiceCallSupported())
-        {
-            StopTimer(TIMER_IMS_ESTABLISHMENT);
-            return;
-        }
-
-        if (m_pCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
-        {
-            StopTimer(TIMER_IMS_ESTABLISHMENT);
-            return;
-        }
-
-        if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
-        {
-            if (m_nRat == nNewRat || !m_pUtil->IsSupportedNetworkTypeForCellular(m_nRat))
-            {
-                return;
-            }
-        }
-
-        A_IMS_TRACE_D(
-                APPID, "ProcessImsEstablishmentStart :: ims est time (%d sec)", nEstTime, 0, 0);
-
-        StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
+        return;
     }
+
+    IMS_SINT32 nEstTime = GetImsEstablishmentTime();
+
+    if (nEstTime <= 0 || IsImsEstablishmentTimerStopRequired())
+    {
+        StopTimer(TIMER_IMS_ESTABLISHMENT);
+        return;
+    }
+
+    if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
+    {
+        if (m_nRat == m_piNetTracker->GetMobileNetworkType() ||
+                !m_pUtil->IsSupportedNetworkTypeForCellular(m_nRat))
+        {
+            return;
+        }
+    }
+
+    A_IMS_TRACE_D(APPID, "ProcessImsEstablishmentStart :: ims est time (%d sec)", nEstTime, 0, 0);
+
+    StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessPlmnBlock(IN AosReasonCode eReason)
@@ -3439,7 +3471,7 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
     if (eType == AosRegRequestType::START_IMS_EST_TIMER)
     {
-        if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() > 0)
+        if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte() > 0)
         {
             PostMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
         }
