@@ -170,11 +170,30 @@ public class MtsController {
         return mHandler;
     }
 
+    /** Deprecated */
     public boolean sendMessage(
             int smsFormat, byte[] smsData, String psiSmsc, String dialedNumber, int seqId) {
+        // Call the new overloaded method with isRetry = false by default
+        return sendMessage(smsFormat, smsData, psiSmsc, dialedNumber, seqId, false);
+    }
+
+    /**
+     * Constructs a Parcel containing the necessary MO SMS information from the given parameters.
+     * Initiates the sending process by dispatching the Parcel to the native via JNI.
+     *
+     * @param smsFormat The smsFormat Format of the SMS PDU.
+     * @param smsData The raw PDU (Protocol Data Unit) data of the SMS message to be sent.
+     * @param psiSmsc The Public Service Identity (PSI) of the IP-SM-GW (SMSC).
+     * @param dialedNumber The destination phone number originally dialed by the user.
+     * @param seqId A sequence identifier provided by the caller.
+     * @param isRetry Indicates if this attempt is a retry of a previously failed one.
+     */
+    public boolean sendMessage(int smsFormat, byte[] smsData, String psiSmsc,
+            String dialedNumber, int seqId, boolean isRetry) {
         ImsLog.d(mSlotId, "smsFormat : " + smsFormat + ", smsDataLength = " + smsData.length
                 + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
-                + ", seqId = " + seqId);
+                + ", seqId = " + seqId + ", isRetry = " + isRetry);
+        // TODO(b/388163941): Need to send this flag to MTS enabler.
         String encodedPdu = Base64.encodeToString(smsData, Base64.DEFAULT);
         if (encodedPdu == null || psiSmsc == null) {
             processNotifySendMoSmsError(smsFormat, seqId);
