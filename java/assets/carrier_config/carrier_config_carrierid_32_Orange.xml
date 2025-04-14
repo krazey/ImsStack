@@ -17,7 +17,10 @@
 <carrier_config>
     <!-- Carrier configurations -->
     <!-- Aos -->
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Mtc Assets -->
     <int name="ims.geolocation_policy_for_location_based_call_int" value="9"/>
@@ -34,7 +37,6 @@
         <item value="116000"/>
         <item value="116117"/>
     </int-array>
-
     <!-- Ut/Xcap -->
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="0">
     </int-array>
@@ -46,4 +48,9 @@
     </int-array>
     <int name="imsss.ut_temporary_block_timer_min_int" value="240"/>
 
+    <!-- Mts -->
+    <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
+    <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="1">
+        <item value="41"/>
+    </int-array>
 </carrier_config>

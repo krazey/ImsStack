@@ -19,4 +19,7 @@
         <item value="2"/> <!-- GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI -->
         <item value="4"/> <!-- GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR -->
     </int-array>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1200"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1200"/>
+    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
 </carrier_config>

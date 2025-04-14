@@ -16,4 +16,5 @@
 -->
 <carrier_config>
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
+    <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
 </carrier_config>

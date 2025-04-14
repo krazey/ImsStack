@@ -19,4 +19,6 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1030"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1080"/>
 </carrier_config>

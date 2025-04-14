@@ -15,9 +15,15 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
         <item value="2"/>
-        <item value="4"/>
+        <item value="2"/>
     </int-array>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="2"/>
+        <item value="2"/>
+    </int-array>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="3"/>
+    </int-array>
 </carrier_config>

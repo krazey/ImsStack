@@ -30,5 +30,5 @@
     </int-array>
     <!-- Ut/Xcap -->
     <boolean name="imsss.ut_support_cf_action_erasure_bool" value="false"/>
-    <boolean name="imsss.ut_support_cfnr_timer_bool" value="false"/>
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 </carrier_config>

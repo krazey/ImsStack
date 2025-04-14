@@ -297,4 +297,8 @@
         <item value="5"/>
         <item value="5"/>
     </int-array>
+    <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
+        <item value="35000"/>
+        <item value="16000"/>
+    </int-array>
 </carrier_config>

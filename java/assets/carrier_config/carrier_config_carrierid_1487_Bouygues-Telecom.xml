@@ -16,11 +16,15 @@
 -->
 <carrier_config>
     <!-- Aos -->
+    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <int name="imswfc.registration_private_header_int" value="1"/>
 
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
+    <int name="ims.ims_signalling_dscp_int" value="40"/>
+    <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="480"/>
 </carrier_config>

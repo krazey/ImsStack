@@ -15,9 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
-        <item value="2"/>
-        <item value="4"/>
-    </int-array>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
 </carrier_config>
