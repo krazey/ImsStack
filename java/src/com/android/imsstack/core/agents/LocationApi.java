@@ -15,13 +15,17 @@
  */
 package com.android.imsstack.core.agents;
 
-import android.annotation.NonNull;
+import android.annotation.CallbackExecutor;
 import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.os.CancellationSignal;
 import android.util.ArraySet;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.SystemServiceProxy.LocationManagerProxy;
@@ -29,6 +33,7 @@ import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * This class provides utilities classes/methods for Location information retrieval.
@@ -54,7 +59,6 @@ public final class LocationApi {
     // It indicates that Location API is ready to use.
     // If it's not set, LocationManager will be used as a default.
     private static final int FLAG_LOCATION_API_READY = 0x80000000;
-    private static final boolean ALWAYS_PROVIDER_ENABLED = true;
 
     private static LocationApi sLocationApi = null;
     private final Object mLock = new Object();
@@ -137,11 +141,48 @@ public final class LocationApi {
      * @return true if the provider exists and is enabled
      */
     public boolean isProviderEnabled(String provider) {
-        if (ALWAYS_PROVIDER_ENABLED) {
-            return true;
-        }
-
         return LocationManagerApi.isProviderEnabled(provider);
+    }
+
+    /**
+     * Returns a preferred location provider for a location update.
+     */
+    public String getPreferredProvider() {
+        if (isProviderEnabled(FUSED_PROVIDER)) {
+            return FUSED_PROVIDER;
+        } else if (isProviderEnabled(NETWORK_PROVIDER)) {
+            return NETWORK_PROVIDER;
+        } else if (isProviderEnabled(GPS_PROVIDER)) {
+            return GPS_PROVIDER;
+        }
+        return null;
+    }
+
+    /**
+     * Asynchronously returns a single current location fix from the given provider based on
+     * the given {@link LocationRequest}. This may activate sensors in order to compute
+     * a new location, unlike {@link #getLastKnownLocation(String)}, which will only return
+     * a cached fix if available. The given callback will be invoked once and only once,
+     * either with a valid location or with a null location if the provider was unable to
+     * generate a valid location.
+     *
+     * @param provider A provider listed by {@link LocationManager#getAllProviders()}.
+     * @param request The location request containing location parameters.
+     * @param cancellationSignal An optional signal that allows for cancelling this call
+     * @param executor The executor handling listener callbacks.
+     * @param consumer The callback invoked with either a {@link Location} or null
+     */
+    public void getCurrentLocation(@NonNull String provider,
+            @NonNull LocationRequest request,
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Location> consumer) {
+        LocationManagerProxy lmp = getLocationManagerProxy();
+        if (lmp != null) {
+            lmp.getCurrentLocation(provider, request, cancellationSignal, executor, consumer);
+        } else {
+            executor.execute(() -> consumer.accept(null));
+        }
     }
 
     /**

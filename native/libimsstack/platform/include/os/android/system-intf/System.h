@@ -177,7 +177,8 @@ public:
     void StopListeningForLocation(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetLastKnownLocation(
             OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId) override;
-    IMS_BOOL StartInstantLocationUpdate(IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 RequestLocationUpdate(IN IMS_SINT32 nWaitTimeMs, IN IMS_SINT32 nSlotId) override;
+    void CancelLocationUpdate(IN IMS_SINT32 nId, IN IMS_SINT32 nSlotId) override;
 
     ////
     // Ims radio interface
@@ -230,6 +231,8 @@ private:
     void NotifySimCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN IMS_UINT32 nCategory,
             IN const android::Parcel& in);
     void NotifyRadioCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyLocationCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
 
 private:

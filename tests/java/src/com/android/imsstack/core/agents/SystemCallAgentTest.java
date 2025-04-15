@@ -981,13 +981,28 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
-    public void testStartInstantLocationUpdate() {
-        mSystemCallAgent.startInstantLocationUpdate();
+    public void testRequestLocationUpdate() {
+        int waitTimeMs = 2000; // 2s
+        mSystemCallAgent.requestLocationUpdate(waitTimeMs);
 
-        verify(mLocationInterface).startInstantLocationUpdate();
+        verify(mLocationInterface).requestLocationUpdate(eq(waitTimeMs));
 
         AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
-        mSystemCallAgent.startInstantLocationUpdate();
+        mSystemCallAgent.requestLocationUpdate(waitTimeMs);
+
+        verifyNoMoreInteractions(mLocationInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testCancelLocationUpdate() {
+        int requestId = 1;
+        mSystemCallAgent.cancelLocationUpdate(requestId);
+
+        verify(mLocationInterface).cancelLocationUpdate(eq(requestId));
+
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
+        mSystemCallAgent.cancelLocationUpdate(requestId);
 
         verifyNoMoreInteractions(mLocationInterface);
     }

@@ -1710,12 +1710,20 @@ TEST_F(SystemTest, GetLastKnownLocation)
             0);
 }
 
-TEST_F(SystemTest, StartInstantLocationUpdate)
+TEST_F(SystemTest, RequestLocationUpdate)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
+            .Times(1)
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->StartInstantLocationUpdate(0), 0);
+    m_pSystem->RequestLocationUpdate(2000, 0);
+}
+
+TEST_F(SystemTest, CancelLocationUpdate)
+{
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
+            .Times(1)
+            .WillRepeatedly(Return(1));
+    m_pSystem->CancelLocationUpdate(1, 0);
 }
 
 TEST_F(SystemTest, StartImsTraffic)

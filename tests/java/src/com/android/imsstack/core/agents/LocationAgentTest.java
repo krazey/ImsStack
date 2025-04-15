@@ -19,16 +19,24 @@ import static com.android.imsstack.base.TestAppContext.SLOT0;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.location.LocationRequest;
+import android.os.CancellationSignal;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.imsstack.base.SystemServiceProxy;
+import com.android.imsstack.base.SystemServiceProxy.LocationManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.config.CarrierConfig;
 
@@ -39,6 +47,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -154,11 +165,26 @@ public class LocationAgentTest {
 
     @Test
     @SmallTest
-    public void testNotifyListenersWhenLocationFixed() {
-        mLocationAgent.startInstantLocationUpdate();
+    public void testRequestLocationUpdate() {
+        LocationManagerProxy lmp = mTestAppContext.getSystemServiceProxy(
+                SystemServiceProxy.LocationManagerProxy.class);
+        when(lmp.isProviderEnabled(any(String.class))).thenReturn(false);
 
-        mLocationAgent.notifyEventOnLocationFixedForInstantRequest();
+        int waitTimeMs = 2000; // 2s
+        assertEquals(0, mLocationAgent.requestLocationUpdate(waitTimeMs));
 
-        verify(mLocationInfoListener).onInstantRequestedLocationUpdated();
+        when(lmp.isProviderEnabled(any(String.class))).thenReturn(true);
+        int requestId = mLocationAgent.requestLocationUpdate(waitTimeMs);
+
+        ArgumentCaptor<CancellationSignal> cancellationSignalCaptor =
+                ArgumentCaptor.forClass(CancellationSignal.class);
+        verify(lmp).getCurrentLocation(any(String.class), any(LocationRequest.class),
+                cancellationSignalCaptor.capture(), any(Executor.class), any(Consumer.class));
+        assertFalse(cancellationSignalCaptor.getValue().isCanceled());
+        assertNotEquals(0, requestId);
+
+        mLocationAgent.cancelLocationUpdate(requestId);
+
+        assertTrue(cancellationSignalCaptor.getValue().isCanceled());
     }
 }

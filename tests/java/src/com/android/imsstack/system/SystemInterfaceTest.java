@@ -649,6 +649,25 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testNotifyLocationUpdateCompleted() throws Exception {
+        setUpSystemInterface();
+        ISystem system = setUpSystemWithLooper();
+
+        int requestId = 1;
+        system.notifyLocationUpdateCompleted(requestId);
+
+        Parcel data = getDataForSystem();
+        try {
+            assertEquals(SLOT0, data.readInt());
+            assertEquals(SystemConstants.NOTIFY_LOCATION_EVENT, data.readInt());
+            assertEquals(LocationInterface.EVENT_LOCATION_UPDATE_COMPLETED, data.readInt());
+        } finally {
+            data.recycle();
+        }
+    }
+
+    @Test
+    @SmallTest
     public void testOnAdvancedCallingSettingChangedWhenEnabled() throws Exception {
         setUpSystemInterface();
         setUpSystemWithLooper(ImsEventDef.IMS_EVENT_VOLTE_SETTING, mMmTelFeatureRegistry);
@@ -2458,20 +2477,42 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testSystemCallStartInstantLocationUpdate() {
+    public void testSystemCallRequestLocationUpdate() {
         setUpSystemInterface();
         setUpSystem();
+        int waitTimeMs = 2000; // 2s
         Parcel data = Parcel.obtain();
         try {
             data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.START_INSTANT_LOCATION_UPDATE);
+            data.writeInt(SystemConstants.REQUEST_LOCATION_UPDATE);
+            data.writeInt(waitTimeMs);
             data.setDataPosition(0);
             mSystemInterface.onMessage(data, null);
         } finally {
             data.recycle();
         }
 
-        verify(mSystemCall).startInstantLocationUpdate();
+        verify(mSystemCall).requestLocationUpdate(eq(waitTimeMs));
+    }
+
+    @Test
+    @SmallTest
+    public void testSystemCallCancelLocationUpdate() {
+        setUpSystemInterface();
+        setUpSystem();
+        int requestId = 1;
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.CANCEL_LOCATION_UPDATE);
+            data.writeInt(requestId);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).cancelLocationUpdate(eq(requestId));
     }
 
     @Test

@@ -24,6 +24,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -115,8 +116,8 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.START_LISTENING_FOR_LOCATION, "START_LISTENING_FOR_LOCATION"),
             Map.entry(SystemConstants.STOP_LISTENING_FOR_LOCATION, "STOP_LISTENING_FOR_LOCATION"),
             Map.entry(SystemConstants.GET_LAST_KNOWN_LOCATION, "GET_LAST_KNOWN_LOCATION"),
-            Map.entry(SystemConstants.START_INSTANT_LOCATION_UPDATE,
-                    "START_INSTANT_LOCATION_UPDATE"),
+            Map.entry(SystemConstants.REQUEST_LOCATION_UPDATE, "REQUEST_LOCATION_UPDATE"),
+            Map.entry(SystemConstants.CANCEL_LOCATION_UPDATE, "CANCEL_LOCATION_UPDATE"),
             Map.entry(SystemConstants.SET_EVENT, "SET_EVENT"),
             Map.entry(SystemConstants.RESET_EVENT, "RESET_EVENT"),
             Map.entry(SystemConstants.GET_CS_CALL_STATE_IN_OTHER_SLOT,
@@ -1001,6 +1002,22 @@ public class SystemInterface implements JniSystemListener {
         }
 
         @Override
+        public void notifyLocationUpdateCompleted(int requestId) {
+            mExecutor.execute(() -> {
+                Parcel parcel = Parcel.obtain();
+                try {
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_LOCATION_EVENT);
+                    parcel.writeInt(LocationInterface.EVENT_LOCATION_UPDATE_COMPLETED);
+                    parcel.writeInt(requestId);
+                    sendSystemEvent(parcel);
+                } finally {
+                    parcel.recycle();
+                }
+            });
+        }
+
+        @Override
         public void onAdvancedCallingSettingChanged() {
             notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
                     mMmTelFeatureRegistry.isAdvancedCallingSettingEnabled()
@@ -1127,7 +1144,8 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.START_LISTENING_FOR_LOCATION: // fall through
                 case SystemConstants.STOP_LISTENING_FOR_LOCATION: // fall through
                 case SystemConstants.GET_LAST_KNOWN_LOCATION: // fall through
-                case SystemConstants.START_INSTANT_LOCATION_UPDATE:
+                case SystemConstants.REQUEST_LOCATION_UPDATE: // fall through
+                case SystemConstants.CANCEL_LOCATION_UPDATE:
                     handleSystemCallForLocation(method, in, out);
                     break;
                 case SystemConstants.START_IMS_TRAFFIC: // fall through
@@ -1468,8 +1486,10 @@ public class SystemInterface implements JniSystemListener {
                 for (int i = 0; i < locationParam.length; ++i) {
                     out.writeString(locationParam[i]);
                 }
-            } else if (method == SystemConstants.START_INSTANT_LOCATION_UPDATE) {
-                mSystemCall.startInstantLocationUpdate();
+            } else if (method == SystemConstants.REQUEST_LOCATION_UPDATE) {
+                out.writeInt(mSystemCall.requestLocationUpdate(in.readInt()));
+            } else if (method == SystemConstants.CANCEL_LOCATION_UPDATE) {
+                mSystemCall.cancelLocationUpdate(in.readInt());
                 out.writeInt(1);
             }
         }

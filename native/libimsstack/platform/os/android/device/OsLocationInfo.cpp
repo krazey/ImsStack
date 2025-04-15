@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <binder/Parcel.h>
+
 #include "PlatformContext.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "device/OsLocationInfo.h"
+#include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_IPL__;
 
@@ -26,7 +29,7 @@ class LocationProperties : public ILocationProperties
 {
 public:
     LocationProperties();
-    virtual ~LocationProperties();
+    virtual ~LocationProperties() = default;
 
     inline const AString& GetLatitude() const override { return m_strLatitude; }
     inline const AString& GetLongitude() const override { return m_strLongitude; }
@@ -96,7 +99,52 @@ LocationProperties::LocationProperties() :
 {
 }
 
-PUBLIC VIRTUAL LocationProperties::~LocationProperties() {}
+class LocationUpdateRequest final : public AsyncExecutor
+{
+public:
+    inline LocationUpdateRequest(IN IMS_SINT32 nId, IN ILocationUpdateListener* piListener) :
+            AsyncExecutor(IMS_TRUE),
+            m_nId(nId),
+            m_piListener(piListener)
+    {
+    }
+    ~LocationUpdateRequest() = default;
+
+public:
+    inline IMS_SINT32 GetId() const { return m_nId; }
+    inline ILocationUpdateListener* GetListener() const { return m_piListener; }
+    inline void NotifyLocationUpdateCompleted() { m_piListener->LocationUpdate_OnCompleted(); }
+
+protected:
+    inline void OnExecute(IN IMS_UINTP /*nParam1*/, IN IMS_UINTP /*nParam2*/) override
+    {
+        NotifyLocationUpdateCompleted();
+    }
+
+private:
+    IMS_SINT32 m_nId;
+    ILocationUpdateListener* m_piListener;
+};
+
+class LocationUpdateCompletedHandler final : public AsyncExecutor
+{
+public:
+    inline explicit LocationUpdateCompletedHandler(IN AsyncExecutor::IListener* piListener) :
+            AsyncExecutor(piListener, IMS_FALSE)
+    {
+    }
+    ~LocationUpdateCompletedHandler() = default;
+
+public:
+    inline void OnExecute(IN IMS_UINTP /*nParam1*/, IN IMS_UINTP nParam2) override
+    {
+        nId = static_cast<IMS_SINT32>(nParam2);
+    }
+    inline IMS_SINT32 GetId() const { return nId; }
+
+private:
+    IMS_SINT32 nId;
+};
 
 PUBLIC
 OsLocationInfo::OsLocationInfo(IN IMS_SINT32 nSlotId) :
@@ -105,9 +153,52 @@ OsLocationInfo::OsLocationInfo(IN IMS_SINT32 nSlotId) :
         m_strLastKnownCountry(COUNTRY_ISO_UNKNOWN),
         m_pLocationProperties(IMS_NULL)
 {
+    m_pLocationUpdateCompletedHandler = new LocationUpdateCompletedHandler(this);
+
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_LOCATION, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL OsLocationInfo::~OsLocationInfo() {}
+PUBLIC VIRTUAL OsLocationInfo::~OsLocationInfo()
+{
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_LOCATION, this, GetSlotId());
+
+    for (IMS_UINT32 i = 0; i < m_objLocationUpdateRequests.GetSize(); ++i)
+    {
+        delete m_objLocationUpdateRequests.GetAt(i);
+    }
+    m_objLocationUpdateRequests.Clear();
+
+    delete m_pLocationUpdateCompletedHandler;
+}
+
+PUBLIC VIRTUAL void OsLocationInfo::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP /*nWParam*/, IN IMS_UINTP nLParam)
+{
+    IMS_TRACE_D("OsLocationInfo: System_NotifyEvent - slotId=%d, event=%d", GetSlotId(), nEvent, 0);
+
+    android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(nLParam);
+
+    if (pParcel == IMS_NULL)
+    {
+        return;
+    }
+
+    if (nEvent == EVENT_LOCATION_UPDATE_COMPLETED)
+    {
+        IMS_SINT32 nId = pParcel->readInt32();
+        m_pLocationUpdateCompletedHandler->Execute(0, nId);
+    }
+}
+
+PUBLIC VIRTUAL void OsLocationInfo::AsyncExecutor_OnExecuteCompleted(IN AsyncExecutor* pExecutor)
+{
+    if (m_pLocationUpdateCompletedHandler == pExecutor)
+    {
+        NotifyLocationUpdateCompleted(m_pLocationUpdateCompletedHandler->GetId());
+    }
+}
 
 PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartListeningForLocation(
         IN IMS_UINT32 nUpdateIntervalInSec)
@@ -196,9 +287,42 @@ PUBLIC VIRTUAL ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS
     return m_pLocationProperties;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartInstantLocationUpdate()
+PUBLIC VIRTUAL void OsLocationInfo::RequestLocationUpdate(
+        IN IMS_SINT32 nWaitTimeMs, IN ILocationUpdateListener* piListener)
 {
-    return PlatformContext::GetInstance()->GetSystem()->StartInstantLocationUpdate(GetSlotId());
+    IMS_SINT32 nId = PlatformContext::GetInstance()->GetSystem()->RequestLocationUpdate(
+            nWaitTimeMs, GetSlotId());
+    LocationUpdateRequest* pRequest = new LocationUpdateRequest(nId, piListener);
+
+    if (nId > 0)
+    {
+        m_objLocationUpdateRequests.Append(pRequest);
+    }
+    else
+    {
+        IMS_TRACE_I("LUR-failed", 0, 0, 0);
+        pRequest->Execute();
+    }
+}
+
+PUBLIC VIRTUAL void OsLocationInfo::CancelLocationUpdate(IN ILocationUpdateListener* piListener)
+{
+    IMS_SINT32 i = static_cast<IMS_SINT32>(m_objLocationUpdateRequests.GetSize()) - 1;
+
+    for (; i >= 0; --i)
+    {
+        LocationUpdateRequest* pRequest = m_objLocationUpdateRequests.GetAt(i);
+
+        if (pRequest->GetListener() == piListener)
+        {
+            m_objLocationUpdateRequests.RemoveAt(i);
+
+            PlatformContext::GetInstance()->GetSystem()->CancelLocationUpdate(
+                    pRequest->GetId(), GetSlotId());
+
+            delete pRequest;
+        }
+    }
 }
 
 PUBLIC VIRTUAL void OsLocationInfo::SetDefaultLocationProperties(
@@ -262,5 +386,22 @@ void OsLocationInfo::SetLastKnownCountry(IN const AString& strCountry)
                 strCountry.GetStr(), 0);
 
         m_strLastKnownCountry = strCountry;
+    }
+}
+
+PRIVATE
+void OsLocationInfo::NotifyLocationUpdateCompleted(IN IMS_SINT32 nId)
+{
+    for (IMS_UINT32 i = 0; i < m_objLocationUpdateRequests.GetSize(); ++i)
+    {
+        LocationUpdateRequest* pRequest = m_objLocationUpdateRequests.GetAt(i);
+
+        if (pRequest->GetId() == nId)
+        {
+            m_objLocationUpdateRequests.RemoveAt(i);
+            pRequest->NotifyLocationUpdateCompleted();
+            delete pRequest;
+            break;
+        }
     }
 }

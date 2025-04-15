@@ -69,6 +69,8 @@ public:
     static const IMS_UINT32 CATEGORY_ISIM = 0x00400000;
     static const IMS_UINT32 CATEGORY_USIM = 0x00800000;
     static const IMS_UINT32 CATEGORY_RADIO = 0x01000000;
+    static const IMS_UINT32 CATEGORY_LOCATION = 0x02000000;
+
     ////
     // Methods for the system information's notification (Java to Native)
     ////
@@ -88,6 +90,7 @@ public:
     static const IMS_UINT32 NOTIFY_DATA_CONNECTION_IPCAN_CHANGED = CATEGORY_NETWORK + 14;
     static const IMS_UINT32 NOTIFY_VOICE_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 15;
     static const IMS_UINT32 NOTIFY_RADIO_EVENT = CATEGORY_RADIO + 16;
+    static const IMS_UINT32 NOTIFY_LOCATION_EVENT = CATEGORY_LOCATION + 17;
 
     ////
     // Methods for the system access (Native to Java)
@@ -206,7 +209,8 @@ public:
     static const IMS_UINT32 START_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1201;
     static const IMS_UINT32 STOP_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1202;
     static const IMS_UINT32 GET_LAST_KNOWN_LOCATION = CATEGORY_BASE + 1203;
-    static const IMS_UINT32 START_INSTANT_LOCATION_UPDATE = CATEGORY_BASE + 1204;
+    static const IMS_UINT32 REQUEST_LOCATION_UPDATE = CATEGORY_BASE + 1204;
+    static const IMS_UINT32 CANCEL_LOCATION_UPDATE = CATEGORY_BASE + 1205;
 
     ////
     // Ims radio interface

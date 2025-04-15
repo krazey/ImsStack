@@ -19,7 +19,6 @@ import static android.telephony.CarrierConfigManager.Ims.GEOLOCATION_PIDF_FOR_EM
 import static android.telephony.CarrierConfigManager.Ims.GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI;
 import static android.telephony.CarrierConfigManager.Ims.GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI;
 import static android.telephony.CarrierConfigManager.Ims.KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY;
-import static android.telephony.CarrierConfigManager.ImsEmergency.KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -29,27 +28,27 @@ import android.location.Address;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.SystemClock;
 import android.telephony.ServiceState;
-import android.telephony.TelephonyCallback;
-import android.telephony.emergency.EmergencyNumber;
 import android.text.TextUtils;
+import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
-import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.SystemServiceProxy.SensorManagerProxy;
-import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ServiceCaps;
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
@@ -65,6 +64,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * A class for providing the location information to report the device's location to the network.
@@ -267,9 +268,11 @@ public class LocationAgent implements LocationInterface {
     private boolean mPidfLoRequiredOnVoWifiCall;
     private boolean mCachedLocationLoaded;
     private boolean mLocationUpdateRequestedForPidfLo;
-    private EmergencyCallListener mEmergencyCallListener;
     private WifiInterface.Listener mWifiListener;
+    private final LocationUpdater mLocationUpdater;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
+    private final AtomicInteger mLocationUpdateRequestNextId = new AtomicInteger(1);
+    private final SparseArray<LocationUpdateRequest> mLocationUpdateRequests = new SparseArray<>();
 
     public LocationAgent(int slotId) {
         mSlotId = slotId;
@@ -283,6 +286,8 @@ public class LocationAgent implements LocationInterface {
         mLocations[CACHE_I_GPS] = new Location(LocationApi.GPS_PROVIDER);
         mLocations[CACHE_I_NLP] = new Location(LocationApi.NETWORK_PROVIDER);
         mLocations[CACHE_I_FLP] = new Location(LocationApi.FUSED_PROVIDER);
+
+        mLocationUpdater = new LocationUpdater(mHandler);
     }
 
     @Override
@@ -301,6 +306,15 @@ public class LocationAgent implements LocationInterface {
 
     @Override
     public void cleanup() {
+        for (int i = 0; i < mLocationUpdateRequests.size(); ++i) {
+            LocationUpdateRequest request = mLocationUpdateRequests.valueAt(i);
+            if (request != null) {
+                request.cancel();
+            }
+        }
+        mLocationUpdateRequests.clear();
+        mLocationUpdateRequestNextId.set(1);
+
         stopLocationUpdateForVoWifiCall();
         stopLocationUpdateForEmergencyCall();
 
@@ -483,12 +497,25 @@ public class LocationAgent implements LocationInterface {
     }
 
     @Override
-    public void startInstantLocationUpdate() {
-        synchronized (mLock) {
-            if (!mInstantLocationInfoRequested) {
-                mInstantLocationInfoRequested = true;
-                startTimer(ETimerType.TIMER_ASYNC_START, 100);
-            }
+    public int requestLocationUpdate(int waitTimeMs) {
+        String provider = mLocationApi.getPreferredProvider();
+
+        if (provider != null) {
+            int requestId = mLocationUpdateRequestNextId.getAndIncrement();
+            LocationUpdateRequest request = new LocationUpdateRequest(requestId, mHandler);
+            mLocationUpdateRequests.put(requestId, request);
+            request.getCurrentLocation(provider, waitTimeMs, true);
+            return requestId;
+        }
+
+        return 0;
+    }
+
+    @Override
+    public void cancelLocationUpdate(int requestId) {
+        LocationUpdateRequest request = removeLocationUpdateRequest(requestId);
+        if (request != null) {
+            request.cancel();
         }
     }
 
@@ -1688,7 +1715,6 @@ public class LocationAgent implements LocationInterface {
         CarrierConfigManagerProxy ccmp =
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
         boolean isConfigForIdentifiedCarrier = ccmp.isConfigForIdentifiedCarrier(cc.getConfig());
-        int refreshTimeout = cc.getInt(KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT, 0);
         int[] pidfInviteSupportTypes =
                 cc.getIntArray(KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY);
 
@@ -1699,18 +1725,13 @@ public class LocationAgent implements LocationInterface {
         for (int type : pidfInviteSupportTypes) {
             if (type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
                     && isConfigForIdentifiedCarrier) {
-                if (refreshTimeout > 0) {
-                    mPidfLoRequiredOnEmergencyCall = true;
-                }
+                mPidfLoRequiredOnEmergencyCall = true;
                 mPidfLoRequiredOnVoWifiCall = true;
             } else if (type == GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR) {
-                if (refreshTimeout > 0) {
-                    mPidfLoRequiredOnEmergencyCall = true;
-                }
-            } else if (type == GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI) {
-                if (isConfigForIdentifiedCarrier) {
-                    mPidfLoRequiredOnVoWifiCall = true;
-                }
+                mPidfLoRequiredOnEmergencyCall = true;
+            } else if (type == GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI
+                    && isConfigForIdentifiedCarrier) {
+                mPidfLoRequiredOnVoWifiCall = true;
             }
         }
 
@@ -1737,7 +1758,12 @@ public class LocationAgent implements LocationInterface {
 
                     if (wifi != null && wifi.isWifiEnabled()) {
                         // Start to refresh the location when Wi-Fi is enabled.
-                        startInstantLocationUpdate();
+                        if (mLocationUpdater.isInProgress()) {
+                            mLocationUpdater.cancel();
+                        }
+                        mLocationUpdater.getCurrentLocation(
+                                mLocationApi.getPreferredProvider(),
+                                LocationUpdateRequest.DEFAULT_WAIT_TIME_MILLIS, false);
                     }
                 }
             };
@@ -1765,13 +1791,6 @@ public class LocationAgent implements LocationInterface {
         ImsLog.d(this, mSlotId, "startLocationUpdateForEmergencyCall"
                 + ": locationPolicyChanged=" + locationPolicyChanged);
 
-        if (mEmergencyCallListener == null) {
-            mEmergencyCallListener = new EmergencyCallListener();
-            TelephonyManagerProxy tmp =
-                    AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
-            tmp.registerTelephonyCallback(mHandler::post, mEmergencyCallListener);
-        }
-
         if ((!mCachedLocationLoaded || locationPolicyChanged)
                 && mPolicy.hasPolicy(LocationPolicy.POLICY_ENABLE_CACHED_LOCATION)) {
             mCachedLocationLoaded = true;
@@ -1783,45 +1802,136 @@ public class LocationAgent implements LocationInterface {
             // To ensure to obtain the location before dialing any emergency calls.
             // Even if the emergency call may not be initiated, it would be efficient to obtain
             // the location once when ImsStack starts or SIM hot swap happens.
-            startInstantLocationUpdate();
+            if (mLocationUpdater.isInProgress()) {
+                mLocationUpdater.cancel();
+            }
+            mLocationUpdater.getCurrentLocation(
+                    mLocationApi.getPreferredProvider(),
+                    LocationUpdateRequest.DEFAULT_WAIT_TIME_MILLIS, true);
         }
     }
 
     private void stopLocationUpdateForEmergencyCall() {
-        if (mEmergencyCallListener != null) {
-            ImsLog.d(this, mSlotId, "stopLocationUpdateForEmergencyCall");
-            TelephonyManagerProxy tmp =
-                    AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
-            tmp.unregisterTelephonyCallback(mEmergencyCallListener);
-            mEmergencyCallListener = null;
-        }
-
+        ImsLog.d(this, mSlotId, "stopLocationUpdateForEmergencyCall");
         mLocationUpdateRequestedForPidfLo = false;
         mCachedLocationLoaded = false;
     }
 
-    private class EmergencyCallListener extends TelephonyCallback implements
-            TelephonyCallback.OutgoingEmergencyCallListener {
+    private void notifyLocationUpdateCompleted(int requestId) {
+        ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+        if (system != null) {
+            system.notifyLocationUpdateCompleted(requestId);
+        }
+        removeLocationUpdateRequest(requestId);
+    }
+
+    private LocationUpdateRequest removeLocationUpdateRequest(int requestId) {
+        LocationUpdateRequest request = mLocationUpdateRequests.get(requestId);
+        if (request != null) {
+            mLocationUpdateRequests.remove(requestId);
+            ImsLog.i(this, mSlotId, "LUR-count: " + mLocationUpdateRequests.size());
+            if (mLocationUpdateRequests.size() == 0
+                    && mLocationUpdateRequestNextId.get() > LocationUpdateRequest.MAX_REQUEST_ID) {
+                mLocationUpdateRequestNextId.set(1);
+            }
+        }
+        return request;
+    }
+
+    /**
+     * This class provides an interface for updating one-time location information.
+     */
+    private class LocationUpdater implements Consumer<Location> {
+        public static final int DEFAULT_WAIT_TIME_MILLIS = 10 * 1000; // 10s
+
+        protected final Handler mHandler;
+        protected final Runnable mTimeoutHandler = this::timeout;
+        protected CancellationSignal mCancellationSignal;
+
+        LocationUpdater(Handler handler) {
+            mHandler = handler;
+        }
+
+        public final void cancel() {
+            markAsCompleted();
+        }
+
+        public final boolean isInProgress() {
+            return mCancellationSignal != null;
+        }
+
         @Override
-        public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber,
-                int subscriptionId) {
-            ImsLog.d(this, mSlotId, "onOutgoingEmergencyCall: subId=" + subscriptionId);
+        public void accept(Location location) {
+            mCancellationSignal = null;
+            markAsCompleted();
 
-            if (subscriptionId == MSimUtils.INVALID_SUB_ID
-                    && mSlotId != MSimUtils.DEFAULT_SLOT_ID) {
-                // If the subscription is invalid,
-                // Assume that SIM1(slot-0) is used for an emergency call.
-                return;
+            if (location != null) {
+                updateLocation(location, true);
             }
+        }
 
-            if (subscriptionId != MSimUtils.INVALID_SUB_ID
-                    && mSlotId != MSimUtils.getSlotId(subscriptionId)) {
-                return;
-            }
+        public void timeout() {
+            markAsCompleted();
+        }
 
-            if (mPidfLoRequiredOnEmergencyCall) {
-                startInstantLocationUpdate();
+        public void getCurrentLocation(String provider, int waitTimeMs, boolean forEmergency) {
+            ImsLog.i(this, mSlotId, "getCurrentLocation: provider=" + provider
+                    + ", waitTimeMs=" + waitTimeMs + ", forEmergency=" + forEmergency);
+
+            mHandler.postDelayed(mTimeoutHandler, waitTimeMs);
+
+            mCancellationSignal = new CancellationSignal();
+            LocationRequest locationRequest = new LocationRequest.Builder(0)
+                    .setMinUpdateIntervalMillis(0)
+                    .setMaxUpdates(1)
+                    .setQuality(LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
+                    .setLocationSettingsIgnored(forEmergency)
+                    .build();
+            mLocationApi.getCurrentLocation(provider, locationRequest,
+                    mCancellationSignal, mHandler::post, this);
+        }
+
+        private void markAsCompleted() {
+            if (mCancellationSignal != null) {
+                mCancellationSignal.cancel();
+                mCancellationSignal = null;
             }
+            mHandler.removeCallbacks(mTimeoutHandler);
+        }
+    }
+
+    /**
+     * This class is used for native layer to refresh the location information
+     * when an emergency call is dialed.
+     */
+    private final class LocationUpdateRequest extends LocationUpdater {
+        public static final int MAX_REQUEST_ID = 1000;
+
+        private final int mId;
+
+        LocationUpdateRequest(int id, Handler handler) {
+            super(handler);
+            mId = id;
+        }
+
+        @Override
+        public void accept(Location location) {
+            ImsLog.d(this, mSlotId, "LUR-complete: " + mId);
+            super.accept(location);
+            notifyLocationUpdateCompleted(mId);
+        }
+
+        @Override
+        public void timeout() {
+            ImsLog.d(this, mSlotId, "LUR-timeout: " + mId);
+            super.timeout();
+            notifyLocationUpdateCompleted(mId);
+        }
+
+        @Override
+        public void getCurrentLocation(String provider, int waitTimeMs, boolean forEmergency) {
+            ImsLog.d(this, mSlotId, "LUR-request: " + mId);
+            super.getCurrentLocation(provider, waitTimeMs, forEmergency);
         }
     }
 }
