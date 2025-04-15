@@ -20,6 +20,8 @@ package com.android.imsstack.core.agents.dcmif;
  * this class is the interface about data connection watcher
  */
 public interface IDcNetWatcher extends IDc {
+    int REGISTRATION_REJECT_CAUSE_NONE = 0;
+
     /**
      * Return service is available or not based on
      * 1) RAT policy configuration
@@ -51,6 +53,11 @@ public interface IDcNetWatcher extends IDc {
      * Return MOCNPLMN info stored in DcNetWatcher object
      */
     int getMocnPlmnInfo();
+
+    /**
+     * Return network registration reject cause stored in DcNetWatcher object
+     */
+    int getNetworkRegistrationRejectCause();
 
     /**
      * Return operator info (numeric type) stored in DcNetWatcher object

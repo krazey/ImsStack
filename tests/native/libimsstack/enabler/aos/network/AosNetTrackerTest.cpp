@@ -369,6 +369,13 @@ TEST_F(AosNetTrackerTest, GetMobileNetworkType)
     EXPECT_EQ(m_pAosNetTracker->GetMobileNetworkType(), NW_REPORT_RADIO_LTE);
 }
 
+TEST_F(AosNetTrackerTest, GetMobileNetworkRegistrationRejectCause)
+{
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetworkRegistrationRejectCause()).WillOnce(Return(3));
+    m_pAosNetTracker->SetNetworkWatcher(&m_objMockINetworkWatcher);
+    EXPECT_EQ(m_pAosNetTracker->GetMobileNetworkRegistrationRejectCause(), 3);
+}
+
 TEST_F(AosNetTrackerTest, GetMobileVoiceServiceState)
 {
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceServiceType())

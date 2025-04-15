@@ -56,6 +56,7 @@ public:
 
     IMS_UINT32 GetMobileChangingNetworkType() override;
     IMS_UINT32 GetMobileNetworkType() override;
+    IMS_UINT32 GetMobileNetworkRegistrationRejectCause() override;
     IMS_SINT32 GetMobileVoiceServiceState() override;
     IMS_UINT32 GetMobileVoiceNetworkType() override;
     IMS_UINT32 GetNetworkType() override;

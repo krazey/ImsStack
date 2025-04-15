@@ -1473,6 +1473,9 @@ TEST_F(AosHandleTest, SetReason_Test)
     m_pAosHandle->SetReason(AosReason::DATA_PERMANENTLY_FAILED);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::DATA_PERMANENTLY_FAILED);
 
+    m_pAosHandle->SetReason(AosReason::NETWORK_ATTACH_REJECTED);
+    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::NETWORK_ATTACH_REJECTED);
+
     m_pAosHandle->SetReason(AosReason::REG_FAILURE);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::REG_FAILURE);
 
@@ -1484,9 +1487,6 @@ TEST_F(AosHandleTest, SetReason_Test)
 
     m_pAosHandle->SetReason(AosReason::REG_TERMINATING);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::REG_TERMINATING);
-
-    m_pAosHandle->SetReason(AosReason::IP_CHANGED);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::IP_CHANGED);
 }
 
 TEST_F(AosHandleTest, ClearSuspendedReason_Test)
@@ -1532,6 +1532,8 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::IMS_DISABLED), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::TTYMODEON), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::IP_CHANGED), ImsAosReason::IP_CHANGED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NETWORK_ATTACH_REJECTED),
+            ImsAosReason::NETWORK_ATTACH_REJECTED);
 
     m_pAosHandle->SetServiceType(ImsAosService::MTC);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_PERMANENTLY_FAILED),

@@ -24,6 +24,12 @@
     <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
         <item value="5"/>
     </int-array>
+    <int-array name="imsemergency.network_attach_reject_causes_for_cross_stack_redial_int_array" num="4">
+        <item value="3"/>
+        <item value="6"/>
+        <item value="7"/>
+        <item value="8"/>
+    </int-array>
     <!-- MTC -->
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->

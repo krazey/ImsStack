@@ -540,6 +540,10 @@ const IMS_CHAR
 const IMS_CHAR
         CarrierConfig::ImsEmergency::KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY[] =
                 KEY_IMS_EMERGENCY_PREFIX "ereg_err_code_not_supported_common_policy_int_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_NETWORK_ATTACH_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY[] =
+                KEY_IMS_EMERGENCY_PREFIX
+        "network_attach_reject_causes_for_cross_stack_redial_int_array";
 
 // Mtc
 const IMS_CHAR

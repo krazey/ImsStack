@@ -38,6 +38,7 @@ public:
     // the network type of moblie
     virtual IMS_UINT32 GetMobileChangingNetworkType() = 0;
     virtual IMS_UINT32 GetMobileNetworkType() = 0;
+    virtual IMS_UINT32 GetMobileNetworkRegistrationRejectCause() = 0;
     virtual IMS_SINT32 GetMobileVoiceServiceState() = 0;
     virtual IMS_UINT32 GetMobileVoiceNetworkType() = 0;
     /*

@@ -70,6 +70,11 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
                 return IMS_FALSE;
             }
 
+            if (MaybeRedialOverCrossStack())
+            {
+                return IMS_TRUE;
+            }
+
             PostMessage(MSG_REG_START, nReason, 0);
             break;
 
@@ -174,6 +179,33 @@ PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
         default:
             return IMS_FALSE;
     }
+}
+
+PROTECTED IMS_BOOL AosEApplication::MaybeRedialOverCrossStack()
+{
+    const ImsVector<IMS_SINT32>& objCauses =
+            GET_N_CONFIG(m_nSlotId)->GetNetworkAttachRejectCausesForCrossStackRedial();
+    if (objCauses.IsEmpty())
+    {
+        return IMS_FALSE;
+    }
+
+    IAosNetTracker* piNetTracker = m_piContext->GetNetTracker();
+    if (piNetTracker == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    const IMS_UINT32 nRejectCause = piNetTracker->GetMobileNetworkRegistrationRejectCause();
+    if (objCauses.Contains(nRejectCause))
+    {
+        A_IMS_TRACE_D(APPID, "Network attach is rejected with cause(%d)", nRejectCause, 0, 0);
+        PostMessage(MSG_REG_STOP, AosReason::NETWORK_ATTACH_REJECTED, 0);
+
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosEApplication::ClearConnection()
@@ -297,9 +329,10 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
     }
 }
 
-PROTECTED VIRTUAL void AosEApplication::ProcessRegStop(IN IMSMSG& /* objMsg */)
+PROTECTED VIRTUAL void AosEApplication::ProcessRegStop(IN IMSMSG& objMsg)
 {
-    CleanAll();
+    IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
+    CleanAll(nReason);
     Report_StateChanged(IMS_FALSE);
     ProcessStateStart();
 }

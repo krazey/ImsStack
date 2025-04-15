@@ -59,6 +59,7 @@ public:
     IMS_BOOL IsEmergencyAttachSupported() override;
     // 2nd PLMN info for MOCN
     IMS_SINT32 GetMocnPlmnInfo() override;
+    IMS_SINT32 GetNetworkRegistrationRejectCause() override;
 
     // ISystemListener
     void System_NotifyEvent(

@@ -230,6 +230,7 @@ public:
     AString m_strServiceId = AString("ims.service.test");
     ImsMap<AString, IAosHandle*> m_objHandles;
     AStringArray m_objPcscfs;
+    ImsVector<IMS_SINT32> m_objEmptyCauses;
 
 protected:
     void SetUp() override
@@ -323,6 +324,8 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_objMockIAosNConfiguration, GetSipTimerT1()).WillByDefault(Return(2000));
+        ON_CALL(m_objMockIAosNConfiguration, GetNetworkAttachRejectCausesForCrossStackRedial())
+                .WillByDefault(ReturnRef(m_objEmptyCauses));
 
         m_objThreadService.SetThread(&m_objMockThread);
         PlatformContext::GetInstance()->SetService(
@@ -409,6 +412,20 @@ TEST_F(AosEApplicationTest, RequestCmd)
 
     // REGISTER_REFRESH - won't handled
     EXPECT_FALSE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_REFRESH, 0));
+}
+
+TEST_F(AosEApplicationTest, RegisterStartCmdShouldRegStopWhenNwAttachRejected)
+{
+    IMS_SINT32 nRejectCause = 3;
+    ImsVector<IMS_SINT32> objCauses;
+    objCauses.Add(nRejectCause);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetNetworkAttachRejectCausesForCrossStackRedial())
+            .WillOnce(ReturnRef(objCauses));
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkRegistrationRejectCause())
+            .WillOnce(Return(nRejectCause));
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+
+    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
 }
 
 TEST_F(AosEApplicationTest, GetProperty)

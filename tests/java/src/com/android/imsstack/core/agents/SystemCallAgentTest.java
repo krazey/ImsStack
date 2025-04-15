@@ -670,6 +670,20 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testGetNetworkRegistrationRejectCause() {
+        mSystemCallAgent.getNetworkRegistrationRejectCause();
+
+        verify(mDcNetWatcher).getNetworkRegistrationRejectCause();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getNetworkRegistrationRejectCause();
+
+        assertEquals(IDcNetWatcher.REGISTRATION_REJECT_CAUSE_NONE, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
     public void testGetHostByName() {
         String host = "test.ims.com";
         mSystemCallAgent.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt(), host);

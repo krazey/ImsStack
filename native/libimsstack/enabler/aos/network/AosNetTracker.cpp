@@ -246,6 +246,11 @@ PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileNetworkType()
     return m_nNetRadioType;
 }
 
+PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileNetworkRegistrationRejectCause()
+{
+    return m_piNetWatcherInfo->GetNetworkRegistrationRejectCause();
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNetTracker::GetMobileVoiceServiceState()
 {
     return m_piNetWatcherInfo->GetNetVoiceServiceType();

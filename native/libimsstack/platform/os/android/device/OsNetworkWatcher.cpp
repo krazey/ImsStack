@@ -542,6 +542,12 @@ PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetMocnPlmnInfo()
     return PlatformContext::GetInstance()->GetSystem()->GetMocnPlmnInfo(GetSlotId());
 }
 
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkRegistrationRejectCause()
+{
+    return PlatformContext::GetInstance()->GetSystem()->GetNetworkRegistrationRejectCause(
+            GetSlotId());
+}
+
 PRIVATE GLOBAL const IMS_CHAR* OsNetworkWatcher::RadioTechToString(IN IMS_UINT32 nType)
 {
     switch (nType)

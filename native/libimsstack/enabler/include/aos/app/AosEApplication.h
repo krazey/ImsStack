@@ -43,6 +43,7 @@ protected:
     IMS_BOOL IsKeepEPdnWhenNoPcscf() const;
     IMS_BOOL IsRegBlockInCbm() const;
     IMS_BOOL IsReleaseEmergencyPdnUponEmergencyCallEnd();
+    IMS_BOOL MaybeRedialOverCrossStack();
 
     // Clean
     void ClearConnection() override;

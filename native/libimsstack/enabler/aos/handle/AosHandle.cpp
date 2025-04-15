@@ -662,6 +662,9 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AosReason::IP_CHANGED:
             nImsAosReason = ImsAosReason::IP_CHANGED;
             break;
+        case AosReason::NETWORK_ATTACH_REJECTED:
+            nImsAosReason = ImsAosReason::NETWORK_ATTACH_REJECTED;
+            break;
         default:
             break;
     }

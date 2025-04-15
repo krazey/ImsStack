@@ -81,6 +81,8 @@ public class SystemInterface implements JniSystemListener {
                     "IS_EMERGENCY_ATTACH_SUPPORTED"),
             Map.entry(SystemConstants.BIND_SOCKET, "BIND_SOCKET"),
             Map.entry(SystemConstants.IS_IPV6_PREFERRED, "IS_IPV6_PREFERRED"),
+            Map.entry(SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE,
+                    "GET_NETWORK_REGISTRATION_REJECT_CAUSE"),
             Map.entry(SystemConstants.GET_PREFERENCE, "GET_PREFERENCE"),
             Map.entry(SystemConstants.SET_PREFERENCE, "SET_PREFERENCE"),
             Map.entry(SystemConstants.GET_PRIVATE_PROPERTY, "GET_PRIVATE_PROPERTY"),
@@ -1116,7 +1118,8 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_MTU: // fall through
                 case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED: // fall through
                 case SystemConstants.BIND_SOCKET: // fall through
-                case SystemConstants.IS_IPV6_PREFERRED:
+                case SystemConstants.IS_IPV6_PREFERRED: // fall through
+                case SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE:
                     handleSystemCallForNetwork(method, in, fd, out);
                     break;
                 case SystemConstants.GET_ISIM_STATE: // fall through
@@ -1373,6 +1376,10 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.IS_IPV6_PREFERRED: {
                     int apnType = in.readInt();
                     out.writeInt(mSystemCall.isIpv6Preferred(apnType) ? 1 : 0);
+                    break;
+                }
+                case SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE: {
+                    out.writeInt(mSystemCall.getNetworkRegistrationRejectCause());
                     break;
                 }
             }

@@ -52,6 +52,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyOnly, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyAttachSupported, (), (override));
     MOCK_METHOD(IMS_SINT32, GetMocnPlmnInfo, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetNetworkRegistrationRejectCause, (), (override));
 };
 
 class MockINetworkWatcherListener : public INetworkWatcherListener

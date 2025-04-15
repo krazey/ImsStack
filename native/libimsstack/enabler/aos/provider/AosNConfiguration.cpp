@@ -990,6 +990,12 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetERegErrCodeNotSuppor
     return m_objAsset.objERegErrCodeNotSupportedCommonPolicy;
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>&
+AosNConfiguration::GetNetworkAttachRejectCausesForCrossStackRedial()
+{
+    return m_objAsset.objNetworkAttachRejectCausesForCrossStackRedial;
+}
+
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_nSlotId != nSlotId)
@@ -1625,6 +1631,9 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_UNAVAILABLE_FEATURES_IN_LIMITED_REG_INT_ARRAY);
     m_objAsset.objERegErrCodeNotSupportedCommonPolicy = piCc->GetIntArray(
             CarrierConfig::ImsEmergency::KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY);
+    m_objAsset.objNetworkAttachRejectCausesForCrossStackRedial =
+            piCc->GetIntArray(CarrierConfig::ImsEmergency::
+                            KEY_NETWORK_ATTACH_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::ImsWfc::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
 }

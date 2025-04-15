@@ -136,6 +136,7 @@ public:
             (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(
             IMS_BOOL, IsIpv6Preferred, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetNetworkRegistrationRejectCause, (IN IMS_SINT32 nSlotId), (override));
 
     ////
     // WiFi-related information

@@ -555,4 +555,11 @@ public interface SystemCallInterface {
      * @param requestId A request identifier returned from {@link #requestLocationUpdate(int)}.
      */
     void cancelLocationUpdate(int requestId);
+
+    /**
+     * Returns the reject cause for the network registration.
+     *
+     * @return A reject cause.
+     */
+    int getNetworkRegistrationRejectCause();
 }

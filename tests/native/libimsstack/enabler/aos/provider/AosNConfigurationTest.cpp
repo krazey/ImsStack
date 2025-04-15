@@ -913,6 +913,14 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     _))
             .WillOnce(Return(objERegErrCodeNotSupportedCommonPolicy));
 
+    ImsVector<IMS_SINT32> objNetworkAttachRejectCausesForCrossStackRedial;
+    objNetworkAttachRejectCausesForCrossStackRedial.Add(3);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::ImsEmergency::
+                                KEY_NETWORK_ATTACH_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY,
+                    _))
+            .WillOnce(Return(objNetworkAttachRejectCausesForCrossStackRedial));
+
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
     objVowifiSubErrorCodeForInitReg.Clear();
     objVowifiSubErrorCodeForInitReg.Add(0);
@@ -1067,6 +1075,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     objErrCode.Clear();
     objErrCode = m_pAosNConfiguration->GetERegErrCodeNotSupportedCommonPolicy();
     EXPECT_EQ(423, objErrCode.GetAt(0));
+    objErrCode.Clear();
+    objErrCode = m_pAosNConfiguration->GetNetworkAttachRejectCausesForCrossStackRedial();
+    EXPECT_EQ(3, objErrCode.GetAt(0));
     objErrCode.Clear();
     objErrCode = m_pAosNConfiguration->GetVowifiSubErrorRegRequired();
     cnt = 0;

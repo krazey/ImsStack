@@ -814,6 +814,12 @@ IMS_BOOL System::IsIpv6Preferred(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
+IMS_SINT32 System::GetNetworkRegistrationRejectCause(IN IMS_SINT32 nSlotId)
+{
+    return GetInt(SystemConstants::GET_NETWORK_REGISTRATION_REJECT_CAUSE, 0, nSlotId);
+}
+
+PUBLIC
 IMS_BOOL System::IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId)
 {
     return (GetInt(SystemConstants::IS_IMS_EMERGENCY_CALL_SUPPORTED, 0, nSlotId) == 1);

@@ -36,6 +36,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRoaming, (), (override));
     MOCK_METHOD(IMS_UINT32, GetMobileChangingNetworkType, (), (override));
     MOCK_METHOD(IMS_UINT32, GetMobileNetworkType, (), (override));
+    MOCK_METHOD(IMS_UINT32, GetMobileNetworkRegistrationRejectCause, (), (override));
     MOCK_METHOD(IMS_SINT32, GetMobileVoiceServiceState, (), (override));
     MOCK_METHOD(IMS_UINT32, GetMobileVoiceNetworkType, (), (override));
     MOCK_METHOD(IMS_UINT32, GetNetworkType, (), (override));

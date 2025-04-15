@@ -56,6 +56,8 @@ public:
         REG_TERMINATING,
         /// Indicate that IP changed during registration.
         IP_CHANGED,
+        /// Indicate that the network attach is rejected because the UICC is invalid.
+        NETWORK_ATTACH_REJECTED,
         NOT_SPECIFIED
     };
 
