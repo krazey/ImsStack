@@ -175,6 +175,15 @@ enum MEDIA_SRVCC_STATUS
     MEDIA_SRVCC_CANCELED
 };
 
+typedef enum
+{
+    NONE = 0,
+    SENDRECV = 1,
+    SENDONLY = 2,
+    RECVONLY = 3,
+    INACTIVE = 4,
+} MEDIA_PEM_TYPE;
+
 struct QosRequestParam
 {
 public:

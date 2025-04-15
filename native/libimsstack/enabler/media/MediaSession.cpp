@@ -580,6 +580,25 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SendMessage(IN IMS_SINT32 nMsg, IN IMS_UIN
     return OnMessage(nMsg, pParam);
 }
 
+PUBLIC
+VIRTUAL void MediaSession::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType)
+
+{
+    std::shared_ptr<MediaNego> pMediaNego = m_pMediaNegoHandler->FindMediaNego(nNegoId);
+
+    // audio
+    if (pMediaNego != IMS_NULL && pMediaNego->GetAudioNego() != IMS_NULL)
+    {
+        m_pAudioController->SetMediaPemType(nNegoId, ePemType);
+    }
+
+    // video
+    if (pMediaNego != IMS_NULL && pMediaNego->GetVideoNego() != IMS_NULL)
+    {
+        m_pVideoController->SetMediaPemType(ePemType);
+    }
+}
+
 PROTECTED
 QosRequestParam* MediaSession::FindQosParam(const QosRequestParam* targetParam)
 {

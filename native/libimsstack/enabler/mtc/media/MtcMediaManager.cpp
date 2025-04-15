@@ -86,6 +86,7 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
     IMS_TRACE_D("MediaSession_Notify : Report[%s] Media[%s]",
             MtcMediaStringUtils::ConvertReportType(eReportType),
             MtcMediaStringUtils::ConvertContentType(eMediaType), 0);
+
     IMS_UINT32 eReportedMediaType = MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType);
 
     switch (eReportType)
@@ -360,6 +361,7 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
 
     AString strPemHeader =
             m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::P_EARLY_MEDIA);
+
     if (strPemHeader.Contains("sendrecv"))
     {
         ePemType = PemType::SENDRECV;

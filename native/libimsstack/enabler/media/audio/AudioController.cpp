@@ -466,6 +466,7 @@ IMS_BOOL AudioController::UpdateLocalAddress(IN std::shared_ptr<AudioNego> pNego
 {
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateLocalAddress() - invalid parameter", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -644,6 +645,7 @@ IMS_BOOL AudioController::IsAudioConfigChanged(IN AudioConfig* pAudioConfig)
 {
     if (pAudioConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "IsAudioConfigChanged() - invalid parameter", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -664,4 +666,24 @@ IMS_BOOL AudioController::IsAudioConfigChanged(IN AudioConfig* pAudioConfig)
     IMS_TRACE_D("IsAudioConfigChanged(): Same RtpConfig", 0, 0, 0);
 
     return IMS_FALSE;
+}
+
+PUBLIC
+void AudioController::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType)
+{
+    if (nNegoId == UNDEFINED_NEGO_ID)
+    {
+        IMS_TRACE_D("SetMediaPemType() - NegoId is invalid", 0, 0, 0);
+        nNegoId = m_nCurrentActiveNegoId;
+    }
+
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
+    if (pAudioSession != IMS_NULL)
+    {
+        pAudioSession->SetMediaPemType(ePemType);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "SetMediaPemType(): session not found", 0, 0, 0);
+    }
 }

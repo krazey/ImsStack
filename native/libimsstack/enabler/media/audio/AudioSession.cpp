@@ -37,7 +37,8 @@ AudioSession::AudioSession(IN IMS_SINT32 nSlotId) :
         m_nRtpInactivityTimer(0),
         m_nRtcpInactivityTimer(0),
         m_bAnbrEnabled(IMS_FALSE),
-        m_piNetworkToneWaitTimer(IMS_NULL)
+        m_piNetworkToneWaitTimer(IMS_NULL),
+        m_ePemType(MEDIA_PEM_TYPE::NONE)
 {
     IMS_TRACE_I("+AudioSession() - state[%d]", m_nState, 0, 0);
 
@@ -206,7 +207,8 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             break;
         case MEDIA_DIRECTION_SEND_RECEIVE:
             nAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
-            if (!bConfirmedSession)
+            if (!bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
+                    m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
             {
                 nAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
                 IMS_TRACE_D("UpdateRtpConfig() - media direction[%d]", nAudioDirection, 0, 0);
@@ -842,6 +844,15 @@ IMS_SINT32 AudioSession::GetInactivityTimer(IN InactivitytimerType eType)
             return m_nNetworkToneTimer;
         default:
             return -1;
+    }
+}
+
+PUBLIC
+void AudioSession::SetMediaPemType(IN MEDIA_PEM_TYPE ePemType)
+{
+    if (m_ePemType != MEDIA_PEM_TYPE::SENDRECV && m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
+    {
+        m_ePemType = ePemType;
     }
 }
 

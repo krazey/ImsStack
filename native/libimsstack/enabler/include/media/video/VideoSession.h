@@ -110,6 +110,13 @@ public:
     /** Get the MediaQualityThreshold */
     MediaQualityThreshold* GetMediaQualityThreshold();
 
+    /**
+     * @brief Set p-early media header
+     *
+     * @param ePemType The p-early media header value
+     */
+    void SetMediaPemType(IN MEDIA_PEM_TYPE ePemType);
+
 private:
     IMS_BOOL OnSetSurfaceCmd(IN IMS_UINTP pParam);
     IMS_BOOL OnSelectCameraCmd(IN IMS_UINTP pParam);
@@ -126,6 +133,7 @@ private:
     IMS_SINT32 m_nCameraZoom;
     IMS_BOOL m_bPreviewSurfaceSet;
     IMS_BOOL m_bDisplaySurfaceSet;
+    MEDIA_PEM_TYPE m_ePemType;
 };
 
 #endif

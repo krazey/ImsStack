@@ -109,6 +109,7 @@ public:
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType, IN IMS_UINT32 nRtpTimer) override;
     IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus) override;
     IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam) override;
+    void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType) override;
 
 protected:
     QosRequestParam* FindQosParam(const QosRequestParam* param);

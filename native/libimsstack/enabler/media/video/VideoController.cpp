@@ -224,3 +224,12 @@ IMS_BOOL VideoController::IsSessionOpened()
 
     return IMS_FALSE;
 }
+
+PUBLIC
+void VideoController::SetMediaPemType(IN MEDIA_PEM_TYPE ePemType)
+{
+    if (m_pSession != IMS_NULL)
+    {
+        m_pSession->SetMediaPemType(ePemType);
+    }
+}

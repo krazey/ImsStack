@@ -250,6 +250,14 @@ public:
      */
     virtual IMS_BOOL IsSessionOpened();
 
+    /**
+     * @brief Set p-early media header
+     *
+     * @param nNegoId The identification to get the audio profile from negotiated parameter
+     * @param ePemType The p-early media header value
+     */
+    virtual void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType);
+
 protected:
     virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);
 

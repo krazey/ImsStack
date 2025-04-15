@@ -36,7 +36,8 @@ PUBLIC VideoSession::VideoSession(IN IMS_SINT32 nSlotId) :
         m_nCameraId(CAMERA_ID_NONE),
         m_nCameraZoom(-1),
         m_bPreviewSurfaceSet(IMS_FALSE),
-        m_bDisplaySurfaceSet(IMS_FALSE)
+        m_bDisplaySurfaceSet(IMS_FALSE),
+        m_ePemType(MEDIA_PEM_TYPE::NONE)
 {
     IMS_TRACE_I("+VideoSession() - state[%d]", m_nState, 0, 0);
 
@@ -134,7 +135,8 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
             case MEDIA_DIRECTION_SEND:
                 nVideoDirection = bHold ? RtpConfig::MEDIA_DIRECTION_INACTIVE
                                         : RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
-                if (!bConfirmedSession)
+                if (!bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
+                        m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
                 {
                     nVideoDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
                     IMS_TRACE_D("UpdateRtpConfig() - media direction[%d]", nVideoDirection, 0, 0);
@@ -142,7 +144,8 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
                 break;
             case MEDIA_DIRECTION_SEND_RECEIVE:
                 nVideoDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
-                if (!bConfirmedSession)
+                if (!bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
+                        m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
                 {
                     nVideoDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
                     IMS_TRACE_D("UpdateRtpConfig() - media direction[%d]", nVideoDirection, 0, 0);
@@ -530,6 +533,14 @@ PUBLIC
 MediaQualityThreshold* VideoSession::GetMediaQualityThreshold()
 {
     return &m_objMediaQualityThreshold;
+}
+
+void VideoSession::SetMediaPemType(IN MEDIA_PEM_TYPE ePemType)
+{
+    if (m_ePemType != MEDIA_PEM_TYPE::SENDRECV && m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
+    {
+        m_ePemType = ePemType;
+    }
 }
 
 PRIVATE IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)

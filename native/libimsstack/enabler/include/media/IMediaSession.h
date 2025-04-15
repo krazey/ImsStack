@@ -247,6 +247,15 @@ public:
      * @return IMS_BOOL Returns when the message is delivered to the target instance without error
      */
     virtual IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam) = 0;
+
+    /**
+     * @brief Set p-early media header
+     *
+     * @param nNegoId The target Audio/Video/TextSession identification
+     * @param ePemType The p-early media header value
+     * @return
+     */
+    virtual void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType) = 0;
 };
 
 #endif

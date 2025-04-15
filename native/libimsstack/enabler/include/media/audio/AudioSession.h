@@ -206,6 +206,13 @@ public:
     IMS_BOOL NotifyAnbrReceived(
             IN IMS_UINT32 nAnbrMediaType, IN IMS_UINT32 nAnbrDirection, IN IMS_UINT32 nAnbrBitRate);
 
+    /**
+     * @brief Set p-early media header
+     *
+     * @param ePemType The p-early media header value
+     */
+    void SetMediaPemType(IN MEDIA_PEM_TYPE ePemType);
+
 private:
     IMS_SINT32 ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT32 nCodecType);
     void NetworkToneTimerExpired();
@@ -223,6 +230,7 @@ protected:
     IMS_SINT32 m_nRtcpInactivityTimer;
     IMS_BOOL m_bAnbrEnabled;
     ITimer* m_piNetworkToneWaitTimer;
+    MEDIA_PEM_TYPE m_ePemType;
 };
 
 #endif
