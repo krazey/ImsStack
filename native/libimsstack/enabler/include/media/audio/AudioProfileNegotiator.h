@@ -121,6 +121,7 @@ private:
             IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload, IN IMS_BOOL bReturnMode);
     MEDIA_DIRECTION UpdateDirectionToMine(
             IN MEDIA_DIRECTION ePeerDirection, IN MEDIA_DIRECTION eLocalDirection);
+    IMS_BOOL IsValidEvsBwList(IN IMS_UINT32 nBwList);
 };
 
 #endif

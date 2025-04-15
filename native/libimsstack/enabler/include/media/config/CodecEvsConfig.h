@@ -71,11 +71,7 @@ public:
         /** EVS nb, wb and swb */
         EVS_ENCODED_BW_TYPE_NB_WB_SWB = 5,
         /** EVS nb, wb, swb and fb */
-        EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6,
-        /** EVS wb and swb */
-        EVS_ENCODED_BW_TYPE_WB_SWB = 7,
-        /** EVS wb, swb and fb */
-        EVS_ENCODED_BW_TYPE_WB_SWB_FB = 8
+        EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6
     };
     /** Enum EVS Bandwidth Type*/
     enum

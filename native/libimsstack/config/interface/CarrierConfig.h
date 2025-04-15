@@ -1060,9 +1060,7 @@ public:
             EVS_ENCODED_BW_TYPE_FB = 3,
             EVS_ENCODED_BW_TYPE_NB_WB = 4,
             EVS_ENCODED_BW_TYPE_NB_WB_SWB = 5,
-            EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6,
-            EVS_ENCODED_BW_TYPE_WB_SWB = 7,
-            EVS_ENCODED_BW_TYPE_WB_SWB_FB = 8
+            EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6
         };
 
         // EVS primary mode bitrates
