@@ -28,6 +28,7 @@ import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AnbrMode;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
+import android.telephony.imsmedia.EvsParams;
 import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityStatus;
@@ -633,7 +634,7 @@ public class AudioSessionHandler extends MediaState {
             case MediaConstants.REQUEST_UPDATE_ANBR_ENABLED_CONFIG:
             {
                 Boolean anbrEnabled = parcel.readBoolean();
-                ImsLog.d("anbr config =" + anbrEnabled);
+                ImsLog.d("anbr config=" + anbrEnabled);
 
                 Message.obtain(mAudioMessageHandler, requestType, anbrEnabled).sendToTarget();
             }
@@ -1037,20 +1038,21 @@ public class AudioSessionHandler extends MediaState {
             int anbrDirection = -1;
             int bitrate = -1;
 
-            if (anbrMode.getAnbrUplinkCodecMode() > 0 && anbrMode.getAnbrDownlinkCodecMode() == 0) {
+            ImsLog.d("handleTriggerAnbrQuery: ul=" + anbrMode.getAnbrUplinkCodecMode() + " dl="
+                    + anbrMode.getAnbrDownlinkCodecMode());
+
+            if (anbrMode.getAnbrUplinkCodecMode() > 0) {
                 anbrDirection = EDirectionType.DIRECTION_UPLINK.getDirection();
                 bitrate = convertCodecModeToBitrate(anbrMode.getAnbrUplinkCodecMode());
 
+            } else if (anbrMode.getAnbrDownlinkCodecMode() > 0) {
+                anbrDirection = EDirectionType.DIRECTION_DOWNLINK.getDirection();
+                bitrate = convertCodecModeToBitrate(anbrMode.getAnbrDownlinkCodecMode());
             } else {
-                if (anbrMode.getAnbrDownlinkCodecMode() > 0) {
-                    anbrDirection = EDirectionType.DIRECTION_DOWNLINK.getDirection();
-                    bitrate = convertCodecModeToBitrate(anbrMode.getAnbrDownlinkCodecMode());
-                } else {
-                    ImsLog.d("handleTriggerAnbrQuery: invalid codec mode ");
-                }
+                ImsLog.d("handleTriggerAnbrQuery: invalid codec mode ");
             }
 
-            ImsLog.d("handleTriggerAnbrQuery: dir: " + anbrDirection + " bitrate: " + bitrate);
+            ImsLog.d("handleTriggerAnbrQuery: dir= " + anbrDirection + " bitrate= " + bitrate);
             mAudioSessionCallbackHandler.triggerAnbrQuery(AUDIO_TYPE, anbrDirection, bitrate);
         } else {
             ImsLog.d("Enter Anbr Callback is null");
@@ -1065,20 +1067,32 @@ public class AudioSessionHandler extends MediaState {
             case CODEC_AMR_WB:
                 break;
             case CODEC_EVS:
-                if (codecMode == 9) {
-                    convertedBitrate = 10; // 5.9 kbps (or 2.8)
-                } else if (codecMode == 10) { // 7.2kbps
-                    convertedBitrate = 12;
-                } else if (codecMode > 10 && codecMode <= 12) { // 9.6kbps
-                    convertedBitrate = 16;
-                } else if (codecMode == 13) { // 13.2kbps
-                    convertedBitrate = 20;
-                } else if (codecMode == 14) { // 16.4kbps
-                    convertedBitrate = 24;
-                } else if (codecMode == 15) { // 24.4kbps
-                    convertedBitrate = 28;
+                if (codecMode == EvsParams.EVS_MODE_9) {            // 5.9 kbps (or 2.8)
+                    convertedBitrate = 5900;
+                } else if (codecMode == EvsParams.EVS_MODE_10) {    //7.2kbps
+                    convertedBitrate = 7200;
+                } else if (codecMode == EvsParams.EVS_MODE_11) {    //8.0kbps
+                    convertedBitrate = 8000;
+                } else if (codecMode == EvsParams.EVS_MODE_12) {    //9.6kbps
+                    convertedBitrate = 9600;
+                } else if (codecMode == EvsParams.EVS_MODE_13) {    //13.2kbps
+                    convertedBitrate = 13200;
+                } else if (codecMode == EvsParams.EVS_MODE_14) {    //16.4kbps
+                    convertedBitrate = 16400;
+                } else if (codecMode == EvsParams.EVS_MODE_15) {    //24.4kbps
+                    convertedBitrate = 24400;
+                } else if (codecMode == EvsParams.EVS_MODE_16) {    //32.0kbps
+                    convertedBitrate = 32000;
+                } else if (codecMode == EvsParams.EVS_MODE_17) {    //48.0kbps
+                    convertedBitrate = 48000;
+                } else if (codecMode == EvsParams.EVS_MODE_18) {    //64.0kbps
+                    convertedBitrate = 64000;
+                } else if (codecMode == EvsParams.EVS_MODE_19) {    //96.0kbps
+                    convertedBitrate = 96000;
+                } else if (codecMode == EvsParams.EVS_MODE_20) {    //128.0kbps
+                    convertedBitrate = 128000;
                 } else {
-                    convertedBitrate = 20; // default valu
+                    convertedBitrate = 13200;                       //default value
                     ImsLog.d("convertCodecModeToBitrate: Error - set to 13.2kbps");
                 }
                 break;
@@ -1086,7 +1100,7 @@ public class AudioSessionHandler extends MediaState {
                 break;
         }
 
-        ImsLog.d("convertedBitrate: " + convertedBitrate);
+        ImsLog.d("convertedBitrate= " + convertedBitrate);
         return convertedBitrate;
     }
 
