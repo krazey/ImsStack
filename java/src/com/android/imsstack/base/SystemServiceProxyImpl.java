@@ -39,6 +39,7 @@ import android.net.QosCallback;
 import android.net.QosSocketInfo;
 import android.net.Uri;
 import android.net.annotations.PolicyDirection;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.telecom.TelecomManager;
@@ -70,6 +71,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * An implementation class to access the APIs of the various system managers.
@@ -300,6 +302,29 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         public boolean isProviderEnabled(@NonNull String provider) {
             LocationManager lm = mContext.getSystemService(LocationManager.class);
             return lm != null ? lm.isProviderEnabled(provider) : false;
+        }
+
+        @Override
+        public void getCurrentLocation(@NonNull String provider,
+                @NonNull LocationRequest locationRequest,
+                @Nullable CancellationSignal cancellationSignal,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull Consumer<Location> consumer) {
+            LocationManager lm = mContext.getSystemService(LocationManager.class);
+            if (lm != null) {
+                try {
+                    lm.getCurrentLocation(provider,
+                            locationRequest, cancellationSignal, executor, consumer);
+                } catch (SecurityException | IllegalArgumentException e) {
+                    Log.e(this, "getCurrentLocation: " + e);
+                    executor.execute(() -> consumer.accept(null));
+                } catch (Exception e) {
+                    Log.e(this, "getCurrentLocation: unknown exception=" + e);
+                    executor.execute(() -> consumer.accept(null));
+                }
+            } else {
+                executor.execute(() -> consumer.accept(null));
+            }
         }
 
         @Override

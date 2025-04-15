@@ -21,6 +21,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.os.CancellationSignal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -30,6 +31,7 @@ import androidx.annotation.Nullable;
 import com.android.imsstack.base.SystemServiceProxy.LocationManagerProxy;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * An implementation class to access the {@link LocationManager}.
@@ -48,6 +50,17 @@ public class LocationManagerProxyImpl implements LocationManagerProxy {
     @Override
     public boolean isProviderEnabled(@NonNull String provider) {
         return mProviderEnablements.getOrDefault(provider, Boolean.FALSE);
+    }
+
+    @Override
+    public void getCurrentLocation(@NonNull String provider,
+            @NonNull LocationRequest locationRequest,
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Location> consumer) {
+        if (mLastKnownLocation != null) {
+            executor.execute(() -> consumer.accept(mLastKnownLocation));
+        }
     }
 
     @Override

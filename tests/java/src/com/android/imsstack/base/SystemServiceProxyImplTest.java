@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,6 +37,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEventListener;
 import android.location.LastLocationRequest;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
@@ -50,6 +52,7 @@ import android.net.NetworkRequest;
 import android.net.QosCallback;
 import android.net.QosSocketInfo;
 import android.net.Uri;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.telecom.TelecomManager;
@@ -92,6 +95,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 @RunWith(JUnit4.class)
 public class SystemServiceProxyImplTest {
@@ -459,6 +463,46 @@ public class SystemServiceProxyImplTest {
         // Expected that the LocationManager is null.
         mContextFixture.setSystemService(Context.LOCATION_SERVICE, null);
         assertFalse(lmp.isProviderEnabled(LocationManager.FUSED_PROVIDER));
+    }
+
+    @Test
+    @SmallTest
+    public void testLocationManagerProxy_getCurrentLocation() {
+        LocationManager locationManager = mContext.getSystemService(LocationManager.class);
+        LocationManagerProxy lmp = mSystemServiceProxy.getSystemService(LocationManagerProxy.class);
+        LocationRequest request = mock(LocationRequest.class);
+        CancellationSignal cancellationSignal = mock(CancellationSignal.class);
+        Executor executor = Runnable::run;
+        Consumer<Location> consumer = mock(Consumer.class);
+
+        lmp.getCurrentLocation(LocationManager.FUSED_PROVIDER,
+                request, cancellationSignal, executor, consumer);
+        verify(locationManager).getCurrentLocation(eq(LocationManager.FUSED_PROVIDER),
+                eq(request), eq(cancellationSignal), eq(executor), eq(consumer));
+
+        doAnswer((invocation) -> {
+            throw new IllegalArgumentException("Invalid provider.");
+        }).when(locationManager).getCurrentLocation(any(), any(), any(), any(), any());
+
+        lmp.getCurrentLocation(LocationManager.FUSED_PROVIDER,
+                request, cancellationSignal, executor, consumer);
+        verify(consumer).accept(eq(null));
+
+        doAnswer((invocation) -> {
+            throw new NullPointerException("Null pointer.");
+        }).when(locationManager).getCurrentLocation(any(), any(), any(), any(), any());
+
+        consumer = mock(Consumer.class);
+        lmp.getCurrentLocation(LocationManager.FUSED_PROVIDER,
+                request, cancellationSignal, executor, consumer);
+        verify(consumer).accept(eq(null));
+
+        // Expected that the LocationManager is null.
+        consumer = mock(Consumer.class);
+        mContextFixture.setSystemService(Context.LOCATION_SERVICE, null);
+        lmp.getCurrentLocation(LocationManager.FUSED_PROVIDER,
+                request, cancellationSignal, executor, consumer);
+        verify(consumer).accept(eq(null));
     }
 
     @Test

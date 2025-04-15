@@ -34,6 +34,7 @@ import android.net.QosCallback;
 import android.net.QosSocketInfo;
 import android.net.Uri;
 import android.net.annotations.PolicyDirection;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.telecom.TelecomManager;
@@ -52,6 +53,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * A proxy interface to access the APIs of the various system managers.
@@ -349,6 +351,26 @@ public interface SystemServiceProxy {
          * @return {@code true} if the provider exists and is enabled, {@code false} otherwise.
          */
         boolean isProviderEnabled(@NonNull String provider);
+
+        /**
+         * Asynchronously returns a single current location fix from the given provider based on
+         * the given {@link LocationRequest}. This may activate sensors in order to compute
+         * a new location, unlike {@link #getLastKnownLocation(String)}, which will only return
+         * a cached fix if available. The given callback will be invoked once and only once,
+         * either with a valid location or with a null location if the provider was unable to
+         * generate a valid location.
+         *
+         * @param provider A provider listed by {@link LocationManager#getAllProviders()}.
+         * @param locationRequest The location request containing location parameters.
+         * @param cancellationSignal An optional signal that allows for cancelling this call
+         * @param executor The executor handling listener callbacks.
+         * @param consumer The callback invoked with either a {@link Location} or null
+         */
+        void getCurrentLocation(@NonNull String provider,
+                @NonNull LocationRequest locationRequest,
+                @Nullable CancellationSignal cancellationSignal,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull Consumer<Location> consumer);
 
         /**
          * Gets the last known location from the given provider, or null if there is no last known
