@@ -250,7 +250,10 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
             else
             {
                 m_objContext.GetUiNotifier().SendStartFailed(
-                        objResult.objReason.ConvertFromInternal());
+                        m_objContext.GetCallInfo().IsEmergency()
+                                ? CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                                          EXTRA_CODE_CALL_RETRY_EMERGENCY)
+                                : objResult.objReason.ConvertFromInternal());
             }
 
             return CallStateName::TERMINATING;
@@ -385,7 +388,7 @@ CallStateName IdleState::ContinueStart()
 {
     if (m_objContext.CreateSession() == IMS_NULL)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
+        m_objContext.GetUiNotifier().SendStartFailed(GetInternalErrorReason());
         return CallStateName::TERMINATING;
     }
 
@@ -395,7 +398,7 @@ CallStateName IdleState::ContinueStart()
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
+        m_objContext.GetUiNotifier().SendStartFailed(GetInternalErrorReason());
         return CallStateName::TERMINATING;
     }
 
@@ -629,4 +632,17 @@ AString IdleState::RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AStrin
     }
 
     return strTarget;
+}
+
+PRIVATE
+CallReasonInfo IdleState::GetInternalErrorReason() const
+{
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+    }
+    else
+    {
+        return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR);
+    }
 }

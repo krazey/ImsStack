@@ -420,6 +420,23 @@ TEST_F(IdleStateTest, StartInvokesSendStartFailedIfBlockCheckerBlocked)
             pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
 }
 
+TEST_F(IdleStateTest, StartInvokesSendStartFailedIfBlockCheckerBlockedForEmergencyCall)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+
+    CallReasonInfo objReasonInfo(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(Return(IMtcBlockChecker::Result(
+                    IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
 TEST_F(IdleStateTest, StartInvokesSendStartFailedIfCreateSessionFailed)
 {
     CallType eCallType = CallType::VOIP;
@@ -436,12 +453,49 @@ TEST_F(IdleStateTest, StartInvokesSendStartFailedIfCreateSessionFailed)
             pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
 }
 
+TEST_F(IdleStateTest, StartInvokesSendStartFailedIfCreateSessionFailedForEmergencyCall)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+
+    CallReasonInfo objReasonInfo(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(nullptr));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
 TEST_F(IdleStateTest, StartInvokesSendStartFailedIfStartSessionFailed)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
 
     CallReasonInfo objReasonInfo(CODE_REJECT_INTERNAL_ERROR);
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_FAILURE));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
+TEST_F(IdleStateTest, StartInvokesSendStartFailedIfStartSessionFailedForEmergencyCall)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+
+    CallReasonInfo objReasonInfo(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
