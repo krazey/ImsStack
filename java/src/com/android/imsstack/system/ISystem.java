@@ -191,4 +191,11 @@ public interface ISystem {
      * @param isSupported The information whether modem supports simultaneous calling.
      */
     void notifySimultaneousCallingSupportChanged(int event, boolean isSupported);
+
+    /**
+     * Notifies the native layer when the location update is completed.
+     *
+     * @param requestId A request identifier.
+     */
+    void notifyLocationUpdateCompleted(int requestId);
 }

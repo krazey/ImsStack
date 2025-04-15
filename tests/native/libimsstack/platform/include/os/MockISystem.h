@@ -198,7 +198,9 @@ public:
     MOCK_METHOD(IMS_SINT32, GetLastKnownLocation,
             (OUT AStringArray & objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId),
             (override));
-    MOCK_METHOD(IMS_BOOL, StartInstantLocationUpdate, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, RequestLocationUpdate,
+            (IN IMS_SINT32 nWaitTimeMs, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(void, CancelLocationUpdate, (IN IMS_SINT32 nId, IN IMS_SINT32 nSlotId), (override));
 
     ////
     // Ims radio interface

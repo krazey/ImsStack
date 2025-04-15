@@ -165,7 +165,8 @@ public:
     virtual void StopListeningForLocation(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetLastKnownLocation(
             OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_BOOL StartInstantLocationUpdate(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 RequestLocationUpdate(IN IMS_SINT32 nWaitTimeMs, IN IMS_SINT32 nSlotId) = 0;
+    virtual void CancelLocationUpdate(IN IMS_SINT32 nId, IN IMS_SINT32 nSlotId) = 0;
 
     ////
     // Ims radio interface

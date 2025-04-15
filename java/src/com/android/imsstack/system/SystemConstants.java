@@ -32,6 +32,7 @@ public interface SystemConstants {
     int CATEGORY_ISIM_EVENT = 0x00400000;
     int CATEGORY_USIM_EVENT = 0x00800000;
     int CATEGORY_RADIO = 0x01000000;
+    int CATEGORY_LOCATION = 0x02000000;
 
     /**
      * Methods for the system information's notification (Java to Native)
@@ -52,6 +53,7 @@ public interface SystemConstants {
     int NOTIFY_DATA_CONNECTION_IPCAN_CHANGED = CATEGORY_NETWORK + 14;
     int NOTIFY_VOICE_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 15;
     int NOTIFY_RADIO_EVENT = CATEGORY_RADIO + 16;
+    int NOTIFY_LOCATION_EVENT = CATEGORY_LOCATION + 17;
 
     /**
      * Methods for the system access (Native to Java)
@@ -171,7 +173,8 @@ public interface SystemConstants {
     int START_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1201;
     int STOP_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1202;
     int GET_LAST_KNOWN_LOCATION = CATEGORY_BASE + 1203;
-    int START_INSTANT_LOCATION_UPDATE = CATEGORY_BASE + 1204;
+    int REQUEST_LOCATION_UPDATE = CATEGORY_BASE + 1204;
+    int CANCEL_LOCATION_UPDATE = CATEGORY_BASE + 1205;
 
     /**
      * Ims radio interface

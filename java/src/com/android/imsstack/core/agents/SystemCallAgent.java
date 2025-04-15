@@ -898,14 +898,32 @@ public final class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
-     * Starts an instant location update (one-time update).
+     * Requests a location update (one-time update).
+     *
+     * @param waitTimeMs A wait time to fix the location in milli-seconds.
+     * @return The request identifier for event handling for location update completion and
+     *         cancellation.
+     *         0(zero) indicates that the location update request cannot be performed,
+     *         otherwise an integer value greater than 0 is returned.
      */
     @Override
-    public void startInstantLocationUpdate() {
+    public int requestLocationUpdate(int waitTimeMs) {
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        return (location != null) ? location.requestLocationUpdate(waitTimeMs) : 0;
+    }
+
+    /**
+     * Cancels a previously requested location update.
+     *
+     * @param requestId A request identifier returned from {@link #requestLocationUpdate(int)}.
+     */
+    @Override
+    public void cancelLocationUpdate(int requestId) {
         LocationInterface location = AgentFactory.getInstance().getAgent(
                 LocationInterface.class, mSlotId);
         if (location != null) {
-            location.startInstantLocationUpdate();
+            location.cancelLocationUpdate(requestId);
         }
     }
 

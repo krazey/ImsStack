@@ -16,12 +16,21 @@
 #ifndef OS_LOCATION_INFO_H_
 #define OS_LOCATION_INFO_H_
 
+#include "AsyncExecutor.h"
+#include "ImsList.h"
 #include "ImsSlot.h"
 #include "IPhoneInfoLocation.h"
+#include "ISystemListener.h"
 
 class LocationProperties;
+class LocationUpdateCompletedHandler;
+class LocationUpdateRequest;
 
-class OsLocationInfo : public ImsSlot, public ILocationInfo
+class OsLocationInfo :
+        public ImsSlot,
+        public ILocationInfo,
+        public ISystemListener,
+        public AsyncExecutor::IListener
 {
 public:
     explicit OsLocationInfo(IN IMS_SINT32 nSlotId);
@@ -31,24 +40,36 @@ public:
     OsLocationInfo& operator=(IN const OsLocationInfo&) = delete;
 
 public:
+    // ISystemListener class
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    // AsyncExecutor::IListener class
+    void AsyncExecutor_OnExecuteCompleted(IN AsyncExecutor* pExecutor) override;
+
     IMS_BOOL StartListeningForLocation(IN IMS_UINT32 nUpdateIntervalInSec) override;
     void StopListeningForLocation() override;
     ILocationProperties* GetLocationProperties(IN IMS_SINT32 nType = LOCATION_ALL) override;
-    IMS_BOOL StartInstantLocationUpdate() override;
+    void RequestLocationUpdate(
+            IN IMS_SINT32 nWaitTimeMs, IN ILocationUpdateListener* piListener) override;
+    void CancelLocationUpdate(ILocationUpdateListener* piListener) override;
     void SetDefaultLocationProperties(IN IMS_BOOL bFromUicc = IMS_TRUE) override;
     const AString& GetLastKnownCountry() const override;
 
 private:
-    void SetLastKnownCountry(IN const AString& strCountry);
     AString GetCountryIso(IN IMS_BOOL bFromUicc = IMS_FALSE) const;
+    void SetLastKnownCountry(IN const AString& strCountry);
+    void NotifyLocationUpdateCompleted(IN IMS_SINT32 nId);
 
 public:
     static const IMS_CHAR COUNTRY_ISO_UNKNOWN[];
+    static constexpr IMS_SINT32 EVENT_LOCATION_UPDATE_COMPLETED = 1;
 
 private:
     IMS_BOOL m_bIsStarted;
     AString m_strLastKnownCountry;
     LocationProperties* m_pLocationProperties;
+    ImsList<LocationUpdateRequest*> m_objLocationUpdateRequests;
+    LocationUpdateCompletedHandler* m_pLocationUpdateCompletedHandler;
 };
 
 #endif
