@@ -364,6 +364,19 @@ void AosApplication::ClearPending()
 }
 
 PROTECTED
+void AosApplication::ClearWifiRegBlock()
+{
+    if (!IsRegTypeNormal() ||
+            GET_N_CONFIG(m_nSlotId)->GetSubConsecutiveRetryCntForRegForbiddenInWifi() <= 0)
+    {
+        return;
+    }
+
+    m_pCondition->ResetBlock(BLOCK_WIFI_REG_FORBIDDEN);
+    m_piRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_RETRY_COUNT);
+}
+
+PROTECTED
 AosNetworkType AosApplication::GetNetworkTypeForImsRegState() const
 {
     if (m_pUtil->IsWifiTest())
@@ -1245,6 +1258,12 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegRecovery(IN IMSMSG& objMsg)
 
 PROTECTED VIRTUAL void AosApplication::ProcessIpcanChanged(IN IMSMSG& /* objMsg */)
 {
+    // In case handover is successful, wifi-connection will be newly connected later.
+    if (!m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        ClearWifiRegBlock();
+    }
+
     if (IsUpdateAvailable())
     {
         if (IsTimerRunning(TIMER_RECONFIG_GUARD))
@@ -1880,6 +1899,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateConnected(IN IMS_UI
             ProcessPdnBlockWithTime();
             break;
 
+        case IAosRegistration::REASON_FAILURE_FORBIDDEN_IN_WIFI:
+            ProcessRegForbiddenInWifi();
+            break;
+
         default:
             break;
     }
@@ -1940,6 +1963,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateUpdating(IN IMS_UIN
 
         case IAosRegistration::REASON_FAILURE_BANNDED:
             ProcessPdnBlock();
+            break;
+
+        case IAosRegistration::REASON_FAILURE_FORBIDDEN_IN_WIFI:
+            ProcessRegForbiddenInWifi();
             break;
 
         default:
@@ -2063,6 +2090,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegSucceeded(IN IMS_UINT32 /* nRea
     SetAppState(STATE_CONNECTED);
     UpdateRegisteredRat(m_piContext->GetNetTracker()->GetNetworkType());
     PerformRatBlockActions(IMS_FALSE);
+    if (!m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        ClearWifiRegBlock();
+    }
     Report_StateChanged();
 
     UpdateConnectedServices(IMS_FALSE);
@@ -2224,6 +2255,23 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegUsimAuthenticationFailed()
 
     CleanAll(AosReason::IMS_DISABLED);
     Report_StateChanged(IMS_FALSE);
+}
+
+PROTECTED VIRTUAL void AosApplication::ProcessRegForbiddenInWifi()
+{
+    if (!IsRegTypeNormal() ||
+            GET_N_CONFIG(m_nSlotId)->GetSubConsecutiveRetryCntForRegForbiddenInWifi() <= 0)
+    {
+        return;
+    }
+
+    A_IMS_TRACE_I(APPID, "ProcessRegForbiddenInWifi", 0, 0, 0);
+    m_pCondition->SetBlock(BLOCK_WIFI_REG_FORBIDDEN);
+
+    CleanAll(AosReason::REG_TERMINATED);
+    Report_StateChanged(IMS_FALSE);
+
+    ProcessStateStart(UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegTerminated()
@@ -3168,6 +3216,9 @@ PROTECTED VIRTUAL void AosApplication::Connector_Deactivated(IN IMS_UINT32 nReas
     // To allow IMS registration to resume upon IMS PDN reconnection, the USIM authentication
     // failure block is released when the IMS PDN disconnects. (SKT specific)
     m_pCondition->ResetBlock(BLOCK_USIM_AUTHENTICATION_FAILED);
+    // If the data is disconnected, it will be newly connected. So, wifi connection will be also
+    // newly connected
+    ClearWifiRegBlock();
 
     if (IsNotReady())
     {

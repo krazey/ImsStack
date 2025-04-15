@@ -56,6 +56,7 @@ public:
 
 protected:
     void ClearThrottlingCount();
+    void ClearSubConsecutiveRetryCnt();
 
     IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
@@ -185,11 +186,12 @@ public:
         CMD_REG_REQUIRED,
         CMD_REG_REQUIRED_WITH_NEXT_PCSCF,
         CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION,
-        CMD_REG_REQUIRED_WITH_SUB_403_MSG,
-        CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG,
+        CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI,
+        CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI,
         CMD_REG_TERMINATED,
         CMD_SUB_REQUIRED,
-        CMD_SUB_TERMINATED
+        CMD_SUB_TERMINATED,
+        CMD_RESET_SUB_RETRY_CNT_FOR_WIFI
     };
 
 protected:

@@ -113,6 +113,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_nConsecutiveFailure(0),
         m_nConsecutiveFailureForPdnReactivated(0),
         m_nForbiddenCount(0),
+        m_nSubConsecutiveFailureForRegForbiddenInWifi(0),
         m_piOfflineRecoverTimer(IMS_NULL),
         m_piStopRetryTimer(IMS_NULL),
         m_piRefreshTimer(IMS_NULL),
@@ -950,6 +951,28 @@ IMS_BOOL AosRegistration::IsErrorCodeExisted(
 }
 
 PROTECTED
+IMS_BOOL AosRegistration::IsRegForbiddenInWifi()
+{
+    IMS_SINT32 nSubRetryCntConfig = GET_N_CONFIG(m_piContext->GetSlotId())
+                                            ->GetSubConsecutiveRetryCntForRegForbiddenInWifi();
+    if (nSubRetryCntConfig <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    m_nSubConsecutiveFailureForRegForbiddenInWifi++;
+    if (m_nSubConsecutiveFailureForRegForbiddenInWifi < nSubRetryCntConfig)
+    {
+        A_IMS_TRACE_I(REGID, "IsRegForbiddenInWifi :: retry count(%d)",
+                m_nSubConsecutiveFailureForRegForbiddenInWifi, 0, 0);
+        return IMS_FALSE;
+    }
+
+    m_nSubConsecutiveFailureForRegForbiddenInWifi = 0;
+    return IMS_TRUE;
+}
+
+PROTECTED
 IMS_SINT32 AosRegistration::GetRegExpires()
 {
     return (m_piRegContact != IMS_NULL) ? m_piRegContact->GetExpires() : -1;
@@ -1258,6 +1281,10 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::OnMessage(IN IMSMSG& objMsg)
 
         case MSG_REG_TERMINATED_BY_NOTIFY:
             ProcessRegTerminatedByNotify();
+            break;
+
+        case MSG_REG_FORBIDDEN_IN_WIFI:
+            ProcessRegForbbidenInWifi();
             break;
 
         case MSG_SUB_REINITIATE:
@@ -2900,6 +2927,7 @@ PROTECTED VIRTUAL void AosRegistration::ClearRetryCount(IN IMS_BOOL bForced /* =
 
     A_IMS_TRACE_D(REGID, "ClearRetryCount :: (%d) -> (%d)", m_nConsecutiveFailure, 0, 0);
     m_nConsecutiveFailure = 0;
+    m_nSubConsecutiveFailureForRegForbiddenInWifi = 0;
 
     if (GET_N_CONFIG(m_piContext->GetSlotId())->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
     {
@@ -3437,6 +3465,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegTerminatedByNotify()
 {
     Destroy();
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN);
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessRegForbbidenInWifi()
+{
+    Destroy();
+    ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN_IN_WIFI);
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
@@ -5969,9 +6003,15 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
             PostMessage(MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION,
                     static_cast<IMS_UINT32>(nRetryAfter), 0);
             break;
-        case AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG:
+        case AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI:
         {
             m_eImsReasonCode = AosReasonCode::WFC_SUB_RESP_403;
+            if (IsRegForbiddenInWifi())
+            {
+                PostMessage(MSG_REG_FORBIDDEN_IN_WIFI, 0, 0);
+                break;
+            }
+
             IMS_SINT32 nTime = nRetryAfter;
             if (bAwt)
             {
@@ -5981,9 +6021,15 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
             PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nTime, 0);
             break;
         }
-        case AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG:
+        case AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI:
         {
             m_eImsReasonCode = AosReasonCode::WFC_SUB_NOTIFY_TERMINATED;
+            if (IsRegForbiddenInWifi())
+            {
+                PostMessage(MSG_REG_FORBIDDEN_IN_WIFI, 0, 0);
+                break;
+            }
+
             IMS_SINT32 nTime = nRetryAfter;
             if (bAwt)
             {
@@ -6001,6 +6047,9 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
             break;
         case AosSubscription::CMD_SUB_TERMINATED:
             PostMessage(MSG_SUB_TERMINATED, 0, 0);
+            break;
+        case AosSubscription::CMD_RESET_SUB_RETRY_CNT_FOR_WIFI:
+            m_nSubConsecutiveFailureForRegForbiddenInWifi = 0;
             break;
         default:
             break;

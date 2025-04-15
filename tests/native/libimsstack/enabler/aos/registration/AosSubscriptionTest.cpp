@@ -72,6 +72,7 @@ const IMS_SINT32 SLOT_ID = 0;
     using Base::IsRegAfterWaitRequiredByNotify;             \
     using Base::IsWfcErrorMessageSupportedWithStateChecked; \
     using Base::ProcessFailed_StatusCode;                   \
+    using Base::ProcessStartFailed_StatusCode;              \
     using Base::GetNextThrottlingTime;                      \
     using Base::ProcessNotifyState_Active;                  \
     using Base::ProcessRegEventChange;                      \
@@ -452,7 +453,8 @@ TEST_F(AosSubscriptionTest,
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(
-                    AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_FALSE));
+                    AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI, 0,
+                    IMS_FALSE));
 
     m_pAosSubscription->ReportNotifyEvent(AosSubscription::EVENT_REJECTED);
 }
@@ -752,7 +754,6 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenErrRegRequiredInWifiIsMatchedBySingleD
     ON_CALL(m_objMockIAosConfig,
             IsWfcErrorMessageSupported(CarrierConfig::ImsWfc::WFC_ERROR_SUB_403))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosConfig, GetRegRetryCountResetPolicy()).WillByDefault(Return(2));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_StateChanged(
@@ -786,7 +787,8 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupported)
                     AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_TRUE));
+            Subscription_Request(
+                    AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI, 0, IMS_TRUE));
 
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
@@ -1291,6 +1293,17 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenErrResubStoppedIsNotMatchedInRefresh)
     // Skipped all functions in ProcessFailed_StatusCode()
 
     EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(403, IMS_TRUE));
+}
+
+TEST_F(AosSubscriptionTest, ClearSubConsecutiveRetryCntWhenProcessFailedWithStatusCode)
+{
+    ON_CALL(m_objMockIAosConfig, GetSubConsecutiveRetryCntForRegForbiddenInWifi())
+            .WillByDefault(Return(3));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_RESET_SUB_RETRY_CNT_FOR_WIFI, 0, IMS_FALSE));
+
+    m_pAosSubscription->ProcessStartFailed_StatusCode(403);
 }
 
 /// Called ProcessStartFailed_Others() > SetRetryTimer(IMS_FALSE)

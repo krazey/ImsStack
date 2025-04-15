@@ -248,6 +248,10 @@ public:
     {
         return m_nConsecutiveFailureForPdnReactivated;
     }
+    inline void SetSubConsecutiveFailureForRegForbiddenInWifi(IN IMS_UINT32 nCount)
+    {
+        m_nSubConsecutiveFailureForRegForbiddenInWifi = nCount;
+    }
     ITimer* GetTimer(IN IMS_UINT32 nType)
     {
         switch (nType)
@@ -2156,6 +2160,20 @@ TEST_F(AosRegistrationTest, ReportFailureOnReceivingMessageThatRegTerminatedByNo
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN));
 
     ImsMessage objMsg(AosRegistration::MSG_REG_TERMINATED_BY_NOTIFY, 0, 0);
+    m_pAosRegistration->OnMessage(objMsg);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureOnReceivingMessageThatRegForbiddenInWifi)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_FORBIDDEN_IN_WIFI));
+
+    ImsMessage objMsg(AosRegistration::MSG_REG_FORBIDDEN_IN_WIFI, 0, 0);
     m_pAosRegistration->OnMessage(objMsg);
 
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
@@ -5448,7 +5466,33 @@ TEST_F(AosRegistrationTest, RegRequiredWithSub403MsgSubscriptionCommandSendsMess
             PostMessageI(IsSameMsg(AosRegistration::MSG_REG_REQUIRED_WITH_WAIT_TIME)));
 
     m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_TRUE);
+            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI, 0, IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest,
+        RegRequiredWithSub403MsgSubscriptionAndIfCntIsNotReachedSubRetryCntConfig)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSubConsecutiveRetryCntForRegForbiddenInWifi())
+            .WillByDefault(Return(3));
+
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(IsSameMsg(AosRegistration::MSG_REG_REQUIRED_WITH_WAIT_TIME)));
+
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI, 0, IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest,
+        RegForbiddenInWifiWithSub403MsgSubscriptionAndIfCntReachedSubRetryCntConfig)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSubConsecutiveRetryCntForRegForbiddenInWifi())
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(
+            m_objMockThread, PostMessageI(IsSameMsg(AosRegistration::MSG_REG_FORBIDDEN_IN_WIFI)));
+
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI, 0, IMS_TRUE);
 }
 
 TEST_F(AosRegistrationTest,
@@ -5458,7 +5502,21 @@ TEST_F(AosRegistrationTest,
             PostMessageI(IsSameMsg(AosRegistration::MSG_REG_REQUIRED_WITH_WAIT_TIME)));
 
     m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_TRUE);
+            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI, 0, IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest,
+        RegForbiddenInWifiWithNotifyTerminatedMsgSubscriptionAndIfCntReachedSubRetryCntConfig)
+{
+    m_pAosRegistration->SetSubConsecutiveFailureForRegForbiddenInWifi(2);
+    ON_CALL(m_objMockIAosNConfiguration, GetSubConsecutiveRetryCntForRegForbiddenInWifi())
+            .WillByDefault(Return(3));
+
+    EXPECT_CALL(
+            m_objMockThread, PostMessageI(IsSameMsg(AosRegistration::MSG_REG_FORBIDDEN_IN_WIFI)));
+
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI, 0, IMS_TRUE);
 }
 
 TEST_F(AosRegistrationTest, RegTerminatedSubscriptionCommandSendsMessageForHandling)

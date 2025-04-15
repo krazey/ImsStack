@@ -90,6 +90,8 @@ typedef enum
     BLOCK_WIFI_AIRPLANE_MODE_ON,
     /// wifi is not connected.
     BLOCK_WIFI_NO_WIFI,
+    /// The registration is blocked when registration failed repeatedly in wifi.
+    BLOCK_WIFI_REG_FORBIDDEN,
     /// wifi service is blocked temporarily
     BLOCK_WIFI_TEMPORARILY_BLOCKED,
     /// End wifi Block reason

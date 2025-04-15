@@ -140,6 +140,7 @@ protected:
     IMS_BOOL IsReregFailureReportOnIpcanChangeRequired() const;
     IMS_BOOL IsErrorCodeExisted(
             IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
+    IMS_BOOL IsRegForbiddenInWifi();
 
     IMS_SINT32 GetRegExpires();
 
@@ -274,6 +275,7 @@ protected:
     virtual IMS_BOOL ProcessUnpredictableFailureHeldByCall();
     virtual void ProcessRegTerminated();
     virtual void ProcessRegTerminatedByNotify();
+    virtual void ProcessRegForbbidenInWifi();
     virtual void ProcessAuthenticationFailed();
     virtual void ProcessRegRequiredWithWaitTime(IN IMS_SINT32 nWaitTime);
     virtual void ProcessRegRequiredWithNextPcscf();
@@ -441,6 +443,7 @@ public:
         MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION,
         MSG_REG_REINITIATE_WITH_REG_STATE,
         MSG_REG_TERMINATED_BY_NOTIFY,
+        MSG_REG_FORBIDDEN_IN_WIFI,
         MSG_REG_PROCESS_GIBA,
 
         MSG_SUB_REINITIATE,
@@ -559,6 +562,7 @@ protected:
     IMS_UINT32 m_nConsecutiveFailure;
     IMS_UINT32 m_nConsecutiveFailureForPdnReactivated;
     IMS_UINT32 m_nForbiddenCount;
+    IMS_UINT32 m_nSubConsecutiveFailureForRegForbiddenInWifi;
 
     /// timer
     /// this is used in the OFFLINE state without registration
