@@ -1425,6 +1425,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "use_wfc_country_code_availability_check_bool";
         public static final String KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL =
                 KEY_PREFIX + "video_over_wifi_supported_without_voice_bool";
+        public static final String KEY_SUB_CONSECUTIVE_RETRY_CNT_FOR_REG_FORBIDDEN_IN_WIFI_INT =
+                KEY_PREFIX + "sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int";
         public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
                 KEY_PREFIX + "vowifi_sub_err_code_for_init_reg_int_array";
         // Bundle {

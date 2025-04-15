@@ -512,6 +512,7 @@
     <boolean name="imswfc.support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="false"/>
     <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="false"/>
+    <int name ="imswfc.sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int" value="0"/>
     <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="0">
     </int-array>
     <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->

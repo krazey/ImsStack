@@ -143,6 +143,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetSubRetrySip503CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUsatRegEventDownloadPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetVolteHysTime, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetSubConsecutiveRetryCntForRegForbiddenInWifi, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip305CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetReregRetrySip305CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip503CodePolicy, (), (const, override));

@@ -1066,6 +1066,9 @@ const IMS_CHAR CarrierConfig::ImsWfc::KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHEC
         KEY_IMS_WFC_PREFIX "use_wfc_country_code_availability_check_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL[] =
         KEY_IMS_WFC_PREFIX "video_over_wifi_supported_without_voice_bool";
+const IMS_CHAR
+        CarrierConfig::ImsWfc::KEY_SUB_CONSECUTIVE_RETRY_CNT_FOR_REG_FORBIDDEN_IN_WIFI_INT[] =
+                KEY_IMS_WFC_PREFIX "sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] =
         KEY_IMS_WFC_PREFIX "vowifi_sub_err_code_for_init_reg_int_array";
 // Bundle {

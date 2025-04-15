@@ -1179,6 +1179,21 @@ public:
     virtual IMS_SINT32 GetVolteHysTime() const = 0;
 
     /**
+     * @brief  Indicate retry count to block wifi registration when receiving error response to the
+     *         reg event package consecutively
+     *
+     *         The retry count is increased if delivering the wfc error message below.
+     *         CarrierConfig::ImsWfc::KEY_WFC_ERR_SUB_403_STRING
+     *         CarrierConfig::ImsWfc::KEY_WFC_ERR_NOTIFY_TERMINATED_STRING
+     *         The retry count is reset if the error response is not received consecutively.
+     *
+     * @note   This asset is used if `CarrierConfig::ImsWfc::KEY_WFC_ERR_MESSAGE_BUNDLE` is set.
+     * @return IMS_SINT32 Return the number of retry
+     * @see {code imswfc.sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int}
+     */
+    virtual IMS_SINT32 GetSubConsecutiveRetryCntForRegForbiddenInWifi() const = 0;
+
+    /**
      * @brief Indicate the SIP 305 response policy for registration
      *
      *        Possible values are,

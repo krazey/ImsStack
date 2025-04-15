@@ -696,6 +696,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetVolteHysTime() const
     return m_objAsset.nVolteHysTimeSec;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSubConsecutiveRetryCntForRegForbiddenInWifi() const
+{
+    return m_objAsset.nSubConsecutiveRetryCntForRegForbiddenInWifi;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetrySip305CodePolicy() const
 {
     return m_objAsset.nRegRetry305Policy;
@@ -1605,6 +1610,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.nUsatRegEventDownloadPolicy =
             piCc->GetInt(CarrierConfig::Ims::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT);
     m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::ImsVoice::KEY_VOLTE_HYS_TIME_SEC_INT);
+    m_objAsset.nSubConsecutiveRetryCntForRegForbiddenInWifi = piCc->GetInt(
+            CarrierConfig::ImsWfc::KEY_SUB_CONSECUTIVE_RETRY_CNT_FOR_REG_FORBIDDEN_IN_WIFI_INT);
 
     m_objAsset.objRegErrCodeForPcscfDiscovery =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY);

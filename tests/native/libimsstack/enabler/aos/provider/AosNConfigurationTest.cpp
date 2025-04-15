@@ -810,6 +810,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::ImsVoice::KEY_VOLTE_HYS_TIME_SEC_INT, -1))
             .WillOnce(Return(60));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::ImsWfc::
+                            KEY_SUB_CONSECUTIVE_RETRY_CNT_FOR_REG_FORBIDDEN_IN_WIFI_INT,
+                    -1))
+            .WillOnce(Return(0));
 
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Clear();
@@ -1021,6 +1026,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD,
             m_pAosNConfiguration->GetUsatRegEventDownloadPolicy());
     EXPECT_EQ(60, m_pAosNConfiguration->GetVolteHysTime());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetSubConsecutiveRetryCntForRegForbiddenInWifi());
 
     ImsVector<IMS_SINT32> objFeatures = m_pAosNConfiguration->GetUnavailableFeaturesInLimitedReg();
     EXPECT_TRUE(objFeatures.Contains(CarrierConfig::Ims::REG_FEATURE_MMTEL));

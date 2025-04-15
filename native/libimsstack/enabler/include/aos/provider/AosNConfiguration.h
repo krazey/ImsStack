@@ -154,6 +154,7 @@ public:
     IMS_SINT32 GetSubRetrySip503CodePolicy() const override;
     IMS_SINT32 GetUsatRegEventDownloadPolicy() const override;
     IMS_SINT32 GetVolteHysTime() const override;
+    IMS_SINT32 GetSubConsecutiveRetryCntForRegForbiddenInWifi() const override;
     IMS_SINT32 GetRegRetrySip305CodePolicy() const override;
     IMS_SINT32 GetReregRetrySip305CodePolicy() const override;
     IMS_SINT32 GetRegRetrySip503CodePolicy() const override;
