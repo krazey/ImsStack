@@ -544,7 +544,46 @@ CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
         return GetStateName();
     }
 
-    return Terminate(CallReasonInfo(GetCallReasonByAosReason(eAosReason)));
+    return Terminate(CallReasonInfo(GetCallReasonByAosDisconnection(eAosReason)));
+}
+
+PROTECTED
+IMS_SINT32 MtcCallState::GetCallReasonByAosDisconnection(IN IMS_UINT32 nAosReason) const
+{
+    switch (nAosReason)
+    {
+        case ImsAosReason::POWER_OFF:
+            return CODE_LOCAL_POWER_OFF;
+        case ImsAosReason::AIRPLANE_MODE:
+            if (m_objContext.GetService().IsCrossSimConnected())
+            {
+                return CODE_OEM_CAUSE_3;
+            }
+            return m_objContext.GetService().GetLastConnectedRatType() ==
+                            INetworkWatcher::RADIOTECH_TYPE_IWLAN
+                    ? CODE_WIFI_LOST
+                    : CODE_RADIO_OFF;
+        case ImsAosReason::WIFI_OFF:
+            return CODE_WIFI_LOST;
+        case ImsAosReason::SERVICE_POLICY:
+        case ImsAosReason::REG_TERMINATING:
+            return CODE_LOCAL_SERVICE_UNAVAILABLE;
+        case ImsAosReason::DATA_DISCONNECTED:
+        case ImsAosReason::DATA_PERMANENTLY_FAILED:
+        case ImsAosReason::NETWORK_ATTACH_REJECTED:
+            return CODE_LOCAL_NETWORK_NO_SERVICE;
+        case ImsAosReason::REG_TERMINATED:
+        case ImsAosReason::REG_NEW_REQUIRED:
+            return CODE_LOCAL_NOT_REGISTERED;
+        case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
+            return CODE_LOCAL_NETWORK_NO_SERVICE;
+        case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
+            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
+        case ImsAosReason::IP_CHANGED:
+            return CODE_LOCAL_NETWORK_IP_CHANGED;
+        default:  // NOT_SPECIFIED
+            return CODE_LOCAL_NOT_REGISTERED;
+    }
 }
 
 PROTECTED
@@ -1017,45 +1056,6 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) con
     }
 
     m_objContext.GetEpsFallbackTrigger().StartWatchdog();
-}
-
-PROTECTED
-IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const
-{
-    switch (nAosReason)
-    {
-        case ImsAosReason::POWER_OFF:
-            return CODE_LOCAL_POWER_OFF;
-        case ImsAosReason::AIRPLANE_MODE:
-            if (m_objContext.GetService().IsCrossSimConnected())
-            {
-                return CODE_OEM_CAUSE_3;
-            }
-            return m_objContext.GetService().GetLastConnectedRatType() ==
-                            INetworkWatcher::RADIOTECH_TYPE_IWLAN
-                    ? CODE_WIFI_LOST
-                    : CODE_RADIO_OFF;
-        case ImsAosReason::WIFI_OFF:
-            return CODE_WIFI_LOST;
-        case ImsAosReason::SERVICE_POLICY:
-        case ImsAosReason::REG_TERMINATING:
-            return CODE_LOCAL_SERVICE_UNAVAILABLE;
-        case ImsAosReason::DATA_DISCONNECTED:
-        case ImsAosReason::DATA_PERMANENTLY_FAILED:
-        case ImsAosReason::NETWORK_ATTACH_REJECTED:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
-        case ImsAosReason::REG_TERMINATED:
-        case ImsAosReason::REG_NEW_REQUIRED:
-            return CODE_LOCAL_NOT_REGISTERED;
-        case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
-        case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
-            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
-        case ImsAosReason::IP_CHANGED:
-            return CODE_LOCAL_NETWORK_IP_CHANGED;
-        default:  // NOT_SPECIFIED
-            return CODE_LOCAL_NOT_REGISTERED;
-    }
 }
 
 PROTECTED

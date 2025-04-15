@@ -318,6 +318,17 @@ PROTECTED VIRTUAL CallStateName IdleState::HandleAosConnected()
     return GetStateName();
 }
 
+PROTECTED VIRTUAL IMS_SINT32 IdleState::GetCallReasonByAosDisconnection(
+        IN IMS_UINT32 nAosReason) const
+{
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        return CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+    }
+
+    return MtcCallState::GetCallReasonByAosDisconnection(nAosReason);
+}
+
 PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSession)
 {
     IMS_TRACE_D("HandleIncomingUssi", 0, 0, 0);
@@ -639,7 +650,7 @@ AString IdleState::RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AStrin
 }
 
 PRIVATE
-CallReasonInfo IdleState::GetInternalErrorReason() const
+const CallReasonInfo IdleState::GetInternalErrorReason() const
 {
     if (m_objContext.GetCallInfo().IsEmergency())
     {
