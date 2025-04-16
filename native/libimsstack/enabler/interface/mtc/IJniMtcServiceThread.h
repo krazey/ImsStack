@@ -48,7 +48,8 @@ public:
      * @param eServiceType
      */
     virtual void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
-            IN IMS_SINT32 eReason, IN ServiceType eServiceType) = 0;
+            IN IuMtcService::EmergencyServiceUnavailableReason eReason,
+            IN ServiceType eServiceType) = 0;
 
     /**
      * @brief Notifies

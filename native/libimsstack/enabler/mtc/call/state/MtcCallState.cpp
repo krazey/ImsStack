@@ -1041,6 +1041,8 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) cons
         case ImsAosReason::REG_TERMINATING:
             return CODE_LOCAL_SERVICE_UNAVAILABLE;
         case ImsAosReason::DATA_DISCONNECTED:
+        case ImsAosReason::DATA_PERMANENTLY_FAILED:
+        case ImsAosReason::NETWORK_ATTACH_REJECTED:
             return CODE_LOCAL_NETWORK_NO_SERVICE;
         case ImsAosReason::REG_TERMINATED:
         case ImsAosReason::REG_NEW_REQUIRED:

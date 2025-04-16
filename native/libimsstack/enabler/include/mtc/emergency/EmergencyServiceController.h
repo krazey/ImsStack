@@ -29,6 +29,7 @@
 class IMtcContext;
 
 using EmergencyServiceState = IuMtcService::EmergencyServiceState;
+using EmergencyServiceUnavailableReason = IuMtcService::EmergencyServiceUnavailableReason;
 
 class EmergencyServiceController final :
         public IEmergencyServiceController,
@@ -80,7 +81,9 @@ private:
     void AddListeners();
     void RemoveListeners();
 
-    void Notify(IN EmergencyServiceState eState, IN IMS_SINT32 eReason = REASON_UNSPECIFIED) const;
+    void Notify(IN EmergencyServiceState eState,
+            IN EmergencyServiceUnavailableReason eReason =
+                    EmergencyServiceUnavailableReason::UNKNOWN) const;
     void ControlAos(IN IMS_UINT32 nType) const;
     void Finish();
     void FinishAndRetryOverImsPdn();
@@ -90,6 +93,8 @@ private:
 
     IMS_BOOL IsCurrentEmergencyCall(IN CallKey nCallKey) const;
     IMS_BOOL IsRetryOverImsPdnRequired(IN IMS_SINT32 eAosReason) const;
+
+    EmergencyServiceUnavailableReason ConvertToUnavailableReason(IN IMS_UINT32 eAosReason);
 };
 
 #endif

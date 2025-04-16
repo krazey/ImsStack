@@ -116,7 +116,8 @@ TEST_F(JniMtcServiceThreadTest, OnEmergencyServiceChanged)
                     IsSameMessageTypeAndState(eType, static_cast<IMS_SINT32>(eState))))
             .Times(1);
 
-    pJniServiceThread->OnEmergencyServiceChanged(eState, -1, eServiceType);
+    pJniServiceThread->OnEmergencyServiceChanged(
+            eState, IuMtcService::EmergencyServiceUnavailableReason::UNKNOWN, eServiceType);
 }
 
 TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)

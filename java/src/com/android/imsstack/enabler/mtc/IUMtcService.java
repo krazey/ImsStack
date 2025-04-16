@@ -68,9 +68,13 @@ public class IUMtcService {
     public static final int ES_IDLE_REASON_NONE     = 0;
     public static final int ES_IDLE_REASON_WITH_ECM = 1;
 
+    // Emergency Service Unavailable Reason
+    /**
+     * This refers to the case where it was not used for the reason of
+     * EmergencyServiceUnavailableReason
+     */
     public static final int ES_UNAVAILABLE_REASON_UNKNOWN = -1;
     public static final int ES_UNAVAILABLE_REASON_NONE    = 0;
-    public static final int ES_UNAVAILABLE_REASON_NO_CSFB = 1;
-    public static final int ES_UNAVAILABLE_REASON_SSAC    = 2;
-
+    public static final int ES_UNAVAILABLE_REASON_DATA_PERMANENTLY_FAILED = 1;
+    public static final int ES_UNAVAILABLE_REASON_NETWORK_ATTACH_REJECTED = 2;
 }

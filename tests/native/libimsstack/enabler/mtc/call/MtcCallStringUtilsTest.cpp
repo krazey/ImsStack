@@ -338,6 +338,9 @@ TEST_F(MtcCallStringUtilsTest, ConvertAosReason)
     eAosReason = ImsAosReason::DATA_DISCONNECTED;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "data disconnected");
 
+    eAosReason = ImsAosReason::DATA_PERMANENTLY_FAILED;
+    EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "data permanently failed");
+
     eAosReason = ImsAosReason::REG_TERMINATED;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "registration terminated");
 
@@ -349,6 +352,9 @@ TEST_F(MtcCallStringUtilsTest, ConvertAosReason)
 
     eAosReason = ImsAosReason::IP_CHANGED;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "ip changed");
+
+    eAosReason = ImsAosReason::NETWORK_ATTACH_REJECTED;
+    EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "network attach rejected");
 
     eAosReason = ImsAosReason::NOT_SPECIFIED;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "not specified");

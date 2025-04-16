@@ -54,13 +54,13 @@ void JniMtcServiceThread::OnServiceChanged(
 
 PUBLIC
 void JniMtcServiceThread::OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
-        IN IMS_SINT32 eReason, IN ServiceType eServiceType)
+        IN IuMtcService::EmergencyServiceUnavailableReason eReason, IN ServiceType eServiceType)
 {
     IMS_TRACE_D("OnEmergencyServiceChanged [%d]", eState, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IuMtcService::E_SERVICE_CHANGED);
     objParcel.writeInt32(static_cast<IMS_SINT32>(eState));
-    objParcel.writeInt32(eReason);
+    objParcel.writeInt32(static_cast<IMS_SINT32>(eReason));
     objParcel.writeInt32(static_cast<IMS_SINT32>(eServiceType));
 
     SendData2Java(objParcel);

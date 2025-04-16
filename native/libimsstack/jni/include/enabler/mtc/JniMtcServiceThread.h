@@ -32,7 +32,8 @@ public:
 
     void OnServiceChanged(IN IuMtcService::ServiceState eState, IN IMS_SINT32 eReason) override;
     void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
-            IN IMS_SINT32 eReason, IN ServiceType eServiceType) override;
+            IN IuMtcService::EmergencyServiceUnavailableReason eReason,
+            IN ServiceType eServiceType) override;
     void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
     void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
             IN const MediaInfo& objMediaInfo,

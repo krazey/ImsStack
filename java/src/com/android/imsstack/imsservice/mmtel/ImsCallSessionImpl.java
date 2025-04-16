@@ -2799,7 +2799,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 int extraCode = 0;
 
                 if (ss.mExtraState == IUMtcService.ES_UNAVAILABLE) {
-                    code = CallReasonInfo.CODE_LOCAL_NOT_REGISTERED;
+                    switch (ss.mReason) {
+                        case IUMtcService.ES_UNAVAILABLE_REASON_DATA_PERMANENTLY_FAILED:
+                            code = CallReasonInfo.CODE_EMERGENCY_TEMP_FAILURE;
+                            break;
+                        case IUMtcService.ES_UNAVAILABLE_REASON_NETWORK_ATTACH_REJECTED:
+                            code = CallReasonInfo.CODE_EMERGENCY_PERM_FAILURE;
+                            break;
+                        default:
+                            code = CallReasonInfo.CODE_LOCAL_NOT_REGISTERED;
+                            break;
+                    }
                 }
 
                 mListenerProxy.onCallStartFailed(mCall, new CallReasonInfo(code, extraCode, ""));

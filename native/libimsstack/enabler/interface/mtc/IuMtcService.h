@@ -72,6 +72,18 @@ public:
         UNAVAILABLE = 3,
     };
 
+    enum class EmergencyServiceUnavailableReason
+    {
+        /**
+         * This refers to the case where it was not used for the reason of
+         * EmergencyServiceUnavailableReason
+         */
+        UNKNOWN = -1,
+        NONE = 0,
+        DATA_PERMANENTLY_FAILED = 1,
+        NETWORK_ATTACH_REJECTED = 2,
+    };
+
     enum
     {
         SERVICESTATUS_REASON_UNKNOWN = 0,
@@ -87,14 +99,6 @@ public:
         ES_IDLE_REASON_UNKNOWN = -1,
         ES_IDLE_REASON_NONE = 0,
         ES_IDLE_REASON_WITH_ECM = 1,
-    };
-
-    enum
-    {
-        ES_UNAVAILABLE_REASON_UNKNOWN = -1,
-        ES_UNAVAILABLE_REASON_NONE = 0,
-        ES_UNAVAILABLE_REASON_NO_CSFB = 1,
-        ES_UNAVAILABLE_REASON_SSAC = 2
     };
 };
 
