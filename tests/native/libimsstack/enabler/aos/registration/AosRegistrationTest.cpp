@@ -6132,6 +6132,23 @@ TEST_F(AosRegistrationTest, TransactionOnConnectionFailedWithAccessDeniedDestroy
 }
 
 TEST_F(AosRegistrationTest,
+        TransactionOnConnectionFailedWithAccessDeniedNotDestroyRegistrationIfInRefreshStopState)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHSTOP);
+
+    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(0);
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START))
+            .Times(0);
+
+    m_pAosRegistration->Transaction_OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 0, 0);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
+TEST_F(AosRegistrationTest,
         TransactionOnConnectionFailedWithRrcRejectDestroysRegistrationWithoutPcscfClear)
 {
     EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(0);

@@ -650,6 +650,7 @@ protected:
     static const IMS_UINT32 DEFAULT_SIP_THRESHOLD_SIZE = 200;
     static const IMS_UINT32 MTU_MAX_SIZE_VIA_MOBILE = 1500;
     static const IMS_UINT32 MTU_MAX_SIZE_VIA_WIFI = 1280;
+    static const IMS_UINT32 MIN_RETRY_NUMBER_DURING_ACCESS_BARRING = 10;
 
 private:
     /// IPCAN category being registered
