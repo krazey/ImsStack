@@ -518,7 +518,7 @@ ImsList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
-    lstRules.Append(new CallTypeBlockRule(m_objContext));
+    lstRules.Append(new CallTypeBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     lstRules.Append(new CallWaitingBlockRule(m_objContext));
     lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));

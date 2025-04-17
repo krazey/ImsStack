@@ -197,7 +197,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
 PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
-
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::UPDATE, *piMessage);
     m_objContext.GetUpdatingInfo().GetOriginalInfo() =
@@ -685,7 +684,8 @@ ImsList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
     // No pending rules
     ImsList<IMtcBlockRule*> lstRules;
 
-    lstRules.Append(new CallTypeBlockRule(m_objContext));
+    lstRules.Append(new CallTypeBlockRule(
+            m_objContext, m_objContext.GetUpdatingInfo().GetTargetCallType()));
     lstRules.Append(new SrvccBlockRule(m_objContext.GetService().GetSrvccState()));
     return lstRules;
 }

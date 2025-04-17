@@ -28,7 +28,7 @@ class MtcConfigurationProxy;
 class CallTypeBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit CallTypeBlockRule(IN IMtcCallContext& objContext);
+    explicit CallTypeBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
     virtual ~CallTypeBlockRule();
     CallTypeBlockRule(IN const CallTypeBlockRule&) = delete;
     CallTypeBlockRule& operator=(IN const CallTypeBlockRule&) = delete;
@@ -38,12 +38,14 @@ public:
 private:
     IMS_BOOL IsBlockedByTextVideoCall();
     IMS_BOOL IsBlockedByVideoMultipleCall();
+    static CallType GetRemoteCallTypeIncludingInactiveMedia(IN IMtcCallContext& objContext);
     static IMS_BOOL HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL HasRttCall(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL IsVideoCall(IN CallType eCallType);
 
     IMtcCallContext& m_objContext;
     MtcConfigurationProxy& m_objConfiguration;
+    CallType m_eCallType;
 };
 
 #endif
