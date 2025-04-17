@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 #include "text/TextController.h"
 #include "text/TextProfile.h"
+#include "text/TextSession.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -42,6 +43,7 @@ IMS_BOOL TextController::CreateSession(IMediaSessionListener* pListener, TextCon
 {
     if (pListener == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateSession() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -51,10 +53,9 @@ IMS_BOOL TextController::CreateSession(IMediaSessionListener* pListener, TextCon
         m_pSession = new TextSession();
         m_pSession->SetMediaSessionListener(pListener);
         m_pSession->SetConfiguration(pConfig);
-        return IMS_TRUE;
     }
 
-    return IMS_FALSE;
+    return IMS_TRUE;
 }
 
 PUBLIC
@@ -85,8 +86,6 @@ IMS_BOOL TextController::OpenSession()
 PUBLIC
 IMS_BOOL TextController::UpdateSession()
 {
-    IMS_TRACE_D("UpdateSession()", 0, 0, 0);
-
     if (m_pSession != IMS_NULL && m_pSession->GetState() != TextSession::STATE_NONE)
     {
         if (m_pSession->GetRemotePort() == 0 || m_pSession->GetLocalPort() == 0)
@@ -100,16 +99,17 @@ IMS_BOOL TextController::UpdateSession()
         }
     }
 
+    IMS_TRACE_E(0, "UpdateSession() - invalid", 0, 0, 0);
     return IMS_FALSE;
 }
 
 PUBLIC
 IMS_BOOL TextController::CloseSession()
 {
-    IMS_TRACE_D("CloseSession()", 0, 0, 0);
-
     if (m_pSession != IMS_NULL)
     {
+        IMS_TRACE_D("CloseSession() - state[%d]", m_pSession->GetState(), 0, 0);
+
         if (m_pSession->GetState() != TextSession::STATE_NONE)
         {
             m_pSession->Close();
@@ -126,10 +126,9 @@ IMS_BOOL TextController::CloseSession()
 PROTECTED
 IMS_BOOL TextController::UpdateLocalAddress(IN std::shared_ptr<TextNego> pNego)
 {
-    IMS_TRACE_I("UpdateLocalAddress()", 0, 0, 0);
-
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateLocalAddress() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -141,10 +140,9 @@ IMS_BOOL TextController::UpdateLocalAddress(IN std::shared_ptr<TextNego> pNego)
 PUBLIC
 IMS_BOOL TextController::UpdateRtpConfig(IN std::shared_ptr<TextNego> pNego)
 {
-    IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
-
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateRtpConfig() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -173,10 +171,9 @@ void TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 PUBLIC
 IMS_BOOL TextController::UpdateQualityThreshold(IN std::shared_ptr<TextNego> pNego)
 {
-    IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
-
     if (m_pSession == IMS_NULL || pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateQualityThreshold() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -190,4 +187,15 @@ IMS_BOOL TextController::UpdateQualityThreshold(IN std::shared_ptr<TextNego> pNe
     }
 
     return m_pSession->UpdateMediaQualityThreshold(IMS_TRUE, bEnableRtcp);
+}
+
+PUBLIC
+IMS_BOOL TextController::IsSessionOpened()
+{
+    if (m_pSession != NULL && m_pSession->GetState() != TextSession::STATE_NONE)
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }

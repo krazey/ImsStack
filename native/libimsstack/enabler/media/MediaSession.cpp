@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MediaDef.h"
 #include "ServiceTrace.h"
 
 #include "MediaManager.h"
@@ -49,9 +50,7 @@ PUBLIC VIRTUAL MediaSession::~MediaSession()
     std::lock_guard<std::mutex> guard(m_objMutex);
 
     ClearMediaNego();
-    m_objAudioController.CloseSession();
-    m_objVideoController.CloseSession();
-    m_objTextController.CloseSession();
+    CloseMediaSessions(MEDIA_TYPE_AUDIOVIDEOTEXT);
     ClearQosParam();
 }
 
@@ -81,6 +80,7 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 
     if (pMediaNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateProfile() - invalid media nego id", 0, 0, 0);
         return UNDEFINED_NEGO_ID;
     }
 
@@ -159,29 +159,10 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession
         return IMS_FALSE;
     }
 
-    // audio
-    if (pMediaNego->GetAudioNego() != IMS_NULL)
+    if (nVideoDirection != MEDIA_DIRECTION_INVALID)
     {
-        m_objAudioController.UpdateLocalAddress(pMediaNego->GetAudioNego());
-        m_objAudioController.OpenSession(nNegoId);
-    }
-
-    // video
-    if (pMediaNego->GetVideoNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(nVideoDirection))
-    {
-        m_objVideoController.CreateSession(
-                this, MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
-        m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
-        m_objVideoController.OpenSession();
-    }
-
-    // text
-    if (pMediaNego->GetTextNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(nTextDirection))
-    {
-        m_objTextController.CreateSession(
-                this, MediaConfigUtil::GetTextConfig(m_nSlotId, m_pEnvironment->eServiceType));
-        m_objTextController.UpdateLocalAddress(pMediaNego->GetTextNego());
-        m_objTextController.OpenSession();
+        // open the video session for preview
+        OpenMediaSessions(nNegoId, pMediaNego, MEDIA_TYPE_VIDEO);
     }
 
     return IMS_TRUE;
@@ -220,61 +201,29 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISes
         return IMS_FALSE;
     }
 
-    if (pMediaNego->NegotiateSdp(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
-                errorReason) == IMS_TRUE)
+    if (!pMediaNego->NegotiateSdp(
+                pSession, *nAudioDirection, *nVideoDirection, *nTextDirection, errorReason))
     {
-        IMS_TRACE_I("NegotiateSdp() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
+        IMS_TRACE_E(0, "NegotiateSdp() - failed, Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
                 *nVideoDirection, *nTextDirection);
-        /* TODO : After determining whether AddConfig is to be used,
-                  must decide whether to clear the logic or re-enable it.
-        // set Access Network
-        MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-        IMS_SINT32 nAccessNetwork = 0;
-
-        if (pMediaManager != IMS_NULL)
-        {
-            nAccessNetwork = pMediaManager->GetResourceManager()->GetNetworkType();
-        }
-
-        // audio
-        if (pMediaNego->GetAudioNego() != IMS_NULL)
-        {
-            // TODO : If we decide to use AddConfig, this one has to be changed to `AddConfig`
-            m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
-        }
-        */
-
-        // video
-        if (pMediaNego->GetVideoNego() != IMS_NULL)
-        {
-            if (IS_VALID_MEDIA_DIRECTION(*nVideoDirection))
-            {
-                m_objVideoController.CreateSession(this,
-                        MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
-                m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
-                m_objVideoController.OpenSession();
-            }
-            else
-            {
-                IMS_TRACE_I("NegotiateSdp() - close videoSession", 0, 0, 0);
-                m_objVideoController.CloseSession();
-            }
-        }
-
-        // text
-        if (pMediaNego->GetTextNego() != IMS_NULL && IS_VALID_MEDIA_DIRECTION(*nTextDirection))
-        {
-            m_objTextController.CreateSession(
-                    this, MediaConfigUtil::GetTextConfig(m_nSlotId, m_pEnvironment->eServiceType));
-            m_objTextController.UpdateLocalAddress(pMediaNego->GetTextNego());
-            m_objTextController.OpenSession();
-        }
-
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
-    return IMS_FALSE;
+    if (!IS_VALID_MEDIA_DIRECTION(*nVideoDirection))
+    {
+        OpenMediaSessions(nNegoId, pMediaNego,
+                static_cast<MEDIA_CONTENT_TYPE>(static_cast<int>(GetNegotiatedMediaType(nNegoId)) &
+                        ~static_cast<int>(MEDIA_TYPE_VIDEO)));
+        CloseMediaSessions(MEDIA_TYPE_VIDEO);
+    }
+    else
+    {
+        OpenMediaSessions(nNegoId, pMediaNego, GetNegotiatedMediaType(nNegoId));
+    }
+
+    IMS_TRACE_I("NegotiateSdp() - Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
+            *nVideoDirection, *nTextDirection);
+    return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
@@ -412,34 +361,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
-    // set Access Network
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
-
-    IMS_SINT32 nAccessNetwork = 0;
-
-    if (pMediaManager != IMS_NULL)
-    {
-        nAccessNetwork = pMediaManager->GetResourceManager()->GetNetworkType();
-    }
-
-    m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
-
-    if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
-    {
-        m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
-        m_objVideoController.UpdateAccessNetwork(nAccessNetwork);
-        m_objVideoController.UpdateQualityThreshold(pMediaNego->GetVideoNego());
-        m_objVideoController.UpdateSession();
-    }
-
-    if (m_bSessionConfirmed)
-    {
-        m_objTextController.UpdateRtpConfig(pMediaNego->GetTextNego());
-        m_objTextController.UpdateAccessNetwork(nAccessNetwork);
-        m_objTextController.UpdateQualityThreshold(pMediaNego->GetTextNego());
-        m_objTextController.UpdateSession();
-    }
-
+    UpdateMediaSessions(nNegoId, pMediaNego, GetNegotiatedMediaType(nNegoId));
     return IMS_TRUE;
 }
 
@@ -457,7 +379,7 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
 
     m_objAudioController.UpdateAccessNetwork(nAccessNetwork);
 
-    if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
+    if (m_objVideoController.IsSessionOpened())
     {
         m_objVideoController.UpdateAccessNetwork(nAccessNetwork);
         m_objVideoController.UpdateSession();
@@ -472,7 +394,7 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
 PROTECTED
 IMS_BOOL MediaSession::OnMediaMtuChanged()
 {
-    if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
+    if (m_objVideoController.IsSessionOpened())
     {
         m_objVideoController.SetMtu(GetMtu());
         m_objVideoController.UpdateSession();
@@ -511,9 +433,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Terminate()
         return IMS_FALSE;
     }
 
-    m_objAudioController.CloseSession();
-    m_objVideoController.CloseSession();
-    m_objTextController.CloseSession();
+    CloseMediaSessions(MEDIA_TYPE_AUDIOVIDEOTEXT);
     ClearMediaNego();
 
     return IMS_TRUE;
@@ -1397,4 +1317,127 @@ IMS_BOOL MediaSession::IsInactivityTimerExpired(
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+void MediaSession::OpenMediaSessions(
+        IN IMS_UINTP nNegoId, IN MediaNego* pMediaNego, MEDIA_CONTENT_TYPE eType)
+{
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "OpenMediaSessions() - invalid MediaNego", 0, 0, 0);
+        return;
+    }
+
+    // audio
+    if (eType & MEDIA_TYPE_AUDIO && !m_objAudioController.IsSessionOpened())
+    {
+        m_objAudioController.UpdateLocalAddress(pMediaNego->GetAudioNego());
+
+        if (!m_objAudioController.OpenSession(nNegoId))
+        {
+            IMS_TRACE_I("OpenMediaSessions() - Audio OpenSession Failed", 0, 0, 0);
+        }
+    }
+
+    // video
+    if (eType & MEDIA_TYPE_VIDEO && !m_objVideoController.IsSessionOpened())
+    {
+        m_objVideoController.CreateSession(
+                this, MediaConfigUtil::GetVideoConfig(m_nSlotId, m_pEnvironment->eServiceType));
+        m_objVideoController.UpdateLocalAddress(pMediaNego->GetVideoNego());
+
+        if (!m_objVideoController.OpenSession())
+        {
+            IMS_TRACE_E(0, "OpenMediaSessions() - Video OpenSession Failed", 0, 0, 0);
+        }
+    }
+
+    // text
+    if (eType & MEDIA_TYPE_TEXT && !m_objTextController.IsSessionOpened())
+    {
+        m_objTextController.CreateSession(
+                this, MediaConfigUtil::GetTextConfig(m_nSlotId, m_pEnvironment->eServiceType));
+        m_objTextController.UpdateLocalAddress(pMediaNego->GetTextNego());
+
+        if (!m_objTextController.OpenSession())
+        {
+            IMS_TRACE_E(0, "OpenMediaSessions() - Text OpenSession Failed", 0, 0, 0);
+        }
+    }
+}
+
+PRIVATE
+void MediaSession::UpdateMediaSessions(
+        IN IMS_UINTP nNegoId, IN MediaNego* pMediaNego, MEDIA_CONTENT_TYPE eType)
+{
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "UpdateMediaSessions() - invalid MediaNego", 0, 0, 0);
+        return;
+    }
+
+    // set Access Network
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+
+    IMS_SINT32 nAccessNetwork = 0;
+
+    if (pMediaManager != IMS_NULL)
+    {
+        nAccessNetwork = pMediaManager->GetResourceManager()->GetNetworkType();
+    }
+
+    // Update Audio Session
+    if (eType & MEDIA_TYPE_AUDIO &&
+            !m_objAudioController.UpdateSession(
+                    nNegoId, nAccessNetwork, pMediaNego->GetAudioNego()))
+    {
+        IMS_TRACE_E(0, "UpdateMediaSessions() - fail to update audio", 0, 0, 0);
+    }
+
+    // Update Video Session
+    if (eType & MEDIA_TYPE_VIDEO && m_objVideoController.IsSessionOpened())
+    {
+        m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
+        m_objVideoController.UpdateAccessNetwork(nAccessNetwork);
+        m_objVideoController.UpdateQualityThreshold(pMediaNego->GetVideoNego());
+        m_objVideoController.UpdateSession();
+    }
+
+    // Update Text Session
+    if (eType & MEDIA_TYPE_TEXT && m_bSessionConfirmed)
+    {
+        m_objTextController.UpdateRtpConfig(pMediaNego->GetTextNego());
+        m_objTextController.UpdateAccessNetwork(nAccessNetwork);
+        m_objTextController.UpdateQualityThreshold(pMediaNego->GetTextNego());
+        m_objTextController.UpdateSession();
+    }
+}
+
+PRIVATE
+void MediaSession::CloseMediaSessions(MEDIA_CONTENT_TYPE eType)
+{
+    if (eType & MEDIA_TYPE_AUDIO && m_objAudioController.IsSessionOpened())
+    {
+        if (!m_objAudioController.CloseSession())
+        {
+            IMS_TRACE_E(0, "CloseMediaSessions() - failed to close audio", 0, 0, 0);
+        }
+    }
+
+    if (eType & MEDIA_TYPE_VIDEO && m_objVideoController.IsSessionOpened())
+    {
+        if (!m_objVideoController.CloseSession())
+        {
+            IMS_TRACE_E(0, "CloseMediaSessions() - failed to close video", 0, 0, 0);
+        }
+    }
+
+    if (eType & MEDIA_TYPE_TEXT && m_objTextController.IsSessionOpened())
+    {
+        if (!m_objTextController.CloseSession())
+        {
+            IMS_TRACE_E(0, "CloseMediaSessions() - failed to close text", 0, 0, 0);
+        }
+    }
 }

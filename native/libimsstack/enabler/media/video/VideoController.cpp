@@ -62,6 +62,7 @@ IMS_BOOL VideoController::CreateSession(
 {
     if (pListener == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateSession() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -71,10 +72,9 @@ IMS_BOOL VideoController::CreateSession(
         m_pSession = new VideoSession();
         m_pSession->SetMediaSessionListener(pListener);
         m_pSession->SetConfiguration(pConfig);
-        return IMS_TRUE;
     }
 
-    return IMS_FALSE;
+    return IMS_TRUE;
 }
 
 PUBLIC
@@ -120,16 +120,17 @@ IMS_BOOL VideoController::UpdateSession()
         }
     }
 
+    IMS_TRACE_E(0, "UpdateSession() - invalid", 0, 0, 0);
     return IMS_FALSE;
 }
 
 PUBLIC
 IMS_BOOL VideoController::CloseSession()
 {
-    IMS_TRACE_D("CloseSession()", 0, 0, 0);
-
     if (m_pSession != IMS_NULL)
     {
+        IMS_TRACE_D("CloseSession() - state[%d]", m_pSession->GetState(), 0, 0);
+
         if (m_pSession->GetState() != VideoSession::STATE_NONE)
         {
             m_pSession->Close();
@@ -149,6 +150,7 @@ IMS_BOOL VideoController::UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego
 
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateLocalAddress() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -160,10 +162,9 @@ IMS_BOOL VideoController::UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego
 PUBLIC
 IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego)
 {
-    IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
-
     if (pNego != NULL && m_pSession != IMS_NULL)
     {
+        IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
         return m_pSession->UpdateRtpConfig(
                 pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
@@ -171,6 +172,7 @@ IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego)
                 m_eCallState == CONFIRMED_SESSION);
     }
 
+    IMS_TRACE_E(0, "UpdateRtpConfig() - invalid", 0, 0, 0);
     return IMS_FALSE;
 }
 
@@ -199,13 +201,14 @@ void VideoController::SetMtu(IN IMS_SINT32 nMtu)
 PUBLIC
 IMS_BOOL VideoController::UpdateQualityThreshold(IN std::shared_ptr<VideoNego> pNego)
 {
-    IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
-
     if (m_pSession == IMS_NULL || pNego == IMS_NULL ||
             m_pSession->GetState() == VideoSession::STATE_NONE)
     {
+        IMS_TRACE_E(0, "UpdateQualityThreshold() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
+
+    IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
 
     VideoProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
 
@@ -226,7 +229,7 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN std::shared_ptr<VideoNego> p
 PUBLIC
 IMS_BOOL VideoController::IsSessionOpened()
 {
-    if (m_pSession != NULL)
+    if (m_pSession != NULL && m_pSession->GetState() != VideoSession::STATE_NONE)
     {
         return IMS_TRUE;
     }

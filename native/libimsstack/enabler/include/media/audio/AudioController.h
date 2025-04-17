@@ -241,6 +241,13 @@ public:
     IMS_BOOL NotifyAnbrReceived(
             IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
 
+    /**
+     * @brief Check there is a session opened
+     *
+     * @return IMS_BOOL Return IMS_TRUE when there is a session created
+     */
+    IMS_BOOL IsSessionOpened();
+
 protected:
     virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);
 

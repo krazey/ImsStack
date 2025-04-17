@@ -98,6 +98,13 @@ public:
      */
     IMS_BOOL UpdateQualityThreshold(IN std::shared_ptr<TextNego> pNego);
 
+    /**
+     * @brief Check there is a session opened
+     *
+     * @return IMS_BOOL Return IMS_TRUE when there is a session created
+     */
+    IMS_BOOL IsSessionOpened();
+
 private:
     TextSession* m_pSession;
     IpAddress m_objLocalAddr;

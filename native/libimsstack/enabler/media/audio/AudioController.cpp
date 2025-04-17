@@ -161,7 +161,7 @@ IMS_BOOL AudioController::OpenSession(IN IMS_UINTP nNegoId)
     {
         pAudioSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
 
-        if (pAudioSession->Open() == IMS_TRUE)
+        if (pAudioSession->Open())
         {
             m_eMediaState = AudioSession::STATE_IDLE;
             return IMS_TRUE;
@@ -188,7 +188,7 @@ IMS_BOOL AudioController::AddSession(
 
     if (pAudioSession != IMS_NULL && m_eMediaState != AudioSession::STATE_NONE)
     {
-        if (UpdateRtpConfig(nNegoId, nAccessNetwork, pNego) == IMS_TRUE)
+        if (UpdateRtpConfig(nNegoId, nAccessNetwork, pNego))
         {
             UpdateQualityThreshold(nNegoId, pNego);
             pAudioSession->SetMediaQuality(m_eCallState);
@@ -196,7 +196,7 @@ IMS_BOOL AudioController::AddSession(
         }
     }
 
-    if (bResult == IMS_TRUE)
+    if (bResult)
     {
         for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
         {
@@ -204,7 +204,7 @@ IMS_BOOL AudioController::AddSession(
 
             if (pAudioSession != IMS_NULL)
             {
-                if (pAudioSession->IsSameNegoId(nNegoId) == IMS_FALSE)
+                if (!pAudioSession->IsSameNegoId(nNegoId))
                 {
                     pAudioSession->SetState(AudioSession::STATE_PAUSED);
                 }
@@ -233,7 +233,7 @@ IMS_BOOL AudioController::ConfirmSession(IN IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
-    if (pAudioSession->Confirm() == IMS_TRUE)
+    if (pAudioSession->Confirm())
     {
         IMS_SINT32 nIndex = 0;
 
@@ -246,7 +246,7 @@ IMS_BOOL AudioController::ConfirmSession(IN IMS_UINTP nNegoId)
                 IMS_TRACE_E(0, "ConfirmSession() - invalid pAudioSession", 0, 0, 0);
                 m_listAudioSession.RemoveAt(nIndex);
             }
-            else if (pAudioSession->IsSameNegoId(nNegoId) == IMS_FALSE)
+            else if (!pAudioSession->IsSameNegoId(nNegoId))
             {
                 delete pAudioSession;
                 m_listAudioSession.RemoveAt(nIndex);
@@ -312,7 +312,7 @@ IMS_BOOL AudioController::DeleteSession(IN IMS_UINTP nNegoId)
     {
         AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId) == IMS_TRUE)
+        if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId))
         {
             delete pAudioSession;
             m_listAudioSession.RemoveAt(nIndex);
@@ -332,7 +332,7 @@ IMS_BOOL AudioController::CloseSession()
 
     if (pAudioSession != IMS_NULL)
     {
-        if (pAudioSession->Close() == IMS_TRUE)
+        if (m_eMediaState != AudioSession::STATE_NONE && pAudioSession->Close())
         {
             m_eMediaState = AudioSession::STATE_NONE;
             ClearSession();
@@ -563,10 +563,20 @@ PUBLIC IMS_SINT32 AudioController::GetInactivityTimer(
     return -1;
 }
 
+PUBLIC IMS_BOOL AudioController::IsSessionOpened()
+{
+    if (m_listAudioSession.IsEmpty())
+    {
+        return IMS_FALSE;
+    }
+
+    return m_eMediaState != AudioSession::STATE_NONE;
+}
+
 PRIVATE
 AudioSession* AudioController::FindAudioSession(IN IMS_UINTP nNegoId)
 {
-    if (m_listAudioSession.IsEmpty() == IMS_TRUE)
+    if (m_listAudioSession.IsEmpty())
     {
         return IMS_NULL;
     }
@@ -580,7 +590,7 @@ AudioSession* AudioController::FindAudioSession(IN IMS_UINTP nNegoId)
     {
         AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId) == IMS_TRUE)
+        if (pAudioSession != IMS_NULL && pAudioSession->IsSameNegoId(nNegoId))
         {
             return pAudioSession;
         }

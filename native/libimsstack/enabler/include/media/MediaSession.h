@@ -122,6 +122,11 @@ private:
     IpAddress GetAndroidIP();
     IMS_BOOL HandleNotifyMediaInactivity(IN IMS_UINTP nParam);
     IMS_BOOL IsInactivityTimerExpired(IN IMS_SINT32 nRunningTimerValue, IN IMS_SINT32 nTimerValue);
+    void OpenMediaSessions(
+            IN IMS_UINTP nNegoId, IN MediaNego* pMediaNego, MEDIA_CONTENT_TYPE eType);
+    void UpdateMediaSessions(
+            IN IMS_UINTP nNegoId, IN MediaNego* pMediaNego, MEDIA_CONTENT_TYPE eType);
+    void CloseMediaSessions(MEDIA_CONTENT_TYPE eType);
 
 protected:
     IMS_UINT32 m_nSlotId;

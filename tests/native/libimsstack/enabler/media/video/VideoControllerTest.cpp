@@ -247,3 +247,25 @@ TEST_F(VideoControllerTest, testSendMessageAfterCloseSession)
                       IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
             IMS_FALSE);
 }
+
+TEST_F(VideoControllerTest, testIsSessionOpened)
+{
+    // Initial state: No session
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+
+    // Create session
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    // Session created but not opened (state is STATE_NONE)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+
+    // Open session
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    // Session is now open (state is STATE_IDLE or higher)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_TRUE);
+
+    // Close session
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    // Session is closed (state is STATE_NONE)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+}

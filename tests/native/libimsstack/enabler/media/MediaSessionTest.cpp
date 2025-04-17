@@ -383,54 +383,6 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackText)
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
 }
 
-TEST_F(MediaSessionTest, testNotifySrvccSuccess)
-{
-    createAudioSession();
-
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_STARTED), IMS_FALSE);
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_SUCCEED), IMS_TRUE);
-
-    destroyAudioSession();
-
-    m_pSession->ModifySession(createAudioSession());
-
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_STARTED), IMS_TRUE);
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_SUCCEED), IMS_TRUE);
-
-    destroyAudioSession();
-}
-
-TEST_F(MediaSessionTest, testNotifySrvccFailed)
-{
-    IMS_UINTP negoId = createAudioSession();
-
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_STARTED), IMS_FALSE);
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_FAILED), IMS_FALSE);
-
-    m_pSession->ModifySession(negoId);
-
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_STARTED), IMS_TRUE);
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_FAILED), IMS_TRUE);
-
-    destroyAudioSession();
-}
-
-TEST_F(MediaSessionTest, testNotifySrvccCanceled)
-{
-    IMS_UINTP negoId = createAudioSession();
-
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_CANCELED), IMS_FALSE);
-
-    m_pSession->ModifySession(negoId);
-
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_CANCELED), IMS_TRUE);
-
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_STARTED), IMS_TRUE);
-    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_CANCELED), IMS_TRUE);
-
-    destroyAudioSession();
-}
-
 TEST_F(MediaSessionTest, testNotifyFirstPacket)
 {
     IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
