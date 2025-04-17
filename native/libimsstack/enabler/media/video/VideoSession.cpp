@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,11 +53,13 @@ PUBLIC VIRTUAL VideoSession::~VideoSession()
 }
 
 PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
-        IN VideoProfile* pPeerProfile, IN VideoProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession)
+        IN VideoProfile* pPeerProfile, IN VideoProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession,
+        IN IMS_BOOL bHold)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
             m_pRtpConfig == NULL)
     {
+        IMS_TRACE_E(0, "UpdateRtpConfig(): invalid parameter", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -65,15 +67,12 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
             pNegoProfile->GetPayloadList().GetSize() == 0 ||
             pPeerProfile->GetPayloadList().GetSize() == 0)
     {
+        IMS_TRACE_E(0, "UpdateRtpConfig(): empty payload list", 0, 0, 0);
         return IMS_FALSE;
     }
 
     VideoProfile::Payload* pLocalPayload;
     VideoProfile::Payload* pNegoPayload;
-
-    IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nPeerPayloadIndex[%d], nLocalPayloadIndex[%d]",
-            pPeerProfile->GetNegotiatedPayloadIndex(), pLocalProfile->GetNegotiatedPayloadIndex(),
-            0);
 
     if (pLocalProfile->GetNegotiatedPayloadIndex() < 0)
     {
@@ -128,10 +127,12 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         switch (pNegoProfile->GetDirection())
         {
             case MEDIA_DIRECTION_RECEIVE:
-                nVideoDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+                nVideoDirection = bHold ? RtpConfig::MEDIA_DIRECTION_INACTIVE
+                                        : RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
                 break;
             case MEDIA_DIRECTION_SEND:
-                nVideoDirection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
+                nVideoDirection = bHold ? RtpConfig::MEDIA_DIRECTION_INACTIVE
+                                        : RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
                 if (!bConfirmedSession)
                 {
                     nVideoDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
@@ -638,9 +639,8 @@ IMS_BOOL VideoSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_BOOL VideoSession::OnSetPauseImageCmd(IN IMS_UINTP pParam)
+IMS_BOOL VideoSession::OnSetPauseImageCmd(IN IMS_UINTP /*pParam*/)
 {
-    (void)pParam;
     return IMS_TRUE;
 }
 

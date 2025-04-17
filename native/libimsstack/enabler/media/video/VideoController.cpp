@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -160,7 +160,7 @@ IMS_BOOL VideoController::UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego
 }
 
 PUBLIC
-IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego)
+IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, IN IMS_BOOL bHold)
 {
     if (pNego != NULL && m_pSession != IMS_NULL)
     {
@@ -169,7 +169,7 @@ IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego)
                 pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
                 pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()),
-                m_eCallState == CONFIRMED_SESSION);
+                m_eCallState == CONFIRMED_SESSION, bHold);
     }
 
     IMS_TRACE_E(0, "UpdateRtpConfig() - invalid", 0, 0, 0);

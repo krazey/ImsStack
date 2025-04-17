@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,7 +62,7 @@ public:
     IMS_BOOL OpenSession();
 
     /**
-     * @brief Update session and send modifySesion of confirmConfig based on the update condition
+     * @brief Update session and send modifySession of confirmConfig based on the update condition
      *
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
@@ -87,12 +87,14 @@ public:
     IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego);
 
     /**
-     * @brief Update rtp config parameters from the negotiation profile
+     * @brief Update rtp config parameters from the negotiation profile.
      *
+     * @param pNego The VideoNego object to get the local, peer and the negotiated profile.
+     * @param bHold The option to enable the video hold when the direction is not sendrecv.
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
-     * failed to update
+     * failed to update.
      */
-    IMS_BOOL UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego);
+    IMS_BOOL UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, IMS_BOOL bHold);
 
     /**
      * @brief Update AccessNetwork information in the RtpConfig

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 #define VIDEO_SESSION_H_
 
 #include "BaseSession.h"
+#include "ImsTypeDef.h"
 #include "video/VideoProfile.h"
 
 class VideoConfiguration;
@@ -53,14 +54,16 @@ public:
     virtual ~VideoSession();
 
     /**
-     * @brief Set the VideoConfig for the ImsMedia from src/dest/negotiated profile
-     * @param pLocalProfile : The local profile of the SDP negotiation
-     * @param pPeerProfile : The peer profile of the SDP negotiation
-     * @param pNegoProfile : The negotiated profile of the SDP negotiation
-     * return IMS_BOOL : IMS_FALSE for error, IMS_TRUE for successful
+     * @brief Set the VideoConfig for the ImsMedia from src/dest/negotiated profile.
+     * @param pLocalProfile : The local profile of the SDP negotiation.
+     * @param pPeerProfile : The peer profile of the SDP negotiation.
+     * @param pNegoProfile : The negotiated profile of the SDP negotiation.
+     * @param bConfirmedSession The option to check the session state is in confirmed or not.
+     * @param bHold The option to enable the video hold when the direction is not sendrecv.
+     * return IMS_BOOL : IMS_FALSE for error, IMS_TRUE for successful.
      */
     IMS_BOOL UpdateRtpConfig(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
-            IN VideoProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession);
+            IN VideoProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession, IN IMS_BOOL bHold);
 
     /**
      * @brief Set MTU size in the VideoConfig

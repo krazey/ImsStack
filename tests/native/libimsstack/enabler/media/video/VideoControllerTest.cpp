@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,7 +90,7 @@ TEST_F(VideoControllerTest, testCreateSessionFail)
 
 TEST_F(VideoControllerTest, testUpdateRtpConfigWithNoSession)
 {
-    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testUpdateLocalAddressFail)
@@ -167,7 +167,7 @@ TEST_F(VideoControllerTest, testUpdateRtpConfigAfterCloseSession)
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
     EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testUpdateQualityThresholdAfterCloseSession)
@@ -198,7 +198,7 @@ TEST_F(VideoControllerTest, testModifySession)
                       IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
-    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }

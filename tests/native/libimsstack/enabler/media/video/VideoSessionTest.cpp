@@ -16,9 +16,11 @@
 
 #include <gtest/gtest.h>
 #include <IJniMedia.h>
+#include <MediaDef.h>
 #include <video/VideoSession.h>
 #include <video/VideoProfile.h>
 #include <config/VideoConfiguration.h>
+
 #include <MockIMediaSessionListener.h>
 
 using namespace android::telephony::imsmedia;
@@ -31,6 +33,9 @@ public:
     std::unique_ptr<VideoSession> m_pSession;
     std::unique_ptr<VideoConfiguration> m_pVideoConfig;
     MockIMediaSessionListener m_objMockListener;
+    VideoProfile m_objLocalProfile;
+    VideoProfile m_objPeerProfile;
+    VideoProfile m_objNegoProfile;
 
 protected:
     virtual void SetUp() override
@@ -39,6 +44,28 @@ protected:
         m_pVideoConfig = std::unique_ptr<VideoConfiguration>(new VideoConfiguration());
         m_pSession->SetConfiguration(m_pVideoConfig.get());
         m_pSession->SetMediaSessionListener(&m_objMockListener);
+
+        VideoProfile::Payload* pLocalPayload = new VideoProfile::Payload();
+        VideoProfile::AvcFmtp* pLocalFmtp = new VideoProfile::AvcFmtp();
+        pLocalPayload->SetRtpMap(100, "H264", 90000, 1);
+        pLocalPayload->SetFmtp(pLocalFmtp);
+
+        VideoProfile::Payload* pPeerPayload = new VideoProfile::Payload();
+        VideoProfile::AvcFmtp* pPeerFmtp = new VideoProfile::AvcFmtp();
+        pPeerPayload->SetRtpMap(100, "H264", 90000, 1);
+        pPeerPayload->SetFmtp(pPeerFmtp);
+
+        VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
+        VideoProfile::AvcFmtp* pNegoFmtp = new VideoProfile::AvcFmtp();
+        pNegoPayload->SetRtpMap(100, "H264", 90000, 1);
+        pNegoPayload->SetFmtp(pNegoFmtp);
+
+        m_objLocalProfile.GetPayloadList().Append(pLocalPayload);
+        m_objNegoProfile.GetPayloadList().Append(pNegoPayload);
+        m_objPeerProfile.GetPayloadList().Append(pPeerPayload);
+        m_objLocalProfile.SetDataPort(10000);
+        m_objPeerProfile.SetDataPort(10000);
+        m_objNegoProfile.SetDataPort(10000);
     }
 
     virtual void TearDown() override {}
@@ -79,32 +106,76 @@ TEST_F(VideoSessionTest, testUpdateMediaQualityThreshold)
     EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE, IMS_FALSE, IMS_FALSE));
 }
 
-TEST_F(VideoSessionTest, testUpdateRtpConfig)
+TEST_F(VideoSessionTest, testUpdateRtpConfigPortZero)
 {
-    VideoProfile objLocalProfile;
-    VideoProfile objPeerProfile;
-    VideoProfile objNegoProfile;
-    VideoProfile::Payload* pLocalPayload = new VideoProfile::Payload();
-    VideoProfile::AvcFmtp* pLocalFmtp = new VideoProfile::AvcFmtp();
-    pLocalPayload->SetRtpMap(100, "H264", 90000, 1);
-    pLocalPayload->SetFmtp(pLocalFmtp);
-
-    VideoProfile::Payload* pPeerPayload = new VideoProfile::Payload();
-    VideoProfile::AvcFmtp* pPeerFmtp = new VideoProfile::AvcFmtp();
-    pPeerPayload->SetRtpMap(100, "H264", 90000, 1);
-    pPeerPayload->SetFmtp(pPeerFmtp);
-
-    VideoProfile::Payload* pNegoPayload = new VideoProfile::Payload();
-    VideoProfile::AvcFmtp* pNegoFmtp = new VideoProfile::AvcFmtp();
-    pNegoPayload->SetRtpMap(100, "H264", 90000, 1);
-    pNegoPayload->SetFmtp(pNegoFmtp);
-
-    objLocalProfile.GetPayloadList().Append(pLocalPayload);
-    objNegoProfile.GetPayloadList().Append(pNegoPayload);
-    objPeerProfile.GetPayloadList().Append(pPeerPayload);
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_objNegoProfile.SetDataPort(0);
 
     EXPECT_TRUE(m_pSession->UpdateRtpConfig(
-            &objLocalProfile, &objPeerProfile, &objNegoProfile, IMS_TRUE));
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_NO_FLOW);
+
+    m_objNegoProfile.SetDataPort(10000);
+    m_objLocalProfile.SetDataPort(0);
+
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_NO_FLOW);
+}
+
+TEST_F(VideoSessionTest, testUpdateRtpConfigSendRecv)
+{
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(),
+            RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoSessionTest, testUpdateRtpConfigSendOnlyHoldOff)
+{
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND);
+
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_FALSE));
+
+    EXPECT_EQ(
+            m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
+}
+
+TEST_F(VideoSessionTest, testUpdateRtpConfigSendOnlyHoldOn)
+{
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND);
+
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
+}
+
+TEST_F(VideoSessionTest, testUpdateRtpConfigRecvOnlyHoldOff)
+{
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_RECEIVE);
+
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_FALSE));
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(),
+            RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+}
+
+TEST_F(VideoSessionTest, testUpdateRtpConfigRecvOnlyHoldOn)
+{
+    m_objNegoProfile.SetDirection(MEDIA_DIRECTION_SEND);
+
+    EXPECT_TRUE(m_pSession->UpdateRtpConfig(
+            &m_objLocalProfile, &m_objPeerProfile, &m_objNegoProfile, IMS_TRUE, IMS_TRUE));
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
 }
 
 TEST_F(VideoSessionTest, testSetMtu)

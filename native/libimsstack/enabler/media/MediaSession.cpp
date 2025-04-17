@@ -1398,7 +1398,9 @@ void MediaSession::UpdateMediaSessions(
     // Update Video Session
     if (eType & MEDIA_TYPE_VIDEO && m_objVideoController.IsSessionOpened())
     {
-        m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
+        m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego(),
+                pMediaNego->GetAudioNego()->GetNegotiatedDirection() !=
+                        MEDIA_DIRECTION_SEND_RECEIVE);
         m_objVideoController.UpdateAccessNetwork(nAccessNetwork);
         m_objVideoController.UpdateQualityThreshold(pMediaNego->GetVideoNego());
         m_objVideoController.UpdateSession();
