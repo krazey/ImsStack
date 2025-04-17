@@ -87,7 +87,7 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService& objMtsService,
 
     if (nResult != MO_ERROR_GENERIC)
     {
-        CalculateRetryAfterCondition(
+        SetRetryAfterStatus(
                 objMtsDynamicLoader.GetMtsSipFormUtils()->GetRetryAfterValue(piMessage));
         if (IsRegisterWithNextPcscfRequired(piMessage) && nPolicy == MTS_REG_RECOVERY_POLICY_NONE)
         {
@@ -272,11 +272,12 @@ IMS_SINT32 MtsErrorHandler::Get504ResponsePolicy() const
 }
 
 PRIVATE
-void MtsErrorHandler::CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAfterValue)
+void MtsErrorHandler::SetRetryAfterStatus(IN const IMS_SINT32 nRetryAfterValue)
 {
     if (nRetryAfterValue <= 0)
     {
         // The error response does not have Retry-After header
+        ResetRetryAfterStatus();
         return;
     }
 
@@ -284,7 +285,7 @@ void MtsErrorHandler::CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAft
     m_nCurrentRetryCount++;
     m_nCumulativeDuration += m_nRetryAfterValue;
 
-    IMS_TRACE_I("CalculateRetryAfterCondition : RetryAfterValue[%d], CurrentRetryCount[%d], "
+    IMS_TRACE_I("SetRetryAfterStatus : RetryAfterValue[%d], CurrentRetryCount[%d], "
                 "CumulativeDuration[%d]",
             m_nRetryAfterValue, m_nCurrentRetryCount, m_nCumulativeDuration);
 }
@@ -303,6 +304,7 @@ IMS_BOOL MtsErrorHandler::IsRetryPossible() const
     if ((nMaxRetryCount > 0) && (m_nCurrentRetryCount >= nMaxRetryCount))
     {
         // imssms.sms_retry_after_max_count_int has reached
+        IMS_TRACE_I("IsRetryPossible : Reached the max retry counter", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -311,6 +313,7 @@ IMS_BOOL MtsErrorHandler::IsRetryPossible() const
     if (m_nCumulativeDuration >= nMaxRetryDuration)
     {
         // imssms.sms_retry_after_max_time_sec_int has reached
+        IMS_TRACE_I("IsRetryPossible : Reached the max retry duration", 0, 0, 0);
         return IMS_FALSE;
     }
 

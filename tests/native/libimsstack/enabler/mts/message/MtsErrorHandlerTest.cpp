@@ -428,4 +428,43 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportFallback)
     EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 
+TEST_F(MtsErrorHandlerTest, ResetRetryAfterConditionIfRetryAfterValueDoesNotExist)
+{
+    ImsVector<IMS_SINT32> objErrorCodes;
+    objErrorCodes.Push(SipStatusCode::SC_500);
+    objErrorCodes.Push(SipStatusCode::SC_504);
+    const AString strRetryAfter(SipHeaderName::RETRY_AFTER);
+    ImsList<AString> objRetryAfterHeaders;
+    objRetryAfterHeaders.Append("10");
+    ImsList<AString> objNoHeaders;
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT, _))
+            .WillByDefault(Return(5));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT, _))
+            .WillByDefault(Return(45));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::ImsSms::
+                               KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL,
+                    _))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objMockMessage, GetHeaders(strRetryAfter))
+            .WillOnce(Return(objRetryAfterHeaders))
+            .WillRepeatedly(Return(objNoHeaders));
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_603));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
+            .WillByDefault(Return(objErrorCodes));
+
+    IMS_SINT32 nResult =
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    EXPECT_EQ(nResult, MO_ERROR_BY_RETRY_AFTER);
+    EXPECT_EQ(pMtsErrorHandler->GetRetryAfterValue(), 10);
+
+    nResult = pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
+    EXPECT_EQ(pMtsErrorHandler->GetRetryAfterValue(), 0);
+}
+
 }  // namespace android

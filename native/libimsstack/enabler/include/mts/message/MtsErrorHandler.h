@@ -57,7 +57,7 @@ private:
     IMS_SINT32 Get503ResponsePolicy(IN const IMessage* piMessage) const;
     IMS_SINT32 Get504ResponsePolicy() const;
 
-    void CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAfterValue);
+    void SetRetryAfterStatus(IN const IMS_SINT32 nRetryAfterValue);
     IMS_BOOL IsRetryPossible() const;
     IMS_BOOL IsRegisterWithNextPcscfRequired(IN const IMessage* piMessage) const;
 
