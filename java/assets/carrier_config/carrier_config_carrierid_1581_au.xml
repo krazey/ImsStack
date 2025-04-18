@@ -23,6 +23,7 @@
     <!-- Aos -->
     <int name="ims.ims_establishment_time_for_nr_sec_int" value="0"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="3"/>
+    <int name="ims.reg_retry_503_policy_int" value="0"/>
     <int name="ims.reg_retry_cnt_reset_policy_int" value="2"/>
     <int name="ims.rereg_retry_305_policy_int" value="0"/>
     <int name="ims.sub_retry_503_policy_int" value="0"/>
