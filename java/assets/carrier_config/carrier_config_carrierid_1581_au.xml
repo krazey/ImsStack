@@ -89,6 +89,7 @@
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="500"/>
     <int name="imsvoice.prack_wait_timer_millis_int" value="10000"/>
+    <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="45000"/>
