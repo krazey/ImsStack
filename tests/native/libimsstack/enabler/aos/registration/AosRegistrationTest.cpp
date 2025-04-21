@@ -2806,6 +2806,20 @@ TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenRegRequir
     m_pAosRegistration->ProcessRegRequiredWithNextPcscf();
 }
 
+TEST_F(AosRegistrationTest, ReportFailureIfExistErrorTypeRatBlockWhenRegRequiredWithNextPcscf)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessRegRequiredWithNextPcscf();
+}
+
 TEST_F(AosRegistrationTest, ReportFailureIfFailToSetNextPcscfWhenRegRequiredWithNextPcscf)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));

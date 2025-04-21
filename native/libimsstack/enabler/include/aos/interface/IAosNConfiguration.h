@@ -1347,6 +1347,8 @@ public:
      *        CarrierConfig::Ims::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK
      *            Indicate that it results in blocking PLMN with the specific protocol timer
      *            like T3402.
+     *        CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK
+     *            Indicate that it results in blocking access based on the RAT.
      *
      * @return IMS_SINT32 Return the extra error type
      * @see {@code ims.extra_reg_err_final_type_int}

@@ -3552,6 +3552,18 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithNextPcscf()
         ReportTryingState();
         return;
     }
+    else
+    {
+        if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
+                CarrierConfig::Ims::ERROR_TYPE_RAT_BLOCK)
+        {
+            A_IMS_TRACE_I(REGID,
+                    "ProcessRegRequiredWithNextPcscf :: All P-CSCFs attempted, RAT block required",
+                    0, 0, 0);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+            return;
+        }
+    }
 
     ClearPcscf();
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_TERMINATED);
