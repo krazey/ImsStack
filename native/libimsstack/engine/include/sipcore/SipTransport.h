@@ -139,6 +139,8 @@ protected:
                 ((m_nTransportExt & Sip::TRANSPORT_EXT_TLS) != 0));
     }
     void NotifyTransportError(IN IMS_SINT32 nErrorCode);
+    void NotifyTransportError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSocketType,
+            IN IMS_BOOL bIgnoreClosedOrConnectFailed);
 
 private:
     IMS_BOOL IsNetworkConnectionAvailable() const;

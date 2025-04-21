@@ -701,13 +701,13 @@ PROTECTED VIRTUAL void SipClientTransport::Socket_NotifyError(
 
     IMS_TRACE_D("ClientTransport :: Error (%d)", nErrorCode, 0, 0);
 
-    NotifyTransportError(nErrorCode);
-
     if (m_pServerSocket != IMS_NULL)
     {
         GetTransportHelper()->Destroy(m_pServerSocket, this);
         m_pServerSocket = IMS_NULL;
     }
+
+    NotifyTransportError(nErrorCode);
 }
 
 PRIVATE

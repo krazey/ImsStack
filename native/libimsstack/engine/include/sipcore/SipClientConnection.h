@@ -17,6 +17,7 @@
 #define SIP_CLIENT_CONNECTION_H_
 
 #include "Credential.h"
+#include "ITimer.h"
 
 #include "ISipClientTransactionStateListener.h"
 #include "ISipClientTransmissionListener.h"
@@ -34,7 +35,8 @@ class SipConnectionNotifier;
 class SipClientConnection :
         public SipConnection,
         public ISipClientTransactionStateListener,
-        public ISipClientTransmissionListener
+        public ISipClientTransmissionListener,
+        public ITimerListener
 {
 public:
     SipClientConnection();
@@ -100,7 +102,7 @@ private:
     void ClientTransactionState_ForkedResponseReceived(
             IN SipClientTransactionState* pCtState) override;
     void ClientTransactionState_ResponseReceived(IN ::SipMessage* pSipMsg) override;
-
+    void Transport_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) override;
     // SIP_TRANSPORT_ERROR_REPORT_ON_TXN
     IMS_BOOL IsTransportErrorReportRequired(
             IN IMS_SINT32 nCode, IN const AString& strMessage) const override;
@@ -109,8 +111,13 @@ private:
     void ClientTransmission_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) override;
     void ClientTransmission_TransmissionCompleted() override;
 
+    // ITimerListener interface
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+    void StartTcpConnectionMonitoringTimer();
+    void StopTcpConnectionMonitoringTimer();
     void SetState(IN IMS_SINT32 nState);
 
+    static IMS_BOOL IsTransportErrorCode104(IN const AString& strMessage);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
@@ -145,6 +152,9 @@ private:
     IOnSipClientConnectionListener* m_piListener;
     // UDP_FALLBACK
     SipClientTransmissionProxy* m_pTransmissionProxy;
+    // A timer to handle an exceptional condition between sending SIP request from UE and
+    // closing TCP connection from network.
+    ITimer* m_piTcpConnectionMonitoringTimer;
 };
 
 #endif

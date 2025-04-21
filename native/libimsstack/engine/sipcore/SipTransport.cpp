@@ -654,7 +654,9 @@ PROTECTED VIRTUAL void SipTransport::Socket_NotifyError(
         return;
     }
 
-    NotifyTransportError(nErrorCode);
+    IMS_BOOL bIgnoreClosedOrConnectFailed = (m_pSocket == IMS_NULL);
+    IMS_SINT32 nSocketType =
+            (m_pSocket != IMS_NULL) ? m_pSocket->GetType() : SipSocketAddress::SOCKET_NONE;
 
     if (m_pSendBuffer != IMS_NULL)
     {
@@ -663,6 +665,7 @@ PROTECTED VIRTUAL void SipTransport::Socket_NotifyError(
     }
 
     ReleaseSocket();
+    NotifyTransportError(nErrorCode, nSocketType, bIgnoreClosedOrConnectFailed);
 }
 
 PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
@@ -750,6 +753,15 @@ SipTransportHelper* SipTransport::GetTransportHelper() const
 PROTECTED
 void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 {
+    IMS_SINT32 nSocketType =
+            (m_pSocket != IMS_NULL) ? m_pSocket->GetType() : SipSocketAddress::SOCKET_NONE;
+    NotifyTransportError(nErrorCode, nSocketType, (m_pSocket == IMS_NULL));
+}
+
+PROTECTED
+void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSocketType,
+        IN IMS_BOOL bIgnoreClosedOrConnectFailed)
+{
     if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_D("Transport :: No Listener, Error (%d)", nErrorCode, 0, 0);
@@ -763,7 +775,7 @@ void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
         case SipSocket::ERROR_CLOSED:          // FALL-THROUGH
         case SipSocket::ERROR_CONNECT_FAILED:  // FALL-THROUGH
         case SipSocket::ERROR_DATA_CONNECTION_LOST:
-            if (m_pSocket == IMS_NULL)
+            if (bIgnoreClosedOrConnectFailed)
             {
                 // no-op
                 return;
@@ -771,13 +783,6 @@ void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
             break;
         default:
             break;
-    }
-
-    IMS_SINT32 nSocketType = SipSocketAddress::SOCKET_NONE;
-
-    if (nErrorCode == SipSocket::ERROR_CLOSED)
-    {
-        nSocketType = m_pSocket->GetType();
     }
 
     AString strError = CreateSocketErrorMessage(nErrorCode, nSocketType);
