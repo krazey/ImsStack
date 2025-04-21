@@ -21,6 +21,7 @@
 
 #include "IMediaSession.h"
 #include "MediaNego.h"
+#include "MediaNegoHandler.h"
 #include "audio/AudioController.h"
 #include "text/TextController.h"
 #include "video/VideoController.h"
@@ -56,11 +57,32 @@ public:
      */
     IMS_SINTP GetCallKey() { return m_nCallKey; };
 
+    /**
+     * @brief Set the MediaNegoHandler object
+     */
+    void SetMediaNegoHandler(std::shared_ptr<MediaNegoHandler> pMediaNegoHandler);
+
+    /**
+     * @brief Set the AudioController object
+     */
+    void SetAudioController(std::shared_ptr<AudioController> pAudioController);
+
+    /**
+     * @brief Set the VideoController object
+     */
+    void SetVideoController(std::shared_ptr<VideoController> pVideoController);
+
+    /**
+     * @brief Set the TextController object
+     */
+    void SetTextController(std::shared_ptr<TextController> pTextController);
+
+    // IMediaSession
     void SetMtcListener(IN IMediaSessionClientListener* pISessionListener) override;
     IMS_UINTP CreateProfile(
-            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
+            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) override;
     IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) override;
-    IMS_BOOL FormSdp(IN IMS_UINTP nNegoID, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+    IMS_BOOL FormSdp(IN IMS_UINTP nNegoID, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eType,
             IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
             IN IMS_SINT32 nTextDirection = -1,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) override;
@@ -70,7 +92,7 @@ public:
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) override;
     IMS_BOOL RequestQos(
-            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
+            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO) override;
     void FinalizeSdp(IN IMS_UINTP nNegoID, IN ISession* pSession) override;
     IMS_BOOL Run(IN IMS_UINTP nNegoID) override;
     IMS_BOOL Terminate() override;
@@ -80,28 +102,23 @@ public:
     IMS_SINT32 GetNegotiatedCodecBitrate(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) override;
     IMS_SINT32 GetRemotePort(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) override;
     MEDIA_DIRECTION GetNegotiatedDirection(
-            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType) override;
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType) override;
     void SetOptions(IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1,
             IN IMS_SINT32 param2) override;
-    void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType,
-            IN IMS_UINT32 nRtpTimer) override;
+    void SetNetworkToneRtpTimer(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType, IN IMS_UINT32 nRtpTimer) override;
     IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus) override;
     IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam) override;
 
 protected:
-    MediaNego* CreateMediaNego(IN IMS_UINTP nNegoId);
-    virtual MediaNego* FindMediaNego(IN IMS_UINTP nNegoId);
-    void ConfirmMediaNego(IN IMS_UINTP nNegoId);
-    IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
-    void ClearMediaNego();
     QosRequestParam* FindQosParam(const QosRequestParam* param);
-    virtual QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
+    virtual QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
     void ClearQosParam();
     // IMediaSessionListener
     IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param) override;
     IMS_BOOL MediaSession_NotifyToClient(IMS_UINT32 eReportType,
-            MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
+            MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_INVALID,
             MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
     virtual IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
@@ -110,22 +127,23 @@ protected:
     IMS_BOOL OnResponse(IN IMS_UINTP pParam);
     IMS_BOOL OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
     IMS_BOOL OnSendDtmf(IN IMS_UINTP nParam);
-    void ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eMediaType);
+    void ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eType);
     IMS_BOOL OnChangeNetworkConnection(IN IMS_UINTP pParam);
     IMS_BOOL OnMediaMtuChanged();
     IMS_SINT32 GetMtu();
     IMS_BOOL OnNotifyAnbrReceived(IN IMS_UINTP nParam);
-    void RequestQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
-    void ReleaseQosParam(IN MEDIA_CONTENT_TYPE eMediaType);
+    void RequestQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
+    void ReleaseQosParam(IN MEDIA_CONTENT_TYPE eType);
 
 private:
     IpAddress GetAndroidIP();
     IMS_BOOL HandleNotifyMediaInactivity(IN IMS_UINTP nParam);
     IMS_BOOL IsInactivityTimerExpired(IN IMS_SINT32 nRunningTimerValue, IN IMS_SINT32 nTimerValue);
-    void OpenMediaSessions(
-            IN IMS_UINTP nNegoId, IN MediaNego* pMediaNego, MEDIA_CONTENT_TYPE eType);
-    void UpdateMediaSessions(
-            IN IMS_UINTP nNegoId, IN MediaNego* pMediaNego, MEDIA_CONTENT_TYPE eType);
+    void CreateMediaSessions(IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eType);
+    void OpenMediaSessions(IN IMS_UINTP nNegoId, IN std::shared_ptr<MediaNego> pMediaNego,
+            MEDIA_CONTENT_TYPE eType);
+    void UpdateMediaSessions(IN IMS_UINTP nNegoId, IN std::shared_ptr<MediaNego> pMediaNego,
+            MEDIA_CONTENT_TYPE eType);
     void CloseMediaSessions(MEDIA_CONTENT_TYPE eType);
 
 protected:
@@ -133,11 +151,11 @@ protected:
     IMS_SINTP m_nCallKey;
     IMediaSessionClientListener* m_pClientListener;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;
-    ImsMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
+    std::shared_ptr<MediaNegoHandler> m_pMediaNegoHandler;
     ImsList<QosRequestParam*> m_objListQosParams;
-    AudioController m_objAudioController;
-    VideoController m_objVideoController;
-    TextController m_objTextController;
+    std::shared_ptr<AudioController> m_pAudioController;
+    std::shared_ptr<VideoController> m_pVideoController;
+    std::shared_ptr<TextController> m_pTextController;
     IMS_BOOL m_bSessionConfirmed;
     std::mutex m_objMutex;
     MEDIA_CONTENT_TYPE m_eCurMediaType;

@@ -36,37 +36,37 @@ MediaNegoHandler::~MediaNegoHandler()
 }
 
 PUBLIC
-MediaNego* MediaNegoHandler::CreateMediaNego(IMS_UINTP nNegoId)
+std::shared_ptr<MediaNego> MediaNegoHandler::CreateMediaNego(IMS_UINTP nNegoId)
 {
     IMS_TRACE_I("CreateMediaNego(): NegoId[%" PFLS_x "]", nNegoId, 0, 0);
 
     // Create new MediaNego
-    MediaNego* pMediaNego = new MediaNego(m_nSlotId);
+    std::shared_ptr<MediaNego> pMediaNego = std::make_shared<MediaNego>(m_nSlotId);
 
     // Copy Existed Media Nego with nego id
     if (nNegoId != 0)
     {
-        MediaNego* objExistingNego = FindMediaNego(nNegoId);
+        std::shared_ptr<MediaNego> pExistingMediaNego = FindMediaNego(nNegoId);
 
-        if (objExistingNego == IMS_NULL)
+        if (pExistingMediaNego == IMS_NULL)
         {
             IMS_TRACE_I("CreateMediaNego(): invalid negoId", 0, 0, 0);
             return IMS_NULL;
         }
 
-        pMediaNego->Forking(objExistingNego);
+        pMediaNego->Forking(pExistingMediaNego.get());
     }
     else
     {
         pMediaNego->CreateProfile(m_pEnvironment);
     }
 
-    m_objMapMediaNego.Add(reinterpret_cast<IMS_UINTP>(pMediaNego), pMediaNego);
+    m_objMapMediaNego.Add(reinterpret_cast<IMS_UINTP>(pMediaNego.get()), pMediaNego);
     return pMediaNego;
 }
 
 PUBLIC
-MediaNego* MediaNegoHandler::FindMediaNego(IMS_UINTP nNegoId)
+std::shared_ptr<MediaNego> MediaNegoHandler::FindMediaNego(IMS_UINTP nNegoId)
 {
     IMS_SLONG nIndex = m_objMapMediaNego.GetIndexOfKey(nNegoId);
     if (nIndex < 0)
@@ -97,7 +97,7 @@ IMS_BOOL MediaNegoHandler::DeleteMediaNego(IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
-    MediaNego* pMediaNego = m_objMapMediaNego.GetValueAt(nIndex);
+    std::shared_ptr<MediaNego> pMediaNego = m_objMapMediaNego.GetValueAt(nIndex);
     m_objMapMediaNego.RemoveAt(nIndex);
 
     if (pMediaNego == IMS_NULL)
@@ -105,8 +105,6 @@ IMS_BOOL MediaNegoHandler::DeleteMediaNego(IMS_UINTP nNegoId)
         IMS_TRACE_E(0, "DeleteMediaNego(): pMediaNego is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
-
-    delete pMediaNego;
 
     return IMS_TRUE;
 }
@@ -118,13 +116,7 @@ void MediaNegoHandler::ClearAllMediaNego()
 
     while (!m_objMapMediaNego.IsEmpty())
     {
-        MediaNego* pMediaNego = m_objMapMediaNego.GetValueAt(0);
-
-        if (pMediaNego != IMS_NULL)
-        {
-            delete pMediaNego;
-        }
-
+        std::shared_ptr<MediaNego> pMediaNego = m_objMapMediaNego.GetValueAt(0);
         m_objMapMediaNego.RemoveAt(0);
     }
 
@@ -136,7 +128,7 @@ IMS_BOOL MediaNegoHandler::FormSdp(IMS_UINTP nNegoId, OUT ISession* pSession,
         MEDIA_CONTENT_TYPE eType, IMS_SINT32 nAudioDirection, IMS_SINT32 nVideoDirection,
         IMS_SINT32 nTextDirection, IMS_BOOL bEnforceReofferMode)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -152,7 +144,7 @@ PUBLIC
 MEDIA_CONTENT_TYPE MediaNegoHandler::GetSupportedMediaTypesFromSdp(
         IMS_UINTP nNegoId, IN ISession* pSession)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -176,7 +168,7 @@ IMS_BOOL MediaNegoHandler::NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession
         return IMS_FALSE;
     }
 
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "NegotiateSdp(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
@@ -194,7 +186,7 @@ IMS_BOOL MediaNegoHandler::NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession
 PUBLIC
 void MediaNegoHandler::FinalizeSdp(IMS_UINTP nNegoId, IN ISession* pSession)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -208,7 +200,7 @@ void MediaNegoHandler::FinalizeSdp(IMS_UINTP nNegoId, IN ISession* pSession)
 PUBLIC
 NEGO_STATE MediaNegoHandler::GetNegoState(IMS_UINTP nNegoId)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -222,7 +214,7 @@ NEGO_STATE MediaNegoHandler::GetNegoState(IMS_UINTP nNegoId)
 PUBLIC
 MEDIA_CONTENT_TYPE MediaNegoHandler::GetNegotiatedMediaType(IMS_UINTP nNegoId)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "GetNegotiatedMediaType(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
@@ -256,7 +248,7 @@ MEDIA_CONTENT_TYPE MediaNegoHandler::GetNegotiatedMediaType(IMS_UINTP nNegoId)
 PUBLIC
 IMS_SINT32 MediaNegoHandler::GetNegotiatedQuality(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "GetNegotiatedQuality(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
@@ -280,17 +272,10 @@ IMS_SINT32 MediaNegoHandler::GetNegotiatedQuality(IMS_UINTP nNegoId, MEDIA_CONTE
 PUBLIC
 IMS_SINT32 MediaNegoHandler::GetNegotiatedCodecBitrate(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "GetNegotiatedCodecBitrate(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
-        return 0;
-    }
-
-    if (pMediaNego == IMS_NULL)
-    {
-        IMS_TRACE_E(
-                0, "GetNegotiatedCodecBitrate(): Can't find NegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return 0;
     }
 
@@ -327,7 +312,7 @@ IMS_SINT32 MediaNegoHandler::GetNegotiatedCodecBitrate(IMS_UINTP nNegoId, MEDIA_
 PUBLIC
 IMS_SINT32 MediaNegoHandler::GetRemotePort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -361,7 +346,7 @@ PUBLIC
 MEDIA_DIRECTION MediaNegoHandler::GetNegotiatedDirection(
         IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -387,7 +372,7 @@ MEDIA_DIRECTION MediaNegoHandler::GetNegotiatedDirection(
 const IpAddress& MediaNegoHandler::GetNegotiatedRemoteAddress(
         IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -425,7 +410,7 @@ const IpAddress& MediaNegoHandler::GetNegotiatedRemoteAddress(
 PUBLIC
 IMS_BOOL MediaNegoHandler::SetRtpPort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType, IMS_UINT32 nPort)
 {
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    std::shared_ptr<MediaNego> pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
@@ -433,7 +418,7 @@ IMS_BOOL MediaNegoHandler::SetRtpPort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eTyp
         return IMS_FALSE;
     }
 
-    IMS_BOOL bResult = IMS_FALSE;
+    IMS_BOOL bResult = IMS_TRUE;
 
     if (eType & MEDIA_TYPE_AUDIO)
     {
@@ -463,9 +448,4 @@ IMS_BOOL MediaNegoHandler::SetRtpPort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eTyp
     }
 
     return bResult;
-}
-
-const ImsMap<IMS_UINTP, MediaNego*>& MediaNegoHandler::GetMediaNegoMap() const
-{
-    return m_objMapMediaNego;
 }

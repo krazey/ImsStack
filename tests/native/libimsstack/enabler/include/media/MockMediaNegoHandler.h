@@ -34,8 +34,9 @@ public:
 
     virtual ~MockMediaNegoHandler() = default;
 
-    MOCK_METHOD(MediaNego*, CreateMediaNego, (IMS_UINTP nExistingNegoId), (override));
-    MOCK_METHOD(MediaNego*, FindMediaNego, (IMS_UINTP nNegoId), (override));
+    MOCK_METHOD(
+            std::shared_ptr<MediaNego>, CreateMediaNego, (IMS_UINTP nExistingNegoId), (override));
+    MOCK_METHOD(std::shared_ptr<MediaNego>, FindMediaNego, (IMS_UINTP nNegoId), (override));
     MOCK_METHOD(IMS_BOOL, DeleteMediaNego, (IMS_UINTP nNegoId), (override));
     MOCK_METHOD(void, ClearAllMediaNego, (), (override));
     MOCK_METHOD(IMS_BOOL, FormSdp,

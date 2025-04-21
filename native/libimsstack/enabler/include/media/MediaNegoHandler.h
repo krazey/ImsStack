@@ -57,19 +57,19 @@ public:
      *
      * @param nExistingNegoId The ID (pointer) of an existing MediaNego to fork from,
      *                        or 0 to create a new one.
-     * @return MediaNego* Pointer to the newly created or forked MediaNego instance, or nullptr on
-     * failure. The caller does NOT own this pointer. The ID (pointer value) should be used for
-     * subsequent operations.
+     * @return std::shared_ptr<MediaNego> Pointer to the newly created or forked MediaNego instance,
+     * or nullptr on failure. The caller does NOT own this pointer. The ID (pointer value) should be
+     * used for subsequent operations.
      */
-    virtual MediaNego* CreateMediaNego(IMS_UINTP nExistingNegoId = 0);
+    virtual std::shared_ptr<MediaNego> CreateMediaNego(IMS_UINTP nExistingNegoId = 0);
 
     /**
      * @brief Finds a MediaNego instance by its ID.
      * @param nNegoId The ID (pointer) of the MediaNego instance to find.
-     * @return MediaNego* Pointer to the found MediaNego instance, or nullptr if not found. The
-     * caller does NOT own this pointer.
+     * @return std::shared_ptr<MediaNego> Pointer to the found MediaNego instance, or nullptr if not
+     * found. The caller does NOT own this pointer.
      */
-    virtual MediaNego* FindMediaNego(IMS_UINTP nNegoId);
+    virtual std::shared_ptr<MediaNego> FindMediaNego(IMS_UINTP nNegoId);
 
     /**
      * @brief Deletes a specific MediaNego instance identified by its ID.
@@ -219,16 +219,6 @@ public:
      */
     virtual IMS_BOOL SetRtpPort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType, IMS_UINT32 nPort);
 
-    // --- Getter ---
-
-    /**
-     * @brief Gets a constant reference to the internal map of MediaNego instances.
-     * @warning Use with caution. Modifying the map externally can break handler logic. Consider
-     * using existing management methods (Create/Find/Delete) instead.
-     * @return const ImsMap<IMS_UINTP, MediaNego*>& A const reference to the map.
-     */
-    const ImsMap<IMS_UINTP, MediaNego*>& GetMediaNegoMap() const;
-
 private:
     // Prevent copy and assignment
     MediaNegoHandler(const MediaNegoHandler&) = delete;
@@ -236,7 +226,7 @@ private:
 
     IMS_UINT32 m_nSlotId;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;  // Needed for MediaNego::CreateProfile
-    ImsMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
+    ImsMap<IMS_UINTP, std::shared_ptr<MediaNego>> m_objMapMediaNego;
 };
 
 #endif  // MEDIA_NEGO_HANDLER_H_
