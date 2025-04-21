@@ -18,6 +18,6 @@
     <!-- Ims General -->
     <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
     <!-- Ut/Xcap -->
-    <int name="imsss.ut_oir_network_default_operation_int" value="3"/>
+    <int name="imsss.ut_oir_network_default_operation_int" value="4"/>
     <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
 </carrier_config>
