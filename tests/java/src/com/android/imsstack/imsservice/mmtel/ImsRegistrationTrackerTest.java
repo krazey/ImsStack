@@ -805,6 +805,9 @@ public class ImsRegistrationTrackerTest {
         mRegTracker.refreshCallRegistrationState();
         assertEquals(IAosRegistrationListener.NetworkType.LTE,
                 mRegTracker.getRegisteredNetworkType());
+
+        verify(mMockIDcNetWatcher, times(2)).addListener(any(IDcNetWatcher.Listener.class));
+        verify(mMockIDcNetWatcher, times(1)).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -853,7 +856,10 @@ public class ImsRegistrationTrackerTest {
         assertNotNull(listener);
 
         listener.onImsServiceStarted(SLOT0);
-        verify(mMockIDcNetWatcher, times(1)).addListener(any(IDcNetWatcher.Listener.class));
+        listener.onImsServiceStopped(SLOT0);
+        listener.onImsServiceStarted(SLOT0);
+        verify(mMockIDcNetWatcher, times(2)).addListener(any(IDcNetWatcher.Listener.class));
+        verify(mMockIDcNetWatcher, times(1)).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -862,7 +868,10 @@ public class ImsRegistrationTrackerTest {
         assertNotNull(listener);
 
         listener.onImsServiceStopped(SLOT0);
-        verify(mMockIDcNetWatcher).removeListener(any(IDcNetWatcher.Listener.class));
+        listener.onImsServiceStarted(SLOT0);
+        listener.onImsServiceStopped(SLOT0);
+        verify(mMockIDcNetWatcher, times(2)).addListener(any(IDcNetWatcher.Listener.class));
+        verify(mMockIDcNetWatcher, times(2)).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
