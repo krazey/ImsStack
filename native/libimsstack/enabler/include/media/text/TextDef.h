@@ -25,4 +25,6 @@ typedef enum
     TEXT_CODEC_NOT_USED = 99,
 } TEXT_CODEC;
 
+#define TEXT_CODEC_BITRATE_DEFAULT (1000)
+
 #endif
