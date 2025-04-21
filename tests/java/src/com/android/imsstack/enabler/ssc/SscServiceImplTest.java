@@ -779,6 +779,57 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testQueryClir_noRequestToSever_invocation() {
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
+        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_INVOCATION);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
+        processEntireXmlDocQueryAsSuccess();
+        processGetTransactionAsSuccess(ESsType.OIR, SscConstant.EVENT_SSC_QUERY_OIR, -1);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener)
+                .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
+
+        ImsSsInfo ssInfo = captorSsInfo.getValue();
+        assertNotNull(ssInfo);
+
+        int outGoingState = SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equals(mDefaultBehaviour)
+                ? SscConstant.OIR_SUPPRESSION : SscConstant.OIR_INVOCATION;
+        assertEquals(ssInfo.getClirOutgoingState(), outGoingState);
+
+        verify(mMockSscTransaction).close();
+    }
+
+    @Test
+    public void testQueryClir_noRequestToSever_default() {
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
+        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_DEFAULT);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.queryCLIR(tId);
+        processEntireXmlDocQueryAsSuccess();
+        processGetTransactionAsSuccess(ESsType.OIR, SscConstant.EVENT_SSC_QUERY_OIR, -1);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener)
+                .lineIdentificationSupplementaryServiceResponse(eq(tId), captorSsInfo.capture());
+
+        ImsSsInfo ssInfo = captorSsInfo.getValue();
+        assertNotNull(ssInfo);
+        assertEquals(ssInfo.getClirOutgoingState(), SscConstant.OIR_DEFAULT);
+
+        verify(mMockSscTransaction).close();
+    }
+
+    @Test
     public void testQueryClip_success() {
         int tId = 1;
 
@@ -1534,6 +1585,40 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testUpdateClir_noRequestToSeverAndInvocation_requestToNetwork() {
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
+        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+        int tId = 1;
+
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_INVOCATION);
+        processEntireXmlDocQueryAsSuccess();
+        processPutTransactionAsSuccess(ESsType.OIR, SscConstant.EVENT_SSC_UPDATE_OIR, -1);
+
+        mLooper.processAllMessages();
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
+        verify(mMockSscTransaction).close();
+    }
+
+    @Test
+    public void testUpdateClir_noRequestToSeverAndDefault_noRequestToNetworkAndLocalUpdate() {
+        when(mMockCarrierConfig.getInt(
+                CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
+                .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
+        when(mMockSscPreferenceHelper.updateClir(SscConstant.OIR_DEFAULT)).thenReturn(true);
+        mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
+
+        int tId = 1;
+        mSscServiceImpl.updateCLIR(tId, SscConstant.OIR_DEFAULT);
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationUpdated(eq(tId));
         verifyNoMoreInteractions(mMockSscTransaction);
     }
 

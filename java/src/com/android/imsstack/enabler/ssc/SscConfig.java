@@ -40,6 +40,8 @@ public final class SscConfig {
     public static final int OIR_TEMP_MODE_RESTRICTED = 2;
     // CarrierConfigManager.OIR_TEMP_MODE_ALLOWED;
     public static final int OIR_TEMP_MODE_ALLOWED = 3;
+    // CarrierConfigManager.OIR_NO_REQUEST_TO_SERVER;
+    public static final int OIR_NO_REQUEST_TO_SERVER = 4;
 
     public static final int GBA_ME = CarrierConfigManager.GBA_ME; // 1
     public static final int GBA_U = CarrierConfigManager.GBA_U; // 2
@@ -386,6 +388,10 @@ public final class SscConfig {
         }
 
         return Arrays.stream(terminalBasedServices).anyMatch(value -> value == serviceType);
+    }
+
+    static boolean isLocalUpdateRequiredForOir(int slotId) {
+        return getOirNetworkDefaultOperation(slotId) == SscConfig.OIR_NO_REQUEST_TO_SERVER;
     }
 
     static boolean isSupportedNetwork(int slotId, @AccessNetworkTypes int networkType) {

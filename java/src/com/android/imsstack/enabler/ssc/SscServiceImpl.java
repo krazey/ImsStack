@@ -579,6 +579,12 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
+        if (clirMode == SscConstant.OIR_DEFAULT && SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
+            ImsLog.d(mSlotId, "update Network Default OIR, but no request to network");
+            handleUpdateClirTb(tId, clirMode);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -942,14 +948,22 @@ public class SscServiceImpl implements IUtInterface {
                 }
             }
 
+            int eventNum = msg.what;
             if (resultState == SscConstant.REQUEST_SUCCESS) {
+                if (eventNum == SscConstant.EVENT_SSC_UPDATE_OIR
+                        && SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
+                    OirServiceData oirData = (OirServiceData) requestData.peakSscData();
+                    if (!mSscPreferenceHelper.updateClir(oirData.getState())) {
+                        ImsLog.d(mSlotId, "local update error");
+                    }
+                }
+
                 if (handleAdditionalRequestWhenSuccess(requestData)) {
                     ImsLog.d(mSlotId, "Need to send additional request");
                     return;
                 }
             }
 
-            int eventNum = msg.what;
             if (eventNum == SscConstant.EVENT_SSC_QUERY_DOCUMENT) {
                 if (resultState == SscConstant.REQUEST_FAILURE) {
                     // set actual event requested
@@ -1248,6 +1262,13 @@ public class SscServiceImpl implements IUtInterface {
                     return new ImsSsInfo.Builder(oirData.getState())
                             .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
                             .setClirOutgoingState(SscConstant.OIR_DEFAULT).build(); // n
+                } else if (SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
+                    int clirMode =  mSscPreferenceHelper.queryClir();
+                    int outgoingState = clirMode == SscConstant.OIR_DEFAULT
+                            ? clirMode : oirData.getOutgoingState();
+                    return new ImsSsInfo.Builder(oirData.getState())
+                            .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
+                            .setClirOutgoingState(outgoingState).build(); // n
                 } else {
                     return new ImsSsInfo.Builder(oirData.getState())
                             .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
