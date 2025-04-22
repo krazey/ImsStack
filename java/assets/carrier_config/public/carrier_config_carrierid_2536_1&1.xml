@@ -18,4 +18,33 @@
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="10000"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
+    <pbundle name="imsvoice.evs_payload_description_bundle">
+        <pbundle name="127">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="6"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="255"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <int name="imsvoice.evs_codec_attribute_hf_only_int" value="1"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="1">
+            <item value="102"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="1">
+            <item value="104"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="97"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="96"/>
+        </int-array>
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="127"/>
+        </int-array>
+    </pbundle>
 </carrier_config>
