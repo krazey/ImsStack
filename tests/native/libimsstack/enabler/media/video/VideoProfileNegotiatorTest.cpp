@@ -1,0 +1,578 @@
+/*
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include "MediaDef.h"
+#include "video/VideoProfileNegotiator.h"
+#include "video/VideoProfile.h"
+#include "video/VideoProfileUtil.h"
+
+// mocking
+#include "config/MockVideoConfiguration.h"
+
+using ::testing::_;
+using ::testing::NiceMock;
+using ::testing::Return;
+
+const AString kAvcProfileID = "42e01f";
+const IMS_UINT32 kLocalPayload = 97;
+const IMS_UINT32 kPeerPayload = 98;
+
+// Test fixture for VideoProfileNegotiator tests
+class VideoProfileNegotiatorTest : public ::testing::Test
+{
+protected:
+    // SetUp is called before each test case
+    void SetUp() override
+    {
+        // Initialize objects before each test
+        m_pLocalProfile = std::make_unique<VideoProfile>();
+        m_pPeerProfile = std::make_unique<VideoProfile>();
+        m_pNegotiatedProfile = std::make_unique<VideoProfile>();
+        // Use the MockVideoConfiguration, wrapped in NiceMock to avoid warnings
+        // for uninteresting calls.
+        m_pConfig = std::make_unique<NiceMock<MockVideoConfiguration>>();
+        m_pNegotiator = std::make_unique<VideoProfileNegotiator>();
+
+        // --- Basic Configuration Setup (Customize as needed for tests) ---
+
+        // Example: Set default directions
+        m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+        m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+
+        // Example: Set default ports (non-zero to avoid immediate invalidation)
+        m_pLocalProfile->SetDataPort(5004);
+        m_pLocalProfile->SetControlPort(5005);
+        m_pPeerProfile->SetDataPort(6004);
+        m_pPeerProfile->SetControlPort(6005);
+
+        // Example: Set default bandwidths
+        m_pLocalProfile->SetBandwidthAs(1000);
+        m_pLocalProfile->SetBandwidthRs(150);
+        m_pLocalProfile->SetBandwidthRr(150);
+        m_pPeerProfile->SetBandwidthAs(1200);
+        m_pPeerProfile->SetBandwidthRs(200);
+        m_pPeerProfile->SetBandwidthRr(200);
+
+        // --- Set up default mock expectations ---
+        // The negotiator will *get* values from the config.
+        // Use WillRepeatedly if the value might be checked multiple times.
+        ON_CALL(*m_pConfig, GetAsBandwidthKbps())
+                .WillByDefault(Return(1000));  // Example default config value
+        ON_CALL(*m_pConfig, GetRsBandwidthBps()).WillByDefault(Return(150));
+        ON_CALL(*m_pConfig, GetRrBandwidthBps()).WillByDefault(Return(150));
+        ON_CALL(*m_pConfig, GetRtcpIntervalOnActive()).WillByDefault(Return(5));
+        ON_CALL(*m_pConfig, GetRtcpIntervalOnHold()).WillByDefault(Return(5));
+
+        // Assume AVPF is generally supported by config unless overridden in a test
+        ON_CALL(*m_pConfig, IsVideoAvpfEnabled()).WillByDefault(Return(IMS_TRUE));
+        // Assume specific FB types are supported by config unless overridden
+    }
+
+    // TearDown is called after each test case
+    void TearDown() override
+    {
+        // Clean up resources if necessary (smart pointers handle memory)
+    }
+
+    // Helper function to add a basic AVC pPayload (customize as needed)
+    VideoProfile::Payload* AddAvcPayload(VideoProfile* pProfile, IMS_UINT32 nPayloadNum,
+            VIDEO_RESOLUTION eResolution = VIDEO_RESOLUTION_VGA_LS, IMS_UINT32 nLevel = 31,
+            const AString& strProfileLevelId = kAvcProfileID)
+    {
+        if (!pProfile)
+            return nullptr;
+
+        auto* pPayload = new VideoProfile::Payload();
+        pPayload->SetRtpMap(nPayloadNum, "H264", 90000);
+
+        auto* pFmtp = new VideoProfile::AvcFmtp();
+        pFmtp->SetResolution(eResolution);
+        pFmtp->SetLevel(nLevel);
+        pFmtp->SetProfileLevelId(strProfileLevelId);
+        pFmtp->SetProfile(VideoProfileUtil::GetAvcProfileFromProfileLevelId(strProfileLevelId));
+        // Set other pFmtp properties as needed (bitrate, framerate, packetization, sprop)
+        pFmtp->SetPacketizationMode(1);
+        pFmtp->SetShowPacketizationMode(IMS_TRUE);
+        pFmtp->SetShowProfileLevelId(IMS_TRUE);
+
+        pPayload->SetFmtp(pFmtp);
+        pProfile->GetPayloadList().Append(pPayload);
+        return pPayload;
+    }
+
+    // Helper function to add a basic HEVC pPayload (customize as needed)
+    VideoProfile::Payload* AddHevcPayload(VideoProfile* pProfile, IMS_UINT32 nPayloadNum,
+            VIDEO_RESOLUTION eResolution = VIDEO_RESOLUTION_VGA_LS,
+            IMS_UINT32 nLevel = 30,  // nLevel-id is typically 30*3 = 90 in SDP
+            VIDEO_PROFILE_HEVC eHevcProfile = HEVC_PROFILE_MAIN)
+    {
+        if (!pProfile)
+            return nullptr;
+
+        auto* pPayload = new VideoProfile::Payload();
+        pPayload->SetRtpMap(nPayloadNum, "H265", 90000);
+
+        auto* pFmtp = new VideoProfile::HevcFmtp();
+        pFmtp->SetResolution(eResolution);
+        pFmtp->SetLevel(nLevel * 3);  // Store the SDP nLevel-id value
+        pFmtp->SetProfile(eHevcProfile);
+        // Set other pFmtp properties as needed (bitrate, framerate, packetization, sprop)
+        pFmtp->SetPacketizationMode(1);
+        pFmtp->SetShowPacketizationMode(IMS_TRUE);
+        pFmtp->SetShowProfile(IMS_TRUE);
+        pFmtp->SetShowLevel(IMS_TRUE);
+
+        pPayload->SetFmtp(pFmtp);
+        pProfile->GetPayloadList().Append(pPayload);
+        return pPayload;
+    }
+
+    // Member variables accessible by tests
+    std::unique_ptr<VideoProfileNegotiator> m_pNegotiator;
+    std::unique_ptr<VideoProfile> m_pLocalProfile;
+    std::unique_ptr<VideoProfile> m_pPeerProfile;
+    std::unique_ptr<VideoProfile> m_pNegotiatedProfile;
+    // Use the mock configuration type
+    std::unique_ptr<NiceMock<MockVideoConfiguration>> m_pConfig;
+};
+
+// --- Test Cases ---
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateBasicSuccess)
+{
+    // Arrange: Add compatible payloads
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31,
+            "42e01f");  // Level 3.1
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 31,
+            "42e01f");  // Level 3.1
+
+    // Act: Perform negotiation (Offer received scenario)
+    // Pass the mock config object using .get()
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE /* bIsOfferReceived */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_NE(m_pNegotiatedProfile->GetDataPort(), 0);  // Port should be non-zero
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(),
+            MEDIA_DIRECTION_SEND_RECEIVE);  // Example expected direction
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(),
+            kPeerPayload);  // Should take peer's pPayload number in offer scenario
+    EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
+
+    VideoProfile::AvcFmtp* pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    EXPECT_NE(pNegoFmtp, nullptr);
+    EXPECT_EQ(pNegoFmtp->GetResolution(), VIDEO_RESOLUTION_VGA_LS);
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
+    EXPECT_EQ(pNegoFmtp->GetProfileLevelId(), kAvcProfileID);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateNoCommonCodec)
+{
+    // Arrange: Add incompatible payloads
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddHevcPayload(m_pPeerProfile.get(), kPeerPayload);  // Different codec
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_FALSE(bResult);  // Negotiation itself might succeed but bResult in an unusable pProfile
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 0);  // No common pPayload found
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiatePeerPortZero)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pPeerProfile->SetDataPort(0);  // Peer port is zero
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);  // Negotiation should still "succeed" but bResult in port 0
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    // Check if pPayload list is copied but ports/direction are invalidated
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(),
+            1);  // Payload might still be selected initially
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvpf)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+
+    m_pLocalProfile->SetSupportAvpf(IMS_TRUE);
+    m_pLocalProfile->SetTransportType("RTP/AVPF");
+    m_pPeerProfile->SetSupportAvpf(IMS_TRUE);
+    m_pPeerProfile->SetTransportType("RTP/AVPF");
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_TRUE(m_pNegotiatedProfile->IsAvpfSupported());
+    EXPECT_EQ(m_pNegotiatedProfile->GetTransportType(), "RTP/AVPF");
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    // Add more checks for RTCP-FB attributes if needed
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateNullInputsReturnsFalse)
+{
+    // Arrange (Payloads don't matter here)
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+
+    // Act & Assert
+    EXPECT_FALSE(m_pNegotiator->Negotiate(
+            nullptr, m_pPeerProfile.get(), IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get()));
+    EXPECT_FALSE(m_pNegotiator->Negotiate(
+            m_pLocalProfile.get(), nullptr, IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get()));
+    EXPECT_FALSE(m_pNegotiator->Negotiate(
+            m_pLocalProfile.get(), m_pPeerProfile.get(), IMS_TRUE, nullptr, m_pConfig.get()));
+    EXPECT_FALSE(m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(), IMS_TRUE,
+            m_pNegotiatedProfile.get(), nullptr));
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateLocalPortZero)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pLocalProfile->SetDataPort(0);  // Local port is zero
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);  // Negotiation "succeeds" but bResults in port 0
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    // Payload list might be copied from local but ports/direction invalidated
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvcLevelMismatchLocalLower)
+{
+    // Arrange: Local nLevel is lower than peer's
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 30,
+            "42e01e");  // Level 3.0
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 31,
+            "42e01f");  // Level 3.1
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    VideoProfile::VideoFmtp* pNegoFmtp =
+            static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 30);  // lower nLevel
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateAvcResolutionMismatchClosest)
+{
+    // Arrange: No exact eResolution match, but levels match. Local has VGA+CIF, Peer offers VGA.
+    // Expect negotiation to succeed using the closest available local eResolution (VGA).
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31,
+            "42e01f");                                                                // Local VGA
+    AddAvcPayload(m_pLocalProfile.get(), 99, VIDEO_RESOLUTION_CIF_LS, 31, "42e01f");  // Local CIF
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_HD_LS, 31,
+            "42e01f");  // Peer offers HD (mismatch)
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);  // Should succeed by choosing the closest (highest available local)
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_NE(pNegoPayload, nullptr);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);  // Peer's PT
+    VideoProfile::AvcFmtp* pNegoFmtp = static_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
+    EXPECT_NE(pNegoFmtp, nullptr);
+    // Check that the eResolution was set based on GetAvcMaxResolutionFromLevel or highest local
+    // In this case, local VGA (index 0) was the temp pPayload. SetClosestAvc uses nLevel 31 ->
+    // VGA_LS
+    EXPECT_EQ(pNegoFmtp->GetResolution(),
+            VIDEO_RESOLUTION_VGA_LS);  // SetClosestAvc logic based on nLevel
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 31);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateHevcLevelMismatchLocalLower)
+{
+    // Arrange: Local nLevel is lower than peer's
+    AddHevcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS,
+            30);  // Level 3.0 (SDP 90)
+    AddHevcPayload(
+            m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 31);  // Level 3.1 (SDP 93)
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    VideoProfile::VideoFmtp* pNegoFmtp =
+            static_cast<VideoProfile::VideoFmtp*>(pNegoPayload->GetFmtp());
+
+    EXPECT_EQ(pNegoFmtp->GetLevel(), 90);  // lower nLevel
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateAnswerSentBasicSuccess)
+{
+    // Arrange: Add compatible payloads
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload, VIDEO_RESOLUTION_VGA_LS, 31, "42e01f");
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload, VIDEO_RESOLUTION_VGA_LS, 31, "42e01f");
+
+    // Act: Perform negotiation (Answer sent scenario)
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_FALSE /* bIsOfferReceived = false */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_NE(pNegoPayload, nullptr);
+    // Should use local pPayload number in answer scenario
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), kPeerPayload);
+    EXPECT_TRUE(pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"));
+    // Local pPayload number should NOT be modified in MO case
+    EXPECT_EQ(m_pLocalProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kLocalPayload);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthRemoteOption)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    // Set config option to use remote bandwidth values
+    EXPECT_CALL(*m_pConfig, GetBandwidthNegoOption())
+            .WillRepeatedly(Return(MediaConfiguration::BW_OPTION_REMOTE_VALUE));
+    // Set distinct peer bandwidths
+    m_pPeerProfile->SetBandwidthRs(500);
+    m_pPeerProfile->SetBandwidthRr(600);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // Check that negotiated bandwidth matches the peer's values due to config option
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRs(), 500);
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), 600);
+    // AS value depends on codec and potentially remote AS if config option is remote and lower
+    // Add specific AS check if needed based on MakeNegotiatedBandwidth logic
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateRtcpIntervalHold)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pPeerProfile->SetDirection(
+            MEDIA_DIRECTION_SEND);  // Not SEND_RECEIVE, so should use hold interval
+    // Set distinct config intervals
+    EXPECT_CALL(*m_pConfig, GetRtcpIntervalOnActive()).WillRepeatedly(Return(5));
+    EXPECT_CALL(*m_pConfig, GetRtcpIntervalOnHold()).WillRepeatedly(Return(30));
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_RECEIVE);
+    // Should use the hold interval because direction is not SEND_RECEIVE
+    EXPECT_EQ(m_pNegotiatedProfile->GetRtcpInterval(), 30);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateRtcpFbAllSupported)
+{
+    // Arrange
+    VideoProfile::Payload* pLocalPayload = AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    VideoProfile::Payload* pPeerPayload = AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pLocalProfile->SetSupportAvpf(IMS_TRUE);
+    m_pPeerProfile->SetSupportAvpf(IMS_TRUE);
+
+    // Enable all FB types on both local and peer
+    pLocalPayload->GetRtcpFbAttr().SetNackSupported(IMS_TRUE);
+    pLocalPayload->GetRtcpFbAttr().SetTmmbrSupported(IMS_TRUE);
+    pLocalPayload->GetRtcpFbAttr().SetPliSupported(IMS_TRUE);
+    pLocalPayload->GetRtcpFbAttr().SetFirSupported(IMS_TRUE);
+    pLocalPayload->GetRtcpFbAttr().SetTrrSupported(IMS_TRUE);
+    pLocalPayload->GetRtcpFbAttr().SetTrrInt(100);
+
+    pPeerPayload->GetRtcpFbAttr().SetNackSupported(IMS_TRUE);
+    pPeerPayload->GetRtcpFbAttr().SetTmmbrSupported(IMS_TRUE);
+    pPeerPayload->GetRtcpFbAttr().SetPliSupported(IMS_TRUE);
+    pPeerPayload->GetRtcpFbAttr().SetFirSupported(IMS_TRUE);
+    pPeerPayload->GetRtcpFbAttr().SetTrrSupported(IMS_TRUE);
+    pPeerPayload->GetRtcpFbAttr().SetTrrInt(120);  // Different TrrInt
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    VideoProfile::Payload* pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_NE(pNegoPayload, nullptr);
+    EXPECT_TRUE(m_pNegotiatedProfile->IsAvpfSupported());
+
+    // Check that all common FB types are enabled in negotiated pPayload
+    EXPECT_TRUE(pNegoPayload->GetRtcpFbAttr().IsNackSupported());
+    EXPECT_TRUE(pNegoPayload->GetRtcpFbAttr().IsTmmbrSupported());
+    EXPECT_TRUE(pNegoPayload->GetRtcpFbAttr().IsPliSupported());
+    EXPECT_TRUE(pNegoPayload->GetRtcpFbAttr().IsFirSupported());
+    EXPECT_TRUE(pNegoPayload->GetRtcpFbAttr().IsTrrSupported());
+    // TRR-INT should take the peer's value
+    EXPECT_EQ(pNegoPayload->GetRtcpFbAttr().GetTrrInt(), 120);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateCvoEnabled)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pLocalProfile->SetCvoId(1);  // Local supports CVO
+    m_pPeerProfile->SetCvoId(1);   // Peer supports CVO
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // CVO ID should be negotiated (takes peer's ID if both > 0)
+    EXPECT_EQ(m_pNegotiatedProfile->GetCvoId(), 1);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateCvoDisabledPeer)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pLocalProfile->SetCvoId(1);  // Local supports CVO
+    m_pPeerProfile->SetCvoId(0);   // Peer does NOT support CVO
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // CVO ID should be 0 if either side doesn't support it
+    EXPECT_EQ(m_pNegotiatedProfile->GetCvoId(), 0);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionOfferPeerSend)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND);  // Peer offers to send only
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE /* Offer Received */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_RECEIVE);  // We should receive
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionOfferPeerReceive)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_RECEIVE);  // Peer offers to receive only
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE /* Offer Received */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    // If peer offers RECEIVE, we should negotiate to SEND
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionAnswerPeerReceive)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_RECEIVE);  // Peer expects to receive only
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_FALSE /* Answer Sent */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_SEND);  // We should send
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateDirectionInactive)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);  // Peer offers inactive
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE /* Offer Received */, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
+}
