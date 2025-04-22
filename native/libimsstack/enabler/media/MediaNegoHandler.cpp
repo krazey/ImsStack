@@ -15,15 +15,22 @@
  */
 
 #include "MediaNegoHandler.h"
+#include "ImsTypeDef.h"
 #include "ServiceTrace.h"
+#include "ConcreteMediaNegoFactory.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
+static IMS_UINTP g_nNextNegoId = 0;
+
 PUBLIC
-MediaNegoHandler::MediaNegoHandler(
-        IMS_UINT32 nSlotId, std::shared_ptr<MediaEnvironment> pEnvironment) :
+MediaNegoHandler::MediaNegoHandler(IMS_UINT32 nSlotId,
+        std::shared_ptr<MediaEnvironment> pEnvironment,
+        std::shared_ptr<IMediaNegoFactory> pFactory) :
         m_nSlotId(nSlotId),
-        m_pEnvironment(pEnvironment)
+        m_pEnvironment(pEnvironment),
+        m_pMediaNegoFactory(
+                pFactory != IMS_NULL ? pFactory : std::make_shared<ConcreteMediaNegoFactory>())
 {
     IMS_TRACE_I("+MediaNegoHandler(): SlotId[%u]", m_nSlotId, 0, 0);
 }
@@ -36,33 +43,53 @@ MediaNegoHandler::~MediaNegoHandler()
 }
 
 PUBLIC
-std::shared_ptr<MediaNego> MediaNegoHandler::CreateMediaNego(IMS_UINTP nNegoId)
+IMS_UINTP MediaNegoHandler::CreateMediaNego(IMS_UINTP nNegoId)
 {
     IMS_TRACE_I("CreateMediaNego(): NegoId[%" PFLS_x "]", nNegoId, 0, 0);
 
-    // Create new MediaNego
-    std::shared_ptr<MediaNego> pMediaNego = std::make_shared<MediaNego>(m_nSlotId);
+    std::shared_ptr<MediaNego> pNewMediaNego = nullptr;
 
-    // Copy Existed Media Nego with nego id
     if (nNegoId != 0)
     {
         std::shared_ptr<MediaNego> pExistingMediaNego = FindMediaNego(nNegoId);
 
         if (pExistingMediaNego == IMS_NULL)
         {
-            IMS_TRACE_I("CreateMediaNego(): invalid negoId", 0, 0, 0);
-            return IMS_NULL;
+            IMS_TRACE_E(0, "CreateMediaNego(): Invalid NegoId[%" PFLS_x "]", nNegoId, 0, 0);
+            return 0;
         }
 
-        pMediaNego->Forking(pExistingMediaNego.get());
+        pNewMediaNego = m_pMediaNegoFactory->CreateForkedMediaNego(
+                m_nSlotId, pExistingMediaNego, m_pEnvironment);
+        if (!pNewMediaNego)
+        {
+            IMS_TRACE_E(0, "CreateMediaNego(): Factory failed to create forked nego.", 0, 0, 0);
+            return 0;
+        }
     }
     else
     {
-        pMediaNego->CreateProfile(m_pEnvironment);
+        pNewMediaNego = m_pMediaNegoFactory->CreateMediaNego(m_nSlotId);
+
+        if (!pNewMediaNego)
+        {
+            IMS_TRACE_E(0, "CreateMediaNego(): Factory failed to create new nego.", 0, 0, 0);
+            return 0;
+        }
+
+        if (!pNewMediaNego->CreateProfile(m_pEnvironment))
+        {
+            IMS_TRACE_E(0, "CreateMediaNego(): Failed to create profile for new nego.", 0, 0, 0);
+            return 0;
+        }
     }
 
-    m_objMapMediaNego.Add(reinterpret_cast<IMS_UINTP>(pMediaNego.get()), pMediaNego);
-    return pMediaNego;
+    IMS_UINTP nNewNegoId = GenerateNewNegoId();
+    m_objMapMediaNego.Add(nNewNegoId, pNewMediaNego);
+
+    IMS_TRACE_I("CreateMediaNego(): Created NegoId[%" PFLS_x "], MapSize[%d]", nNewNegoId,
+            m_objMapMediaNego.GetSize(), 0);
+    return nNewNegoId;
 }
 
 PUBLIC
@@ -100,12 +127,6 @@ IMS_BOOL MediaNegoHandler::DeleteMediaNego(IMS_UINTP nNegoId)
     std::shared_ptr<MediaNego> pMediaNego = m_objMapMediaNego.GetValueAt(nIndex);
     m_objMapMediaNego.RemoveAt(nIndex);
 
-    if (pMediaNego == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "DeleteMediaNego(): pMediaNego is NULL", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
     return IMS_TRUE;
 }
 
@@ -119,8 +140,6 @@ void MediaNegoHandler::ClearAllMediaNego()
         std::shared_ptr<MediaNego> pMediaNego = m_objMapMediaNego.GetValueAt(0);
         m_objMapMediaNego.RemoveAt(0);
     }
-
-    m_objMapMediaNego.Clear();
 }
 
 PUBLIC
@@ -172,7 +191,8 @@ IMS_BOOL MediaNegoHandler::NegotiateSdp(IMS_UINTP nNegoId, IN ISession* pSession
     if (pMediaNego == IMS_NULL)
     {
         IMS_TRACE_E(0, "NegotiateSdp(): NegoId[%" PFLS_x "] not found", nNegoId, 0, 0);
-        errorReason = MediaNego::ERROR_INVALID_DESCRIPTOR;  // Indicate failure due to missing Nego
+        errorReason = MediaNego::ERROR_INVALID_DESCRIPTOR;  // Indicate failure due to
+                                                            // missing Nego
         *nAudioDirection = MEDIA_DIRECTION_INVALID;
         *nVideoDirection = MEDIA_DIRECTION_INVALID;
         *nTextDirection = MEDIA_DIRECTION_INVALID;
@@ -423,29 +443,26 @@ IMS_BOOL MediaNegoHandler::SetRtpPort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eTyp
     if (eType & MEDIA_TYPE_AUDIO)
     {
         std::shared_ptr<AudioNego> pAudioNego = pMediaNego->GetAudioNego();
-        if (pAudioNego != IMS_NULL)
-        {
-            bResult &= pAudioNego->SetLocalPort(nPort);
-        }
+        bResult &= pAudioNego != IMS_NULL ? pAudioNego->SetLocalPort(nPort) : IMS_FALSE;
     }
 
     if (eType & MEDIA_TYPE_VIDEO)
     {
         std::shared_ptr<VideoNego> pVideoNego = pMediaNego->GetVideoNego();
-        if (pVideoNego != IMS_NULL)
-        {
-            bResult &= pVideoNego->SetLocalPort(nPort);
-        }
+        bResult &= pVideoNego != IMS_NULL ? pVideoNego->SetLocalPort(nPort) : IMS_FALSE;
     }
 
     if (eType & MEDIA_TYPE_TEXT)
     {
         std::shared_ptr<TextNego> pTextNego = pMediaNego->GetTextNego();
-        if (pTextNego != IMS_NULL)
-        {
-            bResult &= pTextNego->SetLocalPort(nPort);
-        }
+        bResult &= pTextNego != IMS_NULL ? pTextNego->SetLocalPort(nPort) : IMS_FALSE;
     }
 
     return bResult;
+}
+
+PRIVATE
+IMS_UINTP MediaNegoHandler::GenerateNewNegoId()
+{
+    return ++g_nNextNegoId;
 }

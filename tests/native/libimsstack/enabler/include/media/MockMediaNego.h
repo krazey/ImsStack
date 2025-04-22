@@ -26,42 +26,36 @@ class MockMediaNego : public MediaNego
 public:
     explicit MockMediaNego(IMS_SINT32 nSlotId) :
             MediaNego(nSlotId) {};
-    MOCK_METHOD(void, CreateProfile, (IN std::shared_ptr<MediaEnvironment> pEnvironment), (const));
-    MOCK_METHOD(IMS_BOOL, Forking, (IN MediaNego * pMediaNego), (const));
+    MOCK_METHOD(IMS_BOOL, CreateProfile, (IN std::shared_ptr<MediaEnvironment> pEnvironment),
+            (override));
+    MOCK_METHOD(IMS_BOOL, Forking, (IN MediaNego * pMediaNego), (override));
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (OUT ISession * pSession, IN MEDIA_CONTENT_TYPE eMediaType,
                     IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
                     IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),
-            (const));
+            (override));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp, (IN ISession * pSession),
             (override));
     MOCK_METHOD(IMS_BOOL, NegotiateSdp,
             (IN ISession * pSession, OUT IMS_SINT32& nAudioDirection,
                     OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
                     OUT MediaNegoResult& errorReason),
-            (const));
-    MOCK_METHOD(void, FinalizeSdp, (IN ISession * pSession), (const));
-
-    MOCK_METHOD(void, SetNegoState, (NEGO_STATE eNegoState), (const));
-    MOCK_METHOD(NEGO_STATE, GetNegoState, (), (const));
-
-    MOCK_METHOD(void, SetAudioNego, (AudioNego * pAudioNego), (const));
-    MOCK_METHOD(std::shared_ptr<AudioNego>, GetAudioNego, (), (const));
-    MOCK_METHOD(void, SetVideoNego, (VideoNego * pVideoNego), (const));
-    MOCK_METHOD(std::shared_ptr<VideoNego>, GetVideoNego, (), (const));
-    MOCK_METHOD(void, SetTextNego, (TextNego * pTextNego), (const));
-    MOCK_METHOD(std::shared_ptr<TextNego>, GetTextNego, (), (const));
-    MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSessionType, (), (const));
-
-    MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedAudioDirection, (), (const));
-    MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedVideoDirection, (), (const));
-    MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedTextDirection, (), (const));
-    MOCK_METHOD(AUDIO_CODEC, GetNegotiatedAudioQuality, (), (const));
-    MOCK_METHOD(VIDEO_RESOLUTION, GetNegotiatedVideoQuality, (), (const));
-    MOCK_METHOD(TEXT_CODEC, GetNegotiatedTextQuality, (), (const));
-
-    MOCK_METHOD(IMediaDescriptor*, GetMediaDescriptor, (IN IMedia * pIMedia), (const));
-    MOCK_METHOD(IMS_BOOL, IsForking, (), (const));
+            (override));
+    MOCK_METHOD(void, FinalizeSdp, (IN ISession * pSession), (override));
+    MOCK_METHOD(void, SetNegoState, (NEGO_STATE eNegoState), (override));
+    MOCK_METHOD(NEGO_STATE, GetNegoState, (), (override));
+    MOCK_METHOD(std::shared_ptr<AudioNego>, GetAudioNego, (), (override));
+    MOCK_METHOD(std::shared_ptr<VideoNego>, GetVideoNego, (), (override));
+    MOCK_METHOD(std::shared_ptr<TextNego>, GetTextNego, (), (override));
+    MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSessionType, (), (override));
+    MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedAudioDirection, (), (override));
+    MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedVideoDirection, (), (override));
+    MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedTextDirection, (), (override));
+    MOCK_METHOD(AUDIO_CODEC, GetNegotiatedAudioQuality, (), (override));
+    MOCK_METHOD(VIDEO_RESOLUTION, GetNegotiatedVideoQuality, (), (override));
+    MOCK_METHOD(TEXT_CODEC, GetNegotiatedTextQuality, (), (override));
+    MOCK_METHOD(IMediaDescriptor*, GetMediaDescriptor, (IN IMedia * pIMedia), (override));
+    MOCK_METHOD(IMS_BOOL, IsForking, (), (override));
 };
 
 #endif

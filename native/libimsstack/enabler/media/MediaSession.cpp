@@ -36,7 +36,8 @@ MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServ
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(std::make_shared<MediaEnvironment>(eNetwork, eServiceType, pIService)),
-        m_pMediaNegoHandler(std::make_shared<MediaNegoHandler>(m_nSlotId, m_pEnvironment)),
+        m_pMediaNegoHandler(
+                std::make_shared<MediaNegoHandler>(m_nSlotId, m_pEnvironment, IMS_NULL)),
         m_pAudioController(std::make_shared<AudioController>()),
         m_pVideoController(std::make_shared<VideoController>()),
         m_pTextController(std::make_shared<TextController>()),
@@ -111,18 +112,16 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
         return UNDEFINED_NEGO_ID;
     }
 
-    std::shared_ptr<MediaNego> pMediaNego = m_pMediaNegoHandler->CreateMediaNego(nNegoId);
+    IMS_UINTP nNewNegoId = m_pMediaNegoHandler->CreateMediaNego(nNegoId);
 
-    if (pMediaNego == IMS_NULL)
+    if (nNewNegoId == 0)
     {
         IMS_TRACE_E(0, "CreateProfile() - invalid media nego id", 0, 0, 0);
         return UNDEFINED_NEGO_ID;
     }
 
-    IMS_UINTP nMediaNego = reinterpret_cast<IMS_UINTP>(pMediaNego.get());
-    CreateMediaSessions(nMediaNego, eType);
-
-    return nMediaNego;
+    CreateMediaSessions(nNewNegoId, eType);
+    return nNewNegoId;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)

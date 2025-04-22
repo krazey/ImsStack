@@ -49,7 +49,7 @@ public:
     MediaSessionTest()
     {
         m_pMediaNego = std::make_shared<MockMediaNego>(0);
-        m_nNegoId = reinterpret_cast<IMS_UINTP>(m_pMediaNego.get());
+        m_nNegoId = NEGO_ID;
     }
     ~MediaSessionTest() {}
 
@@ -120,7 +120,8 @@ protected:
         m_pEnvironment->eNetworkType = MEDIA_NETWORK_LTE;
 
         m_pIsession = new MockISession();
-        m_pMockMediaNegoHandler = std::make_shared<MockMediaNegoHandler>(0, m_pEnvironment);
+        m_pMockMediaNegoHandler =
+                std::make_shared<MockMediaNegoHandler>(0, m_pEnvironment, IMS_NULL);
         m_pMockAudioController = std::make_shared<MockAudioController>();
         m_pMockVideoController = std::make_shared<MockVideoController>();
         m_pMockTextController = std::make_shared<MockTextController>();
@@ -130,7 +131,7 @@ protected:
         m_pSession->SetTextController(m_pMockTextController);
 
         ON_CALL(*m_pMockMediaNegoHandler, FindMediaNego(_)).WillByDefault(Return(m_pMediaNego));
-        ON_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(_)).WillByDefault(Return(m_pMediaNego));
+        ON_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(_)).WillByDefault(Return(NEGO_ID));
         ON_CALL(*m_pMockMediaNegoHandler, DeleteMediaNego(_)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(*m_pMockMediaNegoHandler, GetRemotePort(_, _))
                 .WillByDefault(Return(REMOTE_PORT));  // Default remote port
@@ -155,7 +156,7 @@ TEST_F(MediaSessionTest, testCreateProfileSuccess)
 {
     EXPECT_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(0))
             .Times(1)
-            .WillOnce(Return(m_pMediaNego));  // Assume MediaNego returns the ID
+            .WillOnce(Return(NEGO_ID));  // Assume MediaNego returns the ID
 
     EXPECT_CALL(*m_pMockAudioController, CreateSession(_, m_nNegoId, _, MEDIA_SERVICE_DEFAULT))
             .Times(1)
@@ -168,9 +169,7 @@ TEST_F(MediaSessionTest, testCreateProfileSuccess)
 
 TEST_F(MediaSessionTest, testCreateProfileVideoTextSuccess)
 {
-    EXPECT_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(0))
-            .Times(1)
-            .WillOnce(Return(m_pMediaNego));
+    EXPECT_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(0)).Times(1).WillOnce(Return(NEGO_ID));
 
     EXPECT_CALL(*m_pMockAudioController, CreateSession(_, m_nNegoId, _, _)).Times(0);  // No audio
     EXPECT_CALL(*m_pMockVideoController, CreateSession(_, _)).Times(1).WillOnce(Return(IMS_TRUE));
@@ -183,7 +182,7 @@ TEST_F(MediaSessionTest, testCreateProfileNegoHandlerFails)
 {
     EXPECT_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(0))
             .Times(1)
-            .WillOnce(Return(nullptr));  // Handler fails to create nego
+            .WillOnce(Return(0));  // Handler fails to create nego
 
     EXPECT_CALL(*m_pMockAudioController, CreateSession(_, _, _, _)).Times(0);
 
@@ -193,7 +192,7 @@ TEST_F(MediaSessionTest, testCreateProfileNegoHandlerFails)
 TEST_F(MediaSessionTest, testDestroyProfileSuccess)
 {
     // First, create the profile successfully
-    EXPECT_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(0)).WillOnce(Return(m_pMediaNego));
+    EXPECT_CALL(*m_pMockMediaNegoHandler, CreateMediaNego(0)).WillOnce(Return(NEGO_ID));
     EXPECT_CALL(*m_pMockAudioController, CreateSession(_, m_nNegoId, _, MEDIA_SERVICE_DEFAULT))
             .WillOnce(Return(IMS_TRUE));
     ASSERT_EQ(m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO), m_nNegoId);

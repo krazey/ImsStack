@@ -19,12 +19,12 @@
 
 #include <memory>
 
+#include "IMediaNegoFactory.h"
+#include "ISession.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
-#include "MediaNego.h"
 #include "MediaEnvironment.h"
-#include "ISession.h"
 
 /**
  * @brief Handles the creation, management, and SDP negotiation logic associated with MediaNego
@@ -36,10 +36,12 @@ public:
     /**
      * @brief Constructor
      * @param nSlotId The UICC slot id.
-     * @param pEnvironment Shared pointer to the media environment containing network and service
-     * information.
+     * @param pEnvironment Shared pointer to the media environment containing network
+     *                     and service information.
+     * @param pFactory The factory to inject the dependency
      */
-    MediaNegoHandler(IMS_UINT32 nSlotId, std::shared_ptr<MediaEnvironment> pEnvironment);
+    MediaNegoHandler(IMS_UINT32 nSlotId, std::shared_ptr<MediaEnvironment> pEnvironment,
+            std::shared_ptr<IMediaNegoFactory> pFactory);
 
     /**
      * @brief Destructor. Cleans up all managed MediaNego instances.
@@ -57,11 +59,9 @@ public:
      *
      * @param nExistingNegoId The ID (pointer) of an existing MediaNego to fork from,
      *                        or 0 to create a new one.
-     * @return std::shared_ptr<MediaNego> Pointer to the newly created or forked MediaNego instance,
-     * or nullptr on failure. The caller does NOT own this pointer. The ID (pointer value) should be
-     * used for subsequent operations.
+     * @return Return a new MediaNego id.
      */
-    virtual std::shared_ptr<MediaNego> CreateMediaNego(IMS_UINTP nExistingNegoId = 0);
+    virtual IMS_UINTP CreateMediaNego(IMS_UINTP nExistingNegoId = 0);
 
     /**
      * @brief Finds a MediaNego instance by its ID.
@@ -220,13 +220,18 @@ public:
     virtual IMS_BOOL SetRtpPort(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE eType, IMS_UINT32 nPort);
 
 private:
-    // Prevent copy and assignment
     MediaNegoHandler(const MediaNegoHandler&) = delete;
     MediaNegoHandler& operator=(const MediaNegoHandler&) = delete;
+
+    /**
+     * @brief Generate the new identification of the MediaNego
+     */
+    IMS_UINTP GenerateNewNegoId();
 
     IMS_UINT32 m_nSlotId;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;  // Needed for MediaNego::CreateProfile
     ImsMap<IMS_UINTP, std::shared_ptr<MediaNego>> m_objMapMediaNego;
+    std::shared_ptr<IMediaNegoFactory> m_pMediaNegoFactory;
 };
 
 #endif  // MEDIA_NEGO_HANDLER_H_
