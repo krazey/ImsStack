@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@
 #include "CarrierConfig.h"
 #include "ServiceConfig.h"
 #include "MockICarrierConfig.h"
+#include <config/MockMediaConfiguration.h>
 #include "config/MediaCarrierConfigBundle.h"
 #include "config/CodecAmrConfig.h"
 
@@ -30,6 +31,7 @@ using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecAmrConfig::DEFAULT_CHANNEL;
 static const IMS_SINT32 DEFAULT_OCTET_ALIGN = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
+static const IMS_SINT32 DEFAULT_MODESET_AMR = CodecAmrConfig::DEFAULT_MODESET_AMR;
 static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecAmrConfig::DEFAULT_MODESET_AMR_WB;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMRWB;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMR;
@@ -39,242 +41,254 @@ static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecAmrConfig::DEFAULT_MODECHANGE_PERIOD;
 static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = CodecAmrConfig::DEFAULT_MODECHANGE_NEIGHBOR;
 
-MATCHER_P(IsSameKey, key, "")
+class CodecAmrConfigTest : public ::testing::Test
 {
-    return IMS_StrCmp(arg, key) == 0;
-}
-
-class CodecAmrConfigTest : public ::testing::Test {
-public:
-    ICarrierConfig* m_piCc;
-    CodecAmrConfig* m_pConfig_AmrWb;
-    CodecAmrConfig* m_pConfig_AmrNb;
-    MockICarrierConfig* m_pMockICarrierConfig;
-    MockICarrierConfig* m_pAudioBundle;
-    MockICarrierConfig* m_pAudioSubBundle;
-    IMS_SINT32 m_nAmrWbPayloadTypeNumber = 101;
-    IMS_SINT32 m_nAmrNbPayloadTypeNumber = 99;
-    AString m_strPayloadTypeNumber;
-
 protected:
-    virtual void SetUp() override
+    std::unique_ptr<MockICarrierConfig> m_pMockICarrierConfig;
+    std::unique_ptr<MockICarrierConfig> m_pMockBundle;
+    std::unique_ptr<MockICarrierConfig> m_pMockSubBundle;
+
+    void SetUp() override
     {
-        m_pConfig_AmrWb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, m_nAmrWbPayloadTypeNumber);
-        m_pConfig_AmrNb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, m_nAmrNbPayloadTypeNumber);
-        m_pMockICarrierConfig = new MockICarrierConfig();
-        m_pAudioBundle = new MockICarrierConfig();
-        m_pAudioSubBundle = new MockICarrierConfig();
+        m_pMockICarrierConfig = std::make_unique<MockICarrierConfig>();
+        m_pMockBundle = std::make_unique<MockICarrierConfig>();
+        m_pMockSubBundle = std::make_unique<MockICarrierConfig>();
+
+        EXPECT_CALL(*m_pMockBundle, ReleaseBundle()).Times(::testing::AnyNumber());
+        EXPECT_CALL(*m_pMockSubBundle, ReleaseBundle()).Times(::testing::AnyNumber());
     }
 
-    virtual void TearDown() override
-    {
-        delete m_pConfig_AmrWb;
-        delete m_pConfig_AmrNb;
-        delete m_pMockICarrierConfig;
-        delete m_pAudioBundle;
-        delete m_pAudioSubBundle;
-
-        m_pConfig_AmrWb = IMS_NULL;
-        m_pConfig_AmrNb = IMS_NULL;
-        m_pMockICarrierConfig = IMS_NULL;
-        m_pAudioBundle = IMS_NULL;
-        m_pAudioSubBundle = IMS_NULL;
-    }
-
-    inline void GetReadyToCreateAmrWb()
-    {
-        m_strPayloadTypeNumber.SetNumber(m_nAmrWbPayloadTypeNumber);
-
-        ON_CALL(*m_pMockICarrierConfig,
-                GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE))
-                .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
-                .WillByDefault(Return(m_pAudioSubBundle));
-    }
-
-    inline void GetReadyToCreateAmrNb()
-    {
-        m_strPayloadTypeNumber.SetNumber(m_nAmrNbPayloadTypeNumber);
-
-        ON_CALL(*m_pMockICarrierConfig,
-                GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
-                .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
-                .WillByDefault(Return(m_pAudioSubBundle));
-    }
+    void TearDown() override {}
 };
 
-TEST_F(CodecAmrConfigTest, GetConfigDefault)
+// Test case 1: piCc is IMS_NULL
+TEST_F(CodecAmrConfigTest, Create_NullCarrierConfig)
 {
-    EXPECT_EQ(m_pConfig_AmrWb->GetChannel(), DEFAULT_CHANNEL);
-    EXPECT_EQ(m_pConfig_AmrWb->GetAmrModeSetList(), DEFAULT_MODESET_AMR_WB);
-    EXPECT_EQ(m_pConfig_AmrWb->GetDefaultAmrModeSetList(), DEFAULT_MODESET_AMR_WB);
-    EXPECT_EQ(m_pConfig_AmrWb->GetShowAmrModeSet(), IMS_FALSE);
-    EXPECT_EQ(m_pConfig_AmrWb->GetOctetAlign(), DEFAULT_OCTET_ALIGN);
-    EXPECT_EQ(m_pConfig_AmrWb->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
-    EXPECT_EQ(m_pConfig_AmrWb->GetDtx(), IMS_TRUE);
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeChangeCapability(), DEFAULT_MODECHANGE_CAPABILITY);
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
+    CodecAmrConfig codecConfig(ImsCodec::AUDIO_AMR, 100);
+
+    IMS_BOOL bResult = codecConfig.Create(IMS_NULL);
+
+    ASSERT_EQ(bResult, IMS_FALSE);
 }
 
-TEST_F(CodecAmrConfigTest, WB_GetConfigOctetAlign)
+// Test case 2: Codec is AUDIO_AMR and carrier config is valid
+TEST_F(CodecAmrConfigTest, Create_AmrCodec)
 {
-    IMS_SINT32 mOctetAlign = 0;
+    IMS_SINT32 nCodecType = ImsCodec::AUDIO_AMR;
+    IMS_SINT32 nPayloadType = 100;
+    IMS_SINT32 nOctetAlign = 1;
+    ImsVector<IMS_SINT32> objModesetArray;
+    objModesetArray.Push(0);
+    objModesetArray.Push(1);
+    objModesetArray.Push(4);
+    objModesetArray.Push(7);
+    IMS_SINT32 nModeSetList = (1 << 0) | (1 << 1) | (1 << 4) | (1 << 7);
+    IMS_SINT32 nModeChangeCapability = 1;
+    IMS_SINT32 nModeChangePeriod = 2;
+    IMS_SINT32 nModeChangeNeighbor = 3;
 
-    ON_CALL(*m_pAudioSubBundle,
+    CodecAmrConfig codecConfig(nCodecType, nPayloadType);
+
+    EXPECT_CALL(*m_pMockICarrierConfig,
+            GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
+            .WillOnce(::testing::Return(m_pMockBundle.get()));
+    EXPECT_CALL(*m_pMockBundle, GetBundle(AString(std::to_string(nPayloadType).c_str()).GetStr()))
+            .WillOnce(::testing::Return(m_pMockSubBundle.get()));
+    EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
                     DEFAULT_OCTET_ALIGN))
-            .WillByDefault(Return(mOctetAlign));
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrWb->GetOctetAlign(), mOctetAlign);
-}
-
-TEST_F(CodecAmrConfigTest, NB_GetConfigOctetAlign)
-{
-    IMS_SINT32 mOctetAlign = 1;
-
-    ON_CALL(*m_pAudioSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
-                    DEFAULT_OCTET_ALIGN))
-            .WillByDefault(Return(mOctetAlign));
-    GetReadyToCreateAmrNb();
-    EXPECT_TRUE(m_pConfig_AmrNb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrNb->GetOctetAlign(), mOctetAlign);
-}
-
-TEST_F(CodecAmrConfigTest, WB_GetChannel)
-{
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrWb->GetChannel(), DEFAULT_CHANNEL);
-}
-
-TEST_F(CodecAmrConfigTest, NB_GetChannel)
-{
-    GetReadyToCreateAmrNb();
-    EXPECT_TRUE(m_pConfig_AmrNb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrNb->GetChannel(), DEFAULT_CHANNEL);
-}
-
-TEST_F(CodecAmrConfigTest, GetConfigShowModeSetList)
-{
-    IMS_BOOL bMockShowModeSet = IMS_TRUE;
-
-    ON_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL,
-                    IMS_FALSE))
-            .WillByDefault(Return(bMockShowModeSet));
-
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrWb->GetShowAmrModeSet(), bMockShowModeSet);
-}
-
-TEST_F(CodecAmrConfigTest, WB_GetConfigModeSetList)
-{
-    ImsVector<IMS_SINT32> objCodecAttributeModesetWb;
-    objCodecAttributeModesetWb.Push(0);
-    objCodecAttributeModesetWb.Push(1);
-    objCodecAttributeModesetWb.Push(2);
-
-    ON_CALL(*m_pAudioSubBundle,
+            .WillOnce(::testing::Return(nOctetAlign));
+    EXPECT_CALL(*m_pMockSubBundle,
             GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
-            .WillByDefault(Return(objCodecAttributeModesetWb));
-
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrWb->GetAmrModeSetList(), 7);
-    EXPECT_EQ(m_pConfig_AmrWb->GetAmrModeSet(), 2);
-}
-
-TEST_F(CodecAmrConfigTest, NB_GetConfigModeSetList)
-{
-    ImsVector<IMS_SINT32> objCodecAttributeModesetNb;
-    objCodecAttributeModesetNb.Push(0);
-    objCodecAttributeModesetNb.Push(2);
-    objCodecAttributeModesetNb.Push(4);
-    objCodecAttributeModesetNb.Push(7);
-
-    ON_CALL(*m_pAudioSubBundle,
-            GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
-            .WillByDefault(Return(objCodecAttributeModesetNb));
-    GetReadyToCreateAmrNb();
-    EXPECT_TRUE(m_pConfig_AmrNb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrNb->GetAmrModeSetList(), 149);
-    EXPECT_EQ(m_pConfig_AmrNb->GetAmrModeSet(), 7);
-}
-
-TEST_F(CodecAmrConfigTest, WB_GetConfigSamplingRate)
-{
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrWb->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
-}
-
-TEST_F(CodecAmrConfigTest, NB_GetConfigSamplingRate)
-{
-    GetReadyToCreateAmrNb();
-    EXPECT_TRUE(m_pConfig_AmrNb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrNb->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMR);
-}
-
-TEST_F(CodecAmrConfigTest, GetDtx)
-{
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrWb->GetDtx(), DEFAULT_DTX);
-}
-
-TEST_F(CodecAmrConfigTest, GetModeChangeCapability)
-{
-    IMS_SINT32 nModeChangeCapability = 10;
-
-    ON_CALL(*m_pAudioSubBundle,
+            .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objModesetArray)));
+    EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1))
-            .WillByDefault(Return(nModeChangeCapability));
-
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeChangeCapability(), nModeChangeCapability);
-}
-
-TEST_F(CodecAmrConfigTest, GetModeChangePeriod)
-{
-    IMS_SINT32 nModeChangePeriod = 20;
-
-    ON_CALL(*m_pAudioSubBundle,
+            .WillOnce(::testing::Return(nModeChangeCapability));
+    EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1))
-            .WillByDefault(Return(nModeChangePeriod));
+            .WillOnce(::testing::Return(nModeChangePeriod));
+    EXPECT_CALL(*m_pMockSubBundle,
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1))
+            .WillOnce(::testing::Return(nModeChangeNeighbor));
 
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
+    IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
 
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeChangePeriod(), nModeChangePeriod);
+    ASSERT_EQ(bResult, IMS_TRUE);
+    ASSERT_EQ(codecConfig.GetCodec(), nCodecType);
+    ASSERT_EQ(codecConfig.GetPayloadType(), nPayloadType);
+    ASSERT_EQ(codecConfig.GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMR);
+    ASSERT_EQ(codecConfig.GetDefaultAmrModeSetList(), (1 << DEFAULT_MODESET_AMR));
+    ASSERT_EQ(codecConfig.GetOctetAlign(), nOctetAlign);
+    ASSERT_EQ(codecConfig.GetAmrModeSetList(), nModeSetList);
+    ASSERT_EQ(codecConfig.GetModeChangeCapability(), nModeChangeCapability);
+    ASSERT_EQ(codecConfig.GetModeChangePeriod(), nModeChangePeriod);
+    ASSERT_EQ(codecConfig.GetModeChangeNeighbor(), nModeChangeNeighbor);
 }
 
-TEST_F(CodecAmrConfigTest, GetModeChangeNeighbor)
+// Test case 3: Codec is AUDIO_AMR_WB and carrier config is valid
+TEST_F(CodecAmrConfigTest, Create_AmrWbCodec)
 {
-    IMS_SINT32 nModeChangeNeighbor = 30;
+    IMS_SINT32 nCodecType = ImsCodec::AUDIO_AMR_WB;
+    IMS_SINT32 nPayloadType = 101;
+    IMS_SINT32 nOctetAlign = 0;
+    ImsVector<IMS_SINT32> objModesetArray;
+    objModesetArray.Push(6);
+    objModesetArray.Push(8);
+    objModesetArray.Push(9);
 
-    ON_CALL(*m_pAudioSubBundle,
+    IMS_SINT32 nModeSetList = (1 << 6) | (1 << 8) | (1 << 9);
+    IMS_SINT32 nModeChangeCapability = -1;
+    IMS_SINT32 nModeChangePeriod = -1;
+    IMS_SINT32 nModeChangeNeighbor = -1;
+
+    CodecAmrConfig codecConfig(nCodecType, nPayloadType);
+
+    EXPECT_CALL(*m_pMockICarrierConfig,
+            GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE))
+            .WillOnce(::testing::Return(m_pMockBundle.get()));
+    EXPECT_CALL(*m_pMockBundle, GetBundle(AString(std::to_string(nPayloadType).c_str()).GetStr()))
+            .WillOnce(::testing::Return(m_pMockSubBundle.get()));
+    EXPECT_CALL(*m_pMockSubBundle,
+            GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+                    DEFAULT_OCTET_ALIGN))
+            .WillOnce(::testing::Return(nOctetAlign));
+    EXPECT_CALL(*m_pMockSubBundle,
+            GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
+            .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objModesetArray)));
+    EXPECT_CALL(*m_pMockSubBundle,
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1))
+            .WillOnce(::testing::Return(nModeChangeCapability));
+    EXPECT_CALL(*m_pMockSubBundle,
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1))
+            .WillOnce(::testing::Return(nModeChangePeriod));
+    EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1))
-            .WillByDefault(Return(nModeChangeNeighbor));
+            .WillOnce(::testing::Return(nModeChangeNeighbor));
 
-    GetReadyToCreateAmrWb();
-    EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
+    IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
 
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeChangeNeighbor(), nModeChangeNeighbor);
+    ASSERT_EQ(bResult, IMS_TRUE);
+    ASSERT_EQ(codecConfig.GetCodec(), nCodecType);
+    ASSERT_EQ(codecConfig.GetPayloadType(), nPayloadType);
+    ASSERT_EQ(codecConfig.GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
+    ASSERT_EQ(codecConfig.GetDefaultAmrModeSetList(), (1 << DEFAULT_MODESET_AMR_WB));
+    ASSERT_EQ(codecConfig.GetOctetAlign(), nOctetAlign);
+    ASSERT_EQ(codecConfig.GetAmrModeSetList(), nModeSetList);
+    ASSERT_EQ(codecConfig.GetModeChangeCapability(), nModeChangeCapability);
+    ASSERT_EQ(codecConfig.GetModeChangePeriod(), nModeChangePeriod);
+    ASSERT_EQ(codecConfig.GetModeChangeNeighbor(), nModeChangeNeighbor);
+}
+
+// Test case 4: GetBundle for the main bundle returns IMS_NULL
+TEST_F(CodecAmrConfigTest, Create_NullBundle)
+{
+    IMS_SINT32 nCodecType = ImsCodec::AUDIO_AMR;
+    IMS_SINT32 nPayloadType = 100;
+
+    CodecAmrConfig codecConfig(nCodecType, nPayloadType);
+
+    EXPECT_CALL(*m_pMockICarrierConfig,
+            GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
+            .WillOnce(::testing::Return(IMS_NULL));
+
+    IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
+    ASSERT_EQ(bResult, IMS_FALSE);
+}
+
+// Test case 5: GetBundle for the sub-bundle returns IMS_NULL
+TEST_F(CodecAmrConfigTest, Create_NullSubBundle)
+{
+    IMS_SINT32 nCodecType = ImsCodec::AUDIO_AMR;
+    IMS_SINT32 nPayloadType = 100;
+
+    CodecAmrConfig codecConfig(nCodecType, nPayloadType);
+
+    // Set expectations: main bundle is returned, but sub-bundle is IMS_NULL
+    EXPECT_CALL(*m_pMockICarrierConfig,
+            GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
+            .WillOnce(::testing::Return(m_pMockBundle.get()));
+    EXPECT_CALL(*m_pMockBundle, GetBundle(AString(std::to_string(nPayloadType).c_str()).GetStr()))
+            .WillOnce(::testing::Return(IMS_NULL));
+
+    IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
+
+    ASSERT_EQ(bResult, IMS_FALSE);
+}
+
+// Test case 6: Modeset array processing with various values
+TEST_F(CodecAmrConfigTest, Create_ModesetArrayProcessing)
+{
+    IMS_SINT32 nCodecType = ImsCodec::AUDIO_AMR;
+    IMS_SINT32 nPayloadType = 100;
+
+    {
+        CodecAmrConfig codecConfig(nCodecType, nPayloadType);
+        ImsVector<IMS_SINT32> objEmptyModesetArray;
+
+        EXPECT_CALL(*m_pMockICarrierConfig, GetBundle(::testing::_))
+                .WillOnce(::testing::Return(m_pMockBundle.get()));
+        EXPECT_CALL(*m_pMockBundle, GetBundle(::testing::_))
+                .WillOnce(::testing::Return(m_pMockSubBundle.get()));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(DEFAULT_OCTET_ALIGN));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
+                .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objEmptyModesetArray)));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(-1));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(-1));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(-1));
+
+        IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
+        ASSERT_EQ(bResult, IMS_TRUE);
+        ASSERT_EQ(codecConfig.GetAmrModeSetList(), 0);
+    }
+
+    {
+        CodecAmrConfig codecConfig(nCodecType, nPayloadType);
+        // ImsVector<IMS_SINT32> modesetArrayWithNegative = {0, 1, -2, 7}; // -2 is invalid
+        ImsVector<IMS_SINT32> objModesetArrayWithNegative;
+        objModesetArrayWithNegative.Push(0);
+        objModesetArrayWithNegative.Push(1);
+        objModesetArrayWithNegative.Push(-2);
+        objModesetArrayWithNegative.Push(7);
+
+        EXPECT_CALL(*m_pMockICarrierConfig, GetBundle(::testing::_))
+                .WillOnce(::testing::Return(m_pMockBundle.get()));
+        EXPECT_CALL(*m_pMockBundle, GetBundle(::testing::_))
+                .WillOnce(::testing::Return(m_pMockSubBundle.get()));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(DEFAULT_OCTET_ALIGN));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
+                .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objModesetArrayWithNegative)));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(-1));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(-1));
+        EXPECT_CALL(*m_pMockSubBundle,
+                GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT,
+                        ::testing::_))
+                .WillOnce(::testing::Return(-1));
+
+        IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
+        ASSERT_EQ(bResult, IMS_TRUE);
+        ASSERT_EQ(codecConfig.GetAmrModeSetList(), (1 << 0) | (1 << 1));
+    }
 }

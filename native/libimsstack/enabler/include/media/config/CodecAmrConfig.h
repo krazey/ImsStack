@@ -73,7 +73,7 @@ public:
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = 8000;
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = 16000;
 
-protected:
+private:
     IMS_SINT32 m_nOctetAlign;
     IMS_SINT32 m_nSamplingRate;
 };
