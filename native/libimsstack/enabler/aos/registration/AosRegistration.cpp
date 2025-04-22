@@ -3411,6 +3411,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessReconfigPending()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessUnpredictableFailure()
 {
+    m_eImsReasonCode = AosReasonCode::INTERNAL_ERROR;
     Destroy();
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_INTERNAL);
 }

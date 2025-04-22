@@ -396,6 +396,9 @@ enum class AosReasonCode
     /// Registration failed due to USIM authentication failure.
     USIM_AUTHENTICATION_FAILURES = TO_UINT32(AosReasonCodeBase::BASE) + 10,
 
+    /// Registration failed due to internal error.
+    INTERNAL_ERROR = TO_UINT32(AosReasonCodeBase::BASE) + 11,
+
     /**
      * @brief : BASE_MODEM(2000) - Errors requiring special action from the modem.
      */

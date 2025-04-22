@@ -378,6 +378,7 @@ public interface IAosRegistrationListener {
         SERVICE_UNAVAILABLE(ReasonCode.BASE, 8),
         NOT_REGISTERED(ReasonCode.BASE, 9),
         USIM_AUTHENTICATION_FAILURES(ReasonCode.BASE, 10),
+        INTERNAL_ERROR(ReasonCode.BASE, 11),
 
         /**
          * BASE_MODEM : 2000 (Errors requiring special action from the modem.)
@@ -610,8 +611,10 @@ public interface IAosRegistrationListener {
                         ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
                 Map.entry(ReasonCode.REG_RESP_NETWORK_TIMEOUT, Pair.create(
                         ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT))
-
+                                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT)),
+                Map.entry(ReasonCode.INTERNAL_ERROR, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                        ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR))
         );
 
         /**
