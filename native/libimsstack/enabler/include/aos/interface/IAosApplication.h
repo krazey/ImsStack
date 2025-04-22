@@ -40,6 +40,7 @@ public:
             IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) = 0;
     virtual IMS_UINT32 GetAppState() = 0;
     virtual IMS_UINT32 GetOffReason() = 0;
+    virtual IMS_SINT32 GetDataFailureReason() const = 0;
 
     virtual IMS_BOOL IsActivated() = 0;
     virtual IMS_BOOL IsOn() = 0;

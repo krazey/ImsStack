@@ -97,7 +97,7 @@ public:
     void expiredTimer(ITimer* piTimer) { Timer_TimerExpired(piTimer); }
     void aosConnecting() { ImsAos_Connecting(); }
     void aosDisConnecting() { ImsAos_Disconnecting(0); }
-    void aosDisConnected() { ImsAos_Disconnected(0); }
+    void aosDisConnected() { ImsAos_Disconnected(0, 0); }
     void aosSuspend() { ImsAos_Suspended(0); }
     void aosResume() { ImsAos_Resumed(); }
     void aosMonitorConnected() { ImsAosMonitor_Connected(0, 0); }

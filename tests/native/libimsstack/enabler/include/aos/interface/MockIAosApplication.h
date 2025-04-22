@@ -33,6 +33,7 @@ public:
             (IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue), (override));
     MOCK_METHOD(IMS_UINT32, GetAppState, (), (override));
     MOCK_METHOD(IMS_UINT32, GetOffReason, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetDataFailureReason, (), (const));
     MOCK_METHOD(IMS_BOOL, IsActivated, (), (override));
     MOCK_METHOD(IMS_BOOL, IsOn, (), (override));
     MOCK_METHOD(IMS_BOOL, IsCrossSimConnected, (), (override));

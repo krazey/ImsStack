@@ -275,7 +275,7 @@ PUBLIC
 void MtsService::ImsAos_Connecting() {}
 
 PUBLIC
-void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
+void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDataFailureReason */)
 {
     IMS_TRACE_I("ImsAos_Disconnected : Reason[%d]", nReason, 0, 0);
 

@@ -699,7 +699,7 @@ TEST_F(AosHandleTest, App_Notify_Null_Listener)
     ASSERT_EQ(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(0);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_, _)).Times(0);
     EXPECT_FALSE(m_pAosHandle->App_Notify());
 
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
@@ -723,7 +723,7 @@ TEST_F(AosHandleTest, App_Notify_No_Notify)
     ASSERT_FALSE(m_pAosHandle->GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(0);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_, _)).Times(0);
     EXPECT_FALSE(m_pAosHandle->App_Notify());
 
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
@@ -759,7 +759,7 @@ TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTED)
     ASSERT_TRUE(m_pAosHandle->GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(1);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_, _)).Times(1);
     EXPECT_TRUE(m_pAosHandle->App_Notify());
 }
 
@@ -772,7 +772,7 @@ TEST_F(AosHandleTest, App_Notify_STATE_CONNECTING)
     ASSERT_TRUE(m_pAosHandle->GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(1);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_, _)).Times(1);
     EXPECT_TRUE(m_pAosHandle->App_Notify());
 }
 
@@ -874,7 +874,7 @@ TEST_F(AosHandleTest,
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
     m_pAosHandle->SetReason(AosReason::REG_FAILURE);
 
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(ImsAosReason::REG_NEW_REQUIRED));
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(ImsAosReason::REG_NEW_REQUIRED, _));
 
     // WHEN
     m_pAosHandle->App_Notify();
@@ -889,7 +889,8 @@ TEST_F(AosHandleTest, ShouldNotifyWithRegAllPcscfFailedIfNotifiedAllPcscfUnavail
     m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
 
-    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(ImsAosReason::REG_ALL_PCSCF_FAILED));
+    EXPECT_CALL(
+            m_objMockIImsAosListener, ImsAos_Disconnected(ImsAosReason::REG_ALL_PCSCF_FAILED, _));
 
     // WHEN
     m_pAosHandle->NotifyAllPcscfsUnavailable();

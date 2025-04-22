@@ -67,8 +67,11 @@ public:
      *
      * @param nReason Indicate the reason that results that the service is disconnected.
      *                (@see ImsAosReason)
+     * @param nDataFailureReason Indicate the reason that results that the data is disconnected.
+     *                (@link android.telephony.DataFailCause)
      */
-    virtual void ImsAos_Disconnected(IN IMS_UINT32 nReason) = 0;
+    virtual void ImsAos_Disconnected(
+            IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason = 0) = 0;
 
     /**
      * @brief Indicate that the service is suspended with reason like out-of-servce

@@ -270,7 +270,7 @@ PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
             ImsAos_Connected((IMS_UINT32)nWParam, (IMS_UINT32)nLParam);
             break;
         case static_cast<IMS_SINT32>(TestCommand::AOS_DISCONNECTED):
-            ImsAos_Disconnected((IMS_UINT32)nWParam);
+            ImsAos_Disconnected((IMS_UINT32)nWParam, (IMS_SINT32)nLParam);
             break;
         case static_cast<IMS_SINT32>(TestCommand::RAT_CHANGED):
             m_pNetworkWatcher->UpdateMobileRat((IMS_SINT32)nWParam);
@@ -345,7 +345,8 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
     m_pAosEventHandler->OnDisconnecting(nReason);
 }
 
-PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
+PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(
+        IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason)
 {
     SetStatus(ServiceStatus::SERVICE_IDLE);
     m_pNetworkWatcher->OnDisconnected();
