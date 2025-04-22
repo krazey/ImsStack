@@ -23,10 +23,6 @@ import android.os.Parcel;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.TelephonyInterface;
-import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -34,9 +30,6 @@ import com.android.internal.annotations.VisibleForTesting;
 public class MtcEmergencyServiceManager {
 
     private static final int MSG_SEND_REQUEST = 101;
-    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_COUNTRY_ISO_INDEX = 0;
-    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_MNC_INDEX = 1;
-    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_NUMBER_INDEX = 2;
 
     private final IBaseContext mContext;
     private MessageHandler mMessageHandler = null;
@@ -94,12 +87,9 @@ public class MtcEmergencyServiceManager {
      * Notifies the Native to do registration for emergency call.
      *
      * @param emergencyRouting The routing information for emergency call.
-     * @param callee The dialed string.
      */
-    public void openEmergencyService(@EmergencyCallRouting int emergencyRouting,
-            String callee, IServiceStateTracker serviceStateTracker) {
-        emergencyRouting = maybeUpdateEmergencyRouting(
-                emergencyRouting, callee, serviceStateTracker);
+    public void openEmergencyService(
+            @EmergencyCallRouting int emergencyRouting, IServiceStateTracker serviceStateTracker) {
         mEmergencyType = emergencyRouting == EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL
                 ? IUMtcCall.EMERGENCYTYPE_NORMAL_ROUTING
                 : IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
@@ -192,88 +182,6 @@ public class MtcEmergencyServiceManager {
             default: // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY
                 return IUMtcCall.SERVICETYPE_EMERGENCY;
         }
-    }
-
-    private @EmergencyCallRouting int maybeUpdateEmergencyRouting(
-            @EmergencyCallRouting int emergencyRouting, String callee,
-            IServiceStateTracker serviceStateTracker) {
-        if (emergencyRouting != EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN) {
-            return emergencyRouting;
-        }
-
-        if (isFromNetworkOrSim(callee)) {
-            return emergencyRouting;
-        }
-
-        if (!isDynamicRoutingNumber(callee)) {
-            return emergencyRouting;
-        }
-
-        if (serviceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP)) {
-            log("update to EMERGENCY_CALL_ROUTING_NORMAL");
-            emergencyRouting = EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL;
-        }
-
-        return emergencyRouting;
-    }
-
-    private boolean isFromNetworkOrSim(String callee) {
-        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
-                TelephonyInterface.class, mContext.getSlotId());
-        if (telephony == null) {
-            return false;
-        }
-        for (EmergencyNumber number : telephony.getEmergencyNumberList()) {
-            if (number.getNumber().equals(callee)) {
-                if (number.isFromSources(EmergencyNumber.EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING)
-                        || number.isFromSources(EmergencyNumber.EMERGENCY_NUMBER_SOURCE_SIM)) {
-                    log("SIM or NETWORK emergency number");
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isDynamicRoutingNumber(String callee) {
-        String[] configs = AgentFactory.getInstance().getAgent(ConfigInterface.class,
-                mContext.getSlotId()).getCarrierConfig().getStringArray(CarrierConfig.ImsEmergency
-                        .KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY);
-        if (configs == null) {
-            return false;
-        }
-
-        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
-                TelephonyInterface.class, mContext.getSlotId());
-        if (telephony == null) {
-            return false;
-        }
-        String countryIso = telephony.getNetworkCountryIso();
-        String mnc = telephony.getNetworkMnc();
-        log("isDynamicRoutingNumber :: countryIso=" + countryIso + ", mnc=" + mnc);
-
-        for (String config : configs) {
-            String[] fields = config.split(",");
-            // Format: "iso,mnc,number1,number2,..."
-            if (fields == null || fields.length < 3) {
-                continue;
-            }
-            if (!countryIso.equals(fields[DYNAMIC_ROUTING_NUMBER_CONFIG_COUNTRY_ISO_INDEX])) {
-                continue;
-            }
-            if (!fields[DYNAMIC_ROUTING_NUMBER_CONFIG_MNC_INDEX].isEmpty() && mnc != null
-                    && !mnc.equals(fields[DYNAMIC_ROUTING_NUMBER_CONFIG_MNC_INDEX])) {
-                continue;
-            }
-            for (int i = DYNAMIC_ROUTING_NUMBER_CONFIG_NUMBER_INDEX; i < fields.length; i++) {
-                if (callee.equals(fields[i])) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private void sendRequest(Parcel parcel) {

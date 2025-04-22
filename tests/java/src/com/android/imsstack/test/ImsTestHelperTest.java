@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2023 The Android Open Source Project
  *
@@ -239,7 +240,7 @@ public class ImsTestHelperTest extends ImsStackTest {
 
         mBroadcastReceiver.onReceive(mContext, intentSrv);
         verify(mImsServiceManager).getCallApp(SLOT0);
-        verify(mtcApp).openEmergencyService(any(), anyInt(), anyString());
+        verify(mtcApp).openEmergencyService(any(), anyInt());
     }
 
     @Test

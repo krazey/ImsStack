@@ -177,19 +177,13 @@ public class MtcApp implements Closeable {
     /**
      * Notifies {@link MtcEmergencyServiceManager} to do registration for emergency call.
      *
-     * TODO : b/399029238, Including the callee for emergency routing confirmation is a short-term
-     * solution. For a long-term solution, Telephony should determine and provide the emergency
-     * routing information.
-     *
      * @param call The target emergency call.
      * @param emergencyRouting The emergency call routing value.
-     * @param callee The dialed string.
      */
-    public void openEmergencyService(
-            MtcCall call, @EmergencyCallRouting int emergencyRouting, String callee) {
+    public void openEmergencyService(MtcCall call, @EmergencyCallRouting int emergencyRouting) {
         mEmergencyServiceManager.setCall(call);
         mEmergencyServiceManager.openEmergencyService(
-                emergencyRouting, callee, mContext.getServiceStateTracker());
+                emergencyRouting, mContext.getServiceStateTracker());
     }
 
     /**

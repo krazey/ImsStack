@@ -26,6 +26,7 @@ import android.telecom.Connection.RttModifyStatus;
 import android.telephony.CallQuality;
 import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
+import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsConferenceState;
@@ -399,8 +400,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if (mCall.isEmergencyCall()) {
             ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
-            callApp.getCallManager().getMtcApp().openEmergencyService(
-                    mCall, ImsCallUtils.getEmergencyRoutingFromCallProfile(profile), callee);
+            @EmergencyCallRouting
+            int emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
+                    mCallContext, ImsCallUtils.getEmergencyRoutingFromCallProfile(profile), callee);
+            callApp.getCallManager().getMtcApp().openEmergencyService(mCall, emergencyRouting);
         }
 
         int state = getState();
@@ -490,7 +493,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 profile.getCallType(), profile.getMediaProfile().isRttCall()),
                 MtcCallUtils.createUsersInfo(participants),
                 ImsCallMediaUtils.createMediaInfoFromMediaProfile(profile.getMediaProfile()),
-                ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile));
+                ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile, null));
 
         setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
@@ -2189,7 +2192,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             mCall.start(
                     ImsCallUtils.getCallTypeFromProfile(profile.getCallType(), isRttOn),
                     callee, actualCallee, mi,
-                    ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile));
+                    ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile, callee));
 
             notifyCallEventForVideoCallSession(IVideoCallSession.EVENT_CALL_INITIATING);
         } else if (state == ImsCallSessionImplBase.State.TERMINATED) {

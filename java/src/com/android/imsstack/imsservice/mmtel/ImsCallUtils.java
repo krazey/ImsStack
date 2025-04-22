@@ -16,6 +16,7 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
@@ -29,11 +30,14 @@ import android.text.TextUtils;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
+import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
+import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCallInfo;
@@ -96,6 +100,14 @@ public class ImsCallUtils {
      * P-OS: true (AOSP based video state control - CALL_TYPE_VT_NODIR is not used)
      */
     private static final boolean CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO = true;
+
+    /**
+     * Definition of the index as configured in
+     * CarrierConfig::ImsEmergency::KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY
+     */
+    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_COUNTRY_ISO = 0;
+    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC = 1;
+    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_NUMBER = 2;
 
     /** "sos" URN for IMS emergency call */
     private static final String SOS_SERVICE_URN_POLICE = "urn:service:sos.police";
@@ -326,7 +338,7 @@ public class ImsCallUtils {
     }
 
     public static SuppInfo createSuppInfoFromCallProfile(
-            ICallContext context, final ImsCallProfile profile) {
+            ICallContext context, final ImsCallProfile profile, @Nullable String callee) {
         SuppInfo si = new SuppInfo();
 
         // OIR (0 : default, 1 : presentation restricted, 2 : presentation not restricted)
@@ -368,13 +380,22 @@ public class ImsCallUtils {
                 List<String> urns = profile.getEmergencyUrns();
 
                 if (urns.isEmpty()) {
-                    ConfigInterface config = AgentFactory.getInstance().getAgent(
-                            ConfigInterface.class, context.getSlotId());
-                    CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
-                    int[] policies = cc != null ? cc.getIntArray(
-                        CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
-                    urn = getSosUrnFromECallServiceCategory(
-                            profile.getEmergencyServiceCategories(), policies);
+                    @EmergencyCallRouting
+                    int emergencyRouting = getEmergencyRoutingFromCallProfile(profile);
+                    if (callee != null && !callee.isEmpty()) {
+                        emergencyRouting =
+                                maybeUpdateEmergencyRouting(context, emergencyRouting, callee);
+                    }
+
+                    if (emergencyRouting != EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL) {
+                        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                                ConfigInterface.class, context.getSlotId());
+                        CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
+                        int[] policies = cc != null ? cc.getIntArray(
+                            CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
+                        urn = getSosUrnFromECallServiceCategory(
+                                profile.getEmergencyServiceCategories(), policies);
+                    }
                 } else {
                     // The first item has priority ??
                     urn = urns.get(0);
@@ -520,6 +541,29 @@ public class ImsCallUtils {
         emergencyUrn.add(sosUrn);
         profile.setEmergencyUrns(emergencyUrn);
         profile.setEmergencyServiceCategories(emergencyServiceCategory);
+    }
+
+   public static @EmergencyCallRouting int maybeUpdateEmergencyRouting(
+            ICallContext context, @EmergencyCallRouting int emergencyRouting, String callee) {
+        if (emergencyRouting != EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN) {
+            return emergencyRouting;
+        }
+
+        IServiceStateTracker serviceStateTracker = context.getServiceStateTracker();
+        if (isFromNetworkOrSim(context, callee)) {
+            return emergencyRouting;
+        }
+
+        if (!isDynamicRoutingNumber(context, callee)) {
+            return emergencyRouting;
+        }
+
+        if (serviceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP)) {
+            ImsLog.d("update to EMERGENCY_CALL_ROUTING_NORMAL");
+            emergencyRouting = EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL;
+        }
+
+        return emergencyRouting;
     }
 
     public static String getStringFromUserStatus(int status) {
@@ -994,6 +1038,65 @@ public class ImsCallUtils {
             default:
                 return CallReasonInfo.EXTRA_CODE_CALL_RETRY_NORMAL;
         }
+    }
+
+    private static boolean isFromNetworkOrSim(ICallContext context, String callee) {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, context.getSlotId());
+        if (telephony == null) {
+            return false;
+        }
+        for (EmergencyNumber number : telephony.getEmergencyNumberList()) {
+            if (number.getNumber().equals(callee)) {
+                if (number.isFromSources(EmergencyNumber.EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING)
+                        || number.isFromSources(EmergencyNumber.EMERGENCY_NUMBER_SOURCE_SIM)) {
+                    ImsLog.d("SIM or NETWORK emergency number");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isDynamicRoutingNumber(ICallContext context, String callee) {
+        String[] configs = AgentFactory.getInstance().getAgent(ConfigInterface.class,
+                context.getSlotId()).getCarrierConfig().getStringArray(CarrierConfig.ImsEmergency
+                        .KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY);
+        if (configs == null) {
+            return false;
+        }
+
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, context.getSlotId());
+        if (telephony == null) {
+            return false;
+        }
+        String countryIso = telephony.getNetworkCountryIso();
+        String mnc = telephony.getNetworkMnc();
+        ImsLog.d("isDynamicRoutingNumber :: countryIso=" + countryIso + ", mnc=" + mnc);
+
+        for (String config : configs) {
+            String[] fields = config.split(",");
+            // Format: "iso,mnc,number1,number2,..."
+            if (fields == null || fields.length < 3) {
+                continue;
+            }
+            if (!countryIso.equals(fields[DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_COUNTRY_ISO])) {
+                continue;
+            }
+            if (!fields[DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC].isEmpty() && mnc != null
+                    && !mnc.equals(fields[DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC])) {
+                continue;
+            }
+            for (int i = DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_NUMBER; i < fields.length; i++) {
+                if (callee.equals(fields[i])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static int getOIRTypeFromTIPType(int tip) {
