@@ -442,8 +442,8 @@ TEST_F(TextNegoTest, testGetNegotiatedRtpPortValid)
 
 TEST_F(TextNegoTest, testSetPort)
 {
-    EXPECT_TRUE(m_pTextNego->SetPort(LOCAL_PORT));
-    EXPECT_TRUE(m_pTextNego->SetPort(0));
+    EXPECT_TRUE(m_pTextNego->SetLocalPort(LOCAL_PORT));
+    EXPECT_TRUE(m_pTextNego->SetLocalPort(0));
 }
 
 TEST_F(TextNegoTest, testGetters)

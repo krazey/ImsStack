@@ -514,8 +514,8 @@ TEST_F(VideoNegoTest, testGetNegotiatedRtpPortValid)
 
 TEST_F(VideoNegoTest, testSetPort)
 {
-    EXPECT_TRUE(m_pVideoNego->SetPort(LOCAL_PORT));
-    EXPECT_TRUE(m_pVideoNego->SetPort(0));
+    EXPECT_TRUE(m_pVideoNego->SetLocalPort(LOCAL_PORT));
+    EXPECT_TRUE(m_pVideoNego->SetLocalPort(0));
 }
 
 TEST_F(VideoNegoTest, testGetters)

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -369,15 +369,15 @@ IMS_BOOL AudioController::UpdateRtpConfig(
         return IsAudioConfigChanged(pAudioConfig);
     }
 
-    IMS_TRACE_E(0, "UpdateRtpConfig() - invalid param", 0, 0, 0);
+    IMS_TRACE_E(0, "UpdateRtpConfig() - session not found", 0, 0, 0);
     return IMS_FALSE;
 }
 
 PUBLIC
-IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_BOOL anbrEnabled)
+IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_BOOL bAnbrEnabled)
 {
     IMS_TRACE_D("UpdateAnbrEnabledConfig() - nNegoId[%" PFLS_x "], anbr enable[%d]", nNegoId,
-            anbrEnabled, 0);
+            bAnbrEnabled, 0);
 
     if (nNegoId == UNDEFINED_NEGO_ID)
     {
@@ -389,18 +389,18 @@ IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_B
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->UpdateAnbrEnabledConfig(anbrEnabled);
+        return pAudioSession->UpdateAnbrEnabledConfig(bAnbrEnabled);
     }
 
-    IMS_TRACE_E(0, "UpdateAnbrEnabledConfig() - invalid param", 0, 0, 0);
+    IMS_TRACE_E(0, "UpdateAnbrEnabledConfig() - session not found", 0, 0, 0);
     return IMS_FALSE;
 }
 
 PUBLIC
 IMS_BOOL AudioController::NotifyAnbrReceived(
-        IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate)
+        IN IMS_UINT32 nAnbrMediaType, IN IMS_UINT32 nAnbrDirection, IN IMS_UINT32 nAnbrBitrate)
 {
-    IMS_TRACE_D("NotifyAnbrReceived() - anbr bitrate[%d]", anbrBitrate, 0, 0);
+    IMS_TRACE_D("NotifyAnbrReceived() - anbr bitrate[%d]", nAnbrBitrate, 0, 0);
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
@@ -408,7 +408,7 @@ IMS_BOOL AudioController::NotifyAnbrReceived(
 
         if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioSession::STATE_LIVE)
         {
-            return pAudioSession->NotifyAnbrReceived(anbrMediaType, anbrDirection, anbrBitrate);
+            return pAudioSession->NotifyAnbrReceived(nAnbrMediaType, nAnbrDirection, nAnbrBitrate);
         }
     }
 

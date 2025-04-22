@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ public:
      *
      * @param bConfirmed it is IMS_TRUE when the session changed to confirmed session
      */
-    void SetCallSessionState(IN IMS_BOOL bConfirmed);
+    virtual void SetCallSessionState(IN IMS_BOOL bConfirmed);
 
     /**
      * @brief Send dtmf digit to ImsMedia module
@@ -52,7 +52,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message delivered to java correctly,
      * IMS_FALSE when it fails to send to java
      */
-    IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode);
+    virtual IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode);
 
     /**
      * @brief Create a AudioSession instance with given parameters
@@ -65,7 +65,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the session created successfully, IMS_FALSE when it is
      * failed with invalid arguments
      */
-    IMS_BOOL CreateSession(IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId,
+    virtual IMS_BOOL CreateSession(IN IMediaSessionListener* pListener, IN IMS_UINTP nNegoId,
             AudioConfiguration* pConfig, MEDIA_SERVICE_TYPE eServiceType);
 
     /**
@@ -75,7 +75,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL OpenSession(IN IMS_UINTP nNegoId);
+    virtual IMS_BOOL OpenSession(IN IMS_UINTP nNegoId);
 
     /**
      * @brief Update session and send modifySesion of confirmConfig based on the update condition
@@ -86,7 +86,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateSession(const IN IMS_UINTP nNegoId, const IN IMS_UINT32 nAccessNetwork,
+    virtual IMS_BOOL UpdateSession(const IN IMS_UINTP nNegoId, const IN IMS_UINT32 nAccessNetwork,
             IN std::shared_ptr<AudioNego> pNego);
 
     /**
@@ -98,7 +98,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL AddSession(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork,
+    virtual IMS_BOOL AddSession(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork,
             IN std::shared_ptr<AudioNego> pNego);
 
     /**
@@ -108,7 +108,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL ConfirmSession(IN IMS_UINTP nNegoId);
+    virtual IMS_BOOL ConfirmSession(IN IMS_UINTP nNegoId);
 
     /**
      * @brief Send modifySession message to java
@@ -117,7 +117,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL ModifySession(IN IMS_UINTP nNegoId);
+    virtual IMS_BOOL ModifySession(IN IMS_UINTP nNegoId);
 
     /**
      * @brief Send SetMediaQuality message to java without any following session changing method
@@ -126,7 +126,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL SetMediaQuality(IN IMS_UINTP nNegoId);
+    virtual IMS_BOOL SetMediaQuality(IN IMS_UINTP nNegoId);
 
     /**
      * @brief Send deleteConfig message to java
@@ -135,7 +135,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL DeleteSession(IN IMS_UINTP nNegoId);
+    virtual IMS_BOOL DeleteSession(IN IMS_UINTP nNegoId);
 
     /**
      * @brief Send closeSession message to java
@@ -143,7 +143,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL CloseSession();
+    virtual IMS_BOOL CloseSession();
 
     /**
      * @brief Update rtp config parameters from the negotiation profile
@@ -154,7 +154,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when there is the parameter to updates IMS_FALSE when there
      * are no parameters updated
      */
-    IMS_BOOL UpdateRtpConfig(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork,
+    virtual IMS_BOOL UpdateRtpConfig(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork,
             IN std::shared_ptr<AudioNego> pNego);
 
     /**
@@ -164,7 +164,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
      * failed to update
      */
-    IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<AudioNego> pNego);
+    virtual IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<AudioNego> pNego);
 
     /**
      * @brief Update AccessNetwork information in the RtpConfig and initiate modifySession
@@ -173,7 +173,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when there is the parameter to updates IMS_FALSE when there
      * are no parameters updated
      */
-    IMS_BOOL UpdateAccessNetwork(IN IMS_UINT32 accessNetwork);
+    virtual IMS_BOOL UpdateAccessNetwork(IN IMS_UINT32 accessNetwork);
 
     /**
      * @brief Update MediaQualityThreshold and send message to java
@@ -183,14 +183,15 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN std::shared_ptr<AudioNego> pNego);
+    virtual IMS_BOOL UpdateQualityThreshold(
+            IN IMS_UINTP nNegoId, IN std::shared_ptr<AudioNego> pNego);
 
     /**
      * @brief Get the size of AudioSession list
      *
      * @return IMS_UINT32 the size of list
      */
-    IMS_UINT32 GetAudioSessionSize();
+    virtual IMS_UINT32 GetAudioSessionSize();
 
     /**
      * @brief Set and update the media direction of the audio session
@@ -199,7 +200,8 @@ public:
      * @param bRestore If this set IMS_TRUE, update media direction with previous one
      * @return IMS_TRUE if the update stream is completed
      */
-    IMS_BOOL UpdateMediaDirection(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bRestore = IMS_FALSE);
+    virtual IMS_BOOL UpdateMediaDirection(
+            IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bRestore = IMS_FALSE);
 
     /**
      * @brief Set network tone timer
@@ -207,7 +209,7 @@ public:
      * @param nNegoId The identification to get the audio profile from negotiated parameter
      * @param nTimer The network tone timer value
      */
-    void SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer);
+    virtual void SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer);
 
     /**
      * @brief Get Inactivity timer
@@ -215,38 +217,38 @@ public:
      * @param nNegoId The identification to get the audio profile from negotiated parameter
      * @return IMS_UINT32 Inactivity timer value
      */
-    IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType, IN IMS_UINTP nNegoId);
+    virtual IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType, IN IMS_UINTP nNegoId);
 
     /**
      * @brief Update the sdp negotiation result on whether to support anbr feature
      *
      * @param nNegoId The identification to get the audio profile from negotiated parameter
-     * @param anbrEnabled Anbr negotiation result, if it is true, anbr feature can be supported on
+     * @param bAnbrEnabled Anbr negotiation result, if it is true, anbr feature can be supported on
      * both devices.
      * @return IMS_BOOL Return IMS_TRUE, when the update is done successfully, IMS_FALSE when it is
      * failed
      */
-    IMS_BOOL UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_BOOL anbrEnabled);
+    virtual IMS_BOOL UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_BOOL bAnbrEnabled);
 
     /**
      * @brief Notify the received ANBR information such as mediaType, bitrate and direction received
      * from the network
      *
-     * @param anbrMediaType mediaType such as audio and video
-     * @param anbrDirection media stream direction to change the bitrate
-     * @param anbrBitrate bitrate the network wants to change
+     * @param nAnbrMediaType mediaType such as audio and video
+     * @param nAnbrDirection media stream direction to change the bitrate
+     * @param nAnbrBitrate bitrate the network wants to change
      * @return IMS_BOOL Return IMS_TRUE if the parameter is passed successfully, IMS_FALSE if it is
      * failed
      */
-    IMS_BOOL NotifyAnbrReceived(
-            IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
+    virtual IMS_BOOL NotifyAnbrReceived(
+            IN IMS_UINT32 nAnbrMediaType, IN IMS_UINT32 nAnbrDirection, IN IMS_UINT32 nAnbrBitrate);
 
     /**
      * @brief Check there is a session opened
      *
      * @return IMS_BOOL Return IMS_TRUE when there is a session created
      */
-    IMS_BOOL IsSessionOpened();
+    virtual IMS_BOOL IsSessionOpened();
 
 protected:
     virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);

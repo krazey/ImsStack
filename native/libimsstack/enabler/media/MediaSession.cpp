@@ -648,7 +648,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
 
                     if (pAudioNego != IMS_NULL)
                     {
-                        pAudioNego->SetPort(param2);
+                        pAudioNego->SetLocalPort(param2);
                     }
                 }
                 else if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_VIDEO)
@@ -657,7 +657,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
 
                     if (pVideoNego != IMS_NULL)
                     {
-                        pVideoNego->SetPort(param2);
+                        pVideoNego->SetLocalPort(param2);
                     }
                 }
                 else if (param1 == (IMS_SINT32)MEDIA_CONTENT_TYPE::MEDIA_TYPE_TEXT)
@@ -666,7 +666,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
 
                     if (pTextNego != IMS_NULL)
                     {
-                        pTextNego->SetPort(param2);
+                        pTextNego->SetLocalPort(param2);
                     }
                 }
             }

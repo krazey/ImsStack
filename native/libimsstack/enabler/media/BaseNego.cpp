@@ -233,7 +233,6 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedLocalProfile()
         return GetLocalProfile(pOaModel);
     }
 
-    IMS_TRACE_E(0, "GetNegotiatedLocalProfile(): type[%d], invalid OA model", m_eType, 0, 0);
     return IMS_NULL;
 }
 
@@ -246,7 +245,6 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedNegoProfile()
         return GetNegotiatedProfile(pOaModel);
     }
 
-    IMS_TRACE_E(0, "GetNegotiatedNegoProfile(): type[%d], invalid OA model", m_eType, 0, 0);
     return IMS_NULL;
 }
 
@@ -259,7 +257,6 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedPeerProfile()
         return GetPeerProfile(pOaModel);
     }
 
-    IMS_TRACE_E(0, "GetNegotiatedPeerProfile(): type[%d], invalid OA model", m_eType, 0, 0);
     return IMS_NULL;
 }
 
@@ -420,11 +417,11 @@ BaseNego::OaModel* BaseNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
     return IMS_NULL;
 }
 
-PUBLIC IMS_BOOL BaseNego::SetPort(IN IMS_UINT32 nPort)
+PUBLIC IMS_BOOL BaseNego::SetLocalPort(IN IMS_UINT32 nPort)
 {
     if (m_pBaseProfile == IMS_NULL)
     {
-        IMS_TRACE_E(0, "SetPort(): type[%d], invalid profile", m_eType, 0, 0);
+        IMS_TRACE_E(0, "SetLocalPort(): type[%d], invalid profile", m_eType, 0, 0);
         return IMS_FALSE;
     }
 

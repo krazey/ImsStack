@@ -39,9 +39,22 @@ public:
      *
      * @param bConfirmed it is IMS_TRUE when the session changed to confirmed session
      */
-    void SetCallSessionState(IN IMS_BOOL bConfirmed);
+    virtual void SetCallSessionState(IN IMS_BOOL bConfirmed);
 
-    IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+    /**
+     * @brief Sends a message with parameters to the underlying video session or component.
+     *
+     * This method is typically used to forward control commands (like camera selection,
+     * orientation changes, etc.) received from the MediaSession down to the actual
+     * video processing layer.
+     *
+     * @param[in] nMsg The message identifier (e.g., IJniMedia::SETSURFACE_CMD).
+     * @param[in] pParam A parameter associated with the message, often a pointer cast to IMS_UINTP.
+     *                   The interpretation depends on the specific message ID.
+     * @return IMS_BOOL Returns IMS_TRUE if the message was successfully processed or forwarded,
+     *                  IMS_FALSE otherwise (e.g., invalid message ID, session not ready).
+     */
+    virtual IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
 
     /**
      * @brief Create a VideoSession instance with given parameters
@@ -51,7 +64,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the session created successfully, IMS_FALSE when it is
      * failed with invalid arguments
      */
-    IMS_BOOL CreateSession(IMediaSessionListener* pListener, VideoConfiguration* pConfig);
+    virtual IMS_BOOL CreateSession(IMediaSessionListener* pListener, VideoConfiguration* pConfig);
 
     /**
      * @brief Send openSession message from the given id of the VideoSession instance
@@ -59,7 +72,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL OpenSession();
+    virtual IMS_BOOL OpenSession();
 
     /**
      * @brief Update session and send modifySession of confirmConfig based on the update condition
@@ -67,7 +80,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateSession();
+    virtual IMS_BOOL UpdateSession();
 
     /**
      * @brief Send closeSession message to java
@@ -76,7 +89,7 @@ public:
      * failed to send
      *
      */
-    IMS_BOOL CloseSession();
+    virtual IMS_BOOL CloseSession();
 
     /**
      * @brief Update local address from the parameters of the negotiation profile
@@ -84,7 +97,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
      * failed to update
      */
-    IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego);
+    virtual IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego);
 
     /**
      * @brief Update rtp config parameters from the negotiation profile.
@@ -94,21 +107,21 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
      * failed to update.
      */
-    IMS_BOOL UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, IMS_BOOL bHold);
+    virtual IMS_BOOL UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, IMS_BOOL bHold);
 
     /**
      * @brief Update AccessNetwork information in the RtpConfig
      *
      * @param nAccessNetwork : AccessNetwork information
      */
-    void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+    virtual void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
 
     /**
      * @brief Set MTU size in the VideoConfig
      *
      * @param nMtu : The MTU size to be set to VideoConfig
      */
-    void SetMtu(IN IMS_SINT32 nMtu);
+    virtual void SetMtu(IN IMS_SINT32 nMtu);
 
     /**
      * @brief Update MediaQualityThreshold and send message to java
@@ -116,14 +129,14 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateQualityThreshold(IN std::shared_ptr<VideoNego> pNego);
+    virtual IMS_BOOL UpdateQualityThreshold(IN std::shared_ptr<VideoNego> pNego);
 
     /**
      * @brief Check there is a session opened
      *
      * @return IMS_BOOL Return IMS_TRUE when there is a session created
      */
-    IMS_BOOL IsSessionOpened();
+    virtual IMS_BOOL IsSessionOpened();
 
 private:
     VideoSession* m_pSession;

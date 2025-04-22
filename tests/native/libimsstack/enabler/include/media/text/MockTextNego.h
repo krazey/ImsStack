@@ -44,6 +44,7 @@ public:
     MOCK_METHOD(void, FinalizeSdp,
             (IN ISessionDescriptor * pSessionDescriptor, NEGO_STATE eNegoState), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));
+    MOCK_METHOD(IMS_BOOL, SetLocalPort, (IMS_UINT32 nPort), (override));
     MOCK_METHOD(IMS_UINT32, GetLocalPort, (), (override));
     MOCK_METHOD(const IpAddress&, GetNegotiatedRemoteAddress, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRemotePort, (), (override));

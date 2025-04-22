@@ -536,8 +536,8 @@ TEST_F(AudioNegoTest, testGetNegotiatedRtpPortValid)
 
 TEST_F(AudioNegoTest, testSetPort)
 {
-    EXPECT_TRUE(m_pAudioNego->SetPort(LOCAL_PORT));
-    EXPECT_TRUE(m_pAudioNego->SetPort(0));
+    EXPECT_TRUE(m_pAudioNego->SetLocalPort(LOCAL_PORT));
+    EXPECT_TRUE(m_pAudioNego->SetLocalPort(0));
 }
 
 TEST_F(AudioNegoTest, testGetters)

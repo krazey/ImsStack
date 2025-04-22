@@ -140,7 +140,7 @@ public:
      * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
      * invalid port number which is already reserved
      */
-    IMS_BOOL SetPort(IN IMS_UINT32 nPort);
+    virtual IMS_BOOL SetLocalPort(IN IMS_UINT32 nPort);
 
     /**
      * @brief Create a base local/peer/negotiate profile with given configuration
