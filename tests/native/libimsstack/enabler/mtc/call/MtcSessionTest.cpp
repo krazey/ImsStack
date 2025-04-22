@@ -1260,3 +1260,47 @@ TEST_F(MtcSessionTest, SetCallTypeUpdatesCurrentCallTypeAndPreviousCallType)
     EXPECT_EQ(pMtcSession->GetCallType(), CallType::VT);
     EXPECT_EQ(pMtcSession->GetPreviousCallType(), CallType::VOIP);
 }
+
+TEST_F(MtcSessionTest, HandleResponseUpdateCallTypeAndCapabilityFromMessage)
+{
+    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    ResponseType eType = ResponseType::ACCEPT;
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_TTA_VOLTE_INFO))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    pMtcSession->HandleResponse(eType, objMessage);
+    EXPECT_TRUE(pMtcSession->IsVideoCapable());
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleResponse(eType, objMessage);
+    EXPECT_FALSE(pMtcSession->IsVideoCapable());
+}
+
+TEST_F(MtcSessionTest, HandleResponseSkipUpdateCallTypeAndCapabilityFromMessageIfRejectType)
+{
+    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_FALSE, IMS_TRUE);
+    ResponseType eType = ResponseType::REJECT;
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                    MessageUtil::STR_P_TTA_VOLTE_INFO))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    pMtcSession->HandleResponse(eType, objMessage);
+
+    EXPECT_FALSE(pMtcSession->IsVideoCapable());
+}

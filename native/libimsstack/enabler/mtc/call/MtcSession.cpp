@@ -339,11 +339,13 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
 {
     m_objExtensionSet.HandleResponse(eType, objResponse);
 
-    if (eType == ResponseType::PROVISIONAL_RESPONSE || eType == ResponseType::EARLY_UPDATE_RESPONSE)
+    if (eType == ResponseType::REJECT)
     {
-        UpdateCallTypeFromMessage(objResponse, IMS_TRUE);
-        UpdateCapabilityFromMessage(objResponse);
+        return;
     }
+
+    UpdateCallTypeFromMessage(objResponse, IMS_TRUE);
+    UpdateCapabilityFromMessage(objResponse);
 
     if (eType == ResponseType::EARLY_UPDATE_RESPONSE &&
             objResponse.GetStatusCode() == SipStatusCode::SC_200)
