@@ -47,12 +47,15 @@ const std::unordered_map<IMS_SINT32, EarlyUpdateErrorHandler::ActionFunc>
             &EarlyUpdateErrorHandler::HandleGlareCondition},
     {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER,
             &EarlyUpdateErrorHandler::HandleBlockCallByTimer},
+    {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TIMEOUT,
+            &EarlyUpdateErrorHandler::HandleTimeout},
 };
 // clang-format on
 
 PUBLIC
 EarlyUpdateErrorHandler::EarlyUpdateErrorHandler(IN IMtcCallContext& objContext) :
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_eStatusCode(SipStatusCode::SC_INVALID)
 {
 }
 
@@ -62,22 +65,18 @@ EarlyUpdateErrorHandler::~EarlyUpdateErrorHandler() {}
 PUBLIC
 CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage)
 {
-    if (IsTransactionTimeout(piMessage))
-    {
-        IMS_TRACE_I("Handle : Timeout", 0, 0, 0);
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
-    }
+    m_eStatusCode = piMessage ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
 
+    IMS_TRACE_I("Handle : StatusCode[%d]", m_eStatusCode, 0, 0);
     ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
             m_objContext.GetConfigurationProxy(),
-            ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
-            piMessage->GetStatusCode());
+            ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY, m_eStatusCode);
     for (IMS_UINT32 i = 0; i < objActions.GetSize(); ++i)
     {
         auto it = objActionFuncMap.find(objActions.GetAt(i));
         if (it != objActionFuncMap.end())
         {
-            CallReasonInfo objResult = (this->*(it->second))(*piMessage);
+            CallReasonInfo objResult = (this->*(it->second))(piMessage);
             if (objResult.nCode != CODE_NONE)
             {
                 return objResult;
@@ -85,37 +84,28 @@ CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage)
         }
     }
 
-    return HandleTerminateCall(*piMessage);
+    return HandleTerminateCall(piMessage);
 }
 
 PRIVATE
-IMS_BOOL EarlyUpdateErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
-{
-    if (piMessage == IMS_NULL)
-    {
-        return IMS_TRUE;
-    }
-
-    return piMessage->GetStatusCode() == SipStatusCode::SC_INVALID;
-}
-
-PRIVATE
-CallReasonInfo EarlyUpdateErrorHandler::HandleTerminateDialog(IN const IMessage& objMessage) const
+CallReasonInfo EarlyUpdateErrorHandler::HandleTerminateDialog(
+        [[maybe_unused]] IN const IMessage* piMessage) const
 {
     IMS_TRACE_D("HandleTerminateDialog", 0, 0, 0);
-    return CallReasonInfo(CODE_INTERNAL_TERMINATE_EARLYDIALOG, objMessage.GetStatusCode());
+    return CallReasonInfo(CODE_INTERNAL_TERMINATE_EARLYDIALOG, m_eStatusCode);
 }
 
 PRIVATE
-CallReasonInfo EarlyUpdateErrorHandler::HandleTerminateCall(IN const IMessage& objMessage) const
+CallReasonInfo EarlyUpdateErrorHandler::HandleTerminateCall(
+        [[maybe_unused]] IN const IMessage* piMessage) const
 {
     IMS_TRACE_D("HandleTerminateCall", 0, 0, 0);
-    return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, objMessage.GetStatusCode());
+    return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, m_eStatusCode);
 }
 
 PRIVATE
 CallReasonInfo EarlyUpdateErrorHandler::HandleGlareCondition(
-        IN [[maybe_unused]] const IMessage& objMessage) const
+        [[maybe_unused]] IN const IMessage* piMessage) const
 {
     IMS_TRACE_D("HandleGlareCondition", 0, 0, 0);
     return CallReasonInfo(CODE_SIP_REQUEST_PENDING,
@@ -123,16 +113,16 @@ CallReasonInfo EarlyUpdateErrorHandler::HandleGlareCondition(
 }
 
 PRIVATE
-CallReasonInfo EarlyUpdateErrorHandler::HandleBlockCallByTimer(IN const IMessage& objMessage) const
+CallReasonInfo EarlyUpdateErrorHandler::HandleBlockCallByTimer(IN const IMessage* piMessage) const
 {
     IMS_TRACE_D("HandleBlockCallByTimer", 0, 0, 0);
     if (!m_objContext.GetCallManager().GetCallsByState(IMtcCall::State::ESTABLISHED).IsEmpty())
     {
-        return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, objMessage.GetStatusCode());
+        return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, m_eStatusCode);
     }
 
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
-            &objMessage, ISipHeader::RETRY_AFTER_ANY);
+            piMessage, ISipHeader::RETRY_AFTER_ANY);
     IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
     if (IsRegisterWithNextPcscfAndRedialRequiredFor503(nRetryAfter))
     {
@@ -154,6 +144,14 @@ CallReasonInfo EarlyUpdateErrorHandler::HandleBlockCallByTimer(IN const IMessage
     AString strRetryAfter;
     strRetryAfter.SetNumber(nRetryAfterInMillis);
     return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfter);
+}
+
+PRIVATE
+CallReasonInfo EarlyUpdateErrorHandler::HandleTimeout(
+        [[maybe_unused]] IN const IMessage* piMessage) const
+{
+    IMS_TRACE_D("HandleTimeout", 0, 0, 0);
+    return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
 }
 
 PRIVATE
