@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,7 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Update codec using the configuration
      *
@@ -48,32 +48,32 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc) override;
     /**
      * @brief Get the T140 payload type number
      *
      * @return IMS_SINT32 Return T140 payload type number
      */
-    IMS_SINT32 GetT140PayloadType() const;
+    virtual IMS_SINT32 GetT140PayloadType() const;
     /**
      * @brief Get the redundant payload type value
      *
      * @return IMS_SINT32 Return redendancy payload type number
      */
-    IMS_SINT32 GetRedPayloadType() const;
+    virtual IMS_SINT32 GetRedPayloadType() const;
     /**
      * @brief Get the Text dscp value
      *
      * @return IMS_SINT32 Return text dscp value
      */
-    IMS_SINT32 GetTextDscp() const;
+    virtual IMS_SINT32 GetTextDscp() const;
     /**
      * @brief Return whether textxodec emptyredundant is enabled
      *
      * @return IMS_BOOL Return true if textxodec emptyredundant is enabled
      * Return false if  textxodec emptyredundant is disabled
      */
-    IMS_BOOL IsTextCodecEmptyRedundantEnabled() const;
+    virtual IMS_BOOL IsTextCodecEmptyRedundantEnabled() const;
 
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
     static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = NEED_TO_CHECK_I;
