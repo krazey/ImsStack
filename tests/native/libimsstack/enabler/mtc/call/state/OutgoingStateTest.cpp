@@ -609,6 +609,47 @@ TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesIfWaitingEpsFallbackForNoTri
             CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
 
+TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedCsfbWhenConfigIsEnabled)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED)));
+    pOutgoingState->OnAosStateChanged(
+            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED);
+}
+
+TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedNoCsfbWhenCsfbIsNotAvailable)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED)));
+    pOutgoingState->OnAosStateChanged(
+            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED);
+}
+
+TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedNoCsfbWhenConfigIsDisable)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED)));
+    pOutgoingState->OnAosStateChanged(
+            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED);
+}
+
 TEST_F(OutgoingStateTest, OnRatChangedPerformsSilentRedialIfWaitingEpsFallback)
 {
     // Sets up for creating SilentRedialHelper.

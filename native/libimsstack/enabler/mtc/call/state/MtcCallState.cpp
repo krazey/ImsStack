@@ -526,6 +526,11 @@ CallStateName MtcCallState::HandleAosConnected()
 PROTECTED
 CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
 {
+    if (eAosReason == ImsAosReason::REG_ALL_PCSCF_FAILED)
+    {
+        return HandleAosDisconnectedByAllPcscfFailed();
+    }
+
     if (eAosReason == ImsAosReason::REG_NEW_REQUIRED)
     {
         // AoS will trigger a new registration to continue the call.

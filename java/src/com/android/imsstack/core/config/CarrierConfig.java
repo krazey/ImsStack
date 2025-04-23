@@ -1097,6 +1097,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "early_update_reject_code_and_action_set_string_array";
         public static final String KEY_CSFB_BLOCK_CONDITION_INT_ARRAY =
                 KEY_PREFIX + "csfb_block_condition_int_array";
+        public static final String KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL =
+                KEY_PREFIX + "csfb_when_all_pcscf_unavailable_bool";
         public static final String KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT =
                 KEY_PREFIX + "policy_for_403_response_for_invite_int";
         public static final String KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT =

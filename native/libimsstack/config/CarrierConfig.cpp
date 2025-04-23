@@ -883,6 +883,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_
         KEY_IMS_VOICE_PREFIX "early_update_reject_code_and_action_set_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CSFB_BLOCK_CONDITION_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "csfb_block_condition_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "csfb_when_all_pcscf_unavailable_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_403_response_for_invite_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT[] =

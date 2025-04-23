@@ -350,6 +350,10 @@ TEST_F(MtcCallStringUtilsTest, ConvertAosReason)
     eAosReason = ImsAosReason::REG_TERMINATING;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "registration terminating");
 
+    eAosReason = ImsAosReason::REG_ALL_PCSCF_FAILED;
+    EXPECT_EQ(
+            MtcCallStringUtils::ConvertAosReason(eAosReason), "registration failed for all pcscfs");
+
     eAosReason = ImsAosReason::IP_CHANGED;
     EXPECT_EQ(MtcCallStringUtils::ConvertAosReason(eAosReason), "ip changed");
 

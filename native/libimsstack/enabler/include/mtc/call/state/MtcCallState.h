@@ -181,6 +181,7 @@ protected:
     virtual CallStateName HandleAosConnected();
     virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
     virtual IMS_SINT32 GetCallReasonByAosDisconnection(IN IMS_UINT32 nAosReason) const;
+    inline virtual CallStateName HandleAosDisconnectedByAllPcscfFailed() { return GetStateName(); }
 
     void HandleTerminate(IN const CallReasonInfo& objReason) const;
     void NotifyHoldResumeState();
