@@ -314,42 +314,47 @@ PROTECTED VIRTUAL void
 AosERegistration::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
         IN IMS_UINT32 nRetryAfter)
 {
-    IMS_UINT32 nAwt = 0;
+    IMS_UINT32 nAwt = nRetryAfter;
+    if (nAwt == 0)
+    {
+        const ImsVector<IMS_SINT32>& objInterval = GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
+        nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0) : RETRY_DEFAULT_WAIT_TIME;
+    }
+
+    IMS_BOOL bIsRetryNeeded = IMS_FALSE;
+
     if (AosProvider::GetInstance()
                     ->GetRetryRepository(m_piContext->GetSlotId())
                     ->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY))
     {
-        if (nRetryAfter > 0)
-        {
-            nAwt = nRetryAfter;
-        }
-        else
-        {
-            const ImsVector<IMS_SINT32>& objInterval =
-                    GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
-
-            nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0) : RETRY_DEFAULT_WAIT_TIME;
-        }
-
-        StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
-        SetState(STATE_REGSTOP);
+        bIsRetryNeeded = IMS_TRUE;
     }
     else
     {
         m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
         if (SetNextPcscf())
         {
-            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
-            SetState(STATE_REGSTOP);
+            bIsRetryNeeded = IMS_TRUE;
         }
         else
         {
-            // For Emergency, reports that the status has changed after trying all retries.
-            A_IMS_TRACE_I(
-                    REGID, "StartWithSpecifiedIntervalPolicy :: all pcscfs were tried", 0, 0, 0);
-            SetTraffic(IMS_FALSE);
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            A_IMS_TRACE_I(REGID, "All P-CSCFs attempted, will start retrying", 0, 0, 0);
+            m_piContext->GetPcscf()->SetAllPcscfValid();
+            if (SetFirstPcscf())
+            {
+                bIsRetryNeeded = IMS_TRUE;
+            }
         }
+    }
+
+    if (bIsRetryNeeded)
+    {
+        StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+        SetState(STATE_REGSTOP);
+    }
+    else
+    {
+        ProcessUnpredictableFailure();
     }
 }
 

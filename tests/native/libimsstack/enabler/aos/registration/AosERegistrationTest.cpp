@@ -783,6 +783,11 @@ TEST_F(AosERegistrationTest, StartWithSpecifiedIntervalPolicytWhenRetryRuleForER
     ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillByDefault(Return(IMS_TRUE));
 
+    ImsVector<IMS_SINT32> objInterval;
+    objInterval.Add(10000);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
+            .WillByDefault(ReturnRef(objInterval));
+
     m_pAosERegistration->ProcessDefaultFlowRecovery_Start(400);
 
     EXPECT_EQ(m_pAosERegistration->GetInvokedCount(
@@ -975,16 +980,30 @@ TEST_F(AosERegistrationTest, StartRetryTimerIfNotPossibleToIncreaseCountAndHasNe
     EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
 }
 
-TEST_F(AosERegistrationTest, ReportFailureIfNotPossibleToIncreaseCountAndNoPcscf)
+TEST_F(AosERegistrationTest, StartRetryTimerIfNotPossibleToIncreaseCountAndNoPcscf)
 {
     ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
+}
+
+TEST_F(AosERegistrationTest, ReportFailureInternalIfNotPossibleToIncreaseCountAndNoPcscf)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
 
     m_pAosERegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
 }
