@@ -1110,13 +1110,15 @@ public class DcNetWatcher implements IDcNetWatcher {
             mNetworkRegistrationState = getWwanNetworkRegistrationState(serviceState);
 
             // WWAN network registration reject cause
-            if (mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_DENIED) {
-                mNetworkRegistrationRejectCause = getWwanNetworkRegistrationRejectCause(
-                        serviceState);
-            } else if (mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
+            if (mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
                     || mNetworkRegistrationState
                             == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING) {
                 mNetworkRegistrationRejectCause = REGISTRATION_REJECT_CAUSE_NONE;
+            } else {
+                int rejectCause = getWwanNetworkRegistrationRejectCause(serviceState);
+                if (rejectCause != REGISTRATION_REJECT_CAUSE_NONE) {
+                    mNetworkRegistrationRejectCause = rejectCause;
+                }
             }
         }
 
