@@ -16,6 +16,8 @@
 
 package com.android.imsstack.core.agents.dcm;
 
+import static android.telephony.DataFailCause.ERROR_UNSPECIFIED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -38,6 +40,7 @@ import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.system.ISystem;
@@ -62,6 +65,7 @@ public class ApnEmergencyTest {
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
     @Mock private IDcApn mMockIDcApn;
+    @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private IDcSettings mMockIDcSettings;
     @Mock private IDcUtils mMockIDcUtils;
     @Mock private ISystem mMockISystem;
@@ -78,6 +82,8 @@ public class ApnEmergencyTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        DcFactory.setDcAgent(IDcNetWatcher.class, mMockIDcNetWatcher, SLOT_0);
 
         // create the instance to test
         mApnEmergency = new ApnEmergency(AppContext.getInstance(), SLOT_0);
@@ -97,6 +103,8 @@ public class ApnEmergencyTest {
             mApnEmergency = null;
         }
         mTestableLooper = null;
+
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
     }
 
     @AfterClass
@@ -243,7 +251,7 @@ public class ApnEmergencyTest {
 
     @Test
     public void testHandleDataConnectionFailed_crossStackRedialCause() throws Exception {
-        int failureCause = 5;
+        int failureCause = 33;
         when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, failureCause))
                 .thenReturn(true);
         // only when the apn has been requested before, notify data connection state change
@@ -252,6 +260,25 @@ public class ApnEmergencyTest {
         Message msg1 = Message.obtain();
         msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
         msg1.obj = failureCause;
+        mApnEmergency.sendMessage(msg1);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem).notifyDataConnectionFailed(EApnType.EMERGENCY.getType());
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_crossStackRedialCauseWithEmmCause()
+            throws Exception {
+        int failureCause = 5; // EMM cause IMEI not accepted.
+        when(mMockIDcNetWatcher.getNetworkRegistrationRejectCause()).thenReturn(failureCause);
+        when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, failureCause))
+                .thenReturn(true);
+        // only when the apn has been requested before, notify data connection state change
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        Message msg1 = Message.obtain();
+        msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg1.obj = ERROR_UNSPECIFIED;
         mApnEmergency.sendMessage(msg1);
         mTestableLooper.processAllMessages();
 

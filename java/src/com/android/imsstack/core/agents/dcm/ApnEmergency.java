@@ -178,6 +178,17 @@ public final class ApnEmergency extends Apn {
                     sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECT_FAILED);
                     return;
                 }
+
+                if (mDcNetWatcher != null) {
+                    // If EPDN connection is failed by EMM rejection, it needs to check the reject
+                    // cause in the network registration info.
+                    int nwRejectCause = mDcNetWatcher.getNetworkRegistrationRejectCause();
+                    if (mDcSettings.isCrossStackRedialCause(mType, nwRejectCause)) {
+                        ImsLog.d(mSlotId, "nwRejectCause : " + nwRejectCause);
+                        sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECT_FAILED);
+                        return;
+                    }
+                }
             }
 
             sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
