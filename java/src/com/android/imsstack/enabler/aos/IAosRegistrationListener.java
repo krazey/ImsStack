@@ -620,7 +620,10 @@ public interface IAosRegistrationListener {
                         ExtraReason.WFC_MISSING_911_ADDRESS)),
                 Map.entry(ReasonCode.WFC_SUB_NOTIFY_TERMINATED, Pair.create(
                         ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                        ExtraReason.WFC_MISSING_911_ADDRESS))
+                        ExtraReason.WFC_MISSING_911_ADDRESS)),
+                Map.entry(ReasonCode.USIM_AUTHENTICATION_FAILURES, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                        ImsReasonInfo.CODE_NO_VALID_SIM))
         );
 
         /**
