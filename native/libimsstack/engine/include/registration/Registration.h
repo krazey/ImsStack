@@ -70,7 +70,7 @@ public:
     const RegInfo* GetRegInfo() const override;
     inline const RegStateTracker* GetStateTracker() const override { return m_pStateTracker.Get(); }
 
-    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
+    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor, IN IMS_BOOL bEmergency,
             IN const AString& strSubsId = AString::ConstNull(), IN SipProfile* pProfile = IMS_NULL);
     void Destroy();
     inline const ImsList<RegContact*>& GetAllContactsEx() const { return m_objContacts; }
@@ -185,6 +185,10 @@ private:
     inline IMS_BOOL IsActiveBindingsRestorationEnabled() const override
     {
         return m_bActiveBindingsRestorationEnabled;
+    }
+    inline IMS_BOOL IsEmergencyRegistration() const override
+    {
+        return m_pStateTracker->IsEmergencyRegistration();
     }
 
     // IRefreshable interface

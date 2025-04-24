@@ -58,12 +58,17 @@ public:
     inline SipProfile* GetSipProfile() const { return m_pSipProfile.Get(); }
     inline const AString& GetSubscriberId() const { return m_strSubsId; }
     inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
+    inline IMS_BOOL IsEmergencyRegistration() const { return m_bEmergencyRegistration; }
     IMS_BOOL IsWithinTrustDomain(IN IMS_SINT32 nSlotId) const;
 
 private:
     void AdjustRegistrationDedicatedParameters();
     inline void SetAor(IN const SipAddress& objAor) { m_objAor = objAor; }
     void SetAssociatedUris(IN const AStringArray& objAssociatedUris);
+    inline void SetEmergencyRegistration(IN IMS_BOOL bEmergencyRegistration)
+    {
+        m_bEmergencyRegistration = bEmergencyRegistration;
+    }
     inline void SetPathHeaders(IN const AStringArray& objPaths) { m_objPaths = objPaths; }
     inline void SetPortFlowControl(IN IMS_SINT32 nPort) { m_nPortFlowControl = nPort; }
     inline void SetPortUc(IN IMS_SINT32 nPort) { m_nPortUc = nPort; }
@@ -116,6 +121,8 @@ private:
     AStringArray m_objSecurityClients;
     AStringArray m_objSecurityVerifys;
     RcPtr<SipProfile> m_pSipProfile;
+    // Flag specifying whether this registration is for an emergency registration or not.
+    IMS_BOOL m_bEmergencyRegistration;
 };
 
 #endif

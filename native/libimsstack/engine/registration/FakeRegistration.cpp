@@ -85,7 +85,7 @@ PUBLIC VIRTUAL IMS_BOOL FakeRegistration::Equals(IN const IRegistration* piReg) 
 
 PUBLIC
 IMS_BOOL FakeRegistration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
-        IN const AString& strSubsId /* = AString::ConstNull() */,
+        IN IMS_BOOL bEmergency, IN const AString& strSubsId /* = AString::ConstNull() */,
         IN SipProfile* pProfile /* = IMS_NULL*/)
 {
     m_pRegFlow = new RegFlow(RegKey(GetSlotId(), nFlowId));
@@ -114,6 +114,7 @@ IMS_BOOL FakeRegistration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& ob
 
     m_pStateTracker->SetAor(objAor);
     m_pStateTracker->SetSubscriberId(strSubsId);
+    m_pStateTracker->SetEmergencyRegistration(bEmergency);
 
     return IMS_TRUE;
 }

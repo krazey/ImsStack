@@ -38,11 +38,11 @@ public:
 
 public:
     IMS_BOOL CreateRegistration(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId,
-            IN const AString& strAor, IN IMS_BOOL bFake = IMS_FALSE,
+            IN const AString& strAor, IN IMS_BOOL bEmergency, IN IMS_BOOL bFake = IMS_FALSE,
             IN const AString& strSubsId = AString::ConstNull(),
             IN SipProfile* pProfile = IMS_NULL) override;
     IMS_BOOL CreateRegistration(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId,
-            IN const SipAddress& objAor, IN IMS_BOOL bFake = IMS_FALSE,
+            IN const SipAddress& objAor, IN IMS_BOOL bEmergency, IN IMS_BOOL bFake = IMS_FALSE,
             IN const AString& strSubsId = AString::ConstNull(),
             IN SipProfile* pProfile = IMS_NULL) override;
     void DestroyRegistration(IN IRegistration* piReg, IN IMS_BOOL bByForce = IMS_FALSE) override;

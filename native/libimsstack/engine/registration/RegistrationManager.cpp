@@ -37,8 +37,8 @@ RegistrationManager::~RegistrationManager()
 }
 
 PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nFlowId, IN const AString& strAor, IN IMS_BOOL bFake /*= IMS_FALSE*/,
-        IN const AString& strSubsId /*= AString::ConstNull()*/,
+        IN IMS_UINT32 nFlowId, IN const AString& strAor, IN IMS_BOOL bEmergency,
+        IN IMS_BOOL bFake /*= IMS_FALSE*/, IN const AString& strSubsId /*= AString::ConstNull()*/,
         IN SipProfile* pProfile /*= IMS_NULL*/)
 {
     SipAddress objAor;
@@ -48,12 +48,12 @@ PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nS
         return IMS_FALSE;
     }
 
-    return CreateRegistration(nSlotId, nFlowId, objAor, bFake, strSubsId, pProfile);
+    return CreateRegistration(nSlotId, nFlowId, objAor, bEmergency, bFake, strSubsId, pProfile);
 }
 
 PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nFlowId, IN const SipAddress& objAor, IN IMS_BOOL bFake /*= IMS_FALSE*/,
-        IN const AString& strSubsId /*= AString::ConstNull()*/,
+        IN IMS_UINT32 nFlowId, IN const SipAddress& objAor, IN IMS_BOOL bEmergency,
+        IN IMS_BOOL bFake /*= IMS_FALSE*/, IN const AString& strSubsId /*= AString::ConstNull()*/,
         IN SipProfile* pProfile /*= IMS_NULL*/)
 {
     if (GetRegistration(nSlotId, nFlowId) != IMS_NULL)
@@ -70,7 +70,7 @@ PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nS
             return IMS_FALSE;
         }
 
-        if (!pFakeReg->Create(nFlowId, objAor, strSubsId, pProfile))
+        if (!pFakeReg->Create(nFlowId, objAor, bEmergency, strSubsId, pProfile))
         {
             delete pFakeReg;
             return IMS_FALSE;
@@ -93,7 +93,7 @@ PUBLIC VIRTUAL IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_SINT32 nS
             return IMS_FALSE;
         }
 
-        if (!pReg->Create(nFlowId, objAor, strSubsId, pProfile))
+        if (!pReg->Create(nFlowId, objAor, bEmergency, strSubsId, pProfile))
         {
             delete pReg;
             return IMS_FALSE;

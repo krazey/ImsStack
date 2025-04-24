@@ -34,13 +34,14 @@ public:
      * @param nSlotId Slot id
      * @param nFlowId Registration flow id
      * @param strAor Address-Of-Record(public user identity to be registered)
+     * @param bEmergency Flag to indicate whether it's used for emergency or not.
      * @param bFake Flag to indicate whether it's used for fake or not
      * @param strSubsId Subscriber configuration's identifier as a string
      * @param pProfile SIP profile for this registration
      * @return IMS_TRUE if IRegistration is successfully created, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL CreateRegistration(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId,
-            IN const AString& strAor, IN IMS_BOOL bFake = IMS_FALSE,
+            IN const AString& strAor, IN IMS_BOOL bEmergency, IN IMS_BOOL bFake = IMS_FALSE,
             IN const AString& strSubsId = AString::ConstNull(),
             IN SipProfile* pProfile = IMS_NULL) = 0;
 
@@ -50,13 +51,14 @@ public:
      * @param nSlotId Slot id
      * @param nFlowId Registration flow id
      * @param strAor Address-Of-Record(public user identity to be registered)
+     * @param bEmergency Flag to indicate whether it's used for emergency or not.
      * @param bFake Flag to indicate whether it's used for fake or not
      * @param strSubsId Subscriber configuration's identifier as a string
      * @param pProfile SIP profile for this registration
      * @return IMS_TRUE if IRegistration is successfully created, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL CreateRegistration(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId,
-            IN const SipAddress& objAor, IN IMS_BOOL bFake = IMS_FALSE,
+            IN const SipAddress& objAor, IN IMS_BOOL bEmergency, IN IMS_BOOL bFake = IMS_FALSE,
             IN const AString& strSubsId = AString::ConstNull(),
             IN SipProfile* pProfile = IMS_NULL) = 0;
 

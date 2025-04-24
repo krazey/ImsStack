@@ -543,6 +543,11 @@ PROTECTED VIRTUAL IMS_BOOL RegBinding::IsWithinTrustDomain() const
     return (m_piRegEx != IMS_NULL) ? m_piRegEx->IsWithinTrustDomain() : IMS_FALSE;
 }
 
+PROTECTED VIRTUAL IMS_BOOL RegBinding::IsEmergencyRegistration() const
+{
+    return (m_piRegEx != IMS_NULL) ? m_piRegEx->IsEmergencyRegistration() : IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void RegBinding::NotifyCallerCapabilityChanged()
 {
     if (m_piRegEx == IMS_NULL)
