@@ -605,7 +605,9 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
             MtsTransactionType::MESSAGE_TYPE_SEND, piMtsMessage);
     piMtsMessage->PrintInfo();
 
-    if (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_MS)
+    // TODO: Remove In-Reply-To validation for SMMA case.
+    if (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_MS ||
+            piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_SMMA)
     {
         ImsList<AString> objCallIds = piMessage->GetHeaders("Call-ID");
         if (!objCallIds.IsEmpty())
