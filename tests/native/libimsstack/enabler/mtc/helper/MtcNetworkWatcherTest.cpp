@@ -74,16 +74,6 @@ TEST_F(MtcNetworkWatcherTest, GetMobileRatTypeReturnsConvertedType)
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
 
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_INVALID));
-    pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
-    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetMobileRatType());
-
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
-    pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
-    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkWatcher->GetMobileRatType());
-
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_WCDMA));
     pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_UNKNOWN, pNetworkWatcher->GetMobileRatType());
@@ -115,6 +105,16 @@ TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatDoesNotChangedOnMobileIpcan)
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetMobileRatType());
     EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE, pNetworkWatcher->GetLastConnectedRatType());
+}
+
+TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedAsInvalidOne)
+{
+    pNetworkWatcher->OnConnected(IIpcan::CATEGORY_MOBILE);
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_INVALID));
+
+    EXPECT_CALL(objNetworkWatcherListener, OnRatChanged(_, _, _)).Times(0);
+    pNetworkWatcher->NetworkWatcher_NotifyStatus(objPhoneInfoService.GetNetworkWatcher(0));
 }
 
 TEST_F(MtcNetworkWatcherTest, UpdatesWhenMobileRatChangedOnWlanIpcan)

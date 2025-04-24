@@ -131,6 +131,12 @@ PUBLIC VIRTUAL void MtcNetworkWatcher::NetworkWatcher_NotifyStatus(
     }
 
     IMS_SINT32 eNewMobileRatType = ConvertCellularRatType(m_piNetWatcher->GetNetRadioTechType());
+
+    if (eNewMobileRatType == INetworkWatcher::RADIOTECH_TYPE_INVALID)
+    {
+        return;
+    }
+
     if (m_eMobileRatType != eNewMobileRatType)
     {
         UpdateMobileRat(eNewMobileRatType);
