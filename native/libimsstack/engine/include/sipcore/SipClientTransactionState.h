@@ -73,7 +73,7 @@ private:
     IMS_BOOL InitAck(IN_OUT ::SipMessage*& pAckSipMsg, IN ::SipMessage* pRespSipMsg);
     IMS_BOOL SetDialogRelatedHeaders(IN const SipMethod& objMethod);
     IMS_BOOL SetMandatoryHeaders(IN const SipMethod& objMethod);
-    void SetPaniHeader(IN const SipMethod& objMethod, IN_OUT ::SipMessage*& pSipMsg);
+    void SetPaniHeader(IN_OUT ::SipMessage*& pSipMsg);
     IMS_BOOL UpdateTxnDetails(IN const SipMethod& objMethod);
 
 private:

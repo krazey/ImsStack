@@ -55,6 +55,7 @@ public:
             m_strRegUaString(AString::ConstNull()),
             m_nRegSubscription(NOT_PROVISIONED),
             m_nRegSubExpires(NOT_PROVISIONED),
+            m_bForEmergency(IMS_FALSE),
             m_nConfigValue(0)
     {
     }
@@ -76,6 +77,7 @@ public:
             m_strRegUaString(other.m_strRegUaString),
             m_nRegSubscription(other.m_nRegSubscription),
             m_nRegSubExpires(other.m_nRegSubExpires),
+            m_bForEmergency(other.m_bForEmergency),
             m_nConfigValue(other.m_nConfigValue)
     {
     }
@@ -713,6 +715,28 @@ public:
     inline void SetConfiguration(IN IMS_SINT32 nValue) { m_nConfigValue = nValue; }
     // }
 
+    /**
+     * @brief Checks if this profile is for emergency service or not.
+     *
+     * @return IMS_TRUE if this profile is for emergency service, IMS_FALSE otherwise.
+     */
+    inline IMS_BOOL IsForEmergency() const { return m_bForEmergency; }
+
+    /**
+     * @brief Creates a new SipProfile with the specified SipProfile and emergency flag.
+     *
+     * @param pProfile The original profile for creation
+     * @param bForEmergency Flag specifying whether this profile is for emergency service or not
+     * @return A new SipProfile instance.
+     */
+    inline static SipProfile* Create(IN SipProfile* pProfile, IN IMS_BOOL bForEmergency)
+    {
+        SipProfile* pNewProfile =
+                (pProfile != IMS_NULL) ? new SipProfile(*pProfile) : new SipProfile();
+        pNewProfile->m_bForEmergency = bForEmergency;
+        return pNewProfile;
+    }
+
 private:
     inline IMS_BOOL HasFeature(IN IMS_SINT32 nSipFeature) const
     {
@@ -761,6 +785,8 @@ private:
     IMS_SINT32 m_nRegSubscription;
     // Expires for Reg-Subscription
     IMS_SINT32 m_nRegSubExpires;
+    // Flag specifying whether this is for emergency service or not.
+    IMS_BOOL m_bForEmergency;
 
     // Runtime configuration
     IMS_SINT32 m_nConfigValue;

@@ -27,15 +27,30 @@
 #include "ISipMessage.h"
 #include "ISipRtConfigHelper.h"
 #include "PAccessNetworkInfoHeader.h"
+#include "SipAddress.h"
 #include "SipConfigProxy.h"
 #include "SipFactory.h"
 #include "SipFeatures.h"
 #include "SipHeaderName.h"
+#include "SipParsingHelper.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
+// clang-format off
+static const IMS_CHAR* N11[] = {
+        "211",
+        "311",
+        "411",
+        "511",
+        "611",
+        "711",
+        "811",
+        IMS_NULL
+};
+// clang-format on
+
 PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
-        IN INetworkConnection* piConnection, IN const SipMethod& /*objMethod*/,
+        IN INetworkConnection* piConnection, IN const ISipMessage* piSipMsg,
         IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
     if (piConnection == IMS_NULL)
@@ -47,9 +62,18 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
 
     piConnection->GetAccessNetworkInfo(objAni);
 
-    if (SipConfigProxy::IsMacAddressHiddenInPaniHeader(nSlotId, pSipProfile))
+    if (IsAccessNetworkTypeWiFi(objAni))
     {
-        RefineMacAddressAsInvalid(objAni);
+        IMS_SINT32 nMacAddressDisplayRule =
+                SipConfigProxy::GetHideMacInPaniHeaderPolicy(nSlotId, pSipProfile);
+
+        if (nMacAddressDisplayRule == ISipConfig::HIDE_MAC_IN_PANI ||
+                (nMacAddressDisplayRule == ISipConfig::HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL &&
+                        !IsMessageForN11OrEmergency(pSipProfile, piSipMsg)))
+        {
+            // Hide MAC address in PANI header
+            IMS_MEM_Memset(&objAni.uniAI.i_wlan_node_id, 0x00, sizeof(I_WLAN_NODE_ID));
+        }
     }
 
     if (!FormHeader(nSlotId, objAni, strHeader))
@@ -75,7 +99,7 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
 }
 
 PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
-        IN const IpAddress& objIpAddr, IN const SipMethod& objMethod,
+        IN const IpAddress& objIpAddr, IN const ISipMessage* piSipMsg,
         IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
     INetworkConnection* piConnection =
@@ -83,7 +107,7 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
 
     if (piConnection != IMS_NULL)
     {
-        return FormHeader(nSlotId, piConnection, objMethod, pSipProfile, strHeader);
+        return FormHeader(nSlotId, piConnection, piSipMsg, pSipProfile, strHeader);
     }
 
     return IMS_FALSE;
@@ -108,7 +132,7 @@ PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
 
     AString strHeader;
 
-    if (!FormHeader(nSlotId, piConnection, piSipMsg->GetMethod(), pSipProfile, strHeader))
+    if (!FormHeader(nSlotId, piConnection, piSipMsg, pSipProfile, strHeader))
     {
         return;
     }
@@ -180,23 +204,6 @@ PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE GLOBAL void PAccessNetworkInfoHeader::RefineMacAddressAsInvalid(
-        IN_OUT AccessNetworkInfo& objAni)
-{
-    switch (objAni.nType)
-    {
-        case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11B:  // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11G:  // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11N:
-            IMS_MEM_Memset(&objAni.uniAI.i_wlan_node_id, 0x00, sizeof(I_WLAN_NODE_ID));
-            break;
-        default:
-            break;
-    }
 }
 
 PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddLocalTimezone(IN_OUT AString& strHeader)
@@ -474,5 +481,51 @@ PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsAccessNetworkTypeWiFi(
             break;
     }
 
+    return IMS_FALSE;
+}
+
+PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsMessageForN11OrEmergency(
+        IN const SipProfile* pSipProfile, IN const ISipMessage* piSipMsg)
+{
+    if (pSipProfile != IMS_NULL && pSipProfile->IsForEmergency())
+    {
+        return IMS_TRUE;
+    }
+
+    AString strHeader;
+
+    if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
+    {
+        strHeader = piSipMsg->GetHeader(ISipHeader::TO);
+    }
+    else
+    {
+        strHeader = piSipMsg->GetHeader(ISipHeader::FROM);
+    }
+
+    ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::TO, strHeader);
+
+    if (piHeader != IMS_NULL)
+    {
+        SipAddress* pAddress = piHeader->GetSipAddress();
+        const SipAddress::UserInfoPart* pUserInfoPart =
+                pAddress != IMS_NULL ? pAddress->GetUserInfoPart() : IMS_NULL;
+        const AString& strUser =
+                pUserInfoPart != IMS_NULL ? pUserInfoPart->GetUser() : AString::ConstNull();
+
+        IMS_SINT32 i = 0;
+
+        while (N11[i] != IMS_NULL)
+        {
+            if (strUser.Equals(N11[i]))
+            {
+                piHeader->Destroy();
+                return IMS_TRUE;
+            }
+            ++i;
+        }
+
+        piHeader->Destroy();
+    }
     return IMS_FALSE;
 }

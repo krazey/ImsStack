@@ -704,21 +704,19 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsSessionIdHeaderSupported(
     return pSipConfig->IsSessionIdHeaderSupported();
 }
 
-PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMacAddressHiddenInPaniHeader(
+PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetHideMacInPaniHeaderPolicy(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
     if (pProfile != IMS_NULL)
     {
         if (pProfile->IsSipFeatureProvisioned())
         {
-            return (pProfile->GetHideMacInPaniHeaderPolicy() != SipConfig::SHOW_MAC_IN_PANI);
+            return pProfile->GetHideMacInPaniHeaderPolicy();
         }
     }
 
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
-
-    // TODO - add implementation to handle HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL
-    return (pSipConfig->GetHideMacInPaniHeaderPolicy() != SipConfig::SHOW_MAC_IN_PANI);
+    return pSipConfig->GetHideMacInPaniHeaderPolicy();
 }
 
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(

@@ -187,8 +187,8 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
 
     m_nTransportType = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT);
 
-    m_nHideMacInPaniHeader =
-            piCc->GetInt(CarrierConfig::Ims::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT);
+    m_nHideMacInPaniHeader = piCc->GetInt(
+            CarrierConfig::Ims::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT, HIDE_MAC_IN_PANI);
     m_nSupportMultipleReg = piCc->GetInt(CarrierConfig::Ims::KEY_SUPPORT_MULTIPLE_REGISTRATION_INT,
             CarrierConfig::Ims::MULTIPLE_REGISTRATION_NONE);
     m_nRegContactUserInfoPart =

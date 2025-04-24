@@ -610,7 +610,9 @@ void RegBinding::CreateSipConnectionNotifier()
     // MULTI_REG_SIP_PROFILE
     if (m_piScn != IMS_NULL)
     {
-        m_piScn->SetSipProfile(GetSipProfile());
+        RcPtr<SipProfile> pSipProfile =
+                SipProfile::Create(GetSipProfile(), IsEmergencyRegistration());
+        m_piScn->SetSipProfile(pSipProfile.Get());
     }
     else
     {

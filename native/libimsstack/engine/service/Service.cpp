@@ -256,7 +256,8 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN const SipAddre
         return IMS_NULL;
     }
 
-    piScc->SetSipProfile(GetSipProfile());
+    RcPtr<SipProfile> pSipProfile = SipProfile::Create(GetSipProfile(), IsForEmergency());
+    piScc->SetSipProfile(pSipProfile.Get());
 
     IMS_SINT32 nPortS = m_piRegBinding->GetPortUs();
     IMS_SINT32 nPortC = m_piRegBinding->GetPortUc();
@@ -422,7 +423,8 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN const SipAddre
     }
 
     // Sets P-Access-Network-Info header field
-    PAccessNetworkInfoHeader::SetHeader(GetSlotId(), GetIpAddress(), GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            GetSlotId(), GetIpAddress(), piScc->GetSipProfile(), piSipMsg);
 
     // IPSEC {
     {
@@ -495,7 +497,8 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
         return IMS_NULL;
     }
 
-    piScc->SetSipProfile(GetSipProfile());
+    RcPtr<SipProfile> pSipProfile = SipProfile::Create(GetSipProfile(), IsForEmergency());
+    piScc->SetSipProfile(pSipProfile.Get());
 
     IMS_SINT32 nPortS = IsRegBindingOnActive() ? m_piRegBinding->GetPortUs()
                                                : m_objCachedRegBinding.GetPortUs();
@@ -617,7 +620,8 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
     }
 
     // Sets P-Access-Network-Info header field
-    PAccessNetworkInfoHeader::SetHeader(GetSlotId(), GetIpAddress(), GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            GetSlotId(), GetIpAddress(), piScc->GetSipProfile(), piSipMsg);
 
     // In case of PRACK method, then do not contain the Security related headers.
     if (objMethod.Equals(SipMethod::PRACK))
@@ -724,7 +728,8 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piS
     // MULTI_REG_SIP_PROFILE
     if (!m_pSipProfile.IsNull())
     {
-        piSsc->SetSipProfile(m_pSipProfile.Get());
+        RcPtr<SipProfile> pSipProfile = SipProfile::Create(m_pSipProfile.Get(), IsForEmergency());
+        piSsc->SetSipProfile(pSipProfile.Get());
     }
 
     const SipMethod& objMethod = piSsc->GetMethod();
@@ -834,7 +839,8 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piS
     // Sets P-Access-Network-Info header field
     if (!objMethod.Equals(SipMethod::CANCEL) && (nStatusCode > SipStatusCode::SC_100))
     {
-        PAccessNetworkInfoHeader::SetHeader(GetSlotId(), GetIpAddress(), GetSipProfile(), piSipMsg);
+        PAccessNetworkInfoHeader::SetHeader(
+                GetSlotId(), GetIpAddress(), piSsc->GetSipProfile(), piSipMsg);
     }
 
     // Sets Server header field - User-Agent ?
@@ -1144,7 +1150,8 @@ SipProfile* Service::GetSipProfile() const
 {
     if (m_pSipProfile.IsNull())
     {
-        return (m_piRegBinding != IMS_NULL) ? m_piRegBinding->GetSipProfile() : IMS_NULL;
+        return (m_piRegBinding != IMS_NULL) ? m_piRegBinding->GetSipProfile()
+                                            : m_objCachedRegBinding.GetSipProfile();
     }
 
     return m_pSipProfile.Get();
@@ -1214,6 +1221,13 @@ IMS_BOOL Service::IsEventPackageSupported(IN const AString& strEvent) const
     }
 
     return m_pAppConfig->IsEventPackageSupported(strEvent);
+}
+
+PUBLIC
+IMS_BOOL Service::IsForEmergency() const
+{
+    return (m_piRegBinding != IMS_NULL) ? m_piRegBinding->IsEmergencyRegistration()
+                                        : m_objCachedRegBinding.IsEmergencyRegistration();
 }
 
 PUBLIC
@@ -2359,6 +2373,8 @@ void Service::UpdateRegBindings()
         m_objCachedRegBinding.SetTemporaryGruu(IMS_NULL);
         // }
         m_objCachedRegBinding.SetAssociatedUris(AStringArray::ConstNull());
+        m_objCachedRegBinding.SetSipProfile(IMS_NULL);
+        m_objCachedRegBinding.SetEmergencyRegistration(IMS_FALSE);
     }
     else
     {
@@ -2381,5 +2397,7 @@ void Service::UpdateRegBindings()
         m_objCachedRegBinding.SetTemporaryGruu(m_piRegBinding->GetTemporaryGruu());
         // }
         m_objCachedRegBinding.SetAssociatedUris(m_piRegBinding->GetAssociatedUris());
+        m_objCachedRegBinding.SetSipProfile(m_piRegBinding->GetSipProfile());
+        m_objCachedRegBinding.SetEmergencyRegistration(m_piRegBinding->IsEmergencyRegistration());
     }
 }

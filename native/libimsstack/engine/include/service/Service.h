@@ -135,6 +135,7 @@ public:
 
     IMS_BOOL IsBehindNat() const;
     IMS_BOOL IsEventPackageSupported(IN const AString& strEvent) const;
+    IMS_BOOL IsForEmergency() const;
     inline IMS_BOOL IsImsConnected() const { return m_bImsConnected; }
     IMS_BOOL IsWithinTrustDomain() const;
 
@@ -269,7 +270,8 @@ private:
                 m_objSecurityVerifys(AStringArray::ConstNull()),
                 m_pPubGruu(IMS_NULL),
                 m_pTempGruu(IMS_NULL),
-                m_objAssociatedUris(AStringArray::ConstNull())
+                m_objAssociatedUris(AStringArray::ConstNull()),
+                m_bEmergencyRegistration(IMS_FALSE)
         {
         }
         inline ~CachedRegBinding()
@@ -314,6 +316,8 @@ private:
         inline const SipAddress* GetTemporaryGruu() const { return m_pTempGruu; }
 
         inline const AStringArray& GetAssociatedUris() const { return m_objAssociatedUris; }
+        inline SipProfile* GetSipProfile() const { return m_pSipProfile.Get(); }
+        inline IMS_BOOL IsEmergencyRegistration() const { return m_bEmergencyRegistration; }
 
         inline void SetPortUc(IN IMS_SINT32 nPortUc) { m_nPortUc = nPortUc; }
         inline void SetPortUs(IN IMS_SINT32 nPortUs) { m_nPortUs = nPortUs; }
@@ -386,6 +390,11 @@ private:
         {
             m_objAssociatedUris = objAssociatedUris;
         }
+        inline void SetSipProfile(IN SipProfile* pSipProfile) { m_pSipProfile = pSipProfile; }
+        inline void SetEmergencyRegistration(IN IMS_BOOL bEmergencyRegistration)
+        {
+            m_bEmergencyRegistration = bEmergencyRegistration;
+        }
 
     public:
         // port-uc / port-us
@@ -410,6 +419,9 @@ private:
 
         // Authorized URIs
         AStringArray m_objAssociatedUris;
+        RcPtr<SipProfile> m_pSipProfile;
+        // Flag specifying whether the registration is for emergency or not.
+        IMS_BOOL m_bEmergencyRegistration;
     };
 
     // In case of JSR 281, it MUST be a "imscore"

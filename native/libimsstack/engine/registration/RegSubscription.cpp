@@ -605,8 +605,8 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::SendRequestToChallenge(IN ISipClientCo
     }
 
     // Set P-Access-Network-Info header
-    PAccessNetworkInfoHeader::SetHeader(GetSlotId(), m_pRegStateTracker->GetIpAddress(),
-            m_pRegStateTracker->GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            GetSlotId(), m_pRegStateTracker->GetIpAddress(), piScc->GetSipProfile(), piSipMsg);
 
     if (!Method::SendRequestToChallenge(piScc))
     {
@@ -1247,8 +1247,8 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
     }
 
     // Sets P-Access-Network-Info header field
-    PAccessNetworkInfoHeader::SetHeader(GetSlotId(), m_pRegStateTracker->GetIpAddress(),
-            m_pRegStateTracker->GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            GetSlotId(), m_pRegStateTracker->GetIpAddress(), piSsc->GetSipProfile(), piSipMsg);
 
     // Sets Server header field - User-Agent ?
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()))
@@ -1751,7 +1751,9 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     // we needs to have a policy of which network will have a preference between the connections.
 
     // MULTI_REG_SIP_PROFILE
-    piScc->SetSipProfile(pStateTracker->GetSipProfile());
+    RcPtr<SipProfile> pSipProfile = SipProfile::Create(
+            pStateTracker->GetSipProfile(), pStateTracker->IsEmergencyRegistration());
+    piScc->SetSipProfile(pSipProfile.Get());
 
     // Sets the transport tuples
     // RFC5626_FLOW_CONTROL
@@ -1881,8 +1883,8 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     // }
 
     // Set P-Access-Network-Info header
-    PAccessNetworkInfoHeader::SetHeader(pRegSub->GetSlotId(), pStateTracker->GetIpAddress(),
-            pStateTracker->GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            pRegSub->GetSlotId(), pStateTracker->GetIpAddress(), piScc->GetSipProfile(), piSipMsg);
 
     return piScc;
 }

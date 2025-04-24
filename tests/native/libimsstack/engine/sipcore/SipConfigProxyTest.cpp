@@ -92,7 +92,8 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_FALSE(
             SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsSessionIdHeaderSupported(IMS_SLOT_0));
-    EXPECT_TRUE(SipConfigProxy::IsMacAddressHiddenInPaniHeader(IMS_SLOT_0));
+    EXPECT_EQ(
+            SipConfigProxy::GetHideMacInPaniHeaderPolicy(IMS_SLOT_0), ISipConfig::HIDE_MAC_IN_PANI);
     EXPECT_FALSE(SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(IMS_SLOT_0));
 
     EXPECT_EQ(SipConfigProxy::GetTimerValue100Trying(IMS_SLOT_0), 200);
@@ -242,6 +243,7 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     IMS_SINT32 nRegSub = 1;
 
     objSipProfile.SetRegSubscription(nRegSub);
+    objSipProfile.SetHideMacInPaniHeaderPolicy(ISipConfig::HIDE_MAC_IN_PANI);
 
     EXPECT_TRUE(SipConfigProxy::IsRegExpiresConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsRegSubExpiresConfigured(IMS_SLOT_0, &objSipProfile));
@@ -274,7 +276,8 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_TRUE(SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
             IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsSessionIdHeaderSupported(IMS_SLOT_0, &objSipProfile));
-    EXPECT_TRUE(SipConfigProxy::IsMacAddressHiddenInPaniHeader(IMS_SLOT_0, &objSipProfile));
+    EXPECT_EQ(SipConfigProxy::GetHideMacInPaniHeaderPolicy(IMS_SLOT_0, &objSipProfile),
+            ISipConfig::HIDE_MAC_IN_PANI);
     EXPECT_TRUE(SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(
             IMS_SLOT_0, &objSipProfile));
 

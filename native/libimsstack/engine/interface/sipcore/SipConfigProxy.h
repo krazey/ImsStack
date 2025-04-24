@@ -570,15 +570,18 @@ public:
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
-     * @brief Checks if the MAC address should be hidden in PANI header on Wi-Fi.
+     * @brief Gets the display rule of MAC address in PANI header when using WLAN.
      *
      * SipProfile is preferred than a default SipConfig.
      *
      * @param nSlotId The current slot id
      * @param pProfile The dynamic SIP profile
-     * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
+     * @return The display rule of MAC address.\n
+     *         #SipConfig#SHOW_MAC_IN_PANI\n
+     *         #SipConfig#HIDE_MAC_IN_PANI\n
+     *         #SipConfig#HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL
      */
-    static IMS_BOOL IsMacAddressHiddenInPaniHeader(
+    static IMS_SINT32 GetHideMacInPaniHeaderPolicy(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**

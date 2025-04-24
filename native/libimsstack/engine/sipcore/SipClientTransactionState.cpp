@@ -25,6 +25,7 @@
 #include "SipDialogEx.h"
 #include "SipFactoryProxy.h"
 #include "SipFeatures.h"
+#include "SipMessage.h"
 #include "SipMessageTracker.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
@@ -634,7 +635,7 @@ IMS_BOOL SipClientTransactionState::InitRequest(
     // P-Access-Network-Info header if required
     if (objMethod.Equals(SipMethod::ACK) && SipFeatures::IsPaniHeaderForAckRequired(GetSlotId()))
     {
-        SetPaniHeader(objMethod, m_pSipMsg);
+        SetPaniHeader(m_pSipMsg);
     }
 
     return IMS_TRUE;
@@ -1440,7 +1441,7 @@ IMS_BOOL SipClientTransactionState::InitAck(
     // P-Access-Network-Info header if required
     if (SipFeatures::IsPaniHeaderForAckRequired(GetSlotId()))
     {
-        SetPaniHeader(objMethodAck, pAckSipMsg);
+        SetPaniHeader(pAckSipMsg);
     }
 
     return IMS_TRUE;
@@ -1575,13 +1576,13 @@ IMS_BOOL SipClientTransactionState::SetMandatoryHeaders(IN const SipMethod& objM
 }
 
 PRIVATE
-void SipClientTransactionState::SetPaniHeader(
-        IN const SipMethod& objMethod, IN_OUT ::SipMessage*& pSipMsg)
+void SipClientTransactionState::SetPaniHeader(IN_OUT ::SipMessage*& pSipMsg)
 {
     AString strPani;
+    sipcore::SipMessage objSipMsg(pSipMsg);
 
     if (PAccessNetworkInfoHeader::FormHeader(
-                GetSlotId(), m_pTransport->GetIpAddress(), objMethod, GetSipProfile(), strPani))
+                GetSlotId(), m_pTransport->GetIpAddress(), &objSipMsg, GetSipProfile(), strPani))
     {
         if (strPani.GetLength() > 0)
         {

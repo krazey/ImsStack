@@ -128,10 +128,7 @@ private:
     {
         return m_pStateTracker->GetServiceRoutes();
     }
-    inline SipProfile* GetSipProfile() const override
-    {
-        return (!m_pStateTracker.IsNull()) ? m_pStateTracker->GetSipProfile() : IMS_NULL;
-    }
+    inline SipProfile* GetSipProfile() const override { return m_pStateTracker->GetSipProfile(); }
     inline IMS_SINT32 GetState() const override { return m_nState; }
     IMS_BOOL IsBindingsUpdated() const override;
     inline IMS_BOOL IsBindingsUpdating() const override
