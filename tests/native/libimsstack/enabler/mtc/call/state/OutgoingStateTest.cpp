@@ -1367,9 +1367,9 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedReturnsTerminating)
             .WillByDefault(Return(IMS_NULL));
 
     EXPECT_CALL(objMtcSession,
-            Terminate(_, CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE)));
+            Terminate(_, CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, SipStatusCode::SC_INVALID)));
     EXPECT_CALL(objUiNotifier,
-            SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE)));
+            SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, SipStatusCode::SC_INVALID)));
 
     EXPECT_EQ(
             CallStateName::TERMINATING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));

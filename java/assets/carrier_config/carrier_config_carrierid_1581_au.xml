@@ -164,7 +164,8 @@
         <item value="481:0"/> <!-- UPDATE_ERROR_ACTION_TERMINATE -->
         <item value="491:2"/> <!-- UPDATE_ERROR_ACTION_GLARE_CONDITION -->
     </string-array>
-    <string-array name="imsvoice.early_update_reject_code_and_action_set_string_array" num="3">
+    <string-array name="imsvoice.early_update_reject_code_and_action_set_string_array" num="4">
+        <item value="0:0"/> <!-- EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG -->
         <item value="408:0"/> <!-- EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG -->
         <item value="481:0"/> <!-- EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG -->
         <item value="491:2"/> <!-- EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION -->
