@@ -43,7 +43,7 @@ adb wait-for-device
 REMOTE_COVERAGE_OUTPUT_FILE="/storage/self/primary/Download/coverage.ec"
 
 COVERAGE_OUTPUT_FILE="$ANDROID_BUILD_TOP/out/$PACKAGE_NAME.ec"
-COVERAGE_CLASS_FILE="$ANDROID_BUILD_TOP/out/soong/.intermediates/$MODULE_PATH/java/imsstack/android_common/javac/imsstack.jar"
+COVERAGE_CLASS_FILE="$ANDROID_BUILD_TOP/out/soong/.intermediates/$MODULE_PATH/java/ImsStack/android_common/jacoco-report-classes/ImsStack.jar"
 
 echo ""
 echo "RUNNING TESTS $TEST_RUNNER"
