@@ -622,6 +622,14 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
                 ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
             }
         }
+        else
+        {
+            if (AosHandle::IsHandleBlocked(BLOCK_NETWORK) ||
+                    AosHandle::IsHandleBlocked(m_nHoldingBlocksForMobile, BLOCK_NETWORK))
+            {
+                ProcessBlock(BLOCK_NETWORK, IMS_FALSE);
+            }
+        }
 
         if (IsVolteHysTimerRunning())  // VZ_REQ_LTEDATA_39857
         {

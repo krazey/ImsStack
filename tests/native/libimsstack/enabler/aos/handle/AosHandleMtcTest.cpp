@@ -3095,6 +3095,32 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_RefreshSsacInfoOnLte)
     EXPECT_TRUE(m_pAosHandleMtc->IsSsacBarred());
 }
 
+TEST_F(AosHandleMtcTest, ResetBlockNetworkIfRatIsChangedToInvalid)
+{
+    // GIVEN
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_NETWORK);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_INVALID);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+}
+
+TEST_F(AosHandleMtcTest, ResetHoldingBlockNetworkIfRatIsChangedToInvalid)
+{
+    // GIVEN
+    m_pAosHandleMtc->AddHoldingBlockForMobile(AosHandle::BLOCK_NETWORK);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_INVALID);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsHoldingBlockForMobile(AosHandle::BLOCK_NETWORK));
+}
+
 TEST_F(AosHandleMtcTest, NoCheckVopsStateOnRatsOtherThanNeitherLteNorNr)
 {
     // GIVEN
