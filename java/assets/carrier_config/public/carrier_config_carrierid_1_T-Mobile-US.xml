@@ -26,7 +26,7 @@
         <item value="0"/>
     </int-array>
     <int name="gba_mode_int" value="2"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
+    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
     <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="3">
         <item value="1"/>
