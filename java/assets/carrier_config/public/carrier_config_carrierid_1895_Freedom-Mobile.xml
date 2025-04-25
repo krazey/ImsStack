@@ -30,4 +30,18 @@
     <!-- Previous solution was using 8090, but requirements is 80 -->
     <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
+    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="1">
+            <item value="102"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="1">
+            <item value="104"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="97"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="96"/>
+        </int-array>
+    </pbundle>
 </carrier_config>

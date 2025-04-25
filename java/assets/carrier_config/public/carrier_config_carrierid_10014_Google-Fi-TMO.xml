@@ -45,86 +45,48 @@
         <item value="1"/>
         <item value="3"/>
     </int-array>
-    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="true"/>
+    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
     <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="false"/>
     <string name="imsvoice.conference_factory_uri_string">sip:8881112663@msg.pc.t-mobile.com</string>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="false"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="true"/>
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="127"/>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+            <item value="98"/>
+            <item value="103"/>
         </int-array>
         <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
-            <item value="97"/>
-            <item value="98"/>
-        </int-array>
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
             <item value="100"/>
-            <item value="101"/>
-        </int-array>
-        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
-            <item value="99"/>
+            <item value="105"/>
         </int-array>
         <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="102"/>
+            <item value="97"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="96"/>
+        </int-array>
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="127"/>
         </int-array>
     </pbundle>
     <pbundle name="imsvoice.evs_payload_description_bundle">
         <pbundle name="127">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
                 <item value="0"/>
                 <item value="4"/>
             </int-array>
             <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
-            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle name="97">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
-                <item value="0"/>
-                <item value="1"/>
-                <item value="2"/>
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="98">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
-                <item value="0"/>
-                <item value="1"/>
-                <item value="2"/>
-            </int-array>
+        <pbundle name="105">
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle name="100">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
-                <item value="0"/>
-                <item value="2"/>
-                <item value="4"/>
-                <item value="7"/>
-            </int-array>
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="101">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
-                <item value="0"/>
-                <item value="2"/>
-                <item value="4"/>
-                <item value="7"/>
-            </int-array>
+        <pbundle name="103">
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">

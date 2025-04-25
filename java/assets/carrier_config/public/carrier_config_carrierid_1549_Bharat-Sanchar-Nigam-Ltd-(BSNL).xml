@@ -15,36 +15,20 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
-        <item value="2"/>
-        <item value="4"/>
-    </int-array>
-    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1030"/>
-    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1080"/>
-    <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="127">
-            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-                <item value="3"/>
-                <item value="6"/>
-            </int-array>
-            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="255"/>
-        </pbundle>
-    </pbundle>
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="1">
-            <item value="102"/>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+            <item value="98"/>
+            <item value="103"/>
         </int-array>
-        <int-array name="imsvoice.amrwb_payload_type_int_array" num="1">
-            <item value="104"/>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="100"/>
+            <item value="105"/>
         </int-array>
         <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
             <item value="97"/>
         </int-array>
         <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
             <item value="96"/>
-        </int-array>
-        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="127"/>
         </int-array>
     </pbundle>
 </carrier_config>

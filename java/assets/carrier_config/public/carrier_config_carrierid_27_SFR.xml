@@ -19,4 +19,30 @@
     <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="0"/>
     <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
+    <pbundle name="imsvoice.evs_payload_description_bundle">
+        <pbundle name="127">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="6"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="255"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="1">
+            <item value="102"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="1">
+            <item value="104"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="97"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="96"/>
+        </int-array>
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="127"/>
+        </int-array>
+    </pbundle>
 </carrier_config>
