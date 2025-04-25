@@ -88,6 +88,7 @@ protected:
     IMS_BOOL IsCsFeatureTagRequired() const;
     IMS_BOOL IsInvalidMobileNetwork() const;
     IMS_BOOL IsPlmnBlockCondition() const;
+    IMS_BOOL IsVoiceCapableOnWiFiCalling() const;
 
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);

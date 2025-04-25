@@ -75,6 +75,7 @@ using ::testing::SetArgReferee;
     using Base::IsFeatureBlocked;                   \
     using Base::IsInvalidMobileNetwork;             \
     using Base::IsPlmnBlockCondition;               \
+    using Base::IsVoiceCapableOnWiFiCalling;        \
     using Base::IsVolteHysTimerRunning;             \
     using Base::ImsRadio_OnSsacChanged;             \
     using Base::NConfiguration_NotifyConfigChanged; \
@@ -621,55 +622,154 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test5)
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_SSAC));
 }
 
-TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test6)
+TEST_F(AosHandleMtcTest, TemporarilyVoiceCapableDuringWiFiCallingWhenWfcDisabledAndVideoAvailable)
 {
-    // Test6: vzw vowifi feature tag test. Idle -> Offhook -> Idle
-    // Expectation: "cs" in idle, "cs,volte" in offhook
+    // GIVEN
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest, BackToVoiceNotCapableIfWiFiCallingFinishedWhenWfcDisabledAndVideoAvailable)
+{
+    // GIVEN
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest, CsVolteFeatureTagDuringWiFiCallingWhenWfcDisabledAndVideoAvailable)
+{
+    // GIVEN
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
 
     m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
     m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
     m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::VIDEO);
     m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
+    AosFeatureTagList objExpectedFeatureTagListOffhook;
+    objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::MMTEL);
+    objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListOffhook.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListOffhook.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListOffhook));
+}
+
+TEST_F(AosHandleMtcTest, CsFeatureTagIfWiFiCallingFinishedWhenWfcDisabledAndVideoAvailable)
+{
+    // GIVEN
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
     m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     AosFeatureTagList objExpectedFeatureTagListIdle;
     objExpectedFeatureTagListIdle.AddFeature(ImsAosFeature::VIDEO);
     objExpectedFeatureTagListIdle.AddFeatureTag(
             FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
-    AosFeatureTagList objExpectedFeatureTagListOffhook;
-    objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListOffhook.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
-    objExpectedFeatureTagListOffhook.AddFeatureTag(
-            FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
+    ON_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_GSM));
 
-    EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
-            .Times(2)
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
-
-    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
-    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListOffhook));
-
+    // WHEN
     m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    // THEN
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListIdle));
 }
 
@@ -3253,6 +3353,96 @@ TEST_F(AosHandleMtcTest, ShouldStopVolteHysTimerIfVopsIsNotSupportedOnNetworkCha
     EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
 }
 
+TEST_F(AosHandleMtcTest, ShouldKeepCsVolteFeatureTagIfCallHandoverToWlanWhenWfcOffAndVideoAvailable)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+
+    AosFeatureTagList objExpectedFeatureTagListOffhook;
+    objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::MMTEL);
+    objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListOffhook.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListOffhook.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListOffhook));
+}
+
+TEST_F(AosHandleMtcTest, ShouldSetCsFeatureTagIfNoCallOnHandoverToWlanWhenWfcOffAndVideoAvailable)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::TEXT));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->SetDataConnected(IMS_TRUE);
+
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandleMtc->AddBindedFeature(ImsAosFeature::VIDEO);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    m_pAosHandleMtc->AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+
+    AosFeatureTagList objExpectedFeatureTagListIdle;
+    objExpectedFeatureTagListIdle.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListIdle.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_GSM));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListIdle));
+}
+
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)
 {
     // Test1: call active
@@ -4142,6 +4332,71 @@ TEST_F(AosHandleMtcTest, IsPlmnBlockCondition_Nr)
 
     m_pAosHandleMtc->SetCsVoiceAvailable(IMS_TRUE);
     EXPECT_TRUE(m_pAosHandleMtc->IsPlmnBlockCondition());
+}
+
+TEST_F(AosHandleMtcTest,
+        VoiceNotCapableOnWiFiCallingIfNotUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVoiceCapableOnWiFiCalling());
+}
+
+TEST_F(AosHandleMtcTest, VoiceNotCapableOnWiFiCallingIfNetworkTypeIsNotWlan)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVoiceCapableOnWiFiCalling());
+}
+
+TEST_F(AosHandleMtcTest, VoiceNotCapableOnWiFiCallingIfCallTrackerIsNull)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    AosProvider::GetInstance()->SetCallTracker(nullptr, 0);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVoiceCapableOnWiFiCalling());
+}
+
+TEST_F(AosHandleMtcTest, VoiceNotCapableOnWiFiCallingIfNoActiveCall)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsVoiceCapableOnWiFiCalling());
+}
+
+TEST_F(AosHandleMtcTest, VoiceCapableOnWiFiCallingIfWiFiCallIsActive)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsVoiceCapableOnWiFiCalling());
 }
 
 TEST_F(AosHandleMtcTest, ProcessHoldingVopsState_Test)

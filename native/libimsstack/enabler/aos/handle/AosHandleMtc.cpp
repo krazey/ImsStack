@@ -193,12 +193,12 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
         }
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+    if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() &&
+            IsEpdgEnabled())
     {
         if (eState == CallState::IDLE || eState == CallState::OFFHOOK)
         {
-            UpdateGGsmaRcsTelephonyFeatureTag();
-            ProcessFeatureTagChange();
+            ReevaluateCapabilities(IMS_FALSE);
         }
     }
 }
@@ -722,6 +722,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities(IN IMS_BOOL bNetwork
     IMS_BOOL bIsB2cCallComposerCapable = IsCapabilityExistedForNetworkType(
             m_nNetworkType, AosCapability::CALL_COMPOSER_BUSINESS_ONLY);
 
+    if (!bIsVoiceCapable)
+    {
+        bIsVoiceCapable = IsVoiceCapableOnWiFiCalling();
+    }
+
     if (bNetworkChanged && GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
     {
         ReevaluateUnavailableFeature();
@@ -933,6 +938,32 @@ IMS_BOOL AosHandleMtc::IsPlmnBlockCondition() const
     {
         return IMS_FALSE;
     }
+
+    return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL AosHandleMtc::IsVoiceCapableOnWiFiCalling() const
+{
+    // VZ_REQ_VOWIFI_6258874
+    if (!GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_nNetworkType != NW_REPORT_RADIO_WLAN)
+    {
+        return IMS_FALSE;
+    }
+
+    const IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    if (piCallTracker == IMS_NULL || !piCallTracker->IsNormalCallActive())
+    {
+        return IMS_FALSE;
+    }
+
+    A_IMS_TRACE_D(
+            APPPROFILE, "IsVoiceCapableOnWiFiCalling :: Voice capable during WiFi calls", 0, 0, 0);
 
     return IMS_TRUE;
 }
