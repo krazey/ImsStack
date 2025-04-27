@@ -1405,7 +1405,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
             if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() &&
                     GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
-                bRequired = IMS_TRUE;
+                return IMS_TRUE;
             }
         }
 
@@ -1426,7 +1426,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
             if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() &&
                     GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
-                bRequired = IMS_TRUE;
+                return IMS_TRUE;
             }
         }
 
@@ -2047,6 +2047,11 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddOperation_OnSendRegister()
     AddAccesstypeFeatureTag();
 
     ControlPrivateHeader();
+
+    if (m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        AddLocationHeaderBody(m_piRegistration->GetNextRequest());
+    }
 
     return IMS_TRUE;
 }
