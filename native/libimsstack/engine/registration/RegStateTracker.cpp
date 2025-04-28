@@ -36,7 +36,8 @@ RegStateTracker::RegStateTracker() :
         m_nPortFlowControl(0),
         m_nPortUc(0),
         m_nPortUs(0),
-        m_pSipProfile(IMS_NULL)
+        m_pSipProfile(IMS_NULL),
+        m_bEmergencyRegistration(IMS_FALSE)
 {
 }
 
@@ -53,7 +54,8 @@ RegStateTracker::RegStateTracker(IN const RegStateTracker& other) :
         m_nPortFlowControl(other.m_nPortFlowControl),
         m_nPortUc(other.m_nPortUc),
         m_nPortUs(other.m_nPortUs),
-        m_pSipProfile(other.m_pSipProfile)
+        m_pSipProfile(other.m_pSipProfile),
+        m_bEmergencyRegistration(other.m_bEmergencyRegistration)
 {
     if (other.m_pAuthorizedAor != IMS_NULL)
     {

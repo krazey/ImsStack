@@ -201,6 +201,13 @@ public:
     virtual IMS_BOOL IsWithinTrustDomain() const = 0;
 
     /**
+     * @brief Checks if this registration is for emergency or not.
+     *
+     * @return true if this registration is for emergency, false otherwise.
+     */
+    virtual IMS_BOOL IsEmergencyRegistration() const = 0;
+
+    /**
      * @brief Notifies the registration when the caller capability is changed to refresh
      *        the IMS registration if the device is already registered to the IMS network.
      */

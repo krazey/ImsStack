@@ -48,6 +48,7 @@ public:
     MOCK_METHOD(const SipAddress*, GetTemporaryGruu, (), (const, override));
     MOCK_METHOD(const ImsList<SipAddress*>&, GetTemporaryGruus, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsBehindNat, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyRegistration, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWithinTrustDomain, (), (const, override));
     MOCK_METHOD(void, NotifyCallerCapabilityChanged, (), (override));
     MOCK_METHOD(void, SetListener, (IN IRegBindingListener * piListener), (override));
