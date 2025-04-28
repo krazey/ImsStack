@@ -15,13 +15,19 @@
  */
 package com.android.imsstack.internal;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.util.SparseBooleanArray;
+
 import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.TestInstanceHolder;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,16 +37,23 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.CopyOnWriteArraySet;
+
 @RunWith(JUnit4.class)
 public class ImsStackRegistryTest {
-    private static final int SLOT0 = 0;
+    private @Mock ImsStackRegistry.ImsServiceListener mImsServiceListener;
 
-    @Mock ImsStackRegistry.ImsServiceListener mImsServiceListener;
+    private AutoCloseable mMocksCloseable;
+    private final TestInstanceHolder mInstanceHolder = new TestInstanceHolder();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        mMocksCloseable = MockitoAnnotations.openMocks(this);
 
+        mInstanceHolder.replace(ImsStackRegistry.class, "sImsServiceStates", null,
+                new SparseBooleanArray());
+        mInstanceHolder.replace(ImsStackRegistry.class, "sImsServiceListeners", null,
+                new CopyOnWriteArraySet<ImsStackRegistry.ImsServiceListener>());
         ImsStackRegistry.setImsServiceState(SLOT0, false);
         ImsStackRegistry.addImsServiceListener(mImsServiceListener);
     }
@@ -49,6 +62,12 @@ public class ImsStackRegistryTest {
     public void tearDown() throws Exception {
         ImsStackRegistry.setImsServiceState(SLOT0, false);
         ImsStackRegistry.removeImsServiceListener(mImsServiceListener);
+
+        mInstanceHolder.restoreAll();
+        if (mMocksCloseable != null) {
+            mMocksCloseable.close();
+            mMocksCloseable = null;
+        }
     }
 
     @Test
