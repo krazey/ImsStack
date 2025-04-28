@@ -1666,7 +1666,11 @@ PROTECTED VIRTUAL IRegistration* AosRegistration::GetRegistration()
     A_IMS_TRACE_D(REGID, "GetRegistration :: m_nFlowId (%d), strAoR (%s)", m_nFlowId,
             m_strPuid.GetStr(), 0);
 
-    if (!m_piRegManager->CreateRegistration(m_nSlotId, m_nFlowId, m_strPuid, IsFakeRegistration()))
+    IMS_BOOL bEmergency = (m_eRegType == AosRegistrationType::EMERGENCY ||
+            m_eRegType == AosRegistrationType::FAKE);
+
+    if (!m_piRegManager->CreateRegistration(
+                m_nSlotId, m_nFlowId, m_strPuid, bEmergency, IsFakeRegistration()))
     {
         A_IMS_TRACE_I(REGID, "create reg is failed", 0, 0, 0);
         return IMS_NULL;
