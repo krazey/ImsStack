@@ -42,11 +42,7 @@ protected:
     {
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
-
-        pBlockRule = new ServiceBlockRule(objContext);
     }
-
-    virtual void TearDown() override { delete pBlockRule; }
 };
 
 TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfMmtelFeatureAvailable)
@@ -54,7 +50,7 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfMmtelFeatureAvailable)
     ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::MMTEL))
             .WillByDefault(Return(IMS_TRUE));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = ServiceBlockRule(objContext, CallType::VOIP).Check(objListener);
 
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
@@ -67,7 +63,7 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfb
     ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = ServiceBlockRule(objContext, CallType::VOIP).Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(
@@ -83,7 +79,7 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForCsfb
     ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = ServiceBlockRule(objContext, CallType::VOIP).Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE), objResult.objReason);
@@ -97,9 +93,21 @@ TEST_F(ServiceBlockRuleTest, CheckReturnsBlockedIfMmtelFeatureUnavailableForMtCa
     ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = ServiceBlockRule(objContext, CallType::VOIP).Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_488),
             objResult.objReason);
+}
+
+TEST_F(ServiceBlockRuleTest, CheckReturnsUnblockedIfOnlyVideoFeatureAvailableForVideoCall)
+{
+    ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::MMTEL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objAosConnector, IsFeatureConnected(ImsAosFeature::VIDEO))
+            .WillByDefault(Return(IMS_TRUE));
+
+    Result objResult = ServiceBlockRule(objContext, CallType::VT).Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }

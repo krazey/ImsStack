@@ -26,9 +26,10 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ServiceBlockRule::ServiceBlockRule(IN IMtcCallContext& objContext) :
+ServiceBlockRule::ServiceBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType) :
         m_objService(objContext.GetService()),
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_eCallType(eCallType)
 {
 }
 
@@ -38,6 +39,12 @@ PUBLIC VIRTUAL ServiceBlockRule::Result ServiceBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
     if (m_objService.GetAosConnector()->IsFeatureConnected(ImsAosFeature::MMTEL))
+    {
+        return Result(Result::Status::UNBLOCKED);
+    }
+
+    if (m_eCallType == CallType::VT &&
+            m_objService.GetAosConnector()->IsFeatureConnected(ImsAosFeature::VIDEO))
     {
         return Result(Result::Status::UNBLOCKED);
     }

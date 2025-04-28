@@ -31,7 +31,7 @@ class IMtcService;
 class ServiceBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit ServiceBlockRule(IN IMtcCallContext& objContext);
+    ServiceBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
     virtual ~ServiceBlockRule();
     ServiceBlockRule(IN const ServiceBlockRule&) = delete;
     ServiceBlockRule& operator=(IN const ServiceBlockRule&) = delete;
@@ -41,6 +41,7 @@ public:
 private:
     const IMtcService& m_objService;
     IMtcCallContext& m_objContext;
+    CallType m_eCallType;
 
     CallReasonInfo GetBlockReason() const;
 };

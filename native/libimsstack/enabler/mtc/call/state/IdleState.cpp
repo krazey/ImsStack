@@ -511,30 +511,34 @@ void IdleState::SetResourceListForConference(IN_OUT IMessage& objMessage)
 PRIVATE
 ImsList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 {
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+
     ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(new VopsBlockRule(m_objContext));
-    lstRules.Append(new WfcBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
-    lstRules.Append(new ServiceBlockRule(m_objContext));
+    lstRules.Append(new WfcBlockRule(m_objContext, eCallType));
+    lstRules.Append(new ServiceBlockRule(m_objContext, eCallType));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
-    lstRules.Append(new CallTypeBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
+    lstRules.Append(new CallTypeBlockRule(m_objContext, eCallType));
     lstRules.Append(new CallWaitingBlockRule(m_objContext));
-    lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
-    lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
+    lstRules.Append(new SsacBlockRule(m_objContext, eCallType));
+    lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
     return lstRules;
 }
 
 PRIVATE
 ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
 {
+    CallType eCallType = m_objContext.GetCallInfo().eInitialCallType;
+
     ImsList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new ServiceBlockRule(m_objContext));
+    lstRules.Append(new ServiceBlockRule(m_objContext, eCallType));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
-    lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
-    lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
+    lstRules.Append(new SsacBlockRule(m_objContext, eCallType));
+    lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
     lstRules.Append(new RetryAfterBlockRule(m_objContext));
     return lstRules;
 }
