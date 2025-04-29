@@ -502,7 +502,7 @@
     <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="0"/>
     <int name="imsemergency.roaming_preferred_ereg_int" value="-1"/>
-    <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="true"/>
+    <boolean name="imssms.sms_over_ims_available_without_voice_capa_bool" value="false"/>
     <boolean name="imssms.support_sms_capability_in_wifi_roaming_bool" value="true"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="true"/>
     <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="false"/>
