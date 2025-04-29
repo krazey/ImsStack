@@ -28,6 +28,8 @@ import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.RtpReceptionStats;
 import android.view.Surface;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -872,5 +874,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
     private static void log(String s) {
         ImsLog.d("[GII-MTC] " + s);
+    }
+
+    @VisibleForTesting
+    void setMediaSession(MediaSession mediaSession) {
+        mMediaSession = mediaSession;
     }
 }
