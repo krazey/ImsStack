@@ -41,6 +41,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsNetworkRegBinded, (), (override));
     MOCK_METHOD(void, SetNetworkRegBinded, (IN IMS_BOOL bNetworkBind), (override));
     MOCK_METHOD(IMS_BOOL, IsRegFeatureTagRequired, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsRegToNextPcscfRequested, (), (override));
+    MOCK_METHOD(void, NotifyAllPcscfsUnavailable, (), (override));
     MOCK_METHOD(AosFeatureTagList&, GetFeatureTagList, (), (override));
     MOCK_METHOD(AosFeatureTagList&, GetBindedFeatureTagList, (), (override));
     MOCK_METHOD(void, ProcessFeatureTagChange, (), (override));

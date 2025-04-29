@@ -54,6 +54,8 @@ public:
         /// Indicate that registration is terminating.
         /// So services may send a BYE message to terminate the session if there is on a session.
         REG_TERMINATING,
+        /// Indicate that registration is failed for all pcscfs.
+        REG_ALL_PCSCF_FAILED,
         /// Indicate that IP changed during registration.
         IP_CHANGED,
         /// Indicate that the network attach is rejected because the UICC is invalid.

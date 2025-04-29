@@ -158,6 +158,7 @@ protected:
     void NotifyDeregistered();
 
     IMS_BOOL UpdateCallingNumberVerification();
+    IMS_BOOL IsPdnReconnectWithDelayRequiredOnWfcSetupFailure();
 
     /// Set Detail State
     void UpdateDetailState(IN IMS_UINT32 nState);
@@ -619,6 +620,9 @@ protected:
     /// this is used to set SIP Profile on run-time
     RcPtr<SipProfile> m_pSipProfile;
 
+    /// Wait time before reconnecting pdn (sec)
+    IMS_UINT32 m_nPdnReactivateWaitTime;
+
     AString m_strTag;
 
     static const IMS_UINT32 INTERNAL_ERROR_INTERVAL = 3;   // 3 Sec.
@@ -634,7 +638,6 @@ protected:
 private:
     /// IPCAN category being registered
     IMS_SINT32 m_nRegIpcanCategory;
-    IMS_UINT32 m_nPdnReactivateWaitTime;
 };
 
 #endif  // AOS_REGISTRATION_H_
