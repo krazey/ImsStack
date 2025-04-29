@@ -228,7 +228,7 @@
     <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
     <int name="imsvoice.user_cancel_reason_after_response_timeout_timer_millis_int" value="8000"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="4"/>
-    <int name="imsvoice.policy_on_audio_qos_deactivation_int" value="0"/>
+    <int name="imsvoice.policy_on_audio_qos_deactivation_int" value="1"/>
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="7000"/>
     <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
