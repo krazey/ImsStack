@@ -92,7 +92,6 @@ using ::testing::SetArgReferee;
     using Base::AddAccesstypeFeatureTag;                          \
     using Base::AddFeatureTagForMtc;                              \
     using Base::AddLocationHeaderBody;                            \
-    using Base::AddOperation_OnSendRegister;                      \
     using Base::AddSpecificOperation;                             \
     using Base::Block_Changed;                                    \
     using Base::CallTracker_StateChanged;                         \
@@ -1636,20 +1635,6 @@ TEST_F(AosRegistrationTest, DoNotClearRetryCountIfConfiguredToKeep)
     m_pAosRegistration->ClearRetryCount();
 
     EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 1);
-}
-
-TEST_F(AosRegistrationTest, AddOperationWhenSendingRegisterOnWifi)
-{
-    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
-            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
-    m_pAosRegistration->UpdateRegIpcanCategory();
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
-
-    EXPECT_TRUE(m_pAosRegistration->AddOperation_OnSendRegister());
 }
 
 TEST_F(AosRegistrationTest, AddSpecificOperationWhileInRoamingAddsIpsecBlockReason)
