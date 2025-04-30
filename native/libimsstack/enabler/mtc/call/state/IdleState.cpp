@@ -41,6 +41,7 @@
 #include "call/block/CallWaitingBlockRule.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
+#include "call/block/LocationBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "call/block/RadioBlockRule.h"
 #include "call/block/RetryAfterBlockRule.h"
@@ -551,6 +552,7 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new SsacBlockRule(m_objContext, eCallType));
     lstRules.Append(new RetryAfterBlockRule(m_objContext));
     lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
+    lstRules.Append(new LocationBlockRule(m_objContext));
     return lstRules;
 }
 
