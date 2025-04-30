@@ -2052,11 +2052,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddOperation_OnSendRegister()
 
     ControlPrivateHeader();
 
-    if (m_piContext->GetConnection()->IsEpdgEnabled())
-    {
-        AddLocationHeaderBody(m_piRegistration->GetNextRequest());
-    }
-
     return IMS_TRUE;
 }
 
