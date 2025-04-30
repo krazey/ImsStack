@@ -22,7 +22,6 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/radio/IMtcRadioChecker.h"
-#include "helper/IMtcAosStateListener.h"
 #include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 
@@ -79,7 +78,6 @@ class MtcTrafficInfo;
  */
 class MtcRadioChecker final :
         public IMtcRadioChecker,
-        public IMtcAosStateListener,
         public IInterfaceHolderListener,
         public IMtcRadioConnectionListener,
         public IMtcNetworkWatcherListener
@@ -98,9 +96,6 @@ public:
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey) override;
 
-    // IMtcAosStateListener
-    inline void OnAosStateChanged(IN IMtcService&, IN MtcAosState, IN IMS_UINT32) override {}
-
     // IInterfaceHolderListener
     void OnSessionInterfaceReleased(IN CallKey nKey) override;
 
@@ -117,7 +112,7 @@ public:
 
     // for test
     void CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
-            IN CallDirection eCallDirection, IN IMS_BOOL bActive, IN CallKey nCallKeyIn);
+            IN CallDirection eCallDirection, IN IMS_SINT32 eRat, IN CallKey nCallKeyIn);
 
     static IMS_BOOL IsReasonToIgnore(IN IMS_UINT32 nFailureReason);
 
@@ -130,14 +125,16 @@ private:
     MtcTrafficInfo* GetCallTrafficInfo(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) const;
     MtcTrafficInfo* CreateCallTrafficInfo(
-            IN TrafficType eTrafficType, IN CallDirection eCallDirection);
-    IMS_BOOL IsTrafficPrepared(
+            IN TrafficType eTrafficType, IN CallDirection eCallDirection, IN IMS_SINT32 eRatType);
+    IMS_BOOL IsTrafficActivated(
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const;
     IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_SINT32 eRatType, IN CallKey nCallKey);
     void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);
     IMS_BOOL IsCallTerminated(IN CallKey nKey);
+    void UpdateTrafficIfRatChanged(IN_OUT MtcTrafficInfo& objTrafficInfo, IN IMS_SINT32 m_eRat);
+    IMS_BOOL IsInEpsfbSilentRedial(ImsList<CallKey>& objCallKeys) const;
 
 private:
     IMtcContext& m_objContext;
@@ -150,12 +147,12 @@ class MtcTrafficInfo final : public IImsRadioConnectionListener
 {
 public:
     explicit MtcTrafficInfo(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
-            IN IMtcRadioConnectionListener& objMtcRadioConnectionListener) :
+            IMS_SINT32 eRat, IN IMtcRadioConnectionListener& objMtcRadioConnectionListener) :
             m_eTrafficType(eTrafficType),
             m_eCallDirection(eCallDirection),
+            m_eRat(eRat),
             m_objMtcRadioConnectionListener(objMtcRadioConnectionListener),
-            m_objCallKeys(),
-            m_bTrafficActive(IMS_FALSE)
+            m_objCallKeys()
     {
     }
     ~MtcTrafficInfo() = default;
@@ -170,11 +167,11 @@ public:
 private:
     friend class MtcRadioChecker;
 
-    TrafficType m_eTrafficType;
-    CallDirection m_eCallDirection;
+    const TrafficType m_eTrafficType;
+    const CallDirection m_eCallDirection;
+    IMS_SINT32 m_eRat;
     IMtcRadioConnectionListener& m_objMtcRadioConnectionListener;
     ImsList<CallKey> m_objCallKeys;
-    IMS_BOOL m_bTrafficActive;
 };
 
 #endif
