@@ -75,6 +75,7 @@ public:
 
 protected:
     CallStateName HandleAosConnected() override;
+    IMS_SINT32 GetCallReasonByAosDisconnection(IN IMS_UINT32 nAosReason) const override;
 
 private:
     CallStateName On100TryingReceived();

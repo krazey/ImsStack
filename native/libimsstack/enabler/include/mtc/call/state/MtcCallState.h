@@ -180,6 +180,7 @@ protected:
     virtual CallStateName SendUpdateBySrvcc(IN UpdateType eType);
     virtual CallStateName HandleAosConnected();
     virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
+    virtual IMS_SINT32 GetCallReasonByAosDisconnection(IN IMS_UINT32 nAosReason) const;
 
     void HandleTerminate(IN const CallReasonInfo& objReason) const;
     void NotifyHoldResumeState();
@@ -212,7 +213,6 @@ protected:
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
-    IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
     static IMS_SINT32 GetCallReasonByNegotiationResult(IN NegotiationResult eNegoResult);
 
     IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;

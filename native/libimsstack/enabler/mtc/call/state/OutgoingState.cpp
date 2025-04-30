@@ -684,6 +684,17 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
     return GetStateName();
 }
 
+PROTECTED VIRTUAL IMS_SINT32 OutgoingState::GetCallReasonByAosDisconnection(
+        IN IMS_UINT32 nAosReason) const
+{
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        return CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+    }
+
+    return MtcCallState::GetCallReasonByAosDisconnection(nAosReason);
+}
+
 PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
