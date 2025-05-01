@@ -6256,6 +6256,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
                 CreateRemoteMediaCapabilities(piSipMsg);
                 SetState(STATE_TERMINATED);
                 CleanupMedia();
+                ClearForkedSessionsByTerminated();
 
                 PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
             }
@@ -6277,6 +6278,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
             {
                 SetState(STATE_TERMINATED);
                 CleanupMedia();
+                ClearForkedSessionsByTerminated();
 
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
@@ -7342,6 +7344,52 @@ void Session::TerminateForkedSession()
     {
         SetState(STATE_TERMINATING);
     }
+
+    // Abort the ongoing transaction
+    CloseConnection(IMessage::SESSION_PRACK);
+    CloseConnection(IMessage::SESSION_EARLY_UPDATE);
+}
+
+PRIVATE
+void Session::ClearForkedSessionsByTerminated()
+{
+    IMS_TRACE_I("ClearForkedSessionsByTerminated :: %p state=%d", this, GetState(), 0);
+
+    if (m_pForkedSessions.IsNull())
+    {
+        return;
+    }
+
+    const ImsList<Method*>& objMethods = m_pForkedSessions->GetMethods();
+
+    if (objMethods.IsEmpty())
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < objMethods.GetSize(); i++)
+    {
+        Session* pSession = DYNAMIC_CAST(Session*, objMethods.GetAt(i));
+
+        if (pSession != IMS_NULL)
+        {
+            pSession->HandleForkedSessionTerminated();
+        }
+    }
+}
+
+PRIVATE
+void Session::HandleForkedSessionTerminated()
+{
+    IMS_TRACE_I("HandleForkedSessionTerminated :: %p state=%d", this, GetState(), 0);
+
+    if (GetState() == STATE_NEGOTIATING)
+    {
+        SetState(STATE_TERMINATING);
+    }
+    SetState(STATE_TERMINATED);
+
+    PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
 }
 
 PRIVATE
