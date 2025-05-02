@@ -42,7 +42,6 @@ class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class ISubscriberConfig;
 class MtcConfigurationProxy;
-class MtcLocationRefresher;
 class RttAutoUpgrader;
 class OperationAsyncRunner;
 
@@ -234,13 +233,6 @@ public:
      * @return
      */
     virtual CallConnectionIdManager& GetCallConnectionIdManager() = 0;
-
-    /**
-     * @brief Returns an instance of {@link MtcLocationRefresher}.
-     *
-     * @return {@link MtcLocationRefresher} instance.
-     */
-    virtual MtcLocationRefresher& GetLocationRefresher() = 0;
 
     /**
      * @brief Creates

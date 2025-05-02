@@ -20,7 +20,6 @@
 #include "emergency/EmergencyServiceController.h"
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "emergency/NormalServiceController.h"
-#include "helper/MtcLocationRefresher.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -41,8 +40,6 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
 PUBLIC VIRTUAL void MtcEmergencyServiceManager::StartOpen(IN ServiceType eServiceType)
 {
     IMS_TRACE_D("StartOpen Service=[%d]", eServiceType, 0, 0);
-
-    RequestLocationUpdateIfRequired();
 
     if (!m_pController || m_pController->GetServiceType() != eServiceType)
     {
@@ -74,14 +71,4 @@ PRIVATE IEmergencyServiceController* MtcEmergencyServiceManager::CreateControlle
         return new NormalServiceController(*this, m_objContext);
     }
     return new EmergencyServiceController(*this, m_objContext);
-}
-
-PRIVATE void MtcEmergencyServiceManager::RequestLocationUpdateIfRequired()
-{
-    IMS_SINT32 nWaitTime = m_objContext.GetConfigurationProxy().GetInt(
-            ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT);
-    if (nWaitTime > 0)
-    {
-        m_objContext.GetLocationRefresher().RequestUpdate(nWaitTime);
-    }
 }
