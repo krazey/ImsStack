@@ -23,11 +23,11 @@
     <boolean name="imssms.sms_csfb_retry_on_failure_bool" value="false"/>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
         <int-array name="imsvt.h264_payload_type_int_array" num="1">
-            <item value="105"/>
+            <item value="115"/>
         </int-array>
     </pbundle>
     <pbundle name="imsvt.h264_payload_description_bundle">
-        <pbundle name="105">
+        <pbundle name="115">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>

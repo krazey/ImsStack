@@ -52,22 +52,22 @@
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="false"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="true"/>
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
-        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
-            <item value="98"/>
-            <item value="103"/>
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="127"/>
         </int-array>
         <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
             <item value="100"/>
             <item value="105"/>
         </int-array>
-        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
-            <item value="97"/>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+            <item value="98"/>
+            <item value="103"/>
         </int-array>
         <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
             <item value="96"/>
         </int-array>
-        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="127"/>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="97"/>
         </int-array>
     </pbundle>
     <pbundle name="imsvoice.evs_payload_description_bundle">
@@ -79,28 +79,18 @@
             <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
         </pbundle>
     </pbundle>
-    <pbundle name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle name="105">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle name="103">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-        </pbundle>
-    </pbundle>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
         <int-array name="imsvt.hevc_payload_type_int_array" num="1">
             <item value="115"/>
         </int-array>
         <int-array name="imsvt.h264_payload_type_int_array" num="3">
-            <item value="104"/>
-            <item value="105"/>
-            <item value="106"/>
+            <item value="116"/>
+            <item value="117"/>
+            <item value="118"/>
         </int-array>
     </pbundle>
     <pbundle name="imsvt.h264_payload_description_bundle">
-        <pbundle name="104">
+        <pbundle name="116">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">640C1F</string>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="24"/>
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
@@ -109,7 +99,7 @@
                 <item value="640"/>
             </int-array>
         </pbundle>
-        <pbundle name="105">
+        <pbundle name="117">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C01F</string>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="24"/>
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
@@ -118,7 +108,7 @@
                 <item value="640"/>
             </int-array>
         </pbundle>
-        <pbundle name="106">
+        <pbundle name="118">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="20"/>
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>

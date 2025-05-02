@@ -276,9 +276,9 @@
     </pbundle>
     <string-array name="imsvt.video_codec_frame_size_string_array" num="4">
         <item value="115 480 640"/>
-        <item value="104 480 640"/>
-        <item value="105 480 640"/>
-        <item value="106 240 320"/>
+        <item value="116 480 640"/>
+        <item value="117 480 640"/>
+        <item value="118 240 320"/>
     </string-array>
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>

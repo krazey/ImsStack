@@ -36,6 +36,7 @@
                 <item value="1"/>
                 <item value="2"/>
             </int-array>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
         <pbundle name="105">
             <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
@@ -44,6 +45,7 @@
                 <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
@@ -73,6 +75,7 @@
                 <item value="4"/>
                 <item value="7"/>
             </int-array>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
         <pbundle name="103">
             <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
@@ -82,6 +85,7 @@
                 <item value="7"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
 </carrier_config>

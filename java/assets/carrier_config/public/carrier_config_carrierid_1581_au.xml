@@ -73,6 +73,12 @@
                 <item value="1"/>
                 <item value="2"/>
             </int-array>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrnb_payload_description_bundle">
+        <pbundle name="102">
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="38"/>
