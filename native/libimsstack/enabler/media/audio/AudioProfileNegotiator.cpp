@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <array>
+
 #include "ServiceTrace.h"
 
 #include "MediaProfileUtil.h"
@@ -1343,6 +1345,12 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
     }
     else  // Primary Mode
     {
+        if (!IsValidEvsBwList(pDestFmtp->GetBwList()))
+        {
+            IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - invalid received BW", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
         // Set Bandwidth/Bitrate list.
         if ((pSrcFmtp->GetBwList() == 0) && (pDestFmtp->GetBwList() == 0))
         {
@@ -1577,6 +1585,12 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
     }
     else  // Primary Mode
     {
+        if (!IsValidEvsBwList(pDestFmtp->GetBwList()))
+        {
+            IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Primary Mode - invalid received BW", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
         // Set Bandwidth/Bitrate list.
         if ((pSrcFmtp->GetBwList() == 0) && (pDestFmtp->GetBwList() == 0))
         {
@@ -1944,4 +1958,22 @@ MEDIA_DIRECTION AudioProfileNegotiator::UpdateDirectionToMine(
     }
 
     return eNegotiatedDir;
+}
+
+PRIVATE
+IMS_BOOL AudioProfileNegotiator::IsValidEvsBwList(IN IMS_UINT32 nBwList)
+{
+    static const std::array<IMS_UINT32, 7> nValidBwLists = {EVS_BW_NB, EVS_BW_WB, EVS_BW_SWB,
+            EVS_BW_FB, (EVS_BW_NB | EVS_BW_WB), (EVS_BW_NB | EVS_BW_WB | EVS_BW_SWB),
+            (EVS_BW_NB | EVS_BW_WB | EVS_BW_SWB | EVS_BW_FB)};
+
+    for (IMS_UINT32 nValidBw : nValidBwLists)
+    {
+        if (nBwList == nValidBw)
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
