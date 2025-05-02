@@ -993,14 +993,51 @@ TEST_F(ConferenceControllerTest,
 }
 
 TEST_F(ConferenceControllerTest,
-        OnOperationReadyWithCheckConnectedDoesNothingIfSubscribeNotifyReferFlowOn)
+        OnOperationReadyWithCheckConnectedDoesNothingIfSubscribeNotifyReferFlowOnAndSubscribing)
 {
-    IMS_SINT32 nPreviousState = pController->GetState();
+    // Sets m_pSubscription exists.
     ConferenceOperationQueue::ConferenceOperation* pOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_SUBSCRIBE, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    MockIConferenceSubscriptionListener objSubsListener;
+    MockConferenceSubscription* pSubscription = CreateSubscription(objSubsListener);
+    // Sets GetFocusAddress() not to have exception.
+    ON_CALL(objMockCallContext, GetSession()).WillByDefault(ReturnNull());
+
+    pController->OnOperationReady();
+    delete pOperation;
+
+    // Tests
+    IMS_SINT32 nPreviousState = pController->GetState();
+    pOperation =
             new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_CHECK_CONNECTED, 0);
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT))
             .WillByDefault(Return(ConfigVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER));
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    pController->OnOperationReady();
+    EXPECT_EQ(pController->GetState(), nPreviousState);
+    delete pOperation;
+}
+
+TEST_F(ConferenceControllerTest,
+        OnOperationReadyWithCheckConnectedCompletesOperationIfSubscribeNotifyReferFlowOnAndSubscriptionFailed)
+{
+    IMS_SINT32 nPreviousState = pController->GetState();
+    ConfUser objUser;
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(&objUser);
+    EXPECT_CALL(*pMockParticipantList, IsConnectedUser(&objUser, _)).WillOnce(Return(IMS_TRUE));
+
+    ConferenceOperationQueue::ConferenceOperation* pOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_CHECK_CONNECTED, 0);
+    pOperation->SetConfUsers(objUsers);
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT))
+            .WillByDefault(Return(ConfigVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER));
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CHECK_CONNECTED, IMS_NULL));
 
     pController->OnOperationReady();
     EXPECT_EQ(pController->GetState(), nPreviousState);
