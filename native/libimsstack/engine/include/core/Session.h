@@ -309,6 +309,8 @@ private:
     // RACE_CONDITION : 200 OK to CANCEL and 200 OK to forked INVITE
     void TerminateForkedSessionsOnNegotiating();
     void TerminateForkedSession();
+    void ClearForkedSessionsByTerminated();
+    void HandleForkedSessionTerminated();
 
     // Methods for handling SDP & Media related operations
     IMS_BOOL AddMedia(IN Media* pMedia);
