@@ -122,6 +122,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1);
     m_nModeChangeNeighbor = piCcSubBundle->GetInt(
             CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1);
+    // TODO(b/414484057) : need to change the default value like the amrcodec and check the display
+    // asset for the AMR-IO mode again
 
     piCcSubBundle->ReleaseBundle();
     piCcBundle->ReleaseBundle();
