@@ -67,7 +67,7 @@ private:
     {
         END_SIZE = 15,
         START_SIZE = 17,
-        MAX_SPARE_SIZE = 128,
+        MAX_SUMMARY_SIZE = 512,
         MAX_TEXT_SIZE = 4096
     };
 

@@ -179,27 +179,22 @@ PRIVATE VIRTUAL void OsTrace::OutputString(
     if ((nOption & ITraceOption::OPT_MEDIUM_SERIAL) != 0)
     {
         IMS_UINT32 nCurrentPos = 0;
-        IMS_CHAR cRestoringChar = '\0';
+        IMS_CHAR cCharToRestore = '\0';
         IMS_CHAR* pszOutString;
         const IMS_UINT32 MAX_LOG_BUFF = OsTraceNode::MAX_TRACE_SIZE - 1;
 
         while (nLength > 0)
         {
-            if (nLength >= OsTraceNode::MAX_TRACE_SIZE)
-            {
-                cRestoringChar = pszTrace[nCurrentPos + MAX_LOG_BUFF];
-                pszTrace[nCurrentPos + MAX_LOG_BUFF] = '\0';
+            IMS_UINT32 nLengthToPrint =
+                    (nLength >= OsTraceNode::MAX_TRACE_SIZE) ? MAX_LOG_BUFF : nLength;
 
-                pszOutString = &(pszTrace[nCurrentPos]);
+            cCharToRestore = pszTrace[nCurrentPos + nLengthToPrint];
+            pszTrace[nCurrentPos + nLengthToPrint] = '\0';
 
-                nCurrentPos += MAX_LOG_BUFF;
-                nLength -= MAX_LOG_BUFF;
-            }
-            else
-            {
-                pszOutString = &(pszTrace[nCurrentPos]);
-                nLength = 0;
-            }
+            pszOutString = &(pszTrace[nCurrentPos]);
+
+            nCurrentPos += nLengthToPrint;
+            nLength -= nLengthToPrint;
 
             if (nCategory == ITrace::CAT_I)
             {
@@ -214,10 +209,7 @@ PRIVATE VIRTUAL void OsTrace::OutputString(
                 (void)ALOG(LOG_DEBUG, IMS_LOG_TAG, "%s", pszOutString);
             }
 
-            if (nLength != 0)
-            {
-                pszTrace[nCurrentPos] = cRestoringChar;
-            }
+            pszTrace[nCurrentPos] = cCharToRestore;
         }
     }
 }
