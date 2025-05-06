@@ -1297,8 +1297,8 @@ PUBLIC VIRTUAL void MtcCall::OnSrvccStateUpdated(IN SrvccState eState)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
-        IN IMtcService& /*objMtcService*/, IN MtcAosState eState, IN IMS_UINT32 eAosReason)
+PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(IN IMtcService& /*objMtcService*/,
+        IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason)
 {
     IMS_TRACE_I("%s - OnAosStateChanged : AosState[%s] reason[%s]", ToString().GetStr(),
             MtcCallStringUtils::ConvertAosState(eState),
@@ -1307,7 +1307,7 @@ PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->OnAosStateChanged(eState, eAosReason);
+                return pState->OnAosStateChanged(eState, eAosReason, nDataFailureReason);
             });
 }
 

@@ -143,7 +143,8 @@ public:
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneFailed, (), (override));
     MOCK_METHOD(CallStateName, OnMediaFailed, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(CallStateName, OnSrvccStateUpdated, (IN SrvccState eState), (override));
-    MOCK_METHOD(CallStateName, OnAosStateChanged, (IN MtcAosState eState, IN IMS_UINT32 eAosReason),
+    MOCK_METHOD(CallStateName, OnAosStateChanged,
+            (IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason),
             (override));
     MOCK_METHOD(CallStateName, OnIpcanChanged, (IN IMS_UINT32 eIpcan), (override));
     MOCK_METHOD(CallStateName, OnRatChanged, (IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType),

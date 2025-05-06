@@ -85,8 +85,10 @@ PUBLIC VIRTUAL IMS_BOOL PassiveTimerHolder::IsActive(IN IPassiveTimerHolder::Typ
     return m_objTimerInfoByType.GetIndexOfKey(eType) >= 0;
 }
 
-PUBLIC VIRTUAL void PassiveTimerHolder::OnAosStateChanged(
-        IN IMtcService& /*objMtcService*/, IN MtcAosState eState, IN IMS_UINT32 /*eAosReason*/)
+PUBLIC VIRTUAL void PassiveTimerHolder::OnAosStateChanged(IN
+        [[maybe_unused]] IMtcService& objMtcService,
+        IN MtcAosState eState, IN [[maybe_unused]] IMS_UINT32 eAosReason,
+        IN [[maybe_unused]] IMS_SINT32 nDataFailureReason)
 {
     // All timers are released by normal AoS disconnection. If aother policy comes up, This logic
     // needs to move into each class to handle the policies differently. Or, we can add differencial

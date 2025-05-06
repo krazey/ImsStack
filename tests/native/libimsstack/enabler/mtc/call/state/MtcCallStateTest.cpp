@@ -529,61 +529,79 @@ TEST_F(MtcCallStateTest, OnSrvccStateUpdateDoesNothingIfFailedOrCanceledButNegoS
 TEST_F(MtcCallStateTest, OnAosConnectedDoesNothing)
 {
     IMS_UINT32 nAnyAosReason = 1;
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
+    IMS_SINT32 nAnyDataFailureReason = 1;
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(
+                    MtcAosState::CONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosSuspendedDoesNothing)
 {
     IMS_UINT32 nAnyAosReason = 1;
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnAosStateChanged(MtcAosState::SUSPENDED, nAnyAosReason));
+    IMS_SINT32 nAnyDataFailureReason = 1;
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(
+                    MtcAosState::SUSPENDED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfSrvccStarted)
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::STARTED));
     ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfEpsFallbackOngoing)
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
 
     ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsNotTerminatesCalls)
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsTerminatesCalls)
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnIpcanChangedDoesNothing)

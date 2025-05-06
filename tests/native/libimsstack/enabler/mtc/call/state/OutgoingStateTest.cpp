@@ -557,7 +557,7 @@ TEST_F(OutgoingStateTest, HandleAosConnectedStopsRegistrationTimers)
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
-    pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0);
+    pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0);
 }
 
 TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback)
@@ -568,8 +568,8 @@ TEST_F(OutgoingStateTest, HandleAosConnectedDoesNotRedialIfNotWaitingEpsFallback
 
     EXPECT_CALL(objRedialHelper, Redial).Times(0);
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted).Times(0);
-    EXPECT_EQ(
-            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
 
 TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesAndRedialsIfWaitingEpsFallbackForNoResponse)
@@ -595,7 +595,7 @@ TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesAndRedialsIfWaitingEpsFallba
     EXPECT_CALL(objController, GetRedialHelper(Ref(objCallContext), objReasonByEpsfb)).Times(0);
     EXPECT_CALL(objRedialHelper, Redial).WillOnce(Return(CallReasonInfo(CODE_NONE)));
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
-    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
 
 TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesIfWaitingEpsFallbackForNoTrigger)
@@ -607,8 +607,8 @@ TEST_F(OutgoingStateTest, HandleAosConnectedNotifiesIfWaitingEpsFallbackForNoTri
 
     EXPECT_CALL(objRedialHelper, Redial).Times(0);
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted).Times(0);
-    EXPECT_EQ(
-            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
 
 TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedCsfbWhenConfigIsEnabled)
@@ -622,7 +622,7 @@ TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedCsfbWhenConfigIsE
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED)));
     pOutgoingState->OnAosStateChanged(
-            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED);
+            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED, 0);
 }
 
 TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedNoCsfbWhenCsfbIsNotAvailable)
@@ -636,7 +636,7 @@ TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedNoCsfbWhenCsfbIsN
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED)));
     pOutgoingState->OnAosStateChanged(
-            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED);
+            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED, 0);
 }
 
 TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedNoCsfbWhenConfigIsDisable)
@@ -649,7 +649,7 @@ TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedNoCsfbWhenConfigI
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED)));
     pOutgoingState->OnAosStateChanged(
-            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED);
+            MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED, 0);
 }
 
 TEST_F(OutgoingStateTest, OnRatChangedPerformsSilentRedialIfWaitingEpsFallback)
@@ -1252,7 +1252,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
 
     EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(CallReasonInfo(CODE_NONE)));
-    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
 
 TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
@@ -1292,10 +1292,10 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
 
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->OnAosStateChanged(
-                    MtcAosState::DISCONNECTED, ImsAosReason::REG_NEW_REQUIRED));
+                    MtcAosState::DISCONNECTED, ImsAosReason::REG_NEW_REQUIRED, 0));
 
     EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(CallReasonInfo(CODE_NONE)));
-    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
 
 TEST_F(OutgoingStateTest, SessionTerminatedNotifiesStartFailed)
@@ -1460,10 +1460,10 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503WaitsRedial)
 
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->OnAosStateChanged(
-                    MtcAosState::DISCONNECTED, ImsAosReason::REG_NEW_REQUIRED));
+                    MtcAosState::DISCONNECTED, ImsAosReason::REG_NEW_REQUIRED, 0));
 
     EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(CallReasonInfo(CODE_NONE)));
-    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
 
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)

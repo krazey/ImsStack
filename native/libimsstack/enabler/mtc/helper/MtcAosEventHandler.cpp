@@ -100,7 +100,7 @@ void MtcAosEventHandler::OnDisconnecting(IN IMS_UINT32 nReason)
 }
 
 PUBLIC
-void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason)
+void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason)
 {
     IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nReason, 0);
@@ -114,7 +114,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason)
         }
     }
 
-    NotifyStateChanged(MtcAosState::DISCONNECTED, nReason);
+    NotifyStateChanged(MtcAosState::DISCONNECTED, nReason, nDataFailureReason);
 }
 
 PUBLIC
@@ -147,11 +147,13 @@ void MtcAosEventHandler::OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState
 }
 
 PRIVATE
-void MtcAosEventHandler::NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const
+void MtcAosEventHandler::NotifyStateChanged(
+        IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) const
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); i++)
     {
-        m_objListeners.GetAt(i)->OnAosStateChanged(m_objService, eState, eAosReason);
+        m_objListeners.GetAt(i)->OnAosStateChanged(
+                m_objService, eState, eAosReason, nDataFailureReason);
     }
 }
 

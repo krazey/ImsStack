@@ -646,15 +646,18 @@ TEST_F(IncomingStateTest, SendUpdateBySrvccByFailed)
 TEST_F(IncomingStateTest, OnAosConnectedInvokesPreconditionManagerIpCanChanged)
 {
     IMS_UINT32 nAnyAosReason = 1;
+    IMS_SINT32 nAnyDataFailureReason = 1;
     ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(CallStateName::INCOMING,
-            pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
+            pIncomingState->OnAosStateChanged(
+                    MtcAosState::CONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback)
 {
     IMS_UINT32 nAnyAosReason = 1;
+    IMS_SINT32 nAnyDataFailureReason = 1;
 
     MockIMtcService objService;
     ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
@@ -668,7 +671,8 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(CallStateName::ALERTING,
-            pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
+            pIncomingState->OnAosStateChanged(
+                    MtcAosState::CONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 }  // namespace android

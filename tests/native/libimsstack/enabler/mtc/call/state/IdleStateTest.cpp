@@ -1663,7 +1663,7 @@ TEST_F(IdleStateTest, HandleAosConnectedDoesNothingIfNoEpsFallbackOngoing)
     ON_CALL(*pEpsfbTrigger, IsWaitingRegistration()).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pEpsfbTrigger, OnEpsFallbackCompleted()).Times(0);
-    EXPECT_EQ(CallStateName::IDLE, pIdleState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::IDLE, pIdleState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }
 
 TEST_F(IdleStateTest, HandleAosConnectedNotifiesEpsFallbackCompletedIfEpsFallbackOngoing)
@@ -1675,5 +1675,5 @@ TEST_F(IdleStateTest, HandleAosConnectedNotifiesEpsFallbackCompletedIfEpsFallbac
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
 
     EXPECT_CALL(*pEpsfbTrigger, OnEpsFallbackCompleted()).Times(1);
-    EXPECT_EQ(CallStateName::IDLE, pIdleState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::IDLE, pIdleState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
 }

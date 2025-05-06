@@ -86,12 +86,12 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemo
 
     IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO;
     EXPECT_CALL(objListener1,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE))
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED,
+                    ImsAosReason::NONE, 0))
             .Times(1);
     EXPECT_CALL(objListener2,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE))
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED,
+                    ImsAosReason::NONE, 0))
             .Times(1);
     pEventHandler->OnConnected(nFeatures);
 
@@ -99,8 +99,8 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemo
     pEventHandler->RemoveListener(&objListener2);
     pEventHandler->RemoveListener(&objListener2);  // to check not matching case
 
-    EXPECT_CALL(objListener1, OnAosStateChanged(_, _, _)).Times(0);
-    EXPECT_CALL(objListener2, OnAosStateChanged(_, _, _)).Times(0);
+    EXPECT_CALL(objListener1, OnAosStateChanged(_, _, _, _)).Times(0);
+    EXPECT_CALL(objListener2, OnAosStateChanged(_, _, _, _)).Times(0);
     pEventHandler->OnConnected(nFeatures);
 }
 
@@ -110,12 +110,13 @@ TEST_F(MtcAosEventHandlerTest, OnDisconnectedNotifiesJni)
     pEventHandler->AddListener(&objListener);
 
     IMS_UINT32 nAnyReason = 1;
+    IMS_SINT32 nAnyDataFailureReason = 1;
     EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_NONE, 0));
     EXPECT_CALL(objListener,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTED, nAnyReason));
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTED,
+                    nAnyReason, nAnyDataFailureReason));
 
-    pEventHandler->OnDisconnected(nAnyReason);
+    pEventHandler->OnDisconnected(nAnyReason, nAnyDataFailureReason);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnDisconnectingNotifiesListenerOnly)
@@ -127,7 +128,7 @@ TEST_F(MtcAosEventHandlerTest, OnDisconnectingNotifiesListenerOnly)
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
     EXPECT_CALL(objListener,
             OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTING, nAnyReason));
+                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTING, nAnyReason, 0));
 
     pEventHandler->OnDisconnecting(nAnyReason);
 }
@@ -141,7 +142,7 @@ TEST_F(MtcAosEventHandlerTest, OnSuspendedNotifiesListenerOnly)
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
     EXPECT_CALL(objListener,
             OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::SUSPENDED, nAnyReason));
+                    IsEqualMtcService(&objMtcService), MtcAosState::SUSPENDED, nAnyReason, 0));
 
     pEventHandler->OnSuspended(nAnyReason);
 }
@@ -153,8 +154,8 @@ TEST_F(MtcAosEventHandlerTest, OnResumedNotifiesListenerOnly)
 
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
     EXPECT_CALL(objListener,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE));
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED,
+                    ImsAosReason::NONE, 0));
 
     pEventHandler->OnResumed();
 }
@@ -165,7 +166,7 @@ TEST_F(MtcAosEventHandlerTest, OnServiceConnectedDoesNothing)
     pEventHandler->AddListener(&objListener);
 
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
-    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _)).Times(0);
+    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _, _)).Times(0);
 
     pEventHandler->OnServiceConnected(1, 1);
 }
@@ -176,7 +177,7 @@ TEST_F(MtcAosEventHandlerTest, OnEventNotifyDoesNothing)
     pEventHandler->AddListener(&objListener);
 
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
-    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _)).Times(0);
+    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _, _)).Times(0);
 
     pEventHandler->OnEventNotify(1, 1);
 }

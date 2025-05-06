@@ -350,7 +350,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(
 {
     SetStatus(ServiceStatus::SERVICE_IDLE);
     m_pNetworkWatcher->OnDisconnected();
-    m_pAosEventHandler->OnDisconnected(nReason);
+    m_pAosEventHandler->OnDisconnected(nReason, nDataFailureReason);
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Suspended(IN IMS_UINT32 nReason)

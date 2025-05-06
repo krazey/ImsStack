@@ -64,7 +64,8 @@ public:
 
 protected:
     CallStateName HandleAosConnected() override;
-    IMS_SINT32 GetCallReasonByAosDisconnection(IN IMS_UINT32 nAosReason) const override;
+    const CallReasonInfo GetCallReasonInfoByAosDisconnection(
+            IN IMS_UINT32 nAosReason, IN IMS_SINT32 nDataFailureReason) const override;
 
 private:
     CallStateName ContinueStart();

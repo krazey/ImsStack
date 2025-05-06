@@ -210,12 +210,14 @@ TEST_F(MultiEndpointManagerTest, ConstructorStartsAndStopsIfSubscriptionFailed)
 TEST_F(MultiEndpointManagerTest, OnAosStateChangedStopsIfDisconnected)
 {
     IMS_UINT32 nAnyReason = 0;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     MtcAosState eAnyState = MtcAosState::DISCONNECTED;
     ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
     EXPECT_CALL(*(piDialogSubscription.get()), Unsubscribe);
     CreateManager(IMS_TRUE);
     ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::VIDEO));
-    pMultiEndpointManager->OnAosStateChanged(objService, eAnyState, nAnyReason);
+    pMultiEndpointManager->OnAosStateChanged(
+            objService, eAnyState, nAnyReason, nAnyDataFailureReason);
 }
 
 TEST_F(MultiEndpointManagerTest, IsRequiredReturnsConfigurationValue)
@@ -483,7 +485,9 @@ TEST_F(MultiEndpointManagerTest, OnAosStateChangedChecksCondition)
     EXPECT_CALL(objAosConnector, GetFeatures).WillOnce(Return(ImsAosFeature::VIDEO));
 
     IMS_UINT32 nAnyReason = 0;
-    pMultiEndpointManager->OnAosStateChanged(objService, MtcAosState::CONNECTED, nAnyReason);
+    IMS_SINT32 nAnyDataFailureReason = 0;
+    pMultiEndpointManager->OnAosStateChanged(
+            objService, MtcAosState::CONNECTED, nAnyReason, nAnyDataFailureReason);
 }
 
 TEST_F(MultiEndpointManagerTest, OnRatChangedChecksCondition)
@@ -517,7 +521,7 @@ TEST_F(MultiEndpointManagerTest, OnSubscriptionStartedDoesNothing)
 
     ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
     ON_CALL(*(piDialogSubscription.get()), Subscribe).WillByDefault(Return(IMS_SUCCESS));
-    pMultiEndpointManager->OnAosStateChanged(objService, MtcAosState::CONNECTED, 0);
+    pMultiEndpointManager->OnAosStateChanged(objService, MtcAosState::CONNECTED, 0, 0);
 
     EXPECT_TRUE(pMultiEndpointManager->IsRunning());
     pMultiEndpointManager->OnSubscriptionStarted();
