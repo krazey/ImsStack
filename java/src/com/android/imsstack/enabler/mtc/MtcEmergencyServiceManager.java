@@ -77,19 +77,15 @@ public class MtcEmergencyServiceManager {
         mNativeObject = nativeObject;
     }
 
-    public void setCall(MtcCall call) {
-        log("setCall");
-
-        mCall = call;
-    }
-
     /**
      * Notifies the Native to do registration for emergency call.
      *
+     * @param call The target emergency call.
      * @param emergencyRouting The routing information for emergency call.
      */
-    public void openEmergencyService(
-            @EmergencyCallRouting int emergencyRouting, IServiceStateTracker serviceStateTracker) {
+    public void openEmergencyService(MtcCall call, @EmergencyCallRouting int emergencyRouting,
+            IServiceStateTracker serviceStateTracker) {
+        mCall = call;
         mEmergencyType = emergencyRouting == EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL
                 ? IUMtcCall.EMERGENCYTYPE_NORMAL_ROUTING
                 : IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
@@ -163,7 +159,6 @@ public class MtcEmergencyServiceManager {
             return;
         }
 
-        mCall.createNativeCallObject();
         mCall.open(serviceType, mEmergencyType, false, false);
     }
 
