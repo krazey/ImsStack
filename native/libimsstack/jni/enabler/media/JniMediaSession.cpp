@@ -165,19 +165,19 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
             OnResponses(nMsg, IMS_TRUE, objParcel);
             break;
         case IJniMedia::NOTIFY_MEDIA_INACTIVITY:
-            OnNofityMediaInactitivy(nMsg, objParcel);
+            OnNotifyMediaInactivity(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_PACKET_LOSS:
-            OnNofityPacketLosses(nMsg, objParcel);
+            OnNotifyPacketLosses(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_JITTER:
             // TODO : implementation
             break;
         case IJniMedia::NOTIFY_CALL_QUALITY_CHANGE:
-            OnNofityCallQualityChange(nMsg, objParcel);
+            OnNotifyCallQualityChange(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_HEADER_EXTENSION:
-            OnNofityHeaderExtension(nMsg, objParcel);
+            OnNotifyHeaderExtension(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_MEDIA_DETACH:
             OnNotifyMediaDetach(nMsg);
@@ -283,7 +283,7 @@ void JniMediaSession::OnNotifyAnbrReceived(IN IMS_SINT32 nMsg, IN const Parcel& 
 }
 
 PRIVATE
-void JniMediaSession::OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyMediaInactivity(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     MEDIA_CONTENT_TYPE eMediaType =
             ConvertToMediaType(static_cast<SessionType>(objParcel.readInt32()));
@@ -312,7 +312,7 @@ void JniMediaSession::OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parce
 }
 
 PRIVATE
-void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     ImsMediaNotifyPacketParam* pParam = new ImsMediaNotifyPacketParam();
 
@@ -323,14 +323,14 @@ void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& 
 }
 
 PRIVATE
-void JniMediaSession::OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     (void)nMsg;
     (void)objParcel;
 }
 
 PRIVATE
-void JniMediaSession::OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     (void)nMsg;
     (void)objParcel;

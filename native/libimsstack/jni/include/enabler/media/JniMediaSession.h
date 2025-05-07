@@ -51,10 +51,10 @@ private:
     IJniMediaManager* GetMediaManager();
     MEDIA_CONTENT_TYPE ConvertToMediaType(IN SessionType eSessiontype);
     void OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const Parcel& objParcel);
-    void OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
-    void OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
-    void OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
-    void OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyMediaInactivity(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnNotifyMediaDetach(IN IMS_SINT32 nMsg);
     void OnSendDtmf(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
