@@ -145,7 +145,6 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
 
         default:  // SubscriptionUpdateType::FAILED
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
-            // do something???
             delete m_pSubscription;
             m_pSubscription = IMS_NULL;
             break;
@@ -887,7 +886,8 @@ void ConferenceController::DoNextOperation()
             break;
         case CONTROL_OPERATION_CHECK_CONNECTED:
             if (!ConferenceConfigurationHelper::IsSubscriptionNotifyRequiredForRefer(
-                        m_objContext.GetConfigurationProxy()))
+                        m_objContext.GetConfigurationProxy()) ||
+                    !m_pSubscription)
             {
                 CheckUserEntityConnected(pOperation->GetUsers().GetAt(0));
             }
