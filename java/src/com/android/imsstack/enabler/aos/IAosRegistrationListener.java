@@ -614,7 +614,16 @@ public interface IAosRegistrationListener {
                                 ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT)),
                 Map.entry(ReasonCode.INTERNAL_ERROR, Pair.create(
                         ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                        ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR))
+                        ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR)),
+                Map.entry(ReasonCode.WFC_SUB_RESP_403, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ExtraReason.WFC_MISSING_911_ADDRESS)),
+                Map.entry(ReasonCode.WFC_SUB_NOTIFY_TERMINATED, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ExtraReason.WFC_MISSING_911_ADDRESS)),
+                Map.entry(ReasonCode.USIM_AUTHENTICATION_FAILURES, Pair.create(
+                        ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                        ImsReasonInfo.CODE_NO_VALID_SIM))
         );
 
         /**
@@ -652,5 +661,16 @@ public interface IAosRegistrationListener {
          * The capability was able to be changed.
          */
         public static final int SUCCESS = 0;
+    }
+
+    /**
+     * ExtraReason
+     */
+    class ExtraReason {
+
+        /**
+         * Used as extra code when IMS termination due to WFC missing 911 address
+         */
+        public static final int WFC_MISSING_911_ADDRESS = 1626;
     }
 }
