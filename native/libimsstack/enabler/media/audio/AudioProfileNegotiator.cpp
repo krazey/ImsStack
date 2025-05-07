@@ -997,22 +997,6 @@ IMS_BOOL AudioProfileNegotiator::FindEvsInProfile(IN AudioProfile* pLocalProfile
                     }
                 }
 
-                // TODO - 20220415 - Need to implement this requirement later
-                /*if (IMS_OPERATOR(VZW, GetSlotId()) && ((VZWProperty::GetInstance()->GetTestMask()
-                        & TEST_MASK_UNLOCK_EVS_NEGO_LIMIT) == 0))
-                {
-                    //let channel aware mode option to be a negotitation item
-                    if (pReceivedFmtp->GetBwList() == 1)
-                    {
-                        continue;      //vzw req. if offer is nb only, no evs negotiation
-                }
-                    if (pDstPayload->GetRtpMap().GetPayloadNumber()
-                            != comparedPayload->GetRtpMap().GetPayloadNumber())
-                    {
-                        continue;     //vzw req. payload number based negotiation
-                    }
-                }*/
-
                 // check channel aware mode received param
                 if (pReceivedFmtp->GetReceivedChAwRecv() > 0)
                 {
@@ -1133,8 +1117,9 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfi
                 continue;
             }
 
-            /** Fix for AMR Open Offer In case of MO, mode-set from MT could be mismatched, then
-            keep the negotiated mode-set and try to find exact one */
+            /* AMR Open Offer (MO): In cases where the mode-set received from the MT device does not
+             * align with the offered capabilities, the mode-set determined through SDP negotiation
+             * is nevertheless preserved. */
             IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp, bReturnMode,
                     pnNegoModeSetList, pnNegoDefaultRtpModeSet);
 
@@ -1385,59 +1370,18 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pS
                 }
                 else  // received EVS category A case
                 {
-                    // TODO - 20220415 - Need to implement this requirement later
-                    /*// except for VZW operator. (only supported category B0 case.)
-                    if (IMS_OPERATOR(VZW, GetSlotId()) == IMS_TRUE)
-                    {
-                        *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
-                    }
-                    else // GSMA IR92 case
-                    {
-                        // check own EVS SWB only capa. (category B0, B1, B2)
-                        if (pSrcFmtp->GetBwList() == 0x04)
-                        {
-                            // this case, Do not negotiate with own category B. check next paylaod.
-                            IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - \
-                                    not support B Type Nego", 0, 0, 0);
-                            return IMS_FALSE;
-                        }
-                        else
-                        {
-                            *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
-                        }
-                    }*/
-                    // check own EVS SWB only capa. (category B0, B1, B2)
-                    if (pSrcFmtp->GetBwList() == 0x04)
-                    {
-                        // this case, Do not negotiate with own category B. check next paylaod.
-                        IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - \
-                                not support B Type Nego",
-                                0, 0, 0);
-                        return IMS_FALSE;
-                    }
-                    else
-                    {
-                        *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
-                    }
+                    /* TODO - b/416161869 We plan to create a new asset to identify and
+                    differentiate single-bandwidth EVS codec operators, such as VZW or SoftBank.
+                    This code will be replaced later.*/
+                    IMS_TRACE_D("CompareEvsBwBrMode() - Primary Mode: B Type Nego", 0, 0, 0);
+                    *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
                 }
             }
             else
             {
-                // TODO - 20220415 - Need to implement this requirement later
-                /*// IR92 release15 EVS Answer Received Case.
-                if (IMS_OPERATOR(VZW, GetSlotId()) == IMS_TRUE)
-                {
-                    *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
-                }
-                else
-                {
-                    if (pSrcFmtp->GetBwList() == 0x04 && pDestFmtp->GetBwList() != 0x04)
-                    {
-                        IMS_TRACE_D("CompareEvsBwBrMode(): check next payload", 0, 0, 0);
-                        return IMS_FALSE;
-                    }
-                    *nNegoBwList = pSrcFmtp->GetBwList() & pDestFmtp->GetBwList();
-                }*/
+                /* TODO - b/416161869 We plan to create a new asset to identify and
+                    differentiate single-bandwidth EVS codec operators, such as VZW or SoftBank.
+                    This code will be replaced later.*/
                 if (pSrcFmtp->GetBwList() == 0x04 && pDestFmtp->GetBwList() != 0x04)
                 {
                     IMS_TRACE_D("CompareEvsBwBrMode(): check next payload", 0, 0, 0);
@@ -1762,27 +1706,14 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                         continue;
                     }
 
-                    // TODO - 20220415 - Need to implement this requirement later
-                    /*if (IMS_OPERATOR(SKT, GetSlotId()) && m_bIsOfferReceived == IMS_TRUE)
-                    {
-                        IMS_TRACE_D("FindPayloadIndexFromProfile - ignore AMR octet align case",
-                                0, 0, 0);
-                    }
-                    else
-                    {
-                        if (pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign() )
-                        {
-                            continue;
-                        }
-                    }*/
                     if (pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign())
                     {
                         continue;
                     }
 
-                    // AMR Open Offer
-                    // In case of MO, mode-set from MT could be mismatched, then keep the negotiated
-                    // mode-set and try to find exact one
+                    /* AMR Open Offer (MO): In cases where the mode-set received from the MT device
+                     * does not align with the offered capabilities, the mode-set determined through
+                     * SDP negotiation is nevertheless preserved. */
                     IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp,
                             bReturnMode, &pnNegoModeSetList, &pnNegoDefaultRtpModeSet);
                     if (nCompareResult == -1)
@@ -1859,23 +1790,6 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                             continue;
                         }
                     }
-
-                    // TODO - 20220415 - Need to implement this requirement later
-                    /*if (IMS_OPERATOR(VZW, GetSlotId()) &&
-                            ((VZWProperty::GetInstance()->GetTestMask()
-                            & TEST_MASK_UNLOCK_EVS_NEGO_LIMIT) == 0))
-                    {
-                        //let channel aware mode option to be a negotitation item
-                        if (pReceivedFmtp->GetBwList() == 1)
-                        {
-                            continue;      //vzw req. if offer is nb only, no evs negotiation
-                        }
-                        if (pDstPayload->GetRtpMap().GetPayloadNumber() !=
-                                comparedPayload->GetRtpMap().GetPayloadNumber())
-                        {
-                            continue;     //vzw req. payload number based negotiation
-                        }
-                    }*/
 
                     IMS_TRACE_D("FindMatchedPayloadIndexFromProfile() Found EVS at[%d], "
                                 "Codec[%s],EvsModeSwitch[%d]",
