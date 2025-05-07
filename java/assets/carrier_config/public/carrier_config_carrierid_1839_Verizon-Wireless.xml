@@ -20,6 +20,7 @@
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <int name="ims.request_uri_type_int" value="0"/>
+    <int name="imsemergency.refresh_geolocation_timeout_millis_int" value="2000"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="-1"/>
