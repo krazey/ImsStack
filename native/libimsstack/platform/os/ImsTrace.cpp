@@ -250,7 +250,7 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
         return;
     }
 
-    IMS_CHAR acBuffer[MAX_TEXT_SIZE + 1];
+    IMS_CHAR acBuffer[MAX_SUMMARY_SIZE + 1];
     IMS_SINT32 nLength = 0;
 
     IMS_MEM_Memcpy(&acBuffer[nLength], START[nType], START_SIZE);
@@ -258,54 +258,53 @@ PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nTyp
 
     if (pszDescription != IMS_NULL)
     {
-        nLength +=
-                IMS_Sprintf(&acBuffer[nLength], MAX_TEXT_SIZE - nLength, "%s\n\n", pszDescription);
+        nLength += IMS_Sprintf(
+                &acBuffer[nLength], MAX_SUMMARY_SIZE - nLength, "%s\n\n", pszDescription);
     }
 
-    if (nTextSize <= (MAX_TEXT_SIZE - MAX_SPARE_SIZE))
+    // Display Start & Info.
+    OutputString(ITrace::CAT_I, acBuffer, nLength);
+
+    IMS_SINT32 nTotalLength = static_cast<IMS_SINT32>(nTextSize);
+    IMS_CHAR* pszTextStart = const_cast<IMS_CHAR*>(pszText);
+
+    if (nType == ITrace::TEXT_SIP)
     {
-        IMS_MEM_Memcpy(&acBuffer[nLength], pszText, nTextSize);
-        nLength += nTextSize;
-        OutputString(ITrace::CAT_I, acBuffer, nLength);
+        // Find double CRLF - end of SIP header fields.
+        IMS_CHAR* pszBodyStart = IMS_StrStr(pszTextStart, "\r\n\r\n");
+        // Skip double CRLF if present
+        pszBodyStart = (pszBodyStart != IMS_NULL) ? pszBodyStart + 4 : IMS_NULL;
+
+        // NOTE: The SIP core can control the text to be printed in the logging message
+        // based on a specified length, so need to consider the length of the message to be printed.
+        if (pszBodyStart != IMS_NULL && ((pszBodyStart - pszTextStart) <= nTotalLength))
+        {
+            IMS_CHAR* pszHeaderStart = pszTextStart;
+
+            while (IMS_TRUE)
+            {
+                IMS_CHAR* pszLineEnd = IMS_StrChr(pszHeaderStart, '\n');
+
+                OutputString(ITrace::CAT_I, pszHeaderStart, pszLineEnd - pszHeaderStart);
+
+                pszHeaderStart = pszLineEnd + 1;  // Skip LF
+
+                if (pszHeaderStart == pszBodyStart)
+                {
+                    // End of SIP header fields.
+                    break;
+                }
+            }
+
+            nTotalLength -= (pszBodyStart - pszTextStart);
+            pszTextStart = pszBodyStart;
+        }
     }
-    else
+
+    // Print other text messages or SIP message body parts here.
+    if (nTotalLength > 0)
     {
-        // Display Start & Info.
-        OutputString(ITrace::CAT_I, acBuffer, nLength);
-
-        // Display a protocol message
-        IMS_UINT32 nTotalLength = nTextSize;
-        const IMS_CHAR* pszTextStart = pszText;
-
-        if (nTotalLength > MAX_TEXT_SIZE)
-        {
-            nLength = MAX_TEXT_SIZE;
-        }
-        else
-        {
-            nLength = nTotalLength;
-        }
-
-        while (nTotalLength > 0)
-        {
-            IMS_MEM_Memcpy(acBuffer, pszTextStart, nLength);
-
-            pszTextStart += nLength;
-            nTotalLength -= nLength;
-
-            acBuffer[nLength] = '\0';
-
-            OutputString(ITrace::CAT_I, acBuffer, nLength);
-
-            if (nTotalLength > MAX_TEXT_SIZE)
-            {
-                nLength = MAX_TEXT_SIZE;
-            }
-            else
-            {
-                nLength = nTotalLength;
-            }
-        }
+        OutputString(ITrace::CAT_I, pszTextStart, nTotalLength);
     }
 
     // Display END
