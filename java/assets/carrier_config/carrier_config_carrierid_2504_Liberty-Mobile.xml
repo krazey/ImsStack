@@ -63,6 +63,7 @@
             <item value="0"/>
         </int-array>
     </pbundle>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="false"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="imsvoice.plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
 
