@@ -69,4 +69,8 @@ public interface IVideoCallSession {
     public void setMultitaskingState(int state);
     public void setVideoCallProvider(ImsVideoCallProvider provider);
     public void setEventListener(EventListener listener);
+    /**
+     * Sets Camera ID to handle multitasking.
+     */
+    void onSetCamera(String cameraId);
 }

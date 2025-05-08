@@ -61,6 +61,8 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
                 mMediaSession.selectCamera(camId);
             }
         }
+
+        mCallSession.onSetCamera(cameraId);
     }
 
     @Override
