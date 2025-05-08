@@ -160,7 +160,7 @@ TEST_F(AudioControllerTest, testModifySessionSendDtmf)
     EXPECT_EQ(m_pController->OpenSession(nNegoId), IMS_TRUE);
 
     m_pController->SetCallSessionState(IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateSession(2000, ACCESS_NETWORK, m_pAudioNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->UpdateSession(2000, ACCESS_NETWORK, m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateSession(nNegoId, ACCESS_NETWORK, m_pAudioNego), IMS_TRUE);
 
     EXPECT_EQ(m_pController->SendDtmf('1'), IMS_TRUE);
