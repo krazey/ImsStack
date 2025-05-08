@@ -24,7 +24,7 @@ PUBLIC
 MtcLocationRefresher::MtcLocationRefresher(IN ILocationInfo& objLocationInfo) :
         m_objLocationInfo(objLocationInfo),
         m_eState(LocationRefreshState::IDLE),
-        m_lstListeners(ImsList<ILocationUpdateListener*>())
+        m_pListener(IMS_NULL)
 {
 }
 
@@ -51,34 +51,24 @@ void MtcLocationRefresher::RequestUpdate(IN IMS_SINT32 nWaitTimeInMillis)
 }
 
 PUBLIC
-void MtcLocationRefresher::AddListener(IN ILocationUpdateListener& objListener)
+void MtcLocationRefresher::SetListener(IN ILocationUpdateListener& objListener)
 {
-    if (m_lstListeners.Contains(&objListener))
-    {
-        IMS_TRACE_I("AddListener : Already added", 0, 0, 0);
-        return;
-    }
-    m_lstListeners.Append(&objListener);
+    m_pListener = &objListener;
 }
 
 PUBLIC
-void MtcLocationRefresher::RemoveListener(IN ILocationUpdateListener& objListener)
+void MtcLocationRefresher::ResetListener()
 {
-    m_lstListeners.Remove(&objListener);
+    m_pListener = IMS_NULL;
 }
 
 PUBLIC
 void MtcLocationRefresher::LocationUpdate_OnCompleted()
 {
-    m_eState = LocationRefreshState::IDLE;
-    NotifyListeners();
-}
+    m_eState = LocationRefreshState::REFRESHED;
 
-PRIVATE
-void MtcLocationRefresher::NotifyListeners()
-{
-    for (IMS_SINT32 i = static_cast<IMS_SINT32>(m_lstListeners.GetSize()) - 1; i >= 0; i--)
+    if (m_pListener)
     {
-        m_lstListeners.GetAt(i)->LocationUpdate_OnCompleted();
+        m_pListener->LocationUpdate_OnCompleted();
     }
 }

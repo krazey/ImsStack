@@ -15,41 +15,35 @@
  */
 
 #include "ServiceTrace.h"
-#include "call/IMtcCallContext.h"
 #include "call/block/LocationBlockRule.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcLocationRefresher.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-LocationBlockRule::LocationBlockRule(IN IMtcCallContext& objContext) :
-        m_objContext(objContext),
-        m_objLocationRefresher(objContext.GetLocationRefresher()),
+LocationBlockRule::LocationBlockRule(IN MtcLocationRefresher& objLocationRefresher) :
+        m_objLocationRefresher(objLocationRefresher),
         m_pListener(IMS_NULL)
 {
 }
 
 PUBLIC VIRTUAL LocationBlockRule::~LocationBlockRule()
 {
-    m_objLocationRefresher.RemoveListener(*this);
+    m_objLocationRefresher.ResetListener();
 }
 
 PUBLIC VIRTUAL LocationBlockRule::Result LocationBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
-    if (!IsLocationUpdateRequired())
-    {
-        return Result(Result::Status::UNBLOCKED);
-    }
-
-    if (IsLocationUpdateCompleted())
+    // It assumes that a update request have been made by the LocationBlockRule's owner if it's
+    // required.
+    if (m_objLocationRefresher.GetState() != MtcLocationRefresher::LocationRefreshState::REFRESHING)
     {
         return Result(Result::Status::UNBLOCKED);
     }
 
     IMS_TRACE_I("Still refreshing the location", 0, 0, 0);
-    m_objLocationRefresher.AddListener(*this);
+    m_objLocationRefresher.SetListener(*this);
     m_pListener = &objListener;
     return Result(Result::Status::PENDING);
 }
@@ -60,20 +54,4 @@ PUBLIC VIRTUAL void LocationBlockRule::LocationUpdate_OnCompleted()
     {
         m_pListener->OnBlockRuleChecked(Result(Result::Status::UNBLOCKED));
     }
-}
-
-PRIVATE
-IMS_BOOL LocationBlockRule::IsLocationUpdateRequired() const
-{
-    return m_objContext.GetCallInfo().eEmergencyType != EmergencyType::NONE &&
-            m_objContext.GetConfigurationProxy().GetInt(
-                    ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT) > 0;
-}
-
-PRIVATE
-IMS_BOOL LocationBlockRule::IsLocationUpdateCompleted() const
-{
-    // It assumes that a update request have been made by EmergencyServiceManager if it's required.
-    // TODO(b/412489169): The subject to trigger the location update could be changed.
-    return m_objLocationRefresher.GetState() == MtcLocationRefresher::LocationRefreshState::IDLE;
 }

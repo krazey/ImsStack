@@ -15,10 +15,8 @@
  */
 
 #include "MockIPhoneInfoLocation.h"
-#include "call/MockIMtcCallContext.h"
 #include "call/block/LocationBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
-#include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/MtcLocationRefresher.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -33,10 +31,7 @@ class LocationBlockRuleTest : public ::testing::Test
 public:
     inline explicit LocationBlockRuleTest() {}
 
-    MockIMtcCallContext objContext;
-    CallInfo objCallInfo;
     MockIMtcBlockRuleCheckListener objListener;
-    MockMtcConfigurationProxy objConfigurationProxy;
     MockILocationInfo objLocationInfo;
     MtcLocationRefresher* pLocationRefresher;
 
@@ -45,12 +40,8 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
-        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         pLocationRefresher = new MtcLocationRefresher(objLocationInfo);
-        ON_CALL(objContext, GetLocationRefresher).WillByDefault(ReturnRef(*pLocationRefresher));
-
-        pBlockRule = new LocationBlockRule(objContext);
+        pBlockRule = new LocationBlockRule(*pLocationRefresher);
     }
 
     virtual void TearDown() override
@@ -60,35 +51,14 @@ protected:
     }
 };
 
-TEST_F(LocationBlockRuleTest, CheckReturnsUnblockedIfNotEmergency)
+TEST_F(LocationBlockRuleTest, CheckReturnsUnblockedIfNoLocationRefreshHaveBeenRequested)
 {
-    objCallInfo.eEmergencyType = EmergencyType::NONE;
-    ON_CALL(objConfigurationProxy,
-            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(1000));
-
-    Result objResult = pBlockRule->Check(objListener);
-    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
-}
-
-TEST_F(LocationBlockRuleTest, CheckReturnsUnblockedIfLocationRefreshTimerIsNotSet)
-{
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    ON_CALL(objConfigurationProxy,
-            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(0));
-
     Result objResult = pBlockRule->Check(objListener);
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
 TEST_F(LocationBlockRuleTest, CheckReturnsPendingIfLocationRefreshing)
 {
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    ON_CALL(objConfigurationProxy,
-            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(1000));
-
     pLocationRefresher->RequestUpdate(1000);
 
     Result objResult = pBlockRule->Check(objListener);
@@ -97,11 +67,6 @@ TEST_F(LocationBlockRuleTest, CheckReturnsPendingIfLocationRefreshing)
 
 TEST_F(LocationBlockRuleTest, CheckReturnsUnblockedIfLocationRefreshIsCompleted)
 {
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    ON_CALL(objConfigurationProxy,
-            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(1000));
-
     pLocationRefresher->RequestUpdate(1000);
     pLocationRefresher->LocationUpdate_OnCompleted();
 
@@ -111,11 +76,6 @@ TEST_F(LocationBlockRuleTest, CheckReturnsUnblockedIfLocationRefreshIsCompleted)
 
 TEST_F(LocationBlockRuleTest, NotifyListenerUnblockedWhenLocationIsUpdated)
 {
-    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
-    ON_CALL(objConfigurationProxy,
-            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
-            .WillByDefault(Return(1000));
-
     pLocationRefresher->RequestUpdate(1000);
     pBlockRule->Check(objListener);
     pLocationRefresher->LocationUpdate_OnCompleted();

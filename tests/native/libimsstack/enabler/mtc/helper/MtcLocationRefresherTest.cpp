@@ -62,30 +62,24 @@ TEST_F(MtcLocationRefresherTest, DoesNotRequestLocationUpdateIfRefreshing)
     pLocationRefresher->RequestUpdate(2000);
 }
 
-TEST_F(MtcLocationRefresherTest, NotifyListenersWhenUpdated)
+TEST_F(MtcLocationRefresherTest, NotifyListenerWhenUpdated)
 {
-    MockILocationUpdateListener objListener1;
-    MockILocationUpdateListener objListener2;
+    MockILocationUpdateListener objListener;
 
-    EXPECT_CALL(objListener1, LocationUpdate_OnCompleted());
-    EXPECT_CALL(objListener2, LocationUpdate_OnCompleted());
+    EXPECT_CALL(objListener, LocationUpdate_OnCompleted());
 
-    pLocationRefresher->AddListener(objListener1);
-    pLocationRefresher->AddListener(objListener2);
+    pLocationRefresher->SetListener(objListener);
     pLocationRefresher->LocationUpdate_OnCompleted();
 }
 
-TEST_F(MtcLocationRefresherTest, DoesNotNotifyRemovedListeners)
+TEST_F(MtcLocationRefresherTest, DoesNotNotifyAfterResetListener)
 {
-    MockILocationUpdateListener objListener1;
-    MockILocationUpdateListener objListener2;
+    MockILocationUpdateListener objListener;
 
-    EXPECT_CALL(objListener1, LocationUpdate_OnCompleted()).Times(0);
-    EXPECT_CALL(objListener2, LocationUpdate_OnCompleted());
+    EXPECT_CALL(objListener, LocationUpdate_OnCompleted()).Times(0);
 
-    pLocationRefresher->AddListener(objListener1);
-    pLocationRefresher->AddListener(objListener2);
-    pLocationRefresher->RemoveListener(objListener1);
+    pLocationRefresher->SetListener(objListener);
+    pLocationRefresher->ResetListener();
     pLocationRefresher->LocationUpdate_OnCompleted();
 }
 
@@ -101,12 +95,12 @@ TEST_F(MtcLocationRefresherTest, GetStateReturnsRefreshingAfterRequesting)
     EXPECT_EQ(LocationRefreshState::REFRESHING, pLocationRefresher->GetState());
 }
 
-TEST_F(MtcLocationRefresherTest, GetStateReturnsIdleAfterUpdate)
+TEST_F(MtcLocationRefresherTest, GetStateReturnsRefreshedAfterUpdate)
 {
     pLocationRefresher->RequestUpdate(1000);
     pLocationRefresher->LocationUpdate_OnCompleted();
 
-    EXPECT_EQ(LocationRefreshState::IDLE, pLocationRefresher->GetState());
+    EXPECT_EQ(LocationRefreshState::REFRESHED, pLocationRefresher->GetState());
 }
 
 }  // namespace android

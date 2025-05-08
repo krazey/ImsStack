@@ -18,12 +18,11 @@
 #define MTC_LOCATION_REFRESHER_H_
 
 #include "IPhoneInfoLocation.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 
 /*
- * This class manages location refresh requests through the {@link ILocationInfo} and notifies the
- * registered listeners.
+ * This class stores the state of location refresh request through the {@link ILocationInfo} and
+ * notifies the registered listener when it's finished.
  *
  * It can be used when the module that requests location update and the module that receiving the
  * result are different.
@@ -35,6 +34,7 @@ public:
     {
         IDLE,
         REFRESHING,
+        REFRESHED,
     };
 
     explicit MtcLocationRefresher(IN ILocationInfo& objLocationInfo);
@@ -43,24 +43,24 @@ public:
     MtcLocationRefresher& operator=(IN const MtcLocationRefresher&) = delete;
 
     /**
-     * @brief Starts location refresh. Listeners will be notified if the wait timer is expired or
-     *        update is completed.
+     * @brief Starts location refresh. The registered listener will be notified if the wait timer is
+     *        expired or update is completed.
      *
      * If it's waiting for the refresh already, it doesn't trigger another refresh request.
-     * All listeners will receive notification simultaneously, regardless of when they are added.
      *
      * @param nWaitTimeInMillis The maximum wait time in milliseconds.
      */
     void RequestUpdate(IN IMS_SINT32 nWaitTimeInMillis);
 
-    void AddListener(IN ILocationUpdateListener& objListener);
-    void RemoveListener(IN ILocationUpdateListener& objListener);
+    void SetListener(IN ILocationUpdateListener& objListener);
+    void ResetListener();
 
     /**
      * @brief Gets the current location update state.
      *
-     * @return {@code REFRESHING} if there's ongoing request and wait for it.
-     *         Otherwise {@code IDLE}.
+     * @return {@code IDLE} if no request have been made.
+     *         {@code REFRESHING} if there's ongoing request and wait for it.
+     *         {@code REFRESHED} Location have been updated.
      */
     inline LocationRefreshState GetState() const { return m_eState; }
 
@@ -69,9 +69,7 @@ public:
 private:
     ILocationInfo& m_objLocationInfo;
     LocationRefreshState m_eState;
-    ImsList<ILocationUpdateListener*> m_lstListeners;
-
-    void NotifyListeners();
+    ILocationUpdateListener* m_pListener;
 };
 
 #endif
