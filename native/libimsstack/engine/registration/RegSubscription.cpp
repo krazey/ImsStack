@@ -1772,7 +1772,17 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
                 pRegSub->GetSlotId(), pStateTracker->GetSipProfile()));
     }
 
-    if (pRegSub->GetState() != STATE_ACTIVE)
+    if (pRegSub->GetState() == STATE_ACTIVE)
+    {
+        // IMPLICIT_ROUTING_FOR_MID_DIALOG
+        const AStringArray& objServiceRoutes = pStateTracker->GetServiceRoutes();
+
+        if (!objServiceRoutes.IsEmpty())
+        {
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+        }
+    }
+    else
     {
         if (piScc->InitRequest(SipMethod::ToName(SipMethod::SUBSCRIBE), IMS_NULL) != IMS_SUCCESS)
         {
