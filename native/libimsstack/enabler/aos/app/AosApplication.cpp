@@ -132,7 +132,8 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_bIsPublished(IMS_FALSE),
         m_bIsActivated(IMS_TRUE),
         m_bEpdgEnabled(IMS_FALSE),
-        m_bDataRoaming(IMS_FALSE)
+        m_bDataRoaming(IMS_FALSE),
+        m_bPdnDeactivationRequired(IMS_FALSE)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, strAppId.GetStr());
 
@@ -722,6 +723,12 @@ IMS_BOOL AosApplication::IsImsEstablishmentTimerStopRequired() const
 }
 
 PROTECTED
+IMS_BOOL AosApplication::IsPdnDeactivationRequired() const
+{
+    return m_bPdnDeactivationRequired;
+}
+
+PROTECTED
 IMS_SINT32 AosApplication::GetImsEstablishmentTime() const
 {
     return (m_piNetTracker->GetMobileNetworkType() == NW_REPORT_RADIO_NR)
@@ -972,7 +979,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegUpdatedByNrLteRatChange() const
 
 PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = AosReason::NONE */)
 {
-    A_IMS_TRACE_I(APPID, "CleanAll", 0, 0, 0);
+    A_IMS_TRACE_I(APPID, "CleanAll:: nOffReason (%d)", nOffReason, 0, 0);
 
     SetAppState(STATE_NOTREADY);
 
@@ -995,6 +1002,12 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
     {
         ProcessPdnDisconnect();
         ClearOffReason();
+    }
+
+    if (IsPdnDeactivationRequired())
+    {
+        m_pConnector->Stop();
+        m_bPdnDeactivationRequired = IMS_FALSE;
     }
 }
 
@@ -3516,6 +3529,15 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
     if (eType == AosRegRequestType::STOP)
     {
+        if (eCause == AosControlCause::RADIO_SIM_REMOVED ||
+                eCause == AosControlCause::RADIO_SIM_REFRESH)
+        {
+            if (!IsEmergency())
+            {
+                m_bPdnDeactivationRequired = IMS_TRUE;
+            }
+        }
+
         ProcessDisconnectingState(GetOffReason());
         PostMessage(MSG_REG_STOP, 0, 0);
         return;

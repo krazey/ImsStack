@@ -125,6 +125,7 @@ protected:
     IMS_BOOL IsBlockRat(IN IMS_UINT32 nRat) const;
     IMS_BOOL IsReasonBlockedForImsEstablishmentTimer() const;
     IMS_BOOL IsImsEstablishmentTimerStopRequired() const;
+    IMS_BOOL IsPdnDeactivationRequired() const;
 
     IMS_SINT32 GetImsEstablishmentTime() const;
 
@@ -454,6 +455,7 @@ protected:
     IMS_BOOL m_bIsActivated;
     IMS_BOOL m_bEpdgEnabled;
     IMS_BOOL m_bDataRoaming;
+    IMS_BOOL m_bPdnDeactivationRequired;
 
     AString m_strTag;
 };

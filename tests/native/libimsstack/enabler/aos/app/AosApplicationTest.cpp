@@ -194,6 +194,7 @@ enum
     using Base::IsRegTypeNormal;                         \
     using Base::IsRegStateUpdatedByNrLteRatChange;       \
     using Base::IsPdnDisconnectRequired;                 \
+    using Base::IsPdnDeactivationRequired;               \
     using Base::IsPlmnBlockRequired;                     \
     using Base::IsBlockRat;                              \
     using Base::CreateAosCondition;                      \
@@ -367,6 +368,11 @@ public:
     inline void SetAppTypeEmergency() { m_nAppType = TYPE_EMERGENCY; }
 
     inline void SetEpdgEnabled(IN IMS_BOOL bEpdgEnabled) { m_bEpdgEnabled = bEpdgEnabled; }
+
+    inline void SetPdnDeativationRequired(IN IMS_BOOL bPdnDeativationRequired)
+    {
+        m_bPdnDeactivationRequired = bPdnDeativationRequired;
+    }
 
 private:
     IMS_BOOL m_bRegReconfigAvailable;
@@ -3417,6 +3423,39 @@ TEST_F(AosApplicationTest,
     EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::AIRPLANE_MODE);
 }
 
+TEST_F(AosApplicationTest,
+        SetPdnDeactivationRequiredFalseWhenControlRegistrationCalledWithStopIfSimRemovedForEmergency)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REMOVED);
+
+    EXPECT_FALSE(m_pAosApplication->IsPdnDeactivationRequired());
+}
+
+TEST_F(AosApplicationTest,
+        SetPdnDeactivationRequiredTrueWhenControlRegistrationCalledWithStopIfSimRemovedForNormal)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REMOVED);
+
+    EXPECT_TRUE(m_pAosApplication->IsPdnDeactivationRequired());
+}
+
+TEST_F(AosApplicationTest,
+        SetPdnDeactivationRequiredTrueWhenControlRegistrationCalledWithStopIfSimRefreshForNormal)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REFRESH);
+
+    EXPECT_TRUE(m_pAosApplication->IsPdnDeactivationRequired());
+}
+
 TEST_F(AosApplicationTest, InvokeResetReadyRecoveryWhenReceiveResetPcscfRecoveryRequest)
 {
     EXPECT_CALL(m_objMockAosConnector, ResetReadyRecovery());
@@ -3812,4 +3851,19 @@ TEST_F(AosApplicationTest, ReturnImsEstablishmentTimeForNrIfRatIsNr)
 
     // WHEN & THEN
     EXPECT_EQ(m_pAosApplication->GetImsEstablishmentTime(), 160);
+}
+
+TEST_F(AosApplicationTest,
+        ProcessCleanAllShouldStopConnectorWhenPdnDeactivationRequiredIsTrue)
+{
+    // GIVEN
+    m_pAosApplication->SetPdnDeativationRequired(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    // WHEN
+    m_pAosApplication->CleanAll();
+
+    // THEN : GIVEN conditions should be met.
+    EXPECT_FALSE(m_pAosApplication->IsPdnDeactivationRequired());
 }
