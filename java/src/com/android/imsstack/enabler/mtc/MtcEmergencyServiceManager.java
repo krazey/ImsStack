@@ -16,13 +16,23 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import android.annotation.NonNull;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
+import android.text.TextUtils;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -40,6 +50,7 @@ public class MtcEmergencyServiceManager {
     private final ICallStateTracker mCallStateTracker;
     private int mEmergencyType;
     private boolean mIsStopEmergencyServiceRequired;
+    private String mLastCountryIso = "";
 
     public MtcEmergencyServiceManager(IBaseContext context, ICallStateTracker callStateTracker) {
         mContext = context;
@@ -62,6 +73,9 @@ public class MtcEmergencyServiceManager {
         mCall = null;
         mNativeObject = 0;
         mECallStateListener = new ECallStateListener();
+        IntentFilter filter = new IntentFilter(TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED);
+        AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(
+                mIntentReceiver, filter);
     }
 
     public void clear() {
@@ -71,10 +85,30 @@ public class MtcEmergencyServiceManager {
         mCall = null;
         mNativeObject = 0;
         mCallStateTracker.removeListener(mECallStateListener);
+        AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(mIntentReceiver);
     }
 
     public void setNativeObject(long nativeObject) {
         mNativeObject = nativeObject;
+    }
+
+    /**
+     * Retrieves the cached network country ISO.
+     *
+     * This method returns the cached value of the network country ISO.
+     * The ISO value is initially populated and updated whenever the
+     * {@link android.content.Intent#ACTION_NETWORK_COUNTRY_CHANGED} intent is received.
+     * This ensures that the returned value is the most recently known country ISO,
+     * even if the device's radio is temporarily off (e.g., in airplane mode).
+     *
+     * @return A non-null string representing the cached network country ISO.
+     * Returns an empty string if no country ISO has been cached.
+     */
+    @NonNull
+    public String getNetworkCountryIso() {
+        maybeUpdateNetworkCountryIso();
+        log("getNetworkCountryIso : " + mLastCountryIso);
+        return mLastCountryIso;
     }
 
     /**
@@ -239,5 +273,38 @@ public class MtcEmergencyServiceManager {
                 stopEmergencyService();
             }
         }
+    }
+
+    @VisibleForTesting
+    BroadcastReceiver getBroadcastReceiver() {
+        return mIntentReceiver;
+    }
+
+    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(
+                    TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED)) {
+                String countryIso = intent.getStringExtra(
+                        TelephonyManager.EXTRA_NETWORK_COUNTRY);
+                log("ACTION_NETWORK_COUNTRY_CHANGED : " + countryIso);
+                if (TextUtils.isEmpty(countryIso)) {
+                    return;
+                }
+                mLastCountryIso = countryIso;
+            }
+        }
+    };
+
+    private void maybeUpdateNetworkCountryIso() {
+        if (!TextUtils.isEmpty(mLastCountryIso)) {
+            return;
+        }
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mContext.getSlotId());
+        if (telephony == null) {
+            return;
+        }
+        mLastCountryIso = telephony.getNetworkCountryIso();
     }
 }

@@ -338,7 +338,8 @@ public class ImsCallUtils {
     }
 
     public static SuppInfo createSuppInfoFromCallProfile(
-            ICallContext context, final ImsCallProfile profile, @Nullable String callee) {
+            ICallContext context, final ImsCallProfile profile, @Nullable String callee,
+            String countryIso) {
         SuppInfo si = new SuppInfo();
 
         // OIR (0 : default, 1 : presentation restricted, 2 : presentation not restricted)
@@ -383,8 +384,8 @@ public class ImsCallUtils {
                     @EmergencyCallRouting
                     int emergencyRouting = getEmergencyRoutingFromCallProfile(profile);
                     if (callee != null && !callee.isEmpty()) {
-                        emergencyRouting =
-                                maybeUpdateEmergencyRouting(context, emergencyRouting, callee);
+                        emergencyRouting = maybeUpdateEmergencyRouting(
+                                context, emergencyRouting, callee, countryIso);
                     }
 
                     if (emergencyRouting != EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL) {
@@ -544,7 +545,8 @@ public class ImsCallUtils {
     }
 
    public static @EmergencyCallRouting int maybeUpdateEmergencyRouting(
-            ICallContext context, @EmergencyCallRouting int emergencyRouting, String callee) {
+            ICallContext context, @EmergencyCallRouting int emergencyRouting, String callee,
+            String countryIso) {
         if (emergencyRouting != EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN) {
             return emergencyRouting;
         }
@@ -554,7 +556,7 @@ public class ImsCallUtils {
             return emergencyRouting;
         }
 
-        if (!isDynamicRoutingNumber(context, callee)) {
+        if (!isDynamicRoutingNumber(context, callee, countryIso)) {
             return emergencyRouting;
         }
 
@@ -1059,7 +1061,8 @@ public class ImsCallUtils {
         return false;
     }
 
-    private static boolean isDynamicRoutingNumber(ICallContext context, String callee) {
+    private static boolean isDynamicRoutingNumber(ICallContext context, String callee,
+            String countryIso) {
         String[] configs = AgentFactory.getInstance().getAgent(ConfigInterface.class,
                 context.getSlotId()).getCarrierConfig().getStringArray(CarrierConfig.ImsEmergency
                         .KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY);
@@ -1072,7 +1075,6 @@ public class ImsCallUtils {
         if (telephony == null) {
             return false;
         }
-        String countryIso = telephony.getNetworkCountryIso();
         String mnc = telephony.getNetworkMnc();
         ImsLog.d("isDynamicRoutingNumber :: countryIso=" + countryIso + ", mnc=" + mnc);
 

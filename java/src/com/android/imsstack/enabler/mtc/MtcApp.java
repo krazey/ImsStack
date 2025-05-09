@@ -174,6 +174,10 @@ public class MtcApp implements Closeable {
         return mCM;
     }
 
+    public MtcEmergencyServiceManager getMtcEmergencyServiceManager() {
+        return mEmergencyServiceManager;
+    }
+
     /**
      * Notifies {@link MtcEmergencyServiceManager} to do registration for emergency call.
      *
