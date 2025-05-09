@@ -564,8 +564,18 @@ SIP_BOOL SipNameAddrHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     else
     {
+        const SIP_CHAR* pTempStart = pStartPt;
         SIP_INT32 nLen = nDecLen;
-        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+
+        if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, ATRATE) ==
+                SIP_TRUE)
+        {
+            pTempStart = pTempNext;
+            pTempPre = SIP_NULL;
+            pTempNext = SIP_NULL;
+        }
+
+        if (SipAbnfUtil::FindActualPosition(pTempStart, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
                 SIP_TRUE)
         {
             nLen = pTempPre - pStartPt + SIP_ONE;

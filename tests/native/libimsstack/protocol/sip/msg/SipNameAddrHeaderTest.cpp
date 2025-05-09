@@ -17,6 +17,7 @@
 
 #include "SipAbnfUtil.h"
 #include "msg/SipHeaderBase.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -222,6 +223,80 @@ TEST_F(SipNameAddrHeaderTest, Decode)
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_objValueList.GetSize());
     EXPECT_STREQ("param-value", pNameVal->m_objValueList.GetAt(0));
+
+    pHeader->SipDelete();
+    pHeader = nullptr;
+}
+
+TEST_F(SipNameAddrHeaderTest, DecodeEncodeSipUri)
+{
+    SipNameAddrHeader* pHeader = reinterpret_cast<SipNameAddrHeader*>(
+            SipNameAddrHeader::GetNewObj(SipHeaderBase::TO, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    const SIP_CHAR* pUri = "<sip:user%3Binfo@host>";
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pUri, SipPf_Strlen(pUri)));
+
+    const SIP_INT32 BUFFER_SIZE = 4096;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    SIP_CHAR* pBuff = &(aBuffer[0]);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+    EXPECT_STREQ("<sip:user;info@host>", &(aBuffer[0]));
+
+    pHeader->SipDelete();
+    pHeader = nullptr;
+
+    pHeader = reinterpret_cast<SipNameAddrHeader*>(
+            SipNameAddrHeader::GetNewObj(SipHeaderBase::TO, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    pUri = "sip:user;info@host";
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pUri, SipPf_Strlen(pUri)));
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+    EXPECT_STREQ("<sip:user;info@host>", &(aBuffer[0]));
+
+    pHeader->SipDelete();
+    pHeader = nullptr;
+
+    pHeader = reinterpret_cast<SipNameAddrHeader*>(
+            SipNameAddrHeader::GetNewObj(SipHeaderBase::FROM, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    pUri = "sip:2222;222@ims.mnc001.mcc001.3gppnetwork.org;tag=565656";
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pUri, SipPf_Strlen(pUri)));
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+    EXPECT_STREQ("<sip:2222;222@ims.mnc001.mcc001.3gppnetwork.org>;tag=565656", &(aBuffer[0]));
+
+    pHeader->SipDelete();
+    pHeader = nullptr;
+
+    pHeader = reinterpret_cast<SipNameAddrHeader*>(
+            SipNameAddrHeader::GetNewObj(SipHeaderBase::FROM, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    pUri = "<sip:2222;222@ims.mnc001.mcc001.3gppnetwork.org>;tag=2899e67";
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pUri, SipPf_Strlen(pUri)));
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+    EXPECT_STREQ(pUri, &(aBuffer[0]));
 
     pHeader->SipDelete();
     pHeader = nullptr;
