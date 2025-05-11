@@ -1059,6 +1059,16 @@ public:
     virtual IMS_SINT32 GetRegistrationPrivateHeader() const = 0;
 
     /**
+     * @brief Indicate the delay time before reconnecting IMS PDN when WFC setup is failed
+     *        for all P-CSCFs while UE is on CS roaming network
+     *
+     * @return IMS_SINT32 Return the delay time (Second)
+     * @see {@code
+     *      ims.pdn_reconnect_delay_on_wfc_setup_fail_all_pcscfs_with_cs_roam_sec_int}
+     */
+    virtual IMS_SINT32 GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam() const = 0;
+
+    /**
      * @brief Indicate the actual wait time policy
      *
      *        Possible values are,

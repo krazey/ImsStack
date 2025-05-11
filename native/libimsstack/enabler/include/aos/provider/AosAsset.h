@@ -87,6 +87,7 @@ public:
             nImsEstablishmentTimeForNrSec(180),
             nImsPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
             nImsSignallingDscp(46),
+            nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam(0),
             nRegActualWaitTimePolicy(CarrierConfig::Ims::AWT_POLICY_RFC_RULE),
             nRegDefaultWaitTime(0),
             nRegOutOfServicePolicy(CarrierConfig::Ims::REG_OOS_POLICY_DEFAULT),
@@ -191,6 +192,7 @@ public:
     IMS_SINT32 nImsEstablishmentTimeForNrSec;
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
+    IMS_SINT32 nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam;
     IMS_SINT32 nRegActualWaitTimePolicy;
     IMS_SINT32 nRegDefaultWaitTime;
     IMS_SINT32 nRegOutOfServicePolicy;

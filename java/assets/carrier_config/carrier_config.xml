@@ -377,6 +377,7 @@
     <int name="ims.ims_establishment_time_for_nr_sec_int" value="180"/>
     <int name="ims.ims_preferred_iptype_int" value="1"/>
     <int name="ims.ims_signalling_dscp_int" value="46"/>
+    <int name="ims.pdn_reconnect_delay_on_wfc_setup_fail_all_pcscfs_with_cs_roam_sec_int" value="0"/>
     <int name="ims.reg_actual_wait_time_policy_int" value="0"/>
     <int name="ims.reg_default_wait_time_int" value="0"/>
     <int name="ims.reg_out_of_service_policy_int" value="0"/>

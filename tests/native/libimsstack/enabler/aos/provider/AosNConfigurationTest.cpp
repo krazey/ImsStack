@@ -764,6 +764,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT, -1))
             .WillOnce(Return(46));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Ims::
+                            KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT,
+                    -1))
+            .WillOnce(Return(0));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT, -1))
             .WillOnce(Return(0));
@@ -996,6 +1001,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(180, m_pAosNConfiguration->GetImsEstablishmentTimeForNr());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, m_pAosNConfiguration->GetImsSignallingDscp());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegActualWaitTimePolicy());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegDefaultWaitTime());
     EXPECT_EQ(CarrierConfig::Ims::REG_OOS_POLICY_DEFAULT,
