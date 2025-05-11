@@ -14,11 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
-<!-- carrier_name: Orange (Belgium) -->
+<!-- carrier_name: Orange (Tunisia) -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="2">
         <item value="0"/>
         <item value="5"/>

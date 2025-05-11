@@ -14,8 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
+<!-- carrier_name: Orange (Slovakia) -->
 <carrier_config>
     <!-- Carrier configurations -->
+    <!-- Aos -->
+    <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="2">
+        <item value="0"/>
+        <item value="5"/>
+    </int-array>
+    <int-array name="ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="2">
+        <item value="0"/>
+        <item value="5"/>
+    </int-array>
+
     <!-- Mtc Assets -->
     <int name="ims.geolocation_policy_for_location_based_call_int" value="9"/>
     <int-array name="imsvoice.location_based_number_list_int_array" num="5">
@@ -29,5 +40,4 @@
     <!-- Mts -->
     <int name="imssms.sms_message_response_wait_timer_millis_int" value="8000"/>
     <int name="imssms.sms_retry_policy_for_expiry_timer_f_int" value="4"/>
-
 </carrier_config>

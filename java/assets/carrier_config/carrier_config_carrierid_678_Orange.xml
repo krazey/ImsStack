@@ -14,10 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
+<!-- carrier_name: Orange (Spain) -->
 <carrier_config>
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int-array name="ims.reg_err_code_for_pcscf_discovery_int_array" num="2">
+        <item value="0"/>
+        <item value="5"/>
+    </int-array>
+    <int-array name="ims.rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="2">
+        <item value="0"/>
+        <item value="5"/>
+    </int-array>
 
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 </carrier_config>
