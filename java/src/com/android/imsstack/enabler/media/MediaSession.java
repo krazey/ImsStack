@@ -146,13 +146,33 @@ public class MediaSession implements IMediaConnectionObserver {
     }
 
     @VisibleForTesting
+    AudioSessionHandler getAudioSessionHandler() {
+        return mAudioSessionHandler;
+    }
+
+    @VisibleForTesting
     void setVideoSessionHandler(VideoSessionHandler videoSessionHandler) {
         mVideoSessionHandler = videoSessionHandler;
     }
 
     @VisibleForTesting
+    VideoSessionHandler getVideoSessionHandler() {
+        return mVideoSessionHandler;
+    }
+
+    @VisibleForTesting
     void setTextSessionHandler(TextSessionHandler textSessionHandler) {
         mTextSessionHandler = textSessionHandler;
+    }
+
+    @VisibleForTesting
+    TextSessionHandler getTextSessionHandler() {
+        return mTextSessionHandler;
+    }
+
+    @VisibleForTesting
+    void setAvSync(AudioVideoSync avSync) {
+        mAvSync = avSync;
     }
 
     private void createAudioSession() {
