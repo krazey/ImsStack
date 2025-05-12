@@ -1415,6 +1415,20 @@ TEST_F(AosERegistrationTest, RegistrationTerminated_ChangeStateToOffline)
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
+TEST_F(AosERegistrationTest, ClearCbmWhenRegistrationTerminated)
+{
+    m_pAosERegistration->CreateEModeInfo();
+    m_pAosERegistration->GetEModeInfo()->SetEcbm(IMS_TRUE);
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->Registration_Terminated(IRegistration::REASON_REFRESH_TIMEOUT);
+
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
+}
+
 TEST_F(AosERegistrationTest, CallTrackerStateChangedForNonEmergencyType_Ignored)
 {
     m_pAosERegistration->SetImsCall(IMS_FALSE);
@@ -1433,6 +1447,21 @@ TEST_F(AosERegistrationTest, CallTrackerStateChangedForEmergencyType_UpdateCallS
 
     EXPECT_TRUE(m_pAosERegistration->IsImsCall());
     EXPECT_TRUE(m_pAosERegistration->IsTransactionStarted());
+}
+
+TEST_F(AosERegistrationTest, ClearCbmWhenCallTrackerStateChanged)
+{
+    m_pAosERegistration->SetImsCall(IMS_FALSE);
+    m_pAosERegistration->CreateEModeInfo();
+    m_pAosERegistration->GetEModeInfo()->SetEcbm(IMS_TRUE);
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->CallTracker_StateChanged(IAosCallTracker::TYPE_EMERGENCY, CallState::NEW);
+
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
 }
 
 TEST_F(AosERegistrationTest, NotifyConfigChangedWhenEmergencyCallbackModeSupported)
