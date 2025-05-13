@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,13 @@
  */
 package com.android.imsstack.enabler.media;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.RtpReceptionStats;
 import android.telephony.imsmedia.VideoConfig;
 
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
@@ -156,5 +158,27 @@ public class VideoSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+    }
+
+    @Test
+    public void testOnNotifyVideoDataUsage() {
+        mVideoSessionCallbackHandler.onNotifyVideoDataUsage(2048);
+        // This method only logs a message,
+        // so there is nothing to verify other than that it doesn't crash.
+    }
+
+    @Test
+    public void testOnNotifyRtpReceptionStats() {
+        RtpReceptionStats videoStats = new RtpReceptionStats.Builder()
+                .setRtpTimestamp(10)
+                .setRtcpSrTimestamp(20)
+                .setRtcpSrNtpTimestamp(200)
+                .setJitterBufferMs(200)
+                .setRoundTripTimeMs(20)
+                .build();
+        mVideoSessionCallbackHandler.onNotifyRtpReceptionStats(videoStats);
+
+        verify(mMockMtcMediaSession).onNotifyRtpReceptionStats(
+                eq(ImsMediaSession.SESSION_TYPE_VIDEO), eq(videoStats));
     }
 }
