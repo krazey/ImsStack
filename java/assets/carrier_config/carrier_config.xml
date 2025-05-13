@@ -635,14 +635,18 @@
         <item value="311480"/>
     </string-array>
     <int name="imsvoice.session_refresh_sdp_session_version_increment_int" value="0"/>
-    <string-array name="imsemergency.dynamic_routing_number_per_plmn_string_array" num="18">
+    <string-array name="imsemergency.dynamic_routing_number_per_plmn_string_array" num="20">
+        <!-- b/411710086 -->
+        <item value="al,,125,126,127,128,129"/>
         <!-- b/393518741 -->
         <item value="cz,01,156"/>
         <item value="cz,03,156"/>
         <!-- b/383915621 -->
-        <item value="gr,,100,108,166,199,1056"/>
+        <item value="gr,,100,108,166,197,199,1056,11188,116000"/>
         <!-- b/379083664 -->
         <item value="hr,,192,193,194,195,1987"/>
+        <!-- b/383579266 -->
+        <item value="me,,122,123,124"/>
         <item value="in,,101,102,103,108"/>
         <item value="il,,101,102"/>
         <item value="tw,,110,119"/>
