@@ -53,6 +53,8 @@ public:
     // TODO: removing bAquot is for VZW GetEntryUri. should not be required.
     static AString& GetTranslatedUri(IN IMtcContext& objContext, IN_OUT AString& strNumber,
             Scheme eScheme, IN const ImsIdentityProxy& objIdentityProxy);
+    static AString& GetTranslatedUriForEmergencyTestNumber(IN IMtcContext& objContext,
+            IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy);
     static AString& GetTranslatedUriForDialString(IN const IMtcContext& objContext,
             IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy);
 

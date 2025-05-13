@@ -32,6 +32,8 @@ public:
     MOCK_METHOD(AString, GetToUri,
             (IN const AString& strNumber, IN IMtcCallContext& objContext, IN Scheme eScheme),
             (override));
+    MOCK_METHOD(AString, GetToUriForEmergencyTestNumber,
+            (IN const AString& strNumber, IN IMtcCallContext& objContext), (override));
 };
 
 #endif

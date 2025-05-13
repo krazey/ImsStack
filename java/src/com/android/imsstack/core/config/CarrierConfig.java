@@ -774,6 +774,8 @@ public class CarrierConfig {
         // Mtc
         public static final String KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL =
                 KEY_PREFIX + "emergency_call_over_emergency_pdn_on_cellular_bool";
+        public static final String KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL =
+                KEY_PREFIX + "exclude_uri_parameters_for_emergency_test_number_bool";
         public static final String KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL =
                 KEY_PREFIX + "emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool";
         public static final String KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT =

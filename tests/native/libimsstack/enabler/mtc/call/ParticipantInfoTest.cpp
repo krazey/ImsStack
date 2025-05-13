@@ -271,7 +271,7 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteUriIfIsEmergency)
     ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     MockIMtcDialingPlan objDialingPlan;
-    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strToUri));
+    ON_CALL(objDialingPlan, GetToUriForEmergencyTestNumber(_, _)).WillByDefault(Return(strToUri));
     ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
     CallInfo objCallInfo;
