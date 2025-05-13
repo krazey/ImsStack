@@ -729,6 +729,8 @@
     </int-array>
     <int-array name="imssms.sms_fallback_error_codes_int_array" num="0">
     </int-array>
+    <int-array name="imssms.sms_smma_generic_error_codes_int_array" num="0">
+    </int-array>
     <int name="imssms.sms_reg_policy_for_expiry_timer_f_int" value="-1"/>
     <int name="imssms.sms_reg_policy_for_403_response_int" value="-1"/>
     <int name="imssms.sms_reg_policy_for_404_response_int" value="-1"/>

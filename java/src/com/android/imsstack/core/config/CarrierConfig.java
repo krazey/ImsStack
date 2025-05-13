@@ -871,6 +871,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "sms_generic_error_codes_int_array";
         public static final String KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY =
                 KEY_PREFIX + "sms_fallback_error_codes_int_array";
+        public static final String KEY_SMS_SMMA_GENERIC_ERROR_CODES_INT_ARRAY =
+                KEY_PREFIX + "sms_smma_generic_error_codes_int_array";
         public static final String KEY_SMS_REG_POLICY_FOR_EXPIRY_TIMER_F_INT =
                 KEY_PREFIX + "sms_reg_policy_for_expiry_timer_f_int";
         public static final String KEY_SMS_REG_POLICY_FOR_403_RESPONSE_INT =
