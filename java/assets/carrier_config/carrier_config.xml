@@ -551,6 +551,7 @@
     <int name="imsvoice.delay_update_after_connected_timer_millis_int" value="0"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="0"/>
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
+    <boolean name="imsemergency.silent_retry_emergency_call_with_delay_of_retry_after_bool" value="false"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="-1"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="2"/>
     <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="2"/>

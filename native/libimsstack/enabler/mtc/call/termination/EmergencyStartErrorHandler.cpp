@@ -15,6 +15,7 @@
  */
 
 #include "IMessage.h"
+#include "ISipHeader.h"
 #include "ImsAosParameter.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
@@ -105,6 +106,21 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
     if (IsRedialEmergencyWithNextPcscfRequired(piMessage))
     {
         return HandleRedialEmergencyWithNextPcscf();
+    }
+
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+               ConfigEmergency::KEY_SILENT_RETRY_EMERGENCY_CALL_WITH_DELAY_OF_RETRY_AFTER_BOOL))
+    {
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+    }
+    IMS_SINT32 nRetryAfterInSeconds = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            piMessage, ISipHeader::RETRY_AFTER_ANY);
+    if (nRetryAfterInSeconds > 0)
+    {
+        AString strRetryAfterInMillis;
+        strRetryAfterInMillis.SetNumber(nRetryAfterInSeconds * 1000);
+        return CallReasonInfo(
+                    CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfterInMillis);
     }
 
     return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
