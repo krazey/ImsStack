@@ -73,6 +73,8 @@ public:
             (override));
     MOCK_METHOD(IMS_BOOL, IsAudioConfigChanged, (IN AudioConfig * pAudioConfig), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionOpened, (), (override));
+    MOCK_METHOD(
+            void, SetMediaPemType, (IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType), (override));
 };
 
 #endif

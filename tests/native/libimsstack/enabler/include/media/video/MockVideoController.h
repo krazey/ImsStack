@@ -44,6 +44,7 @@ public:
     MOCK_METHOD(void, SetMtu, (IN IMS_SINT32 nMtu), (override));
     MOCK_METHOD(IMS_BOOL, ApplyQualityThreshold, (), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionOpened, (), (override));
+    MOCK_METHOD(void, SetMediaPemType, (IN MEDIA_PEM_TYPE ePemType), (override));
 };
 
 #endif  // MOCK_VIDEO_CONTROLLER_H_

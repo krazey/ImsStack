@@ -28,6 +28,8 @@
 #include "audio/MockAudioController.h"
 #include "video/MockVideoController.h"
 #include "text/MockTextController.h"
+#include "audio/MockAudioNego.h"
+#include "video/MockVideoNego.h"
 
 using ::testing::_;
 using ::testing::An;
@@ -66,6 +68,8 @@ public:
     std::shared_ptr<MockAudioController> m_pMockAudioController;
     std::shared_ptr<MockVideoController> m_pMockVideoController;
     std::shared_ptr<MockTextController> m_pMockTextController;
+    std::shared_ptr<MockAudioNego> m_pMockAudioNegoInstance;
+    std::shared_ptr<MockVideoNego> m_pMockVideoNegoInstance;
 
     // Helper to simulate successful negotiation and opening for a media type
     void SimulateNegotiateAndOpen(IMS_UINTP nNegoId, MEDIA_CONTENT_TYPE typeToOpen)
@@ -125,6 +129,10 @@ protected:
         m_pMockAudioController = std::make_shared<MockAudioController>();
         m_pMockVideoController = std::make_shared<MockVideoController>();
         m_pMockTextController = std::make_shared<MockTextController>();
+
+        m_pMockAudioNegoInstance = std::make_shared<MockAudioNego>(0);
+        m_pMockVideoNegoInstance = std::make_shared<MockVideoNego>(0);
+
         m_pSession->SetMediaNegoHandler(m_pMockMediaNegoHandler);
         m_pSession->SetAudioController(m_pMockAudioController);
         m_pSession->SetVideoController(m_pMockVideoController);
@@ -137,6 +145,12 @@ protected:
                 .WillByDefault(Return(REMOTE_PORT));  // Default remote port
         ON_CALL(*m_pMockMediaNegoHandler, GetNegotiatedRemoteAddress(_, _))
                 .WillByDefault(ReturnRef(m_objRemoteIpAddress));  // Default remote address
+
+        // Stub Get*Nego methods on the main MediaNego mock to return the sub-nego mock instances
+        ON_CALL(*m_pMediaNego, GetAudioNego()).WillByDefault(Return(m_pMockAudioNegoInstance));
+        ON_CALL(*m_pMediaNego, GetVideoNego()).WillByDefault(Return(m_pMockVideoNegoInstance));
+        ON_CALL(*m_pMediaNego, GetTextNego()).WillByDefault(Return(nullptr));
+
         ON_CALL(*m_pMockAudioController, DeleteSession(_)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(*m_pMockAudioController, CloseSession()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(*m_pMockVideoController, CloseSession()).WillByDefault(Return(IMS_TRUE));
@@ -802,4 +816,36 @@ TEST_F(MediaSessionTest, testSendMessageResponseNullParam)
             IJniMedia::RESPONSE_OPEN_SESSION, reinterpret_cast<IMS_UINTP>(nullptr)));
     // Note: SendMessage itself returns true even if the param is null,
     // because OnResponse handles the null check internally.
+}
+
+// --- SetMediaPemType Test ---
+TEST_F(MediaSessionTest, testSetMediaPemType)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    MEDIA_PEM_TYPE ePemType = MEDIA_PEM_TYPE::SENDRECV;
+
+    // Expect FindMediaNego to be called and return a valid mock
+    EXPECT_CALL(*m_pMockMediaNegoHandler, FindMediaNego(nNegoId))
+            .Times(1)
+            .WillOnce(Return(m_pMediaNego));
+
+    // Expect SetMediaPemType to be called on the controllers
+    EXPECT_CALL(*m_pMockAudioController, SetMediaPemType(nNegoId, ePemType)).Times(1);
+    EXPECT_CALL(*m_pMockVideoController, SetMediaPemType(ePemType)).Times(1);
+
+    m_pSession->SetMediaPemType(nNegoId, ePemType);
+}
+
+TEST_F(MediaSessionTest, testSetMediaPemTypeNegoNotFound)
+{
+    // Expect FindMediaNego to be called and return nullptr
+    EXPECT_CALL(*m_pMockMediaNegoHandler, FindMediaNego(NEGO_ID))
+            .Times(1)
+            .WillOnce(Return(nullptr));
+
+    // Expect SetMediaPemType NOT to be called on the controllers
+    EXPECT_CALL(*m_pMockAudioController, SetMediaPemType(_, _)).Times(0);
+    EXPECT_CALL(*m_pMockVideoController, SetMediaPemType(_)).Times(0);
+
+    m_pSession->SetMediaPemType(NEGO_ID, MEDIA_PEM_TYPE::SENDONLY);
 }
