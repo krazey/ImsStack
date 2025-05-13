@@ -32,6 +32,13 @@
     </int-array>
 
     <!-- MTC -->
+    <int-array name="imsvoice.csfb_block_condition_int_array" num="5">
+        <item value="0"/> <!-- CSFB_BLOCK_CONDITION_EPS_ONLY_ATTACH -->
+        <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
+        <item value="2"/> <!-- CSFB_BLOCK_CONDITION_IN_WIFI -->
+        <item value="3"/> <!-- CSFB_BLOCK_CONDITION_IN_ROAMING -->
+        <item value="4"/> <!-- CSFB_BLOCK_CONDITION_IN_HOME -->
+    </int-array>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
     <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
         <item value="10000"/>
