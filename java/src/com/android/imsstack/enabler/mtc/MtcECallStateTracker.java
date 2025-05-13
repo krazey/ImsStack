@@ -120,7 +120,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
         log("exitEmergencyCallbackMode - ExitedByNewCall=" + bExitedByNewCall);
         mEcbmExitedByNewCall = bExitedByNewCall;
 
-        mHandler.sendEmptyMessage(EVENT_EXIT_ECBM);
+        sendEmptyMessage(EVENT_EXIT_ECBM);
     }
 
     @Override
@@ -229,14 +229,14 @@ public class MtcECallStateTracker implements IECallStateTracker {
             setEcbmEntered(false);
 
             if (checkEcbmExitedDelayAndDisconnectEApn()) {
-                mHandler.sendEmptyMessageDelayed(EVENT_ECBM_EXITED, 1000);
+                sendEmptyMessageDelayed(EVENT_ECBM_EXITED, 1000);
             } else {
-                mHandler.sendEmptyMessage(EVENT_ECBM_EXITED);
+                sendEmptyMessage(EVENT_ECBM_EXITED);
             }
         }
         // Calls onEcbmExited() even the ECBM is not entered for preventing timing issue.
         else {
-            mHandler.sendEmptyMessage(EVENT_ECBM_EXITED);
+            sendEmptyMessage(EVENT_ECBM_EXITED);
         }
 
         setECallStarted(false);
@@ -265,7 +265,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
         setProceedingExitEmergency(false);
     }
-
 
     private void notifyEventForEcmState(boolean isEntered) {
         ISystem system = mContext.getSystem();
@@ -329,7 +328,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
                 if (reason == IUMtcService.ES_IDLE_REASON_WITH_ECM) {
                     setEcbmEntered(true);
                     sendStatus(EMERGENCY_CALL_STOP_WITH_ECB, 0);
-                    mHandler.sendEmptyMessage(EVENT_ECBM_ENTERED);
+                    sendEmptyMessage(EVENT_ECBM_ENTERED);
                 } else if (isECallStarted()) {
                     exitEcbm();
                 }
@@ -423,6 +422,14 @@ public class MtcECallStateTracker implements IECallStateTracker {
         ImsLog.i("[GII-MTC] " + s);
     }
 
+    private boolean sendEmptyMessage(int what) {
+        return mHandler != null ? mHandler.sendEmptyMessage(what) : false;
+    }
+
+    private boolean sendEmptyMessageDelayed(int what, long delayMillis) {
+        return mHandler != null ? mHandler.sendEmptyMessageDelayed(what, delayMillis) : false;
+    }
+
     @VisibleForTesting
     protected final class ECallStateHandler extends Handler {
 
@@ -499,8 +506,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
                 if (isECallState(ECALLSTATE_CREATED)) {
                     if (!isProceedingExitEmergency()) {
-                        mHandler.sendEmptyMessageDelayed(
-                                EVENT_EXIT_EMERGENCY_BY_CALL_DESTROYED, 1000);
+                        sendEmptyMessageDelayed(EVENT_EXIT_EMERGENCY_BY_CALL_DESTROYED, 1000);
                         setProceedingExitEmergency(true);
                     }
                 }
@@ -569,7 +575,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
                         if (!isRetryReason(callReasonInfo.mCode)) {
                             if (!isProceedingExitEmergency()) {
-                                mHandler.sendEmptyMessageDelayed(
+                                sendEmptyMessageDelayed(
                                         EVENT_EXIT_EMERGENCY_BY_CALL_TERMINATED, 1000);
                                 setProceedingExitEmergency(true);
                             }
@@ -591,7 +597,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
                     if (!ecbmSupported && (isECallState(ECALLSTATE_ESTABLISHED))) {
                         if (!isProceedingExitEmergency()) {
-                            mHandler.sendEmptyMessageDelayed(
+                            sendEmptyMessageDelayed(
                                     EVENT_EXIT_EMERGENCY_BY_CALL_TERMINATED, 1000);
                             setProceedingExitEmergency(true);
                         }
