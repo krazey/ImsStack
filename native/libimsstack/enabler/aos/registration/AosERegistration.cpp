@@ -682,6 +682,7 @@ PROTECTED VIRTUAL void AosERegistration::Registration_Terminated(IN IMS_SINT32 n
     }
     else
     {
+        ClearCbm();
         AosRegistration::Registration_Terminated(nReason);
     }
 }
@@ -702,6 +703,7 @@ PROTECTED VIRTUAL void AosERegistration::CallTracker_StateChanged(
 
         if (bCurrState)
         {
+            ClearCbm();
             ProcessReRegStart();
         }
     }
