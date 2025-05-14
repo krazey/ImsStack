@@ -727,7 +727,7 @@ PROTECTED VIRTUAL void AosConnector::ClearTimers()
 
 PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nDataState)
 {
-    A_IMS_TRACE_I(APPPROFILE, "AoSConnection_StateChanged :: state(%d)", nDataState, 0, 0);
+    A_IMS_TRACE_I(APPPROFILE, "AosConnection_StateChanged :: state(%d)", nDataState, 0, 0);
 
     if (nDataState == IAosConnection::STATE_ACTIVE)
     {

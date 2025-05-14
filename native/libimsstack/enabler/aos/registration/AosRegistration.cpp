@@ -391,6 +391,10 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             CloseUnsecureTcpSocket();
             break;
 
+        case CMD_UPDATE_STOP_RETRY_TIMER_WITH_DEFAULT:
+            UpdateStopRetryTimer(RETRY_DEFAULT_WAIT_TIME);
+            break;
+
         default:
             break;
     }
@@ -1297,6 +1301,21 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
                     nImsRegType, m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
     }
+}
+
+PROTECTED
+void AosRegistration::UpdateStopRetryTimer(IN IMS_UINT32 nRetryTime)
+{
+    if (m_nState != STATE_REGSTOP || m_piStopRetryTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    A_IMS_TRACE_D(REGID, "UpdateStopRetryTimer", 0, 0, 0);
+
+    ClearRetryCount(IMS_TRUE);
+
+    StartTimer(TIMER_STOP_RETRY, nRetryTime * 1000);
 }
 
 PROTECTED

@@ -165,6 +165,7 @@ protected:
     /// Set Detail State
     void UpdateDetailState(IN IMS_UINT32 nState);
 
+    void UpdateStopRetryTimer(IN IMS_UINT32 nRetryTime);
     void SetRetryTimeToProperty(IN IMS_UINT32 nSeconds);
 
     /// Log

@@ -2521,6 +2521,35 @@ TEST_F(AosApplicationTest,
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(AosApplicationTest, RequestUpdateStopRetryTimerWhenImsEstTimerIsExpired)
+{
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetImsCall(IMS_FALSE);
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_TRAFFIC_PRIORITY_BLOCK, _, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(AosProperty::AOS_FALSE), Return(0)));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+    ON_CALL(m_objMockIAosRegistration,
+            GetProperty(IAosRegistration::PROPERTY_REG_FAILURE_COUNT, _, _))
+            .WillByDefault(DoAll(SetArgReferee<1>(2), Return(0)));
+    ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::NR,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_UPDATE_STOP_RETRY_TIMER_WITH_DEFAULT, _));
+
+    m_pAosApplication->ProcessImsEstablishmentTimerExpired();
+}
+
 TEST_F(AosApplicationTest, RegTerminating)
 {
     m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);

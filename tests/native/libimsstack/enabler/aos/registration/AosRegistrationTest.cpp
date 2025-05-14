@@ -1629,6 +1629,18 @@ TEST_F(AosRegistrationTest, DoNotSetReasonToRegResp403WhenStatusCodeIsNot403)
     EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_403);
 }
 
+TEST_F(AosRegistrationTest, ClearRetryCountAndStartRetryTimerWhenRequestCmdWithUpdateStopRetryTimer)
+{
+    m_pAosRegistration->SetConsecutiveFailureCount(2);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 3000);
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_UPDATE_STOP_RETRY_TIMER_WITH_DEFAULT, 0);
+
+    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 0);
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
 TEST_F(AosRegistrationTest, DoNotSetRetryTimeToPropIfNotCdmalessConfigured)
 {
     EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(0);

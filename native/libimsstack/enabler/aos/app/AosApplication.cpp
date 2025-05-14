@@ -2581,6 +2581,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
     if (m_piRegistration->IsRegistered() || nFailureCount > 0)
     {
         A_IMS_TRACE_I(APPID, "ims est timer :: not to stop ims pdn - (%d)", nFailureCount, 0, 0);
+        if (GET_N_CONFIG(m_nSlotId)->IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry())
+        {
+            m_piRegistration->RequestCmd(
+                    IAosRegistration::CMD_UPDATE_STOP_RETRY_TIMER_WITH_DEFAULT);
+        }
         return;
     }
 
