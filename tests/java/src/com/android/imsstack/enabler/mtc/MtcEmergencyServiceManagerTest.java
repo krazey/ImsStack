@@ -28,14 +28,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Intent;
 import android.os.Looper;
 import android.os.Parcel;
 import android.telephony.CarrierConfigManager;
+import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
@@ -76,6 +79,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     public void setUp() throws Exception {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
+        AppContext.init(mContext);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class,
                 mMockTelephonyInterface, SLOT_ID);
@@ -250,6 +254,20 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         processAllMessages();
         assertEquals(1, mNativeObject);
         assertEquals(IUMtcService.STOP_EMERGENCY_SERVICE, mCommand);
+    }
+
+    @Test
+    public void testGetNetworkCountryIso() {
+        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("");
+        assertEquals(mTestMtcEmergencyServiceManager.getNetworkCountryIso(), "");
+
+        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("kr");
+        assertEquals(mTestMtcEmergencyServiceManager.getNetworkCountryIso(), "kr");
+
+        Intent intent = new Intent(TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED)
+                .putExtra(TelephonyManager.EXTRA_NETWORK_COUNTRY, "us");
+        mTestMtcEmergencyServiceManager.getBroadcastReceiver().onReceive(mContext, intent);
+        assertEquals(mTestMtcEmergencyServiceManager.getNetworkCountryIso(), "us");
     }
 
     private void verifyOpenEmergencyService(int nativeObject, int serviceType) {

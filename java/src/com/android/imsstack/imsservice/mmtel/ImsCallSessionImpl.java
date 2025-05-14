@@ -54,6 +54,7 @@ import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
+import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
@@ -400,10 +401,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if (mCall.isEmergencyCall()) {
             ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
+            MtcApp mtcApp = callApp.getCallManager().getMtcApp();
             @EmergencyCallRouting
             int emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                    mCallContext, ImsCallUtils.getEmergencyRoutingFromCallProfile(profile), callee);
-            callApp.getCallManager().getMtcApp().openEmergencyService(mCall, emergencyRouting);
+                    mCallContext, ImsCallUtils.getEmergencyRoutingFromCallProfile(profile), callee,
+                    mtcApp.getMtcEmergencyServiceManager().getNetworkCountryIso());
+            mtcApp.openEmergencyService(mCall, emergencyRouting);
         }
 
         int state = getState();
@@ -493,7 +496,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 profile.getCallType(), profile.getMediaProfile().isRttCall()),
                 MtcCallUtils.createUsersInfo(participants),
                 ImsCallMediaUtils.createMediaInfoFromMediaProfile(profile.getMediaProfile()),
-                ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile, null));
+                ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile, null, ""));
 
         setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
@@ -2189,10 +2192,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 || (state == ImsCallSessionImplBase.State.INITIATED)) {
             setState(ImsCallSessionImplBase.State.NEGOTIATING);
 
+            ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
             mCall.start(
                     ImsCallUtils.getCallTypeFromProfile(profile.getCallType(), isRttOn),
                     callee, actualCallee, mi,
-                    ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile, callee));
+                    ImsCallUtils.createSuppInfoFromCallProfile(mCallContext, profile, callee,
+                            callApp.getCallManager().getMtcApp().getMtcEmergencyServiceManager()
+                            .getNetworkCountryIso()));
 
             notifyCallEventForVideoCallSession(IVideoCallSession.EVENT_CALL_INITIATING);
         } else if (state == ImsCallSessionImplBase.State.TERMINATED) {

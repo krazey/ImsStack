@@ -58,7 +58,9 @@ import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.MediaInfo;
+import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
+import com.android.imsstack.enabler.mtc.MtcEmergencyServiceManager;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
@@ -88,7 +90,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     private ImsCallContext mMockCallContext;
     private CallTracker mMockCallTracker;
     private IServiceStateTracker mMockServiceStateTracker;
+    private MtcApp mMockMtcApp;
     private MtcCall mMockMtcCall;
+    private MtcEmergencyServiceManager mMockMtcEmergencyServiceManager;
     private ImsCallProfile mImsCallProfile;
     private TestImsCallSessionImpl mImsCallSession;
     private ImsCallSessionListener mMockImsCallSessionListener;
@@ -119,7 +123,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mMockImsCallSessionCallback = Mockito.mock(ImsCallSessionCallback.class);
         mMockImsCallSessionListener = Mockito.mock(ImsCallSessionListener.class);
         mMockMediaInfo = Mockito.mock(MediaInfo.class);
+        mMockMtcApp = Mockito.mock(MtcApp.class);
         mMockMtcCall = Mockito.mock(MtcCall.class);
+        mMockMtcEmergencyServiceManager = Mockito.mock(MtcEmergencyServiceManager.class);
         mMediaInfoCaptor = ArgumentCaptor.forClass(MediaInfo.class);
         mCallId = "1";
         mImsCallProfile = new ImsCallProfile();
@@ -218,6 +224,12 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
     @Test
     public void testStart() {
+        when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
+        when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
+        when(mMockImsCallManager.getMtcApp()).thenReturn(mMockMtcApp);
+        when(mMockMtcApp.getMtcEmergencyServiceManager())
+                .thenReturn(mMockMtcEmergencyServiceManager);
+
         //verify start failed.
         mImsCallSession = new TestImsCallSessionImpl(mMockCallContext, mMockCallTracker, null,
                 mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
@@ -275,6 +287,11 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     public void testStartEmergencyCallAndEmergencyServiceOpened() {
         final ArgumentCaptor<IServiceStateTracker.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(IServiceStateTracker.Listener.class);
+        when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
+        when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
+        when(mMockImsCallManager.getMtcApp()).thenReturn(mMockMtcApp);
+        when(mMockMtcApp.getMtcEmergencyServiceManager())
+                .thenReturn(mMockMtcEmergencyServiceManager);
         when(mMockServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY))
                 .thenReturn(false);
 

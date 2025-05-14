@@ -313,6 +313,11 @@ public class MtcAppTest extends ImsStackTest {
     }
 
     @Test
+    public void testGetMtcEmergencyServiceManager() {
+        assertEquals(mEmergencyServiceManager, mTestMtcApp.getMtcEmergencyServiceManager());
+    }
+
+    @Test
     public void testOpenEmergencyService() {
         mTestMtcApp.openEmergencyService(
                 mMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);

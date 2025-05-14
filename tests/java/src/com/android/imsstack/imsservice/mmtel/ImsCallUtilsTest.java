@@ -208,7 +208,8 @@ public class ImsCallUtilsTest {
         */
         profile.setEmergencyUrns(urns);
         profile.setEmergencyServiceCategories(1);
-        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999");
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, "999", "");
         assertEquals(1, suppInfo.getServiceSize());
         assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
         assertEquals(SOS_SERVICE_URN_POLICE,
@@ -216,7 +217,7 @@ public class ImsCallUtilsTest {
 
         //Case 2:- urns is empty and ESCV is UNSPECIFIED
         profile.setEmergencyServiceCategories(0);
-        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999");
+        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999", "");
         assertEquals(1, suppInfo.getServiceSize());
         assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
         assertEquals(SOS_SERVICE_URN_GENERIC,
@@ -225,7 +226,7 @@ public class ImsCallUtilsTest {
         //Case 3:- urns is not empty
         urns.add(SOS_SERVICE_URN_AMBULANCE);
         profile.setEmergencyUrns(urns);
-        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999");
+        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999", "");
         assertEquals(1, suppInfo.getServiceSize());
         assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
         assertEquals(SOS_SERVICE_URN_AMBULANCE,
@@ -235,7 +236,7 @@ public class ImsCallUtilsTest {
         urns.clear();
         profile.setEmergencyUrns(urns);
         profile.setEmergencyCallRouting(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL);
-        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "110");
+        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "110", "");
         assertEquals(0, suppInfo.getServiceSize());
         assertNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
 
@@ -247,7 +248,7 @@ public class ImsCallUtilsTest {
                 ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED);
         profile.setCallExtra(ImsCallProfile.EXTRA_CNA, "UNKNOWN");
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CALL_PULL, true);
-        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999");
+        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile, "999", "");
         assertEquals(3, suppInfo.getServiceSize());
         assertNotNull(suppInfo.getService(SuppInfo.TYPE_CALLERID));
         assertNotNull(suppInfo.getService(SuppInfo.TYPE_CNAP));
@@ -256,7 +257,6 @@ public class ImsCallUtilsTest {
 
     @Test
     public void testCreateSuppInfoFromCallProfileForDynamicRouting() {
-        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("us");
         when(mMockTelephonyInterface.getNetworkMnc()).thenReturn("55");
 
         String[] dynamicNumbers = {"us,,555", "us,66,666", "us,,777"};
@@ -284,49 +284,47 @@ public class ImsCallUtilsTest {
 
         // Non dynamic routing number by routing
         @EmergencyCallRouting int emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "555");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, "555", "us");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
 
         // Non dynamic routing number by source
         emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "777");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "777", "us");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
 
         // Non dynamic routing number by country
-        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("kr");
         emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555", "kr");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
 
         // Non dynamic routing number by number
-        when(mMockTelephonyInterface.getNetworkCountryIso()).thenReturn("us");
         emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "911");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "911", "us");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
 
         // Non dynamic routing number by mnc
         emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "666");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "666", "us");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
 
         // Dynamic routing number without IMS REG
         when(mMockServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP))
                 .thenReturn(false);
         emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555", "us");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
 
         // Dynamic routing number with IMS REG
         when(mMockServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP))
                 .thenReturn(true);
         emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "555", "us");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL);
 
         // Dynamic routing number with IMS REG
         when(mMockTelephonyInterface.getNetworkMnc()).thenReturn("66");
         emergencyRouting = ImsCallUtils.maybeUpdateEmergencyRouting(
-                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "666");
+                mContext, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN, "666", "us");
         assertEquals(emergencyRouting, EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL);
     }
 
