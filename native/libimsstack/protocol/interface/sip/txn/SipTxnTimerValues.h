@@ -54,6 +54,7 @@ private:
     SIP_BOOL IsTimerSet(IN SIP_UINT32 nTimerOptions, IN SIP_UINT32 nType);
     SIP_VOID PrintSIPTxnTimerValues() const;
 
+public:
     enum
     {
         TV_T1 = 0x0001,

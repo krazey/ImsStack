@@ -4278,55 +4278,76 @@ GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnCo
 
     if (pTv->IsSet(SipTimerValues::TIMER_T1))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_T1;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T1, pTv->GetValue(SipTimerValues::TIMER_T1));
+        IMS_SINT32 nT1 = pTv->GetValue(SipTimerValues::TIMER_T1);
+        nTxnTimerOptions |= SipTxnTimerValues::TV_T1;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T1, nT1);
+
+        // Timer-A, Timer-E, Timer-G is based on T1.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_A;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_A, nT1);
+
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_E;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_E, nT1);
+
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_G;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_G, nT1);
+
+        // Timer-M is set based on T1 due to no configuration definition.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_M;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_M, nT1 * 64);
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_T2))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_T2;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T2, pTv->GetValue(SipTimerValues::TIMER_T2));
+        IMS_SINT32 nT2 = pTv->GetValue(SipTimerValues::TIMER_T2);
+        nTxnTimerOptions |= SipTxnTimerValues::TV_T2;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T2, nT2);
+
+        // Actually, T4 is used for Timer-I/Timer-K, but those are already set based on T4.
+        // Even if T4 value is not actually used, it's set to the default value of T4 based on T2.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_T4;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T4, nT2 + 1000);
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_B))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_B;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_B;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_B, pTv->GetValue(SipTimerValues::TIMER_B));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_D))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_D;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_D;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_D, pTv->GetValue(SipTimerValues::TIMER_D));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_F))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_F;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_F;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_F, pTv->GetValue(SipTimerValues::TIMER_F));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_H))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_H;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_H;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_H, pTv->GetValue(SipTimerValues::TIMER_H));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_I))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_I;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_I;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_I, pTv->GetValue(SipTimerValues::TIMER_I));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_J))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_J;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_J;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_J, pTv->GetValue(SipTimerValues::TIMER_J));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_K))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_K;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_K;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_K, pTv->GetValue(SipTimerValues::TIMER_K));
     }
 

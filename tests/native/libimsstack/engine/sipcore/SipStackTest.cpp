@@ -57,4 +57,51 @@ TEST_F(SipStackTest, DisplayBadHeaders)
     pSipMsg->SipDelete();
 }
 
+TEST_F(SipStackTest, SetTimerValues)
+{
+    SipTimerValues objTv;
+    IMS_UINT32 nT1 = 3000;
+    IMS_UINT32 nT2 = 16000;
+    IMS_UINT32 nT4 = nT2 + 1000;
+    IMS_UINT32 nTB = 32000;
+    IMS_UINT32 nTD = 64000;
+    IMS_UINT32 nTF = 8000;
+    IMS_UINT32 nTH = 192000;
+    IMS_UINT32 nTI = 64000;
+    IMS_UINT32 nTJ = 64000;
+    IMS_UINT32 nTK = 32000;
+
+    objTv.SetValue(SipTimerValues::TIMER_T1, nT1);
+    objTv.SetValue(SipTimerValues::TIMER_T2, nT2);
+    objTv.SetValue(SipTimerValues::TIMER_B, nTB);
+    objTv.SetValue(SipTimerValues::TIMER_D, nTD);
+    objTv.SetValue(SipTimerValues::TIMER_F, nTF);
+    objTv.SetValue(SipTimerValues::TIMER_H, nTH);
+    objTv.SetValue(SipTimerValues::TIMER_I, nTI);
+    objTv.SetValue(SipTimerValues::TIMER_J, nTJ);
+    objTv.SetValue(SipTimerValues::TIMER_K, nTK);
+
+    SipTxnContext objTxnContext;
+    SipTxnTimerValues* pTxnTimerValues = objTxnContext.m_pSipTimerContext->m_pTxnSipTxnTimers;
+    SipTxnContext* pTxnContext = &objTxnContext;
+    SipStack::SetTimerValues(&objTv, pTxnContext);
+
+    EXPECT_EQ(nT1, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_T1));
+    EXPECT_EQ(nT1, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_A));
+    EXPECT_EQ(nT1, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_E));
+    EXPECT_EQ(nT1, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_G));
+    EXPECT_EQ(nT1 * 64, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_M));
+
+    EXPECT_EQ(nT2, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_T2));
+    EXPECT_EQ(nT2 + 1000, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_T4));
+
+    EXPECT_EQ(nTB, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_B));
+    EXPECT_EQ(nTD, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_D));
+    EXPECT_EQ(nTF, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_F));
+    EXPECT_EQ(nTH, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_H));
+    EXPECT_EQ(nTI, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_I));
+    EXPECT_EQ(nTJ, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_J));
+    EXPECT_EQ(nTK, pTxnTimerValues->GetTimerValue(SipTxn::TIMER_K));
+}
+
 }  // namespace android

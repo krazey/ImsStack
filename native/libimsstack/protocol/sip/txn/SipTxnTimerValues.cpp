@@ -314,11 +314,11 @@ SIP_VOID SipTxnTimerValues::PrintSIPTxnTimerValues() const
 {
     SIP_CHAR szTimerLog[SIP_TRACE_MAX_SIZE] = {SIP_ZERO};
     SIP_CHAR const* pTimerVal =
-            "(T1|T2|T4|A|B|D|E|F|G|H|I|J|K|M)=%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d";
+            "(T1|T2|A|B|D|E|F|G|H|I|J|K|M)=%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d";
 
-    SipPf_Sprintf(szTimerLog, pTimerVal, m_nT1Value, m_nT2Value, m_nT4Value, m_nTimerA_Value,
-            m_nTimerB_Value, m_nTimerD_Value, m_nTimerE_Value, m_nTimerF_Value, m_nTimerG_Value,
-            m_nTimerH_Value, m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value, m_nTimerM_Value);
+    SipPf_Sprintf(szTimerLog, pTimerVal, m_nT1Value, m_nT2Value, m_nTimerA_Value, m_nTimerB_Value,
+            m_nTimerD_Value, m_nTimerE_Value, m_nTimerF_Value, m_nTimerG_Value, m_nTimerH_Value,
+            m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value, m_nTimerM_Value);
 
     SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER, "SIPTimer%s", szTimerLog, SIP_ZERO);
 }
