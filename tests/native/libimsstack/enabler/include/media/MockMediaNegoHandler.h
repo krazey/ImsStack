@@ -27,15 +27,15 @@
 class MockMediaNegoHandler : public MediaNegoHandler
 {
 public:
-    MockMediaNegoHandler(IMS_SINT32 nSlotId, std::shared_ptr<MediaEnvironment> pEnvironment) :
-            MediaNegoHandler(nSlotId, pEnvironment)
+    MockMediaNegoHandler(IMS_SINT32 nSlotId, std::shared_ptr<MediaEnvironment> pEnvironment,
+            std::shared_ptr<IMediaNegoFactory> pFactory) :
+            MediaNegoHandler(nSlotId, pEnvironment, pFactory)
     {
     }
 
     virtual ~MockMediaNegoHandler() = default;
 
-    MOCK_METHOD(
-            std::shared_ptr<MediaNego>, CreateMediaNego, (IMS_UINTP nExistingNegoId), (override));
+    MOCK_METHOD(IMS_UINTP, CreateMediaNego, (IMS_UINTP nExistingNegoId), (override));
     MOCK_METHOD(std::shared_ptr<MediaNego>, FindMediaNego, (IMS_UINTP nNegoId), (override));
     MOCK_METHOD(IMS_BOOL, DeleteMediaNego, (IMS_UINTP nNegoId), (override));
     MOCK_METHOD(void, ClearAllMediaNego, (), (override));
