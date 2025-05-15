@@ -36,10 +36,10 @@ public:
         enum
         {
             DEFAULT_MODESETLIST = 0,
-            DEFAULT_MODECHANGE_CAPABILITY = 1,
+            DEFAULT_MODECHANGE_CAPABILITY = 2,
             DEFAULT_MODECHANGE_PERIOD = 1,
             DEFAULT_MODECHANGE_NEIGHBOR = 0,
-            DEFAULT_MAXRED = -1,
+            DEFAULT_MAXRED = 0,
             DEFAULT_DTX = 1,
         };
 

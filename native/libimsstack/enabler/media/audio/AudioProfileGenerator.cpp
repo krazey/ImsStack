@@ -122,35 +122,38 @@ PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN CodecAudioConfig* pCo
     if (pCodecConfig->GetModeChangeCapability() != NOT_PRESENT)
     {
         pFmtp->SetModeChangeCapability(pCodecConfig->GetModeChangeCapability());
-        pFmtp->SetShowModeChangeCapability(IMS_TRUE);
     }
     else
     {
         pFmtp->SetModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
-        pFmtp->SetShowModeChangeCapability(IMS_FALSE);
     }
+
+    // TODO(b/414484057) : need to add a new asset to handle to include this attribute to SDP
+    pFmtp->SetShowModeChangeCapability(IMS_TRUE);
 
     if (pCodecConfig->GetModeChangePeriod() != NOT_PRESENT)
     {
         pFmtp->SetModeChangePeriod(pCodecConfig->GetModeChangePeriod());
-        pFmtp->SetShowModeChangePeriod(IMS_TRUE);
     }
     else
     {
         pFmtp->SetModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
-        pFmtp->SetShowModeChangePeriod(IMS_FALSE);
     }
+
+    // TODO(b/414484057) : need to add a new asset to handle to include this attribute to SDP
+    pFmtp->SetShowModeChangePeriod(IMS_FALSE);
 
     if (pCodecConfig->GetModeChangeNeighbor() != NOT_PRESENT)
     {
         pFmtp->SetModeChangeNeighbor(pCodecConfig->GetModeChangeNeighbor());
-        pFmtp->SetShowModeChangeNeighbor(IMS_TRUE);
     }
     else
     {
         pFmtp->SetModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
-        pFmtp->SetShowModeChangeNeighbor(IMS_FALSE);
     }
+
+    // TODO(b/414484057) : need to add a new asset to handle to include this attribute to SDP
+    pFmtp->SetShowModeChangeNeighbor(IMS_FALSE);
 
     if (pAudioConfig->GetMaxRed() != NOT_PRESENT)
     {

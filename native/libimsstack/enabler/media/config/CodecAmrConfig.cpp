@@ -101,11 +101,14 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
     }
 
     m_nModeChangeCapability = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1);
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+            CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
     m_nModeChangePeriod = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1);
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+            CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
     m_nModeChangeNeighbor = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1);
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT,
+            CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
 
     if (m_nCodec == ImsCodec::AUDIO_AMR && m_nSamplingRate == 16000)
     {
