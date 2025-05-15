@@ -28,7 +28,7 @@
     <int name="ims.rereg_retry_305_policy_int" value="0"/>
     <int name="ims.sub_retry_503_policy_int" value="0"/>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <pbundle name="ims.extra_reg_err_bundle">
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
         <boolean name="ims.extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="true"/>
         <int name="ims.extra_reg_err_final_type_int" value="5"/>
         <int name="ims.extra_reg_err_max_cnt_int" value="5"/>
@@ -46,15 +46,15 @@
             <item value="503"/>
             <item value="504"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <pbundle name="ims.reg_retry_interval_bundle">
+    <pbundle_as_map name="ims.reg_retry_interval_bundle">
         <int-array name="ims.reg_retry_interval_sec_int_array" num="1">
             <item value="10"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="ims.sub_err_code_for_init_reg_bundle">
+    <pbundle_as_map name="ims.sub_err_code_for_init_reg_bundle">
         <int name="ims.sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
         <int-array name="ims.sub_err_code_for_init_reg_int_array" num="7">
             <item value="0"/>
@@ -65,7 +65,7 @@
             <item value="503"/>
             <item value="504"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="true"/>
     <boolean name="imsemergency.support_anonymous_ecall_action_bool" value="true"/>
     <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="true"/>

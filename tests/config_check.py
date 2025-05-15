@@ -137,7 +137,7 @@ def check_bundle(element):
         'long-array': check_long_array,
         'string-array': check_string_array,
         'double-array': check_double_array,
-        'pbundle': lambda n, e: check_bundle(e),
+        'pbundle_as_map': lambda n, e: check_bundle(e),
     }.get(child.tag)
     if check_fn:
       check_fn(name, child)

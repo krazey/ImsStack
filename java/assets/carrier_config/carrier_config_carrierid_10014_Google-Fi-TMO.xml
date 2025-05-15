@@ -54,7 +54,7 @@
         <item value="422"/>
     </int-array>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <pbundle name="ims.extra_reg_err_bundle">
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
         <int name="ims.extra_reg_err_final_type_int" value="4"/>
         <int name="ims.extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int" value="1"/>
         <int name="ims.extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int" value="2"/>
@@ -67,23 +67,23 @@
             <item value="503"/>
             <item value="504"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="ims.notify_terminated_for_init_reg_bundle">
+    <pbundle_as_map name="ims.notify_terminated_for_init_reg_bundle">
         <int-array name="ims.notify_terminated_for_init_reg_used_event_int_array" num="4">
             <item value="1"/>
             <item value="2"/>
             <item value="3"/>
             <item value="5"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="ims.sub_err_code_for_init_reg_bundle">
+    <pbundle_as_map name="ims.sub_err_code_for_init_reg_bundle">
         <int name="ims.sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
         <int-array name="ims.sub_err_code_for_init_reg_int_array" num="1">
             <item value="0"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <boolean name="imsemergency.keep_epdn_upon_pcscf_unavailable_bool" value="true"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
@@ -98,14 +98,14 @@
         <item value="403"/>
     </int-array>
     <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
-    <pbundle name="imswfc.wfc_err_message_bundle">
+    <pbundle_as_map name="imswfc.wfc_err_message_bundle">
         <string name="imswfc.wfc_err_reg_403_string">REG90 - Unable to Connect</string>
         <string name="imswfc.wfc_err_reg_500_string">REG91 - Unable to Connect</string>
         <string name="imswfc.wfc_err_not_supported_country_string">REG92 - Wi-Fi Calling isn't supported in this country</string>
         <string name="imswfc.wfc_err_sub_403_string">REG09 - Missing 911 Address</string>
         <string name="imswfc.wfc_err_notify_terminated_string">REG09 - Missing 911 Address</string>
         <string name="imswfc.wfc_err_other_failures_string">REG99 - Unable to Connect</string>
-    </pbundle>
+    </pbundle_as_map>
 
     <!-- Uce -->
     <int name="imsuce.publish_refresh_ratio_int" value="85"/>
@@ -259,8 +259,8 @@
     <boolean name="imsemergency.release_emergency_pdn_on_failure_after_100_bool" value="true"/>
 
     <!-- Media -->
-    <pbundle name="imsvt.hevc_payload_description_bundle">
-        <pbundle name="115">
+    <pbundle_as_map name="imsvt.hevc_payload_description_bundle">
+        <pbundle_as_map name="115">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="30"/>
             <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
@@ -270,8 +270,8 @@
             <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
             <int name="imsvt.hevc_profile_int" value="1"/>
             <int name="imsvt.hevc_level_int" value="93"/>
-        </pbundle>
-    </pbundle>
+        </pbundle_as_map>
+    </pbundle_as_map>
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>

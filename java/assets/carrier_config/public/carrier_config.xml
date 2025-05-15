@@ -17,7 +17,7 @@
 <carrier_config>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
     <int name="imsemergency.refresh_geolocation_timeout_millis_int" value="5000"/>
-    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+    <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
             <item value="127"/>
         </int-array>
@@ -35,35 +35,35 @@
         <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
             <item value="97"/>
         </int-array>
-    </pbundle>
-    <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="127">
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
                 <item value="3"/>
                 <item value="6"/>
             </int-array>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle name="100">
+        </pbundle_as_map>
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
+        <pbundle_as_map name="100">
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="105">
+        </pbundle_as_map>
+        <pbundle_as_map name="105">
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-    </pbundle>
-    <pbundle name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle name="98">
+        </pbundle_as_map>
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
+        <pbundle_as_map name="98">
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-        <pbundle name="103">
+        </pbundle_as_map>
+        <pbundle_as_map name="103">
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle>
-    </pbundle>
+        </pbundle_as_map>
+    </pbundle_as_map>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="41"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="600"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2000"/>
@@ -74,10 +74,10 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
+    <pbundle_as_map name="imsrtt.text_codec_capability_payload_types_bundle">
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>
-    </pbundle>
+    </pbundle_as_map>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1300"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1300"/>
 </carrier_config>

@@ -26,21 +26,21 @@
     <int name="ims.reg_actual_wait_time_policy_int" value="2"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <pbundle name="ims.extra_reg_err_bundle">
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
         <int-array name="ims.extra_reg_err_code_int_array" num="2">
             <item value="0"/>
             <item value="2"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="ims.sub_err_code_for_init_reg_bundle">
+    <pbundle_as_map name="ims.sub_err_code_for_init_reg_bundle">
         <int name="ims.sub_err_code_for_init_reg_with_retry_max_cnt_int" value="2"/>
         <int-array name="ims.sub_err_code_for_init_reg_int_array" num="3">
             <item value="500"/>
             <item value="503"/>
             <item value="600"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="true"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>

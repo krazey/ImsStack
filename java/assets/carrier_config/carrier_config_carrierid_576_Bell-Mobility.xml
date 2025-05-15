@@ -33,9 +33,9 @@
     <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
-    <pbundle name="ims.extra_reg_err_bundle">
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
         <int name="ims.extra_reg_err_final_type_int" value="2"/>
-    </pbundle>
+    </pbundle_as_map>
 
     <!-- MTC -->
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="18">

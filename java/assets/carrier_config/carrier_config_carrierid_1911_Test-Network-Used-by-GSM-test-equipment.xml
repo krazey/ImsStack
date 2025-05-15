@@ -32,8 +32,8 @@
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
     <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
     <boolean name="imsvoice.media_session_level_bandwidth_bool" value="true"/>
-    <pbundle name="imsvt.hevc_payload_description_bundle">
-        <pbundle name="125">
+    <pbundle_as_map name="imsvt.hevc_payload_description_bundle">
+        <pbundle_as_map name="125">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="30"/>
             <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
@@ -43,8 +43,8 @@
             <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
             <int name="imsvt.hevc_profile_int" value="1"/>
             <int name="imsvt.hevc_level_int" value="93"/>
-        </pbundle>
-    </pbundle>
+        </pbundle_as_map>
+    </pbundle_as_map>
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
     <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>

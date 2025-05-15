@@ -71,16 +71,16 @@
         <item value="0"/>
     </int-array>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <pbundle name="ims.extra_reg_err_bundle">
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
         <boolean name="ims.extra_reg_err_code_as_failure_in_roaming_for_update_bool" value="true"/>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
-    <pbundle name="ims.sub_err_code_for_terminated_bundle">
+    <pbundle_as_map name="ims.sub_err_code_for_terminated_bundle">
         <int name="ims.sub_err_code_for_terminated_with_retry_max_cnt_int" value="1"/>
         <int-array name="ims.sub_err_code_for_terminated_int_array" num="1">
             <item value="489"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="true"/>
     <int name="imsemergency.epdn_preferred_iptype_int" value="0"/>

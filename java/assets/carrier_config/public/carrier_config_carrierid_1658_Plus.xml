@@ -15,14 +15,14 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="127">
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
             <int name="imsvoice.codec_attribute_cmr_int" value="2"/>
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
                 <item value="0"/>
                 <item value="6"/>
             </int-array>
             <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-        </pbundle>
-    </pbundle>
+        </pbundle_as_map>
+    </pbundle_as_map>
 </carrier_config>

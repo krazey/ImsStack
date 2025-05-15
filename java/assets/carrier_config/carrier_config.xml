@@ -420,7 +420,7 @@
     <int-array name="ims.unavailable_features_in_limited_reg_int_array" num="0">
     </int-array>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <pbundle name="ims.extra_reg_err_bundle">
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
         <boolean name="ims.extra_reg_err_code_as_failure_in_roaming_for_update_bool" value="false"/>
         <boolean name="ims.extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="false"/>
         <int name="ims.extra_reg_err_final_type_int" value="0"/>
@@ -434,9 +434,9 @@
         </int-array>
         <int-array name="ims.extra_reg_err_wait_time_sec_int_array" num="0">
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="ims.notify_terminated_for_init_reg_bundle">
+    <pbundle_as_map name="ims.notify_terminated_for_init_reg_bundle">
         <int name="ims.notify_terminated_for_init_reg_with_wait_time_int" value="0"/>
         <int-array name="ims.notify_terminated_for_init_reg_used_event_int_array" num="3">
             <item value="1"/>
@@ -445,42 +445,42 @@
         </int-array>
         <int-array name="ims.notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="0">
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE -->
-    <pbundle name="ims.pcscf_recovery_conditions_bundle">
+    <pbundle_as_map name="ims.pcscf_recovery_conditions_bundle">
         <int name="ims.pcscf_recovery_max_cnt_int" value="3"/>
         <int name="ims.pcscf_recovery_wait_time_sec_int" value="20"/>
         <int name="ims.pcscf_recovery_base_time_sec_int" value="20"/>
         <int name="ims.pcscf_recovery_max_time_sec_int" value="1800"/>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
-    <pbundle name="ims.reg_err_code_with_ra_time_bundle">
+    <pbundle_as_map name="ims.reg_err_code_with_ra_time_bundle">
         <boolean name="ims.reg_err_code_with_ra_time_only_defined_bool" value="false"/>
         <int-array name="ims.reg_err_code_with_ra_time_int_array" num="0">
         </int-array>
         <int-array name="ims.reg_err_code_with_ra_time_for_update_int_array" num="0">
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <pbundle name="ims.reg_retry_interval_bundle">
+    <pbundle_as_map name="ims.reg_retry_interval_bundle">
         <boolean name="ims.reg_retry_interval_used_for_sub_bool" value="true"/>
         <int-array name="ims.reg_retry_interval_random_upper_value_sec_int_array" num="0">
         </int-array>
         <int-array name="ims.reg_retry_interval_sec_int_array" num="0">
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="ims.sub_err_code_for_init_reg_bundle">
+    <pbundle_as_map name="ims.sub_err_code_for_init_reg_bundle">
         <int name="ims.sub_err_code_for_init_reg_with_retry_max_cnt_int" value="0"/>
         <int-array name="ims.sub_err_code_for_init_reg_int_array" num="0">
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
-    <pbundle name="ims.sub_err_code_for_terminated_bundle">
+    <pbundle_as_map name="ims.sub_err_code_for_terminated_bundle">
         <int name="ims.sub_err_code_for_terminated_with_retry_max_cnt_int" value="0"/>
         <int-array name="ims.sub_err_code_for_terminated_int_array" num="0">
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <boolean name="imsemergency.ecall_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
     <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="false"/>
     <boolean name="imsemergency.ereg_set_tcp_only_in_roaming_bool" value="false"/>
@@ -517,14 +517,14 @@
     <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="0">
     </int-array>
     <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
-    <pbundle name="imswfc.wfc_err_message_bundle">
+    <pbundle_as_map name="imswfc.wfc_err_message_bundle">
         <string name="imswfc.wfc_err_reg_403_string"></string>
         <string name="imswfc.wfc_err_reg_500_string"></string>
         <string name="imswfc.wfc_err_not_supported_country_string"></string>
         <string name="imswfc.wfc_err_sub_403_string"></string>
         <string name="imswfc.wfc_err_notify_terminated_string"></string>
         <string name="imswfc.wfc_err_other_failures_string"></string>
-    </pbundle>
+    </pbundle_as_map>
 
     <!-- Mtc -->
     <boolean name="imsvoice.check_conference_event_package_version_bool" value="true"/>

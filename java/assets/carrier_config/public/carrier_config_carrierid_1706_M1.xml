@@ -16,7 +16,7 @@
 -->
 <carrier_config>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
-    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+    <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
             <item value="98"/>
             <item value="103"/>
@@ -31,5 +31,5 @@
         <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
             <item value="96"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
 </carrier_config>

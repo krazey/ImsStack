@@ -21,13 +21,13 @@
     <int name="imsss.ut_transport_type_int" value="1"/>
     <int name="imsss.ut_as_server_port_int" value="7077"/>
     <boolean name="imssms.sms_csfb_retry_on_failure_bool" value="false"/>
-    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
+    <pbundle_as_map name="imsvt.video_codec_capability_payload_types_bundle">
         <int-array name="imsvt.h264_payload_type_int_array" num="1">
             <item value="115"/>
         </int-array>
-    </pbundle>
-    <pbundle name="imsvt.h264_payload_description_bundle">
-        <pbundle name="115">
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvt.h264_payload_description_bundle">
+        <pbundle_as_map name="115">
             <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
             <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
@@ -35,8 +35,8 @@
                 <item value="240"/>
                 <item value="320"/>
             </int-array>
-        </pbundle>
-    </pbundle>
+        </pbundle_as_map>
+    </pbundle_as_map>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>

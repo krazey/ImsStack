@@ -76,7 +76,7 @@
         <item value="6"/>
     </int-array>
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <pbundle name="ims.extra_reg_err_bundle">
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
         <int name="ims.extra_reg_err_final_type_int" value="2"/>
         <int name="ims.extra_reg_err_policy_int" value="2"/>
         <int-array name="ims.extra_reg_err_code_for_update_int_array" num="2">
@@ -92,9 +92,9 @@
         <int-array name="ims.extra_reg_err_wait_time_sec_int_array" num="1">
             <item value="30"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
-    <pbundle name="ims.notify_terminated_for_init_reg_bundle">
+    <pbundle_as_map name="ims.notify_terminated_for_init_reg_bundle">
         <int name="ims.notify_terminated_for_init_reg_with_wait_time_int" value="60"/>
         <int-array name="ims.notify_terminated_for_init_reg_used_event_int_array" num="4">
             <item value="1"/>
@@ -106,9 +106,9 @@
             <item value="2"/>
             <item value="5"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
-    <pbundle name="ims.reg_err_code_with_ra_time_bundle">
+    <pbundle_as_map name="ims.reg_err_code_with_ra_time_bundle">
         <boolean name="ims.reg_err_code_with_ra_time_only_defined_bool" value="true"/>
         <int-array name="ims.reg_err_code_with_ra_time_int_array" num="5">
             <item value="480"/>
@@ -124,9 +124,9 @@
             <item value="503"/>
             <item value="600"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <pbundle name="ims.reg_retry_interval_bundle">
+    <pbundle_as_map name="ims.reg_retry_interval_bundle">
         <int-array name="ims.reg_retry_interval_random_upper_value_sec_int_array" num="6">
             <item value="0"/>
             <item value="0"/>
@@ -143,9 +143,9 @@
             <item value="480"/>
             <item value="900"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
-    <pbundle name="ims.sub_err_code_for_terminated_bundle">
+    <pbundle_as_map name="ims.sub_err_code_for_terminated_bundle">
         <int name="ims.sub_err_code_for_terminated_with_retry_max_cnt_int" value="2"/>
         <int-array name="ims.sub_err_code_for_terminated_int_array" num="4">
             <item value="400"/>
@@ -153,7 +153,7 @@
             <item value="404"/>
             <item value="420"/>
         </int-array>
-    </pbundle>
+    </pbundle_as_map>
     <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="true"/>
     <boolean name="imsemergency.keep_ereg_retry_on_wlan_bool" value="true"/>
     <boolean name="imsemergency.release_epdn_of_unavailable_network_bool" value="false"/>
@@ -359,8 +359,8 @@
 
     <!-- Media -->
     <boolean name="imsvoice.media_anbr_capability_in_modem_bool" value="true"/>
-    <pbundle name="imsvt.hevc_payload_description_bundle">
-        <pbundle name="115">
+    <pbundle_as_map name="imsvt.hevc_payload_description_bundle">
+        <pbundle_as_map name="115">
             <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
             <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
                 <item value="480"/>
@@ -369,8 +369,8 @@
             <string name="imsvt.hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
             <int name="imsvt.hevc_profile_int" value="1"/>
             <int name="imsvt.hevc_level_int" value="93"/>
-        </pbundle>
-    </pbundle>
+        </pbundle_as_map>
+    </pbundle_as_map>
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
