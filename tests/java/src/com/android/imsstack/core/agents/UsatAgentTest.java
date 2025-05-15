@@ -96,11 +96,20 @@ public class UsatAgentTest {
 
         mUsatAgent = null;
         mTelephonyManagerProxy = null;
-        mListener = null;
-        mSimInterface = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
         mTestableLooper = null;
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateSetupEventList() {
+        int[] updatedList = {Usat.SETUP_EVENT_IMS_REGISTRATION};
+
+        mUsatAgent.updateSetupEventList(updatedList);
+        processAllMessages();
+
+        assertTrue(mUsatAgent.isInSetupEventList(Usat.SETUP_EVENT_IMS_REGISTRATION));
     }
 
     @Test
