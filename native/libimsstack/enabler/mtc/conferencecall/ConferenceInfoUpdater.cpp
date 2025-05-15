@@ -38,7 +38,7 @@ ConferenceInfoUpdater::ConferenceInfoUpdater(
         m_objFactory(objFactory),
         m_pParticipantList(IMS_NULL),
         m_nInfoState(ConferenceInfo::STATE_INVALID),
-        m_eCurrentMatchPolicy(MatchingPolicy::ORDER_LEG_ID),
+        m_eCurrentMatchPolicy(MatchingPolicy::USERENTITY),
         m_bHostInfoInUsers(IMS_FALSE)
 {
     IMS_TRACE_I("+ConferenceInfoUpdater", 0, 0, 0);
@@ -209,8 +209,7 @@ IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
 
     SetParticipantsMatchingStarted();
 
-    std::vector<MatchingPolicy> objPolicies{MatchingPolicy::ORDER_LEG_ID,
-            MatchingPolicy::USERENTITY, MatchingPolicy::REFER_TO_URI, MatchingPolicy::ORDER};
+    std::vector<MatchingPolicy> objPolicies{ MatchingPolicy::USERENTITY, MatchingPolicy::REFER_TO_URI, MatchingPolicy::ORDER};
 
     IMS_BOOL bFound = std::any_of(objPolicies.begin(), objPolicies.end(),
             [&](MatchingPolicy ePolicy)
