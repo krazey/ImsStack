@@ -57,6 +57,7 @@ public:
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
     CallStateName OnAttached() override;
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
     CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;

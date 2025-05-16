@@ -208,6 +208,8 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
+    StartTimer(TIMER_MT_ALERTING);
+
     if (LastComeFirstServedHelper::IsSupported(m_objContext.GetConfigurationProxy()))
     {
         m_objContext.GetLastComeFirstServedHelper().OnCallReceived(m_objContext.GetCallKey());
@@ -261,6 +263,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
                                 : objResult.objReason.ConvertFromInternal());
             }
 
+            StopTimer(TIMER_MT_ALERTING);
             return CallStateName::TERMINATING;
 
         default:  // IMtcBlockChecker::Result::Status::PENDING:
@@ -307,6 +310,20 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
     StartEpsFallbackWatchdogIfNeeded(*piSession->GetPreviousResponse(IMessage::SESSION_START));
     return CallStateName::INCOMING;
+}
+
+PUBLIC VIRTUAL CallStateName IdleState::OnTimerExpired(IN IMS_SINT32 nType)
+{
+    switch (nType)
+    {
+        case TIMER_MT_ALERTING:
+            IMS_TRACE_D("TIMER_MT_ALERTING expires in IdleState", 0, 0, 0);
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
+        default:
+            break;
+    }
+
+    return GetStateName();
 }
 
 PROTECTED VIRTUAL CallStateName IdleState::HandleAosConnected()

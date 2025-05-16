@@ -1254,6 +1254,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool";
         public static final String KEY_RESTART_DEDICATED_BEARER_WAIT_TIMER_BY_EPS_FALLBACK_BOOL =
                 KEY_PREFIX + "restart_dedicated_bearer_wait_timer_by_eps_fallback_bool";
+        public static final String KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL =
+                KEY_PREFIX + "restart_ringing_timer_by_sending_180_bool";
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "audio_rtp_port_range_int_array";

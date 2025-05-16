@@ -196,6 +196,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
+        case TIMER_MT_ALERTING:
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER));
         case TIMER_MT_PRACK_WAIT:
             return RejectIncomingAndToTerminating(
                     CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK));

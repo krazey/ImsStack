@@ -521,6 +521,16 @@ TEST_F(IncomingStateTest, OnTimerExpiredInvokesSendEarlyUpdate)
             pIncomingState->OnTimerExpired(MtcCallState::TimerType::TIMER_RETRY_UPDATE));
 }
 
+TEST_F(IncomingStateTest, OnTimerExpiredRejectIncomingCallIfAlertingTimerExpired)
+{
+    const CallReasonInfo objReason(CODE_TIMEOUT_NO_ANSWER);
+    EXPECT_CALL(objMtcSession, Reject(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIncomingState->OnTimerExpired(MtcCallState::TIMER_MT_ALERTING));
+}
+
 TEST_F(IncomingStateTest, QosReservedDoesNothingIfPrackIsNull)
 {
     MockIMessage* objNullIMessage = reinterpret_cast<MockIMessage*>(0x0);

@@ -225,6 +225,7 @@
     <string-array name="imsemergency.number_need_oir_string_array" num="1">
         <item value="184"/>
     </string-array>
+    <boolean name="imsvoice.restart_ringing_timer_by_sending_180_bool" value="false"/>
 
     <!-- Mts -->
     <int-array name="imssms.sms_generic_error_codes_int_array" num="7">

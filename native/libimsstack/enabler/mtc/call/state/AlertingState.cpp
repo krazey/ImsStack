@@ -77,9 +77,14 @@ PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
-    // Not run the TIMER_MT_PRACK_WAIT since the call is already alerted to the user and
-    // still able to be accepted without PRACK.
-    StartTimer(TIMER_MT_ALERTING);
+
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL))
+    {
+        // Not run the TIMER_MT_PRACK_WAIT since the call is already alerted to the user and
+        // still able to be accepted without PRACK.
+        StartTimer(TIMER_MT_ALERTING);
+    }
 
     return GetStateName();
 }

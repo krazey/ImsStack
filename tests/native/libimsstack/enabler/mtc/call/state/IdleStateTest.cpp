@@ -1089,8 +1089,15 @@ TEST_F(IdleStateTest, HandleIncomingReturnsIdleStateIfBlockCheckResultIsPending)
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
+    IMS_SINT32 nMtAlertingTimer = 60;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nMtAlertingTimer));
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(
+            objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MT_ALERTING, nMtAlertingTimer));
+
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
@@ -1116,8 +1123,15 @@ TEST_F(IdleStateTest, HandleIncomingRejectsIfBlockCheckResultIsBlocked)
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
+    IMS_SINT32 nMtAlertingTimer = 60;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nMtAlertingTimer));
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(
+            objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MT_ALERTING, nMtAlertingTimer));
+
     CallReasonInfo objReasonInfo(CODE_LOCAL_NOT_REGISTERED);
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(Return(IMtcBlockChecker::Result(
@@ -1145,8 +1159,15 @@ TEST_F(IdleStateTest, HandleIncomingInvokesSendPreIncomingCallReceived)
 
     EXPECT_CALL(objMtcSession, HandleRequest(RequestType::START, IsEqualMessage(pMessage)));
 
+    IMS_SINT32 nMtAlertingTimer = 60;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nMtAlertingTimer));
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(
+            objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MT_ALERTING, nMtAlertingTimer));
+
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
@@ -1172,10 +1193,17 @@ TEST_F(IdleStateTest, HandleIncomingInvokesOnCallReceivedForLastComeFirstServedH
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
+    IMS_SINT32 nMtAlertingTimer = 60;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nMtAlertingTimer));
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
             .WillByDefault(Return(7000));
+
+    EXPECT_CALL(
+            objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MT_ALERTING, nMtAlertingTimer));
+
     const IMS_UINTP ANY_KEY = 100;
     ON_CALL(objCallContext, GetCallKey()).WillByDefault(Return(ANY_KEY));
     EXPECT_CALL(objLastComeFirstServedHelper, OnCallReceived(ANY_KEY)).Times(1);
@@ -1203,10 +1231,17 @@ TEST_F(IdleStateTest, HandleIncomingDoesNothingForLastComeFirstServedHelperIfNot
     MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
     ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
 
+    IMS_SINT32 nMtAlertingTimer = 60;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nMtAlertingTimer));
     ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_PREALERTING_TIMER_MILLIS_INT))
             .WillByDefault(Return(0));
+
+    EXPECT_CALL(
+            objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MT_ALERTING, nMtAlertingTimer));
+
     const IMS_UINTP ANY_KEY = 100;
     ON_CALL(objCallContext, GetCallKey()).WillByDefault(Return(ANY_KEY));
     EXPECT_CALL(objLastComeFirstServedHelper, OnCallReceived(ANY_KEY)).Times(0);
@@ -1611,6 +1646,16 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsfbIfRequired)
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(*pEpsfbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK));
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
+}
+
+TEST_F(IdleStateTest, OnTimerExpiredRejectIncomingCallIfAlertingTimerExpired)
+{
+    const CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
+    EXPECT_CALL(objMtcSession, Reject(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->OnTimerExpired(MtcCallState::TIMER_MT_ALERTING));
 }
 
 TEST_F(IdleStateTest, HandleAosConnectedDoesNothingIfNoEpsFallbackOngoing)

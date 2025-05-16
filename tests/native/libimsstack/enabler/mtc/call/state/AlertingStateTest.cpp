@@ -217,6 +217,9 @@ TEST_F(AlertingStateTest,
     EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_FALSE))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
@@ -252,6 +255,9 @@ TEST_F(AlertingStateTest,
     EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
@@ -271,6 +277,9 @@ TEST_F(AlertingStateTest,
     EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());

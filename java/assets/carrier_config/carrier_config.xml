@@ -206,6 +206,7 @@
     </int-array>
     <boolean name="imsvoice.trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool" value="false"/>
     <boolean name="imsvoice.restart_dedicated_bearer_wait_timer_by_eps_fallback_bool" value="true"/>
+    <boolean name="imsvoice.restart_ringing_timer_by_sending_180_bool" value="true"/>
 
     <!-- Media -->
     <int-array name="imsvoice.audio_jitter_buffer_size_int_array" num="3">
