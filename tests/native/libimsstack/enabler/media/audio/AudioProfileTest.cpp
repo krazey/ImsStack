@@ -24,7 +24,7 @@ const AString EVS_PAYLOAD_TYPE = "EVS";
 const AString TELEPHONY_EVENT_PAYLOAD_TYPE = "telephone-event";
 const IMS_UINT32 AUDIO_FMTP_MODESET_LIST = 7;
 const IMS_UINT32 AUDIO_FMTP_DEFAULT_MODESET = 7;
-const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_CAPABILITY = 1;
+const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_CAPABILITY = 2;
 const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_PERIOD = 2;
 const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_NEIGHBOR = 2;
 const IMS_SINT32 AUDIO_FMTP_MAX_RED = 220;
@@ -101,7 +101,7 @@ TEST_F(AudioProfileTest, testAudioFmtpDefaultModeSet)
 TEST_F(AudioProfileTest, testAudioFmtpModeChangeCapability)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 2);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
 
     pFmtp->SetModeChangeCapability(AUDIO_FMTP_MODE_CHANGE_CAPABILITY);
     EXPECT_EQ(pFmtp->GetModeChangeCapability(), AUDIO_FMTP_MODE_CHANGE_CAPABILITY);
@@ -134,7 +134,7 @@ TEST_F(AudioProfileTest, testAudioFmtpModeChangeNeighbor)
 TEST_F(AudioProfileTest, testAudioFmtpMaxRed)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
-    EXPECT_EQ(pFmtp->GetMaxRed(), 0);
+    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
 
     pFmtp->SetMaxRed(AUDIO_FMTP_MAX_RED);
     EXPECT_EQ(pFmtp->GetMaxRed(), AUDIO_FMTP_MAX_RED);
@@ -224,10 +224,10 @@ TEST_F(AudioProfileTest, testAudioFmtpCreationDefault)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 2);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
     EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
     EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
-    EXPECT_EQ(pFmtp->GetMaxRed(), 0);
+    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
     EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
@@ -306,10 +306,10 @@ TEST_F(AudioProfileTest, testAmrFmtpCreationDefault)
 
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 2);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
     EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
     EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
-    EXPECT_EQ(pFmtp->GetMaxRed(), 0);
+    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
     EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
@@ -572,10 +572,10 @@ TEST_F(AudioProfileTest, testEvsFmtpCreationDefault)
 
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 2);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
     EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
     EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
-    EXPECT_EQ(pFmtp->GetMaxRed(), 0);
+    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
     EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);

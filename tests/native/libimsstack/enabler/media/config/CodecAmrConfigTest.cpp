@@ -102,16 +102,13 @@ TEST_F(CodecAmrConfigTest, Create_AmrCodec)
             GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
             .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objModesetArray)));
     EXPECT_CALL(*m_pMockSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
-                    CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY))
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1))
             .WillOnce(::testing::Return(nModeChangeCapability));
     EXPECT_CALL(*m_pMockSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
-                    CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD))
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1))
             .WillOnce(::testing::Return(nModeChangePeriod));
     EXPECT_CALL(*m_pMockSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT,
-                    CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR))
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1))
             .WillOnce(::testing::Return(nModeChangeNeighbor));
 
     IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
@@ -159,16 +156,13 @@ TEST_F(CodecAmrConfigTest, Create_AmrWbCodec)
             GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
             .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objModesetArray)));
     EXPECT_CALL(*m_pMockSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
-                    CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY))
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1))
             .WillOnce(::testing::Return(nModeChangeCapability));
     EXPECT_CALL(*m_pMockSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
-                    CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD))
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1))
             .WillOnce(::testing::Return(nModeChangePeriod));
     EXPECT_CALL(*m_pMockSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT,
-                    CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR))
+            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1))
             .WillOnce(::testing::Return(nModeChangeNeighbor));
 
     IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
