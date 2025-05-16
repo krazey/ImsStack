@@ -31,7 +31,7 @@ PUBLIC MediaNetworkConnectionWatcher::MediaNetworkConnectionWatcher(
 {
     UpdateParameters(m_pNetConnection);
 
-    if (m_pNetConnection != NULL)
+    if (m_pNetConnection != IMS_NULL)
     {
         m_pNetConnection->AddReferenceListener(this);
     }

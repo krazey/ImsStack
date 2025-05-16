@@ -56,7 +56,7 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgOpenConfigParam* pPa
     objParcel.writeString16(android::String16(pParam->m_objLocalAddress.ToString().GetStr()));
     objParcel.writeInt32(pParam->m_nLocalPort);
 
-    if (pParam->m_pConfig != NULL)
+    if (pParam->m_pConfig != IMS_NULL)
     {
         pParam->m_pConfig->writeToParcel(&objParcel);
     }

@@ -31,10 +31,10 @@ TextController::TextController() :
 PUBLIC
 TextController::~TextController()
 {
-    if (m_pSession != NULL)
+    if (m_pSession != IMS_NULL)
     {
         delete m_pSession;
-        m_pSession = NULL;
+        m_pSession = IMS_NULL;
     }
 }
 
@@ -192,7 +192,7 @@ IMS_BOOL TextController::UpdateQualityThreshold(IN std::shared_ptr<TextNego> pNe
 PUBLIC
 IMS_BOOL TextController::IsSessionOpened()
 {
-    if (m_pSession != NULL && m_pSession->GetState() != TextSession::STATE_NONE)
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != TextSession::STATE_NONE)
     {
         return IMS_TRUE;
     }

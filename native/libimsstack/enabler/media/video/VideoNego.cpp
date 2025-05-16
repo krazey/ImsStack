@@ -226,8 +226,8 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == NULL || pDescriptor == NULL ||
-            m_pProfileNegotiator == NULL || m_pSdpGenerator == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
+            m_pProfileNegotiator == IMS_NULL || m_pSdpGenerator == IMS_NULL)
     {
         IMS_TRACE_E(0, "FormReoffer(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;

@@ -120,7 +120,7 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 {
     MediaBaseProfile::BasePayload* pNegotiatedPayload = GetNegotiatedPayload();
 
-    if (pNegotiatedPayload == NULL)
+    if (pNegotiatedPayload == IMS_NULL)
     {
         return AUDIO_CODEC_BITRATE_MAX;
     }
@@ -393,7 +393,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         return IMS_FALSE;
     }
 
-    if (m_pConfig == NULL || m_pEnvironment == IMS_NULL)
+    if (m_pConfig == IMS_NULL || m_pEnvironment == IMS_NULL)
     {
         IMS_TRACE_E(0, "FormReoffer(): config is not valid", 0, 0, 0);
         return IMS_FALSE;
@@ -416,7 +416,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
         if (pPrevOaModel == IMS_NULL)
         {
-            if (pNewOaModel != NULL)
+            if (pNewOaModel != IMS_NULL)
             {
                 delete pNewOaModel;
             }

@@ -58,7 +58,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
         IN IMS_BOOL bHold)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
-            m_pRtpConfig == NULL)
+            m_pRtpConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "UpdateRtpConfig(): invalid parameter", 0, 0, 0);
         return IMS_FALSE;
@@ -310,7 +310,7 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
 PUBLIC
 void VideoSession::SetMtu(IN IMS_SINT32 nMtu)
 {
-    if (m_pRtpConfig != NULL)
+    if (m_pRtpConfig != IMS_NULL)
     {
         VideoConfig* pVideoConfig = static_cast<VideoConfig*>(m_pRtpConfig);
         pVideoConfig->setMaxMtuBytes(nMtu);
@@ -396,7 +396,7 @@ IMS_BOOL VideoSession::Open()
         ImsMediaMsgOpenConfigParam* pParam = new ImsMediaMsgOpenConfigParam(MEDIA_TYPE_VIDEO);
         pParam->m_objLocalAddress = m_objLocalAddress;
         pParam->m_nLocalPort = m_nLocalPort;
-        pParam->m_pConfig = NULL;
+        pParam->m_pConfig = IMS_NULL;
 
         if (m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                     IJniMedia::REQUEST_OPEN_SESSION, pParam) == IMS_TRUE)
@@ -412,7 +412,7 @@ IMS_BOOL VideoSession::Open()
 PUBLIC
 IMS_BOOL VideoSession::Modify()
 {
-    if (m_pRtpConfig == NULL)
+    if (m_pRtpConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -536,7 +536,7 @@ PRIVATE IMS_BOOL VideoSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
-    if (param != NULL)
+    if (param != IMS_NULL)
     {
         IMS_TRACE_I("OnSetSurfaceCmd() - state[%d], surface type[%d]", m_nState, param->nValue, 0);
 
@@ -587,7 +587,7 @@ IMS_BOOL VideoSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
-    if (param != NULL)
+    if (param != IMS_NULL)
     {
         IMS_TRACE_I("OnSelectCameraCmd() - state[%d], camera id[%d]", m_nState, param->nValue, 0);
 
@@ -641,7 +641,7 @@ IMS_BOOL VideoSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
-    if (param != NULL)
+    if (param != IMS_NULL)
     {
         IMS_TRACE_I(
                 "OnChangeCameraZoomCmd() - state[%d], camera zoom[%d]", m_nState, param->nValue, 0);
@@ -663,7 +663,7 @@ IMS_BOOL VideoSession::OnChangeOrientation(IN IMS_UINTP pParam)
 {
     ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
-    if (param != NULL)
+    if (param != IMS_NULL)
     {
         IMS_TRACE_I(
                 "OnChangeOrientation() - state[%d], orientation[%d]", m_nState, param->nValue, 0);

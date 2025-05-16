@@ -151,7 +151,7 @@ MediaSessionConfig* MediaSessionConfigFactory::FindMediaSessionConfig(
         }
     }
 
-    if (pMediaSessionConfig != NULL)
+    if (pMediaSessionConfig != IMS_NULL)
     {
         IMS_TRACE_D("FindMediaSessionConfig() - ServiceType[%d]",
                 pMediaSessionConfig->GetServiceType(), 0, 0);

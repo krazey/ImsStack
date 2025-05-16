@@ -321,34 +321,34 @@ PRIVATE IMS_BOOL TextProfileNegotiator::FindT140InProfile(
 
     for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
-        TextProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
+        TextProfile::Payload* pComparedPayload = pProfile->GetPayloadAt(i);
 
-        if (comparedPayload == IMS_NULL)
+        if (pComparedPayload == IMS_NULL)
         {
             continue;
         }
 
-        if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))
+        if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))
         {
-            if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+            if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
                         pPayload->GetRtpMap().GetPayloadType()) &&
-                    comparedPayload->GetRtpMap().GetSamplingRate() ==
+                    pComparedPayload->GetRtpMap().GetSamplingRate() ==
                             pPayload->GetRtpMap().GetSamplingRate())
             {
                 IMS_TRACE_D("FindT140InProfile(): Found T140 at [%d], Codec[%s]", i,
-                        comparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
+                        pComparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
                 return IMS_TRUE;
             }
         }
-        else if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
+        else if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
         {
-            if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+            if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
                         pPayload->GetRtpMap().GetPayloadType()) &&
-                    comparedPayload->GetRtpMap().GetSamplingRate() ==
+                    pComparedPayload->GetRtpMap().GetSamplingRate() ==
                             pPayload->GetRtpMap().GetSamplingRate())
             {
                 TextProfile::RedFmtp* pComparedFmtp =
-                        (TextProfile::RedFmtp*)comparedPayload->GetFmtp();
+                        (TextProfile::RedFmtp*)pComparedPayload->GetFmtp();
                 TextProfile::RedFmtp* pReceivedFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
 
                 if (pReceivedFmtp == IMS_NULL)
@@ -363,7 +363,7 @@ PRIVATE IMS_BOOL TextProfileNegotiator::FindT140InProfile(
                 }
 
                 IMS_TRACE_D("FindT140InProfile(): Found RED at [%d], Codec[%s]", i,
-                        comparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
+                        pComparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
 
                 return IMS_TRUE;
             }

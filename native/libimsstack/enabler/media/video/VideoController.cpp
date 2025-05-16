@@ -31,10 +31,10 @@ VideoController::VideoController() :
 PUBLIC
 VideoController::~VideoController()
 {
-    if (m_pSession != NULL)
+    if (m_pSession != IMS_NULL)
     {
         delete m_pSession;
-        m_pSession = NULL;
+        m_pSession = IMS_NULL;
     }
 }
 
@@ -160,7 +160,7 @@ IMS_BOOL VideoController::UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego
 PUBLIC
 IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, IN IMS_BOOL bHold)
 {
-    if (pNego != NULL && m_pSession != IMS_NULL)
+    if (pNego != IMS_NULL && m_pSession != IMS_NULL)
     {
         IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
         return m_pSession->UpdateRtpConfig(
@@ -217,7 +217,7 @@ IMS_BOOL VideoController::ApplyQualityThreshold()
 PUBLIC
 IMS_BOOL VideoController::IsSessionOpened()
 {
-    if (m_pSession != NULL && m_pSession->GetState() != VideoSession::STATE_NONE)
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != VideoSession::STATE_NONE)
     {
         return IMS_TRUE;
     }
