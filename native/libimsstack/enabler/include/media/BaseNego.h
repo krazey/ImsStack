@@ -226,16 +226,17 @@ public:
     /**
      * @brief Get the OaModel list
      */
-    ImsList<OaModel*>& GetOaModelList();
+    ImsList<std::shared_ptr<BaseNego::OaModel>>& GetOaModelList();
 
 protected:
-    virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
-    virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);
-    virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
-    BaseNego::OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
+    virtual MediaBaseProfile* GetLocalProfile(IN const OaModel& objOaModel);
+    virtual MediaBaseProfile* GetPeerProfile(IN const OaModel& objOaModel);
+    virtual MediaBaseProfile* GetNegotiatedProfile(IN const OaModel& objOaModel);
+    std::shared_ptr<OaModel> GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
     void DestroyListOaModel();
     void Copy(IN const BaseNego* pNego);
-    virtual OaModel* CreateOaModel(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable);
+    virtual std::shared_ptr<BaseNego::OaModel> CreateOaModel(
+            IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable);
     virtual IMS_BOOL CheckArgument(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection);
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
@@ -255,7 +256,7 @@ protected:
 protected:
     MEDIA_CONTENT_TYPE m_eType;
     MediaBaseProfile* m_pBaseProfile;
-    ImsList<OaModel*> m_listOaModel;
+    ImsList<std::shared_ptr<OaModel>> m_listOaModel;
     MediaConfiguration* m_pConfig;
     std::shared_ptr<MediaEnvironment> m_pEnvironment;
     std::shared_ptr<MediaSdpGenerator> m_pSdpGenerator;

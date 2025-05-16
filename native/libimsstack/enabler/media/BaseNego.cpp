@@ -30,7 +30,7 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
         ImsSlot(nSlotId),
         m_eType(eType),
         m_pBaseProfile(IMS_NULL),
-        m_listOaModel(ImsList<OaModel*>()),
+        m_listOaModel(ImsList<std::shared_ptr<OaModel>>()),
         m_pConfig(IMS_NULL),
         m_pEnvironment(IMS_NULL),
         m_pSdpGenerator(IMS_NULL),
@@ -42,7 +42,7 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
 BaseNego::BaseNego(IN const BaseNego& obj) :
         ImsSlot(obj),
         m_pBaseProfile(IMS_NULL),
-        m_listOaModel(ImsList<OaModel*>())
+        m_listOaModel(ImsList<std::shared_ptr<OaModel>>())
 {
     *this = obj;
 }
@@ -158,7 +158,7 @@ PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
     // reset confirmed Session check variable
     for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
     {
-        OaModel* pCheckedOaModel = m_listOaModel.GetAt(i);
+        std::shared_ptr<OaModel> pCheckedOaModel = m_listOaModel.GetAt(i);
 
         if (pCheckedOaModel != IMS_NULL)
         {
@@ -167,7 +167,7 @@ PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
     }
 
     // check latest OA model
-    OaModel* pLatestOaModel = IMS_NULL;
+    std::shared_ptr<OaModel> pLatestOaModel = IMS_NULL;
 
     if (m_listOaModel.GetSize() > 0)
     {
@@ -181,7 +181,6 @@ PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
         {
             IMS_TRACE_I("FinalizeSdp(): type[%d], incomplete OA model index[%d]", m_eType,
                     m_listOaModel.GetSize() - 1, 0);
-            delete pLatestOaModel;
             m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         }
     }
@@ -189,7 +188,8 @@ PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
     for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
     {
         // get OaModel
-        OaModel* pTempOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1 - i);
+        std::shared_ptr<OaModel> pTempOaModel =
+                m_listOaModel.GetAt(m_listOaModel.GetSize() - 1 - i);
 
         // find matched SessionDescriptor key
         if (pTempOaModel != IMS_NULL)
@@ -227,11 +227,11 @@ PUBLIC VIRTUAL IMS_SINT32 BaseNego::GetRemotePort()
 
 PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedLocalProfile()
 {
-    OaModel* pOaModel = GetNegotiatedOaModel();
+    std::shared_ptr<OaModel> pOaModel = GetNegotiatedOaModel();
 
-    if (pOaModel != IMS_NULL)
+    if (pOaModel)
     {
-        return GetLocalProfile(pOaModel);
+        return GetLocalProfile(*pOaModel);
     }
 
     return IMS_NULL;
@@ -239,11 +239,11 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedLocalProfile()
 
 PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedNegoProfile()
 {
-    OaModel* pOaModel = GetNegotiatedOaModel();
+    std::shared_ptr<OaModel> pOaModel = GetNegotiatedOaModel();
 
-    if (pOaModel != IMS_NULL)
+    if (pOaModel)
     {
-        return GetNegotiatedProfile(pOaModel);
+        return GetNegotiatedProfile(*pOaModel);
     }
 
     return IMS_NULL;
@@ -251,22 +251,21 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedNegoProfile()
 
 PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedPeerProfile()
 {
-    OaModel* pOaModel = GetNegotiatedOaModel();
+    std::shared_ptr<OaModel> pOaModel = GetNegotiatedOaModel();
 
-    if (pOaModel != IMS_NULL)
+    if (pOaModel)
     {
-        return GetPeerProfile(pOaModel);
+        return GetPeerProfile(*pOaModel);
     }
 
     return IMS_NULL;
 }
-
 PUBLIC
 MEDIA_DIRECTION BaseNego::GetNegotiatedDirection()
 {
     if (m_listOaModel.GetSize() > 0)
     {
-        OaModel* pLatestOaModel = IMS_NULL;
+        std::shared_ptr<OaModel> pLatestOaModel = IMS_NULL;
         pLatestOaModel = GetNegotiatedOaModel();
 
         if (pLatestOaModel == IMS_NULL)
@@ -290,7 +289,7 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedRtpPort()
 
     if (m_listOaModel.GetSize() > 0)
     {
-        OaModel* pLatestOaModel = IMS_NULL;
+        std::shared_ptr<OaModel> pLatestOaModel = IMS_NULL;
         pLatestOaModel = GetNegotiatedOaModel();
 
         if (pLatestOaModel == IMS_NULL || !pLatestOaModel->IsAllProfileExist())
@@ -309,17 +308,17 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedBandwidth()
 {
     if (m_listOaModel.GetSize() > 0)
     {
-        OaModel* pLatestOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
+        std::shared_ptr<OaModel> pLatestOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
 
-        if (pLatestOaModel == IMS_NULL || GetLocalProfile(pLatestOaModel) == IMS_NULL)
+        if (pLatestOaModel == IMS_NULL || GetLocalProfile(*pLatestOaModel) == IMS_NULL)
         {
             IMS_TRACE_E(0, "GetNegotiatedBandwidth(): type[%d], invalid OA model", m_eType, 0, 0);
             return -1;
         }
 
-        return (GetNegotiatedProfile(pLatestOaModel) != IMS_NULL)
-                ? (IMS_SINT32)GetNegotiatedProfile(pLatestOaModel)->GetBandwidthAs()
-                : (IMS_SINT32)GetLocalProfile(pLatestOaModel)->GetBandwidthAs();
+        return (GetNegotiatedProfile(*pLatestOaModel) != IMS_NULL)
+                ? (IMS_SINT32)GetNegotiatedProfile(*pLatestOaModel)->GetBandwidthAs()
+                : (IMS_SINT32)GetLocalProfile(*pLatestOaModel)->GetBandwidthAs();
     }
 
     return -1;
@@ -329,7 +328,7 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
 {
     if (m_listOaModel.GetSize() > 0)
     {
-        OaModel* pLatestOaModel = GetNegotiatedOaModel();
+        std::shared_ptr<OaModel> pLatestOaModel = GetNegotiatedOaModel();
 
         if (pLatestOaModel == IMS_NULL || !pLatestOaModel->IsAllProfileExist())
         {
@@ -337,7 +336,7 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
             return IMS_NULL;
         }
 
-        MediaBaseProfile* pProfile = GetNegotiatedProfile(pLatestOaModel);
+        MediaBaseProfile* pProfile = GetNegotiatedProfile(*pLatestOaModel);
 
         if (pProfile == IMS_NULL)
         {
@@ -349,7 +348,7 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
         {
             if (pProfile->GetDataPort() == 0)
             {
-                pProfile->CopyPayloads(GetLocalProfile(pLatestOaModel)->GetPayloadList());
+                pProfile->CopyPayloads(GetLocalProfile(*pLatestOaModel)->GetPayloadList());
             }
             else
             {
@@ -366,7 +365,7 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
     return IMS_NULL;
 }
 
-PUBLIC ImsList<BaseNego::OaModel*>& BaseNego::GetOaModelList()
+PUBLIC ImsList<std::shared_ptr<BaseNego::OaModel>>& BaseNego::GetOaModelList()
 {
     return m_listOaModel;
 }
@@ -381,27 +380,27 @@ void BaseNego::SetProfileGenerator(std::shared_ptr<MediaProfileGenerator> pProfi
     m_pProfileGenerator = pProfileGenerator;
 }
 
-PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN OaModel* pOaModel)
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN const OaModel& objOaModel)
 {
-    return (pOaModel != IMS_NULL) ? pOaModel->pLocalProfile : IMS_NULL;
+    return objOaModel.pLocalProfile;
 }
-PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetPeerProfile(IN OaModel* pOaModel)
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetPeerProfile(IN const OaModel& objOaModel)
 {
-    return (pOaModel != IMS_NULL) ? pOaModel->pPeerProfile : IMS_NULL;
+    return objOaModel.pPeerProfile;
 }
-PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedProfile(IN OaModel* pOaModel)
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedProfile(IN const OaModel& objOaModel)
 {
-    return (pOaModel != IMS_NULL) ? pOaModel->pNegotiatedProfile : IMS_NULL;
+    return objOaModel.pNegotiatedProfile;
 }
 
 PROTECTED
-BaseNego::OaModel* BaseNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
+std::shared_ptr<BaseNego::OaModel> BaseNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
 {
     IMS_UINT32 nTempOaModelCount = m_listOaModel.GetSize();
 
     while (nTempOaModelCount > 0)
     {
-        OaModel* pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
+        std::shared_ptr<OaModel> pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
 
         if (pLatestOaModel != IMS_NULL)
         {
@@ -446,13 +445,6 @@ PROTECTED void BaseNego::DestroyListOaModel()
 {
     while (m_listOaModel.GetSize() > 0)
     {
-        OaModel* pOaModel = m_listOaModel.GetAt(0);
-
-        if (pOaModel != IMS_NULL)
-        {
-            delete pOaModel;
-        }
-
         m_listOaModel.RemoveAt(0);
     }
 }
@@ -482,7 +474,7 @@ void BaseNego::Copy(IN const BaseNego* pNego)
         MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
     }
 
-    OaModel* pNewOaModel = new OaModel();
+    std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
 
     if (pNewOaModel != IMS_NULL)
     {
@@ -495,10 +487,11 @@ void BaseNego::Copy(IN const BaseNego* pNego)
 }
 
 PROTECTED
-BaseNego::OaModel* BaseNego::CreateOaModel(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
+std::shared_ptr<BaseNego::OaModel> BaseNego::CreateOaModel(
+        IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable)
 {
     // Make new Offer/Answer model, and copy source profile
-    OaModel* pNewOaModel = new OaModel();
+    std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
     pNewOaModel->pLocalProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
 
@@ -523,8 +516,8 @@ BaseNego::OaModel* BaseNego::CreateOaModel(IN MEDIA_DIRECTION eDirection, IN IMS
     // Modify a RS/RR by conditions (for RTCP enable/disable)
     if (m_eType == MEDIA_TYPE_AUDIO || m_eType == MEDIA_TYPE_VIDEO)
     {
-        /* bDirHold is not proper for formoffer() */
-        MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig, IMS_FALSE);
+        // bDirHold is not proper for formoffer()
+        MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(*pNewOaModel), m_pConfig, IMS_FALSE);
     }
 
     m_listOaModel.Append(pNewOaModel);

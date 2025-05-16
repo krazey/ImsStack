@@ -79,9 +79,9 @@ public:
     }
 
 protected:
-    VideoProfile* GetLocalProfile(IN OaModel* pOaModel) override;
-    VideoProfile* GetPeerProfile(IN OaModel* pOaModel) override;
-    VideoProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    VideoProfile* GetLocalProfile(IN const OaModel& objOaModel) override;
+    VideoProfile* GetPeerProfile(IN const OaModel& objOaModel) override;
+    VideoProfile* GetNegotiatedProfile(IN const OaModel& objOaModel) override;
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable) override;
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
