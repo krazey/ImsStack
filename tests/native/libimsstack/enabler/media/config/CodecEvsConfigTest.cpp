@@ -22,13 +22,13 @@
 #include "CarrierConfig.h"
 #include "ServiceConfig.h"
 #include "MockICarrierConfig.h"
+#include "config/CodecAudioConfig.h"
 #include "config/CodecEvsConfig.h"
 
 using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecEvsConfig::DEFAULT_CHANNEL;
-static const IMS_BOOL DEFAULT_DTX = CodecEvsConfig::DEFAULT_DTX;
 static const IMS_BOOL DEFAULT_DTX_RECV = CodecEvsConfig::DEFAULT_DTX_RECV;
 static const IMS_SINT32 DEFAULT_HF_ONLY = CodecEvsConfig::DEFAULT_HF_ONLY;
 static const IMS_SINT32 DEFAULT_EVS_MODESWITCH = CodecEvsConfig::DEFAULT_EVS_MODESWITCH;
@@ -36,11 +36,12 @@ static const IMS_SINT32 DEFAULT_BR_LIST = CodecEvsConfig::DEFAULT_BR_LIST;
 static const IMS_SINT32 DEFAULT_BW_LIST = CodecEvsConfig::DEFAULT_BW_LIST;
 static const IMS_SINT32 DEFAULT_CMR = CodecEvsConfig::DEFAULT_CMR;
 static const IMS_SINT32 DEFAULT_CH_AW_RECV = CodecEvsConfig::DEFAULT_CH_AW_RECV;
-static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecEvsConfig::DEFAULT_MODESET_AMR_WB;
+static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecAudioConfig::DEFAULT_MODESET_AMR_WB;
 static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
-        CodecEvsConfig::DEFAULT_MODECHANGE_CAPABILITY;
-static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecEvsConfig::DEFAULT_MODECHANGE_PERIOD;
-static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = CodecEvsConfig::DEFAULT_MODECHANGE_NEIGHBOR;
+        CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY;
+static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD;
+static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR;
+static const IMS_BOOL DEFAULT_DTX = CodecAudioConfig::DEFAULT_DTX;
 
 MATCHER_P(IsSameKey, key, "")
 {
@@ -284,46 +285,4 @@ TEST_F(CodecEvsConfigTest, GetShowEvsAmrWbIoModeSet)
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetShowAmrModeSet(), bShowEvsAmrWbIoModeSet);
-}
-
-TEST_F(CodecEvsConfigTest, GetModeChangeCapability)
-{
-    IMS_SINT32 nModeChangeCapability = 20;
-
-    ON_CALL(*m_pAudioSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1))
-            .WillByDefault(Return(nModeChangeCapability));
-
-    GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig->GetModeChangeCapability(), nModeChangeCapability);
-}
-
-TEST_F(CodecEvsConfigTest, GetModeChangePeriod)
-{
-    IMS_SINT32 nModeChangePeriod = 30;
-
-    ON_CALL(*m_pAudioSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1))
-            .WillByDefault(Return(nModeChangePeriod));
-
-    GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig->GetModeChangePeriod(), nModeChangePeriod);
-}
-
-TEST_F(CodecEvsConfigTest, GetModeChangeNeighbor)
-{
-    IMS_SINT32 nModeChangeNeighbor = 40;
-
-    ON_CALL(*m_pAudioSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1))
-            .WillByDefault(Return(nModeChangeNeighbor));
-
-    GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
-
-    EXPECT_EQ(m_pConfig->GetModeChangeNeighbor(), nModeChangeNeighbor);
 }

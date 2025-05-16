@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,13 +104,14 @@ public:
     IMS_SINT32 GetModeChangeNeighbor() const;
 
 public:
-    static const IMS_SINT32 DEFAULT_CHANNEL = 1;
-    static const IMS_SINT32 DEFAULT_MODESET_AMR = 7;
-    static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = 8;
-    static const IMS_BOOL DEFAULT_DTX = IMS_TRUE;
-    static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY = 1;
-    static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = 1;
-    static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
+    static const IMS_SINT32 DEFAULT_CHANNEL;
+    static const IMS_SINT32 DEFAULT_MODESET_AMR;
+    static const IMS_SINT32 DEFAULT_MODESET_AMR_WB;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR;
+    static const IMS_SINT32 DEFAULT_MAXRED;
+    static const IMS_BOOL DEFAULT_DTX;
 
 protected:
     IMS_SINT32 m_nChannel;

@@ -17,6 +17,7 @@
 #ifndef AUDIO_PROFILE_H_
 #define AUDIO_PROFILE_H_
 
+#include "config/CodecAudioConfig.h"
 #include "MediaBaseProfile.h"
 
 /**
@@ -33,25 +34,14 @@ public:
     class AudioFmtp : public BaseFmtp
     {
     public:
-        enum
-        {
-            DEFAULT_MODESETLIST = 0,
-            DEFAULT_MODECHANGE_CAPABILITY = 1,
-            DEFAULT_MODECHANGE_PERIOD = 1,
-            DEFAULT_MODECHANGE_NEIGHBOR = 0,
-            DEFAULT_MAXRED = -1,
-            DEFAULT_DTX = 1,
-        };
-
-    public:
         AudioFmtp() :
-                m_nModeSetList(DEFAULT_MODESETLIST),
-                m_nDefaultRtpModeSet(DEFAULT_MODESETLIST),
-                m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
-                m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-                m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-                m_nMaxRed(DEFAULT_MAXRED),
-                m_bDtx(DEFAULT_DTX),
+                m_nModeSetList(0),
+                m_nDefaultRtpModeSet(0),
+                m_nModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY),
+                m_nModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD),
+                m_nModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR),
+                m_nMaxRed(CodecAudioConfig::DEFAULT_MAXRED),
+                m_bDtx(CodecAudioConfig::DEFAULT_DTX),
                 m_bShowModeSet(IMS_FALSE),
                 m_bShowModeChangeCapability(IMS_FALSE),
                 m_bShowModeChangePeriod(IMS_FALSE),

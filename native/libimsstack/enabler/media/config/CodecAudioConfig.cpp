@@ -20,17 +20,27 @@
 
 __IMS_TRACE_TAG_MEDIA__;
 
+// Define static const members
+const IMS_SINT32 CodecAudioConfig::DEFAULT_CHANNEL = 1;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODESET_AMR = 7;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODESET_AMR_WB = 8;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY = 2;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD = 1;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR = 0;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MAXRED = 0;
+const IMS_BOOL CodecAudioConfig::DEFAULT_DTX = IMS_TRUE;
+
 PUBLIC
 CodecAudioConfig::CodecAudioConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
         CodecConfig(nType, nPayloadTypeNum),
         m_nChannel(DEFAULT_CHANNEL),
         m_bShowAmrModeSet(IMS_FALSE),
-        m_nAmrModeSetList(DEFAULT_MODESET_AMR_WB),
-        m_nDefaultAmrModeSetList(DEFAULT_MODESET_AMR_WB),
-        m_bDtx(DEFAULT_DTX),
-        m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
-        m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-        m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
+        m_nAmrModeSetList(CodecAudioConfig::DEFAULT_MODESET_AMR_WB),
+        m_nDefaultAmrModeSetList(CodecAudioConfig::DEFAULT_MODESET_AMR_WB),
+        m_bDtx(CodecAudioConfig::DEFAULT_DTX),
+        m_nModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY),
+        m_nModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD),
+        m_nModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR)
 {
     IMS_TRACE_I("+CodecAudioConfig - Type[%d]", nType, 0, 0);
 }

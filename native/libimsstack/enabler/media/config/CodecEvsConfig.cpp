@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,8 +73,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL);
     m_bShowDtx = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE);
-    m_bDtx = piCcSubBundle->GetBoolean(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX);
+    m_bDtx = piCcSubBundle->GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL,
+            CodecAudioConfig::DEFAULT_DTX);
     m_bDtxRecv = piCcSubBundle->GetBoolean(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL, DEFAULT_DTX_RECV);
     m_nHfOnly =
@@ -109,19 +109,26 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
     m_bShowAmrModeSet = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
             IMS_FALSE);
-    m_nAmrModeSetList = static_cast<IMS_UINT32>(piCc->GetInt(
-            CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT, DEFAULT_MODESET_AMR_WB));
+    m_nAmrModeSetList = static_cast<IMS_UINT32>(
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
+                    CodecAudioConfig::DEFAULT_MODESET_AMR_WB));
 
     m_nDefaultAmrModeSetList = static_cast<IMS_UINT32>(piCc->GetInt(
             CarrierConfig::ImsVoice::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
-            DEFAULT_MODESET_AMR_WB));
+            CodecAudioConfig::DEFAULT_MODESET_AMR_WB));
 
     m_nModeChangeCapability = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1);
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+            CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
     m_nModeChangePeriod = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1);
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+            CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
     m_nModeChangeNeighbor = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1);
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT,
+            CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
+
+    // TODO(b/414484057) : need to change the default value like the amrcodec and check the display
+    // asset for the AMR-IO mode again
 
     piCcSubBundle->ReleaseBundle();
     piCcBundle->ReleaseBundle();

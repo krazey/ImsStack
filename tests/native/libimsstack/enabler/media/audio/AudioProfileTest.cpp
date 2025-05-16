@@ -16,7 +16,8 @@
 
 #include <gtest/gtest.h>
 
-#include <audio/AudioProfile.h>
+#include "config/CodecAudioConfig.h"
+#include "audio/AudioProfile.h"
 
 const AString AMR_PAYLOAD_TYPE = "AMR";
 const AString AMR_WB_PAYLOAD_TYPE = "AMR-WB";
@@ -24,7 +25,7 @@ const AString EVS_PAYLOAD_TYPE = "EVS";
 const AString TELEPHONY_EVENT_PAYLOAD_TYPE = "telephone-event";
 const IMS_UINT32 AUDIO_FMTP_MODESET_LIST = 7;
 const IMS_UINT32 AUDIO_FMTP_DEFAULT_MODESET = 7;
-const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_CAPABILITY = 2;
+const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_CAPABILITY = 1;
 const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_PERIOD = 2;
 const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_NEIGHBOR = 2;
 const IMS_SINT32 AUDIO_FMTP_MAX_RED = 220;
@@ -101,7 +102,7 @@ TEST_F(AudioProfileTest, testAudioFmtpDefaultModeSet)
 TEST_F(AudioProfileTest, testAudioFmtpModeChangeCapability)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
 
     pFmtp->SetModeChangeCapability(AUDIO_FMTP_MODE_CHANGE_CAPABILITY);
     EXPECT_EQ(pFmtp->GetModeChangeCapability(), AUDIO_FMTP_MODE_CHANGE_CAPABILITY);
@@ -112,7 +113,7 @@ TEST_F(AudioProfileTest, testAudioFmtpModeChangeCapability)
 TEST_F(AudioProfileTest, testAudioFmtpModeChangePeriod)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
-    EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
+    EXPECT_EQ(pFmtp->GetModeChangePeriod(), CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
 
     pFmtp->SetModeChangePeriod(AUDIO_FMTP_MODE_CHANGE_PERIOD);
     EXPECT_EQ(pFmtp->GetModeChangePeriod(), AUDIO_FMTP_MODE_CHANGE_PERIOD);
@@ -123,7 +124,7 @@ TEST_F(AudioProfileTest, testAudioFmtpModeChangePeriod)
 TEST_F(AudioProfileTest, testAudioFmtpModeChangeNeighbor)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
-    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
+    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
 
     pFmtp->SetModeChangeNeighbor(AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
     EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
@@ -134,7 +135,7 @@ TEST_F(AudioProfileTest, testAudioFmtpModeChangeNeighbor)
 TEST_F(AudioProfileTest, testAudioFmtpMaxRed)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
-    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
+    EXPECT_EQ(pFmtp->GetMaxRed(), CodecAudioConfig::DEFAULT_MAXRED);
 
     pFmtp->SetMaxRed(AUDIO_FMTP_MAX_RED);
     EXPECT_EQ(pFmtp->GetMaxRed(), AUDIO_FMTP_MAX_RED);
@@ -145,7 +146,7 @@ TEST_F(AudioProfileTest, testAudioFmtpMaxRed)
 TEST_F(AudioProfileTest, testAudioFmtpDtx)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
-    EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
+    EXPECT_EQ(pFmtp->IsDtxEnabled(), CodecAudioConfig::DEFAULT_DTX);
 
     pFmtp->SetDtx(AUDIO_FMTP_DTX);
     EXPECT_EQ(pFmtp->IsDtxEnabled(), AUDIO_FMTP_DTX);
@@ -224,11 +225,11 @@ TEST_F(AudioProfileTest, testAudioFmtpCreationDefault)
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
-    EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
-    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
-    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
-    EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
+    EXPECT_EQ(pFmtp->GetModeChangePeriod(), CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
+    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
+    EXPECT_EQ(pFmtp->GetMaxRed(), CodecAudioConfig::DEFAULT_MAXRED);
+    EXPECT_EQ(pFmtp->IsDtxEnabled(), CodecAudioConfig::DEFAULT_DTX);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), IMS_FALSE);
@@ -306,11 +307,11 @@ TEST_F(AudioProfileTest, testAmrFmtpCreationDefault)
 
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
-    EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
-    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
-    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
-    EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
+    EXPECT_EQ(pFmtp->GetModeChangePeriod(), CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
+    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
+    EXPECT_EQ(pFmtp->GetMaxRed(), CodecAudioConfig::DEFAULT_MAXRED);
+    EXPECT_EQ(pFmtp->IsDtxEnabled(), CodecAudioConfig::DEFAULT_DTX);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), IMS_FALSE);
@@ -572,11 +573,11 @@ TEST_F(AudioProfileTest, testEvsFmtpCreationDefault)
 
     EXPECT_EQ(pFmtp->GetModeSetList(), 0);
     EXPECT_EQ(pFmtp->GetDefaultRtpModeSet(), 0);
-    EXPECT_EQ(pFmtp->GetModeChangeCapability(), 1);
-    EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
-    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
-    EXPECT_EQ(pFmtp->GetMaxRed(), -1);
-    EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
+    EXPECT_EQ(pFmtp->GetModeChangeCapability(), CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
+    EXPECT_EQ(pFmtp->GetModeChangePeriod(), CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
+    EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
+    EXPECT_EQ(pFmtp->GetMaxRed(), CodecAudioConfig::DEFAULT_MAXRED);
+    EXPECT_EQ(pFmtp->IsDtxEnabled(), CodecAudioConfig::DEFAULT_DTX);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), IMS_FALSE);
