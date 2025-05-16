@@ -28,11 +28,15 @@ __IMS_TRACE_TAG_XML__;
 class DocumentBuilderPrivate
 {
 public:
-    DocumentBuilderPrivate();
-    ~DocumentBuilderPrivate();
+    DocumentBuilderPrivate() = default;
+    ~DocumentBuilderPrivate() = default;
+
+    DocumentBuilderPrivate(IN const DocumentBuilderPrivate&) = delete;
+    DocumentBuilderPrivate& operator=(IN const DocumentBuilderPrivate&) = delete;
 
 public:
     IDocument* Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT32 nLength);
+    static void NormalizeXml(IN_OUT AString& strXml);
 
 private:
     IDocument* CreateDocument(IN xmlDocPtr pstDoc);
@@ -41,12 +45,6 @@ private:
             IN IDocument* piDocument, IN INode* piParentNode, IN xmlNodePtr pstNode);
     static INode* CreateNodeInstance(IN xmlNodePtr pstNode);
 };
-
-PUBLIC
-DocumentBuilderPrivate::DocumentBuilderPrivate() {}
-
-PUBLIC
-DocumentBuilderPrivate::~DocumentBuilderPrivate() {}
 
 PUBLIC
 IDocument* DocumentBuilderPrivate::Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT32 nLength)
@@ -69,6 +67,22 @@ IDocument* DocumentBuilderPrivate::Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT3
             pstDoc->standalone, pstDoc->properties);
 
     return CreateDocument(pstDoc);
+}
+
+PUBLIC
+void DocumentBuilderPrivate::NormalizeXml(IN_OUT AString& strXml)
+{
+    // 2.11 End-of-Line Handling
+    // XML parsed entities are often stored in computer files which, for editing convenience,
+    // are organized into lines. These lines are typically separated by some combination of
+    // the characters CARRIAGE RETURN (#xD) and LINE FEED (#xA).
+    //
+    // To simplify the tasks of applications, the XML processor MUST behave as if it normalized
+    // all line breaks in external parsed entities (including the document entity) on input,
+    // before parsing, by translating both the two-character sequence #xD #xA and any #xD that
+    // is not followed by #xA to a single #xA character.
+    strXml.Replace("\r\n", "\n");
+    strXml.Replace('\r', '\n');
 }
 
 PRIVATE
@@ -220,11 +234,25 @@ PUBLIC VIRTUAL DocumentBuilder::~DocumentBuilder()
 PUBLIC
 IDocument* DocumentBuilder::Parse(IN const AString& strXml)
 {
+    if (strXml.Contains('\r'))
+    {
+        AString strNewXml(strXml);
+        DocumentBuilderPrivate::NormalizeXml(strNewXml);
+        return pDocumentBuilderPrivate->Parse(strNewXml.GetStr(), strNewXml.GetLength());
+    }
+
     return pDocumentBuilderPrivate->Parse(strXml.GetStr(), strXml.GetLength());
 }
 
 PUBLIC
 IDocument* DocumentBuilder::Parse(IN const IMS_CHAR* pszXml)
 {
+    if (IMS_StrChr(pszXml, '\r') != IMS_NULL)
+    {
+        AString strXml(pszXml);
+        DocumentBuilderPrivate::NormalizeXml(strXml);
+        return pDocumentBuilderPrivate->Parse(strXml.GetStr(), strXml.GetLength());
+    }
+
     return pDocumentBuilderPrivate->Parse(pszXml, IMS_StrLen(pszXml));
 }
