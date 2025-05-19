@@ -1188,7 +1188,6 @@ TEST_F(AosApplicationTest, ResetWifiRegForbiddenWhenClearWifiRegBlockCalled)
             .WillByDefault(Return(3));
 
     EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_WIFI_REG_FORBIDDEN, _));
-    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_CLEAR_RETRY_COUNT, _));
 
     m_pAosApplication->ClearWifiRegBlock();
 }

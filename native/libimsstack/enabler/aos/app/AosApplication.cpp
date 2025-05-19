@@ -374,7 +374,6 @@ void AosApplication::ClearWifiRegBlock()
     }
 
     m_pCondition->ResetBlock(BLOCK_WIFI_REG_FORBIDDEN);
-    m_piRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_RETRY_COUNT);
 }
 
 PROTECTED
