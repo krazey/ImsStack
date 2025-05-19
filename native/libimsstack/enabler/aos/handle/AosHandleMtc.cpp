@@ -769,7 +769,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
     IMS_BOOL bIsVoiceUnavailable = IMS_FALSE;
     IMS_UINT32 nOldUnavailableFeature = m_objFeatureTagList.GetUnavailableFeatures();
 
-    if (IsSupportedNetworkTypeForCellular(m_nNetworkType))
+    if (IsEpdgEnabled())
+    {
+        bIsVoiceUnavailable = IMS_FALSE;
+    }
+    else if (IsSupportedNetworkTypeForCellular(m_nNetworkType))
     {
         if (!m_bVopsIgnoredForVolteEnabled)
         {
