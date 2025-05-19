@@ -125,15 +125,18 @@ public class AudioSessionHandler extends MediaState {
     @VisibleForTesting
     public AudioSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull AudioSessionCallbackHandler audioCallbackHandler,
-            @NonNull ImsAudioSession audioSession, MediaConfig mediaConfig, Looper looper) {
+            @NonNull ImsAudioSession audioSession, MediaConfig mediaConfig, Looper looper,
+            @Nullable QosAgent audioQosAgent) {
         super(ImsMediaSession.SESSION_TYPE_AUDIO);
         mContext = context;
         mMediaManager = mediaManager;
         mAudioSessionCallbackHandler = audioCallbackHandler;
         mAudioSession = audioSession;
         mMediaConfig = mediaConfig;
+        mAudioQosAgent = audioQosAgent;
         mAudioSessionCallback = new AudioSessionCallbackProxy();
         mAudioMessageHandler = new AudioMessageHandler(looper);
+        createQosAgent(mContext.getSlotId());
         mAnbrEnabled = false;
         ImsLog.d("AudioSessionHandler created");
     }
@@ -187,13 +190,18 @@ public class AudioSessionHandler extends MediaState {
     }
 
     @VisibleForTesting
-    AudioMessageHandler getAudioMessageHandler() {
-        return mAudioMessageHandler;
+    boolean getAudioAnbrEnabled() {
+        return mAnbrEnabled;
     }
 
     @VisibleForTesting
-    boolean getAudioAnbrEnabled() {
-        return mAnbrEnabled;
+    AudioImsQosCallback getAudioImsQosCallback() {
+        return mAudioImsQosCallback;
+    }
+
+    @VisibleForTesting
+    QosAgent getAudioQosAgent() {
+        return mAudioQosAgent;
     }
 
     private boolean isWaitRequired(int requestType) {

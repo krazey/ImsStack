@@ -92,6 +92,7 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
 
     private void stubContext() {
         when(mMockBaseContext.getContext()).thenReturn(mMockContext);
+        when(mMockBaseContext.getSlotId()).thenReturn(1);
     }
 
     private void stubQosAgent() {
