@@ -418,6 +418,24 @@ TEST_F(AosTransactionTest, StopTrafficForTheTypeAndStartTimerIfTrafficStarted)
     EXPECT_FALSE(m_pAosTransaction->IsTimerRunning());
 }
 
+TEST_F(AosTransactionTest, InvokeStopImsTrafficIfTypeIsDereg)
+{
+    // GIVEN
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_DEREG, NW_REPORT_RADIO_LTE);
+
+    EXPECT_TRUE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_DEREG));
+    EXPECT_TRUE(m_pAosTransaction->IsStartUpdated());
+
+    EXPECT_CALL(m_objMockIImsRadio, StopImsTraffic(_)).Times(1);
+
+    // WHEN
+    m_pAosTransaction->StopTraffic(IAosTransaction::TYPE_DEREG);
+
+    // THEN
+    EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_DEREG));
+    EXPECT_FALSE(m_pAosTransaction->IsStartUpdated());
+}
+
 TEST_F(AosTransactionTest, EmergencyTrafficCannotBeStoppedIfNotStarted)
 {
     // GIVEN
@@ -589,6 +607,22 @@ TEST_F(AosTransactionTest,
     EXPECT_FALSE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
 }
 
+TEST_F(AosTransactionTest, ShouldNotNotifyToTheListenerWhenTrafficConnectionIsFailedForTypeDereg)
+{
+    // GIVEN
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_DEREG, &m_objMockIAosTransactionListener);
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_DEREG, NW_REPORT_RADIO_LTE);
+    EXPECT_CALL(m_objMockIAosTransactionListener,
+            Transaction_OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 0, 1000))
+            .Times(0);
+
+    // WHEN
+    m_pAosTransaction->Traffic_OnConnectionFailed(
+            IAosTransaction::TYPE_DEREG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
+
+    // THEN : The GIVEN condition should be met
+}
+
 TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionSetupIsPrepared)
 {
     // GIVEN
@@ -647,6 +681,19 @@ TEST_F(AosTransactionTest,
     EXPECT_FALSE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
 }
 
+TEST_F(AosTransactionTest,
+        ShouldNotNotifyToTheListenerWhenTrafficConnectionSetupIsPreparedForTypeDereg)
+{
+    // GIVEN
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_DEREG, &m_objMockIAosTransactionListener);
+    EXPECT_CALL(m_objMockIAosTransactionListener, Transaction_OnConnectionSetupPrepared()).Times(0);
+
+    // WHEN
+    m_pAosTransaction->Traffic_OnConnectionSetupPrepared(IAosTransaction::TYPE_DEREG);
+
+    // THEN: The GIVEN condition should be met
+}
+
 TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficPriorityChanged)
 {
     // GIVEN
@@ -677,6 +724,20 @@ TEST_F(AosTransactionTest, ShouldNotifyToTwoListenersWhenTrafficPriorityChanged)
     m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &m_objMockIAosTransactionListener);
     m_pAosTransaction->SetListener(IAosTransaction::TYPE_SUB, &m_objMockIAosTransactionListener);
     EXPECT_CALL(m_objMockIAosTransactionListener, Transaction_OnTrafficPriorityChanged()).Times(2);
+
+    // WHEN
+    m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();
+
+    // THEN: The GIVEN condition should be met
+}
+
+TEST_F(AosTransactionTest, ShouldNotifyToThreeListenersWhenTrafficPriorityChanged)
+{
+    // GIVEN
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &m_objMockIAosTransactionListener);
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_SUB, &m_objMockIAosTransactionListener);
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_DEREG, &m_objMockIAosTransactionListener);
+    EXPECT_CALL(m_objMockIAosTransactionListener, Transaction_OnTrafficPriorityChanged()).Times(3);
 
     // WHEN
     m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();

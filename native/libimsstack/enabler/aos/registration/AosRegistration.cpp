@@ -117,7 +117,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_piOfflineRecoverTimer(IMS_NULL),
         m_piStopRetryTimer(IMS_NULL),
         m_piRefreshTimer(IMS_NULL),
-        m_piExpiredTimer(IMS_NULL),
+        m_piDeregTrafficTimer(IMS_NULL),
         m_piModeTimer(IMS_NULL),
         m_piTransactionTimer(IMS_NULL),
         m_piInternalErrorTimer(IMS_NULL),
@@ -240,16 +240,7 @@ PUBLIC VIRTUAL void AosRegistration::Stop()
 
         case STATE_REGISTERED:  // FALL-THROUGH
         case STATE_REFRESHSTOP:
-            StopSubscription();
-
-            if (!SendDeregister())
-            {
-                Destroy();
-                ReportStateChanged(RESULT_SUCCESS);
-                return;
-            }
-            SetState(STATE_DEREGISTERING);
-            ReportTryingState();
+            ProcessStop();
             break;
 
         default:
@@ -624,9 +615,10 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
     }
 
     A_IMS_TRACE_I(REGID, "SetState :: old state(%s) to state(%s)",
-            AosProvider::GetLog()->RegStateToString(this->m_nState),
+            AosProvider::GetLog()->RegStateToString(m_nState),
             AosProvider::GetLog()->RegStateToString(nState), 0);
 
+    IMS_UINT32 nOldState = m_nState;
     m_nState = nState;
 
     if (m_eRegType != AosRegistrationType::RCS)
@@ -639,6 +631,12 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
         if (!IsRegTrying())
         {
             SetTraffic(IMS_FALSE);
+
+            if (nOldState == STATE_DEREGISTERING && m_piDeregTrafficTimer != IMS_NULL)
+            {
+                StopTimer(TIMER_DEREG_TRAFFIC);
+                SetTrafficForDeregister(IMS_FALSE);
+            }
         }
     }
 }
@@ -739,6 +737,27 @@ IMS_BOOL AosRegistration::SetTraffic(IN IMS_BOOL bStarted)
             {
                 piTransaction->StopEmergencyTraffic();
             }
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL AosRegistration::SetTrafficForDeregister(IN IMS_BOOL bStarted)
+{
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+
+    if (piTransaction != IMS_NULL)
+    {
+        if (bStarted)
+        {
+            return piTransaction->StartTraffic(
+                    IAosTransaction::TYPE_DEREG, m_piContext->GetNetTracker()->GetNetworkType());
+        }
+        else
+        {
+            piTransaction->StopTraffic(IAosTransaction::TYPE_DEREG);
         }
     }
 
@@ -2009,6 +2028,39 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendRegisterEx(
     return IMS_TRUE;
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStop()
+{
+    A_IMS_TRACE_I(REGID, "ProcessStop", 0, 0, 0);
+
+    StopSubscription();
+
+    if (!SendDeregister())
+    {
+        Destroy();
+        ReportStateChanged(RESULT_SUCCESS);
+        return IMS_FALSE;
+    }
+    SetState(STATE_DEREGISTERING);
+
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+    if (piTransaction != IMS_NULL)
+    {
+        if (piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
+        {
+            SetTrafficForDeregister(IMS_TRUE);
+            StartTimer(TIMER_DEREG_TRAFFIC, DEREGISTRATION_TRAFFIC_MAX_TIME * 1000);
+        }
+        else
+        {
+            SetTrafficPriorityBlocked(IMS_TRUE);
+            m_pUtil->AddFeature(PENDING_STOP, m_nTxnPending);
+        }
+    }
+
+    ReportTryingState();
+    return IMS_TRUE;
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::SendDeregister()
 {
     A_IMS_TRACE_I(REGID, "SendDeregister", 0, 0, 0);
@@ -3198,7 +3250,18 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
 
 PROTECTED VIRTUAL void AosRegistration::ProcessPendingTransaction()
 {
-    A_IMS_TRACE_I(REGID, "ProcessPendingTransaction", 0, 0, 0);
+    A_IMS_TRACE_I(REGID, "ProcessPendingTransaction :: pending=%x", m_nTxnPending, 0, 0);
+
+    if (m_pUtil->IsFeatureOn(PENDING_STOP, m_nTxnPending))
+    {
+        m_pUtil->RemoveFeature(PENDING_STOP, m_nTxnPending);
+        if (m_nState == STATE_DEREGISTERING)
+        {
+            StartTimer(TIMER_DEREG_TRAFFIC, DEREGISTRATION_TRAFFIC_MAX_TIME * 1000);
+            SetTrafficForDeregister(IMS_TRUE);
+            return;
+        }
+    }
 
     if (m_pUtil->IsFeatureOn(PENDING_START, m_nTxnPending))
     {
@@ -5584,9 +5647,10 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRefreshTimerExpired()
     StopTimer(TIMER_REFRESH);
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessExpiredTimerExpired()
+PROTECTED VIRTUAL void AosRegistration::ProcessDeregTrafficTimerExpired()
 {
-    StopTimer(TIMER_EXPIRED);
+    StopTimer(TIMER_DEREG_TRAFFIC);
+    SetTrafficForDeregister(IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessModeTimerExpired()
@@ -5630,8 +5694,8 @@ PROTECTED VIRTUAL void AosRegistration::StartTimer(IN IMS_UINT32 nType, IN IMS_U
             ppiTimer = &m_piRefreshTimer;
             break;
 
-        case TIMER_EXPIRED:
-            ppiTimer = &m_piExpiredTimer;
+        case TIMER_DEREG_TRAFFIC:
+            ppiTimer = &m_piDeregTrafficTimer;
             break;
 
         case TIMER_MODE:
@@ -5682,8 +5746,8 @@ PROTECTED VIRTUAL void AosRegistration::StopTimer(IN IMS_UINT32 nType)
             ppiTimer = &m_piRefreshTimer;
             break;
 
-        case TIMER_EXPIRED:
-            ppiTimer = &m_piExpiredTimer;
+        case TIMER_DEREG_TRAFFIC:
+            ppiTimer = &m_piDeregTrafficTimer;
             break;
 
         case TIMER_MODE:
@@ -5737,9 +5801,10 @@ PROTECTED VIRTUAL void AosRegistration::ClearTimers()
         StopTimer(TIMER_REFRESH);
     }
 
-    if (m_piExpiredTimer != IMS_NULL)
+    if (m_piDeregTrafficTimer != IMS_NULL)
     {
-        StopTimer(TIMER_EXPIRED);
+        StopTimer(TIMER_DEREG_TRAFFIC);
+        SetTrafficForDeregister(IMS_FALSE);
     }
 
     if (m_piModeTimer != IMS_NULL)
@@ -5783,9 +5848,9 @@ PROTECTED VIRTUAL void AosRegistration::Timer_TimerExpired(IN ITimer* piTimer)
         return;
     }
 
-    if (piTimer == m_piExpiredTimer)
+    if (piTimer == m_piDeregTrafficTimer)
     {
-        ProcessExpiredTimerExpired();
+        ProcessDeregTrafficTimerExpired();
         return;
     }
 
@@ -6260,7 +6325,7 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnTrafficPriorityChanged()
             SetTrafficPriorityBlocked(IMS_FALSE);
             UpdateTransactionStarted();
 
-            if (IsTransactionStarted())
+            if (IsTransactionStarted() || m_pUtil->IsFeatureOn(PENDING_STOP, m_nTxnPending))
             {
                 ProcessPendingTransaction();
             }

@@ -114,6 +114,7 @@ protected:
     void SetTrafficPriorityBlocked(IN IMS_BOOL bBlocked);
     void SetRetryTime();
     IMS_BOOL SetTraffic(IN IMS_BOOL bStarted);
+    IMS_BOOL SetTrafficForDeregister(IN IMS_BOOL bStarted);
     void SetTrafficListener(IN IMS_BOOL bSet);
     void UpdateRegIpcanCategory();
     void ClearPending();
@@ -202,6 +203,7 @@ protected:
             IN IMS_BOOL bRestore = IMS_FALSE, IN IMS_BOOL bInitial = IMS_FALSE);
     virtual IMS_BOOL SendRegisterEx(
             IN IMS_SINT32 nMinExpireValue, IN IMS_BOOL bAddHalfExpireValue = IMS_FALSE);
+    virtual IMS_BOOL ProcessStop();
     virtual IMS_BOOL SendDeregister();
 
     virtual IMS_BOOL AddOperation_OnSendRegister();
@@ -346,7 +348,7 @@ protected:
     virtual void ProcessOfflineRecoverTimerExpired();
     virtual void ProcessStopRetryTimerExpired();
     virtual void ProcessRefreshTimerExpired();
-    virtual void ProcessExpiredTimerExpired();
+    virtual void ProcessDeregTrafficTimerExpired();
     virtual void ProcessModeTimerExpired();
     virtual void ProcessTransactionTimerExpired();
     virtual void ProcessInternalErrorTimerExpired();
@@ -457,7 +459,7 @@ public:
         TIMER_OFFLINE_RECOVER = 100,
         TIMER_STOP_RETRY,
         TIMER_REFRESH,
-        TIMER_EXPIRED,
+        TIMER_DEREG_TRAFFIC,
         TIMER_MODE,
         TIMER_TRANSACTION,
         TIMER_INTERNAL_ERROR
@@ -483,7 +485,8 @@ public:
         PENDING_SUBSCRIPTION = 0x40,
         PENDING_TERMINATED = 0x80,
 
-        PENDING_TRAFFIC = 0x100
+        PENDING_TRAFFIC = 0x100,
+        PENDING_STOP = 0x200
     };
 
     enum
@@ -571,8 +574,8 @@ protected:
     ITimer* m_piStopRetryTimer;
     /// this is used when running refresh timer within aos module(no engine operation)
     ITimer* m_piRefreshTimer;
-    /// this is used when running expired timer within aos module(no engine operation)
-    ITimer* m_piExpiredTimer;
+    /// this is used to ensure IMS traffic during deregistration
+    ITimer* m_piDeregTrafficTimer;
     /// this is used in ECBM, etc for refresh condition
     ITimer* m_piModeTimer;
     /// this is used when running transaction timer within aos module(Timer F is not used)
@@ -619,8 +622,9 @@ protected:
     AString m_strTag;
 
     static const IMS_UINT32 INTERNAL_ERROR_INTERVAL = 3;   // 3 Sec.
-    static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec
-    static const IMS_UINT32 CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME = 16;  // 16 Sec
+    static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec.
+    static const IMS_UINT32 CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME = 16;  // 16 Sec.
+    static const IMS_UINT32 DEREGISTRATION_TRAFFIC_MAX_TIME = 3;              // 3 Sec.
     static const IMS_UINT32 RECONNECT_SERVER_SOCKET_ERROR_MAX_COUNT = 10;
     static const IMS_UINT32 AUTHENTICATION_RETRY_MAX_COUNT = 6;
     static const IMS_UINT32 SIP_MTU_MAX_SIZE_VIA_WIFI = 1280;

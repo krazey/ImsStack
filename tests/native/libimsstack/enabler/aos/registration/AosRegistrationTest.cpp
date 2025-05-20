@@ -169,6 +169,7 @@ using ::testing::SetArgReferee;
     using Base::SetState;                                         \
     using Base::SetStaticIpQos;                                   \
     using Base::SetTraffic;                                       \
+    using Base::SetTrafficForDeregister;                          \
     using Base::SetTrafficListener;                               \
     using Base::SetTrafficPriorityBlocked;                        \
     using Base::StartSubscription;                                \
@@ -263,8 +264,8 @@ public:
                 return m_piStopRetryTimer;
             case AosRegistration::TIMER_REFRESH:
                 return m_piRefreshTimer;
-            case AosRegistration::TIMER_EXPIRED:
-                return m_piExpiredTimer;
+            case AosRegistration::TIMER_DEREG_TRAFFIC:
+                return m_piDeregTrafficTimer;
             case AosRegistration::TIMER_MODE:
                 return m_piModeTimer;
             case AosRegistration::TIMER_TRANSACTION:
@@ -831,6 +832,25 @@ TEST_F(AosRegistrationTest, SetDeregisteringStateIfDeregistrationSendSucceedsDur
 
     m_pAosRegistration->Stop();
 
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_DEREGISTERING);
+}
+
+TEST_F(AosRegistrationTest,
+        SetDeregisteringStateIfDeregistrationSendSucceedsAndTxnNotAllowedDuringStop)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHSTOP);
+
+    EXPECT_CALL(m_objMockIRegistration, Deregister()).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_STOP));
+    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->Stop();
+
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_STOP));
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_DEREGISTERING);
 }
 
@@ -1390,6 +1410,36 @@ TEST_F(AosRegistrationTest, IgnoreSetTrafficForInvalidRegType)
     IMS_BOOL bResult = m_pAosRegistration->SetTraffic(IMS_TRUE);
 
     EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest,
+        StopDeregTimerAndTrafficIfTimerIsRunningAndOldDeregisteringStateWhenSetState)
+{
+    EXPECT_CALL(m_objMockIAosTransaction, StopTraffic(IAosTransaction::TYPE_REG)).Times(2);
+
+    m_pAosRegistration->SetState(IAosRegistration::STATE_DEREGISTERING);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_DEREG_TRAFFIC, 1000);
+
+    EXPECT_CALL(m_objMockIAosTransaction, StopTraffic(IAosTransaction::TYPE_DEREG));
+
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
+}
+
+TEST_F(AosRegistrationTest, InvokeStartTrafficWhenSetForDeregisterWithStart)
+{
+    EXPECT_CALL(m_objMockIAosTransaction, StartTraffic(IAosTransaction::TYPE_DEREG, _))
+            .WillOnce(Return(IMS_TRUE));
+
+    m_pAosRegistration->SetTrafficForDeregister(IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, InvokeStopTrafficWhenSetForDeregisterWithStop)
+{
+    EXPECT_CALL(m_objMockIAosTransaction, StopTraffic(IAosTransaction::TYPE_DEREG));
+
+    m_pAosRegistration->SetTrafficForDeregister(IMS_FALSE);
 }
 
 TEST_F(AosRegistrationTest, IgnoreSetTrafficListenerForInvalidRegType)
@@ -2402,6 +2452,17 @@ TEST_F(AosRegistrationTest, ReportFailureWhenPlmnBlockWithPcoLimitedModeOnStartF
     IMS_BOOL bResult = m_pAosRegistration->ProcessPlmnBlockWithPcoLimitedModeOnStartFailure();
 
     EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StartDeregTimerIfPendingStopExistWhenHandlePendingTransaction)
+{
+    m_pAosRegistration->SetTxnPending(AosRegistration::PENDING_STOP);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_DEREGISTERING);
+
+    m_pAosRegistration->ProcessPendingTransaction();
+
+    EXPECT_FALSE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_STOP));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
 }
 
 TEST_F(AosRegistrationTest, StartRegisterIfPendingStartExistWhenHandlePendingTransaction)
@@ -5952,7 +6013,7 @@ TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecove
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_DEREG_TRAFFIC, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
@@ -5962,7 +6023,7 @@ TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecove
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
@@ -5973,7 +6034,7 @@ TEST_F(AosRegistrationTest, InvokingClearRetryTimersStopsOfflineRecoverTimerAndS
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_DEREG_TRAFFIC, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
@@ -5983,7 +6044,7 @@ TEST_F(AosRegistrationTest, InvokingClearRetryTimersStopsOfflineRecoverTimerAndS
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
@@ -5994,7 +6055,7 @@ TEST_F(AosRegistrationTest, DoNothingIfExpiredTimerIsNullWhenTimerExpired)
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_DEREG_TRAFFIC, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
@@ -6004,7 +6065,7 @@ TEST_F(AosRegistrationTest, DoNothingIfExpiredTimerIsNullWhenTimerExpired)
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
@@ -6158,14 +6219,16 @@ TEST_F(AosRegistrationTest, StopRefreshTimerWhenRefreshTimerExpired)
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
 }
 
-TEST_F(AosRegistrationTest, StopExpiredTimerWhenExpiredTimerExpired)
+TEST_F(AosRegistrationTest, StopDeregTrafficTimerWhenExpiredTimerExpired)
 {
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_DEREG_TRAFFIC, 5000);
+
+    EXPECT_CALL(m_objMockIAosTransaction, StopTraffic(IAosTransaction::TYPE_DEREG));
 
     m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_EXPIRED));
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_DEREG_TRAFFIC));
 
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_DEREG_TRAFFIC));
 }
 
 TEST_F(AosRegistrationTest, StopModeTimerWhenModeTimerExpired)

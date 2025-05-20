@@ -322,8 +322,8 @@ TEST(AosLogTest, RegTimerToString)
             "TIMER_STOP_RETRY");
     EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_REFRESH),
             "TIMER_REFRESH");
-    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_EXPIRED),
-            "TIMER_EXPIRED");
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_DEREG_TRAFFIC),
+            "TIMER_DEREG_TRAFFIC");
     EXPECT_STREQ(
             AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_MODE), "TIMER_MODE");
     EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_TRANSACTION),
