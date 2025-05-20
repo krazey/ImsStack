@@ -149,6 +149,42 @@ TEST_F(AudioControllerTest, testCloseSessionWithSessionCreated)
     EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
 }
 
+TEST_F(AudioControllerTest, testDeleteSessionFailWithOneSession)
+{
+    IMS_UINTP negoId = 1000;
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
+
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(negoId), IMS_TRUE);
+
+    // Attempt to delete the only session
+    EXPECT_EQ(m_pController->DeleteSession(negoId), IMS_FALSE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
+    m_pController->CloseSession();
+}
+
+TEST_F(AudioControllerTest, testDeleteSessionSuccess)
+{
+    IMS_UINTP negoId1 = 1000;
+    IMS_UINTP negoId2 = 2000;
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId1, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(
+            m_pController->CreateSession(&m_objListener, negoId2, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 2);
+
+    // Attempt to delete one session
+    EXPECT_EQ(m_pController->DeleteSession(negoId1), IMS_TRUE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
+    m_pController->CloseSession();
+    m_pController->CloseSession();
+}
+
 TEST_F(AudioControllerTest, testModifySessionSendDtmf)
 {
     IMS_UINTP nNegoId = 1000;

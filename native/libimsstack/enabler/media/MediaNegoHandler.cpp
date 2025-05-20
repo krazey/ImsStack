@@ -124,6 +124,13 @@ IMS_BOOL MediaNegoHandler::DeleteMediaNego(IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
+    if (m_objMapMediaNego.GetSize() == 1)
+    {
+        IMS_TRACE_E(0, "DeleteMediaNego() - NegoId[%" PFLS_x "], cannot delete last one", nNegoId,
+                0, 0);
+        return IMS_FALSE;
+    }
+
     std::shared_ptr<MediaNego> pMediaNego = m_objMapMediaNego.GetValueAt(nIndex);
     m_objMapMediaNego.RemoveAt(nIndex);
 
