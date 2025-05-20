@@ -610,8 +610,8 @@ public interface IAosRegistrationListener {
                 Map.entry(ReasonCode.WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY, Pair.create(
                         ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
                 Map.entry(ReasonCode.REG_RESP_NETWORK_TIMEOUT, Pair.create(
-                        ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT)),
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT)),
                 Map.entry(ReasonCode.INTERNAL_ERROR, Pair.create(
                         ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
                         ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR)),
