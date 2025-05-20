@@ -97,6 +97,7 @@
     <int name="imsvoice.oip_type_for_unavailable_int" value="5"/>
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
     <string name="imsvoice.local_number_presentation_set_string">+81:0</string>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="3600000"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="60">
         <item value="300:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
         <item value="301:3,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, REDIRECTION_BY_CONTACT -->
