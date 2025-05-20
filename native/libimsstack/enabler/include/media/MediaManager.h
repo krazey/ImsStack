@@ -76,7 +76,8 @@ public:
      * @brief Gets MediaSession instance
      *
      * @param nCallKey The key to identify the session instance
-     * @return MediaSession* The instance matched with the key, NULL if there is not matched session
+     * @return MediaSession* The instance matched with the key, IMS_NULL if there is not matched
+     * session
      */
     MediaSession* GetSession(IN IMS_SINTP nCallKey);
 

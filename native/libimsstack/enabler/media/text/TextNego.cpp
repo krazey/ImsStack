@@ -237,7 +237,7 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
                 // get negotiated OA model which is previou nego result
                 pPrevOaModel = GetNegotiatedOaModel();
 
-                if (pPrevOaModel != NULL &&
+                if (pPrevOaModel != IMS_NULL &&
                         pPrevOaModel->pNegotiatedProfile->GetPayloadList().GetSize() > 0)
                 {
                     IMS_TRACE_D("FormAnswer(): use previous nego payloads", 0, 0, 0);

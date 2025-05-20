@@ -430,7 +430,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
     {
         AudioProfile::AmrFmtp* pAmrFmtp =
                 reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
-        if (pAmrFmtp == NULL)
+        if (pAmrFmtp == IMS_NULL)
         {
             return NO_MODESET;
         }
@@ -465,7 +465,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
     {
         AudioProfile::EvsFmtp* pEvsFmtp =
                 reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
-        if (pEvsFmtp == NULL)
+        if (pEvsFmtp == IMS_NULL)
         {
             return NO_MODESET;
         }
@@ -535,7 +535,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
     {
         AudioProfile::AmrFmtp* pAmrFmtp =
                 reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
-        if (pAmrFmtp == NULL)
+        if (pAmrFmtp == IMS_NULL)
         {
             return NO_MODESET;
         }
@@ -556,7 +556,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
     {
         AudioProfile::EvsFmtp* pEvsFmtp =
                 reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
-        if (pEvsFmtp == NULL)
+        if (pEvsFmtp == IMS_NULL)
         {
             return NO_MODESET;
         }

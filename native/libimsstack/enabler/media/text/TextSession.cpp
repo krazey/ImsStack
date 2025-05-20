@@ -50,7 +50,7 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
         IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile, IN TextProfile* pNegoProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
-            m_pRtpConfig == NULL)
+            m_pRtpConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }

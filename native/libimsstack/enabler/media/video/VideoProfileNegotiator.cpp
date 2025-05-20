@@ -851,11 +851,11 @@ IMS_SINT32 VideoProfileNegotiator::FindPayloadIndexFromProfile(
     // find the index of negotiated payload
     for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
-        VideoProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
-        if (comparedPayload == IMS_NULL)
+        VideoProfile::Payload* pComparedPayload = pProfile->GetPayloadAt(i);
+        if (pComparedPayload == IMS_NULL)
             continue;
 
-        if (comparedPayload == pPayload)
+        if (pComparedPayload == pPayload)
         {
             IMS_TRACE_D("FindPayloadIndexFromProfile(): FindIndex[%d]", i, 0, 0);
             return i;
@@ -1186,7 +1186,7 @@ VIDEO_RESOLUTION VideoProfileNegotiator::GetAvcMaxResolutionFromLevel(IN IMS_UIN
 
 PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig,
         IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
-        IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT VideoProfile* pNegotiatedProfile)
+        IN IMS_SINT32 nAsValueOfNegotiatedCodec, OUT VideoProfile* pNegotiatedProfile)
 {
     if (bIsOfferReceived == IMS_FALSE)
     {
@@ -1229,17 +1229,17 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(IN VideoConfigu
     {
         // MT's Bandwidth Setting
         // 1. Set Negotiated AS Value
-        if (nAsValueOfNegoticatedCodec > 0)
+        if (nAsValueOfNegotiatedCodec > 0)
         {
             if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_REMOTE_VALUE &&
-                    nAsValueOfNegoticatedCodec > pPeerProfile->GetBandwidthAs() &&
+                    nAsValueOfNegotiatedCodec > pPeerProfile->GetBandwidthAs() &&
                     pPeerProfile->GetBandwidthAs() > 0)
             {
                 pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
             }
             else
             {
-                pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegoticatedCodec);
+                pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegotiatedCodec);
             }
         }
         else

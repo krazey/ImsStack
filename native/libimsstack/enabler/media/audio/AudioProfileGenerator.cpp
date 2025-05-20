@@ -376,9 +376,6 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreatePcmPayload(
 
     pPcmPayload->SetRtpMap(nPayloadNum, strCodecName, 8000, 0);
 
-    CodecPcmConfig* pPcmConfig = static_cast<CodecPcmConfig*>(pCodecConfig);
-    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
-
     IMS_TRACE_I(
             "CreatePcmPayload(): Codec[%s], Payload[%d]", strCodecName.GetStr(), nPayloadNum, 0);
     return pPcmPayload;

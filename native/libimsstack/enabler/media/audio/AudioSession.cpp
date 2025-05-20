@@ -146,7 +146,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         IN AudioProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegoProfile == IMS_NULL ||
-            m_pRtpConfig == NULL)
+            m_pRtpConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "UpdateRtpConfig() - invalid profile", 0, 0, 0);
         return IMS_NULL;
@@ -325,7 +325,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     {
         AudioProfile::EvsFmtp* pFmtp =
                 REINTERPRET_CAST(AudioProfile::EvsFmtp*, pNegoPayload->GetFmtp());
-        AudioProfile::EvsFmtp* pDestFmtp =
+        AudioProfile::EvsFmtp* pPeerFmtp =
                 REINTERPRET_CAST(AudioProfile::EvsFmtp*, pPeerPayload->GetFmtp());
         if (pFmtp == IMS_NULL)
         {
@@ -343,7 +343,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         pEvsParams->setChannelAwareMode((int8_t)pFmtp->GetChAwRecv());
 
         // TODO Media : use the Dest HFOnly
-        pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pDestFmtp->GetHfOnly());
+        pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pPeerFmtp->GetHfOnly());
 
         IMS_SINT32 modeSet = AudioProfileUtil::GetModesetList("EVS", pNegoPayload);
 
