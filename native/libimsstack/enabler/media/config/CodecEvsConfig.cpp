@@ -19,6 +19,16 @@
 
 __IMS_TRACE_TAG_MEDIA__;
 
+const IMS_BOOL CodecEvsConfig::DEFAULT_DTX_RECV = IMS_TRUE;
+const IMS_SINT32 CodecEvsConfig::DEFAULT_HF_ONLY = 0;
+const IMS_SINT32 CodecEvsConfig::DEFAULT_EVS_MODESWITCH = 0;
+const IMS_SINT32 CodecEvsConfig::DEFAULT_BR = EVS_PRIMARY_MODE_BITRATE_24_4_KBPS;
+const IMS_SINT32 CodecEvsConfig::DEFAULT_BR_LIST = 1 << DEFAULT_BR;
+const IMS_SINT32 CodecEvsConfig::DEFAULT_BW_LIST = EVS_ENCODED_BW_TYPE_NB_WB_SWB;
+const IMS_SINT32 CodecEvsConfig::DEFAULT_CMR = 0;
+const IMS_SINT32 CodecEvsConfig::DEFAULT_CH_AW_RECV = 0;
+const IMS_SINT32 CodecEvsConfig::CMR_NOT_PRESENT = -2;
+
 PUBLIC
 CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
         CodecAudioConfig(nType, nPayloadTypeNum),
@@ -77,10 +87,11 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
             CodecAudioConfig::DEFAULT_DTX);
     m_bDtxRecv = piCcSubBundle->GetBoolean(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL, DEFAULT_DTX_RECV);
-    m_nHfOnly =
-            piCcSubBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT, -1);
-    m_nEvsModeSwitch = piCcSubBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT, -1);
+    m_nHfOnly = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT, DEFAULT_HF_ONLY);
+    m_nEvsModeSwitch =
+            piCcSubBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT,
+                    DEFAULT_EVS_MODESWITCH);
 
     ImsVector<IMS_SINT32> objBitrateList = piCcSubBundle->GetIntArray(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);

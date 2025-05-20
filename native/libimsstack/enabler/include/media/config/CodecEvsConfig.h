@@ -22,7 +22,7 @@
 
 class CodecEvsConfig : public CodecAudioConfig
 {
-private:
+public:
     /** Specifies the range of source codec bit-rate for EVS Primary mode in the session. */
     enum
     {
@@ -54,7 +54,6 @@ private:
         EVS_PRIMARY_MODE_BITRATE_MAX = EVS_PRIMARY_MODE_BITRATE_128_0_KBPS
     };
 
-public:
     /** Specifies the EVS codec encoding bandwidth options */
     enum
     {
@@ -73,6 +72,7 @@ public:
         /** EVS nb, wb, swb and fb */
         EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB = 6
     };
+
     /** Enum EVS Bandwidth Type*/
     enum
     {
@@ -87,15 +87,15 @@ public:
         EVS_BANDWIDTH_MAX = EVS_BANDWIDTH_FB
     };
 
-    static const IMS_BOOL DEFAULT_DTX_RECV = IMS_TRUE;
-    static const IMS_SINT32 DEFAULT_HF_ONLY = 0;
-    static const IMS_SINT32 DEFAULT_EVS_MODESWITCH = 0;
-    static const IMS_SINT32 DEFAULT_BR = EVS_PRIMARY_MODE_BITRATE_24_4_KBPS;
-    static const IMS_SINT32 DEFAULT_BR_LIST = 1 << DEFAULT_BR;
-    static const IMS_SINT32 DEFAULT_BW_LIST = EVS_ENCODED_BW_TYPE_NB_WB_SWB;
-    static const IMS_SINT32 DEFAULT_CMR = 0;
-    static const IMS_SINT32 DEFAULT_CH_AW_RECV = 0;
-    static const IMS_SINT32 CMR_NOT_PRESENT = -2;
+    static const IMS_BOOL DEFAULT_DTX_RECV;
+    static const IMS_SINT32 DEFAULT_HF_ONLY;
+    static const IMS_SINT32 DEFAULT_EVS_MODESWITCH;
+    static const IMS_SINT32 DEFAULT_BR;
+    static const IMS_SINT32 DEFAULT_BR_LIST;
+    static const IMS_SINT32 DEFAULT_BW_LIST;
+    static const IMS_SINT32 DEFAULT_CMR;
+    static const IMS_SINT32 DEFAULT_CH_AW_RECV;
+    static const IMS_SINT32 CMR_NOT_PRESENT;
 
 public:
     /**
