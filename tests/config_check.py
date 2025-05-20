@@ -15,11 +15,12 @@
 #  limitations under the License.
 
 import argparse
+import os
+import re
 import sys
 import xml.etree.ElementTree as et
 
-CONFIG_PATH = 'carrier_config'
-CONFIG_EXT = '.xml'
+CONFIG_PATH_PATTERN = re.compile("assets/carrier_config/.*\\.xml$", re.I)
 IGNORE_CHECK_NAMES = [
     'ignore_data_enabled_changed_for_video_calls',
 ]
@@ -166,7 +167,7 @@ def main():
   args = get_args()
   config_files = [
       file for file in args.files
-      if CONFIG_PATH in file and file.lower().endswith(CONFIG_EXT)
+      if CONFIG_PATH_PATTERN.search(os.path.abspath(file))
   ]
 
   for config_file in config_files:
