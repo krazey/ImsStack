@@ -236,8 +236,14 @@
         android:key="test_carrier_id" android:defaultValue="0" android:enabled="true"
         android:selectable="true">
     </ListPreference>
+    <EditTextPreference android:title="Test Carrier Id (Enter directly)"
+        android:key="test_entered_carrier_id"
+        android:inputType="number"
+        android:dialogMessage="">
+    </EditTextPreference>
     <EditTextPreference android:title="Test Specific Carrier Id"
         android:key="test_specific_carrier_id"
+        android:inputType="number"
         android:dialogMessage="">
     </EditTextPreference>
     <ListPreference android:title="VoLte Provisioning"

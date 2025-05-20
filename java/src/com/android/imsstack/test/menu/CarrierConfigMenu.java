@@ -68,6 +68,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
     protected static final String KEY_DUMP_CONFIG = "dump_config";
     protected static final String KEY_CLEAR_TEST_CONFIG = "clear_test_config";
     protected static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
+    protected static final String KEY_TEST_ENTERED_CARRIER_ID = "test_entered_carrier_id";
     protected static final String KEY_TEST_SPECIFIC_CARRIER_ID = "test_specific_carrier_id";
     protected static final String KEY_VOLTE_PROVISIONING = "volte_provisioning";
     protected static final String KEY_ASSETS_PREFIX = "assets_";
@@ -254,6 +255,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
     private final List<String> mBundleKeys = new ArrayList<>();
     private ListPreference mClearTestConfig;
     private ListPreference mTestCarrierId;
+    private EditTextPreference mTestEnteredCarrierId;
     private EditTextPreference mTestSpecificCarrierId;
     private ListPreference mVoLteProvisioning;
     private boolean mConfigChanged = false;
@@ -449,6 +451,21 @@ public class CarrierConfigMenu extends AppCompatActivity {
             mTestCarrierId.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
 
+        mTestEnteredCarrierId = (EditTextPreference) findPreference(KEY_TEST_ENTERED_CARRIER_ID);
+        if (mTestEnteredCarrierId != null) {
+            int carrierId = ImsPrivateProperties.Persistent.getInt(
+                    ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
+
+            if (carrierId > 0) {
+                mTestEnteredCarrierId.setText(String.valueOf(carrierId));
+                mTestEnteredCarrierId.setSummary(String.valueOf(carrierId));
+            } else {
+                mTestEnteredCarrierId.setText("0");
+                mTestEnteredCarrierId.setSummary("0");
+            }
+            mTestEnteredCarrierId.setOnPreferenceChangeListener(new EditTextItemChangeListener());
+        }
+
         mTestSpecificCarrierId = (EditTextPreference) findPreference(KEY_TEST_SPECIFIC_CARRIER_ID);
         if (mTestSpecificCarrierId != null) {
             int specificCarrierId = ImsPrivateProperties.Persistent.getInt(
@@ -518,6 +535,27 @@ public class CarrierConfigMenu extends AppCompatActivity {
                             ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID,
                             newSpecificCarrierId, mSlotId);
                 }
+            } else if (KEY_TEST_ENTERED_CARRIER_ID.equals(preference.getKey())) {
+                if (TextUtils.isEmpty(value)) {
+                    value = "0";
+                }
+                mTestEnteredCarrierId.setText(value);
+                mTestEnteredCarrierId.setSummary(value);
+
+                mTestCarrierId.setValue(value);
+                mTestCarrierId.setSummary(mTestCarrierId.getEntry());
+
+                int oldCarrierId = ImsPrivateProperties.Persistent.getInt(
+                        ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
+                int newCarrierId = parseInt(value, 0);
+
+                if (newCarrierId != oldCarrierId) {
+                    ImsLog.d(mSlotId, "TestEnteredCarrierId: " + oldCarrierId
+                            + " >> " + newCarrierId);
+                    ImsPrivateProperties.Persistent.setInt(
+                            ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID,
+                            newCarrierId, mSlotId);
+                }
             }
             return true;
         }
@@ -546,6 +584,9 @@ public class CarrierConfigMenu extends AppCompatActivity {
             } else if (KEY_TEST_CARRIER_ID.equals(preference.getKey())) {
                 mTestCarrierId.setValue(value);
                 mTestCarrierId.setSummary(mTestCarrierId.getEntry());
+
+                mTestEnteredCarrierId.setText(value);
+                mTestEnteredCarrierId.setSummary(value);
 
                 int oldCarrierId = ImsPrivateProperties.Persistent.getInt(
                         ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
