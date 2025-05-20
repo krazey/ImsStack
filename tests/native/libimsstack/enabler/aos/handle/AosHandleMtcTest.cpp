@@ -4241,6 +4241,24 @@ TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test6)
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_SSAC));
 }
 
+TEST_F(AosHandleMtcTest, VoiceAvailableWhenEpdgEnabledToWlanEvenIfVopsNotSupported)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosHandleMtc->SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    m_pAosHandleMtc->SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
+    m_pAosHandleMtc->GetFeatureTagList().AddUnavailableFeature(ImsAosFeature::MMTEL);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+}
+
 TEST_F(AosHandleMtcTest, GetVoiceBlockReasonForIpcan_Test)
 {
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
