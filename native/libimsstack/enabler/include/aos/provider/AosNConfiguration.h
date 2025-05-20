@@ -146,6 +146,7 @@ public:
     IMS_SINT32 GetEmergencyRegistrationTimerMillis() const override;
     IMS_SINT32 GetImsSignallingDscp() const override;
     IMS_SINT32 GetRegistrationPrivateHeader() const override;
+    IMS_SINT32 GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam() const override;
     IMS_SINT32 GetRegActualWaitTimePolicy() const override;
     IMS_SINT32 GetRegDefaultWaitTime() const override;
     IMS_SINT32 GetRegOutOfServicePolicy() const override;

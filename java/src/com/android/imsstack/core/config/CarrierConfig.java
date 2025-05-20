@@ -481,6 +481,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "ims_preferred_iptype_int";
         public static final String KEY_IMS_SIGNALLING_DSCP_INT =
                 KEY_PREFIX + "ims_signalling_dscp_int";
+        public static final String
+                KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT =
+                KEY_PREFIX
+                        + "pdn_reconnect_delay_on_wfc_setup_fail_all_pcscfs_with_cs_roam_sec_int";
         public static final String KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT =
                 KEY_PREFIX + "reg_actual_wait_time_policy_int";
         public static final String KEY_REG_DEFAULT_WAIT_TIME_INT =

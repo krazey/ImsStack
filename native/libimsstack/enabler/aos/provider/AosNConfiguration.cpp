@@ -656,6 +656,12 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() cons
     return m_objCarrierConfig.nRegistrationPrivateHeader;
 }
 
+PUBLIC VIRTUAL IMS_SINT32
+AosNConfiguration::GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam() const
+{
+    return m_objAsset.nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegActualWaitTimePolicy() const
 {
     return m_objAsset.nRegActualWaitTimePolicy;
@@ -1576,6 +1582,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_IMS_ESTABLISHMENT_TIME_FOR_NR_SEC_INT);
     m_objAsset.nImsPreferredIpType = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_PREFERRED_IPTYPE_INT);
     m_objAsset.nImsSignallingDscp = piCc->GetInt(CarrierConfig::Ims::KEY_IMS_SIGNALLING_DSCP_INT);
+    m_objAsset.nPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam = piCc->GetInt(CarrierConfig::
+                    Ims::KEY_PDN_RECONNECT_DELAY_ON_WFC_SETUP_FAIL_ALL_PCSCFS_WITH_CS_ROAM_SEC_INT);
     m_objAsset.nRegActualWaitTimePolicy =
             piCc->GetInt(CarrierConfig::Ims::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT);
     m_objAsset.nRegDefaultWaitTime =
