@@ -166,7 +166,16 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocated(
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAlertUser() const
 {
     IMS_TRACE_D("IsCheckingResourcesRequiredToAlertUser", 0, 0, 0);
-    return !IsDefaultBearerAllowed(MEDIATYPE_AUDIO);
+
+    if (IsDefaultBearerAllowed(MEDIATYPE_AUDIO))
+    {
+        return IMS_FALSE;
+    }
+
+    return IsPreconditionSupportedInLocal()
+            ? IMS_TRUE
+            : m_objContext.GetConfigurationProxy().GetBoolean(
+                      ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISession* piSession) const
@@ -611,7 +620,9 @@ QosStatusTable* MtcPreconditionManager::GetQosStatusTable(IN ISession* piSession
 PRIVATE
 void MtcPreconditionManager::StartQosTimer(IN ISession* piSession, IN QosTimerType eType) const
 {
-    if (!IsPreconditionSupportedInLocal())
+    if (!IsPreconditionSupportedInLocal() &&
+            !m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
     {
         IMS_TRACE_D("StartQosTimer Don't use precondition mechanism.", 0, 0, 0);
         return;
