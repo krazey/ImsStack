@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -332,6 +333,37 @@ public class ImsRegistrationTrackerTest {
         mMmTelCapabilities.removeCapabilities(removeCapabilities);
         verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(
                 eq(mMmTelCapabilities));
+    }
+
+    @Test
+    public void testNotifyDeRegistering_NotifyCapabilityChanges() {
+        // update registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
+
+        // notify de-registering
+        mAosRegListener.notifyDeregistering(IAosRegistrationListener.RegistrationType.NORMAL);
+
+        assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
+                mRegTracker.getRegisteredFeatures());
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE);
+        verify(mMockFeatureCapabilityListener, times(2))
+                .onFeatureCapabilityChanged(eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNotifyDeRegistering_ShouldNotNotifyCapabilityChangesIfNotRegistered() {
+        // notify de-registering
+        mAosRegListener.notifyDeregistering(IAosRegistrationListener.RegistrationType.NORMAL);
+
+        assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
+                mRegTracker.getRegisteredFeatures());
+        verify(mMockFeatureCapabilityListener, never())
+                .onFeatureCapabilityChanged(any(MmTelFeature.MmTelCapabilities.class));
     }
 
     @Test

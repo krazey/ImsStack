@@ -80,6 +80,16 @@ TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyDeregistered)
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyDeregistering)
+{
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyDeregistering(0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
+}
+
 TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyTechnologyChangeFailed)
 {
     // GIVEN

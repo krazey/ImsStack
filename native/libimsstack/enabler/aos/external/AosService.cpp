@@ -701,6 +701,18 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistered(
     return IMS_TRUE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistering(IN IMS_SINT32 nRegType)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyDeregistering", 0, 0, 0);
+    IJniAosServiceThread* piJniThread = GetJniThread();
+    if (piJniThread)
+    {
+        piJniThread->NotifyDeregistering(nRegType);
+    }
+
+    return IMS_TRUE;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyTechnologyChangeFailed(
         IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
 {

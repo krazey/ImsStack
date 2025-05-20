@@ -466,6 +466,22 @@ void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
 }
 
 PROTECTED
+void AosApplication::NotifyDeregistering()
+{
+    if (!IsRegTypeNormal())
+    {
+        return;
+    }
+
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piService != IMS_NULL)
+    {
+        A_IMS_TRACE_D(APPID, "NotifyDeregistering", 0, 0, 0);
+        piService->NotifyDeregistering(IAosRegistration::IMS_REG_TYPE_NORMAL);
+    }
+}
+
+PROTECTED
 void AosApplication::AddRatBlock()
 {
     m_nBlockedRats |= m_nRat;
@@ -1209,6 +1225,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegStop(IN IMSMSG& /* objMsg */)
             A_IMS_TRACE_I(APPID, "ProcessRegStop :: ignore due to processing", 0, 0, 0);
             return;
         }
+
+        NotifyDeregistering();
 
         if (!IsPublished())
         {

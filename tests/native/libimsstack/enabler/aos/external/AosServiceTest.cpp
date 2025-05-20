@@ -1031,6 +1031,11 @@ TEST_F(AosServiceTest, NotifyDeregistered)
             AosNetworkType::LTE, AosReasonCode::UNSPECIFIED));
 }
 
+TEST_F(AosServiceTest, NotifyDeregistering)
+{
+    EXPECT_TRUE(m_pAosService->NotifyDeregistering(IAosRegistration::IMS_REG_TYPE_NORMAL));
+}
+
 TEST_F(AosServiceTest, NotifyTechnologyChangeFailed)
 {
     EXPECT_TRUE(m_pAosService->NotifyTechnologyChangeFailed(

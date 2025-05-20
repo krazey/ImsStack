@@ -1573,6 +1573,31 @@ TEST_F(AosApplicationTest, ProcessMessage)
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
 }
 
+TEST_F(AosApplicationTest, NotifyDeregisteringWhenHandlesRegStopMsg)
+{
+    m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_REGISTERED));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistering(_));
+
+    ImsMessage objMessage(MSG_REG_STOP, 0, 0);
+    m_pAosApplication->ProcessMessage(objMessage);
+}
+
+TEST_F(AosApplicationTest, ShouldNotNotifyDeregisteringWhenHandlesRegStopMsgForEmergencyType)
+{
+    m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+    m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_REGISTERED));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistering(_)).Times(0);
+
+    ImsMessage objMessage(MSG_REG_STOP, 0, 0);
+    m_pAosApplication->ProcessMessage(objMessage);
+}
+
 TEST_F(AosApplicationTest, RegRetryCount)
 {
     ImsMessage objMessage(MSG_RETRY_COUNT_INCREASE, RETRY_COUNT_REG_NONE, 0);

@@ -832,6 +832,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
+    private void onDeregistering(int regType) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
+            l.notifyDeregistering(regType);
+        }
+    }
+
     private void onTechnologyChangeFailed(
             int regType, NetworkType networkType, ReasonCode reason) {
         for (IAosRegistrationListener l : mAosRegistrationListeners) {
@@ -916,6 +922,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         } else {
             mHandler.post(() -> onDeregistered(networkType, reason));
         }
+    }
+
+    private void updateDeregistering(int regType) {
+        ImsLog.d(mSlotId, "updateDeregistering");
+        mHandler.post(() -> onDeregistering(regType));
     }
 
     private void updateTechnologyChangeFailed(
@@ -1104,6 +1115,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     int reason = parcel.readInt();
 
                     updateDeregistered(regType, NetworkType.of(networkType), ReasonCode.of(reason));
+                }
+                case IIAosService.N2J_NOTIFY_DEREGISTERING -> {
+                    int regType = parcel.readInt();
+                    updateDeregistering(regType);
                 }
                 case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED -> {
                     int regType = parcel.readInt();

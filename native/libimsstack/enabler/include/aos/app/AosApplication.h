@@ -107,6 +107,7 @@ protected:
 
     void ResetBlock(IN BLOCK_REASON nReason);
     void NotifyDeregistered(IN AosReasonCode eReason);
+    void NotifyDeregistering();
     void AddRatBlock();
     void ClearRatBlocks();
     void PerformRatBlockActions(IN IMS_BOOL bStart);

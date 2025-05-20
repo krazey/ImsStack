@@ -758,6 +758,18 @@ public class ImsRegistrationTracker {
         }
 
         @Override
+        public void notifyDeregistering(int regType) {
+            if (regType != RegistrationType.NORMAL) {
+                logi("notifyDeregistering is ignored");
+                return;
+            }
+
+            if (updateFeatures(FeatureTagMask.NONE)) {
+                updateFeatureCapabilities();
+            }
+        }
+
+        @Override
         public void notifyTechnologyChangeFailed(
                 int regType, NetworkType networkType, ReasonCode reason, String message) {
             int radioTech = convertToTelephonyNetworkType(networkType);
