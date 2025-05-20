@@ -167,6 +167,16 @@ public class AudioSessionHandler extends MediaState {
     }
 
     @VisibleForTesting
+    void setAudioAnbrEnabled(boolean anbrEnabled) {
+        mAnbrEnabled = anbrEnabled;
+    }
+
+    @VisibleForTesting
+    void setCodecType(int codecType) {
+        mCodecType = codecType;
+    }
+
+    @VisibleForTesting
     AudioSessionCallback getAudioSessionCallback() {
         return mAudioSessionCallback;
     }
@@ -687,12 +697,10 @@ public class AudioSessionHandler extends MediaState {
      * Gets the sampling rate of the rtp timestamp
      */
     public int getSamplingRateKHz() {
-        switch (mCodecType) {
-            default:
-                return 16;
-            case CODEC_AMR:
-                return 8;
+        if (mCodecType == CODEC_AMR) {
+            return 8;
         }
+        return 16;
     }
 
     private void handleAudioOpenSession(String localIpAddress, int localPortNumber) {
@@ -1043,11 +1051,12 @@ public class AudioSessionHandler extends MediaState {
 
             if (anbrMode.getAnbrUplinkCodecMode() > 0) {
                 anbrDirection = EDirectionType.DIRECTION_UPLINK.getDirection();
-                bitrate = convertCodecModeToBitrate(anbrMode.getAnbrUplinkCodecMode());
+                bitrate = convertCodecModeToBitrate(mCodecType, anbrMode.getAnbrUplinkCodecMode());
 
             } else if (anbrMode.getAnbrDownlinkCodecMode() > 0) {
                 anbrDirection = EDirectionType.DIRECTION_DOWNLINK.getDirection();
-                bitrate = convertCodecModeToBitrate(anbrMode.getAnbrDownlinkCodecMode());
+                bitrate =
+                        convertCodecModeToBitrate(mCodecType, anbrMode.getAnbrDownlinkCodecMode());
             } else {
                 ImsLog.d("handleTriggerAnbrQuery: invalid codec mode ");
             }
@@ -1059,47 +1068,31 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private int convertCodecModeToBitrate(int codecMode) {
+    @VisibleForTesting
+    int convertCodecModeToBitrate(int codecType, int codecMode) {
         int convertedBitrate = -1;
 
-        switch (mCodecType) {
-            case CODEC_AMR:
-            case CODEC_AMR_WB:
-                break;
-            case CODEC_EVS:
-                if (codecMode == EvsParams.EVS_MODE_9) {            // 5.9 kbps (or 2.8)
-                    convertedBitrate = 5900;
-                } else if (codecMode == EvsParams.EVS_MODE_10) {    //7.2kbps
-                    convertedBitrate = 7200;
-                } else if (codecMode == EvsParams.EVS_MODE_11) {    //8.0kbps
-                    convertedBitrate = 8000;
-                } else if (codecMode == EvsParams.EVS_MODE_12) {    //9.6kbps
-                    convertedBitrate = 9600;
-                } else if (codecMode == EvsParams.EVS_MODE_13) {    //13.2kbps
-                    convertedBitrate = 13200;
-                } else if (codecMode == EvsParams.EVS_MODE_14) {    //16.4kbps
-                    convertedBitrate = 16400;
-                } else if (codecMode == EvsParams.EVS_MODE_15) {    //24.4kbps
-                    convertedBitrate = 24400;
-                } else if (codecMode == EvsParams.EVS_MODE_16) {    //32.0kbps
-                    convertedBitrate = 32000;
-                } else if (codecMode == EvsParams.EVS_MODE_17) {    //48.0kbps
-                    convertedBitrate = 48000;
-                } else if (codecMode == EvsParams.EVS_MODE_18) {    //64.0kbps
-                    convertedBitrate = 64000;
-                } else if (codecMode == EvsParams.EVS_MODE_19) {    //96.0kbps
-                    convertedBitrate = 96000;
-                } else if (codecMode == EvsParams.EVS_MODE_20) {    //128.0kbps
-                    convertedBitrate = 128000;
-                } else {
-                    convertedBitrate = 13200;                       //default value
+        if (codecType == CODEC_EVS) {
+            convertedBitrate =
+            switch (codecMode) {
+                case EvsParams.EVS_MODE_9 -> 5900; // 5.9 kbps (or 2.8)
+                case EvsParams.EVS_MODE_10 -> 7200; // 7.2kbps
+                case EvsParams.EVS_MODE_11 -> 8000; // 8.0kbps
+                case EvsParams.EVS_MODE_12 -> 9600; // 9.6kbps
+                case EvsParams.EVS_MODE_13 -> 13200; // 13.2kbps
+                case EvsParams.EVS_MODE_14 -> 16400; // 16.4kbps
+                case EvsParams.EVS_MODE_15 -> 24400; // 24.4kbps
+                case EvsParams.EVS_MODE_16 -> 32000; // 32.0kbps
+                case EvsParams.EVS_MODE_17 -> 48000; // 48.0kbps
+                case EvsParams.EVS_MODE_18 -> 64000; // 64.0kbps
+                case EvsParams.EVS_MODE_19 -> 96000; // 96.0kbps
+                case EvsParams.EVS_MODE_20 -> 128000; // 128.0kbps
+                default -> { // default value
                     ImsLog.d("convertCodecModeToBitrate: Error - set to 13.2kbps");
+                    yield 13200;
                 }
-                break;
-            default:
-                break;
+            };
         }
-
         ImsLog.d("convertedBitrate= " + convertedBitrate);
         return convertedBitrate;
     }

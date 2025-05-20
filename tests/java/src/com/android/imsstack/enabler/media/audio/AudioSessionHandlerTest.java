@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,8 +31,11 @@ import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.imsmedia.AmrParams;
+import android.telephony.imsmedia.AnbrMode;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
+import android.telephony.imsmedia.EvsParams;
 import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityStatus;
@@ -64,6 +68,8 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     // Mock Objects
     @Mock AudioSessionCallbackHandler mMockAudioSessionCallbackHandler;
     @Mock ImsAudioSession mMockAudioSession;
+    @Mock AudioConfig mMockAudioConfig;
+    @Mock AnbrMode mMockAnbrMode;
 
     private AudioSessionHandler mAudioSessionHandler;
     private AudioSessionCallback mAudioSessionCallback;
@@ -597,5 +603,183 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         processAllMessages();
         verify(mMockAudioSessionCallbackHandler).onNotifyIncomingDtmfReceived(
                 eq((int) DTMF_DIGIT), eq(DTMF_DURATION));
+    }
+
+    @Test
+    public void testConvertCodecModeToBitrate_evs_allModes() {
+        assertEquals(
+                5900,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_9));
+        assertEquals(
+                7200,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_10));
+        assertEquals(
+                8000,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_11));
+        assertEquals(
+                9600,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_12));
+        assertEquals(
+                13200,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_13));
+        assertEquals(
+                16400,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_14));
+        assertEquals(
+                24400,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_15));
+        assertEquals(
+                32000,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_16));
+        assertEquals(
+                48000,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_17));
+        assertEquals(
+                64000,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_18));
+        assertEquals(
+                96000,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_19));
+        assertEquals(
+                128000,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_20));
+        assertEquals(
+                13200,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_EVS, EvsParams.EVS_MODE_0));
+    }
+
+    @Test
+    public void testConvertCodecModeToBitrate_amr() {
+        assertEquals(
+                -1,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_AMR, AmrParams.AMR_MODE_0));
+        assertEquals(
+                -1,
+                mAudioSessionHandler.convertCodecModeToBitrate(
+                        AudioConfig.CODEC_AMR_WB, AmrParams.AMR_MODE_0));
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_anbrEnabled_uplink() {
+        mAudioSessionHandler.setAudioAnbrEnabled(true);
+        when(mMockAudioConfig.getAnbrMode()).thenReturn(mMockAnbrMode);
+        when(mMockAnbrMode.getAnbrUplinkCodecMode()).thenReturn(EvsParams.EVS_MODE_13);
+        when(mMockAnbrMode.getAnbrDownlinkCodecMode()).thenReturn(0);
+        mAudioSessionHandler.setCodecType(AudioSessionHandler.CODEC_EVS);
+        mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler)
+                .triggerAnbrQuery(
+                        eq(AudioSessionHandler.AUDIO_TYPE),
+                        eq(AudioSessionHandler.EDirectionType.DIRECTION_UPLINK.getDirection()),
+                        eq(13200));
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_anbrEnabled_downlink() {
+        mAudioSessionHandler.setAudioAnbrEnabled(true);
+        when(mMockAudioConfig.getAnbrMode()).thenReturn(mMockAnbrMode);
+        when(mMockAnbrMode.getAnbrUplinkCodecMode()).thenReturn(0);
+        when(mMockAnbrMode.getAnbrDownlinkCodecMode()).thenReturn(EvsParams.EVS_MODE_15);
+        mAudioSessionHandler.setCodecType(AudioSessionHandler.CODEC_EVS);
+        mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler)
+                .triggerAnbrQuery(
+                        eq(AudioSessionHandler.AUDIO_TYPE),
+                        eq(AudioSessionHandler.EDirectionType.DIRECTION_DOWNLINK.getDirection()),
+                        eq(24400));
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_anbrEnabled_invalidCodecMode() {
+        mAudioSessionHandler.setAudioAnbrEnabled(true);
+        when(mMockAudioConfig.getAnbrMode()).thenReturn(mMockAnbrMode);
+        when(mMockAnbrMode.getAnbrUplinkCodecMode()).thenReturn(0);
+        when(mMockAnbrMode.getAnbrDownlinkCodecMode()).thenReturn(0);
+        mAudioSessionHandler.setCodecType(AudioSessionHandler.CODEC_EVS);
+        mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler)
+                .triggerAnbrQuery(eq(AudioSessionHandler.AUDIO_TYPE), eq(-1), eq(-1));
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_anbrDisabled() {
+        AudioConfig audioConfig = MediaTestUtils.createAudioConfig();
+        mAudioSessionHandler.setAudioAnbrEnabled(false);
+        mAudioSessionCallback.triggerAnbrQuery(audioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler, never())
+                .triggerAnbrQuery(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_nullAudioSessionCallbackHandler() {
+        // clear the instance created in setup
+        mAudioSessionHandler = null;
+        // create the instance to test
+        mAudioSessionHandler = new AudioSessionHandler(mMockBaseContext, mMediaManager,
+                null, mMockAudioSession, mMockMediaConfig, Looper.myLooper());
+        mMediaSession.setAudioSessionHandler(mAudioSessionHandler);
+        mAudioSessionCallback = mAudioSessionHandler.getAudioSessionCallback();
+        AudioConfig audioConfig = MediaTestUtils.createAudioConfig();
+        mAudioSessionHandler.setAudioAnbrEnabled(true);
+        mAudioSessionCallback.triggerAnbrQuery(audioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler, never())
+                .triggerAnbrQuery(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testHandleAudioAnbrReceived() {
+        int mediaType = AudioSessionHandler.AUDIO_TYPE;
+        int direction = 1;
+        int bitrate = 12650;
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(mediaType);
+        testParcel.writeInt(direction);
+        testParcel.writeInt(bitrate);
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.onImsMediaAudioMessage(
+                MediaConstants.NOTIFY_ANBR_RECEIVED, testParcel);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler)
+                .notifyAnbrReceived(eq(mediaType), eq(direction), eq(bitrate));
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testGetSamplingRateKHz_default() {
+        mAudioSessionHandler.setCodecType(AudioSessionHandler.CODEC_EVS);
+
+        assertEquals(16, mAudioSessionHandler.getSamplingRateKHz());
+    }
+
+    @Test
+    public void testGetSamplingRateKHz_AMR() {
+        mAudioSessionHandler.setCodecType(AudioSessionHandler.CODEC_AMR);
+
+        assertEquals(8, mAudioSessionHandler.getSamplingRateKHz());
     }
 }
