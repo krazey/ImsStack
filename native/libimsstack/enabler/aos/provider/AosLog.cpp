@@ -345,6 +345,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
         case RegistrationLog::PENDING_TRAFFIC:
             return "PENDING_TRAFFIC";
 
+        case RegistrationLog::PENDING_STOP:
+            return "PENDING_STOP";
+
         default:
             return "__INVALID__";
     }
@@ -432,8 +435,8 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
         case RegistrationLog::TIMER_REFRESH:
             return "TIMER_REFRESH";
 
-        case RegistrationLog::TIMER_EXPIRED:
-            return "TIMER_EXPIRED";
+        case RegistrationLog::TIMER_DEREG_TRAFFIC:
+            return "TIMER_DEREG_TRAFFIC";
 
         case RegistrationLog::TIMER_MODE:
             return "TIMER_MODE";

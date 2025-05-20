@@ -155,7 +155,8 @@ public:
         PENDING_SUBSCRIPTION = 0x40,
         PENDING_TERMINATED = 0x80,
 
-        PENDING_TRAFFIC = 0x100
+        PENDING_TRAFFIC = 0x100,
+        PENDING_STOP = 0x200
     };
 
     enum
@@ -163,7 +164,7 @@ public:
         TIMER_OFFLINE_RECOVER = 100,
         TIMER_STOP_RETRY,
         TIMER_REFRESH,
-        TIMER_EXPIRED,
+        TIMER_DEREG_TRAFFIC,
         TIMER_MODE,
         TIMER_TRANSACTION,
         TIMER_INTERNAL_ERROR
