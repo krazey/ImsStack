@@ -122,6 +122,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_piTransactionTimer(IMS_NULL),
         m_piInternalErrorTimer(IMS_NULL),
         m_nAuthChallengeCount(0),
+        m_nAuthFailureCount(0),
         m_nAuthIpsecCount(0),
         m_nErrorCountForServerSocket(0),
         m_bCallingNumberVerificationSupported(IMS_FALSE),
@@ -850,6 +851,21 @@ PROTECTED
 IMS_BOOL AosRegistration::IsAuthChallengeMoreAllowed()
 {
     return (m_nAuthChallengeCount < AUTHENTICATION_RETRY_MAX_COUNT);
+}
+
+PROTECTED
+IMS_BOOL AosRegistration::IsAuthFailureMaxCountReached() const
+{
+    IMS_SINT32 nAuthFailureMaxCount = GET_N_CONFIG(m_nSlotId)->GetAuthFailureRetryMaxCnt();
+
+    if (nAuthFailureMaxCount <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    A_IMS_TRACE_I(REGID, "IsAuthFailureMaxCountReached: %d", m_nAuthFailureCount, 0, 0);
+
+    return (m_nAuthFailureCount >= (nAuthFailureMaxCount - 1));
 }
 
 PROTECTED
@@ -3095,6 +3111,7 @@ PROTECTED VIRTUAL void AosRegistration::ClearRetryValues(IN IMS_BOOL bRegSuccess
 PROTECTED VIRTUAL void AosRegistration::ClearAuthChallengedCount()
 {
     m_nAuthChallengeCount = 0;
+    m_nAuthFailureCount = 0;
 }
 
 PROTECTED VIRTUAL void AosRegistration::ClearAuthIpsecCount()
@@ -5183,7 +5200,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
 
     m_nAuthChallengeCount++;
 
-    if (!IsAuthChallengeMoreAllowed())
+    if (!IsAuthChallengeMoreAllowed() || IsAuthFailureMaxCountReached())
     {
         bResponseToChallenge = IMS_FALSE;
 
@@ -5256,6 +5273,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAkaResponse(IN IMS_SI
     }
     else
     {
+        m_nAuthFailureCount++;
+
         if (IsAuthChallengedAgain())
         {
             m_pIpsecHelper->CreateOnChallenging();

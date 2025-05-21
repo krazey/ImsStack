@@ -124,6 +124,7 @@ protected:
     IMS_BOOL IsIpsecSupported() const;
     IMS_BOOL IsAuthChallengedAgain() const;
     IMS_BOOL IsAuthChallengeMoreAllowed();
+    IMS_BOOL IsAuthFailureMaxCountReached() const;
     IMS_BOOL IsTransactionStarted() const;
     IMS_BOOL IsBlocked() const;
     IMS_BOOL IsHeldByCall() const;
@@ -589,6 +590,9 @@ protected:
 
     /// authentication failure counter
     IMS_UINT32 m_nAuthChallengeCount;
+
+    /// authentication failure counter that considers the 401 response to be a failure
+    IMS_UINT32 m_nAuthFailureCount;
 
     /// retry count for authentication failure for ipsec.
     IMS_UINT32 m_nAuthIpsecCount;
