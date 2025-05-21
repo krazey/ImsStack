@@ -92,10 +92,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public boolean isUtAvailable() {
-        if (SscConfig.isUtSupported(mSlotId)
-                && isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
-            ImsLog.d(mSlotId, "TB SS is enabled");
-            return true;
+        if (SscConfig.isUtSupported(mSlotId)) {
+            if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)
+                    || !SscConfig.isCsfbSupported(mSlotId)) {
+                ImsLog.d(mSlotId, "Always available");
+                return true;
+            }
         }
 
         return SscServiceStateAgent.getInstance().isUtAvailable(mSlotId);
