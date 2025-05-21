@@ -621,6 +621,11 @@ PROTECTED VIRTUAL void AosRegistration::SetAppReady(IN IMS_BOOL bReady)
     m_bIsAppReady = bReady;
 }
 
+PROTECTED VIRTUAL void AosRegistration::SetReasonCode(IN AosReasonCode eReason)
+{
+    m_eImsReasonCode = eReason;
+}
+
 PROTECTED
 void AosRegistration::SetState(IN IMS_UINT32 nState)
 {

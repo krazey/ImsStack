@@ -3621,6 +3621,7 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
         if (eCause == AosControlCause::RADIO_SIM_REMOVED ||
                 eCause == AosControlCause::RADIO_SIM_REFRESH)
         {
+            m_piRegistration->SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION);
             if (!IsEmergency())
             {
                 m_bPdnDeactivationRequired = IMS_TRUE;

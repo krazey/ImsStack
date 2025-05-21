@@ -7205,3 +7205,9 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegTerminated)
 
     // THEN: The GIVEN condition should be met.
 }
+
+TEST_F(AosRegistrationTest, SetAndGetReasonCode)
+{
+    m_pAosRegistration->SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION);
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::NORMAL_DEREGISTRATION);
+}

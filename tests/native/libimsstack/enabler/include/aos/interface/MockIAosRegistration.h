@@ -55,6 +55,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRetryHeld, (), (override));
     MOCK_METHOD(IMS_BOOL, IsTerminated, (), (override));
     MOCK_METHOD(void, SetAppReady, (IN IMS_BOOL bReady), (override));
+    MOCK_METHOD(void, SetReasonCode, (IN AosReasonCode eReason), (override));
 
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, CleanUp, (), (override));

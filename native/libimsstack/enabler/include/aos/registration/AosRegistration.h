@@ -102,6 +102,7 @@ public:
     IMS_BOOL IsTerminated() override;
 
     void SetAppReady(IN IMS_BOOL bReady) override;
+    void SetReasonCode(IN AosReasonCode eReason) override;
 
 protected:
     void SetState(IN IMS_UINT32 nState);
