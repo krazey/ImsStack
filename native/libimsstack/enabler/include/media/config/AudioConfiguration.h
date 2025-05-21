@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,11 +29,13 @@ public:
      * @param eSessionType the Media type
      */
     explicit AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
+
     /**
      * @brief Destroy the Audio Configuration
      *
      */
     virtual ~AudioConfiguration();
+
     /**
      * @brief Read the carrier configuration items
      *
@@ -41,7 +43,8 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+
     /**
      * @brief Update the carrier configuration items
      *
@@ -49,118 +52,136 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+
     /**
      * @brief Get whether EVS codec is supported
      *
      * @return IMS_BOOL Return true if evs is supported
      * Return false if evs is not supported
      */
-    IMS_BOOL IsEvsSupported() const;
+    virtual IMS_BOOL IsEvsSupported() const;
+
     /**
      * @brief Get the ptime (recommended length of time in milliseconds represented by the media in
      * a packet)
      *
      * @return IMS_SINT32 Return ptime
      */
-    IMS_SINT32 GetPtime() const;
+    virtual IMS_SINT32 GetPtime() const;
+
     /**
      * @brief Get the maxptime (maximum amount of media that can be encapsulated in each packet)
      *
      * @return IMS_SINT32 Return maxptime
      */
-    IMS_SINT32 GetMaxPtime() const;
+    virtual IMS_SINT32 GetMaxPtime() const;
+
     /**
-     * @brief Get the maxredundancy (The maximum duration in milliseconds between the primary and
-     * redundant transmission)
+     * @brief Get the maximum redundancy (The maximum duration in milliseconds between the primary
+     * and redundant transmission)
      *
      * @return IMS_SINT32 Return max-red
      */
-    IMS_SINT32 GetMaxRed() const;
+    virtual IMS_SINT32 GetMaxRed() const;
+
     /**
-     * @brief Get the bandwidthnegooption
+     * @brief Get the bandwidth negotiation option
      *
-     * @return IMS_BOOL Return true if the audio bandwidth nego option is enabled
-     * Return false if the audio bandwidth nego option is disabled
+     * @return IMS_BOOL Return true if the audio bandwidth negotiation option is enabled
+     * Return false if the audio bandwidth negotiation option is disabled
      */
-    IMS_BOOL GetBandwidthNegoOption() const;
+    virtual IMS_BOOL GetBandwidthNegoOption() const;
+
     /**
      * @brief Get the dscp (Differentiated Services Code Point) for rtp
      *
      * @return IMS_SINT32 Return dscp value
      */
-    IMS_SINT32 GetRtpDscp() const;
+    virtual IMS_SINT32 GetRtpDscp() const;
+
     /**
      * @brief Get the min jitter buffer size
      *
-     * @return IMS_SINT32 min jitterbuffer size
+     * @return IMS_SINT32 min jitter buffer size
      */
-    IMS_SINT32 GetJitterBufferMinSize() const;
+    virtual IMS_SINT32 GetJitterBufferMinSize() const;
+
     /**
      * @brief Get the max jitter buffer size
      *
-     * @return IMS_SINT32 Return max jitterbuffer size
+     * @return IMS_SINT32 Return max jitter buffer size
      */
-    IMS_SINT32 GetJitterBufferMaxSize() const;
+    virtual IMS_SINT32 GetJitterBufferMaxSize() const;
+
     /**
      * @brief Get the adjust time for jitter buffer
      *
      * @return IMS_SINT32 Return adjust time for jitter buffer
      */
-    IMS_SINT32 GetJitterBufferAdjustTime() const;
+    virtual IMS_SINT32 GetJitterBufferAdjustTime() const;
+
     /**
-     * @brief Get the jitterbuffer size change unit
+     * @brief Get the jitter buffer size change unit
      *
-     * @return IMS_SINT32 Return jitterbuffer size change unit
+     * @return IMS_SINT32 Return jitter buffer size change unit
      */
-    IMS_SINT32 GetJitterBufferStepSize() const;
+    virtual IMS_SINT32 GetJitterBufferStepSize() const;
+
     /**
-     * @brief Get whether rtcp-xr feature is enabled
+     * @brief Get whether the RTCP-XR feature is enabled
      *
-     * @return IMS_BOOL Return true if rtcp-xr is enabled
-     * Return false if rtcp-xr is disabled
+     * @return IMS_BOOL Return true if the RTCP-XR is enabled
+     * Return false if the RTCP-XR is disabled
      */
-    IMS_BOOL IsRtcpXrEnabled() const;
+    virtual IMS_BOOL IsRtcpXrEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr statistics feature is enabled
+     * @brief Get whether the RTCP-XR statistics feature is enabled
      *
-     * @return IMS_BOOL Return true if rtcp-xr statistics is enabled
-     * Return false if rtcp-xr statistics is disabled
+     * @return IMS_BOOL Return true if the RTCP-XR statistics is enabled
+     * Return false if the RTCP-XR statistics is disabled
      */
-    IMS_BOOL IsRtcpXrStatisticsEnabled() const;
+    virtual IMS_BOOL IsRtcpXrStatisticsEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr voip feature is enabled
+     * @brief Get whether the RTCP-XR voip feature is enabled
      *
-     * @return IMS_BOOL Return true if rtcp-xr voip is enabled
-     * Return false if rtcp-xr voip is disabled
+     * @return IMS_BOOL Return true if the RTCP-XR voip is enabled
+     * Return false if the RTCP-XR voip is disabled
      */
-    IMS_BOOL IsRtcpXrVoipEnabled() const;
+    virtual IMS_BOOL IsRtcpXrVoipEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr plr feature is enabled
+     * @brief Get whether the RTCP-XR plr feature is enabled
      *
-     * @return IMS_BOOL Return true if rtcp-xr plr is enabled
-     * Return false if rtcp-xr plr is disabled
+     * @return IMS_BOOL Return true if the RTCP-XR plr is enabled
+     * Return false if the RTCP-XR plr is disabled
      */
-    IMS_BOOL IsRtcpXrPlrEnabled() const;
+    virtual IMS_BOOL IsRtcpXrPlrEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr pdr feature is enabled
+     * @brief Get whether the RTCP-XR pdr feature is enabled
      *
-     * @return IMS_BOOL Return true if rtcp-xr pdr is enabled
-     * Return false if rtcp-xr pdr is disabled
+     * @return IMS_BOOL Return true if the RTCP-XR pdr is enabled
+     * Return false if the RTCP-XR pdr is disabled
      */
-    IMS_BOOL IsRtcpXrPdrEnabled() const;
+    virtual IMS_BOOL IsRtcpXrPdrEnabled() const;
+
     /**
      * @brief Get dtmf playing duration in milliseconds unit
      *
      * @return IMS_SINT32 Return dtmf duration value
      */
-    IMS_SINT32 GetDtmfDuration() const;
+    virtual IMS_SINT32 GetDtmfDuration() const;
+
     /**
      * @brief Get the audio candidate attribute
      *
      * @return const ImsVector<AString>& Return audio-candidate-attribute
      */
-    const ImsVector<AString>& GetAudioCandidateAttribute() const;
+    virtual const ImsVector<AString>& GetAudioCandidateAttribute() const;
+
     /**
      * @brief Get the call end reasons after the expiry of the inactivity timer
      *

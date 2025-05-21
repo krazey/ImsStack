@@ -34,12 +34,13 @@ IMS_BOOL MediaProfileNegotiator::NegotiateIpPort(IN MediaBaseProfile* pLocalProf
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "NegotiateIpPort(): invalid argument", 0, 0, 0);
         return IMS_FALSE;
     }
 
     pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
 
-    IMS_TRACE_D("NegotiateIpPort() media[%d] - IP Address negotiated[%s], DestPayloadSize[%d]",
+    IMS_TRACE_D("NegotiateIpPort(): type[%d] - IP Address negotiated[%s], DestPayloadSize[%d]",
             m_eType, pNegotiatedProfile->GetIpAddress().ToCharString(),
             pPeerProfile->GetPayloadList().GetSize());
 
@@ -51,8 +52,8 @@ IMS_BOOL MediaProfileNegotiator::NegotiateIpPort(IN MediaBaseProfile* pLocalProf
     {
         pNegotiatedProfile->SetDataPort(0);
 
-        IMS_TRACE_D("NegotiateIpPort() ZERO Port Media type[%d], negotiatedPort[%d], peerPort[%d]",
-                m_eType, pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort());
+        IMS_TRACE_D("NegotiateIpPort(): type[%d], negotiatedPort[%d], peerPort[%d]", m_eType,
+                pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort());
     }
 
     return IMS_TRUE;
