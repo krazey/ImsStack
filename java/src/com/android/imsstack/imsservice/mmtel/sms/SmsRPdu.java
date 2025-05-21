@@ -419,6 +419,14 @@ public final class SmsRPdu {
         return ImsLog.hiddenString(ImsUtils.bytesToHexString(array));
     }
 
+    private byte[] getRpduHeader() {
+        if (mRpdu != null && mRpUserData != null && mRpdu.length > mRpUserData.length) {
+            return Arrays.copyOfRange(mRpdu, 0, mRpdu.length - mRpUserData.length);
+        } else {
+            return mRpdu;
+        }
+    }
+
     private String getRpMessageTypeString() {
         log("RP-MTI: " + mMessageTypeInd);
         return switch (mMessageTypeInd) {
@@ -456,8 +464,7 @@ public final class SmsRPdu {
             builder.append("\n  RP-Cause: ").append(String.format("0x%02X", getRPCause()));
         }
 
-        builder.append("\n  RP-UD (User Data): ").append(byteArrayToString(mRpUserData));
-        builder.append("\n  Raw R-PDU: ").append(byteArrayToString(mRpdu));
+        builder.append("\n  R-PDU Header: ").append(byteArrayToString(getRpduHeader()));
 
         if (mTpdu != null) {
             builder.append("\n").append(mTpdu.toString());

@@ -254,9 +254,7 @@ public class SmsRLStateMachine {
                     return SmsUtils.SMSRL_RESULT_FAILURE;
                 }
                 if (DBG) {
-                    log("Encoded RPDU: "
-                                    + ImsLog.hiddenString(ImsUtils.bytesToHexString(encodedPdu))
-                                    + " Target Address = "
+                    log(" Target Address = "
                                     + ImsLog.hiddenString(smsRLStateMachine.mPSISmsc)
                                     + " Dialled Number = "
                                     + ImsLog.hiddenString(smsRLStateMachine.mDestinationAddress)

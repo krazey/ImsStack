@@ -138,7 +138,6 @@ public class SmsRelayLayer {
                         + " RP Message Type = " + rpType
                         + " Smsc = " + smsc
                         + " destinationAddress = " +  ImsLog.hiddenString(destinationAddress)
-                        + " tpdu = " + ImsLog.hiddenString(ImsUtils.bytesToHexString(tpdu))
                         + " statusResult = " + statusResult);
             }
             String targetAddress = null;
@@ -364,11 +363,7 @@ public class SmsRelayLayer {
         @Override
         public void notifyIncomingMessage(int smsFormat, byte[] pduData) {
             try {
-                logi("notifyIncomingMessage");
-                if (DBG) {
-                    log("SmsFormat = " + smsFormat + " RPdu = " + ImsLog.hiddenString(
-                            ImsUtils.bytesToHexString(pduData)));
-                }
+                logi("notifyIncomingMessage SmsFormat = " + smsFormat);
                 int token = 0;
                 int result;
                 Listener listener = mListener;

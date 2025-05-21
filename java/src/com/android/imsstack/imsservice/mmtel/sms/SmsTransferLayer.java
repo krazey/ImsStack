@@ -194,8 +194,7 @@ public class SmsTransferLayer {
         if (DBG) {
             log("token = " + token
                                 + "tpMessageRef = " + tpMessageRef
-                                + "smsc = " + ImsLog.hiddenString(smsc)
-                                + "pdu = " + ImsLog.hiddenString(ImsUtils.bytesToHexString(pdu)));
+                                + "smsc = " + ImsLog.hiddenString(smsc));
         }
         try {
             /* Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
@@ -512,9 +511,7 @@ public class SmsTransferLayer {
                                     + " encoded Smsc = "
                                     + ImsLog.hiddenString(tpduParameters.mSmsc)
                                     + " tpDestinationAddress = "
-                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress)
-                                    + " tpdu = " + ImsLog.hiddenString(ImsUtils
-                                        .bytesToHexString(tpduParameters.mTpdu)));
+                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress));
                 }
                 mSendSmsQueue.add(tpduParameters.mToken);
                 mTokenMessageMap.put(tpduParameters.mToken, tpduParameters);
@@ -557,9 +554,7 @@ public class SmsTransferLayer {
                                     + tpduParameters.mToken
                                     + " encoded Smsc = " + ImsLog.hiddenString(tpduParameters.mSmsc)
                                     + " tpDestinationAddress = "
-                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress)
-                                    + " tpdu = " + ImsLog.hiddenString(ImsUtils
-                                        .bytesToHexString(tpduParameters.mTpdu)));
+                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress));
                     }
                     mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
                                          tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
@@ -584,9 +579,6 @@ public class SmsTransferLayer {
             loge("pdu is null");
             return new byte[0];
         }
-        if (DBG) {
-            log("Incoming pdu = " + ImsLog.hiddenString(ImsUtils.bytesToHexString(pdu)));
-        }
         CdmaSmsMessageHelper cdmaMsg = new CdmaSmsMessageHelper();
         cdmaMsg.parseCdmaPdu(pdu);
         return cdmaMsg.formatPdu();
@@ -599,9 +591,7 @@ public class SmsTransferLayer {
             logi("notifyRLDataIndication");
             if (DBG) {
                 log("token = " + token  + " smsFormat = " + smsFormat
-                                        + " rpMessageType = " + rpMessageType
-                                        + " pdu = "
-                                        + ImsLog.hiddenString(ImsUtils.bytesToHexString(pdu)));
+                                        + " rpMessageType = " + rpMessageType);
             }
             int result = SmsUtils.SMSTL_RESULT_FAILURE;
             try {
@@ -619,8 +609,6 @@ public class SmsTransferLayer {
                     }
                     synchronized (mLock) {
                         logi("calling notifySmsReceived");
-                        log("CdmaSmsMessage: tpdu= "
-                                + ImsLog.hiddenString(ImsUtils.bytesToHexString(cdmaPdu)));
                         return listener.notifySmsReceived(token, smsFormat,
                                                 SmsUtils.TP_SMS_DELIVER, cdmaPdu);
                     }
@@ -646,7 +634,7 @@ public class SmsTransferLayer {
                                              int reason, int causeCode) {
             try {
                 logi("notifyRLReportIndication :: token = " + token + " messageRef = " + messageRef
-                        + " result = " + result + " reason = " + reason + " casue = " + causeCode);
+                        + " result = " + result + " reason = " + reason + " cause = " + causeCode);
                 TpduParam tpduParameters;
                 int nextToken;
                 SmsTransferLayer.Listener listener = mListener;
