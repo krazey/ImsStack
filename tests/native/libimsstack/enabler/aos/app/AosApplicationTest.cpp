@@ -4173,3 +4173,14 @@ TEST_F(AosApplicationTest, SetNormalRegistrationWhenRegistrationStopDueToSimRefr
     m_pAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::RADIO_SIM_REFRESH);
 }
+
+TEST_F(AosApplicationTest, SetNormalRegistrationWhenRegistrationStopDueToAirplaneMode)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pAosApplication->SetOffReason(AosReason::AIRPLANE_MODE);
+
+    EXPECT_CALL(m_objMockIAosRegistration, SetReasonCode(AosReasonCode::NORMAL_DEREGISTRATION));
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
+}
