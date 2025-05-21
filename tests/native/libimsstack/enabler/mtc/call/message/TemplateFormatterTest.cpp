@@ -84,7 +84,6 @@ TEST_F(TemplateFormatterTest, FormatWithImei)
                         strDeviceId = "123456789012345";
                         return IMS_TRUE;
                     }));
-
     EXPECT_STREQ("<123456789012340>", TemplateFormatter::Format("<#IMEI#>", objContext).GetStr());
 
     ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
@@ -94,8 +93,16 @@ TEST_F(TemplateFormatterTest, FormatWithImei)
                         strDeviceId = "1234567890";
                         return IMS_TRUE;
                     }));
+    EXPECT_STREQ("<123456789000000>", TemplateFormatter::Format("<#IMEI#>", objContext).GetStr());
 
-    EXPECT_STREQ("<1234567890>", TemplateFormatter::Format("<#IMEI#>", objContext).GetStr());
+    ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))
+            .WillByDefault(Invoke(
+                    [](Unused, OUT AString& strDeviceId)
+                    {
+                        strDeviceId = AString::ConstNull();
+                        return IMS_TRUE;
+                    }));
+    EXPECT_STREQ("<000000000000000>", TemplateFormatter::Format("<#IMEI#>", objContext).GetStr());
 }
 
 TEST_F(TemplateFormatterTest, FormatWithImsi)

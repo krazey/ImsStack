@@ -54,6 +54,8 @@ PUBLIC VIRTUAL EmergencyMessageFormatter::~EmergencyMessageFormatter()
 
 PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallType eCallType)
 {
+    IMS_TRACE_I("FormStartMessage : AosRegMode - Normal[%d] Emergency[%d]",
+            GetAosRegMode(ServiceType::NORMAL), GetAosRegMode(ServiceType::EMERGENCY), 0);
     if (GetAosRegMode(ServiceType::NORMAL) == IImsAosInfo::REG_MODE_UNKNOWN ||
             GetAosRegMode(ServiceType::EMERGENCY) == IImsAosInfo::REG_MODE_UNKNOWN)
     {
@@ -137,11 +139,13 @@ PROTECTED VIRTUAL void EmergencyMessageFormatter::SetPPreferredIdentityHeader()
     if (m_objContext.GetMessageUtils().IsHeaderPresent(
                 m_piNextMessage, ISipHeader::P_PREFERRED_IDENTITY))
     {
+        IMS_TRACE_I("SetPPreferredIdentityHeader : Header already present", 0, 0, 0);
         return;
     }
 
     AString strFormat = MtcConfigurationResolver::GetPPreferredIdentityHeaderInInviteForEmergency(
             m_objContext.GetConfigurationProxy(), GetAosRegMode(ServiceType::EMERGENCY));
+    IMS_TRACE_D("SetPPreferredIdentityHeader : Format[%s]", strFormat.GetStr(), 0, 0);
     if (strFormat.GetLength() > 0)
     {
         return SetPPreferredIdentityHeaderByFormat(strFormat);
