@@ -17,7 +17,6 @@
 <carrier_config>
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
     <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="0"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="127">

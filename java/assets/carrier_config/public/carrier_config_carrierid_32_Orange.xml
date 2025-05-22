@@ -15,7 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
     <int name="imsemergency.refresh_geolocation_timeout_millis_int" value="5000"/>
