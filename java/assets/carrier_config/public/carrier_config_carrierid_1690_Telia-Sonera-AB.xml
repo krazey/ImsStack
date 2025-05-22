@@ -19,7 +19,6 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">

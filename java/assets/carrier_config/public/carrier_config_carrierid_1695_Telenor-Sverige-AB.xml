@@ -19,7 +19,6 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="126">
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
