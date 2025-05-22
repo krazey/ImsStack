@@ -332,7 +332,7 @@
     <boolean name="ims.set_sdp_direction_attribute_for_removed_media_bool" value="false"/>
     <boolean name="ims.support_sdp_precondition_bool" value="true"/>
     <int name="ims.hide_mac_address_in_pani_header_int" value="1"/>
-    <boolean name="ims.support_country_param_in_pani_header_bool" value="false"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
     <boolean name="ims.support_local_session_timer_bool" value="false"/>
     <boolean name="ims.allow_session_timer_turn_off_bool" value="false"/>
     <boolean name="imsemergency.support_ecbm_for_volte_bool" value="false"/>
@@ -524,7 +524,7 @@
     <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="false"/>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="false"/>
     <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="false"/>
-    <int name ="imswfc.sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int" value="0"/>
+    <int name="imswfc.sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int" value="0"/>
     <int-array name="imswfc.vowifi_sub_err_code_for_init_reg_int_array" num="0">
     </int-array>
     <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
