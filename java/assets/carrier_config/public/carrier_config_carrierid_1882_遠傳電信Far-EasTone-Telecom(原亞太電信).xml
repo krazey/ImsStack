@@ -31,4 +31,5 @@
             <item value="96"/>
         </int-array>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:APT_CONF@volte.aptg.com.tw</string>
 </carrier_config>

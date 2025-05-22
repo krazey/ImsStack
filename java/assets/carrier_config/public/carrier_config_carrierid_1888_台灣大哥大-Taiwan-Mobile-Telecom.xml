@@ -35,16 +35,11 @@
             <item value="96"/>
         </int-array>
     </pbundle_as_map>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
-    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
-    <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="30000"/>
     <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="3">
         <item value="0"/>
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:conf-factory@ims.taiwanmobile.com</string>
 </carrier_config>

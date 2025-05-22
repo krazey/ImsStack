@@ -16,4 +16,5 @@
 -->
 <carrier_config>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <boolean name="ims.allow_cellular_network_info_header_bool" value="false"/>
 </carrier_config>
