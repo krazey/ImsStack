@@ -248,7 +248,7 @@
     <boolean name="imsss.ut_query_cf_all_and_cf_all_conditional_support_bool" value="true"/>
     <int name="imsss.ut_oir_network_default_operation_int" value="0"/>
     <boolean name="imsss.ut_oir_tir_always_temporary_mode_bool" value="true"/>
-    <int name="imsss.ut_temporary_block_timer_with_any_reason_sec_int" value="10"/>
+    <int name="imsss.ut_temporary_block_timer_with_any_reason_sec_int" value="1"/>
     <string name="imsss.ut_target_address_phone_context_string"></string>
     <string name="imsss.ut_target_address_country_code_replace_to_zero_string"></string>
     <string name="imsss.ut_target_address_zero_replace_to_country_code_string"></string>
