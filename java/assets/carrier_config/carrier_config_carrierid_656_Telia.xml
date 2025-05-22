@@ -17,6 +17,9 @@
 <carrier_config>
     <!-- Ims General -->
     <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
+    <!-- Aos -->
+    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <!-- Ut/Xcap -->
     <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>
 </carrier_config>
