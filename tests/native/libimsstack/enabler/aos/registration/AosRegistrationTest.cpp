@@ -167,6 +167,7 @@ using ::testing::SetArgReferee;
     using Base::SetRadioWaiting;                                  \
     using Base::SetReregFailureReportOnIpcanChangeRequired;       \
     using Base::SetState;                                         \
+    using Base::SetTcpCriterionLength;                            \
     using Base::SetStaticIpQos;                                   \
     using Base::SetTraffic;                                       \
     using Base::SetTrafficForDeregister;                          \
@@ -237,6 +238,7 @@ public:
     inline IMS_BOOL IsTxnPendingOn(IN IMS_UINT32 nFeature) { return (m_nTxnPending & nFeature); }
     inline void SetTransactionStarted(IN IMS_BOOL bStarted) { m_bIsTransactionStarted = bStarted; }
     inline void SetRegType(IN AosRegistrationType objRegType) { m_eRegType = objRegType; }
+    inline void SetIpAddress(IN IpAddress objIpa) { m_objIpa = objIpa; }
     inline IpAddress GetIpAddress() { return m_objIpa; }
     inline void SetPcscfString(IN AString strPcscf) { m_strPcscf = strPcscf; }
     inline void SetPuid(IN AString strPuid) { m_strPuid = strPuid; }
@@ -307,6 +309,7 @@ public:
     {
         return AosRegistration::CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME;
     }
+    inline RcPtr<SipProfile>& GetSipProfile() { return m_pSipProfile; }
 
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
     IMS_BOOL CheckRadioReadyAndSetTxnPending() override
@@ -1870,6 +1873,51 @@ TEST_F(AosRegistrationTest, UpdateFeatureTagIfDifferentFromBindedOne)
     IMS_BOOL bResult = m_pAosRegistration->UpdateFeatureTag(&m_objMockIAosHandle);
 
     EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ShouldNotSetTcpCriterionLengthIfDynamicIsNotPreferred)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSipPreferredTransport())
+            .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_UDP));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetMtu()).Times(0);
+
+    m_pAosRegistration->SetTcpCriterionLength();
+}
+
+TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfWfcAndIpv6)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSipPreferredTransport())
+            .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP));
+    ON_CALL(m_objMockIAosConnection, GetMtu()).WillByDefault(Return(1500));
+    ON_CALL(m_objMockIAosNConfiguration, GetSipMessageThresholdForTransportChange())
+            .WillByDefault(Return(200));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetIpAddress(IpAddress::IPv6LOOPBACK);
+
+    EXPECT_CALL(m_objMockIRegistration, SetSipProfile(_));
+
+    m_pAosRegistration->SetTcpCriterionLength();
+
+    EXPECT_EQ(m_pAosRegistration->GetSipProfile()->GetTcpCriterionLength(), 1080);
+}
+
+TEST_F(AosRegistrationTest, SetTcpCriterionLengthIfMtuIsZeroAndIpv4)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetSipPreferredTransport())
+            .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP));
+    ON_CALL(m_objMockIAosConnection, GetMtu()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetSipMessageThresholdForTransportChange())
+            .WillByDefault(Return(200));
+    ON_CALL(m_objMockIAosNConfiguration, GetIpv4MtuSize()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetIpAddress(IpAddress::LOOPBACK);
+
+    EXPECT_CALL(m_objMockIRegistration, SetSipProfile(_));
+
+    m_pAosRegistration->SetTcpCriterionLength();
+
+    EXPECT_EQ(m_pAosRegistration->GetSipProfile()->GetTcpCriterionLength(), 1300);
 }
 
 TEST_F(AosRegistrationTest, IgnoreSetStaticIpQosIfPreferredDscpIsNone)

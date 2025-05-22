@@ -627,7 +627,9 @@ protected:
     static const IMS_UINT32 DEREGISTRATION_TRAFFIC_MAX_TIME = 3;              // 3 Sec.
     static const IMS_UINT32 RECONNECT_SERVER_SOCKET_ERROR_MAX_COUNT = 10;
     static const IMS_UINT32 AUTHENTICATION_RETRY_MAX_COUNT = 6;
-    static const IMS_UINT32 SIP_MTU_MAX_SIZE_VIA_WIFI = 1280;
+    static const IMS_UINT32 DEFAULT_SIP_THRESHOLD_SIZE = 200;
+    static const IMS_UINT32 MTU_MAX_SIZE_VIA_MOBILE = 1500;
+    static const IMS_UINT32 MTU_MAX_SIZE_VIA_WIFI = 1280;
 
 private:
     /// IPCAN category being registered

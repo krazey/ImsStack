@@ -2518,11 +2518,11 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
         return;
     }
 
-    IMS_SINT32 nMtu = m_piContext->GetConnection()->GetMtu();
-    IMS_SINT32 nSipThresholdSize =
+    const IMS_SINT32 nMtu = m_piContext->GetConnection()->GetMtu();
+    const IMS_SINT32 nSipThresholdSize =
             GET_N_CONFIG(m_nSlotId)->GetSipMessageThresholdForTransportChange();
 
-    IMS_UINT32 nLength = 0;
+    IMS_SINT32 nLength = 0;
 
     if (nMtu > 0)
     {
@@ -2531,9 +2531,9 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
             nLength = nMtu - nSipThresholdSize;
             if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() && m_objIpa.IsIPv6Address())
             {
-                if (nLength > SIP_MTU_MAX_SIZE_VIA_WIFI)
+                if (nMtu > MTU_MAX_SIZE_VIA_WIFI)
                 {
-                    nLength = SIP_MTU_MAX_SIZE_VIA_WIFI;
+                    nLength = MTU_MAX_SIZE_VIA_WIFI - nSipThresholdSize;
                 }
             }
         }
@@ -2544,10 +2544,16 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
                                              : GET_N_CONFIG(m_nSlotId)->GetIpv4MtuSize();
     }
 
-    if (nLength == 0)
+    if (nLength <= 0)
     {
-        nLength = (nSipThresholdSize > SIP_MTU_MAX_SIZE_VIA_WIFI) ? SIP_MTU_MAX_SIZE_VIA_WIFI
-                                                                  : nSipThresholdSize;
+        if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() && m_objIpa.IsIPv6Address())
+        {
+            nLength = MTU_MAX_SIZE_VIA_WIFI - DEFAULT_SIP_THRESHOLD_SIZE;
+        }
+        else
+        {
+            nLength = MTU_MAX_SIZE_VIA_MOBILE - DEFAULT_SIP_THRESHOLD_SIZE;
+        }
     }
 
     A_IMS_TRACE_I(REGID, "SetTcpCriterionLength :: TCP length (%d), MTU (%d), Threshold (%d)",
