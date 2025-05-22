@@ -15,11 +15,16 @@
  */
 
 #include <gtest/gtest.h>
+
+#include <TextConfig.h>
+
 #include <IJniMedia.h>
 #include <text/TextSession.h>
 #include <text/TextProfile.h>
 #include <config/TextConfiguration.h>
-#include <MockIMediaSessionListener.h>
+
+#include "MockIMediaSessionListener.h"
+#include "config/MockTextConfiguration.h"
 
 using namespace android::telephony::imsmedia;
 using ::testing::_;
@@ -75,8 +80,65 @@ TEST_F(TextSessionTest, testSetAnbrMode)
 
 TEST_F(TextSessionTest, testUpdateMediaQualityThreshold)
 {
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_TRUE, IMS_TRUE));
-    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold(IMS_FALSE, IMS_FALSE));
+    MockTextConfiguration objMockConfiguration(MEDIA_TYPE_TEXT);
+    m_pSession->SetConfiguration(&objMockConfiguration);
+
+    const IMS_SINT32 BIT_RATE = 100000;
+    const IMS_SINT32 INACTIVITY_TIME_MS = 100000;
+
+    ON_CALL(objMockConfiguration, GetRtpInactivityTimerMillis())
+            .WillByDefault(Return(INACTIVITY_TIME_MS));
+    ON_CALL(objMockConfiguration, GetRtcpInactivityTimerMillis())
+            .WillByDefault(Return(INACTIVITY_TIME_MS));
+
+    TextConfig* pTextConfig = reinterpret_cast<TextConfig*>(m_pSession->GetRtpConfig());
+    RtcpConfig objRtcpConfig;
+    objRtcpConfig.setIntervalSec(0);
+
+    // Test with direction no flow
+    pTextConfig->setRtcpConfig(objRtcpConfig);
+    pTextConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_NO_FLOW);
+
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    MediaQualityThreshold* pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
+
+    // Test with enable rtcp, direction sendrecv
+    objRtcpConfig.setIntervalSec(5);
+    pTextConfig->setRtcpConfig(objRtcpConfig);
+    pTextConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), INACTIVITY_TIME_MS);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), INACTIVITY_TIME_MS);
+
+    // Test with disable rtcp, direction sendrecv
+    objRtcpConfig.setIntervalSec(0);
+    pTextConfig->setRtcpConfig(objRtcpConfig);
+    pTextConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), INACTIVITY_TIME_MS);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
+
+    // Test with disable rtcp, direction recvonly
+    objRtcpConfig.setIntervalSec(0);
+    pTextConfig->setRtcpConfig(objRtcpConfig);
+    pTextConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), 0);
+
+    // Test with enable rtcp, direction recvonly
+    objRtcpConfig.setIntervalSec(5);
+    pTextConfig->setRtcpConfig(objRtcpConfig);
+    pTextConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+    EXPECT_TRUE(m_pSession->UpdateMediaQualityThreshold());
+    pThreshold = m_pSession->GetMediaQualityThreshold();
+    EXPECT_EQ(pThreshold->getRtpInactivityTimerMillis().front(), 0);
+    EXPECT_EQ(pThreshold->getRtcpInactivityTimerMillis(), INACTIVITY_TIME_MS);
 }
 
 TEST_F(TextSessionTest, testUpdateRtpConfig)

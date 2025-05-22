@@ -90,12 +90,10 @@ public:
 
     /**
      * @brief Update MediaQualityThreshold and send message to java
-     *
-     * @param pNego The negotiated profile to get the negotiated parameter
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    virtual IMS_BOOL UpdateQualityThreshold(IN std::shared_ptr<TextNego> pNego);
+    virtual IMS_BOOL ApplyQualityThreshold();
 
     /**
      * @brief Check there is a session opened

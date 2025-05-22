@@ -334,3 +334,54 @@ TEST_F(AudioControllerTest, testIsSessionOpened)
     // Session is closed (state is STATE_NONE)
     EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
 }
+
+TEST_F(AudioControllerTest, testUpdateAccessNetworkFailed)
+{
+    const IMS_UINT32 NEW_ACCESS_NETWORK = ACCESS_NETWORK + 1;
+
+    // case 1: No sessions
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(NEW_ACCESS_NETWORK), IMS_FALSE);
+
+    // case 2: One session, created but not opened (STATE_NONE)
+    IMS_UINTP nNegoId1 = 1000;
+    EXPECT_EQ(m_pController->CreateSession(
+                      &m_objListener, nNegoId1, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(NEW_ACCESS_NETWORK), IMS_FALSE);
+}
+
+TEST_F(AudioControllerTest, testUpdateAccessNetworkSuccess)
+{
+    const IMS_UINT32 NEW_ACCESS_NETWORK = ACCESS_NETWORK + 1;
+
+    // case 1: One session, created and opened
+    IMS_UINTP nNegoId2 = 2000;
+    EXPECT_EQ(m_pController->CreateSession(
+                      &m_objListener, nNegoId2, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(nNegoId2), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(NEW_ACCESS_NETWORK), IMS_TRUE);
+
+    m_pController->CloseSession();
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 0);
+
+    // case 2: Two sessions. First is STATE_NONE, second is opened.
+    IMS_UINTP nNegoId3 = 3000;
+    IMS_UINTP nNegoId4 = 4000;
+    EXPECT_EQ(m_pController->CreateSession(
+                      &m_objListener, nNegoId3, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+    EXPECT_EQ(m_pController->CreateSession(
+                      &m_objListener, nNegoId4, m_pConfig, MEDIA_SERVICE_DEFAULT),
+            IMS_TRUE);
+
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(nNegoId4), IMS_TRUE);
+
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(NEW_ACCESS_NETWORK + 1), IMS_TRUE);
+
+    m_pController->CloseSession();
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 0);
+}

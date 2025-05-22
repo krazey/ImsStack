@@ -362,23 +362,39 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
 {
     ImsMediaMsgParam* pMediaMsgParam = reinterpret_cast<ImsMediaMsgParam*>(pParam);
 
-    if (pMediaMsgParam == IMS_NULL)
+    if (pMediaMsgParam == IMS_NULL || m_pAudioController == IMS_NULL ||
+            m_pVideoController == IMS_NULL || m_pTextController == IMS_NULL)
     {
+        IMS_TRACE_E(0, "OnChangeNetworkConnection() - invalid parameter", 0, 0, 0);
         return IMS_FALSE;
     }
 
     IMS_UINT32 nAccessNetwork = pMediaMsgParam->m_nValue;
 
-    m_pAudioController->UpdateAccessNetwork(nAccessNetwork);
+    if (m_pAudioController->IsSessionOpened())
+    {
+        m_pAudioController->UpdateAccessNetwork(nAccessNetwork);
+    }
 
     if (m_pVideoController->IsSessionOpened())
     {
         m_pVideoController->UpdateAccessNetwork(nAccessNetwork);
-        m_pVideoController->UpdateSession();
+
+        if (m_pVideoController->UpdateSession())
+        {
+            m_pVideoController->ApplyQualityThreshold();
+        }
     }
 
-    m_pTextController->UpdateAccessNetwork(nAccessNetwork);
-    m_pTextController->UpdateSession();
+    if (m_pTextController->IsSessionOpened())
+    {
+        m_pTextController->UpdateAccessNetwork(nAccessNetwork);
+
+        if (m_pTextController->UpdateSession())
+        {
+            m_pTextController->ApplyQualityThreshold();
+        }
+    }
 
     return IMS_TRUE;
 }
@@ -1144,8 +1160,11 @@ void MediaSession::UpdateMediaSessions(
                 pMediaNego->GetAudioNego()->GetNegotiatedDirection() !=
                         MEDIA_DIRECTION_SEND_RECEIVE);
         m_pVideoController->UpdateAccessNetwork(nAccessNetwork);
-        m_pVideoController->ApplyQualityThreshold();
-        m_pVideoController->UpdateSession();
+
+        if (m_pVideoController->UpdateSession())
+        {
+            m_pVideoController->ApplyQualityThreshold();
+        }
     }
 
     // Update Text Session
@@ -1153,8 +1172,11 @@ void MediaSession::UpdateMediaSessions(
     {
         m_pTextController->UpdateRtpConfig(pMediaNego->GetTextNego());
         m_pTextController->UpdateAccessNetwork(nAccessNetwork);
-        m_pTextController->UpdateQualityThreshold(pMediaNego->GetTextNego());
-        m_pTextController->UpdateSession();
+
+        if (m_pTextController->UpdateSession())
+        {
+            m_pTextController->ApplyQualityThreshold();
+        }
     }
 }
 

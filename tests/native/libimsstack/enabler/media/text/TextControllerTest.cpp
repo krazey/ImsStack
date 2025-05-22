@@ -138,9 +138,9 @@ TEST_F(TextControllerTest, testUpdateRtpConfigWithNoSession)
     EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_FALSE);
 }
 
-TEST_F(TextControllerTest, testUpdateQualityThresholdWithNoSession)
+TEST_F(TextControllerTest, testApplyQualityThresholdWithNoSession)
 {
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_FALSE);
 }
 
 TEST_F(TextControllerTest, testUpdateSessionWithNoSession)
@@ -160,10 +160,10 @@ TEST_F(TextControllerTest, testUpdateRtpConfigBeforeOpenSession)
     EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_TRUE);
 }
 
-TEST_F(TextControllerTest, testUpdateQualityThresholdBeforeOpenSession)
+TEST_F(TextControllerTest, testApplyQualityThresholdBeforeOpenSession)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_TRUE);
 }
 
 TEST_F(TextControllerTest, testCloseSessionAfterOpenSession)
@@ -181,16 +181,8 @@ TEST_F(TextControllerTest, testModifySession)
     EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
 
     EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
-}
-
-TEST_F(TextControllerTest, testUpdateQualityThreshold)
-{
-    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
-
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(nullptr), IMS_FALSE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
 }
 
 TEST_F(TextControllerTest, testUpdateSessionAfterCloseSession)
@@ -211,13 +203,13 @@ TEST_F(TextControllerTest, testUpdateRtpConfigAfterCloseSession)
     EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_FALSE);
 }
 
-TEST_F(TextControllerTest, testUpdateQualityThresholdAfterCloseSession)
+TEST_F(TextControllerTest, testApplyQualityThresholdAfterCloseSession)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
     EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_FALSE);
 }
 
 TEST_F(TextControllerTest, testIsSessionOpened)

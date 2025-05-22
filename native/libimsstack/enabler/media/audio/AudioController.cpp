@@ -441,24 +441,28 @@ IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
 {
     IMS_TRACE_I("UpdateAccessNetwork(): accessNetwork[%d]", accessNetwork, 0, 0);
 
+    IMS_BOOL bResult = IMS_FALSE;
+
     for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
         AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioSession::STATE_LIVE)
+        if (pAudioSession != IMS_NULL && pAudioSession->GetState() != AudioSession::STATE_NONE)
         {
-            pAudioSession->SetAccessNetwork(accessNetwork);
-            IMS_BOOL bResult = pAudioSession->Modify();
-            if (bResult)
+            bResult = pAudioSession->SetAccessNetwork(accessNetwork);
+
+            if (bResult && pAudioSession->Modify())
             {
                 pAudioSession->SetMediaQuality(m_eCallState);
             }
-
-            return bResult;
+            else
+            {
+                return IMS_FALSE;
+            }
         }
     }
 
-    return IMS_FALSE;
+    return bResult;
 }
 
 PUBLIC

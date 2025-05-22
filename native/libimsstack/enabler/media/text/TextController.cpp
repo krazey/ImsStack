@@ -169,24 +169,15 @@ void TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
-IMS_BOOL TextController::UpdateQualityThreshold(IN std::shared_ptr<TextNego> pNego)
+IMS_BOOL TextController::ApplyQualityThreshold()
 {
-    if (m_pSession == IMS_NULL || pNego == IMS_NULL)
+    if (m_pSession == IMS_NULL)
     {
-        IMS_TRACE_E(0, "UpdateQualityThreshold() - invalid", 0, 0, 0);
+        IMS_TRACE_E(0, "ApplyQualityThreshold() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    TextProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
-    IMS_BOOL bEnableRtcp = IMS_TRUE;
-
-    if (pPeerProfile != IMS_NULL && pPeerProfile->GetBandwidthRs() == 0 &&
-            pPeerProfile->GetBandwidthRr() == 0)
-    {
-        bEnableRtcp = IMS_FALSE;
-    }
-
-    return m_pSession->UpdateMediaQualityThreshold(IMS_TRUE, bEnableRtcp);
+    return m_pSession->UpdateMediaQualityThreshold();
 }
 
 PUBLIC
