@@ -44,5 +44,4 @@
         <item value="10000"/>
         <item value="10000"/>
     </int-array>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="0"/>
 </carrier_config>

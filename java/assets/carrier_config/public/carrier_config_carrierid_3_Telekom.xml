@@ -15,10 +15,10 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="0"/>
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="5000"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="126">
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">

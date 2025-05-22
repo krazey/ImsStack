@@ -59,4 +59,8 @@
             <item value="126"/>
         </int-array>
     </pbundle_as_map>
+    <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="10000"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:teleconferenceuri-factory@telefonica.de</string>
 </carrier_config>

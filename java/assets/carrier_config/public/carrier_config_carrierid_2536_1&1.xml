@@ -57,4 +57,5 @@
             <item value="97"/>
         </int-array>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:mmtel@conf-factory.1und1-mobilfunk.de</string>
 </carrier_config>
