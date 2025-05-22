@@ -279,6 +279,16 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
     IMS_TRACE_I("ImsAos_Disconnected : Reason[%d]", nReason, 0, 0);
 
+    // TODO(Mts): Consider of differentiation by aos type.
+    if (m_piImsAos != IMS_NULL && m_piImsAos->IsImsConnected())
+    {
+        if (m_piImsEmergencyAos != IMS_NULL && !m_piImsEmergencyAos->IsImsConnected())
+        {
+            IMS_TRACE_I("ImsAos_Disconnected : IMS PDN active, ignore E-PDN disconnect", 0, 0, 0);
+            return;
+        }
+    }
+
     m_piMtsServiceState->OnImsDisconnected(nReason);
     // if ims data connection is disconnected, terminate all pending messages.
     m_objContext.GetMessageController().ClearAllMessages();
