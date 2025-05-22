@@ -15,13 +15,13 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <boolean name="ims.support_reg_with_feature_tag_unavailable_bool" value="true"/>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-    <!-- Mts -->
-    <int-array name="imssms.sms_fallback_error_codes_int_array" num="2">
-        <item value="500"/>
-        <item value="501"/>
-    </int-array>
-    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="6"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="255"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
 </carrier_config>
