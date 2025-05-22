@@ -15,14 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <!-- MTC -->
-    <int-array name="imsvoice.geolocation_block_condition_int_array" num="1">
-        <item value="1"/> <!-- GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL -->
-    </int-array>
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="3"/>
-    </int-array>
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
 </carrier_config>

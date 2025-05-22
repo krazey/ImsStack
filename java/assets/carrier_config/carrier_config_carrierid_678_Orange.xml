@@ -18,11 +18,6 @@
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <!-- MTC -->
-    <int-array name="imsvoice.geolocation_block_condition_int_array" num="1">
-        <item value="1"/> <!-- GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL -->
-    </int-array>
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="3"/>
-    </int-array>
+
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 </carrier_config>
