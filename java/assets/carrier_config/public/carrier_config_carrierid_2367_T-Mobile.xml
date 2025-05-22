@@ -25,26 +25,6 @@
             </int-array>
         </pbundle_as_map>
     </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle_as_map name="100">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="105">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle_as_map name="98">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="103">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
             <item value="126"/>
