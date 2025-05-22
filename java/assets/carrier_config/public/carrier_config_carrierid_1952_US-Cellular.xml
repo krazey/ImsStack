@@ -15,7 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="880"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1080"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
@@ -88,4 +87,5 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:usccconf@usccims.com</string>
 </carrier_config>

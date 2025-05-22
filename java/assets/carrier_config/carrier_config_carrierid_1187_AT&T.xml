@@ -157,25 +157,9 @@
     <int name="imsvoice.call_max_count_int" value="3"/>
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">RELEASE_CAUSE;cause=1;text=&quot;User ends call&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_rtp_timeout_string">RELEASE_CAUSE;cause=2;text=&quot;RTP/RTCP time-out&quot;</string>
-    <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string"></string>
-    <string name="imsvoice.call_terminate_reason_header_media_bearer_loss_string"></string>
     <string name="imsvoice.call_terminate_reason_header_sip_timeout_string">RELEASE_CAUSE;cause=4;text=&quot;SIP timeout - no ACK&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text=&quot;SIP response time-out&quot;</string>
-    <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string"></string>
     <string name="imsvoice.call_terminate_reason_header_call_setup_timeout_string">RELEASE_CAUSE;cause=6;text=&quot;Call-setup time-out&quot;</string>
-    <string name="imsvoice.call_terminate_reason_header_terminating_earlydialog_string"></string>
-    <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string"></string>
-    <string name="imsvoice.call_terminate_reason_header_conference_call_joined_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_on_cscall_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_on_vilte_and_no_lte_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_on_connecting_call_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_exceeds_max_call_count_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_on_converting_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_negotiation_failure_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_no_answer_by_user_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string"></string>
-    <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
-    <int name="imsvt.convert_remote_response_timer_millis_int" value="20000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="12000"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="1"/>
     <boolean name="imsvt.support_early_session_bool" value="false"/>
@@ -203,8 +187,6 @@
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
     <int name="imsemergency.policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
     <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="4"/>
-    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="0">
-    </string-array>
     <boolean name="imsvt.check_avchange_feature_for_call_converting_capability_bool" value="false"/>
     <boolean name="imsvoice.support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
     <int-array name="imsvoice.policy_for_call_maintaining_on_registration_suspended_int_array" num="5">
@@ -214,16 +196,12 @@
         <item value="0"/> <!-- index 3 : NO_LTE_COVERAGE -->
         <item value="2"/> <!-- index 4 : INSTANTAENOUS_OFFLINE -->
     </int-array>
-    <int-array name="imsemergency.policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array" num="0">
-    </int-array>
     <boolean name="imsvoice.use_mcid_supplementary_service_bool" value="false"/>
     <boolean name="imsvoice.use_mmc_supplementary_service_bool" value="false"/>
     <boolean name="imsvoice.use_lte_preferred_status_for_service_capability_bool" value="false"/>
     <boolean name="imsvoice.allow_incoming_hold_request_during_conference_call_bool" value="false"/>
     <boolean name="imsvoice.ignore_180_after_183_response_bool" value="false"/>
     <boolean name="imsvoice.add_replace_header_for_conference_bool" value="false"/>
-    <int-array name="imsvt.vilte_to_volte_retry_failure_response_code_int_array" num="0">
-    </int-array>
     <boolean name="imsemergency.use_emergency_number_translation_in_roaming_status_bool" value="false"/>
     <int name="imsvoice.policy_for_prack_delivery_failure_int" value="0"/>
     <boolean name="imsvt.support_video_call_only_in_vops_off_status_bool" value="false"/>
@@ -287,15 +265,6 @@
     <!-- Mts -->
     <int name="imssms.sms_preferred_psi_uri_type_int" value="0"/>
     <boolean name="imssms.sms_in_reply_to_validation_bool" value="false"/>
-
-    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="5"/>
-    </int-array>
-    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="5"/>
-    </int-array>
     <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
         <item value="35000"/>
         <item value="16000"/>

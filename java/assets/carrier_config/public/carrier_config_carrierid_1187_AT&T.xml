@@ -59,15 +59,6 @@
     <boolean name="imsvt.video_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="true"/>
     <boolean name="imsrtt.text_qos_precondition_supported_bool" value="false"/>
-    <string-array name="imswfc.pidf_short_code_string_array" num="7">
-        <item value="211"/>
-        <item value="311"/>
-        <item value="411"/>
-        <item value="511"/>
-        <item value="611"/>
-        <item value="711"/>
-        <item value="811"/>
-    </string-array>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="false"/>
     <boolean name="imsemergency.emergency_qos_precondition_supported_bool" value="false"/>
@@ -90,7 +81,6 @@
     </pbundle_as_map>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="127">
-            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
                 <item value="0"/>
                 <item value="4"/>
@@ -100,12 +90,12 @@
     </pbundle_as_map>
     <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
         <pbundle_as_map name="104">
-        <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
     <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
         <pbundle_as_map name="110">
-        <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
     <pbundle_as_map name="imsvt.video_codec_capability_payload_types_bundle">
@@ -129,11 +119,7 @@
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle_as_map>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
     <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
-    <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
-    <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1230"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1230"/>
 </carrier_config>

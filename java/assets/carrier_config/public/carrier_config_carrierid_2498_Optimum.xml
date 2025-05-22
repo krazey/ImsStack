@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,13 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap -->
-    <string name="imsss.ut_naf_fqdn_string">naf.ims.mnc390.mcc313.3gppnetwork.org</string>
-    <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="true"/>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="4"/>
+                <item value="4"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
 </carrier_config>

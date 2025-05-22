@@ -17,7 +17,6 @@
 <carrier_config>
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
-    <int name="ims.sip_preferred_transport_int" value="1"/>
     <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
         <item value="0"/>
         <item value="1"/>
@@ -28,8 +27,7 @@
     <int name="gba_mode_int" value="2"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="3">
-        <item value="1"/>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
         <item value="2"/>
         <item value="4"/>
     </int-array>
@@ -79,26 +77,6 @@
             <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle_as_map name="100">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="105">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle_as_map name="98">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="103">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
     <pbundle_as_map name="imsvt.video_codec_capability_payload_types_bundle">
         <int-array name="imsvt.hevc_payload_type_int_array" num="1">
             <item value="115"/>
@@ -142,9 +120,6 @@
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle_as_map>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="30000"/>
     <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="30000"/>
     <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="3">
@@ -157,6 +132,4 @@
     <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
     <int name="imsvt.video_rtp_inactivity_timer_millis_int" value="30000"/>
     <int name="imsvt.video_rtcp_inactivity_timer_millis_int" value="30000"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
-    <int name="imsvoice.conference_subscribe_type_int" value="1"/>
 </carrier_config>

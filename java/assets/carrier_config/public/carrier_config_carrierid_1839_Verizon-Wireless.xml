@@ -23,7 +23,6 @@
     <int name="imsemergency.refresh_geolocation_timeout_millis_int" value="2000"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
-    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="-1"/>
     <int name="imsvoice.mo_call_request_timeout_millis_int" value="6000"/>
     <int name="imsvoice.ringing_timer_millis_int" value="55000"/>
     <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
@@ -154,7 +153,6 @@
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="38"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="800"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2400"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1228"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1228"/>
 </carrier_config>

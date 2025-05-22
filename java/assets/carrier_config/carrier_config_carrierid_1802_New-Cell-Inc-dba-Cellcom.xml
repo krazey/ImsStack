@@ -15,6 +15,8 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Aos -->
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
     <!-- MTC -->
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->

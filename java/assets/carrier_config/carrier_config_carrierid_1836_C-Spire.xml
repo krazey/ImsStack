@@ -19,4 +19,5 @@
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>
+    <boolean name="ims.allow_algorithm_param_in_sip_authorization_header_bool" value="true"/>
 </carrier_config>

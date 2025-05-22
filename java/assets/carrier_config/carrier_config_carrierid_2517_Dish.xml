@@ -58,4 +58,8 @@
         <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
+    <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
+        <item value="20000"/>
+        <item value="20000"/>
+    </int-array>
 </carrier_config>
