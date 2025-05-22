@@ -25,12 +25,10 @@
     <int name="imsss.ut_as_server_port_int" value="443"/>
     <int name="imsss.ut_transport_type_int" value="3"/>
     <int name="ims.request_uri_type_int" value="1"/>
-    <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="true"/>
     <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
     <boolean name="imsvoice.session_timer_supported_bool" value="true"/>
     <int name="imsvoice.session_refresher_type_int" value="0"/>
     <int name="imsvoice.session_privacy_type_int" value="2"/>
-    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
     <int name="imsvoice.conference_subscribe_type_int" value="0"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
     <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="4000"/>
@@ -87,12 +85,8 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="10000"/>
     <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="10000"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
 </carrier_config>
