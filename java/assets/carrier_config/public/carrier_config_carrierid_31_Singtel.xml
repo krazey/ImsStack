@@ -17,7 +17,6 @@
 <carrier_config>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1030"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1030"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
             <item value="98"/>
@@ -34,4 +33,5 @@
             <item value="96"/>
         </int-array>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:conference@conference.ims.singtel.com</string>
 </carrier_config>

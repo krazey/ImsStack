@@ -15,7 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
             <item value="98"/>
@@ -32,4 +31,5 @@
             <item value="96"/>
         </int-array>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:shconf@ims.mnc005.mcc525.3gppnetwork.org</string>
 </carrier_config>
