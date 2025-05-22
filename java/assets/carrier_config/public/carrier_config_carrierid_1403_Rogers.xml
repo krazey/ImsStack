@@ -15,7 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int name="ims.request_uri_type_int" value="1"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
     <int-array name="imsvoice.srvcc_type_int_array" num="4">
         <item value="0"/>
@@ -28,7 +27,6 @@
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
     <int name="imsss.ut_as_server_port_int" value="80"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1230"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1230"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
@@ -78,4 +76,5 @@
             <item value="106"/>
         </int-array>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:mmtel@conf-factory.ims.mnc720.mcc302.3gppnetwork.org</string>
 </carrier_config>

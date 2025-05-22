@@ -15,19 +15,13 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int name="ims.request_uri_type_int" value="1"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <!-- fqdn is from previously solution. Currently, three types of UICCs are using carrier id 2008
-        for Videotron in AOSP, which are 302500, 302510, and 302520. So, it needs further
-        verification whether it's working with 510 and 520 UICCs for the FQDN of 500 .  -->
-    <string name="imsss.ut_as_server_fqdn_string">xcap.ims.mnc500.mcc302.pub.3gppnetwork.org</string>
     <!-- Previous solution was using 8090, and there is no requirements -->
     <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
             <item value="102"/>
@@ -64,4 +58,5 @@
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle_as_map>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:conference@factory.ims.mnc500.mcc302.3gppnetwork.org</string>
 </carrier_config>

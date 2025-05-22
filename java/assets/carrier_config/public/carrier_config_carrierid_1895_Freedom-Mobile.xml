@@ -15,7 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int name="ims.request_uri_type_int" value="1"/>
     <int-array name="imsvoice.srvcc_type_int_array" num="4">
         <item value="0"/>
         <item value="1"/>
@@ -27,8 +26,6 @@
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <!-- Previous solution was using 8090, but requirements is 80 -->
-    <int name="imsss.ut_as_server_port_int" value="8090"/>
     <int name="imsss.ut_transport_type_int" value="1"/>
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.amrnb_payload_type_int_array" num="1">

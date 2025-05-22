@@ -18,7 +18,6 @@
     <int name="ims.request_uri_type_int" value="1"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
     <int name="imsvoice.session_expires_timer_sec_int" value="3600"/>
-    <int name="imsvoice.mo_call_request_timeout_millis_int" value="180000"/>
     <int name="imsvoice.ringing_timer_millis_int" value="180000"/>
     <int name="imsvoice.ringback_timer_millis_int" value="182000"/>
     <int name="imsvoice.session_refresh_method_int" value="1"/>

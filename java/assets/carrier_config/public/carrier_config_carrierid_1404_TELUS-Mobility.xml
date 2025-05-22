@@ -15,7 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int name="ims.request_uri_type_int" value="1"/>
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
     <int-array name="imsvoice.srvcc_type_int_array" num="4">
         <item value="0"/>
@@ -37,9 +36,6 @@
         <int name="imsrtt.t140_payload_type_int" value="111"/>
         <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle_as_map>
-    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
-    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="1250"/>
-    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="3750"/>
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="14000"/>
     <int name="imsvoice.audio_rtcp_inactivity_timer_millis_int" value="14000"/>
     <int-array name="imsvoice.audio_inactivity_call_end_reasons_int_array" num="5">
@@ -56,7 +52,7 @@
     <int-array name="imsss.ut_terminal_based_services_int_array" num="1">
         <item value="10"/>
     </int-array>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1080"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1080"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:factory@conference.ims.mnc220.mcc302.3gppnetwork.org</string>
 </carrier_config>
