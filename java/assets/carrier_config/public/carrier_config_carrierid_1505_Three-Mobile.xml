@@ -16,7 +16,6 @@
 -->
 <carrier_config>
     <int name="imsvoice.audio_rtp_inactivity_timer_millis_int" value="10000"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
@@ -54,4 +53,7 @@
             <item value="127"/>
         </int-array>
     </pbundle_as_map>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:Conf-Factory@three.co.uk</string>
 </carrier_config>

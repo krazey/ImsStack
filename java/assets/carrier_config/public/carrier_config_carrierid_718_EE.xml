@@ -17,7 +17,6 @@
 <carrier_config>
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1000"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1000"/>
-    <boolean name="imsss.network_initiated_ussd_over_ims_supported_bool" value="false"/>
     <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
         <pbundle_as_map name="127">
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
