@@ -41,4 +41,5 @@
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
     </int-array>
+    <int name="ims.cellular_network_info_cache_expiration_sec_int" value="1200"/>
 </carrier_config>
