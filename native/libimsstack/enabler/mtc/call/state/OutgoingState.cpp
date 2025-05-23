@@ -421,9 +421,18 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
+    StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+
+    // to cover the case that "100 trying" is missed
+    // starts UDP Keep-Alive when the first PR is received,
+    if (nIndex == 0 && UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    {
+        m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
+        m_pUdpKeepAliveSender->Start();
+    }
+
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_START, nIndex);
-    StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
     if (nStatusCode == SipStatusCode::SC_100)
     {
         return On100TryingReceived();
@@ -434,12 +443,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     StartTimer(TIMER_MO_NOANSWER);
     m_objContext.GetPassiveTimerHolder().RemoveTimer(
             IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
-
-    if (nIndex == 0 && UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
-    {
-        m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
-        m_pUdpKeepAliveSender->Start();
-    }
 
     IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_START, nIndex);

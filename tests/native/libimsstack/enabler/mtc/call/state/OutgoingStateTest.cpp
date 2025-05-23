@@ -280,6 +280,8 @@ TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
             .WillByDefault(Return(2000));
+    // to make sure OutgoingState deletes pKeepAliveSender
+    EXPECT_CALL(objCallContext, CreateUdpKeepAliveSender);
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 
     EXPECT_CALL(*pKeepAliveSender, Stop);
@@ -645,6 +647,8 @@ TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
             .WillByDefault(Return(2000));
+    // to make sure OutgoingState deletes pKeepAliveSender
+    EXPECT_CALL(objCallContext, CreateUdpKeepAliveSender);
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 
     EXPECT_CALL(*pKeepAliveSender, Stop);
@@ -1971,9 +1975,13 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSe
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
             .WillByDefault(Return(2000));
-    EXPECT_CALL(*pKeepAliveSender, Start).Times(1);
+    // to make sure OutgoingState deletes pKeepAliveSender
+    EXPECT_CALL(objCallContext, CreateUdpKeepAliveSender);
 
+    EXPECT_CALL(*pKeepAliveSender, Start).Times(1);
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+
+    EXPECT_CALL(*pKeepAliveSender, Start).Times(0);
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 1);
 }
 
