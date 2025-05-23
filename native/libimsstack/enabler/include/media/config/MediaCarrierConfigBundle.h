@@ -94,19 +94,20 @@ public:
 struct MediaEvsPayloadDescriptionBundle
 {
 public:
+    // TODO : the default values will be updated later
     MediaEvsPayloadDescriptionBundle() :
             // KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE
             nEvsCodecAttributeModeSwitch(0),  // KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT
             nEvsCodecAttributeBandwidth(0),   // KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT
             objEvsCodecAttributeBitrate(ImsVector<IMS_SINT32>()),
             // KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY
-            nEvsCodecAttributeChAwRecv(0),         // KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT
-            nEvsCodecAttributeHfOnly(0),           // KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT
-            bEvsCodecAttributeDtx(IMS_FALSE),      // KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL
-            bEvsCodecAttributeDtxRecv(IMS_FALSE),  // KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL
-            nEvsCodecAttributeChannels(0),         // KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT
-            nEvsCodecAttributeCmr(0),              // KEY_EVS_CODEC_ATTRIBUTE_CMR_INT
-            nCodecAttributeModeChangePeriod(1),    // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT
+            nEvsCodecAttributeChAwRecv(0),        // KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT
+            nEvsCodecAttributeHfOnly(0),          // KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT
+            bEvsCodecAttributeDtx(IMS_TRUE),      // KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL
+            bEvsCodecAttributeDtxRecv(IMS_TRUE),  // KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL
+            nEvsCodecAttributeChannels(1),        // KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT
+            nEvsCodecAttributeCmr(0),             // KEY_EVS_CODEC_ATTRIBUTE_CMR_INT
+            nCodecAttributeModeChangePeriod(1),   // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT
             nCodecAttributeModeChangeCapability(
                     1),                           // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT
             nCodecAttributeModeChangeNeighbor(0)  // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT
