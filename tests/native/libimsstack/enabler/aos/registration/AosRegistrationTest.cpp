@@ -118,6 +118,7 @@ using ::testing::SetArgReferee;
     using Base::IsImsCall;                                        \
     using Base::IsIpsecSupported;                                 \
     using Base::IsReregFailureReportOnIpcanChangeRequired;        \
+    using Base::IsConnectionFailureForOfflineRecovery;            \
     using Base::IsRetryOnSamePcscfRequired;                       \
     using Base::IsTransactionStarted;                             \
     using Base::MessageMediator_AdjustMessage;                    \
@@ -5850,6 +5851,22 @@ TEST_F(AosRegistrationTest,
     m_pAosRegistration->Transaction_OnConnectionFailed(IImsRadio::REASON_INTERNAL_ERROR, 0, 0);
 
     EXPECT_FALSE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest,
+        ShouldBeConnectionFailureForOfflineRecoveryIfRachFailureAndLlfTimerCause)
+{
+    const IMS_UINT32 SR_LLF_TIMER_START_CAUSE_CODE = 1000;
+
+    EXPECT_TRUE(m_pAosRegistration->IsConnectionFailureForOfflineRecovery(
+            IImsRadio::REASON_RACH_FAILURE, SR_LLF_TIMER_START_CAUSE_CODE));
+}
+
+TEST_F(AosRegistrationTest,
+        ShouldNotBeConnectionFailureForOfflineRecoveryIfRachFailureAndNotLlfTimerCause)
+{
+    EXPECT_FALSE(m_pAosRegistration->IsConnectionFailureForOfflineRecovery(
+            IImsRadio::REASON_RACH_FAILURE, 0));
 }
 
 TEST_F(AosRegistrationTest, TransactionOnTrafficPriorityChangedTriggersPendingTransaction)

@@ -992,6 +992,25 @@ IMS_BOOL AosRegistration::IsRegForbiddenInWifi()
 }
 
 PROTECTED
+IMS_BOOL AosRegistration::IsConnectionFailureForOfflineRecovery(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode) const
+{
+    if (nFailureReason == IImsRadio::REASON_NAS_FAILURE ||
+            nFailureReason == IImsRadio::REASON_RRC_REJECT)
+    {
+        return IMS_TRUE;
+    }
+
+    if (nFailureReason == IImsRadio::REASON_RACH_FAILURE &&
+            nCauseCode == SR_LLF_TIMER_START_CAUSE_CODE)
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
 IMS_SINT32 AosRegistration::GetRegExpires()
 {
     return (m_piRegContact != IMS_NULL) ? m_piRegContact->GetExpires() : -1;
@@ -6277,7 +6296,7 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
 }
 
 PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
-        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 nWaitTimeMillis)
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
 {
     if (nFailureReason == IImsRadio::REASON_ACCESS_DENIED)
     {
@@ -6288,9 +6307,13 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
     }
     else
     {
-        if (nFailureReason == IImsRadio::REASON_NAS_FAILURE ||
-                nFailureReason == IImsRadio::REASON_RRC_REJECT)
+        if (IsConnectionFailureForOfflineRecovery(nFailureReason, nCauseCode))
         {
+            A_IMS_TRACE_I(REGID,
+                    "Transaction_OnConnectionFailed :: reason (%d), cause code (%d), wait time ms "
+                    "(%d)",
+                    nFailureReason, nCauseCode, nWaitTimeMillis);
+
             if (nWaitTimeMillis > (CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME * 1000))
             {
                 DestroyEx();
