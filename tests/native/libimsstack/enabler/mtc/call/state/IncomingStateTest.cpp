@@ -179,7 +179,7 @@ TEST_F(IncomingStateTest, TerminateInvokesTerminate)
     const CallReasonInfo objAnyReason(CODE_USER_DECLINE);
 
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objAnyReason));
-    EXPECT_CALL(objUiNotifier, SendTerminated(objAnyReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objAnyReason));
 
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->Terminate(objAnyReason));
 }

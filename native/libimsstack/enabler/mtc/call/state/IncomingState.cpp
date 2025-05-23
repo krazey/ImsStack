@@ -54,7 +54,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::Reject(IN const CallReasonInfo& objR
 PUBLIC VIRTUAL CallStateName IncomingState::Terminate(IN const CallReasonInfo& objReason)
 {
     HandleTerminate(objReason);
-    m_objContext.GetUiNotifier().SendTerminated(objReason);
+    m_objContext.GetUiNotifier().SendIncomingCallRejected(objReason);
 
     return CallStateName::TERMINATING;
 }
