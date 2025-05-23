@@ -623,7 +623,10 @@ public interface IAosRegistrationListener {
                         ExtraReason.WFC_MISSING_911_ADDRESS)),
                 Map.entry(ReasonCode.USIM_AUTHENTICATION_FAILURES, Pair.create(
                         ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                        ImsReasonInfo.CODE_NO_VALID_SIM))
+                        ImsReasonInfo.CODE_NO_VALID_SIM)),
+                Map.entry(ReasonCode.WFC_REG_RESP_500, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE))
         );
 
         /**
