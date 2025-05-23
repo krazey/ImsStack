@@ -51,7 +51,7 @@ public:
     inline virtual void Transfer() {}
 
 protected:
-    static const IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 3000;
+    static const IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 32000;
 
     IMtcCall* GetTransferee() const;
     virtual void OnSuccess();

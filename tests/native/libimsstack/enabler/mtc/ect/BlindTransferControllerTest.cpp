@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 
 // EctController::TIME_WAIT_OPERATION_COMPLETE
-LOCAL IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 3000;
+LOCAL IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 32000;
 
 using ::testing::_;
 using ::testing::Return;
