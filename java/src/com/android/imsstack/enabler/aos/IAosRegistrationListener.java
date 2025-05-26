@@ -379,6 +379,7 @@ public interface IAosRegistrationListener {
         NOT_REGISTERED(ReasonCode.BASE, 9),
         USIM_AUTHENTICATION_FAILURES(ReasonCode.BASE, 10),
         INTERNAL_ERROR(ReasonCode.BASE, 11),
+        NETWORK_TRIGGERED_DEREGISTER(ReasonCode.BASE, 12),
 
         /**
          * BASE_MODEM : 2000 (Errors requiring special action from the modem.)
@@ -630,7 +631,10 @@ public interface IAosRegistrationListener {
                         ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE)),
                 Map.entry(ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, Pair.create(
                         ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE,
-                        ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE))
+                        ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE)),
+                Map.entry(ReasonCode.NETWORK_TRIGGERED_DEREGISTER, Pair.create(
+                        ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                        ImsReasonInfo.CODE_NETWORK_DETACH))
         );
 
         /**

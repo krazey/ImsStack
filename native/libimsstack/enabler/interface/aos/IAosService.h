@@ -400,6 +400,9 @@ enum class AosReasonCode
     /// Registration failed due to internal error.
     INTERNAL_ERROR = TO_UINT32(AosReasonCodeBase::BASE) + 11,
 
+    // Registration termination triggered by network.
+    NETWORK_TRIGGERED_DEREGISTER = TO_UINT32(AosReasonCodeBase::BASE) + 12,
+
     /**
      * @brief : BASE_MODEM(2000) - Errors requiring special action from the modem.
      */
