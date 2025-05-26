@@ -461,6 +461,14 @@ public class SmsTPdu {
         return ImsLog.hiddenString(ImsUtils.bytesToHexString(array));
     }
 
+    private byte[] getTpduHeader() {
+        if (mPdu != null && mUserData != null && mPdu.length > mUserData.length) {
+            return Arrays.copyOfRange(mPdu, 0, mPdu.length - mUserData.length);
+        } else {
+            return mPdu;
+        }
+    }
+
     private static void loge(String s) {
         ImsLog.e(TAG + s);
     }
@@ -542,8 +550,7 @@ public class SmsTPdu {
             builder.append("\n  TP-UDH (User Data Header): Not Present");
         }
 
-        builder.append("\n  TP-UD (User Data): ").append(byteArrayToString(mUserData));
-        builder.append("\n  Raw T-PDU: ").append(byteArrayToString(mPdu));
+        builder.append("\n  T-PDU Header: ").append(byteArrayToString(getTpduHeader()));
         return builder.toString();
     }
 
