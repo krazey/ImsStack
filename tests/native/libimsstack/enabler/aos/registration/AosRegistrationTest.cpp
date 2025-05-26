@@ -115,8 +115,10 @@ using ::testing::SetArgReferee;
     using Base::IsAppReady;                                       \
     using Base::IsBlocked;                                        \
     using Base::IsGeolocationInfoRequired;                        \
+    using Base::IsHeldByCall;                                     \
     using Base::IsImsCall;                                        \
     using Base::IsIpsecSupported;                                 \
+    using Base::IsPdnReconnectWithDelayRequiredOnWfcSetupFailure; \
     using Base::IsReregFailureReportOnIpcanChangeRequired;        \
     using Base::IsConnectionFailureForOfflineRecovery;            \
     using Base::IsRetryOnSamePcscfRequired;                       \
@@ -232,6 +234,7 @@ public:
         m_piRegParameter = piParam;
         m_pSubscription = pSubs;
     }
+
     inline AosUtil* GetUtil() { return m_pUtil; }
     inline void SetFeature(IN IMS_UINT32 nFeature) { m_nFeature = nFeature; }
     inline IMS_BOOL IsFeatureOn(IN IMS_UINT32 nFeature) { return (m_nFeature & nFeature); }
@@ -310,6 +313,7 @@ public:
     {
         return AosRegistration::CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME;
     }
+    inline IMS_UINT32 GetPdnReactivateWaitTime() { return m_nPdnReactivateWaitTime; }
     inline RcPtr<SipProfile>& GetSipProfile() { return m_pSipProfile; }
 
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
@@ -559,6 +563,7 @@ protected:
                 .WillByDefault(Return(&m_objMockIAosSubscriber));
         ON_CALL(m_objMockIAosAppContext, GetBlock()).WillByDefault(Return(&m_objMockIAosBlock));
         ON_CALL(m_objMockIAosAppContext, GetHandles()).WillByDefault(ReturnRef(m_objHandles));
+        ON_CALL(m_objMockIAosAppContext, GetHandle(_)).WillByDefault(Return(&m_objMockIAosHandle));
         ON_CALL(m_objMockIAosAppContext, GetPcscf()).WillByDefault(Return(&m_objMockIAosPcscf));
         ON_CALL(m_objMockIAosAppContext, GetConnection())
                 .WillByDefault(Return(&m_objMockIAosConnection));
@@ -1137,7 +1142,8 @@ TEST_F(AosRegistrationTest, DestroyRegistrationWhenRequestForScscfRestroration)
 TEST_F(AosRegistrationTest, StartWithNextPcscfIfAvailableWhenRequestForScscfRestoration)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
 
     // WHEN
@@ -1150,7 +1156,8 @@ TEST_F(AosRegistrationTest, StartWithNextPcscfIfAvailableWhenRequestForScscfRest
 TEST_F(AosRegistrationTest, ReconnectPdnIfNoAvailablePcscfWhenRequestForScscfRestoration)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
@@ -1159,6 +1166,31 @@ TEST_F(AosRegistrationTest, ReconnectPdnIfNoAvailablePcscfWhenRequestForScscfRes
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest,
+        ShouldReconnectPdnWithDelayIfWfcSetupFailedForAllPcscfsWithCsRoamingWhenScscfRestoration)
+{
+    // GIVEN
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_GSM));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN
+    EXPECT_EQ(m_pAosRegistration->GetPdnReactivateWaitTime(), 120);
 }
 
 TEST_F(AosRegistrationTest, ClearErrorCountWhenRequestToClearServerSocketErrorCount)
@@ -2238,6 +2270,7 @@ TEST_F(AosRegistrationTest, TryRegistrationOnReceivingMessageThatRegRequiredWith
 
 TEST_F(AosRegistrationTest, TryRegistrationOnReceivingMessageThatRegRequiredWithScscfRestoration)
 {
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillOnce(Return(3));
     EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(1));
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
@@ -6242,6 +6275,24 @@ TEST_F(AosRegistrationTest, AddTrafficPendingIfTransactionIsNotStartedWhenStopRe
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
+TEST_F(AosRegistrationTest,
+        ShouldNotHoldRetryByCallIfRegToNextPcscfRequestedWhenStopRetryTimerExpired)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    ON_CALL(m_objMockIAosHandle, IsRegToNextPcscfRequested()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIRegistration, Register(_));
+
+    // WHEN
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    // THEN: The GIVEN condition should be met.
+}
+
 TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToSendRegisterWhenStopRetryTimerExpired)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
@@ -6751,6 +6802,83 @@ TEST_F(AosRegistrationTest,
 
     // THEN
     EXPECT_TRUE(objBindedList.HasFeature(ImsAosFeature::VERSTAT));
+}
+
+TEST_F(AosRegistrationTest, NoDelayRequiredForPdnReconnectionOnWfcSetupFailureIfDelayIsLessThanZero)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(0));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->IsPdnReconnectWithDelayRequiredOnWfcSetupFailure());
+}
+
+TEST_F(AosRegistrationTest, NoDelayRequiredForPdnReconnectionOnWfcSetupFailureIfEpdgNotEnabled)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->IsPdnReconnectWithDelayRequiredOnWfcSetupFailure());
+}
+
+TEST_F(AosRegistrationTest, NoDelayRequiredForPdnReconnectionOnWfcSetupFailureIfNoImsCall)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetImsCall(IMS_FALSE);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->IsPdnReconnectWithDelayRequiredOnWfcSetupFailure());
+}
+
+TEST_F(AosRegistrationTest, NoDelayRequiredForPdnReconnectionOnWfcSetupFailureIfNotRoaming)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->IsPdnReconnectWithDelayRequiredOnWfcSetupFailure());
+}
+
+TEST_F(AosRegistrationTest, NoDelayRequiredForPdnReconnectionOnWfcSetupFailureIfSupportedRat)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->IsPdnReconnectWithDelayRequiredOnWfcSetupFailure());
+}
+
+TEST_F(AosRegistrationTest, DelayRequiredForPdnReconnectionOnWfcSetupFailureWithCsRoaming)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam())
+            .WillByDefault(Return(120));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_GSM));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosRegistration->IsPdnReconnectWithDelayRequiredOnWfcSetupFailure());
 }
 
 TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForUnpredictableFailure)

@@ -133,8 +133,8 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_eImsRegNetwork(AosNetworkType::NONE),
         m_eImsReasonCode(AosReasonCode::UNSPECIFIED),
         m_pSipProfile(IMS_NULL),
-        m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE),
-        m_nPdnReactivateWaitTime(30)
+        m_nPdnReactivateWaitTime(RETRY_DEFAULT_WAIT_TIME),
+        m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE)
 {
     // Init Object
     m_pUtil = AosUtil::GetInstance();
@@ -1188,6 +1188,40 @@ IMS_BOOL AosRegistration::UpdateCallingNumberVerification()
 
     A_IMS_TRACE_D(REGID, "Network supports verstat (%s)",
             _TRACE_B_(m_bCallingNumberVerificationSupported), 0, 0);
+
+    return IMS_TRUE;
+}
+
+PROTECTED IMS_BOOL AosRegistration::IsPdnReconnectWithDelayRequiredOnWfcSetupFailure()
+{
+    IMS_SINT32 nPdnReconnectionDelay =
+            GET_N_CONFIG(m_nSlotId)->GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam();
+
+    if (nPdnReconnectionDelay <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    if (!m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        return IMS_FALSE;
+    }
+
+    if (!IsImsCall())
+    {
+        return IMS_FALSE;
+    }
+
+    if (!m_piContext->GetNetTracker()->IsRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_pUtil->IsSupportedNetworkTypeForCellular(
+                m_piContext->GetNetTracker()->GetMobileVoiceNetworkType()))
+    {
+        return IMS_FALSE;
+    }
 
     return IMS_TRUE;
 }
@@ -3260,16 +3294,34 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
         piPcscf->SetCurrentPcscfInvalid();
     }
 
-    Destroy();
-
-    if (SetNextPcscf(IMS_FALSE))
+    if (piPcscf->HasNextPcscf())
     {
+        DestroyEx();
+        SetNextPcscf(IMS_FALSE);
         Start();
     }
     else
     {
-        // make p-cscf discovery
-        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
+        if (piHandleMtc != IMS_NULL && piHandleMtc->IsRegToNextPcscfRequested())
+        {
+            piHandleMtc->NotifyAllPcscfsUnavailable();
+        }
+
+        Destroy();
+
+        if (IsPdnReconnectWithDelayRequiredOnWfcSetupFailure())
+        {
+            m_nPdnReactivateWaitTime =
+                    GET_N_CONFIG(m_nSlotId)
+                            ->GetPdnReconnectDelayOnWfcSetupFailAllPcscfsWithCsRoam();
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+        }
+        else
+        {
+            // make p-cscf discovery
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        }
     }
 }
 
@@ -5639,8 +5691,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStopRetryTimerExpired()
 
     if (IsImsCall())
     {
-        SetHeldByCall(IMS_TRUE);
-        UpdateTransactionStarted();
+        IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
+        if (piHandleMtc == IMS_NULL || !piHandleMtc->IsRegToNextPcscfRequested())
+        {
+            SetHeldByCall(IMS_TRUE);
+            UpdateTransactionStarted();
+        }
     }
 
     if (!IsTransactionStarted())

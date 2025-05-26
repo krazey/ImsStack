@@ -80,6 +80,8 @@ public:
     void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind) override;
 
     IMS_BOOL IsRegFeatureTagRequired() override;
+    IMS_BOOL IsRegToNextPcscfRequested() override;
+    void NotifyAllPcscfsUnavailable() override;
 
     AosFeatureTagList& GetFeatureTagList() override;
     AosFeatureTagList& GetBindedFeatureTagList() override;
@@ -186,6 +188,7 @@ protected:
 
     IMS_UINT32 GetAppState();
     IMS_UINT32 GetImsAosReason(IN IMS_UINT32 nAosReason);
+    IMS_UINT32 GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason);
     IMS_UINT32 GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason);
 
     IMS_BOOL IsEpdgEnabled() const;
@@ -223,6 +226,7 @@ protected:
     IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ReevaluateBlocks();
     IMS_BOOL UpdateIpcan();
+    void UpdateRegToNextPcscfRequested();
 
     void NotifyEmergencyInitiated();
     void NotifyEmergencyInitiationDone();
@@ -348,6 +352,7 @@ protected:
     IMS_UINT32 m_nNetworkType;
 
     IMS_BOOL m_bEmergencyInitiated;
+    IMS_BOOL m_bRegToNextPcscfRequested;
 
     IMS_UINT32 m_nAppState;
 

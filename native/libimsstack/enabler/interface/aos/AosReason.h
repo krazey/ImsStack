@@ -40,7 +40,8 @@ public:
         REG_FAILURE = 30,
         REG_TERMINATED,
         INITIAL_REG_REQUESTED,
-        REG_TERMINATING
+        REG_TERMINATING,
+        REG_ALL_PCSCF_FAILED,
     };
 
     // Flags for suspend reason

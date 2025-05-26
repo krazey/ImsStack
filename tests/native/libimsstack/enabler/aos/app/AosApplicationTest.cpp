@@ -1588,7 +1588,7 @@ TEST_F(AosApplicationTest, RegRetryCount)
     EXPECT_CALL(m_objMockIAosPcscf, HasNextPcscf())
             .Times(AnyNumber())
             .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillOnce(Return(CarrierConfig::Ims::ERROR_TYPE_REPEATED));
@@ -2019,6 +2019,7 @@ TEST_F(AosApplicationTest, StateMachine)
     // TEST_F : StateDisconnecting_Connection
     // StateDisconnecting_Connection - ProcessConnectionDeactivated
     m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+    m_pAosApplication->SetOffReason(AosReason::REG_FAILURE);
     objMessageCnx.nWparam = CONNECTION_DEACTIVATED;
     objMessageCnx.nLparam = 0;
     EXPECT_TRUE(m_pAosApplication->StateDisconnecting_Connection(objMessageCnx));

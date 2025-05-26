@@ -116,7 +116,8 @@ using ::testing::ReturnRef;
     using Base::StateConnecting;                   \
     using Base::StateDisconnecting;                \
     using Base::StateToString;                     \
-    using Base::UpdateIpcan;
+    using Base::UpdateIpcan;                       \
+    using Base::UpdateRegToNextPcscfRequested;
 
 class TestAosHandle : public AosHandle
 {
@@ -288,6 +289,10 @@ public:
     inline void SetEmergencyInitiated(IN IMS_BOOL bInitiated)
     {
         m_bEmergencyInitiated = bInitiated;
+    }
+    inline void SetRegToNextPcscfRequested(IN IMS_BOOL bRequested)
+    {
+        m_bRegToNextPcscfRequested = bRequested;
     }
 };
 
@@ -857,6 +862,111 @@ TEST_F(AosHandleTest, ShouldNotifyESmsDoneAfterCallbackListenersIfESmslInitHasNo
 
     // THEN
     EXPECT_FALSE(m_pAosHandle->IsEmergencyInitiated());
+}
+
+TEST_F(AosHandleTest,
+        ShouldNotifyDisconnectedWithRegNewRequiredForNotSpecifiedIfRegToNextPcscfRequested)
+{
+    // GIVEN
+    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
+    m_pAosHandle->SetNotify(IMS_TRUE);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
+    m_pAosHandle->SetReason(AosReason::REG_FAILURE);
+
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(ImsAosReason::REG_NEW_REQUIRED));
+
+    // WHEN
+    m_pAosHandle->App_Notify();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosHandleTest, ShouldNotifyWithRegAllPcscfFailedIfNotifiedAllPcscfUnavailable)
+{
+    // GIVEN
+    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
+
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(ImsAosReason::REG_ALL_PCSCF_FAILED));
+
+    // WHEN
+    m_pAosHandle->NotifyAllPcscfsUnavailable();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosHandleTest, ShouldResetRegToNextPcscfRequestedIfNotifiedAllPcscfUnavailable)
+{
+    // GIVEN
+    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
+
+    // WHEN
+    m_pAosHandle->NotifyAllPcscfsUnavailable();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandle->IsRegToNextPcscfRequested());
+}
+
+TEST_F(AosHandleTest, ShouldResetRegToNextPcscfRequestedIfStateChangedToConnected)
+{
+    // GIVEN
+    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
+
+    // WHEN
+    m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandle->IsRegToNextPcscfRequested());
+}
+
+TEST_F(AosHandleTest,
+        ShouldResetRegToNextPcscfRequestedIfAppDisconnectedWithDataDisconnectedOnConnectedState)
+{
+    // GIVEN
+    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
+
+    // WHEN
+    IMSMSG objMSG(1 /*AosHandle::HANDLE_MSG_APP_STATUS*/, IAosApplication::APP_DISCONNECTED,
+            AosReason::DATA_DISCONNECTED);
+    m_pAosHandle->StateConnecting(objMSG);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandle->IsRegToNextPcscfRequested());
+}
+
+TEST_F(AosHandleTest,
+        ShouldKeepRegToNextPcscfRequestedIfAppDisconnectedWithRegFailureOnConnectedState)
+{
+    // GIVEN
+    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
+
+    // WHEN
+    IMSMSG objMSG(1 /*AosHandle::HANDLE_MSG_APP_STATUS*/, IAosApplication::APP_DISCONNECTED,
+            AosReason::REG_FAILURE);
+    m_pAosHandle->StateConnecting(objMSG);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsRegToNextPcscfRequested());
+}
+
+TEST_F(AosHandleTest,
+        ShouldKeepRegToNextPcscfRequestedIfAppDisconnectedWithInitialRegRequestedOnConnectedState)
+{
+    // GIVEN
+    m_pAosHandle->SetRegToNextPcscfRequested(IMS_TRUE);
+    m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
+
+    // WHEN
+    IMSMSG objMSG(1 /*AosHandle::HANDLE_MSG_APP_STATUS*/, IAosApplication::APP_DISCONNECTED,
+            AosReason::INITIAL_REG_REQUESTED);
+    m_pAosHandle->StateConnected(objMSG);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsRegToNextPcscfRequested());
 }
 
 TEST_F(AosHandleTest, ControlCallsRequestCmdOfAosApplicationWithTheGivenValue)
@@ -1542,6 +1652,8 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_PERMANENTLY_FAILED),
             ImsAosReason::DATA_PERMANENTLY_FAILED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::REG_ALL_PCSCF_FAILED),
+            ImsAosReason::REG_ALL_PCSCF_FAILED);
 }
 
 TEST_F(AosHandleTest, GetImsAosReasonForSuspend_Test)
@@ -4522,6 +4634,18 @@ TEST_F(AosHandleTest, RequestAppToRegisterWithNextPcscf)
     m_pAosHandle->RegisterWithNextPcscf(0);
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosHandleTest, ShouldSetRegToNexePcscfRequestedToTrueIfMtcService)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::MTC);
+
+    // WHEN
+    m_pAosHandle->RegisterWithNextPcscf(0);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsRegToNextPcscfRequested());
 }
 
 TEST_F(AosHandleTest, CallTracker_StateChanged_Test)

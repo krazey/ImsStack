@@ -109,6 +109,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_bNetSrvIn(IMS_FALSE),
         m_nNetworkType(NW_REPORT_RADIO_INVALID),
         m_bEmergencyInitiated(IMS_FALSE),
+        m_bRegToNextPcscfRequested(IMS_FALSE),
         m_nAppState(APP_STATE_DISCONNECTED)
 {
     IMS_CHAR acLog[256 + 1] = {
@@ -230,6 +231,20 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegFeatureTagRequired()
     return m_bRegFeatureTagRequired;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegToNextPcscfRequested()
+{
+    return m_bRegToNextPcscfRequested;
+}
+
+PUBLIC VIRTUAL void AosHandle::NotifyAllPcscfsUnavailable()
+{
+    m_bRegToNextPcscfRequested = IMS_FALSE;
+    m_bNotify = IMS_TRUE;
+
+    SetReason(AosReason::REG_ALL_PCSCF_FAILED);
+    App_Notify();
+}
+
 PUBLIC VIRTUAL AosFeatureTagList& AosHandle::GetFeatureTagList()
 {
     return m_objFeatureTagList;
@@ -304,9 +319,11 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
     // notify the state to Enabler
     switch (GetState())
     {
-        case STATE_DISCONNECTED:  // FALL-THROUGH
-        case STATE_CONNECTING:
+        case STATE_DISCONNECTED:
             m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
+            break;
+        case STATE_CONNECTING:
+            m_piListener->ImsAos_Disconnected(GetImsAosReasonForConnecting(m_nReason));
             break;
         case STATE_CONNECTED:
             m_piListener->ImsAos_Connected(
@@ -442,6 +459,12 @@ PUBLIC VIRTUAL void AosHandle::RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableT
 {
     A_IMS_TRACE_D(APPPROFILE, "RegisterWithNextPcscf :: nUnavailableTimeForCurrentPcscf (%d)",
             nUnavailableTimeForCurrentPcscf, 0, 0);
+
+    if (m_nServiceType == ImsAosService::MTC)
+    {
+        m_bRegToNextPcscfRequested = IMS_TRUE;
+    }
+
     m_piAppContext->GetApp()->RequestCmd(
             ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY, nUnavailableTimeForCurrentPcscf);
 }
@@ -585,6 +608,8 @@ void AosHandle::SetHandleState(IN IMS_UINT32 nState)
     {
         ClearSuspendedReason();
     }
+
+    UpdateRegToNextPcscfRequested();
 }
 
 PROTECTED
@@ -659,6 +684,9 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AosReason::REG_TERMINATING:
             nImsAosReason = ImsAosReason::REG_TERMINATING;
             break;
+        case AosReason::REG_ALL_PCSCF_FAILED:
+            nImsAosReason = ImsAosReason::REG_ALL_PCSCF_FAILED;
+            break;
         case AosReason::IP_CHANGED:
             nImsAosReason = ImsAosReason::IP_CHANGED;
             break;
@@ -667,6 +695,23 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
             break;
         default:
             break;
+    }
+
+    return nImsAosReason;
+}
+
+PROTECTED
+IMS_UINT32 AosHandle::GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason)
+{
+    IMS_UINT32 nImsAosReason = GetImsAosReason(nAosReason);
+
+    if (m_bRegToNextPcscfRequested)
+    {
+        IMS_UINT32 nState = GetState();
+        if (nState == STATE_CONNECTING && nImsAosReason == ImsAosReason::NOT_SPECIFIED)
+        {
+            nImsAosReason = ImsAosReason::REG_NEW_REQUIRED;
+        }
     }
 
     return nImsAosReason;
@@ -1178,6 +1223,23 @@ IMS_BOOL AosHandle::UpdateIpcan()
 }
 
 PROTECTED
+void AosHandle::UpdateRegToNextPcscfRequested()
+{
+    if (!m_bRegToNextPcscfRequested)
+    {
+        return;
+    }
+
+    if (GetState() == STATE_CONNECTING &&
+            GetImsAosReasonForConnecting(m_nReason) == ImsAosReason::REG_NEW_REQUIRED)
+    {
+        return;
+    }
+
+    m_bRegToNextPcscfRequested = IMS_FALSE;
+}
+
+PROTECTED
 void AosHandle::NotifyEmergencyInitiated()
 {
     if (m_nServiceType == ImsAosService::EMERGENCY_MTC)
@@ -1466,6 +1528,8 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
                     break;
 
                 case IAosApplication::APP_DISCONNECTED:
+                    UpdateRegToNextPcscfRequested();
+
                     // report the failure to Enabler for silent/offline dialing
                     m_bNotify = IMS_TRUE;
                     break;

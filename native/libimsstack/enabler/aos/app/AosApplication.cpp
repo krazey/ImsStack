@@ -1031,7 +1031,8 @@ PROTECTED VIRTUAL IMS_UINT32 AosApplication::GetReportState()
     switch (GetState())
     {
         case STATE_NOTREADY:  // FALL-THROUGH
-        case STATE_READY:
+        case STATE_READY:     // FALL-THROUGH
+        case STATE_CONNECTING:
             break;
 
         case STATE_CONNECTED:
