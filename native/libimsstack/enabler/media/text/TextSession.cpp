@@ -165,37 +165,34 @@ PUBLIC IMS_BOOL TextSession::UpdateRtpConfig(
 }
 
 PUBLIC
-IMS_BOOL TextSession::UpdateMediaQualityThreshold(
-        IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp)
+IMS_BOOL TextSession::UpdateMediaQualityThreshold()
 {
     if (GetConfiguration() == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    /** TODO_MEDIA need to get real value when it's ready. */
-    if (bActiveSession)
+    if (GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
                 std::vector<int32_t>{GetConfiguration()->GetRtpInactivityTimerMillis()});
-
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                (bEnableRtcp) ? GetConfiguration()->GetRtcpInactivityTimerMillis() : 0);
     }
     else
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{0});
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                GetConfiguration()->GetRtcpInactivityTimerMillis());
     }
 
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], RtpInactivity[%d], "
+    m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
+            m_pRtpConfig->getRtcpConfig().getIntervalSec() > 0
+                    ? GetConfiguration()->GetRtcpInactivityTimerMillis()
+                    : 0);
+
+    IMS_TRACE_D("UpdateMediaQualityThreshold(): RtpInactivity[%d], "
                 "RtcpInactivity[%d]",
-            bActiveSession,
             (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
                     ? -1
                     : m_objMediaQualityThreshold.getRtpInactivityTimerMillis().front(),
-            m_objMediaQualityThreshold.getRtcpInactivityTimerMillis());
+            m_objMediaQualityThreshold.getRtcpInactivityTimerMillis(), 0);
 
     return IMS_TRUE;
 }
@@ -279,6 +276,12 @@ IMS_BOOL TextSession::SetMediaQuality()
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC
+MediaQualityThreshold* TextSession::GetMediaQualityThreshold()
+{
+    return &m_objMediaQualityThreshold;
 }
 
 PRIVATE

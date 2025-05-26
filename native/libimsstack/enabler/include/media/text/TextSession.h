@@ -52,14 +52,10 @@ public:
 
     /**
      * @brief Update the MediaQualityThreshold parameters and send it to the java
-     *
-     * @param bActiveSession Set IMS_TRUE if this session is active
-     * @param bEnableRtcp Set IMS_TRUE to enable monitoring the RTCP inactivity, IMS_FALSE to
-     * disable RTCP monitoring
      * @return IMS_BOOL Returns IMS_TRUE when the sending MediaQualityThreshold is done
      * successfully, IMS_FALSE when it is failed with invalid arguments
      */
-    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp);
+    IMS_BOOL UpdateMediaQualityThreshold();
 
     /**
      * @brief Handles the message from the telecom
@@ -89,6 +85,9 @@ public:
      * Request the SET_MEDIA_QUALITY with the MediaQualityThreshold
      */
     IMS_BOOL SetMediaQuality();
+
+    /** Get the MediaQualityThreshold */
+    MediaQualityThreshold* GetMediaQualityThreshold();
 
 private:
     TextConfiguration* GetConfiguration();

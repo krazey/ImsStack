@@ -38,7 +38,7 @@ public:
     MOCK_METHOD(IMS_BOOL, UpdateRtpConfig, (IN std::shared_ptr<TextNego> pNego), (override));
     MOCK_METHOD(IMS_BOOL, UpdateLocalAddress, (IN std::shared_ptr<TextNego> pNego), (override));
     MOCK_METHOD(void, UpdateAccessNetwork, (IN IMS_UINT32 nAccessNetwork), (override));
-    MOCK_METHOD(IMS_BOOL, UpdateQualityThreshold, (IN std::shared_ptr<TextNego> pNego), (override));
+    MOCK_METHOD(IMS_BOOL, ApplyQualityThreshold, (), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionOpened, (), (override));
 };
 
