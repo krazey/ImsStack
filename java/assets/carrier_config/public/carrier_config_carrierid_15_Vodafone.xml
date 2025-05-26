@@ -28,4 +28,5 @@
             </int-array>
         </pbundle_as_map>
     </pbundle_as_map>
+    <string name="imsvoice.conference_factory_uri_string">sip:conference@factory.ims.vodafone.com.au</string>
 </carrier_config>
