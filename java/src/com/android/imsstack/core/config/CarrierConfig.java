@@ -469,6 +469,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "use_security_server_port_in_init_reg_bool";
         public static final String KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL =
                 KEY_PREFIX + "use_security_server_port_in_reg_contact_of_init_reg_bool";
+        public static final String KEY_AUTH_FAILURE_RETRY_MAX_CNT_INT =
+                KEY_PREFIX + "auth_failure_retry_max_cnt_int";
         public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
                 KEY_PREFIX + "contact_user_info_policy_for_non_reg_message_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =

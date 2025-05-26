@@ -372,6 +372,7 @@
     <boolean name="ims.use_reginfo_contact_without_uri_check_bool" value="false"/>
     <boolean name="ims.use_security_server_port_in_init_reg_bool" value="false"/>
     <boolean name="ims.use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>
+    <int name="ims.auth_failure_retry_max_cnt_int" value="0"/>
     <int name="ims.contact_user_info_policy_for_non_reg_message_int" value="1"/>
     <int name="ims.geolocation_pidf_forming_policy_int" value="1"/>
     <int name="ims.ims_establishment_time_for_lte_sec_int" value="0"/>

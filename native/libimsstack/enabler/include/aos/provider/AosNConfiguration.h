@@ -127,6 +127,9 @@ public:
     IMS_UINT32 GetRegistrationRetryBaseTime() override;
     IMS_UINT32 GetRegistrationRetryMaxTime() override;
     IMS_UINT32 GetIsimIndexForImpu() override;
+    IMS_SINT32 GetAuthFailureRetryMaxCnt() const override;
+    IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const override;
+    IMS_SINT32 GetGeolocationPidfFormingPolicy() const override;
     IMS_SINT32 GetImsEstablishmentTimeForLte() const override;
     IMS_SINT32 GetImsEstablishmentTimeForNr() const override;
     IMS_SINT32 GetPreferredImsDscp() const override;
@@ -170,8 +173,6 @@ public:
     IMS_SINT32 GetExtraRegErrPolicy() const override;
     IMS_SINT32 GetExtraRegErrMaxCount() const override;
     IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const override;
-    IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const override;
-    IMS_SINT32 GetGeolocationPidfFormingPolicy() const override;
     IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached() const override;
     IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const override;
 

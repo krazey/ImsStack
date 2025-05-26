@@ -561,6 +561,21 @@ PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetIsimIndexForImpu()
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nIsimIndexForImpu);
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetAuthFailureRetryMaxCnt() const
+{
+    return m_objAsset.nAuthFailureRetryMaxCnt;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUserInfoPolicyForNonRegisterMessage() const
+{
+    return m_objAsset.nContactUserInfoPolicyForNonRegMessage;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetGeolocationPidfFormingPolicy() const
+{
+    return m_objAsset.nGeolocationPidfFormingPolicy;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsEstablishmentTimeForLte() const
 {
     return m_objAsset.nImsEstablishmentTimeForLteSec;
@@ -775,16 +790,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMaxCount() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() const
 {
     return m_objAsset.nRegPcscfUpdatePolicy;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUserInfoPolicyForNonRegisterMessage() const
-{
-    return m_objAsset.nContactUserInfoPolicyForNonRegMessage;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetGeolocationPidfFormingPolicy() const
-{
-    return m_objAsset.nGeolocationPidfFormingPolicy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32
@@ -1566,6 +1571,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.bVideoOverWifiSupportedWithoutVoice = piCc->GetBoolean(
             CarrierConfig::ImsWfc::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL);
 
+    m_objAsset.nAuthFailureRetryMaxCnt =
+            piCc->GetInt(CarrierConfig::Ims::KEY_AUTH_FAILURE_RETRY_MAX_CNT_INT);
     m_objAsset.nContactUserInfoPolicyForNonRegMessage =
             piCc->GetInt(CarrierConfig::Ims::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT);
     m_objAsset.nEmcPreferredIpType =
