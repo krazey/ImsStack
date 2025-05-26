@@ -451,6 +451,32 @@ TEST_F(MtsErrorHandlerTest, Handle380FallbackErrorCode)
     EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 
+TEST_F(MtsErrorHandlerTest, HandleSmma400GenericErrorCode)
+{
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
+
+    ImsVector<IMS_SINT32> objGenericErrorCodes;
+
+    ImsVector<IMS_SINT32> objFallbackErrorCodes;
+    objFallbackErrorCodes.Push(SipStatusCode::SC_380);
+
+    ImsVector<IMS_SINT32> objSmmaGenericErrorCodes;
+    objSmmaGenericErrorCodes.Push(SipStatusCode::SC_400);
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
+            .WillByDefault(Return(objGenericErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY, _))
+            .WillByDefault(Return(objFallbackErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_SMMA_GENERIC_ERROR_CODES_INT_ARRAY, _))
+            .WillByDefault(Return(objSmmaGenericErrorCodes));
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(
+            objMockMtsService, *pMtsDynamicLoader, &objMockMessage, SMS_3GPP_MTI_RP_SMMA);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
+}
+
 TEST_F(MtsErrorHandlerTest, ResetRetryAfterConditionIfRetryAfterValueDoesNotExist)
 {
     ImsVector<IMS_SINT32> objErrorCodes;

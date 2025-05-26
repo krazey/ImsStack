@@ -32,7 +32,8 @@ public:
 
     IMS_SINT32 Handle(IN const IMtsService& objMtsService,
             IN const IMtsDynamicLoader& objMtsDynamicLoader,
-            IN const IMessage* piMessage = IMS_NULL) override;
+            IN const IMessage* piMessage = IMS_NULL,
+            IMS_SINT32 nMti = SMS_3GPP_MTI_RP_DATA_FROM_MS) override;
     inline IMS_SINT32 GetRetryAfterValue() const override { return m_nRetryAfterValue; }
     inline void ResetRetryAfterStatus() override
     {

@@ -53,18 +53,32 @@ MtsErrorHandler::~MtsErrorHandler()
 
 PUBLIC
 IMS_SINT32 MtsErrorHandler::Handle(IN const IMtsService& objMtsService,
-        IN const IMtsDynamicLoader& objMtsDynamicLoader, IN const IMessage* piMessage)
+        IN const IMtsDynamicLoader& objMtsDynamicLoader, IN const IMessage* piMessage,
+        IMS_SINT32 nMti)
 {
     IMS_SINT32 nResult;
     ImsVector<IMS_SINT32> objGenericErrorCodes = m_piCarrierConfig->GetIntArray(
             CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY);
     ImsVector<IMS_SINT32> objFallbackErrorCodes = m_piCarrierConfig->GetIntArray(
             CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY);
+    ImsVector<IMS_SINT32> objSmmaGenericErrorCodes = m_piCarrierConfig->GetIntArray(
+            CarrierConfig::ImsSms::KEY_SMS_SMMA_GENERIC_ERROR_CODES_INT_ARRAY);
     if (piMessage != IMS_NULL)
     {
         // A status code should only be present in either 'imssms.sms_generic_error_codes_int_array'
         // or 'imssms.sms_fallback_error_codes_int_array', but not both.
-        if (objGenericErrorCodes.Contains(piMessage->GetStatusCode()))
+        if (nMti == SMS_3GPP_MTI_RP_SMMA)
+        {
+            if (objSmmaGenericErrorCodes.Contains(piMessage->GetStatusCode()))
+            {
+                nResult = MO_ERROR_GENERIC;
+            }
+            else
+            {
+                nResult = MO_ERROR_RETRY;
+            }
+        }
+        else if (objGenericErrorCodes.Contains(piMessage->GetStatusCode()))
         {
             nResult = MO_ERROR_GENERIC;
         }
