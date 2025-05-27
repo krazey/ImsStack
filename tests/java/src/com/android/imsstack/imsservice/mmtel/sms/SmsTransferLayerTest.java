@@ -105,7 +105,7 @@ public class SmsTransferLayerTest {
     public void test_sendMemoryAvailabilityNotification() {
         mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc), eq(mSmsc),
-                eq(null), eq(STATUS_RESULT_NA));
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
     }
 
     @Test
@@ -117,8 +117,148 @@ public class SmsTransferLayerTest {
 
         verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
                 eq(mSmsc),
-                eq(null), eq(STATUS_RESULT_NA));
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
         verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newPass_newFail() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-passed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (new-failed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (retry)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(true));
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newPass_newPass() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-passed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (new-passed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (not retry)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newFail_retryFail() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-failed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (retry-failed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(true));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (new)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newFail_retryPass() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-failed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (retry-passed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(true));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (new)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
     }
 
     @Test
@@ -127,7 +267,7 @@ public class SmsTransferLayerTest {
                 mSmsFormat, mMessageRef, mSmsc, mPdu));
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.RP_ACK, mMessageRef, mSmsc, mPdu);
         verify(mSmsRL).sendRPMessage(anyInt(), anyInt(), anyString(), anyString(),
-                any(), anyInt());
+                any(), anyInt(), eq(false));
     }
 
     @Test
@@ -152,7 +292,7 @@ public class SmsTransferLayerTest {
         when(mMoSmsCCmd.getTpDestinationAddress()).thenReturn(tpAddr);
         usatListener.onCommandResponse(mMockUsatCmdRes);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_DATA), eq(mSmsc), eq(tpAddr),
-                eq(tpdu), eq(STATUS_RESULT_NA));
+                eq(tpdu), eq(STATUS_RESULT_NA), eq(false));
     }
 
     @Test
@@ -182,7 +322,7 @@ public class SmsTransferLayerTest {
         usatListener.onCommandResponse(mMockUsatCmdRes);
         byte[] usatTpdu = ImsUtils.hexStringToBytes(mUsatTpduString);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_DATA), eq(mEncodedRpDestAddr),
-                             eq(mUsatTpDestAddr), eq(usatTpdu), eq(STATUS_RESULT_NA));
+                             eq(mUsatTpDestAddr), eq(usatTpdu), eq(STATUS_RESULT_NA), eq(false));
     }
 
     @Test
@@ -271,19 +411,19 @@ public class SmsTransferLayerTest {
         mSmsTransferLayer.sendMoTPdu(4, mSmsFormat, mMessageRef, mSmsc, mTpdu);
         mProxyListener = mSmsTransferLayer.getListener();
         verify(mSmsRL).sendRPMessage(eq(1), eq(mRpMessageType), eq(mSmsc), eq(mDestinationAddress),
-                eq(mTpdu), eq(STATUS_RESULT_NA));
+                eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
         mProxyListener.notifyRLReportIndication(1, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
         verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(2), eq(mRpMessageType), eq(mSmsc),
-                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
+                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
         mProxyListener.notifyRLReportIndication(2, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
         verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(3), eq(mRpMessageType), eq(mSmsc),
-                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
+                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
         mProxyListener.notifyRLReportIndication(3, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
         verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc),
-                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
+                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
     }
 
     private static class TestSmsTransferLayer extends SmsTransferLayer {

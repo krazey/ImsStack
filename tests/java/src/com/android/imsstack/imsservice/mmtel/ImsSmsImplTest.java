@@ -107,7 +107,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     @Test
     public void test_sendSms_Success() throws RemoteException {
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
-        verify(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat, mMessageRef, "1111", mPdu);
+        verify(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat, mMessageRef, "1111", mPdu, true);
     }
 
     @Test
@@ -125,19 +125,19 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
                 SmsManager.RESULT_INVALID_SMS_FORMAT, RESULT_NO_NETWORK_ERROR);
 
         when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
-                "1111", mPdu)).thenReturn(SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS);
+                "1111", mPdu, true)).thenReturn(SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener, times(2)).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_INVALID_SMSC_ADDRESS, RESULT_NO_NETWORK_ERROR);
 
         when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
-                "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED);
+                "1111", mPdu, true)).thenReturn(SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_ENCODING_ERROR, RESULT_NO_NETWORK_ERROR);
 
         when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
-                "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED);
+                "1111", mPdu, true)).thenReturn(SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
@@ -306,7 +306,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     @Test
     public void test_sendSms_RuntimeException() {
         doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat,
-                mMessageRef, "1111", mPdu);
+                mMessageRef, "1111", mPdu, true);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mMockRuntimeException).getMessage();
     }

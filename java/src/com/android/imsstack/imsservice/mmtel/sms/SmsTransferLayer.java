@@ -63,6 +63,7 @@ public class SmsTransferLayer {
     private static final boolean DBG = true;
     private UsatBasedSms mUsatBasedSms = null;
     public Map<Usat.MoSmsControlCommand, TpduParam> mUsatCmdMessageMap = new ConcurrentHashMap<>();
+    private boolean mIsSmmaRetry = false;
 
     /**
      * Start Index of TP-DestinationAddress after MTI(0th Index), TP-MR(1st), TP-DA length(2nd)
@@ -98,13 +99,15 @@ public class SmsTransferLayer {
         String mSmsc;
         String mDestinationAddress;
         int mRpMessageType;
+        boolean mIsRetry;
         TpduParam(int token, byte[] pdu, String scAddress, String destinationAddr,
-                    int rpMessageType) {
+                int rpMessageType, boolean isRetry) {
             mToken = token;
             mTpdu = pdu;
             mSmsc = scAddress;
             mDestinationAddress = destinationAddr;
             mRpMessageType = rpMessageType;
+            mIsRetry = isRetry;
         }
     }
 
@@ -186,10 +189,28 @@ public class SmsTransferLayer {
      * @param tpMessageRef the TP-MR passed for the SMS-SUBMIT message
      * @param smsc the Short Message Service Center address
      * @param pdu PDU representing the contents of the message.
+     * @deprecated use {@code sendMoTPdu(int, int, int, String, byte[], boolean)} instead
      *
      * @return result of processing of outgoing SMS's TPDU
      */
+    @Deprecated
     public int sendMoTPdu(int token, int smsFormat, int tpMessageRef, String smsc, byte[] pdu) {
+        return sendMoTPdu(token, smsFormat, tpMessageRef, smsc, pdu, false);
+    }
+
+    /**
+     * Handles SMS-SUBMIT Message at Transfer Layer and notifies Relay Layer to send RP-DATA
+     * @param token sent from framework to track callback for each SMS-SUBMIT message
+     * @param smsFormat format of the message
+     * @param tpMessageRef the TP-MR passed for the SMS-SUBMIT message
+     * @param smsc the Short Message Service Center address
+     * @param pdu PDU representing the contents of the message.
+     * @param isRetry true if it's a retry attempt, otherwise false.
+     *
+     * @return result of processing of outgoing SMS's TPDU
+     */
+    public int sendMoTPdu(int token, int smsFormat, int tpMessageRef, String smsc, byte[] pdu,
+            boolean isRetry) {
         logi("sendMoTPdu");
         if (DBG) {
             log("token = " + token
@@ -211,7 +232,8 @@ public class SmsTransferLayer {
             if (DBG) {
                 log("TpAddress = " + ImsLog.hiddenString(address));
             }
-            TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address, SmsUtils.RP_DATA);
+            TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address, SmsUtils.RP_DATA,
+                    isRetry);
             UsatInterface usat = mCallContext.getUsatInterface();
             mUsatBasedSms = new UsatBasedSms();
             if (usat != null && usat.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)) {
@@ -250,7 +272,8 @@ public class SmsTransferLayer {
         }
         try {
             //In case of RP-SMMA, the destination address is set to smsc address
-            TpduParam tpduParameters = new TpduParam(token, null, smsc, smsc, SmsUtils.RP_SMMA);
+            TpduParam tpduParameters = new TpduParam(token, null, smsc, smsc, SmsUtils.RP_SMMA,
+                    mIsSmmaRetry);
             return enqueueAndSendMessageToRL(tpduParameters);
         } catch (RuntimeException e) {
             loge("sendMemoryAvailabilityNotification :: Failed: " + e.getMessage());
@@ -517,7 +540,7 @@ public class SmsTransferLayer {
                 mTokenMessageMap.put(tpduParameters.mToken, tpduParameters);
                 return mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
                         tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
-                        tpduParameters.mTpdu, 0);
+                        tpduParameters.mTpdu, 0, tpduParameters.mIsRetry);
             } else {
                 if (mTokenMessageMap.containsKey(tpduParameters.mToken)) {
                     loge("enqueueAndSendMessageToRL duplicate token - discarding the request");
@@ -558,7 +581,7 @@ public class SmsTransferLayer {
                     }
                     mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
                                          tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
-                                         tpduParameters.mTpdu, 0);
+                                         tpduParameters.mTpdu, 0, tpduParameters.mIsRetry);
                     break;
 
                 default :
@@ -648,6 +671,12 @@ public class SmsTransferLayer {
                         tpduParameters = mTokenMessageMap.get(token);
                         if (tpduParameters.mRpMessageType == SmsUtils.RP_SMMA) {
                             listener.notifyMemoryAvailableResult(token, result, causeCode);
+                            // As per section 6.3.3.1.2 in TS 124011, only one retry is allowed.
+                            if (result == ImsSmsImplBase.SEND_STATUS_ERROR_RETRY && !mIsSmmaRetry) {
+                                mIsSmmaRetry = true;
+                            } else {
+                                mIsSmmaRetry = false;
+                            }
                         } else {
                             listener.notifySmsResult(token, messageRef, result, reason, causeCode);
                         }

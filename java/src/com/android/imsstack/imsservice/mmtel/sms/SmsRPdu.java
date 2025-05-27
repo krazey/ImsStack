@@ -66,15 +66,24 @@ public final class SmsRPdu {
     private byte[] mRpUserData;
     private byte[] mRpdu;
     private SmsTPdu mTpdu;
+    private boolean mIsRetry;
 
     public SmsRPdu(int messageRef, int messageType,
                    String destinationAddress, int cause,
                    byte[] userData) {
+        this(messageRef, messageType, destinationAddress, cause, userData, false);
+    }
+
+    public SmsRPdu(int messageRef, int messageType,
+                    String destinationAddress, int cause,
+                    byte[] userData,
+                    boolean isRetry) {
         mMessageRef = messageRef;
         mRpMessageType = messageType;
         mDestAddr = destinationAddress;
         mRpCause = cause;
         mRpUserData = userData;
+        mIsRetry = isRetry;
         encodeRpduByteArray();
         parseTpdu(Direction.MS_TO_SC);
     }
@@ -114,6 +123,10 @@ public final class SmsRPdu {
     }
     public byte[] getRpduByteArray() {
         return mRpdu;
+    }
+
+    public boolean isRetry() {
+        return mIsRetry;
     }
     /**
      * Encodes of RPdu as per 3GPP TS 24.011

@@ -24,6 +24,7 @@ import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLS
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -102,7 +103,7 @@ public class SmsRelayLayerTest {
     public void test_VerifyMoSuccess()
             throws NoSuchFieldException, IllegalAccessException {
         when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
-                anyInt())).thenReturn(true);
+                anyInt(), anyBoolean())).thenReturn(true);
         when(mImsCallContext.getSubId()).thenReturn(-1);
         mSmsRelayLayer.sendRPMessage(mToken, mRpType, mSmsc, mDestinationAddress, mTpdu,
                                      mStatusResultNA);
@@ -114,7 +115,7 @@ public class SmsRelayLayerTest {
         byte[] expectedMoRpData = pdu.getRpduByteArray();
         verify(mMtsController, timeout(1000).times(1)).sendMessage(eq(mSmsFormat),
                                         eq(expectedMoRpData), eq(mDecodedSmsc),
-                                        eq(mDestinationAddress), eq(rpDataMR));
+                                        eq(mDestinationAddress), eq(rpDataMR), eq(false));
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRelayLayer.mSmsRLStateMachine.getState());
         byte[] mtRpAck = new byte[2];
         mtRpAck[0] = SmsRPdu.MT_RP_ACK_MTI;
@@ -130,7 +131,7 @@ public class SmsRelayLayerTest {
     public void test_VerifyRPSMMA()
             throws NoSuchFieldException, IllegalAccessException {
         when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
-                anyInt())).thenReturn(true);
+                anyInt(), anyBoolean())).thenReturn(true);
         when(mImsCallContext.getSubId()).thenReturn(-1);
         mSmsRelayLayer.sendRPMessage(mToken, SmsUtils.RP_SMMA, mSmsc, null, null,
                                      mStatusResultNA);
@@ -138,11 +139,12 @@ public class SmsRelayLayerTest {
         f.setAccessible(true);
         AtomicInteger rpMR = (AtomicInteger) f.get(mSmsRelayLayer);
         int rpDataMR = rpMR.get();
-        SmsRPdu pdu = new SmsRPdu(rpDataMR, SmsUtils.RP_SMMA, null, 0, null);
+        SmsRPdu pdu = new SmsRPdu(rpDataMR, SmsUtils.RP_SMMA, null, 0, null, false);
         byte[] expectedMoRpData = pdu.getRpduByteArray();
+        verify(mMtsController).setListener(any());
         verify(mMtsController, timeout(1000).times(1)).sendMessage(eq(mSmsFormat),
                                         eq(expectedMoRpData), eq(mSmsc),
-                                        eq(mSmsc), eq(rpDataMR));
+                                        eq(mSmsc), eq(rpDataMR), eq(false));
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRelayLayer.mSmsRLStateMachine.getState());
         byte[] mtRpAck = new byte[2];
         mtRpAck[0] = SmsRPdu.MT_RP_ACK_MTI;
@@ -162,7 +164,7 @@ public class SmsRelayLayerTest {
         SmsRPdu pdu;
         byte[] expectedMoRpData;
         when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
-                                        anyInt())).thenReturn(true);
+                                        anyInt(), anyBoolean())).thenReturn(true);
         when(mImsCallContext.getSubId()).thenReturn(-1);
         mSmsRelayLayer.sendRPMessage(1, mRpType, mSmsc, mDestinationAddress, mTpdu,
                                      mStatusResultNA);
@@ -174,14 +176,14 @@ public class SmsRelayLayerTest {
         mSmsRelayLayer.sendRPMessage(2, mRpType, mSmsc, mDestinationAddress, mTpdu,
                                      mStatusResultNA);
         rpDataMR2 = rpDataMR1 + 1;
-        pdu = new SmsRPdu(rpDataMR1, mRpType, mSmsc, 0, mTpdu);
+        pdu = new SmsRPdu(rpDataMR1, mRpType, mSmsc, 0, mTpdu, false);
         expectedMoRpData = pdu.getRpduByteArray();
         verify(mMtsController).sendMessage(eq(mSmsFormat), eq(expectedMoRpData), eq(mDecodedSmsc),
-                                           eq(mDestinationAddress), eq(rpDataMR1));
-        pdu = new SmsRPdu(rpDataMR2, mRpType, mSmsc, 0, mTpdu);
+                                           eq(mDestinationAddress), eq(rpDataMR1), eq(false));
+        pdu = new SmsRPdu(rpDataMR2, mRpType, mSmsc, 0, mTpdu, false);
         expectedMoRpData = pdu.getRpduByteArray();
         verify(mMtsController).sendMessage(eq(mSmsFormat), eq(expectedMoRpData), eq(mDecodedSmsc),
-                                           eq(mDestinationAddress), eq(rpDataMR2));
+                                           eq(mDestinationAddress), eq(rpDataMR2), eq(false));
         byte[] mtRpAck1 = new byte[2];
         mtRpAck1[0] = SmsRPdu.MT_RP_ACK_MTI;
         mtRpAck1[1] = (byte) (rpDataMR1 & 0xff);

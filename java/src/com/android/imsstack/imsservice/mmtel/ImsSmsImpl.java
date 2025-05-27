@@ -161,7 +161,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                         RESULT_NO_NETWORK_ERROR);
                 return;
             }
-            result = mSmsTL.sendMoTPdu(token, smsFormat, messageRef, smsc, pdu);
+            result = mSmsTL.sendMoTPdu(token, smsFormat, messageRef, smsc, pdu, isRetry);
             if (result == SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS) {
                 loge("Can not send sms - Invalid smsc");
                 onSendSmsResultError(

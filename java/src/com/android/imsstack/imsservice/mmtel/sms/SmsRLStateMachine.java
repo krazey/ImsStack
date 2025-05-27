@@ -265,7 +265,8 @@ public class SmsRLStateMachine {
                                                 SmsUtils.FORMAT_INT_3GPP, encodedPdu,
                                                 smsRLStateMachine.mPSISmsc,
                                                 smsRLStateMachine.mDestinationAddress,
-                                                moRPData.getMessageRef());
+                                                moRPData.getMessageRef(),
+                                                moRPData.isRetry());
 
                 if (!result) {
                     loge("Failed to send Sms");

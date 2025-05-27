@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -331,14 +332,14 @@ public class SmsRLStateMachineTest {
     public void onRpDatafromTL_timerWithOutExpiry_Idle() throws InterruptedException {
         mSmsRLStateMachine.setState(IDLE);
         when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
-                 anyInt())).thenReturn(true);
-        SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu);
+                 anyInt(), anyBoolean())).thenReturn(true);
+        SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu, false);
         byte[] encodedPdu = moRPData.getRpduByteArray();
         int result = mSmsRLStateMachine.onRPDataFromTL(moRPData);
 
         verify(mMtsController).sendMessage(eq(SmsUtils.FORMAT_INT_3GPP),
                 eq(encodedPdu), eq(mPsiSmsc),
-                eq(mDestinationAddress), eq(1));
+                eq(mDestinationAddress), eq(1), eq(false));
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRLStateMachine.getState());
         assertEquals(SmsUtils.RESULT_SUCCESS, result);
     }
