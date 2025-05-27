@@ -292,8 +292,8 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
         pAudioConfig->setSamplingRateKHz(
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
-        pAudioConfig->setPtimeMillis((int8_t)pNegoProfile->GetPtime());
-        pAudioConfig->setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
+        pAudioConfig->setPTimeMillis((int8_t)pNegoProfile->GetPtime());
+        pAudioConfig->setMaxPTimeMillis((int32_t)pNegoProfile->GetMaxPtime());
         pAudioConfig->setDtxEnabled(IMS_FALSE);
 
         if (pLocalProfile->GetNegotiatedPayloadIndex() >= 0)
@@ -337,8 +337,8 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         pAudioConfig->setCodecType((int32_t)AudioConfig::CODEC_EVS);
         pAudioConfig->setSamplingRateKHz(
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
-        pAudioConfig->setPtimeMillis((int8_t)pNegoProfile->GetPtime());
-        pAudioConfig->setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
+        pAudioConfig->setPTimeMillis((int8_t)pNegoProfile->GetPtime());
+        pAudioConfig->setMaxPTimeMillis((int32_t)pNegoProfile->GetMaxPtime());
         pAudioConfig->setDtxEnabled(pFmtp->IsDtxEnabled());
 
         EvsParams* pEvsParams = new EvsParams();
@@ -392,8 +392,8 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
         pAudioConfig->setSamplingRateKHz(
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
-        pAudioConfig->setPtimeMillis((int8_t)pNegoProfile->GetPtime());
-        pAudioConfig->setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
+        pAudioConfig->setPTimeMillis((int8_t)pNegoProfile->GetPtime());
+        pAudioConfig->setMaxPTimeMillis((int32_t)pNegoProfile->GetMaxPtime());
     }
     else
     {
@@ -403,8 +403,8 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     IMS_TRACE_D("UpdateRtpConfig() - CodecType[%d], SamplingRate[%d]", pAudioConfig->getCodecType(),
             pAudioConfig->getSamplingRateKHz() * 1000, 0);
-    IMS_TRACE_D("UpdateRtpConfig() - PtimeMillis[%d], MaxPtimeMillis[%d], DtxEnabled[%d]",
-            pAudioConfig->getPtimeMillis(), pAudioConfig->getMaxPtimeMillis(),
+    IMS_TRACE_D("UpdateRtpConfig() - PTimeMillis[%d], MaxPTimeMillis[%d], DtxEnabled[%d]",
+            pAudioConfig->getPTimeMillis(), pAudioConfig->getMaxPTimeMillis(),
             pAudioConfig->getDtxEnabled());
 
     for (IMS_UINT32 i = 0; i < pNegoProfile->GetPayloadList().GetSize(); i++)
@@ -420,7 +420,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         {
             pAudioConfig->setTxDtmfPayloadTypeNumber(pPayload->GetRtpMap().GetPayloadNumber());
             pAudioConfig->setRxDtmfPayloadTypeNumber(pPayload->GetRtpMap().GetPayloadNumber());
-            pAudioConfig->setDtmfsamplingRateKHz(pPayload->GetRtpMap().GetSamplingRate() / 1000);
+            pAudioConfig->setDtmfSamplingRateKHz(pPayload->GetRtpMap().GetSamplingRate() / 1000);
             break;
         }
     }
@@ -440,9 +440,9 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     pAudioConfig->setAnbrMode(objAnbr);
 
     IMS_TRACE_D("UpdateRtpConfig() - DtmfTxPayloadTypeNumber[%d], "
-                "DtmfRxPayloadTypeNumber[%d], DtmfsamplingRateKHz[%d]",
+                "DtmfRxPayloadTypeNumber[%d], DtmfSamplingRateKHz[%d]",
             pAudioConfig->getTxDtmfPayloadTypeNumber(), pAudioConfig->getRxDtmfPayloadTypeNumber(),
-            pAudioConfig->getDtmfsamplingRateKHz());
+            pAudioConfig->getDtmfSamplingRateKHz());
     IMS_TRACE_D("UpdateRtpConfig() - Anbr UL CodecMode[%d], Anbr DL CodecMode[%d]",
             pAudioConfig->getAnbrMode().getAnbrUplinkCodecMode(),
             pAudioConfig->getAnbrMode().getAnbrDownlinkCodecMode(), 0);
