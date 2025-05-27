@@ -250,7 +250,6 @@ protected:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessDataConnectionChanged();
     virtual void ProcessNetworkChanged();
-    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
     virtual void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState);
     virtual void ProcessNetworkEvent(
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nExtraInfo);
@@ -336,10 +335,7 @@ protected:
     IMS_UINT32 m_nBlocks;
     IMS_UINT32 m_nHoldingBlocksForMobile;
     IMS_UINT32 m_nHoldingBlocksForWifi;
-    IMS_UINT32 m_nHoldingVopsState;
-    IMS_UINT32 m_nVopsState;
     IMS_UINT32 m_nRoamingState;
-    IMS_BOOL m_bVopsIgnoredForVolteEnabled;
     IMS_BOOL m_bCsVoiceAvailable;
 
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;

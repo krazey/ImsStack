@@ -99,10 +99,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_nBlocks(BLOCK_NONE),
         m_nHoldingBlocksForMobile(BLOCK_NONE),
         m_nHoldingBlocksForWifi(BLOCK_NONE),
-        m_nHoldingVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
-        m_nVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
         m_nRoamingState(IMS_ROAMING_STATE_OFF),
-        m_bVopsIgnoredForVolteEnabled(IMS_TRUE),
         m_bCsVoiceAvailable(IMS_FALSE),
         m_bEpdgEnabled(IMS_FALSE),
         m_bDataConnected(IMS_FALSE),
@@ -1400,12 +1397,6 @@ PROTECTED VIRTUAL void AosHandle::ProcessNetworkChanged()
     // Implemented in child
 }
 
-PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(
-        IN IMS_UINT32 /*nState*/, IN IMS_BOOL /*bUpdateState = IMS_TRUE*/)
-{
-    // Implemented in child
-}
-
 PROTECTED VIRTUAL void AosHandle::ProcessPsRoamingStateChanged(IN IMS_UINT32 nState)
 {
     m_nRoamingState = nState;
@@ -1945,13 +1936,6 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
 
     switch (nEvent)
     {
-        case IMS_EVENT_IMS_VOICE_OVER_PS_STATE:
-            if (!AosUtil::GetInstance()->IsWifiTest())
-            {
-                ProcessVopsStateChanged(nWParam);
-            }
-            break;
-
         case IMS_EVENT_ROAMING_STATE:
             ProcessPsRoamingStateChanged(nWParam);
             break;

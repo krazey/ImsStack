@@ -71,8 +71,6 @@ protected:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
     void ProcessDataConnectionChanged() override;
     void ProcessNetworkChanged() override;
-    void ProcessVopsStateChanged(
-            IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE) override;
 
     void ReevaluateCapabilities() override;
     void ReevaluateUnavailableFeature() override;
@@ -81,6 +79,7 @@ protected:
     void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
 
     void UpdateGGsmaRcsTelephonyFeatureTag();
+    void UpdateVopsInfo(IN IMS_UINT32 nState, IN const AString& strPlmn);
 
     IMS_UINT32 GetVoiceBlockReasonForIpcan();
     IMS_UINT32 GetVideoBlockReasonForIpcan();
@@ -89,11 +88,14 @@ protected:
     IMS_BOOL IsInvalidMobileNetwork() const;
     IMS_BOOL IsPlmnBlockCondition() const;
     IMS_BOOL IsVoiceCapableOnWiFiCalling() const;
+    IMS_BOOL IsVolteHysTimerStartingCondition() const;
 
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);
 
     void ProcessVolteHysTimerExpired();
+    void ProcessVopsStateChanged(
+            IN IMS_UINT32 nState, IN const AString& strPlmn, IN IMS_BOOL bUpdateState = IMS_TRUE);
 
     // Timer
     IMS_BOOL StartVolteHysTimer(IN IMS_UINT32 nDuration);
@@ -119,5 +121,10 @@ protected:
     IMS_BOOL m_bSsacBarred;
     IMS_BOOL m_bSsacHeld;
     IMS_BOOL m_bB2cCallComposerCapable;
+    IMS_BOOL m_bVopsIgnoredForVolteEnabled;
+    IMS_UINT32 m_nVopsState;
+    IMS_UINT32 m_nHoldingVopsState;
+    AString m_strVopsPlmn;
+    IMS_BOOL m_bVopsPlmnChanged;
 };
 #endif  // AOS_HANDLE_MTC_H_

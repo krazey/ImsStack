@@ -100,7 +100,6 @@ using ::testing::ReturnRef;
     using Base::ProcessNetworkChanged;             \
     using Base::ProcessPsRoamingStateChanged;      \
     using Base::ProcessUnavailableFeature;         \
-    using Base::ProcessVopsStateChanged;           \
     using Base::RadioTypeToString;                 \
     using Base::ReevaluateBlocks;                  \
     using Base::ReevaluateUnavailableFeature;      \
@@ -4770,11 +4769,6 @@ TEST_F(AosHandleTest, ShouldReturnFalseIfTheUnavailableFeatureListNotContainTheG
 TEST_F(AosHandleTest, ProcessNetworkChanged_Test)
 {
     m_pAosHandle->ProcessNetworkChanged();
-}
-
-TEST_F(AosHandleTest, ProcessVopsStateChanged_Test)
-{
-    m_pAosHandle->ProcessVopsStateChanged(0);
 }
 
 TEST_F(AosHandleTest, ProcessPsRoamingStateChanged_Test)
