@@ -407,6 +407,27 @@ TEST_F(AosNetTrackerTest, GetNetworkType)
     EXPECT_EQ(m_pAosNetTracker->GetNetworkType(), NW_REPORT_RADIO_WLAN);
 }
 
+TEST_F(AosNetTrackerTest, GetNetworkOperatorReturnsGivenPlmnValue)
+{
+    // GIVEN
+    m_pAosNetTracker->SetNetworkWatcher(&m_objMockINetworkWatcher);
+    ON_CALL(m_objMockINetworkWatcher, GetNetworkOperator())
+            .WillByDefault(Return(AString("311480")));
+
+    // WHEN & THEN
+    EXPECT_STREQ(m_pAosNetTracker->GetNetworkOperator().GetStr(), AString("311480").GetStr());
+}
+
+TEST_F(AosNetTrackerTest, GetNetworkOperatorReturnsEmptyIfGivenValueIsZeroLength)
+{
+    // GIVEN
+    m_pAosNetTracker->SetNetworkWatcher(&m_objMockINetworkWatcher);
+    ON_CALL(m_objMockINetworkWatcher, GetNetworkOperator()).WillByDefault(Return(AString("")));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosNetTracker->GetNetworkOperator().IsEmpty());
+}
+
 TEST_F(AosNetTrackerTest, SetRatGuardTime)
 {
     EXPECT_EQ(m_pAosNetTracker->GetFeature(), AosNetTracker::FEATURE_NONE);

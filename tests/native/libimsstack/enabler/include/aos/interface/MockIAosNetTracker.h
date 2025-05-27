@@ -40,6 +40,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetMobileVoiceServiceState, (), (override));
     MOCK_METHOD(IMS_UINT32, GetMobileVoiceNetworkType, (), (override));
     MOCK_METHOD(IMS_UINT32, GetNetworkType, (), (override));
+    MOCK_METHOD(AString, GetNetworkOperator, (), (override));
     MOCK_METHOD(void, SetRatGuardTime, (IN IMS_UINT32 nGuardTime), (override));
     MOCK_METHOD(void, SetSrvOutGuardTime, (IN IMS_UINT32 nGuardTime), (override));
     MOCK_METHOD(void, SetSrvInGuardTime, (IN IMS_UINT32 nGuardTime), (override));

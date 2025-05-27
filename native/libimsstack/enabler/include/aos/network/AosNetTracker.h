@@ -60,6 +60,7 @@ public:
     IMS_SINT32 GetMobileVoiceServiceState() override;
     IMS_UINT32 GetMobileVoiceNetworkType() override;
     IMS_UINT32 GetNetworkType() override;
+    AString GetNetworkOperator() override;
 
     void SetRatGuardTime(IN IMS_UINT32 nGuardTime) override;
     void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) override;

@@ -274,6 +274,11 @@ PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetNetworkType()
     return m_nNetRadioType;
 }
 
+PUBLIC VIRTUAL AString AosNetTracker::GetNetworkOperator()
+{
+    return m_piNetWatcherInfo->GetNetworkOperator();
+}
+
 PUBLIC VIRTUAL void AosNetTracker::SetRatGuardTime(IN IMS_UINT32 nGuardTime)
 {
     m_nRatTime = nGuardTime;
