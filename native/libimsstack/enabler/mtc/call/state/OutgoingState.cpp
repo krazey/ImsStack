@@ -695,6 +695,20 @@ PROTECTED VIRTUAL IMS_SINT32 OutgoingState::GetCallReasonByAosDisconnection(
     return MtcCallState::GetCallReasonByAosDisconnection(nAosReason);
 }
 
+PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosDisconnectedByAllPcscfFailed()
+{
+    StopTimer(TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL);
+
+    IMS_SINT32 eCode = (m_objContext.GetConfigurationProxy().GetBoolean(
+                                ConfigVoice::KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL) &&
+                               m_objContext.IsCsfbAvailable())
+            ? CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+            : CODE_LOCAL_NOT_REGISTERED;
+
+    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(eCode));
+    return CallStateName::TERMINATING;
+}
+
 PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)

@@ -221,7 +221,7 @@
         <item value="701:0"/> <!-- CSFB -->
     </string-array>
     <int-array name="imsvoice.csfb_block_condition_int_array" num="3">
-        <item value="0"/> <!-- CSFB_BLOCK_CONDITION_EPS_ONLY_ATTACH -->
+        <item value="0"/> <!-- CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH -->
         <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
         <item value="2"/> <!-- CSFB_BLOCK_CONDITION_IN_WIFI -->
     </int-array>
