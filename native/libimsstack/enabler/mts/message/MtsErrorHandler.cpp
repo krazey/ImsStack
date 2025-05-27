@@ -84,7 +84,7 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService& objMtsService,
     else
     {
         nResult = m_piCarrierConfig->GetInt(
-                CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT);
+                CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT, MO_ERROR_RETRY);
     }
 
     IMS_SINT32 nPolicy = GetRegistrationRecoveryPolicy(piMessage);
