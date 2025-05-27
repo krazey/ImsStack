@@ -58,11 +58,19 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService& objMtsService,
     IMS_SINT32 nResult;
     ImsVector<IMS_SINT32> objGenericErrorCodes = m_piCarrierConfig->GetIntArray(
             CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY);
+    ImsVector<IMS_SINT32> objFallbackErrorCodes = m_piCarrierConfig->GetIntArray(
+            CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY);
     if (piMessage != IMS_NULL)
     {
+        // A status code should only be present in either 'imssms.sms_generic_error_codes_int_array'
+        // or 'imssms.sms_fallback_error_codes_int_array', but not both.
         if (objGenericErrorCodes.Contains(piMessage->GetStatusCode()))
         {
             nResult = MO_ERROR_GENERIC;
+        }
+        else if (objFallbackErrorCodes.Contains(piMessage->GetStatusCode()))
+        {
+            nResult = MO_ERROR_FALLBACK;
         }
         else
         {
@@ -85,7 +93,7 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService& objMtsService,
         objMtsService.RequestRegistrationRecovery(nPolicy);
     }
 
-    if (nResult != MO_ERROR_GENERIC)
+    if (nResult != MO_ERROR_GENERIC && nResult != MO_ERROR_FALLBACK)
     {
         SetRetryAfterStatus(
                 objMtsDynamicLoader.GetMtsSipFormUtils()->GetRetryAfterValue(piMessage));

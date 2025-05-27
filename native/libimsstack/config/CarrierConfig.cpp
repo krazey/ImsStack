@@ -1368,6 +1368,8 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[] =
         KEY_IMS_SMS_PREFIX "sms_allow_imsi_based_sip_uri_bool";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[] =
         KEY_IMS_SMS_PREFIX "sms_generic_error_codes_int_array";
+const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY[] =
+        KEY_IMS_SMS_PREFIX "sms_fallback_error_codes_int_array";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
         KEY_IMS_SMS_PREFIX "sms_reg_policy_for_expiry_timer_f_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_403_RESPONSE_INT[] =

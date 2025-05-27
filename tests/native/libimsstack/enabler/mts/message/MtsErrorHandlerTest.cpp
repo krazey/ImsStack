@@ -428,6 +428,29 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportFallback)
     EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
 }
 
+TEST_F(MtsErrorHandlerTest, Handle380FallbackErrorCode)
+{
+    ON_CALL(objMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_380));
+
+    ImsVector<IMS_SINT32> objGenericErrorCodes;
+    objGenericErrorCodes.Push(SipStatusCode::SC_503);
+    objGenericErrorCodes.Push(SipStatusCode::SC_504);
+
+    ImsVector<IMS_SINT32> objFallbackErrorCodes;
+    objFallbackErrorCodes.Push(SipStatusCode::SC_380);
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY, _))
+            .WillByDefault(Return(objGenericErrorCodes));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY, _))
+            .WillByDefault(Return(objFallbackErrorCodes));
+
+    IMS_SINT32 nResult =
+            pMtsErrorHandler->Handle(objMockMtsService, *pMtsDynamicLoader, &objMockMessage);
+    EXPECT_EQ(nResult, MO_ERROR_FALLBACK);
+}
+
 TEST_F(MtsErrorHandlerTest, ResetRetryAfterConditionIfRetryAfterValueDoesNotExist)
 {
     ImsVector<IMS_SINT32> objErrorCodes;
