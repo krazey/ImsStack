@@ -53,45 +53,237 @@ public class SscPreferenceHelperTest {
 
     @Test
     @SmallTest
-    public void queryClirWithInvalidSlotId_returnDefault() {
+    public void queryCbWithInvalidSlotId_returnDefault() {
         mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
 
-        int clirMode = mSscPreferenceHelper.queryClir();
+        int status = mSscPreferenceHelper.queryCb(SscConstant.CONDITION_BAIC,
+                SscServiceClassUtil.SERVICE_CLASS_CALL);
 
-        assertEquals(-1, clirMode);
+        assertEquals(SscPreferenceHelper.DEFAULT_CB_STATUS, status);
     }
 
     @Test
     @SmallTest
-    public void updateClirWithInvalidSlotId_returnFalse() {
+    public void updateCbWithInvalidSlotId_returnFalse() {
         mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
 
-        boolean result = mSscPreferenceHelper.updateClir(SscConstant.OIR_DEFAULT);
+        boolean result = mSscPreferenceHelper.updateCb(SscConstant.CONDITION_BAIC,
+                SscServiceClassUtil.SERVICE_CLASS_CALL, SscConstant.STATUS_ENABLE);
 
         assertFalse(result);
     }
 
     @Test
     @SmallTest
-    public void updateAndQueryClir_oirDefault() {
+    public void updateAndQueryCb_enable() {
+        int condition = SscConstant.CONDITION_BAIC;
+        int serviceClass = SscServiceClassUtil.SERVICE_CLASS_CALL;
+        int updateStatus = SscConstant.STATUS_ENABLE;
         mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
 
-        boolean result = mSscPreferenceHelper.updateClir(SscConstant.OIR_DEFAULT);
-        int clirMode = mSscPreferenceHelper.queryClir();
+        boolean result = mSscPreferenceHelper.updateCb(condition, serviceClass, updateStatus);
+        int queryStatus = mSscPreferenceHelper.queryCb(condition, serviceClass);
 
         assertTrue(result);
-        assertEquals(SscConstant.OIR_DEFAULT, clirMode);
+        assertEquals(updateStatus, queryStatus);
     }
 
     @Test
     @SmallTest
-    public void updateAndQueryClir_oirSuppression() {
+    public void updateAndQueryCb_disable() {
+        int condition = SscConstant.CONDITION_BOIC_EXHC;
+        int serviceClass = SscServiceClassUtil.SERVICE_CLASS_VIDEO;
+        int updateStatus = SscConstant.STATUS_DISABLE;
         mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
 
-        boolean result = mSscPreferenceHelper.updateClir(SscConstant.OIR_SUPPRESSION);
-        int clirMode = mSscPreferenceHelper.queryClir();
+        boolean result = mSscPreferenceHelper.updateCb(condition, serviceClass, updateStatus);
+        int queryStatus = mSscPreferenceHelper.queryCb(condition, serviceClass);
 
         assertTrue(result);
-        assertEquals(SscConstant.OIR_SUPPRESSION, clirMode);
+        assertEquals(updateStatus, queryStatus);
+    }
+
+    @Test
+    @SmallTest
+    public void queryOirWithInvalidSlotId_returnDefault() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        int oirMode = mSscPreferenceHelper.queryOir();
+
+        assertEquals(SscPreferenceHelper.DEFAULT_OIR_MODE, oirMode);
+    }
+
+    @Test
+    @SmallTest
+    public void updateOirWithInvalidSlotId_returnFalse() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        boolean result = mSscPreferenceHelper.updateOir(SscConstant.OIR_DEFAULT);
+
+        assertFalse(result);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryOir_default() {
+        int updateMode = SscConstant.OIR_DEFAULT;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateOir(SscConstant.OIR_DEFAULT);
+        int queryMode = mSscPreferenceHelper.queryOir();
+
+        assertTrue(result);
+        assertEquals(updateMode, queryMode);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryOir_suppression() {
+        int updateMode = SscConstant.OIR_SUPPRESSION;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateOir(updateMode);
+        int queryMode = mSscPreferenceHelper.queryOir();
+
+        assertTrue(result);
+        assertEquals(updateMode, queryMode);
+    }
+
+    @Test
+    @SmallTest
+    public void queryOipWithInvalidSlotId_returnDefault() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        int status = mSscPreferenceHelper.queryOip();
+
+        assertEquals(SscPreferenceHelper.DEFAULT_OIP_STATUS, status);
+    }
+
+    @Test
+    @SmallTest
+    public void updateOipWithInvalidSlotId_returnFalse() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        boolean result = mSscPreferenceHelper.updateOip(SscConstant.STATUS_ENABLE);
+
+        assertFalse(result);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryOip_enable() {
+        int updateStatus = SscConstant.STATUS_ENABLE;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateOip(updateStatus);
+        int queryStatus = mSscPreferenceHelper.queryOip();
+
+        assertTrue(result);
+        assertEquals(updateStatus, queryStatus);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryOip_disable() {
+        int updateStatus = SscConstant.STATUS_DISABLE;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateOip(updateStatus);
+        int queryStatus = mSscPreferenceHelper.queryOip();
+
+        assertTrue(result);
+        assertEquals(updateStatus, queryStatus);
+    }
+
+    @Test
+    @SmallTest
+    public void queryTirWithInvalidSlotId_returnDefault() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        int mode = mSscPreferenceHelper.queryTir();
+
+        assertEquals(SscPreferenceHelper.DEFAULT_TIR_MODE, mode);
+    }
+
+    @Test
+    @SmallTest
+    public void updateTirWithInvalidSlotId_returnFalse() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        boolean result = mSscPreferenceHelper.updateTir(SscConstant.TIR_NOT_PROVISIONED);
+
+        assertFalse(result);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryTir_notProvisioned() {
+        int updateMode = SscConstant.TIR_NOT_PROVISIONED;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateTir(updateMode);
+        int queryMode = mSscPreferenceHelper.queryTir();
+
+        assertTrue(result);
+        assertEquals(updateMode, queryMode);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryTir_provisioned() {
+        int updateMode = SscConstant.TIR_PROVISIONED;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateTir(updateMode);
+        int queryMode = mSscPreferenceHelper.queryTir();
+
+        assertTrue(result);
+        assertEquals(updateMode, queryMode);
+    }
+
+    @Test
+    @SmallTest
+    public void queryTipWithInvalidSlotId_returnDefault() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        int status = mSscPreferenceHelper.queryTip();
+
+        assertEquals(SscPreferenceHelper.DEFAULT_TIP_STATUS, status);
+    }
+
+    @Test
+    @SmallTest
+    public void updateTipWithInvalidSlotId_returnFalse() {
+        mSscPreferenceHelper = new SscPreferenceHelper(MSimUtils.INVALID_SLOT_ID);
+
+        boolean result = mSscPreferenceHelper.updateTip(SscConstant.STATUS_ENABLE);
+
+        assertFalse(result);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryTip_enable() {
+        int updateStatus = SscConstant.STATUS_ENABLE;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateTip(updateStatus);
+        int queryStatus = mSscPreferenceHelper.queryTip();
+
+        assertTrue(result);
+        assertEquals(updateStatus, queryStatus);
+    }
+
+    @Test
+    @SmallTest
+    public void updateAndQueryTip_disable() {
+        int updateStatus = SscConstant.STATUS_DISABLE;
+        mSscPreferenceHelper = new SscPreferenceHelper(SLOT_0);
+
+        boolean result = mSscPreferenceHelper.updateTip(updateStatus);
+        int queryStatus = mSscPreferenceHelper.queryTip();
+
+        assertTrue(result);
+        assertEquals(updateStatus, queryStatus);
     }
 }

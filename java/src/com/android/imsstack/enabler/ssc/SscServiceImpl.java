@@ -775,12 +775,8 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        int clirMode = mSscPreferenceHelper.queryClir();
-        if (clirMode < 0) {
-            clirMode = SscConstant.OIR_DEFAULT;
-        }
-
-        if (clirMode == SscConstant.OIR_DEFAULT
+        int oirMode = mSscPreferenceHelper.queryOir();
+        if (oirMode == SscConstant.OIR_DEFAULT
                 && SscConfig.isNetworkQueryForTbOirNetworkDefault(mSlotId)) {
             SscRequestData requestData = new SscRequestData(tId);
 
@@ -796,8 +792,8 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        int outgoingState = clirMode; // 3GPP 27.007 7.7 n
-        int provisionStatus = switch (clirMode) { // 3GPP 27.007 7.7 m
+        int outgoingState = oirMode; // 3GPP 27.007 7.7 n
+        int provisionStatus = switch (oirMode) { // 3GPP 27.007 7.7 m
             case SscConstant.OIR_DEFAULT -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
             case SscConstant.OIR_INVOCATION ->
                     SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED;
@@ -818,7 +814,7 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        boolean result = mSscPreferenceHelper.updateClir(clirMode);
+        boolean result = mSscPreferenceHelper.updateOir(clirMode);
         if (result) {
             if (SscConfig.isSyncWithCsForTbSs(mSlotId)) {
                 // Invokes utConfigurationUpdateFailed() with CODE_LOCAL_CALL_CS_RETRY_REQUIRED
@@ -955,7 +951,7 @@ public class SscServiceImpl implements IUtInterface {
                 if (eventNum == SscConstant.EVENT_SSC_UPDATE_OIR
                         && SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
                     OirServiceData oirData = (OirServiceData) requestData.peakSscData();
-                    if (!mSscPreferenceHelper.updateClir(oirData.getState())) {
+                    if (!mSscPreferenceHelper.updateOir(oirData.getState())) {
                         ImsLog.d(mSlotId, "local update error");
                     }
                 }
@@ -1265,9 +1261,9 @@ public class SscServiceImpl implements IUtInterface {
                             .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
                             .setClirOutgoingState(SscConstant.OIR_DEFAULT).build(); // n
                 } else if (SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
-                    int clirMode =  mSscPreferenceHelper.queryClir();
-                    int outgoingState = clirMode == SscConstant.OIR_DEFAULT
-                            ? clirMode : oirData.getOutgoingState();
+                    int oirMode =  mSscPreferenceHelper.queryOir();
+                    int outgoingState = oirMode == SscConstant.OIR_DEFAULT
+                            ? oirMode : oirData.getOutgoingState();
                     return new ImsSsInfo.Builder(oirData.getState())
                             .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
                             .setClirOutgoingState(outgoingState).build(); // n

@@ -708,7 +708,7 @@ public class SscServiceImplTest {
                 CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
                 .thenReturn(new int[] {
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
-        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_DEFAULT);
+        when(mMockSscPreferenceHelper.queryOir()).thenReturn(SscConstant.OIR_DEFAULT);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -736,7 +736,7 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.ImsSs.KEY_UT_NETWORK_QUERY_FOR_TB_OIR_NETWORK_DEFAULT_BOOL)))
                 .thenReturn(true);
-        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_DEFAULT);
+        when(mMockSscPreferenceHelper.queryOir()).thenReturn(SscConstant.OIR_DEFAULT);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -762,7 +762,7 @@ public class SscServiceImplTest {
                 CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
                 .thenReturn(new int[] {
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
-        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_INVOCATION);
+        when(mMockSscPreferenceHelper.queryOir()).thenReturn(SscConstant.OIR_INVOCATION);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -786,7 +786,7 @@ public class SscServiceImplTest {
                 CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
                 .thenReturn(new int[] {
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
-        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_SUPPRESSION);
+        when(mMockSscPreferenceHelper.queryOir()).thenReturn(SscConstant.OIR_SUPPRESSION);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -809,7 +809,7 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
-        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_INVOCATION);
+        when(mMockSscPreferenceHelper.queryOir()).thenReturn(SscConstant.OIR_INVOCATION);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -836,7 +836,7 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
-        when(mMockSscPreferenceHelper.queryClir()).thenReturn(SscConstant.OIR_DEFAULT);
+        when(mMockSscPreferenceHelper.queryOir()).thenReturn(SscConstant.OIR_DEFAULT);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -1514,7 +1514,7 @@ public class SscServiceImplTest {
                 CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
                 .thenReturn(new int[]{
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
-        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateOir(anyInt())).thenReturn(true);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -1535,7 +1535,7 @@ public class SscServiceImplTest {
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL))).thenReturn(true);
-        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateOir(anyInt())).thenReturn(true);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -1559,7 +1559,7 @@ public class SscServiceImplTest {
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL))).thenReturn(true);
-        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateOir(anyInt())).thenReturn(true);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -1583,7 +1583,7 @@ public class SscServiceImplTest {
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL))).thenReturn(true);
-        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateOir(anyInt())).thenReturn(true);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -1600,7 +1600,7 @@ public class SscServiceImplTest {
                 CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
                 .thenReturn(new int[]{
                         CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR});
-        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(false);
+        when(mMockSscPreferenceHelper.updateOir(anyInt())).thenReturn(false);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -1619,7 +1619,7 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
-        when(mMockSscPreferenceHelper.updateClir(anyInt())).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateOir(anyInt())).thenReturn(true);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
         int tId = 1;
 
@@ -1637,7 +1637,7 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT))
                 .thenReturn(SscConfig.OIR_NO_REQUEST_TO_SERVER);
-        when(mMockSscPreferenceHelper.updateClir(SscConstant.OIR_DEFAULT)).thenReturn(true);
+        when(mMockSscPreferenceHelper.updateOir(SscConstant.OIR_DEFAULT)).thenReturn(true);
         mSscServiceImpl.setSscPreferenceHelper(mMockSscPreferenceHelper);
 
         int tId = 1;

@@ -28,10 +28,20 @@ import com.android.imsstack.util.ImsLog;
  * A helper class to utilize the shared preference with the specific keys.
  */
 public class SscPreferenceHelper {
-    // File name of the shared preference. Same file name is used regardless of slot ID
+    // File name of the shared preference. Same file name is used regardless of slot ID.
     private static final String FILE_NAME = "ssc_preference";
-    // Key used to read/write current CLIR setting.
-    private static final String KEY_CLIR = "clir_sub";
+    // Preference Key Prefixes.
+    private static final String KEY_CB = "cb_sub"; // + condition + service class
+    private static final String KEY_OIR = "oir_sub";
+    private static final String KEY_OIP = "oip_sub";
+    private static final String KEY_TIR = "tir_sub";
+    private static final String KEY_TIP = "tip_sub";
+
+    static final int DEFAULT_CB_STATUS = SscConstant.STATUS_DISABLE;
+    static final int DEFAULT_OIR_MODE = SscConstant.OIR_DEFAULT;
+    static final int DEFAULT_OIP_STATUS = SscConstant.STATUS_DISABLE;
+    static final int DEFAULT_TIR_MODE = SscConstant.TIR_NOT_PROVISIONED;
+    static final int DEFAULT_TIP_STATUS = SscConstant.STATUS_DISABLE;
 
     private final int mSlotId;
 
@@ -39,43 +49,184 @@ public class SscPreferenceHelper {
         this.mSlotId = slotId;
     }
 
+
     /**
-     * Returns a CLIR mode from the shared preference file for a current subscription ID.
+     * Returns a call barring status from the shared preference file for a current subscription ID.
      * If the current subscription ID is invalid or there is no data in the shared preference, then
-     * returns -1 value.
+     * returns {@code DEFAULT_CB_STATUS}.
      *
-     * @return A CLIR mode.
+     * @param condition A call barring condition. See SscConstant#CONDITION_XXX.
+     * @param serviceClass A call barring service class. See SscServiceClassUtil#SERVICE_CLASS_XXX.
+     * @return A call barring status.
      */
-    public int queryClir() {
+    public int queryCb(int condition, int serviceClass) {
         int subId = getSubId();
         if (subId == MSimUtils.INVALID_SUB_ID) {
             ImsLog.e(mSlotId, "Invalid subId");
-            return -1;
+            return DEFAULT_CB_STATUS;
         }
 
-        return getInt(KEY_CLIR + subId);
+        return getInt(getCbKey(subId, condition, serviceClass), DEFAULT_CB_STATUS);
     }
 
     /**
-     * Puts a CLIR mode value to the shared preference file for a current subscription ID.
+     * Puts a call barring status value to the shared preference file for a current subscription ID.
      *
-     * @param clirMode A CLIR mode.
-     * @return {@code true} if the CLIR mode is successfully set, {@code false} otherwise.
+     * @param condition A call barring condition. See SscConstant#CONDITION_XXX.
+     * @param serviceClass A call barring service class.  See SscServiceClassUtil#SERVICE_CLASS_XXX.
+     * @param status A call barring status.
+     * @return {@code true} if the OIR mode is successfully set, {@code false} otherwise.
      */
-    public boolean updateClir(int clirMode) {
+    public boolean updateCb(int condition, int serviceClass, int status) {
         int subId = getSubId();
         if (subId == MSimUtils.INVALID_SUB_ID) {
             ImsLog.e(mSlotId, "Invalid subId");
             return false;
         }
 
-        putInt(KEY_CLIR + subId, clirMode);
+        putInt(getCbKey(subId, condition, serviceClass), status);
         return true;
     }
 
-    private int getInt(String key) {
+    /**
+     * Returns a OIR mode from the shared preference file for a current subscription ID.
+     * If the current subscription ID is invalid or there is no data in the shared preference, then
+     * returns {@code DEFAULT_OIR_MODE} .
+     *
+     * @return A OIR mode.
+     */
+    public int queryOir() {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return DEFAULT_OIR_MODE;
+        }
+
+        return getInt(KEY_OIR + subId, DEFAULT_OIR_MODE);
+    }
+
+    /**
+     * Puts a OIR mode value to the shared preference file for a current subscription ID.
+     *
+     * @param oirMode A OIR mode.
+     * @return {@code true} if the OIR mode is successfully set, {@code false} otherwise.
+     */
+    public boolean updateOir(int oirMode) {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return false;
+        }
+
+        putInt(KEY_OIR + subId, oirMode);
+        return true;
+    }
+
+    /**
+     * Returns a OIP status from the shared preference file for a current subscription ID.
+     * If the current subscription ID is invalid or there is no data in the shared preference, then
+     * returns {@code DEFAULT_OIP_STATUS} .
+     *
+     * @return A OIP status.
+     */
+    public int queryOip() {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return DEFAULT_OIP_STATUS;
+        }
+
+        return getInt(KEY_OIP + subId, DEFAULT_OIP_STATUS);
+    }
+
+    /**
+     * Puts a OIP status value to the shared preference file for a current subscription ID.
+     *
+     * @param status A OIP status.
+     * @return {@code true} if the OIP status is successfully set, {@code false} otherwise.
+     */
+    public boolean updateOip(int status) {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return false;
+        }
+
+        putInt(KEY_OIP + subId, status);
+        return true;
+    }
+
+    /**
+     * Returns a TIR mode from the shared preference file for a current subscription ID.
+     * If the current subscription ID is invalid or there is no data in the shared preference, then
+     * returns {@code DEFAULT_TIR_MODE} .
+     *
+     * @return A TIR mode.
+     */
+    public int queryTir() {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return DEFAULT_TIR_MODE;
+        }
+
+        return getInt(KEY_TIR + subId, DEFAULT_TIR_MODE);
+    }
+
+    /**
+     * Puts a TIR mode value to the shared preference file for a current subscription ID.
+     *
+     * @param tirMode A TIR mode.
+     * @return {@code true} if the TIR mode is successfully set, {@code false} otherwise.
+     */
+    public boolean updateTir(int tirMode) {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return false;
+        }
+
+        putInt(KEY_TIR + subId, tirMode);
+        return true;
+    }
+
+    /**
+     * Returns a TIP status from the shared preference file for a current subscription ID.
+     * If the current subscription ID is invalid or there is no data in the shared preference, then
+     * returns {@code DEFAULT_TIP_STATUS} .
+     *
+     * @return A TIP status.
+     */
+    public int queryTip() {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return DEFAULT_TIP_STATUS;
+        }
+
+        return getInt(KEY_TIP + subId, DEFAULT_TIP_STATUS);
+    }
+
+    /**
+     * Puts a TIP status value to the shared preference file for a current subscription ID.
+     *
+     * @param status A TIP status.
+     * @return {@code true} if the TIP status is successfully set, {@code false} otherwise.
+     */
+    public boolean updateTip(int status) {
+        int subId = getSubId();
+        if (subId == MSimUtils.INVALID_SUB_ID) {
+            ImsLog.e(mSlotId, "Invalid subId");
+            return false;
+        }
+
+        putInt(KEY_TIP + subId, status);
+        return true;
+    }
+
+    private int getInt(String key, int defaultValue) {
         SharedPreferences sp = getSharedPreferences();
-        return sp.getInt(key, -1);
+        return sp.getInt(key, defaultValue);
     }
 
     private void putInt(String key, int value) {
@@ -91,5 +242,9 @@ public class SscPreferenceHelper {
     private int getSubId() {
         int subId = MSimUtils.getSubId(mSlotId);
         return MSimUtils.isValidSubId(subId) ? subId : MSimUtils.INVALID_SUB_ID;
+    }
+
+    private static String getCbKey(int subId, int condition, int serviceClass) {
+        return KEY_CB + subId + "_" + condition + "_" + serviceClass;
     }
 }
