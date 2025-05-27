@@ -15,7 +15,11 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- MTC -->
     <int name="imsemergency.call_periodic_location_discovery_method_int" value="1"/>
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="30000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="135000"/>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
+    </int-array>
 </carrier_config>
