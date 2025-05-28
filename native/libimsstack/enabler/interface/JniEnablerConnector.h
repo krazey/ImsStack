@@ -29,7 +29,7 @@ enum class EnablerType
     AOS_SERVICE,
     MTC_SERVICE,
     MTC_CALL,
-    MTS_SERVICE,
+    MTS,
     MEDIA_SESSION,
     UCE,
     SIP_DELEGATE

@@ -18,7 +18,7 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "ImsAosParameter.h"
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include "MockICarrierConfig.h"
 #include "MockIMessage.h"
 #include "MockIMtsContext.h"

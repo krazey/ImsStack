@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-#ifndef JNI_MTS_SERVICE_H_
-#define JNI_MTS_SERVICE_H_
+#ifndef JNI_MTS_APP_H_
+#define JNI_MTS_APP_H_
 
 #include "BaseService.h"
 
 class IJniEnablerThread;
-class IMtsService;
-class JniMtsServiceThread;
+class IMtsJni;
+class JniMtsAppThread;
 
-class JniMtsService : public BaseService
+class JniMtsApp : public BaseService
 {
 public:
-    JniMtsService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
-    virtual ~JniMtsService();
+    JniMtsApp(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
+    virtual ~JniMtsApp();
     virtual int SendData(const android::Parcel& objParcel) override;
 
     inline void NotifyNativeEnablerSet() override {}
@@ -38,12 +38,12 @@ protected:
 
 private:
     void Attach();
-    IMtsService* GetNativeService();
+    IMtsJni* GetNativeApp();
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
 
 private:
-    JniMtsServiceThread* m_pJniMtsServiceThread;
+    JniMtsAppThread* m_pJniMtsAppThread;
 };
 
 #endif

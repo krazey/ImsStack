@@ -22,7 +22,6 @@
 #include "MtsDef.h"
 
 class ICoreService;
-class IJniMtsServiceThread;
 class IMtsServiceState;
 
 class MockIMtsService : public IMtsService
@@ -30,14 +29,12 @@ class MockIMtsService : public IMtsService
 public:
     virtual ~MockIMtsService() {}
 
-    MOCK_METHOD(ICoreService*, GetICoreService, (IN IMS_BOOL bEmergency), (const, override));
-    MOCK_METHOD(IMtsServiceState*, GetIMtsServiceState, (), (override));
-    MOCK_METHOD(IJniMtsServiceThread*, GetJniServiceThread, (), (const, override));
-    MOCK_METHOD(void, RequestRegistrationRecovery, (IN IMS_UINT32 nRecoveryType), (override));
+    MOCK_METHOD(ICoreService*, GetICoreService, (), (const, override));
+    MOCK_METHOD(IMtsServiceState*, GetIMtsServiceState, (), (const, override));
     MOCK_METHOD(
-            void, RequestRegisterWithNextPcscf, (IN const IMS_UINT32 nRetryAfterValue), (override));
-
-    MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
+            void, RequestRegistrationRecovery, (IN IMS_UINT32 nRecoveryType), (const, override));
+    MOCK_METHOD(void, RequestRegisterWithNextPcscf, (IN const IMS_UINT32 nRetryAfterValue),
+            (const, override));
     MOCK_METHOD(void, SendMoSms,
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
                     IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef INTERFACE_JNI_MTS_SERVICE_THREAD_H_
-#define INTERFACE_JNI_MTS_SERVICE_THREAD_H_
 
-#include "ImsTypeDef.h"
-#include "IJniEnablerThread.h"
-#include "MtsDef.h"
+#ifndef MOCK_I_MTS_JNI_H_
+#define MOCK_I_MTS_JNI_H_
 
+#include <gmock/gmock.h>
+#include "IMtsJni.h"
+
+class AString;
 class ByteArray;
 
-class IJniMtsServiceThread : public IJniEnablerThread
+class MockIMtsJni : public IMtsJni
 {
 public:
-    virtual ~IJniMtsServiceThread() {}
+    virtual ~MockIMtsJni() {}
 
-    virtual void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
-            IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId) = 0;
-    virtual void ReportMtSms(
-            IN SmsFormatType eSmsFormat, IN const ByteArray& objContent, IN IMS_SINT32 nSlotId) = 0;
+    // IMtsJni
+    MOCK_METHOD(void, SendMoSmsByServiceType,
+            (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
+                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),
+            (override));
+
+    // IEnablerService
+    MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
 };
 
 #endif

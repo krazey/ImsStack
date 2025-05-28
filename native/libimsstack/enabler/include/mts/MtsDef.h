@@ -50,6 +50,12 @@ enum class MtsTimerType
     TIMER_RETRY_AFTER = 2,
 };
 
+enum class MtsServiceType
+{
+    NORMAL = 0,
+    EMERGENCY,
+};
+
 enum class MtsTrafficStartResult
 {
     TRAFFIC_READY = 0,

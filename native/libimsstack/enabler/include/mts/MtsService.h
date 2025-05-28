@@ -27,7 +27,6 @@
 
 class IImsAos;
 class IImsRadio;
-class IJniMtsServiceThread;
 class IMtsContext;
 class IMtsTraffic;
 class INetworkWatcher;
@@ -40,7 +39,7 @@ class MtsService final :
         public ImsService
 {
 public:
-    explicit MtsService(IN IMtsContext& objContext);
+    explicit MtsService(IN IMtsContext& objContext, IN MtsServiceType eServiceType);
     virtual ~MtsService();
     MtsService(IN const MtsService&) = delete;
     MtsService& operator=(IN const MtsService&) = delete;
@@ -70,12 +69,10 @@ public:
     void ImsAos_Resumed() override;
 
     // IMtsService
-    ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
-    inline IMtsServiceState* GetIMtsServiceState() override { return m_piMtsServiceState; }
-    IJniMtsServiceThread* GetJniServiceThread() const override;
-    void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
-    void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) override;
-    inline void NotifyJniEnablerSet() override {}
+    inline ICoreService* GetICoreService() const override { return m_piCoreService; }
+    inline IMtsServiceState* GetIMtsServiceState() const override { return m_piMtsServiceState; }
+    void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) const override;
+    void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) const override;
     void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
 
@@ -89,32 +86,26 @@ public:
     // Test-Purpose
     void InitMtsServiceState();
     inline void SetIImsAos(IN IImsAos* piImsAos) { m_piImsAos = piImsAos; }
-    inline void SetIImsEmergencyAos(IN IImsAos* piImsEmergencyAos)
-    {
-        m_piImsEmergencyAos = piImsEmergencyAos;
-    }
 
 private:
-    void AttachJni();
     void AttachAos();
     void AttachCoreService();
-    IMS_UINT32 ConvertToAccessNetworkType(
-            IN IMS_UINT32 nTrafficType, IN IMS_SINT32 nReportedNetwork);
+    IMS_UINT32 ConvertToAccessNetworkType(IN IMS_SINT32 nReportedNetwork);
     IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
+    IMS_UINT32 GetTrafficTypeOfService() const;
     IMS_BOOL IsEmergencySmsOverImsSupported() const;
     IMS_BOOL IsEmergencySmsReadyToSend() const;
-    MtsTrafficStartResult StartMtTraffic(IN ICoreService* piService);
-    MtsTrafficStartResult StartMoTrafficIfNeeded(IN IMS_BOOL bEmergency);
+    MtsTrafficStartResult StartMtTraffic();
+    MtsTrafficStartResult StartMoTrafficIfNeeded();
 
     void DeInit();
 
     IMtsContext& m_objContext;
+    MtsServiceType m_eServiceType;
     IImsAos* m_piImsAos;
-    IImsAos* m_piImsEmergencyAos;
     INetworkWatcher* m_piNetWatcherInfo;
     AString m_strAppId;
     ICoreService* m_piCoreService;
-    ICoreService* m_piEmergencyCoreService;
     IMtsServiceState* m_piMtsServiceState;
     IImsRadio* m_piImsRadio;
     ImsList<IMtsTraffic*> m_objMtsTraffics;

@@ -17,8 +17,9 @@
 #ifndef MOCK_I_MTS_MESSAGE_CONTROLLER_H_
 #define MOCK_I_MTS_MESSAGE_CONTROLLER_H_
 
-#include <gmock/gmock.h>
+#include "MtsDef.h"
 #include "message/IMtsMessageController.h"
+#include <gmock/gmock.h>
 
 class MockIMtsMessageController : public IMtsMessageController
 {
@@ -28,9 +29,10 @@ public:
     MOCK_METHOD(IMS_BOOL, HasPendingMoSms, (), (const, override));
     MOCK_METHOD(void, ProcessMoSms,
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
-                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),
+                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency, IN MtsServiceType eServiceType),
             (override));
-    MOCK_METHOD(void, ProcessMtSms, (IN IPageMessage * piMessage), (override));
+    MOCK_METHOD(void, ProcessMtSms, (IN IPageMessage * piMessage, IN MtsServiceType eServiceType),
+            (override));
     MOCK_METHOD(void, ClearAllMessages, (), (override));
 };
 

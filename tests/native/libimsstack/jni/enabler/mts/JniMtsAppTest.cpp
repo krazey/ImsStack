@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include "JniEnablerConnector.h"
-#include "JniMtsService.h"
+#include "JniMtsApp.h"
 #include "MockIMtsService.h"
+#include "MockIMtsJni.h"
 #include <binder/Parcel.h>
 #include <gtest/gtest.h>
 
@@ -29,12 +30,12 @@ namespace android
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
-class TestJniMtsService : public JniMtsService
+class TestJniMtsApp : public JniMtsApp
 {
 public:
-    inline explicit TestJniMtsService(
+    inline explicit TestJniMtsApp(
             IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0) :
-            JniMtsService(pfnSendDataToJava, nSlotId)
+            JniMtsApp(pfnSendDataToJava, nSlotId)
     {
     }
 
@@ -44,56 +45,57 @@ public:
     }
 };
 
-class JniMtsServiceTest : public ::testing::Test
+class JniMtsAppTest : public ::testing::Test
 {
 public:
-    MockIMtsService objMockService;
+    MockIMtsJni objMockMtsJni;
     Parcel objParcel;
-    JniMtsService* pJniService;
+    JniMtsApp* pJniApp;
 
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMockService, NotifyJniEnablerSet).WillByDefault(Return());
+        ON_CALL(objMockMtsJni, NotifyJniEnablerSet).WillByDefault(Return());
         JniEnablerConnector::GetInstance().SetNativeEnabler(
-                SLOT_ID, EnablerType::MTS_SERVICE, &objMockService);
+                SLOT_ID, EnablerType::MTS, &objMockMtsJni);
 
-        pJniService = new TestJniMtsService(reinterpret_cast<Jni_SendDataToJava>(0x01), SLOT_ID);
+        pJniApp = new TestJniMtsApp(reinterpret_cast<Jni_SendDataToJava>(0x01), SLOT_ID);
     }
 
     virtual void TearDown() override
     {
-        delete pJniService;
-        JniEnablerConnector::GetInstance().SetNativeEnabler(
-                SLOT_ID, EnablerType::MTS_SERVICE, IMS_NULL);
+        delete pJniApp;
+        JniEnablerConnector::GetInstance().SetNativeEnabler(SLOT_ID, EnablerType::MTS, IMS_NULL);
     }
 };
 
-TEST_F(JniMtsServiceTest, CreatesJniMtsServiceThread)
+TEST_F(JniMtsAppTest, CreatesJniMtsAppThread)
 {
-    EXPECT_NE(nullptr, pJniService->GetJniThread());
+    EXPECT_NE(nullptr, pJniApp->GetJniThread());
 }
 
-TEST_F(JniMtsServiceTest, SendDataMoSms3gpp)
+TEST_F(JniMtsAppTest, SendDataMoSms3gpp)
 {
-    objParcel.writeInt32(IuMtsService::NOTI_MTSENABLER_SEND_MO_SMS);
+    objParcel.writeInt32(IuMtsApp::NOTI_MTSENABLER_SEND_MO_SMS);
     objParcel.writeInt32(SMSFORMAT_3GPP);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockService, SendMoSms(SmsFormatType::SMSFORMAT_3GPP, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMockMtsJni, SendMoSmsByServiceType(SmsFormatType::SMSFORMAT_3GPP, _, _, _, _))
+            .Times(1);
 
-    pJniService->SendData(objParcel);
+    pJniApp->SendData(objParcel);
 }
 
-TEST_F(JniMtsServiceTest, SendDataMoSms3gpp2)
+TEST_F(JniMtsAppTest, SendDataMoSms3gpp2)
 {
-    objParcel.writeInt32(IuMtsService::NOTI_MTSENABLER_SEND_MO_SMS);
+    objParcel.writeInt32(IuMtsApp::NOTI_MTSENABLER_SEND_MO_SMS);
     objParcel.writeInt32(SMSFORMAT_3GPP2);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockService, SendMoSms(SmsFormatType::SMSFORMAT_3GPP2, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMockMtsJni, SendMoSmsByServiceType(SmsFormatType::SMSFORMAT_3GPP2, _, _, _, _))
+            .Times(1);
 
-    pJniService->SendData(objParcel);
+    pJniApp->SendData(objParcel);
 }
 
 }  // namespace android

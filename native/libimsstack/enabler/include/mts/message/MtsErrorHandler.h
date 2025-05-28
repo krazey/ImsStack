@@ -30,7 +30,7 @@ public:
     explicit MtsErrorHandler(IN IMS_SINT32 nSlotId);
     ~MtsErrorHandler();
 
-    IMS_SINT32 Handle(IN IMtsService& objMtsService,
+    IMS_SINT32 Handle(IN const IMtsService& objMtsService,
             IN const IMtsDynamicLoader& objMtsDynamicLoader,
             IN const IMessage* piMessage = IMS_NULL) override;
     inline IMS_SINT32 GetRetryAfterValue() const override { return m_nRetryAfterValue; }

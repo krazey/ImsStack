@@ -17,6 +17,7 @@
 #include "IMtsService.h"
 #include "IMtsServiceState.h"
 #include "MtsApp.h"
+#include "MtsDef.h"
 #include <gtest/gtest.h>
 
 namespace android
@@ -50,7 +51,13 @@ TEST_F(MtsAppTest, StartAndStop)
     pMtsApp->Start();
 
     pMtsApp->Stop();
-    EXPECT_EQ(pMtsApp->GetService().GetIMtsServiceState()->GetImsRegConnected(), IMS_FALSE);
+    EXPECT_EQ(
+            pMtsApp->GetService(MtsServiceType::NORMAL).GetIMtsServiceState()->GetImsRegConnected(),
+            IMS_FALSE);
+    EXPECT_EQ(pMtsApp->GetService(MtsServiceType::EMERGENCY)
+                      .GetIMtsServiceState()
+                      ->GetImsRegConnected(),
+            IMS_FALSE);
 }
 
 }  // namespace android

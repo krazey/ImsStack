@@ -22,44 +22,43 @@
 #include "ServiceTrace.h"
 #include "ServiceMessage.h"
 #include "ImsProcess.h"
+#include "IMtsJni.h"
 #include "IMtsService.h"
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include "OsMutex.h"
 #include "IJniEnablerThread.h"
 #include "JniEnablerConnector.h"
-#include "JniMtsService.h"
-#include "JniMtsServiceThread.h"
+#include "JniMtsApp.h"
+#include "JniMtsAppThread.h"
 #include "EnablerUtils.h"
 
 using namespace android;
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTS");
 
-JniMtsService::JniMtsService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
+JniMtsApp::JniMtsApp(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
         BaseService(nSlotId),
-        m_pJniMtsServiceThread(IMS_NULL)
+        m_pJniMtsAppThread(IMS_NULL)
 {
-    IMS_TRACE_D("+JniMtsService SlotId[%d]", nSlotId, 0, 0);
+    IMS_TRACE_D("+JniMtsApp SlotId[%d]", nSlotId, 0, 0);
 
     Initialize(pfnSendDataToJava);
 }
 
-JniMtsService::~JniMtsService()
+JniMtsApp::~JniMtsApp()
 {
-    IMS_TRACE_D("~JniMtsService SlotId[%d]", GetSlotId(), 0, 0);
+    IMS_TRACE_D("~JniMtsApp SlotId[%d]", GetSlotId(), 0, 0);
 
-    JniEnablerConnector::GetInstance().SetJniEnabler(
-            GetSlotId(), EnablerType::MTS_SERVICE, IMS_NULL);
+    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::MTS, IMS_NULL);
 
-    if (m_pJniMtsServiceThread != IMS_NULL)
+    if (m_pJniMtsAppThread != IMS_NULL)
     {
-        ImsProcess::GetInstance()->UnloadAppThread(m_pJniMtsServiceThread->GetName());
-        m_pJniMtsServiceThread = IMS_NULL;
+        ImsProcess::GetInstance()->UnloadAppThread(m_pJniMtsAppThread->GetName());
+        m_pJniMtsAppThread = IMS_NULL;
     }
 }
 
-PUBLIC VIRTUAL
-int JniMtsService::SendData(const Parcel& objParcel)
+PUBLIC VIRTUAL int JniMtsApp::SendData(const Parcel& objParcel)
 {
     int nMessage = objParcel.readInt32();
 
@@ -75,19 +74,18 @@ int JniMtsService::SendData(const Parcel& objParcel)
     return 1;
 }
 
-PUBLIC VIRTUAL IJniEnablerThread* JniMtsService::GetJniThread() const
+PUBLIC VIRTUAL IJniEnablerThread* JniMtsApp::GetJniThread() const
 {
-    return DYNAMIC_CAST(IJniEnablerThread*, m_pJniMtsServiceThread);
+    return DYNAMIC_CAST(IJniEnablerThread*, m_pJniMtsAppThread);
 }
 
-PROTECTED VIRTUAL
-void JniMtsService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+PROTECTED VIRTUAL void JniMtsApp::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     IMS_TRACE_D("HandleMessage() MSG=[%d]", nMsg, 0, 0);
 
     switch (nMsg)
     {
-        case IuMtsService::NOTI_MTSENABLER_SEND_MO_SMS:
+        case IuMtsApp::NOTI_MTSENABLER_SEND_MO_SMS:
             TriggerSendMoSms(objParcel);
             break;
 
@@ -97,21 +95,20 @@ void JniMtsService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel
 }
 
 PRIVATE
-void JniMtsService::Attach()
+void JniMtsApp::Attach()
 {
-    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::MTS_SERVICE, this);
+    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::MTS, this);
 }
 
 PRIVATE
-IMtsService* JniMtsService::GetNativeService()
+IMtsJni* JniMtsApp::GetNativeApp()
 {
-    return DYNAMIC_CAST(IMtsService*,
-            JniEnablerConnector::GetInstance().GetNativeEnabler(
-                    GetSlotId(), EnablerType::MTS_SERVICE));
+    return DYNAMIC_CAST(IMtsJni*,
+            JniEnablerConnector::GetInstance().GetNativeEnabler(GetSlotId(), EnablerType::MTS));
 }
 
 PRIVATE
-void JniMtsService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
+void JniMtsApp::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
 {
     if (pfnSendDataToJava == IMS_NULL)
     {
@@ -119,30 +116,30 @@ void JniMtsService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
     }
 
     AString strThreadName;
-    strThreadName.Sprintf("JniMtsServiceThread_%d", GetSlotId());
+    strThreadName.Sprintf("JniMtsAppThread_%d", GetSlotId());
 
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     auto fnEntry = []() -> BaseThread*
     {
-        return new JniMtsServiceThread();
+        return new JniMtsAppThread();
     };
 
     ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
-    m_pJniMtsServiceThread = reinterpret_cast<JniMtsServiceThread*>(
-            ImsProcess::GetInstance()->GetThread(strThreadName));
+    m_pJniMtsAppThread =
+            reinterpret_cast<JniMtsAppThread*>(ImsProcess::GetInstance()->GetThread(strThreadName));
 
-    if (m_pJniMtsServiceThread == IMS_NULL)
+    if (m_pJniMtsAppThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "JniMtsService : can't create listener thread", 0, 0, 0);
+        IMS_TRACE_E(0, "JniMtsApp : can't create listener thread", 0, 0, 0);
         return;
     }
 
-    m_pJniMtsServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
+    m_pJniMtsAppThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
     Attach();
 }
 
 PRIVATE
-void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
+void JniMtsApp::TriggerSendMoSms(IN const Parcel& objParcel)
 {
     IMS_UINT32 nSmsFormat_ = objParcel.readInt32();
     android::String8 strEncodedPdu(objParcel.readString16());
@@ -169,13 +166,13 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
         eSmsFormat = SmsFormatType::SMSFORMAT_INVALID;
     }
 
-    IMtsService* piMtsService = GetNativeService();
-    if (piMtsService == IMS_NULL)
+    IMtsJni* piMtsJni = GetNativeApp();
+    if (piMtsJni == IMS_NULL)
     {
         IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
-        m_pJniMtsServiceThread->ReportMoStatus(MO_ERROR_RETRY, eSmsFormat, nSeqId, GetSlotId());
+        m_pJniMtsAppThread->ReportMoStatus(MO_ERROR_RETRY, eSmsFormat, nSeqId, GetSlotId());
         return;
     }
 
-    piMtsService->SendMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
+    piMtsJni->SendMoSmsByServiceType(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
 }

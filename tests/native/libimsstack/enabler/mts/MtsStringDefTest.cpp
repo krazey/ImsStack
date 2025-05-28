@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include "MtsStringDef.h"
 #include <gtest/gtest.h>
 

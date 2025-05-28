@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef JNI_MTS_SERVICE_THREAD_H_
-#define JNI_MTS_SERVICE_THREAD_H_
+#ifndef JNI_MTS_APP_THREAD_H_
+#define JNI_MTS_APP_THREAD_H_
 
 #include "BaseServiceThread.h"
-#include "IJniMtsServiceThread.h"
+#include "IJniMtsAppThread.h"
 #include "MtsDef.h"
 
-class JniMtsServiceThread : public BaseServiceThread, public IJniMtsServiceThread
+class JniMtsAppThread : public BaseServiceThread, public IJniMtsAppThread
 {
 public:
-    JniMtsServiceThread();
-    virtual ~JniMtsServiceThread();
+    JniMtsAppThread();
+    virtual ~JniMtsAppThread();
 
     void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId,
             IN IMS_SINT32 nSlotId) override;

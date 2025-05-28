@@ -22,7 +22,7 @@
 #include "IMtsService.h"
 #include "ISipConfigV.h"
 #include "ImsAosParameter.h"
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include "MtsDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTimer.h"
@@ -52,7 +52,7 @@ MtsErrorHandler::~MtsErrorHandler()
 }
 
 PUBLIC
-IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService& objMtsService,
+IMS_SINT32 MtsErrorHandler::Handle(IN const IMtsService& objMtsService,
         IN const IMtsDynamicLoader& objMtsDynamicLoader, IN const IMessage* piMessage)
 {
     IMS_SINT32 nResult;
