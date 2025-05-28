@@ -5716,6 +5716,9 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
         {
             Stop2xxRetransmission();
             CloseConnection(IMessage::SESSION_START);
+
+            SetState(STATE_ESTABLISHED);
+            PostMessage(AMSG_SESSION_STARTED, 0, 0);
         }
     }
     else if (nState == STATE_REESTABLISHING)
@@ -5727,6 +5730,9 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
         {
             Stop2xxRetransmission();
             CloseConnection(IMessage::SESSION_UPDATE);
+
+            SetState(STATE_ESTABLISHED);
+            PostMessage(AMSG_SESSION_UPDATED, 0, 0);
         }
     }
 
