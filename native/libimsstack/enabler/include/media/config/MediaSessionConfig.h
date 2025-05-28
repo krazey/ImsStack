@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,6 @@
 #define MEDIA_SESSION_CONFIG_H_
 
 #include "MediaDef.h"
-#include "ImsList.h"
-#include "AString.h"
 #include "ICarrierConfigListener.h"
 
 class ICarrierConfig;
@@ -38,82 +36,87 @@ public:
      */
     explicit MediaSessionConfig(
             IN IMS_SINT32 nSlotId = 0, IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
-    /**
-     * @brief Destroy the media session config
-     *
-     */
     virtual ~MediaSessionConfig();
+
     /**
-     * @brief Create codec using the configuration
+     * @brief Create codec using the configuration.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param nSlotId SIM slot id
+     * @return IMS_BOOL Return true if the create function is executed without error, return false
+     * if the create function is failed.
      */
-    IMS_BOOL Create(IN IMS_SINT32 nSlotId);
+    virtual IMS_BOOL Create(IN IMS_SINT32 nSlotId);
+
     /**
-     * @brief Set the service type
+     * @brief Set the service type.
      *
-     * @param eServiceType service type (ex: default, emergency)
+     * @param eServiceType service type (ex: default, emergency).
      */
-    void SetServiceType(IN MEDIA_SERVICE_TYPE eServiceType);
+    virtual void SetServiceType(IN MEDIA_SERVICE_TYPE eServiceType);
+
     /**
-     * @brief Print debug strings
-     *
+     * @brief Print debug strings.
      */
-    void ToDebugString() const;
+    virtual void ToDebugString() const;
+
     /**
-     * @brief Get the audio configuration
+     * @brief Get the audio configuration.
      *
-     * @return AudioConfiguration* Return audio configuration
+     * @return AudioConfiguration* Return audio configuration.
      */
-    AudioConfiguration* GetAudioConfiguration() const;
+    virtual AudioConfiguration* GetAudioConfiguration() const;
+
     /**
-     * @brief Get the video configuration
+     * @brief Get the video configuration.
      *
-     * @return VideoConfiguration* Return video configuration
+     * @return VideoConfiguration* Return video configuration.
      */
-    VideoConfiguration* GetVideoConfiguration() const;
+    virtual VideoConfiguration* GetVideoConfiguration() const;
+
     /**
-     * @brief Get the text configuration
+     * @brief Get the text configuration.
      *
-     * @return TextConfiguration* Return text configuration
+     * @return TextConfiguration* Return text configuration.
      */
-    TextConfiguration* GetTextConfiguration() const;
+    virtual TextConfiguration* GetTextConfiguration() const;
+
     /**
-     * @brief Get the service type
+     * @brief Get the service type.
      *
-     * @return MEDIA_SERVICE_TYPE Return the service type value
+     * @return MEDIA_SERVICE_TYPE Return the service type value.
      */
-    MEDIA_SERVICE_TYPE GetServiceType() const;
+    virtual MEDIA_SERVICE_TYPE GetServiceType() const;
+
     /**
-     * @brief Get whether bandwidth is added to sessionlevel
+     * @brief Get whether bandwidth is added to sessionlevel.
      *
-     * @return IMS_BOOL Return true if the session level bandwidth is enabled
-     * Return false if the session level bandwidth is disabled
+     * @return IMS_BOOL Return true if the session level bandwidth is enabled, return false if the
+     * session level bandwidth is disabled.
      */
-    IMS_BOOL IsSessionLevelBandwidth() const;
+    virtual IMS_BOOL IsSessionLevelBandwidth() const;
+
     /**
-     * @brief Get whether anbr is supported in modem side
+     * @brief Get whether ANBR is supported in modem side.
      *
-     * @return IMS_BOOL Return true if anbr is supported
-     * Return false if anbr is not supported
+     * @return IMS_BOOL Return true if ANBR is supported, return false if ANBR is not supported.
      */
-    IMS_BOOL IsAnbrSupported() const;
+    virtual IMS_BOOL IsAnbrSupported() const;
+
     /**
-     * @brief Get whether multiconfiginearlysession is supported
+     * @brief Get whether multiple configurations are supported in an early session.
      *
-     * @return IMS_BOOL Return true if multiconfiginearlysession is supported
-     * Return false if multiconfiginearlysession is not supported
+     * @return IMS_BOOL Return true if multiple configurations are supported in an early session,
+     * otherwise false.
      */
-    IMS_BOOL IsSupportMultiConfigInEarlySession() const;
+    virtual IMS_BOOL IsSupportMultiConfigInEarlySession() const;
+
     /**
-     * @brief Get whether to use full capability when sdp reoffer
+     * @brief Get whether to use full codec capability when sending a SDP re-offer.
      *
-     * @return IMS_BOOL Return true if SdpReofferFullCapability is enabled
-     * Return false if SdpReofferFullCapability is disabled
+     * @return IMS_BOOL Return true if full codec capability is used for SDP re-offers,
+     * otherwise false.
      */
-    IMS_BOOL IsSdpReofferFullCapability() const;
+    virtual IMS_BOOL IsSdpReofferFullCapability() const;
 
     static const IMS_BOOL DEFAULT_SESSION_LEVEL_BW = IMS_FALSE;
     static const IMS_BOOL DEFAULT_ANBR_CAPABILITY = IMS_FALSE;

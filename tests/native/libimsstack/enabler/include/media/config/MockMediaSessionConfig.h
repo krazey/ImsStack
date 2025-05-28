@@ -1,0 +1,46 @@
+/*
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef MOCK_MEDIA_SESSION_CONFIG_H_
+#define MOCK_MEDIA_SESSION_CONFIG_H_
+
+#include <gmock/gmock.h>
+
+#include "config/MediaSessionConfig.h"
+
+class MockMediaSessionConfig : public MediaSessionConfig
+{
+public:
+    MockMediaSessionConfig(
+            IN IMS_SINT32 nSlotId = 0, IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT) :
+            MediaSessionConfig(nSlotId, eServiceType) {};
+    virtual ~MockMediaSessionConfig() = default;
+
+    // --- Mocked Public Methods ---
+    MOCK_METHOD(IMS_BOOL, Create, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(void, SetServiceType, (IN MEDIA_SERVICE_TYPE eServiceType), (override));
+    MOCK_METHOD(void, ToDebugString, (), (const, override));
+    MOCK_METHOD(AudioConfiguration*, GetAudioConfiguration, (), (const, override));
+    MOCK_METHOD(VideoConfiguration*, GetVideoConfiguration, (), (const, override));
+    MOCK_METHOD(TextConfiguration*, GetTextConfiguration, (), (const, override));
+    MOCK_METHOD(MEDIA_SERVICE_TYPE, GetServiceType, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSessionLevelBandwidth, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsAnbrSupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSupportMultiConfigInEarlySession, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSdpReofferFullCapability, (), (const, override));
+};
+
+#endif  // MOCK_MEDIA_SESSION_CONFIG_H_

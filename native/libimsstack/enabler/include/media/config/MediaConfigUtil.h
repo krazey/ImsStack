@@ -30,11 +30,16 @@ public:
      * @param type MEDIA_SERVICE_TYPE defined in MediaDef.h
      * @return AudioConfiguration*
      */
-    static AudioConfiguration* GetAudioConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
+    static inline AudioConfiguration* GetAudioConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
     {
-        return MediaSessionConfigFactory::GetInstance()
-                ->FindMediaSessionConfig(nSlotId, type)
-                ->GetAudioConfiguration();
+        MediaSessionConfig* pConfig =
+                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, type);
+        if (pConfig == IMS_NULL)
+        {
+            return IMS_NULL;
+        }
+
+        return pConfig->GetAudioConfiguration();
     }
 
     /**
@@ -44,11 +49,16 @@ public:
      * @param type MEDIA_SERVICE_TYPE defined in MediaDef.h
      * @return VideoConfiguration*
      */
-    static VideoConfiguration* GetVideoConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
+    static inline VideoConfiguration* GetVideoConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
     {
-        return MediaSessionConfigFactory::GetInstance()
-                ->FindMediaSessionConfig(nSlotId, type)
-                ->GetVideoConfiguration();
+        MediaSessionConfig* pConfig =
+                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, type);
+        if (pConfig == IMS_NULL)
+        {
+            return IMS_NULL;
+        }
+
+        return pConfig->GetVideoConfiguration();
     }
 
     /**
@@ -58,11 +68,16 @@ public:
      * @param type MEDIA_SERVICE_TYPE defined in MediaDef.h
      * @return TextConfiguration*
      */
-    static TextConfiguration* GetTextConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
+    static inline TextConfiguration* GetTextConfig(IMS_SINT32 nSlotId, MEDIA_SERVICE_TYPE type)
     {
-        return MediaSessionConfigFactory::GetInstance()
-                ->FindMediaSessionConfig(nSlotId, type)
-                ->GetTextConfiguration();
+        MediaSessionConfig* pConfig =
+                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, type);
+        if (pConfig == IMS_NULL)
+        {
+            return IMS_NULL;
+        }
+
+        return pConfig->GetTextConfiguration();
     }
 };
 

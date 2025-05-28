@@ -93,6 +93,7 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(
     }
 
     delete m_pBaseProfile;
+    m_pBaseProfile = IMS_NULL;
 
     m_pEnvironment = pEnvironment;
     m_pConfig = pConfig;
