@@ -977,6 +977,7 @@ IMS_RESULT MessageFormatter::InitVariables(IN FormType eFormType)
 
     if (SetNextMessage() != IMS_SUCCESS)
     {
+        IMS_TRACE_E(0, "InitVariables : Cannot get next message for [%d]", eFormType, 0, 0);
         return IMS_FAILURE;
     }
 
