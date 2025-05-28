@@ -17,6 +17,7 @@
 #ifndef MTC_UI_NOTIFIER_H_
 #define MTC_UI_NOTIFIER_H_
 
+#include "CallReasonInfo.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
@@ -26,7 +27,6 @@
 class AString;
 class IMtcCallContext;
 class IJniMtcCallThread;
-struct CallReasonInfo;
 
 class MtcUiNotifier final : public IMtcUiNotifier
 {
@@ -62,12 +62,14 @@ public:
     void SendCallPushCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
     void SendRatChanged(IN IMS_SINT32 eRatType) override;
     void OnCallSessionReleased() override;
+    const CallReasonInfo GetStartFailedReason() const override;
 
 private:
     IJniMtcCallThread* GetCallThread() const;
 
     IMtcCallContext& m_objContext;
     std::function<void()> m_objBlockedNotification;
+    CallReasonInfo m_objStartFailedReason;
 };
 
 #endif

@@ -198,6 +198,13 @@ public:
     virtual void SendRatChanged(IN IMS_SINT32 eRatType) = 0;
 
     virtual void OnCallSessionReleased() = 0;
+
+    /**
+     * @brief Retrieves the {@link CallReasonInfo} associated with a start failure.
+     *
+     * @return The {@link CallReasonInfo} object containing details about why the start failed.
+     */
+    virtual const CallReasonInfo GetStartFailedReason() const = 0;
 };
 
 #endif

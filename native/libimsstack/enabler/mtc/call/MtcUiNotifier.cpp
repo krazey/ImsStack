@@ -39,7 +39,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MtcUiNotifier::MtcUiNotifier(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
-        m_objBlockedNotification(IMS_NULL)
+        m_objBlockedNotification(IMS_NULL),
+        m_objStartFailedReason(CODE_UNSPECIFIED)
 {
 }
 
@@ -119,6 +120,7 @@ PUBLIC
 void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendStartFailed : %s", _TRACE_CR_(objReason), 0, 0);
+    m_objStartFailedReason = objReason;
 
     if (m_objContext.GetCallInfo().IsEmergency())
     {
@@ -460,6 +462,11 @@ PUBLIC VIRTUAL void MtcUiNotifier::OnCallSessionReleased()
         m_objBlockedNotification();
         m_objBlockedNotification = nullptr;
     }
+}
+
+PUBLIC VIRTUAL const CallReasonInfo MtcUiNotifier::GetStartFailedReason() const
+{
+    return m_objStartFailedReason;
 }
 
 PRIVATE

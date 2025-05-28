@@ -17,13 +17,13 @@
 #ifndef MOCK_I_MTC_UI_NOTIFIER_H_
 #define MOCK_I_MTC_UI_NOTIFIER_H_
 
+#include "CallReasonInfo.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcUiNotifier.h"
 #include <gmock/gmock.h>
 
 class AString;
-struct CallReasonInfo;
 
 class MockIMtcUiNotifier : public IMtcUiNotifier
 {
@@ -56,6 +56,7 @@ public:
     MOCK_METHOD(void, SendCallPushCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, SendRatChanged, (IN IMS_SINT32), (override));
     MOCK_METHOD(void, OnCallSessionReleased, (), (override));
+    MOCK_METHOD(const CallReasonInfo, GetStartFailedReason, (), (const, override));
 };
 
 #endif

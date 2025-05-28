@@ -648,6 +648,7 @@
     </string-array>
     <int name="imsvoice.session_refresh_sdp_session_version_increment_int" value="0"/>
     <boolean name="imsvoice.csfb_when_all_pcscf_unavailable_bool" value="false"/>
+    <boolean name="imsemergency.clear_registration_on_domain_reselection_bool" value="true"/>
     <string-array name="imsemergency.dynamic_routing_number_per_plmn_string_array" num="21">
         <!-- b/419587461 -->
         <item value="mk,,192,193,194,195,196"/>
