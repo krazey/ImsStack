@@ -214,7 +214,7 @@ public interface IDcNetWatcher extends IDc {
         /**
          * Invoked when the numeric ID of the network operator is changed.
          */
-        default void onNetworkOperatorChanged() {
+        default void onNetworkOperatorChanged(String networkOperator) {
         }
 
         /**

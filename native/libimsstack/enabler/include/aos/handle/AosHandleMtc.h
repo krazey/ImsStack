@@ -107,7 +107,7 @@ protected:
     void ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo) override;
 
     // IAosServicePhoneListener
-    void ServicePhone_PlmnChanged() override;
+    void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;

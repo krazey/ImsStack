@@ -1193,8 +1193,10 @@ PROTECTED VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& o
     }
 }
 
-PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged()
+PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged(IN const AString& strPlmn)
 {
+    A_IMS_TRACE_I(APPPROFILE, "ServicePhone_PlmnChanged :: strPlmn(%s)", strPlmn.GetStr(), 0, 0);
+
     if (!IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
     {
         return;

@@ -1158,7 +1158,7 @@ TEST_F(AosConditionTest, ServicePhone_PlmnChanged_ClearReaconPlmlChanged)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
 
-    m_pAosCondition->ServicePhone_PlmnChanged();
+    m_pAosCondition->ServicePhone_PlmnChanged(AString("123456"));
 }
 
 TEST_F(AosConditionTest, ServicePhone_PowerOff_ListenerIsNull)

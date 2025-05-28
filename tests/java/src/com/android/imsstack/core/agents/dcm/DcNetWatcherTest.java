@@ -546,7 +546,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mNetWatherListener).onNetworkOperatorChanged();
+        verify(mNetWatherListener).onNetworkOperatorChanged("45000");
         assertEquals("45000", mDcNetWatcher.getOperatorNumeric());
     }
 

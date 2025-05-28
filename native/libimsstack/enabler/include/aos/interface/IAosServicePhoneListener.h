@@ -16,6 +16,8 @@
 #ifndef INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_
 #define INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_
 
+#include "AString.h"
+
 enum class IsimState;
 enum class LocationInfo;
 enum class PhoneNumberState;
@@ -94,8 +96,9 @@ public:
      * Called to notify the change of PLMN.
      * Called by AosService (Java).
      *
+     * @param strPlmn The changed MCC+MNC string.
      */
-    virtual void ServicePhone_PlmnChanged() = 0;
+    virtual void ServicePhone_PlmnChanged(IN const AString& strPlmn) = 0;
 
     /**
      * Called to notify the power off.
@@ -197,7 +200,7 @@ public:
     inline void ServicePhone_NetworkVideoCapabilityChanged(IN IMS_BOOL /*bIsOn*/) override{};
     inline void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) override{};
-    inline void ServicePhone_PlmnChanged() override{};
+    inline void ServicePhone_PlmnChanged(IN const AString& /*strPlmn*/) override {};
     inline void ServicePhone_PowerOff() override{};
     inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override{};
     inline void ServicePhone_PcoValueChanged(IN IMS_SINT32 /*nValue*/) override{};

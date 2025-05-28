@@ -908,11 +908,11 @@ TEST_F(AosServiceTest, NotifyPlmnChanged)
     pTestAosService->AddListener(&objMockListener2);
     pTestAosService->AddListener(&objMockListener3);
 
-    EXPECT_CALL(objMockListener1, ServicePhone_PlmnChanged());
-    EXPECT_CALL(objMockListener2, ServicePhone_PlmnChanged());
-    EXPECT_CALL(objMockListener3, ServicePhone_PlmnChanged());
+    EXPECT_CALL(objMockListener1, ServicePhone_PlmnChanged(AString("123456")));
+    EXPECT_CALL(objMockListener2, ServicePhone_PlmnChanged(AString("123456")));
+    EXPECT_CALL(objMockListener3, ServicePhone_PlmnChanged(AString("123456")));
 
-    pTestAosService->NotifyPlmnChanged();
+    pTestAosService->NotifyPlmnChanged(AString("123456"));
     EXPECT_TRUE(pTestAosService->IsTimerRunning(TestAosService::TIMER_PLMN_CHANGE_DELAY));
     pTestAosService->ProcessPlmnChangeDelayTimerExpired();
 }

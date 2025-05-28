@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 
+#include "AString.h"
 #include "interface/IAosServicePhoneListener.h"
 
 class MockIAosServicePhoneListener : public IAosServicePhoneListener
@@ -32,7 +33,7 @@ public:
     MOCK_METHOD(void, ServicePhone_NetworkVideoCapabilityChanged, (IN IMS_BOOL bIsOn), (override));
     MOCK_METHOD(void, ServicePhone_PhoneNumberStateChanged,
             (IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState), (override));
-    MOCK_METHOD(void, ServicePhone_PlmnChanged, (), (override));
+    MOCK_METHOD(void, ServicePhone_PlmnChanged, (IN const AString& strPlmn), (override));
     MOCK_METHOD(void, ServicePhone_PowerOff, (), (override));
     MOCK_METHOD(
             void, ServicePhone_PreciseCallStateChanged, (IN PreciseCallState eState), (override));

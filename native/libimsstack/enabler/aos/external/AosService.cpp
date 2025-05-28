@@ -39,6 +39,7 @@ AosService::AosService(IN IMS_SINT32 nSlotId) :
         m_objAosServicePhoneListeners(ImsList<IAosServicePhoneListener*>()),
         m_nSlotId(nSlotId),
         m_piPlmnChangeDelayTimer(IMS_NULL),
+        m_strPlmn(AString::ConstEmpty()),
         m_objCapabilities(ImsMap<IMS_UINT32, IMS_UINT32>())
 {
     m_strTag.Sprintf("%d", m_nSlotId);
@@ -575,9 +576,11 @@ PUBLIC VIRTUAL void AosService::NotifyPhoneNumberState(
     }
 }
 
-PUBLIC VIRTUAL void AosService::NotifyPlmnChanged()
+PUBLIC VIRTUAL void AosService::NotifyPlmnChanged(IN const AString& strPlmn)
 {
-    A_IMS_TRACE_I(AOSTAG, "NotifyPlmnChanged", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "NotifyPlmnChanged :: strPlmn(%s)", strPlmn.GetStr(), 0, 0);
+
+    m_strPlmn = strPlmn;
     StartTimer(TIMER_PLMN_CHANGE_DELAY, PLMN_CHANGE_DELAY_TIME_MS);
 }
 
@@ -907,7 +910,7 @@ PROTECTED void AosService::ProcessPlmnChangeDelayTimerExpired()
 
         if (piListener != IMS_NULL)
         {
-            piListener->ServicePhone_PlmnChanged();
+            piListener->ServicePhone_PlmnChanged(m_strPlmn);
         }
     }
 }

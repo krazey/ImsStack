@@ -70,7 +70,7 @@ public:
     MOCK_METHOD(void, NotifyNetworkVideoCapability, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyPhoneNumberState, (IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState),
             (override));
-    MOCK_METHOD(void, NotifyPlmnChanged, (), (override));
+    MOCK_METHOD(void, NotifyPlmnChanged, (IN const AString& strPlmn), (override));
     MOCK_METHOD(void, NotifyPowerOff, (), (override));
     MOCK_METHOD(void, NotifyPreciseCallState, (IN IMS_SINT32 nState), (override));
     MOCK_METHOD(void, NotifyCarrierSignalPcoValueChanged, (IN IMS_SINT32 nValue), (override));

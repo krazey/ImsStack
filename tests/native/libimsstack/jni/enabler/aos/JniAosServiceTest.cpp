@@ -387,9 +387,10 @@ TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyPlmnChanged)
 {
     // GIVEN
     m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_PLMN_CHANGED);
+    m_objParcel.writeString16(android::String16(AString("123456").GetStr()));
     m_objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyPlmnChanged());
+    EXPECT_CALL(m_objMockIAosService, NotifyPlmnChanged(_));
 
     // WHEN
     m_pJniAosService->SendData(m_objParcel);

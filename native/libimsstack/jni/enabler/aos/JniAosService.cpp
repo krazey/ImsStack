@@ -491,12 +491,14 @@ void JniAosService::NotifyPhoneNumberState(IN const android::Parcel& objParcel)
 }
 
 PRIVATE
-void JniAosService::NotifyPlmnChanged(IN const android::Parcel& /*objParcel*/)
+void JniAosService::NotifyPlmnChanged(IN const android::Parcel& objParcel)
 {
     IAosService* piAosService = GetNativeService();
     if (piAosService)
     {
-        piAosService->NotifyPlmnChanged();
+        AString strPlmn;
+        ConvertString(objParcel.readString16(), strPlmn);
+        piAosService->NotifyPlmnChanged(strPlmn);
     }
 }
 

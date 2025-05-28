@@ -91,7 +91,7 @@ public:
     virtual void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) = 0;
     virtual void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) = 0;
     virtual void NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState) = 0;
-    virtual void NotifyPlmnChanged() = 0;
+    virtual void NotifyPlmnChanged(IN const AString& strPlmn) = 0;
     virtual void NotifyPowerOff() = 0;
     virtual void NotifyPreciseCallState(IN IMS_SINT32 nState) = 0;
     virtual void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) = 0;

@@ -75,7 +75,7 @@ public:
     void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) override;
     void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) override;
     void NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState) override;
-    void NotifyPlmnChanged() override;
+    void NotifyPlmnChanged(IN const AString& strPlmn) override;
     void NotifyPowerOff() override;
     void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
     void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
@@ -142,6 +142,7 @@ private:
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
     ITimer* m_piPlmnChangeDelayTimer;
+    AString m_strPlmn;
 
     // <AosNetworkType, AosCapability>
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;

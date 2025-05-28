@@ -149,7 +149,7 @@ protected:
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
     void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) override;
-    void ServicePhone_PlmnChanged() override;
+    void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
     void ServicePhone_PowerOff() override;
 
     // AosServiceSettingListener

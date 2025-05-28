@@ -815,7 +815,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     private void handleNetworkOperatorChanged() {
         for (Listener l : mListeners) {
-            l.onNetworkOperatorChanged();
+            l.onNetworkOperatorChanged(mNetworkOperator);
         }
     }
 

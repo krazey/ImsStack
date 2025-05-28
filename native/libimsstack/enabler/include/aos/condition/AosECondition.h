@@ -47,7 +47,7 @@ protected:
     inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) final{};
     inline void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) final{};
-    inline void ServicePhone_PlmnChanged() final{};
+    inline void ServicePhone_PlmnChanged(IN const AString& /*strPlmn*/) final {};
     inline void ServicePhone_PowerOff() final{};
 };
 

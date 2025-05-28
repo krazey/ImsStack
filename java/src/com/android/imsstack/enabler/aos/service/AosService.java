@@ -506,9 +506,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void onNetworkOperatorChanged() {
+    public void onNetworkOperatorChanged(String networkOperator) {
         ImsLog.d(mSlotId, "AosService: onNetworkOperatorChanged");
-        sendRequest(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
+        parcel.writeString(networkOperator);
+        sendRequest(parcel);
     }
 
     @Override

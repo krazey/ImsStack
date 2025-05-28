@@ -546,7 +546,7 @@ PROTECTED VIRTUAL void AosCondition::ServicePhone_PhoneNumberStateChanged(
     ProcessPhoneNumberAvailableEvent(bIsRefresh, eState);
 }
 
-PROTECTED VIRTUAL void AosCondition::ServicePhone_PlmnChanged()
+PROTECTED VIRTUAL void AosCondition::ServicePhone_PlmnChanged(IN const AString& /*strPlmn*/)
 {
     A_IMS_TRACE_D(APPPROFILE, "ServicePhone_PlmnChanged()", 0, 0, 0);
     ProcessPlmnEvent();

@@ -774,9 +774,13 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void onNetworkOperatorChanged_notifyChange() {
-        byte[] plmnChangedData = createBytes(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
+        parcel.writeString("123456");
+        byte[] plmnChangedData = parcel.marshall();
+        parcel.recycle();
 
-        mAosService.onNetworkOperatorChanged();
+        mAosService.onNetworkOperatorChanged("123456");
 
         verify(mMockJniIms).sendData(mNativeObject, plmnChangedData);
     }
