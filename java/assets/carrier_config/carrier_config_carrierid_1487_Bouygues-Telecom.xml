@@ -17,7 +17,7 @@
 <carrier_config>
     <!-- MTC -->
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
+        <item value="3"/> <!-- USE_GENERIC_FOR_MULTIPLE_CATEGORIES  -->
     </int-array>
 
     <!-- Aos -->
