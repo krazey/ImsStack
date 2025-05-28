@@ -85,21 +85,28 @@ public class VideoSessionHandler extends MediaState {
     public VideoSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             IMtcMediaVideoCallProvider mtcMediaVideoCallProvider,
             @NonNull VideoSessionCallbackHandler videoCallbackHandler,
-            @NonNull ImsVideoSession videoSession, Looper looper) {
+            @NonNull ImsVideoSession videoSession, Looper looper, @Nullable QosAgent qosAgent) {
         super(ImsMediaSession.SESSION_TYPE_VIDEO);
         mContext = context;
         mMediaManager = mediaManager;
         mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
         mVideoSessionCallbackHandler = videoCallbackHandler;
         mVideoSession = videoSession;
+        mVideoQosAgent = qosAgent;
         mVideoSessionCallback = new VideoSessionCallbackProxy();
         mVideoMessageHandler = new VideoMessageHandler(looper);
+        createQosAgent(mContext.getSlotId());
         ImsLog.d("VideoSessionHandler created");
     }
 
     @VisibleForTesting
     void setVideoSession(@Nullable ImsVideoSession videoSession) {
         mVideoSession = videoSession;
+    }
+
+    @VisibleForTesting
+    ImsVideoSession getVideoSession() {
+        return mVideoSession;
     }
 
     @VisibleForTesting
@@ -123,8 +130,18 @@ public class VideoSessionHandler extends MediaState {
     }
 
     @VisibleForTesting
-    VideoMessageHandler getVideoMessageHandler() {
-        return mVideoMessageHandler;
+    VideoImsQosCallback getVideoImsQosCallback() {
+        return mVideoImsQosCallback;
+    }
+
+    @VisibleForTesting
+    boolean isPreviewSurfaceSet() {
+        return mPreviewSurfaceSet;
+    }
+
+    @VisibleForTesting
+    boolean isDisplaySurfaceSet() {
+        return mDisplaySurfaceSet;
     }
 
     private boolean isWaitRequired(int requestType) {
