@@ -58,7 +58,9 @@ import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Implementation of IUtInterface class that provides query and update APIs for supplementary
@@ -82,6 +84,10 @@ public class SscServiceImpl implements IUtInterface {
     private HandlerThread mSscServiceThread = null;
     private SscRequestHandler mSscRequestHandler = null;
     private SscCallbackHandler mSscCallbackHandler = null;
+
+    @VisibleForTesting
+    final Set<TerminalBasedSupplementaryServiceConfigurationChangeListener>
+            mTbSscChangeListeners = new CopyOnWriteArraySet<>();
 
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
@@ -661,6 +667,20 @@ public class SscServiceImpl implements IUtInterface {
                 SscConstant.EVENT_SSC_UPDATE_TIP, tId, (enable ? 1 : 0)));
 
         addRequestToQueue(requestData);
+    }
+
+    @Override
+    public void addTbSscChangeListener(
+            TerminalBasedSupplementaryServiceConfigurationChangeListener listener) {
+        mTbSscChangeListeners.add(listener);
+
+        // TODO: Notify current status to the added listener.
+    }
+
+    @Override
+    public void removeTbSscChangeListener(
+            TerminalBasedSupplementaryServiceConfigurationChangeListener listener) {
+        mTbSscChangeListeners.remove(listener);
     }
 
     private void startTransaction(SscData data) {
