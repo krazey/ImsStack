@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "ImsEventDef.h"
+
 #include "external/AosService.h"
 #include "interface/IAosEmergencyListener.h"
 #include "interface/IAosRegistration.h"
@@ -915,6 +917,30 @@ TEST_F(AosServiceTest, NotifyPlmnChanged)
     pTestAosService->NotifyPlmnChanged(AString("123456"));
     EXPECT_TRUE(pTestAosService->IsTimerRunning(TestAosService::TIMER_PLMN_CHANGE_DELAY));
     pTestAosService->ProcessPlmnChangeDelayTimerExpired();
+}
+
+TEST_F(AosServiceTest, ShouldNotifyVopsStateChangedToListenersWithGivenValues)
+{
+    // GIVEN
+    MockIAosServicePhoneListener objMockListener1;
+    MockIAosServicePhoneListener objMockListener2;
+    MockIAosServicePhoneListener objMockListener3;
+
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
+
+    EXPECT_CALL(objMockListener1,
+            ServicePhone_VopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, AString("123456")));
+    EXPECT_CALL(objMockListener2,
+            ServicePhone_VopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, AString("123456")));
+    EXPECT_CALL(objMockListener3,
+            ServicePhone_VopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, AString("123456")));
+
+    // WHEN
+    m_pAosService->NotifyVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, AString("123456"));
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosServiceTest, NotifyPowerOff)

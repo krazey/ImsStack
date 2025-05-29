@@ -905,7 +905,12 @@ public class DcNetWatcher implements IDcNetWatcher {
                     boolean vops = vsi.isVopsSupported();
                     boolean emcbs = vsi.isEmergencyServiceSupported();
 
-                    handleImsNetworkVopsChanged(vops);
+                    String operatorNumeric = ss.getOperatorNumeric();
+                    if (operatorNumeric == null) {
+                        operatorNumeric = "";
+                    }
+
+                    handleImsNetworkVopsChanged(vops, operatorNumeric);
                     if (mEmcbs != emcbs) {
                         ImsLog.w(mSlotId, "update emergency service supported info : " + emcbs);
                         mEmcbs = emcbs;
@@ -932,18 +937,23 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
     }
 
-    private void handleImsNetworkVopsChanged(boolean currentVops) {
+    private void handleImsNetworkVopsChanged(boolean currentVops, String currentPlmn) {
         boolean isVopsSupported = currentVops || mDcSettings == null || mDcSettings.isVopsIgnored();
 
         if (mImsVops != isVopsSupported) {
             mImsVops = isVopsSupported;
-            ImsLog.d(mSlotId, "VoPS supported indication is updated as = " + mImsVops);
+            ImsLog.d(mSlotId, "VoPS supported indication is updated as = " + mImsVops + " on PLMN("
+                    + currentPlmn + ")");
 
             int state =
                     (mImsVops)
                             ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
                             : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
             mSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, state, 0);
+
+            for (Listener l : mListeners) {
+                l.onVopsStateChanged(state, currentPlmn);
+            }
         }
     }
 

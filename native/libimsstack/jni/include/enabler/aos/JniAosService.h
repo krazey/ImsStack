@@ -64,6 +64,7 @@ private:
     void NotifyNetworkVideoCapability(IN const android::Parcel& objParcel);
     void NotifyPhoneNumberState(IN const android::Parcel& objParcel);
     void NotifyPlmnChanged(IN const android::Parcel& objParcel);
+    void NotifyVopsStateChanged(IN const android::Parcel& objParcel);
     void NotifyPowerOff(IN const android::Parcel& objParcel);
     void NotifyPreciseCallState(IN const android::Parcel& objParcel);
     void NotifyCarrierSignalPcoValueChanged(IN const android::Parcel& objParcel);

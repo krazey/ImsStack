@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "ImsEventDef.h"
 #include "JniEnablerConnector.h"
 
 #include "IAosService.h"
@@ -391,6 +392,22 @@ TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyPlmnChanged)
     m_objParcel.setDataPosition(0);
 
     EXPECT_CALL(m_objMockIAosService, NotifyPlmnChanged(_));
+
+    // WHEN
+    m_pJniAosService->SendData(m_objParcel);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenVopsStateChanged)
+{
+    // GIVEN
+    m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_VOPS_STATE_CHANGED);
+    m_objParcel.writeInt32(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    m_objParcel.writeString16(android::String16(AString("123456").GetStr()));
+    m_objParcel.setDataPosition(0);
+
+    EXPECT_CALL(m_objMockIAosService, NotifyVopsStateChanged(_, _));
 
     // WHEN
     m_pJniAosService->SendData(m_objParcel);

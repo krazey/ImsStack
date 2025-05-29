@@ -108,6 +108,7 @@ protected:
 
     // IAosServicePhoneListener
     void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
+    void ServicePhone_VopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn) override;
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;

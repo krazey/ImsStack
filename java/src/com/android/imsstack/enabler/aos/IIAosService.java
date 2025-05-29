@@ -63,6 +63,8 @@ public interface IIAosService {
     int J2N_NOTIFY_CROSS_SIM_STATUS = EVENT_J2N_INFO + 22;
     /// IAosInfo(Java) -> IAosServiceSettingListener(Native)
     int J2N_NOTIFY_WIFI_SETTING = EVENT_J2N_INFO + 23;
+    /// IAosInfo(Java) -> IAosServicePhoneListener(Native)
+    int J2N_NOTIFY_VOPS_STATE_CHANGED = EVENT_J2N_INFO + 24;
 
     /**
      * Messages from native layer to java layer

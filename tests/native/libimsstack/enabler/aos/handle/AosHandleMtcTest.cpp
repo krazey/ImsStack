@@ -92,6 +92,7 @@ using ::testing::SetArgReferee;
     using Base::Request;                            \
     using Base::ResetSuspendedReason;               \
     using Base::ServicePhone_PlmnChanged;           \
+    using Base::ServicePhone_VopsStateChanged;      \
     using Base::SetHandleState;                     \
     using Base::SetSuspendedReason;                 \
     using Base::StartVolteHysTimer;                 \
@@ -5055,4 +5056,10 @@ TEST_F(AosHandleMtcTest, StopVolteHysTimer_UmtsGsm_Then_PdnLost)
     EXPECT_EQ(m_pAosHandleMtc->GetNetworkType(), NW_REPORT_RADIO_WCDMA);
     EXPECT_FALSE(m_pAosHandleMtc->IsVolteHysTimerRunning());
     EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_SSAC));
+}
+
+TEST_F(AosHandleMtcTest, VopsStateChangedFromService)
+{
+    m_pAosHandleMtc->ServicePhone_VopsStateChanged(
+            IMS_VOICE_OVER_PS_NOT_SUPPORTED, AString("123456"));
 }

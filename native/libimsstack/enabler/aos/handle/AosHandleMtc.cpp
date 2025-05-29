@@ -1214,6 +1214,13 @@ PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged(IN const AString& 
     }
 }
 
+PROTECTED VIRTUAL void AosHandleMtc::ServicePhone_VopsStateChanged(
+        IN IMS_UINT32 nState, IN const AString& strPlmn)
+{
+    A_IMS_TRACE_I(APPPROFILE, "ServicePhone_VopsStateChanged :: nState(%d), strPlmn(%s)", nState,
+            strPlmn.GetStr(), 0);
+}
+
 PROTECTED VIRTUAL void AosHandleMtc::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
