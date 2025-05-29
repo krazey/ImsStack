@@ -17,7 +17,9 @@
 package com.android.imsstack.enabler.mtc;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -26,6 +28,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.media.ToneGenerator;
 import android.os.Parcel;
 import android.telephony.AccessNetworkConstants;
@@ -38,8 +46,6 @@ import android.telephony.imsmedia.IImsMedia;
 import android.telephony.imsmedia.RtpReceptionStats;
 import android.view.Surface;
 
-import com.android.imsstack.ContextFixture;
-import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.IMediaListener;
@@ -53,14 +59,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RunWith(JUnit4.class)
-public class MtcMediaSessionTest extends ImsStackTest {
+public class MtcMediaSessionTest {
     private static final int SLOT0 = 0;
+    private static final String EXPECTED_IMS_MEDIA_SERVICE_CONTROLLER_ACTION =
+            "com.android.telephony.imsmedia.IMS_MEDIA_SERVICE_CONTROLLER";
     private static final int MEDIA_TYPE_AUDIO = IUMtcMedia.SESSION_TYPE_AUDIO;
     private static final int MEDIA_TYPE_VIDEO = IUMtcMedia.SESSION_TYPE_VIDEO;
     private static final int MEDIA_DIRECTION_UL = 1;
@@ -78,48 +89,64 @@ public class MtcMediaSessionTest extends ImsStackTest {
     @Mock private MmTelMediaRegistry mMockMediaRegistry;
     @Mock private MediaThreshold mMockMediaThreshold;
     @Mock private MediaSession mMockMediaSession;
-    @Mock private IImsMedia mMockImsMedia;
+    @Mock private IImsMedia.Stub mMockImsMedia;
     @Mock private MtcJniProxy mMockMtcJniProxy;
+    @Mock private Context mContext;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp(getClass().getSimpleName());
+        AppContext.deinit();
+        // TODO : Need to improve towards not using Appcontext
+
         MockitoAnnotations.initMocks(this);
 
-        ContextFixture mContextFixture = new ContextFixture();
-        Context fakeContext = mContextFixture.getTestDouble();
-        AppContext.init(fakeContext);
+        AppContext.init(mContext);
 
-        // Configure mMockBaseContext to return our FakeContext
-        when(mMockBaseContext.getContext()).thenReturn(fakeContext);
+        PackageManager mockPackageManager = Mockito.mock(PackageManager.class);
+        when(mContext.getPackageManager()).thenReturn(mockPackageManager);
+        when(mMockBaseContext.getContext()).thenReturn(mContext);
         when(mMockBaseContext.getSlotId()).thenReturn(SLOT0);
 
-        ComponentName imsMediaControllerComponent =
+        final ComponentName imsMediaServiceComponent =
                 new ComponentName("com.android.telephony.imsmedia",
                                 "com.android.telephony.imsmedia.ImsMediaController");
 
-        String serviceInterfaceAction = IImsMedia.Stub.DESCRIPTOR;
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = new ServiceInfo();
+        resolveInfo.serviceInfo.packageName = imsMediaServiceComponent.getPackageName();
+        resolveInfo.serviceInfo.name = imsMediaServiceComponent.getClassName();
+        resolveInfo.serviceInfo.applicationInfo = new ApplicationInfo();
+        resolveInfo.serviceInfo.applicationInfo.packageName =
+                imsMediaServiceComponent.getPackageName();
 
-        mContextFixture.addService(
-                serviceInterfaceAction,
-                imsMediaControllerComponent,
-                null,
-                mMockImsMedia,
-                new android.content.pm.ServiceInfo());
+        List<ResolveInfo> resolveInfoList = new ArrayList<>();
+        resolveInfoList.add(resolveInfo);
 
-        String classNameKey = imsMediaControllerComponent.getClassName();
-        if (!serviceInterfaceAction.equals(classNameKey)) {
-            mContextFixture.addService(
-                    classNameKey,
-                    null,
-                    null,
-                    mMockImsMedia,
-                    new android.content.pm.ServiceInfo());
-        }
+        when(mockPackageManager.queryIntentServices(
+                argThat(intent -> EXPECTED_IMS_MEDIA_SERVICE_CONTROLLER_ACTION.equals(
+                        intent.getAction())),
+                eq(PackageManager.MATCH_DEFAULT_ONLY)
+        )).thenReturn(resolveInfoList);
 
-        // Mock the MtcJniProxy behavior for this test class
+        // --- Mocking the Context.bindService behavior ---
+        // ImsMediaManager will call bindService with an Intent that has the action and package set.
+        // The flags used are Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT |
+        // Context.BIND_NOT_VISIBLE.
+        when(mContext.bindService(
+                argThat((Intent intent) ->
+                        EXPECTED_IMS_MEDIA_SERVICE_CONTROLLER_ACTION.equals(intent.getAction())
+                        && imsMediaServiceComponent.getPackageName().equals(intent.getPackage())
+                ),
+                any(ServiceConnection.class),
+                eq(Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT | Context.BIND_NOT_VISIBLE)
+        )).thenAnswer(invocation -> {
+            ServiceConnection connectionArgument = invocation.getArgument(1);
+            connectionArgument.onServiceConnected(imsMediaServiceComponent, mMockImsMedia);
+            return true;
+        });
+
         MtcJniProxy.setInstanceForTesting(mMockMtcJniProxy);
-        doNothing().when(mMockMtcJniProxy).sendDataToNative(anyInt(), any(Parcel.class));
+        doNothing().when(mMockMtcJniProxy).sendDataToNative(anyLong(), any(Parcel.class));
 
         mMtcMediaSession = new MtcMediaSession(mMockBaseContext, mMockCall);
         mMtcMediaSession.setMediaSession(mMockMediaSession);
@@ -136,10 +163,10 @@ public class MtcMediaSessionTest extends ImsStackTest {
     public void tearDown() throws Exception {
         if (mMtcMediaSession != null) {
             mMtcMediaSession.dispose();
+            mMtcMediaSession = null;
         }
         MtcJniProxy.setInstanceForTesting(null);
-        mMtcMediaSession = null;
-        super.tearDown();
+        AppContext.deinit();
     }
 
     @Test
