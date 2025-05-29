@@ -286,6 +286,7 @@ TEST_F(MtcRadioCheckerTest, OnRatChangedNotInvokesStartImsTrafficForEpsFbSilentR
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
             IImsRadio::DIRECTION_MT, INetworkWatcher::RADIOTECH_TYPE_NR, CALL_KEY1);
+    ON_CALL(m_objCall, GetKey).WillByDefault(Return(CALL_KEY1));
     ON_CALL(m_objEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_TRUE));
 
