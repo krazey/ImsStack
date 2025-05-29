@@ -208,3 +208,9 @@ void MediaSessionConfigFactory::ReleaseInstance(MediaSessionConfigFactory* pSess
         g_pMediaSessionConfigFactory = IMS_NULL;
     }
 }
+
+PUBLIC
+void MediaSessionConfigFactory::SetInstance(MediaSessionConfigFactory* pSessionConfigFactory)
+{
+    g_pMediaSessionConfigFactory = pSessionConfigFactory;
+}
