@@ -36,7 +36,8 @@ public:
     ConferenceEventNotifier& operator=(IN const ConferenceEventNotifier&) = delete;
 
 public:
-    virtual void NotifyMerged(IN ConferenceParticipantList& objParticipantList);
+    virtual void NotifyMerged(
+            IN ConferenceParticipantList& objParticipantList, IN IMS_BOOL bSubscribed);
     virtual void NotifyMergeFailed(IN const CallReasonInfo& objReason);
 
     virtual void NotifyGroupCallStarted();

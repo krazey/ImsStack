@@ -808,7 +808,7 @@ PROTECTED VIRTUAL void ConferenceController::NotifyCmdResult()
             NotifyUsersInfo();
             break;
         case STATE_MERGING:
-            m_pNotifier->NotifyMerged(*m_pParticipantList);
+            m_pNotifier->NotifyMerged(*m_pParticipantList, m_pSubscription ? IMS_TRUE : IMS_FALSE);
             break;
         case STATE_JOINING:
             m_pNotifier->NotifyJoined(*m_pParticipantList);

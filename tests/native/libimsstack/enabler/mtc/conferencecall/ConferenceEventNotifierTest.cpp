@@ -35,6 +35,11 @@
 #include "media/MockIMtcMediaManager.h"
 #include <gtest/gtest.h>
 
+MATCHER(IsEmpty, "")
+{
+    return arg.IsEmpty();
+}
+
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -122,14 +127,24 @@ protected:
     }
 };
 
-TEST_F(ConferenceEventNotifierTest, NotifyMerged)
+TEST_F(ConferenceEventNotifierTest, NotifyMergedIfNotSubscribed)
+{
+    MtcConfigurationProxy objConfigurationProxy;
+    MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
+
+    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, IsEmpty())).Times(1);
+    pNotifier->NotifyMerged(*pParticipantList, IMS_FALSE);
+}
+
+TEST_F(ConferenceEventNotifierTest, NotifyMergedIfSubscribed)
 {
     MtcConfigurationProxy objConfigurationProxy;
     MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, objUsers)).Times(1);
-    pNotifier->NotifyMerged(*pParticipantList);
+    pNotifier->NotifyMerged(*pParticipantList, IMS_TRUE);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyMergeFailed)

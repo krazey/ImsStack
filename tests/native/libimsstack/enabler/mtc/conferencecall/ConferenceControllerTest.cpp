@@ -1100,7 +1100,36 @@ TEST_F(ConferenceControllerTest, OnOperationReadyWithNotifyResultNotifiesMergedI
             new ConferenceOperationQueue::ConferenceOperation(
                     CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
-    EXPECT_CALL(*pMockNotifier, NotifyMerged(Ref(*pMockParticipantList)));
+    EXPECT_CALL(*pMockNotifier, NotifyMerged(Ref(*pMockParticipantList), IMS_FALSE));
+    EXPECT_CALL(
+            *pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_NULL))
+            .WillOnce(Return(IMS_FALSE));
+
+    pController->OnOperationReady();
+    delete pOperation;
+}
+
+TEST_F(ConferenceControllerTest,
+        OnOperationReadyWithNotifyResultNotifiesMergedInMergingStateWhenSubscriptionExists)
+{
+    // Sets m_pSubscription exists.
+    ConferenceOperationQueue::ConferenceOperation* pOperation =
+            new ConferenceOperationQueue::ConferenceOperation(CONTROL_OPERATION_SUBSCRIBE, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+
+    MockIConferenceSubscriptionListener objSubsListener;
+    MockConferenceSubscription* pSubscription = CreateSubscription(objSubsListener);
+    // Sets GetFocusAddress() not to have exception.
+    ON_CALL(objMockCallContext, GetSession()).WillByDefault(ReturnNull());
+
+    EXPECT_CALL(*pSubscription, Subscribe(_)).Times(1);
+    pController->OnOperationReady();
+
+    pController->SetStateForTest(ConferenceController::STATE_MERGING);
+    pOperation = new ConferenceOperationQueue::ConferenceOperation(
+            CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
+    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
+    EXPECT_CALL(*pMockNotifier, NotifyMerged(Ref(*pMockParticipantList), IMS_TRUE));
     EXPECT_CALL(
             *pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_NULL))
             .WillOnce(Return(IMS_FALSE));

@@ -36,8 +36,9 @@ public:
     {
     }
     ~MockConferenceEventNotifier() {}
-    MOCK_METHOD(
-            void, NotifyMerged, (IN ConferenceParticipantList& objParticipantList), (override));
+    MOCK_METHOD(void, NotifyMerged,
+            (IN ConferenceParticipantList & objParticipantList, IN IMS_BOOL bSubscribed),
+            (override));
     MOCK_METHOD(void, NotifyMergeFailed, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, NotifyGroupCallStarted, (), (override));
     MOCK_METHOD(void, NotifyGroupCallFailed, (IN const CallReasonInfo& objReason), (override));

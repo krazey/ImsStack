@@ -49,7 +49,8 @@ PUBLIC VIRTUAL ConferenceEventNotifier::~ConferenceEventNotifier()
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyMerged(
+        IN ConferenceParticipantList& objParticipantList, IN IMS_BOOL bSubscribed)
 {
     IMS_TRACE_I("NotifyMerged", 0, 0, 0);
 
@@ -66,7 +67,7 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
         piThread->OnMerged(piConferenceCallContext->CreateJniCallInfo(),
                 piConferenceCallContext->GetMediaManager().GetMediaInfo(),
                 piConferenceCallContext->GetSupplementaryService().GetServices(),
-                objParticipantList.GetConfUsers());
+                bSubscribed ? objParticipantList.GetConfUsers() : ImsList<ConfUser*>());
     }
 }
 
