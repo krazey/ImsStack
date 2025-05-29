@@ -95,9 +95,6 @@
         <item value="606:3,2,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE_BY_SDP_CONTENT, SILENT_REINVITE -->
     </string-array>
 
-    <!-- Media -->
-    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
-
     <!-- Audio -->
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
