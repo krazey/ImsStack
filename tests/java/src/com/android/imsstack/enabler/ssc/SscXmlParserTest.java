@@ -137,6 +137,7 @@ public class SscXmlParserTest {
         assertEquals("ss:no-answer", SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNR));
         assertEquals("ss:not-reachable", SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNRC));
         assertEquals("ss:not-registered", SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CFNL));
+        assertEquals("ss:target", SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.TARGET));
         assertEquals("cp:ruleset", SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULESET));
         assertEquals("cp:rule", SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULE));
         assertEquals("cp:conditions", SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.CONDITIONS));

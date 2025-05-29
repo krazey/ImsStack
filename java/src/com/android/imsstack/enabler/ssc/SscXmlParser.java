@@ -159,7 +159,11 @@ public class SscXmlParser {
 
         String[] tokens = tagName.split(":");
         if (tokens.length > 1) {
-            SscXmlFormat.setTag(slotId, tokens[1], tokens[0]);
+            if (isNamespaceValid(tokens[0])) {
+                SscXmlFormat.setTag(slotId, tokens[1], tokens[0]);
+            } else {
+                ImsLog.d(slotId, "Invalid namespace : " + tokens[0]);
+            }
         } else {
             SscXmlFormat.setTag(slotId, tokens[0], "");
         }
@@ -949,6 +953,12 @@ public class SscXmlParser {
         ImsLog.d("noReplyTimer is " + noReplyTimer);
 
         return noReplyTimer;
+    }
+
+    private static boolean isNamespaceValid(String namespace) {
+        return SscXmlFormat.NS_SS_PREFIX.equals(namespace + ":")
+                || SscXmlFormat.NS_CP_PREFIX.equals(namespace + ":")
+                || SscXmlFormat.NS_XE_PREFIX.equals(namespace + ":");
     }
 
     // KDDI - getting preferred URI format(SIP) from one element.
