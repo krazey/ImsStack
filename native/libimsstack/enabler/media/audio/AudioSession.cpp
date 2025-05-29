@@ -204,6 +204,11 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     {
         case MEDIA_DIRECTION_RECEIVE:
             nAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+            if (!bConfirmedSession && m_ePemType == MEDIA_PEM_TYPE::SENDRECV)
+            {
+                nAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
+                IMS_TRACE_D("UpdateRtpConfig() - media direction[%d]", nAudioDirection, 0, 0);
+            }
             break;
         case MEDIA_DIRECTION_SEND_RECEIVE:
             nAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
@@ -853,6 +858,7 @@ void AudioSession::SetMediaPemType(IN MEDIA_PEM_TYPE ePemType)
     if (m_ePemType != MEDIA_PEM_TYPE::SENDRECV && m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
     {
         m_ePemType = ePemType;
+        IMS_TRACE_D("SetMediaPemType() - Pem Type[%d]", m_ePemType, 0, 0);
     }
 }
 

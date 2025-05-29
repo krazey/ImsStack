@@ -393,6 +393,12 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
 
     IMS_TRACE_D("UpdatePemType : [%s]", MtcMediaStringUtils::ConvertPemType(GetPemType(piSession)),
             0, 0);
+
+    if (m_piMediaSession != IMS_NULL)
+    {
+        IMS_UINTP nNegoId = GetMediaNegoId(piSession);
+        m_piMediaSession->SetMediaPemType(nNegoId, (MEDIA_PEM_TYPE)ePemType);
+    }
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::Run(
