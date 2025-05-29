@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -138,6 +138,12 @@ public:
      * @return IMS_SINT32 Return the rtcp inactivitity timer
      */
     virtual IMS_SINT32 GetRtcpInactivityTimerMillis() const;
+    /**
+     * @brief Get the receive only direction feature is enabled in early session.
+     *
+     * @return IMS_BOOL Return whether the recvonly direction feature is enabled in early session.
+     */
+    virtual IMS_BOOL IsRecvOnlyEarlySessionEnabled() const;
 
 protected:
     virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
@@ -213,6 +219,7 @@ protected:
     IMS_SINT32 m_nRrBandwidthBps;
     IMS_SINT32 m_nRtpInactivityTimerMillis;
     IMS_SINT32 m_nRtcpInactivityTimerMillis;
+    IMS_BOOL m_bRecvOnlyEarlySessionEnabled;
 
     // Provisioned codecs
     ImsList<CodecConfig*> m_objCodecConfigs;

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,6 +87,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     m_nRtcpInactivityTimerMillis =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTCP_INACTIVITY);
+    m_bRecvOnlyEarlySessionEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL, IMS_TRUE);
 
     m_bAudioBwNegoOptionEnabled = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
@@ -256,6 +258,7 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
             RtcpxrPacketDuplicateRleEnabled[%d]",
             m_bAudioRtcpxrVoipMetricsEnabled, m_bAudioRtcpxrPacketLossRleEnabled,
             m_bAudioRtcpxrPacketDuplicateRleEnabled);
+    IMS_TRACE_D("RecvOnlyEarlySessionEnabled[%d]", m_bRecvOnlyEarlySessionEnabled, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {

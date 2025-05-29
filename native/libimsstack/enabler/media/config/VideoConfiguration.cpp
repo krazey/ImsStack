@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,6 +76,9 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     m_nRtcpInactivityTimerMillis =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT,
                     DEFAULT_RTCP_INACTIVITY);
+
+    m_bRecvOnlyEarlySessionEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL, IMS_TRUE);
 
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.

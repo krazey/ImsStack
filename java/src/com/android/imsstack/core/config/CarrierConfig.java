@@ -1333,6 +1333,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "evs_amrwb_io_mode_set_int";
         public static final String KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
                 KEY_PREFIX + "audio_hold_with_direction_inactive_bool";
+        public static final String KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL =
+                KEY_PREFIX + "media_recvonly_early_session_bool";
 
         private ImsVoice() {}
     }

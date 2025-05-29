@@ -140,7 +140,9 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
             case MEDIA_DIRECTION_SEND:
                 nVideoDirection = bHold ? RtpConfig::MEDIA_DIRECTION_INACTIVE
                                         : RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
-                if (!bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
+                if ((GetConfiguration() != IMS_NULL &&
+                            GetConfiguration()->IsRecvOnlyEarlySessionEnabled()) &&
+                        !bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
                         m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
                 {
                     nVideoDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
@@ -149,7 +151,9 @@ PUBLIC IMS_BOOL VideoSession::UpdateRtpConfig(IN VideoProfile* pLocalProfile,
                 break;
             case MEDIA_DIRECTION_SEND_RECEIVE:
                 nVideoDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
-                if (!bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
+                if ((GetConfiguration() != IMS_NULL &&
+                            GetConfiguration()->IsRecvOnlyEarlySessionEnabled()) &&
+                        !bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
                         m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
                 {
                     nVideoDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
