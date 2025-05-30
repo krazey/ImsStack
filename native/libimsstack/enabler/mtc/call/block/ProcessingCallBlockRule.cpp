@@ -18,6 +18,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/ProcessingCallBlockRule.h"
+#include "emergency/IMtcEmergencyServiceManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -40,16 +41,13 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
     ImsList<IMtcCall*> lstCalls = m_objContext.GetOtherCalls();
 
     PeerType ePeerType = m_objContext.GetCallInfo().ePeerType;
-    if (IsEmergencyCallExists(lstCalls))
+    if (m_objContext.GetEmergencyServiceManager().GetState() ==
+                    IEmergencyServiceController::State::OPENING ||
+            IsEmergencyCallExists(lstCalls))
     {
-        if (ePeerType == PeerType::MO)
-        {
-            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
-        }
-        else
-        {
-            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
-        }
+        return Result(Result::Status::BLOCKED,
+                ePeerType == PeerType::MO ? CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE)
+                                          : CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
     }
 
     if (IsCallSetupProcessing(lstCalls))

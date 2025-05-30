@@ -19,6 +19,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
+#include "emergency/MockIMtcEmergencyServiceManager.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -31,6 +32,7 @@ class ProcessingCallBlockRuleTest : public ::testing::Test
 public:
     MockIMtcCallContext objContext;
     MockIMtcCallContext objEmergencyCallContext;
+    MockIMtcEmergencyServiceManager objEmergencyServiceManager;
     CallInfo objCallInfo;
     CallInfo objEmergencyCallInfo;
 
@@ -42,6 +44,8 @@ protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetEmergencyServiceManager)
+                .WillByDefault(ReturnRef(objEmergencyServiceManager));
 
         objEmergencyCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
         ON_CALL(objEmergencyCallContext, GetCallInfo)
@@ -162,6 +166,30 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMtIfUpdatingCallExists
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CALL_UPGRADE), objResult.objReason);
+}
+
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMoIfEmergencyServiceIsOpening)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objEmergencyServiceManager, GetState)
+            .WillByDefault(Return(IEmergencyServiceController::State::OPENING));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE), objResult.objReason);
+}
+
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMtIfEmergencyServiceIsOpening)
+{
+    objCallInfo.ePeerType = PeerType::MT;
+    ON_CALL(objEmergencyServiceManager, GetState)
+            .WillByDefault(Return(IEmergencyServiceController::State::OPENING));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL), objResult.objReason);
 }
 
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMoIfEmergencyCallExists)
