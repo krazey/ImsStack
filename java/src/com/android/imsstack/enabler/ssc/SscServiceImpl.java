@@ -796,6 +796,10 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         int oirMode = mSscPreferenceHelper.queryOir();
+        if (oirMode == SscConstant.STATUS_NOT_REGISTERED) {
+            oirMode = SscConstant.OIR_DEFAULT;
+        }
+
         if (oirMode == SscConstant.OIR_DEFAULT
                 && SscConfig.isNetworkQueryForTbOirNetworkDefault(mSlotId)) {
             SscRequestData requestData = new SscRequestData(tId);

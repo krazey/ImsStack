@@ -37,12 +37,6 @@ public class SscPreferenceHelper {
     private static final String KEY_TIR = "tir_sub";
     private static final String KEY_TIP = "tip_sub";
 
-    static final int DEFAULT_CB_STATUS = SscConstant.STATUS_DISABLE;
-    static final int DEFAULT_OIR_MODE = SscConstant.OIR_DEFAULT;
-    static final int DEFAULT_OIP_STATUS = SscConstant.STATUS_DISABLE;
-    static final int DEFAULT_TIR_MODE = SscConstant.TIR_NOT_PROVISIONED;
-    static final int DEFAULT_TIP_STATUS = SscConstant.STATUS_DISABLE;
-
     private final int mSlotId;
 
     public SscPreferenceHelper(int slotId) {
@@ -53,7 +47,7 @@ public class SscPreferenceHelper {
     /**
      * Returns a call barring status from the shared preference file for a current subscription ID.
      * If the current subscription ID is invalid or there is no data in the shared preference, then
-     * returns {@code DEFAULT_CB_STATUS}.
+     * returns {@code SscConstant#STATUS_NOT_REGISTERED}.
      *
      * @param condition A call barring condition. See SscConstant#CONDITION_XXX.
      * @param serviceClass A call barring service class. See SscServiceClassUtil#SERVICE_CLASS_XXX.
@@ -63,10 +57,10 @@ public class SscPreferenceHelper {
         int subId = getSubId();
         if (subId == MSimUtils.INVALID_SUB_ID) {
             ImsLog.e(mSlotId, "Invalid subId");
-            return DEFAULT_CB_STATUS;
+            return SscConstant.STATUS_NOT_REGISTERED;
         }
 
-        return getInt(getCbKey(subId, condition, serviceClass), DEFAULT_CB_STATUS);
+        return getInt(getCbKey(subId, condition, serviceClass), SscConstant.STATUS_NOT_REGISTERED);
     }
 
     /**
@@ -91,7 +85,7 @@ public class SscPreferenceHelper {
     /**
      * Returns a OIR mode from the shared preference file for a current subscription ID.
      * If the current subscription ID is invalid or there is no data in the shared preference, then
-     * returns {@code DEFAULT_OIR_MODE} .
+     * returns {@code SscConstant#STATUS_NOT_REGISTERED}.
      *
      * @return A OIR mode.
      */
@@ -99,10 +93,10 @@ public class SscPreferenceHelper {
         int subId = getSubId();
         if (subId == MSimUtils.INVALID_SUB_ID) {
             ImsLog.e(mSlotId, "Invalid subId");
-            return DEFAULT_OIR_MODE;
+            return SscConstant.STATUS_NOT_REGISTERED;
         }
 
-        return getInt(KEY_OIR + subId, DEFAULT_OIR_MODE);
+        return getInt(KEY_OIR + subId, SscConstant.STATUS_NOT_REGISTERED);
     }
 
     /**
@@ -125,7 +119,7 @@ public class SscPreferenceHelper {
     /**
      * Returns a OIP status from the shared preference file for a current subscription ID.
      * If the current subscription ID is invalid or there is no data in the shared preference, then
-     * returns {@code DEFAULT_OIP_STATUS} .
+     * returns {@code SscConstant#STATUS_NOT_REGISTERED}.
      *
      * @return A OIP status.
      */
@@ -133,10 +127,10 @@ public class SscPreferenceHelper {
         int subId = getSubId();
         if (subId == MSimUtils.INVALID_SUB_ID) {
             ImsLog.e(mSlotId, "Invalid subId");
-            return DEFAULT_OIP_STATUS;
+            return SscConstant.STATUS_NOT_REGISTERED;
         }
 
-        return getInt(KEY_OIP + subId, DEFAULT_OIP_STATUS);
+        return getInt(KEY_OIP + subId, SscConstant.STATUS_NOT_REGISTERED);
     }
 
     /**
@@ -159,7 +153,7 @@ public class SscPreferenceHelper {
     /**
      * Returns a TIR mode from the shared preference file for a current subscription ID.
      * If the current subscription ID is invalid or there is no data in the shared preference, then
-     * returns {@code DEFAULT_TIR_MODE} .
+     * returns {@code SscConstant#STATUS_NOT_REGISTERED}.
      *
      * @return A TIR mode.
      */
@@ -167,10 +161,10 @@ public class SscPreferenceHelper {
         int subId = getSubId();
         if (subId == MSimUtils.INVALID_SUB_ID) {
             ImsLog.e(mSlotId, "Invalid subId");
-            return DEFAULT_TIR_MODE;
+            return SscConstant.STATUS_NOT_REGISTERED;
         }
 
-        return getInt(KEY_TIR + subId, DEFAULT_TIR_MODE);
+        return getInt(KEY_TIR + subId, SscConstant.STATUS_NOT_REGISTERED);
     }
 
     /**
@@ -193,7 +187,7 @@ public class SscPreferenceHelper {
     /**
      * Returns a TIP status from the shared preference file for a current subscription ID.
      * If the current subscription ID is invalid or there is no data in the shared preference, then
-     * returns {@code DEFAULT_TIP_STATUS} .
+     * returns {@code SscConstant#STATUS_NOT_REGISTERED}.
      *
      * @return A TIP status.
      */
@@ -201,10 +195,10 @@ public class SscPreferenceHelper {
         int subId = getSubId();
         if (subId == MSimUtils.INVALID_SUB_ID) {
             ImsLog.e(mSlotId, "Invalid subId");
-            return DEFAULT_TIP_STATUS;
+            return SscConstant.STATUS_NOT_REGISTERED;
         }
 
-        return getInt(KEY_TIP + subId, DEFAULT_TIP_STATUS);
+        return getInt(KEY_TIP + subId, SscConstant.STATUS_NOT_REGISTERED);
     }
 
     /**

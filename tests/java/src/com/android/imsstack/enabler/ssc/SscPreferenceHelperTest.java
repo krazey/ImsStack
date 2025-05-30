@@ -59,7 +59,7 @@ public class SscPreferenceHelperTest {
         int status = mSscPreferenceHelper.queryCb(SscConstant.CONDITION_BAIC,
                 SscServiceClassUtil.SERVICE_CLASS_CALL);
 
-        assertEquals(SscPreferenceHelper.DEFAULT_CB_STATUS, status);
+        assertEquals(SscConstant.STATUS_NOT_REGISTERED, status);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class SscPreferenceHelperTest {
 
         int oirMode = mSscPreferenceHelper.queryOir();
 
-        assertEquals(SscPreferenceHelper.DEFAULT_OIR_MODE, oirMode);
+        assertEquals(SscConstant.STATUS_NOT_REGISTERED, oirMode);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class SscPreferenceHelperTest {
 
         int status = mSscPreferenceHelper.queryOip();
 
-        assertEquals(SscPreferenceHelper.DEFAULT_OIP_STATUS, status);
+        assertEquals(SscConstant.STATUS_NOT_REGISTERED, status);
     }
 
     @Test
@@ -202,7 +202,7 @@ public class SscPreferenceHelperTest {
 
         int mode = mSscPreferenceHelper.queryTir();
 
-        assertEquals(SscPreferenceHelper.DEFAULT_TIR_MODE, mode);
+        assertEquals(SscConstant.STATUS_NOT_REGISTERED, mode);
     }
 
     @Test
@@ -248,7 +248,7 @@ public class SscPreferenceHelperTest {
 
         int status = mSscPreferenceHelper.queryTip();
 
-        assertEquals(SscPreferenceHelper.DEFAULT_TIP_STATUS, status);
+        assertEquals(SscConstant.STATUS_NOT_REGISTERED, status);
     }
 
     @Test
