@@ -98,7 +98,8 @@ TEST_F(NormalServiceControllerTest, StartNotifiesOpenedIfNormalServiceActive)
 {
     ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(EmergencyServiceState::OPENED, _, ServiceType::NORMAL))
+            OnEmergencyServiceChanged(
+                    IuMtcService::EmergencyServiceState::OPENED, _, ServiceType::NORMAL))
             .Times(1);
 
     pController->Start();
@@ -115,7 +116,8 @@ TEST_F(NormalServiceControllerTest, StartNotifiesUnavailableIfNormalServiceNotAc
 {
     ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_IDLE));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(EmergencyServiceState::UNAVAILABLE, _, ServiceType::NORMAL))
+            OnEmergencyServiceChanged(
+                    IuMtcService::EmergencyServiceState::UNAVAILABLE, _, ServiceType::NORMAL))
             .Times(1);
 
     pController->Start();
@@ -127,7 +129,8 @@ TEST_F(NormalServiceControllerTest, CallTerminatesDoesNothing)
     objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
     ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(EmergencyServiceState::IDLE, _, ServiceType::NORMAL))
+            OnEmergencyServiceChanged(
+                    IuMtcService::EmergencyServiceState::IDLE, _, ServiceType::NORMAL))
             .Times(1);
 
     pController->OnCallStateChanged(CALL_KEY, IMtcCall::State::TERMINATING,
@@ -148,6 +151,20 @@ TEST_F(NormalServiceControllerTest, NormalCallTerminatesDoesNothing)
 TEST_F(NormalServiceControllerTest, GetServiceTypeReturnsNormal)
 {
     EXPECT_EQ(pController->GetServiceType(), ServiceType::NORMAL);
+}
+
+TEST_F(NormalServiceControllerTest, GetStateReturnsOpenedIfNormalServiceNotActive)
+{
+    ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_IDLE));
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::IDLE);
+}
+
+TEST_F(NormalServiceControllerTest, GetStateReturnsOpenedIfNormalServiceActive)
+{
+    ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
+
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::OPENED);
 }
 
 TEST_F(NormalServiceControllerTest, OnTotalCallStateChangedDoesNothing)

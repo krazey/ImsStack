@@ -17,16 +17,14 @@
 #ifndef NORMAL_SERVICE_CONTROLLER_H_
 #define NORMAL_SERVICE_CONTROLLER_H_
 
-#include "ImsTypeDef.h"
 #include "IMtcCallStateListener.h"
+#include "ImsTypeDef.h"
+#include "IuMtcService.h"
 #include "call/IMtcCall.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/IMtcAosStateListener.h"
 
 class IMtcContext;
-
-using EmergencyServiceState = IuMtcService::EmergencyServiceState;
-using EmergencyServiceUnavailableReason = IuMtcService::EmergencyServiceUnavailableReason;
 
 class NormalServiceController : public IEmergencyServiceController, public IMtcCallStateListener
 {
@@ -40,10 +38,11 @@ public:
     void Start() override;
     inline void Close() override {}
     inline ServiceType GetServiceType() const override { return ServiceType::NORMAL; }
+    IEmergencyServiceController::State GetState() const override;
 
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
-    void OnTotalCallStateChanged(IN State) override {}
+    void OnTotalCallStateChanged(IN IMtcCall::State) override {}
 
 private:
     const LOCAL IMS_SINT32 REASON_UNSPECIFIED = -1;
@@ -57,9 +56,9 @@ private:
     void AddListeners();
     void RemoveListeners();
 
-    void Notify(IN EmergencyServiceState eState,
-            IN EmergencyServiceUnavailableReason eReason =
-                    EmergencyServiceUnavailableReason::UNKNOWN) const;
+    void Notify(IN IuMtcService::EmergencyServiceState eState,
+            IN IuMtcService::EmergencyServiceUnavailableReason eReason =
+                    IuMtcService::EmergencyServiceUnavailableReason::UNKNOWN) const;
     void Finish();
 };
 

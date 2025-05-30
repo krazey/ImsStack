@@ -23,6 +23,7 @@
 #include "ISession.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
+#include "IuMtcService.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
@@ -47,7 +48,7 @@ EmergencyServiceController::EmergencyServiceController(
         IN IMtcEmergencyServiceManager& objServiceManager, IN IMtcContext& objContext) :
         m_objServiceManager(objServiceManager),
         m_objContext(objContext),
-        m_eState(State::IDLE),
+        m_eState(IEmergencyServiceController::State::IDLE),
         m_eEmergencyCallState(IMtcCall::State::IDLE),
         m_nEmergencyCallKey(IMtcCall::CALL_KEY_INVALID)
 {
@@ -68,20 +69,20 @@ PUBLIC VIRTUAL void EmergencyServiceController::Start()
 
     switch (m_eState)
     {
-        case State::IDLE:
+        case IEmergencyServiceController::State::IDLE:
             AddListeners();
 
             ControlAos(ImsAosControl::REGISTER_START);
-            SetState(State::OPENING);
-            Notify(EmergencyServiceState::OPENING);
+            SetState(IEmergencyServiceController::State::OPENING);
+            Notify(IuMtcService::EmergencyServiceState::OPENING);
             break;
 
         // Exceptional cases that the Java layer didn’t receive the notification.
-        case State::OPENING:
-            Notify(EmergencyServiceState::OPENING);
+        case IEmergencyServiceController::State::OPENING:
+            Notify(IuMtcService::EmergencyServiceState::OPENING);
             break;
-        case State::OPENED:
-            Notify(EmergencyServiceState::OPENED);
+        case IEmergencyServiceController::State::OPENED:
+            Notify(IuMtcService::EmergencyServiceState::OPENED);
             break;
     }
 }
@@ -104,10 +105,10 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
 
     switch (m_eState)
     {
-        case State::IDLE:
+        case IEmergencyServiceController::State::IDLE:
             break;
 
-        case State::OPENING:
+        case IEmergencyServiceController::State::OPENING:
             if (eState == MtcAosState::CONNECTED)
             {
                 HandleServiceOpened();
@@ -118,10 +119,10 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
             }
             break;
 
-        case State::OPENED:
+        case IEmergencyServiceController::State::OPENED:
             if (eState == MtcAosState::DISCONNECTED)
             {
-                Notify(EmergencyServiceState::IDLE);
+                Notify(IuMtcService::EmergencyServiceState::IDLE);
                 Finish();
             }
             break;
@@ -132,7 +133,8 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallStateChanged(IN CallKey nC
         IN IMtcCall::State eState, IN Type /* eType */, IN IMS_BOOL bEmergency,
         IN IMS_SINT32 /* nReason */)
 {
-    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) || m_eState != State::OPENED)
+    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) ||
+            m_eState != IEmergencyServiceController::State::OPENED)
     {
         return;
     }
@@ -157,7 +159,8 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallStateChanged(IN CallKey nC
 PUBLIC VIRTUAL void EmergencyServiceController::OnCallSessionReleased(
         IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished)
 {
-    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) || m_eState != State::OPENED)
+    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) ||
+            m_eState != IEmergencyServiceController::State::OPENED)
     {
         return;
     }
@@ -199,13 +202,13 @@ PUBLIC void EmergencyServiceController::OnPassiveTimerExpired(
 
 PRIVATE void EmergencyServiceController::HandleServiceOpened()
 {
-    SetState(State::OPENED);
-    Notify(EmergencyServiceState::OPENED);
+    SetState(IEmergencyServiceController::State::OPENED);
+    Notify(IuMtcService::EmergencyServiceState::OPENED);
 }
 
 PRIVATE void EmergencyServiceController::HandleServiceUnavailable(IN IMS_UINT32 eAosReason)
 {
-    SetState(State::IDLE);
+    SetState(IEmergencyServiceController::State::IDLE);
 
     if (IsRetryOverImsPdnRequired(eAosReason))
     {
@@ -213,7 +216,8 @@ PRIVATE void EmergencyServiceController::HandleServiceUnavailable(IN IMS_UINT32 
     }
     else
     {
-        Notify(EmergencyServiceState::UNAVAILABLE, ConvertToUnavailableReason(eAosReason));
+        Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                ConvertToUnavailableReason(eAosReason));
         Finish();
     }
 }
@@ -247,8 +251,8 @@ PRIVATE void EmergencyServiceController::RemoveListeners()
 }
 
 PRIVATE
-void EmergencyServiceController::Notify(
-        IN EmergencyServiceState eState, IN EmergencyServiceUnavailableReason eReason) const
+void EmergencyServiceController::Notify(IN IuMtcService::EmergencyServiceState eState,
+        IN EmergencyServiceUnavailableReason eReason) const
 {
     IMS_TRACE_D("Notify :: state=%d, reason=%d", eState, eReason, 0);
 
@@ -294,7 +298,7 @@ PRIVATE void EmergencyServiceController::FinishAndRetryOverImsPdn()
 }
 
 PRIVATE
-void EmergencyServiceController::SetState(IN State eState)
+void EmergencyServiceController::SetState(IN IEmergencyServiceController::State eState)
 {
     IMS_TRACE_D("SetState :: state[%d]", eState, 0, 0);
     m_eState = eState;
