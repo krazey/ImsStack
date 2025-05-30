@@ -347,6 +347,12 @@ IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 n
     // Find a socket to send an SIP message, and if not found, try to create a new socket.
     m_pSocket = (m_pSocket == IMS_NULL) ? LookupSocket() : m_pSocket;
 
+    if (m_pSocket != IMS_NULL && m_pSocket->IsClosedOrBeingClosed())
+    {
+        IMS_TRACE_D("Socket is already closed or being closed", 0, 0, 0);
+        ReleaseSocket();
+    }
+
     if (m_pSocket == IMS_NULL)
     {
         ReserveResource(pProfile);
