@@ -2608,6 +2608,35 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_CallComposer)
             ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY));
 }
 
+TEST_F(AosHandleMtcTest, ShouldNotBlockVolteWhenVolteCapabilityRemovedIfUseUnavailableFeature)
+{
+    // GIVEN
+    m_pAosHandleMtc->Init();
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+}
+
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
 {
     // Test1: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=LTE
@@ -4020,7 +4049,7 @@ TEST_F(AosHandleMtcTest, ShouldNotifyMtcIfB2cCallComposerCapabilityIsChanged)
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _));
 
     // WHEN
-    m_pAosHandleMtc->ReevaluateCapabilities(IMS_FALSE);
+    m_pAosHandleMtc->ReevaluateCapabilities();
 
     // THEN: The GIVEN condition should be met.
 }

@@ -198,7 +198,7 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
     {
         if (eState == CallState::IDLE || eState == CallState::OFFHOOK)
         {
-            ReevaluateCapabilities(IMS_FALSE);
+            ReevaluateCapabilities();
         }
     }
 }
@@ -530,7 +530,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
     }
 
     // Manage current blocks
-    ReevaluateCapabilities(IMS_FALSE);
+    ReevaluateCapabilities();
 
     // Manage holding blocks
     if (IsEpdgEnabled())
@@ -586,7 +586,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             }
         }
 
-        ReevaluateCapabilities(IMS_TRUE);
+        ReevaluateCapabilities();
 
         if (!m_bVopsIgnoredForVolteEnabled && IsSupportedNetworkTypeForCellular(m_nNetworkType))
         {
@@ -717,7 +717,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(
     }
 }
 
-PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities(IN IMS_BOOL bNetworkChanged)
+PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities()
 {
     IMS_BOOL bIsVoiceCapable =
             IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE);
@@ -735,7 +735,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities(IN IMS_BOOL bNetwork
         bIsVoiceCapable = IsVoiceCapableOnWiFiCalling();
     }
 
-    if (bNetworkChanged && GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+    if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
     {
         ReevaluateUnavailableFeature();
     }
@@ -766,18 +766,20 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities(IN IMS_BOOL bNetwork
 
 PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
 {
-    IMS_BOOL bIsVoiceUnavailable = IMS_FALSE;
+    IMS_BOOL bIsVoiceUnavailable =
+            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE);
     IMS_UINT32 nOldUnavailableFeature = m_objFeatureTagList.GetUnavailableFeatures();
 
     if (IsEpdgEnabled())
     {
-        bIsVoiceUnavailable = IMS_FALSE;
+        // Do Nothing (Operating by Capability)
     }
     else if (IsSupportedNetworkTypeForCellular(m_nNetworkType))
     {
         if (!m_bVopsIgnoredForVolteEnabled)
         {
-            bIsVoiceUnavailable = (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+            bIsVoiceUnavailable =
+                    bIsVoiceUnavailable || (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED);
         }
 
         if (m_nNetworkType == NW_REPORT_RADIO_LTE)
