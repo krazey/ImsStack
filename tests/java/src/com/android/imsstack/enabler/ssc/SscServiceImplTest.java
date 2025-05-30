@@ -60,6 +60,7 @@ import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
 
@@ -103,6 +104,8 @@ public class SscServiceImplTest {
     @Mock private IUtListener mMockUtListener;
     @Mock private IUtServiceStateListener mMockUtServiceStateListener;
     @Mock private PhoneStateInterface mMockPhoneStateInterface;
+    @Mock private IUtInterface.TerminalBasedSupplementaryServiceConfigurationChangeListener
+            mMockTbSscChangeListener;
 
     @Captor ArgumentCaptor<SscServiceQueryData> captorQueryData;
     @Captor ArgumentCaptor<SscServiceData> captorUpdateData;
@@ -1778,6 +1781,22 @@ public class SscServiceImplTest {
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    @Test
+    public void testAddTbSscChangeListener() {
+        mSscServiceImpl.addTbSscChangeListener(mMockTbSscChangeListener);
+
+        // TODO: Verify the callback for the listener.
+    }
+
+    @Test
+    public void testAddAndRemoveTbSscChangeListener() {
+        mSscServiceImpl.addTbSscChangeListener(mMockTbSscChangeListener);
+        assertEquals(1, mSscServiceImpl.mTbSscChangeListeners.size());
+
+        mSscServiceImpl.removeTbSscChangeListener(mMockTbSscChangeListener);
+        assertEquals(0, mSscServiceImpl.mTbSscChangeListeners.size());
     }
 
     private void processEntireXmlDocQueryAsSuccess() {
