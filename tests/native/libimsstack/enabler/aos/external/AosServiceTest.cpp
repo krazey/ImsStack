@@ -35,9 +35,7 @@ using ::testing::_;
 
 const IMS_SINT32 SLOT_ID = 0;
 
-#define DECLARE_USING(Base)     \
-    using Base::IsTimerRunning; \
-    using Base::ProcessPlmnChangeDelayTimerExpired;
+#define DECLARE_USING(Base)
 
 class TestAosService : public AosService
 {
@@ -917,23 +915,23 @@ TEST_F(AosServiceTest, NotifyPhoneNumberState)
 
 TEST_F(AosServiceTest, NotifyPlmnChanged)
 {
-    TestAosService* pTestAosService = new TestAosService(SLOT_ID);
-
+    // GIVEN
     MockIAosServicePhoneListener objMockListener1;
     MockIAosServicePhoneListener objMockListener2;
     MockIAosServicePhoneListener objMockListener3;
 
-    pTestAosService->AddListener(&objMockListener1);
-    pTestAosService->AddListener(&objMockListener2);
-    pTestAosService->AddListener(&objMockListener3);
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
 
     EXPECT_CALL(objMockListener1, ServicePhone_PlmnChanged(AString("123456")));
     EXPECT_CALL(objMockListener2, ServicePhone_PlmnChanged(AString("123456")));
     EXPECT_CALL(objMockListener3, ServicePhone_PlmnChanged(AString("123456")));
 
-    pTestAosService->NotifyPlmnChanged(AString("123456"));
-    EXPECT_TRUE(pTestAosService->IsTimerRunning(TestAosService::TIMER_PLMN_CHANGE_DELAY));
-    pTestAosService->ProcessPlmnChangeDelayTimerExpired();
+    // WHEN
+    m_pAosService->NotifyPlmnChanged(AString("123456"));
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosServiceTest, ShouldNotifyVopsStateChangedToListenersWithGivenValues)

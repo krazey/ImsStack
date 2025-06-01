@@ -17,13 +17,11 @@
 #include "JniEnablerConnector.h"
 #include "IJniAosServiceThread.h"
 #include "IJniEnabler.h"
-#include "ITimer.h"
 
 #include "interface/IAosEmergencyListener.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
-#include "provider/AosUtil.h"
 #include "external/AosService.h"
 
 __IMS_TRACE_TAG_AOS__;
@@ -38,8 +36,6 @@ AosService::AosService(IN IMS_SINT32 nSlotId) :
         m_objAosServiceSettingListeners(ImsList<IAosServiceSettingListener*>()),
         m_objAosServicePhoneListeners(ImsList<IAosServicePhoneListener*>()),
         m_nSlotId(nSlotId),
-        m_piPlmnChangeDelayTimer(IMS_NULL),
-        m_strPlmn(AString::ConstEmpty()),
         m_objCapabilities(ImsMap<IMS_UINT32, IMS_UINT32>())
 {
     m_strTag.Sprintf("%d", m_nSlotId);
@@ -579,8 +575,15 @@ PUBLIC VIRTUAL void AosService::NotifyPlmnChanged(IN const AString& strPlmn)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyPlmnChanged :: strPlmn(%s)", strPlmn.GetStr(), 0, 0);
 
-    m_strPlmn = strPlmn;
-    StartTimer(TIMER_PLMN_CHANGE_DELAY, PLMN_CHANGE_DELAY_TIME_MS);
+    for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
+    {
+        IAosServicePhoneListener* piListener = m_objAosServicePhoneListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->ServicePhone_PlmnChanged(strPlmn);
+        }
+    }
 }
 
 PUBLIC VIRTUAL void AosService::NotifyVopsStateChanged(
@@ -926,108 +929,6 @@ PUBLIC GLOBAL const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapa
     return strCapabilities;
 }
 
-PROTECTED void AosService::ProcessPlmnChangeDelayTimerExpired()
-{
-    A_IMS_TRACE_I(AOSTAG, "ProcessPlmnChangeDelayTimerExpired", 0, 0, 0);
-
-    StopTimer(TIMER_PLMN_CHANGE_DELAY);
-
-    for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
-    {
-        IAosServicePhoneListener* piListener = m_objAosServicePhoneListeners.GetAt(i);
-
-        if (piListener != IMS_NULL)
-        {
-            piListener->ServicePhone_PlmnChanged(m_strPlmn);
-        }
-    }
-}
-
-PROTECTED IMS_BOOL AosService::IsTimerRunning(IN IMS_UINT32 nType) const
-{
-    if (nType == TIMER_PLMN_CHANGE_DELAY)
-    {
-        return (m_piPlmnChangeDelayTimer != IMS_NULL);
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED const IMS_CHAR* AosService::TimerToString(IN IMS_UINT32 nType)
-{
-    switch (nType)
-    {
-        case TIMER_PLMN_CHANGE_DELAY:
-            return "TIMER_PLMN_CHANGE_DELAY";
-
-        default:
-            return "__INVALID__";
-    }
-}
-
-PROTECTED void AosService::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
-{
-    if (nDuration == 0)
-    {
-        return;
-    }
-
-    ITimer** ppiTimer = IMS_NULL;
-
-    switch (nType)
-    {
-        case TIMER_PLMN_CHANGE_DELAY:
-            ppiTimer = &m_piPlmnChangeDelayTimer;
-            break;
-
-        default:
-            return;
-    }
-
-    if (*ppiTimer != IMS_NULL)
-    {
-        StopTimer(nType);
-    }
-
-    *ppiTimer = AosUtil::GetInstance()->StartTimer(nDuration, this, TimerToString(nType));
-}
-
-PROTECTED VIRTUAL void AosService::StopTimer(IN IMS_UINT32 nType)
-{
-    ITimer** ppiTimer = IMS_NULL;
-
-    switch (nType)
-    {
-        case TIMER_PLMN_CHANGE_DELAY:
-            ppiTimer = &m_piPlmnChangeDelayTimer;
-            break;
-
-        default:
-            return;
-    }
-
-    if (*ppiTimer == IMS_NULL)
-    {
-        return;
-    }
-
-    AosUtil::GetInstance()->StopTimer(*ppiTimer, TimerToString(nType));
-}
-
-PROTECTED VIRTUAL void AosService::Timer_TimerExpired(IN ITimer* piTimer)
-{
-    if (piTimer == IMS_NULL)
-    {
-        return;
-    }
-
-    if (piTimer == m_piPlmnChangeDelayTimer)
-    {
-        ProcessPlmnChangeDelayTimerExpired();
-        return;
-    }
-}
-
 PRIVATE
 void AosService::Init()
 {
@@ -1039,7 +940,6 @@ PRIVATE
 void AosService::CleanUp()
 {
     A_IMS_TRACE_I(AOSTAG, "CleanUp", 0, 0, 0);
-    StopTimer(TIMER_PLMN_CHANGE_DELAY);
 }
 
 PRIVATE
