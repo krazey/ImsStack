@@ -73,6 +73,7 @@ private:
 
 private:
     IMtcCallContext& m_objContext;
+    const CallType m_eOriginalCallType;
     CallType m_eTargetCallType;
     UpdateType m_eRequestingType;
     MediaInfo m_objOriginalInfo;    // Info before starting update.

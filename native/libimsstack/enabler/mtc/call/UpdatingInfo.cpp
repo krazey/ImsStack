@@ -17,6 +17,7 @@
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcSession.h"
+#include "call/MtcCallStringUtils.h"
 #include "call/UpdatingInfo.h"
 #include "media/MtcMediaManager.h"
 
@@ -25,6 +26,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 UpdatingInfo::UpdatingInfo(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
+        m_eOriginalCallType(GetCurrentCallType()),
         m_eTargetCallType(CallType::UNKNOWN),
         m_eRequestingType(UpdateType::NORMAL),
         m_objOriginalInfo(MediaInfo()),
@@ -35,7 +37,8 @@ UpdatingInfo::UpdatingInfo(IN IMtcCallContext& objContext) :
         m_bAlerted(IMS_FALSE),
         m_bHasPendingUpdate(IMS_FALSE)
 {
-    IMS_TRACE_D("+UpdatingInfo", 0, 0, 0);
+    IMS_TRACE_D("+UpdatingInfo CallType[%s]",
+            MtcCallStringUtils::ConvertCallType(m_eOriginalCallType), 0, 0);
 }
 
 PUBLIC VIRTUAL UpdatingInfo::~UpdatingInfo()
@@ -152,8 +155,7 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert() const
 
     if (m_objOriginalInfo.eVideoDirection != m_objAlertingInfo.eVideoDirection)
     {
-        CallType eCurrentType = GetCurrentCallType();
-        if (eCurrentType == CallType::VT || eCurrentType == CallType::VIDEO_RTT)
+        if (m_eOriginalCallType == CallType::VT || m_eOriginalCallType == CallType::VIDEO_RTT)
         {
             return IMS_TRUE;
         }
@@ -186,7 +188,7 @@ IMS_BOOL UpdatingInfo::IsRequestedModifying() const
         return IMS_FALSE;
     }
 
-    if (GetCurrentCallType() != GetTargetCallType())
+    if (m_eOriginalCallType != GetTargetCallType())
     {
         return IMS_TRUE;
     }
@@ -203,17 +205,15 @@ PUBLIC
 IMS_BOOL UpdatingInfo::IsModified() const
 {
     ISession& objSession = m_objContext.GetSession()->GetISession();
-    return GetCurrentCallType() !=
-            m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession);
+    return m_eOriginalCallType != m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession);
 }
 
 PUBLIC
 IMS_BOOL UpdatingInfo::IsDowngraded() const
 {
-    CallType eOriginalCallType = GetCurrentCallType();
     CallType eModifyingCallType = m_objContext.GetMediaManager().GetNegotiatedCallType(
             &m_objContext.GetSession()->GetISession());
-    if (eOriginalCallType == eModifyingCallType)
+    if (m_eOriginalCallType == eModifyingCallType)
     {
         return IMS_FALSE;
     }
@@ -223,7 +223,7 @@ IMS_BOOL UpdatingInfo::IsDowngraded() const
         return IMS_TRUE;
     }
 
-    return eOriginalCallType == CallType::VIDEO_RTT;
+    return m_eOriginalCallType == CallType::VIDEO_RTT;
 }
 
 PUBLIC
@@ -274,5 +274,5 @@ CallType UpdatingInfo::GetCurrentCallType() const
         return CallType::UNKNOWN;
     }
 
-    return pSession->GetPreviousCallType();
+    return pSession->GetCallType();
 }
