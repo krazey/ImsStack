@@ -34,6 +34,7 @@
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <boolean name="ims.required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
     <boolean name="ims.required_init_reg_after_ims_ecall_end_on_reg_held_bool" value="true"/>
+    <boolean name="ims.update_ongoing_reg_retry_timer_on_ims_est_timer_expiry_bool" value="false"/>
     <boolean name="ims.use_tcp_transport_for_register_bool" value="true"/>
     <int name="ims.geolocation_pidf_forming_policy_int" value="3"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
