@@ -101,6 +101,15 @@ public:
     virtual void ServicePhone_PlmnChanged(IN const AString& strPlmn) = 0;
 
     /**
+     * Called to notify the change of VoPS state with the PLMN.
+     * Called by AosService (Java).
+     *
+     * @param nState The VoPS state. {1} if supported, {0} if not supported.
+     * @param strPlmn The MCC+MNC string for the current VoPS state value.
+     */
+    virtual void ServicePhone_VopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn) = 0;
+
+    /**
      * Called to notify the power off.
      * Called by AosService (Java).
      *
@@ -201,6 +210,8 @@ public:
     inline void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) override{};
     inline void ServicePhone_PlmnChanged(IN const AString& /*strPlmn*/) override {};
+    inline void ServicePhone_VopsStateChanged(
+            IN IMS_UINT32 /*nState*/, IN const AString& /*strPlmn*/) override {};
     inline void ServicePhone_PowerOff() override{};
     inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override{};
     inline void ServicePhone_PcoValueChanged(IN IMS_SINT32 /*nValue*/) override{};

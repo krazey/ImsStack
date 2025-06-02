@@ -207,6 +207,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyPlmnChanged(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_VOPS_STATE_CHANGED:
+            NotifyVopsStateChanged(objParcel);
+            break;
+
         case IIAosService::J2N_NOTIFY_POWER_OFF:
             NotifyPowerOff(objParcel);
             break;
@@ -499,6 +503,19 @@ void JniAosService::NotifyPlmnChanged(IN const android::Parcel& objParcel)
         AString strPlmn;
         ConvertString(objParcel.readString16(), strPlmn);
         piAosService->NotifyPlmnChanged(strPlmn);
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyVopsStateChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        IMS_UINT32 nState = objParcel.readInt32();
+        AString strPlmn;
+        ConvertString(objParcel.readString16(), strPlmn);
+        piAosService->NotifyVopsStateChanged(nState, strPlmn);
     }
 }
 

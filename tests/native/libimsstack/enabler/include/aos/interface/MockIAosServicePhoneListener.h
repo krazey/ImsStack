@@ -34,6 +34,8 @@ public:
     MOCK_METHOD(void, ServicePhone_PhoneNumberStateChanged,
             (IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState), (override));
     MOCK_METHOD(void, ServicePhone_PlmnChanged, (IN const AString& strPlmn), (override));
+    MOCK_METHOD(void, ServicePhone_VopsStateChanged,
+            (IN IMS_UINT32 nState, IN const AString& strPlmn), (override));
     MOCK_METHOD(void, ServicePhone_PowerOff, (), (override));
     MOCK_METHOD(
             void, ServicePhone_PreciseCallStateChanged, (IN PreciseCallState eState), (override));

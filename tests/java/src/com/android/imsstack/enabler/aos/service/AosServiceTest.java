@@ -79,6 +79,7 @@ import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
+import com.android.imsstack.system.ImsEventDef;
 
 import org.junit.After;
 import org.junit.Before;
@@ -792,6 +793,20 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.onAirplaneModeChanged(true);
 
         verify(mMockJniIms).sendData(mNativeObject, airplaneSettingData);
+    }
+
+    @Test
+    public void onVopsStateChanged_notifyChange() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_VOPS_STATE_CHANGED);
+        parcel.writeInt(ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+        parcel.writeString("123456");
+        byte[] vopsData = parcel.marshall();
+        parcel.recycle();
+
+        mAosService.onVopsStateChanged(ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, "123456");
+
+        verify(mMockJniIms).sendData(mNativeObject, vopsData);
     }
 
     @Test

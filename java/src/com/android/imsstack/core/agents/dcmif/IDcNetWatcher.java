@@ -230,6 +230,12 @@ public interface IDcNetWatcher extends IDc {
         }
 
         /**
+         * Invoked when VoPS state is changed.
+         */
+        default void onVopsStateChanged(int state, String plmn) {
+        }
+
+        /**
          * Invoked when data connection attempt is failed.
          */
         default void onPdnConnectionFailed(EApnType apnType, int smCause) {

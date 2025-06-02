@@ -522,6 +522,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
+    public void onVopsStateChanged(int state, String plmn) {
+        ImsLog.d(mSlotId, "AosService: onVopsStateChanged");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_VOPS_STATE_CHANGED);
+        parcel.writeInt(state);
+        parcel.writeString(plmn);
+        sendRequest(parcel);
+    }
+
+    @Override
     public void onHandoverStateChanged(int handoverState, int networkType, int failCause) {
         ImsLog.d(mSlotId, "AosService: onHandoverStateChanged");
         if (handoverState == IApn.HANDOVER_FAILURE) {

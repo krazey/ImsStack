@@ -584,6 +584,23 @@ PUBLIC VIRTUAL void AosService::NotifyPlmnChanged(IN const AString& strPlmn)
     StartTimer(TIMER_PLMN_CHANGE_DELAY, PLMN_CHANGE_DELAY_TIME_MS);
 }
 
+PUBLIC VIRTUAL void AosService::NotifyVopsStateChanged(
+        IN IMS_UINT32 nState, IN const AString& strPlmn)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyVopsStateChanged :: nState(%d), strPlmn(%s)", nState,
+            strPlmn.GetStr(), 0);
+
+    for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
+    {
+        IAosServicePhoneListener* piListener = m_objAosServicePhoneListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->ServicePhone_VopsStateChanged(nState, strPlmn);
+        }
+    }
+}
+
 PUBLIC VIRTUAL void AosService::NotifyPowerOff()
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyPowerOff", 0, 0, 0);

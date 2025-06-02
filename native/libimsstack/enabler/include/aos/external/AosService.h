@@ -76,6 +76,7 @@ public:
     void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) override;
     void NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState) override;
     void NotifyPlmnChanged(IN const AString& strPlmn) override;
+    void NotifyVopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn) override;
     void NotifyPowerOff() override;
     void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
     void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
