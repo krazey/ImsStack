@@ -674,12 +674,16 @@ TEST_F(UpdatingStateTest, SessionUpdatedNotifiesResumedBy)
 TEST_F(UpdatingStateTest,
         SessionUpdatedInvokesSendIncomingUpdateIfModificationOccurredWithoutIntentionAsModifier)
 {
+    delete pUpdatingInfo;
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objContext);
+    ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
     pUpdatingInfo->SetModifier();
     pUpdatingInfo->SetTargetCallType(CallType::VOIP);
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::ACCEPT_UPDATE, _)).Times(1);
@@ -692,6 +696,11 @@ TEST_F(UpdatingStateTest,
 
 TEST_F(UpdatingStateTest, SessionUpdatedReturnsEstablishedStateIfResumedAsModifier)
 {
+    delete pUpdatingInfo;
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objContext);
+    ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
     pUpdatingInfo->SetModifier();
     pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
     pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
@@ -699,7 +708,6 @@ TEST_F(UpdatingStateTest, SessionUpdatedReturnsEstablishedStateIfResumedAsModifi
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
     ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::ACCEPT_UPDATE, _)).Times(1);
@@ -747,10 +755,14 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAsModifierWithoutSdp)
 
 TEST_F(UpdatingStateTest, SessionUpdatedInvokesOnMessageReceivedIfModified)
 {
+    delete pUpdatingInfo;
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objContext);
+    ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
     pUpdatingInfo->SetModifier();
 
     // SetUp IsModified() true
-    ON_CALL(objMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_UPDATE))
             .WillByDefault(Return(&objMessage));

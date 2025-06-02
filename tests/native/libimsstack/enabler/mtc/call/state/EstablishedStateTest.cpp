@@ -636,13 +636,17 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfMediaNegoFailedWithIn
 
 TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
 {
+    delete pUpdatingInfo;
+    ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objMockCallContext);
+    ON_CALL(objMockCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
     ON_CALL(objMockMediaManager, NegotiateSdp).WillByDefault(Return(MediaNego::NO_ERROR));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VOIP));
-    ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
     objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
     pUpdatingInfo->GetModifiedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     ON_CALL(*pConfigurationProxy,
@@ -659,13 +663,17 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
 TEST_F(EstablishedStateTest,
         SessionUpdateReceivedAnswersDirectlyWithoutInteractionWithAnotherModule)
 {
+    delete pUpdatingInfo;
+    ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objMockCallContext);
+    ON_CALL(objMockCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+
     // Hold, Resume without interaction with Java side, Refresh
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VOIP));
-    ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL))
             .WillByDefault(Return(IMS_FALSE));

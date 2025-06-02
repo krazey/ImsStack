@@ -197,10 +197,14 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
 PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
-    IMtcSession* pSession = m_objContext.GetSession();
-    pSession->HandleRequest(RequestType::UPDATE, *piMessage);
+
+    // Use CallType before it's updated by receiving INVITE.
     m_objContext.GetUpdatingInfo().GetOriginalInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
+
+    IMtcSession* pSession = m_objContext.GetSession();
+    pSession->HandleRequest(RequestType::UPDATE, *piMessage);
+
     m_objContext.GetUpdatingInfo().SetTargetCallType(
             m_objContext.GetMessageUtils().GetCallType(piMessage, piSession, IMS_TRUE));
 

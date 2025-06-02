@@ -41,7 +41,6 @@ protected:
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objSession));
         ON_CALL(objSession, GetISession()).WillByDefault(ReturnRef(objISession));
         ON_CALL(objCallContext, GetMediaManager()).WillByDefault(ReturnRef(objMediaManager));
-        pUpdatingInfo = new UpdatingInfo(objCallContext);
     }
 
     virtual void TearDown() override { delete pUpdatingInfo; }
@@ -49,11 +48,13 @@ protected:
 
 TEST_F(UpdatingInfoTest, GetTargetCallTypeReturnsUnknownInitially)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     EXPECT_EQ(CallType::UNKNOWN, pUpdatingInfo->GetTargetCallType());
 }
 
 TEST_F(UpdatingInfoTest, GetTargetCallTypeReturnsSetValue)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     CallType eCallType = CallType::VOIP;
 
     pUpdatingInfo->SetTargetCallType(eCallType);
@@ -63,43 +64,51 @@ TEST_F(UpdatingInfoTest, GetTargetCallTypeReturnsSetValue)
 
 TEST_F(UpdatingInfoTest, GetModifyingInfoReturnsNotNull)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     EXPECT_NE(nullptr, &pUpdatingInfo->GetModifyingInfo());
 }
 
 TEST_F(UpdatingInfoTest, GetAlertingInfoReturnsNotNull)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     EXPECT_NE(nullptr, &pUpdatingInfo->GetAlertingInfo());
 }
 
 TEST_F(UpdatingInfoTest, GetModifiedInfoReturnsNotNull)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     EXPECT_NE(nullptr, &pUpdatingInfo->GetModifiedInfo());
 }
 
 TEST_F(UpdatingInfoTest, IsModifierReturnsFalseInitially)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsModifier());
 }
 
 TEST_F(UpdatingInfoTest, IsModifierReturnsTrueAfterSet)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     pUpdatingInfo->SetModifier();
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsModifier());
 }
 
 TEST_F(UpdatingInfoTest, IsAlertedReturnsFalseInitially)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsAlerted());
 }
 
 TEST_F(UpdatingInfoTest, IsAlertedReturnsTrueAfterSet)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     pUpdatingInfo->SetAlerted();
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsAlerted());
 }
 
 TEST_F(UpdatingInfoTest, GetModifiedMediaInfoWithOriginalAudioDirReturnsCorrectInfo)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
@@ -112,6 +121,7 @@ TEST_F(UpdatingInfoTest, GetModifiedMediaInfoWithOriginalAudioDirReturnsCorrectI
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToHeld)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -126,6 +136,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToHeld)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToInactive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -140,6 +151,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToInactive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingReceiveToInactive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -154,6 +166,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingReceiveToInactive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
@@ -170,6 +183,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToInactive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
@@ -188,6 +202,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToInactive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendToInactive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
@@ -204,6 +219,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendToInactive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
@@ -222,6 +238,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToInactive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
@@ -242,6 +259,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToInactive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendToInactive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
@@ -260,6 +278,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendToInactive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendToSendReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -274,6 +293,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendToSendReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -288,6 +308,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToSendReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -302,6 +323,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToSendReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedReceiveToSendReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
@@ -318,6 +340,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedReceiveToSendReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSend)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
@@ -334,6 +357,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSend)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSendReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
@@ -352,6 +376,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSendReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingReceiveToSendReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
@@ -370,6 +395,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingReceiveToSendReceive)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSend)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
@@ -388,6 +414,7 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSend)
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSendReceive)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
@@ -408,7 +435,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSendReceive)
 
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
 {
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VT));
 
@@ -425,15 +453,17 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
 
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VIDEO_RTT));
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
 }
 
-TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsChangingButCallTypeIsVoip)
+TEST_F(UpdatingInfoTest,
+        IsNeedToAlertReturnsFalseIfVideoDirectionIsChangingButCallTypeKeepsBeingVoip)
 {
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VOIP));
 
@@ -453,6 +483,7 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsChangingButC
 
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsNotChanging)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
@@ -468,6 +499,8 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsNotChanging)
 
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChanged)
 {
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
@@ -478,7 +511,6 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChanged)
 
     objOriginalInfo.eVideoDirection = objAlertingInfo.eVideoDirection = DIRECTION_SEND;
 
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VOIP));
 
@@ -487,6 +519,8 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChanged)
 
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChangedAndResumedBySimultaneously)
 {
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
@@ -502,7 +536,6 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChangedAndResumedBy
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
 
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VOIP));
 
@@ -511,6 +544,7 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChangedAndResumedBy
 
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsChanging)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -522,6 +556,7 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsChang
 
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsNotChanging)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -532,6 +567,7 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsNotCh
 
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsInvalid)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     objOriginalInfo.eAudioDirection = DIRECTION_INVALID;
 
@@ -540,6 +576,7 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsInval
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfModifyingInfoIsInvalid)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
@@ -548,6 +585,7 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfModifyingInfoIsInvali
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfAudioDirectionIsChanging)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
@@ -559,6 +597,7 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfAudioDirectionIsChang
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfVideoDirectionIsChanging)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifyingInfo.eAudioDirection = objOriginalInfo.eAudioDirection = DIRECTION_SEND;
@@ -571,6 +610,7 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfVideoDirectionIsChangi
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfVideoDirectionIsNotChanging)
 {
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objOriginalInfo.eAudioDirection = objModifyingInfo.eAudioDirection = DIRECTION_SEND;
@@ -582,6 +622,8 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfVideoDirectionIsNotCh
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfCallTypeIsChanged)
 {
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     MediaInfo& objOriginalInfo = pUpdatingInfo->GetOriginalInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objOriginalInfo.eAudioDirection = objModifyingInfo.eAudioDirection = DIRECTION_SEND;
@@ -589,14 +631,14 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfCallTypeIsChanged)
     objOriginalInfo.eVideoDirection = objModifyingInfo.eVideoDirection = DIRECTION_SEND;
 
     pUpdatingInfo->SetTargetCallType(CallType::VOIP);
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedModifying());
 }
 
 TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfCallTypeIsChanged)
 {
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VOIP));
 
@@ -605,7 +647,8 @@ TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfCallTypeIsChanged)
 
 TEST_F(UpdatingInfoTest, IsModifiedReturnsFalseIfCallTypeIsNotChanged)
 {
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VT));
 
@@ -615,35 +658,44 @@ TEST_F(UpdatingInfoTest, IsModifiedReturnsFalseIfCallTypeIsNotChanged)
 TEST_F(UpdatingInfoTest, IsDowngradedReturnsTrueIfCallTypeIsDowngraded)
 {
     // VT -> VOIP
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VOIP));
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // RTT -> VOIP
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VOIP));
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // VIDEO_RTT -> RTT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::RTT));
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // VIDEO_RTT -> VT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VT));
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // VIDEO_RTT -> VOIP
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VT));
 
@@ -652,7 +704,8 @@ TEST_F(UpdatingInfoTest, IsDowngradedReturnsTrueIfCallTypeIsDowngraded)
 
 TEST_F(UpdatingInfoTest, IsDowngradedReturnsFalseIfCallTypeIsNotModified)
 {
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VT));
 
@@ -662,45 +715,57 @@ TEST_F(UpdatingInfoTest, IsDowngradedReturnsFalseIfCallTypeIsNotModified)
 TEST_F(UpdatingInfoTest, IsDowngradedReturnsFalseIfCallTypeIsUpgraded)
 {
     // VOIP -> VT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VT));
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // VOIP -> RTT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::RTT));
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // VOIP -> VIDEO_RTT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VIDEO_RTT));
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // VT -> VIDEO_RTT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VIDEO_RTT));
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // RTT -> VIDEO_RTT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VIDEO_RTT));
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // Invalid : VT -> RTT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::RTT));
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+    delete pUpdatingInfo;
 
     // Invalid : RTT -> VT
-    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+    pUpdatingInfo = new UpdatingInfo(objCallContext);
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
             .WillByDefault(Return(CallType::VT));
-
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
 }
