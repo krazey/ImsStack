@@ -15,6 +15,12 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="1403"/>
+    </int-array>
+
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
 </carrier_config>
