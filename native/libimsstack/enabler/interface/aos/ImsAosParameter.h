@@ -47,6 +47,8 @@ public:
 
         /// The emergency registration is skipped and next PCSCF is used.
         E_REGISTER_FAKE_WITH_NEXT_PCSCF,
+        /// The emergency registration is skipped and current PCSCF is used.
+        E_REGISTER_FAKE_WITH_SAME_PCSCF,
 
         /// The initial registration is attempted with next PCSCF.
         PCSCF_NEXT,

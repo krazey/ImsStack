@@ -40,6 +40,7 @@ protected:
     void InitEmergencyVariable();
     void SetKeepEPdnWhenNoPcscf(IN IMS_BOOL bEnable);
     void SetRegBlockInCbm(IN IMS_BOOL bBlock);
+    void ProcessFakeRegRequest(IN IMS_UINT32 nReason);
     IMS_BOOL IsKeepEPdnWhenNoPcscf() const;
     IMS_BOOL IsRegBlockInCbm() const;
     IMS_BOOL IsReleaseEmergencyPdnUponEmergencyCallEnd();
