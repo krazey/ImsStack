@@ -226,23 +226,26 @@ public class ConfigAgent implements ConfigInterface {
         // Sets the internal carrier configuration.
         // 1) Precedence: specific-carrier-id > carrier-id > carrier-id-from-sim-mcc-mnc.
         // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
-        PersistableBundle tempConfig;
         mCarrierInternalConfig.clear();
+        PersistableBundle tempConfig = readCarrierConfig(subId, id);
 
-        // Sets the parent carrier configuration first if present.
-        if (id.getSpecificCarrierId() != SimCarrierId.UNKNOWN_ID
-                && id.getCarrierId() != id.getSpecificCarrierId()) {
-            SimCarrierId parentId = new SimCarrierId.Builder()
-                    .setCarrierId(id.getCarrierId())
-                    .build();
-            tempConfig = readCarrierConfig(subId, parentId);
-            mCarrierInternalConfig.putAll(tempConfig);
+        int[] parentCarrierIds = tempConfig.getIntArray(
+                CarrierConfig.KEY_IMS_PARENT_CARRIER_IDS_INT_ARRAY);
+
+        if (parentCarrierIds != null && parentCarrierIds.length > 0) {
+            for (int cid : parentCarrierIds) {
+                SimCarrierId parentCid = new SimCarrierId.Builder()
+                        .setCarrierId(cid)
+                        .build();
+                PersistableBundle parentConfig = readCarrierConfig(subId, parentCid);
+                CarrierConfig.overrideNestedBundles(mCarrierInternalConfig, parentConfig);
+                mCarrierInternalConfig.putAll(parentConfig);
+            }
         }
 
-        tempConfig = readCarrierConfig(subId, id);
         CarrierConfig.overrideNestedBundles(mCarrierInternalConfig, tempConfig);
         mCarrierInternalConfig.putAll(tempConfig);
-        tempConfig = new PersistableBundle(mCarrierInternalConfig);
+        tempConfig = mCarrierInternalConfig.deepCopy();
         CarrierConfig.overrideNestedBundles(config, tempConfig);
         config.putAll(tempConfig);
 
@@ -266,12 +269,25 @@ public class ConfigAgent implements ConfigInterface {
         mCarrierPublicConfig.clear();
         if (config.getBoolean(CarrierConfig.KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL, true)) {
             ImsLog.d(this, mSlotId, "Overriding public configs...");
-            tempConfig = new PersistableBundle(mDefaultPublicConfig);
+            tempConfig = mDefaultPublicConfig.deepCopy();
             CarrierConfig.overrideNestedBundles(config, tempConfig);
             config.putAll(tempConfig);
 
+            if (parentCarrierIds != null && parentCarrierIds.length > 0) {
+                for (int cid : parentCarrierIds) {
+                    SimCarrierId parentCid = new SimCarrierId.Builder()
+                            .setCarrierId(cid)
+                            .build();
+                    PersistableBundle parentConfig = readCarrierConfig(subId, parentCid, false);
+                    CarrierConfig.overrideNestedBundles(mCarrierPublicConfig, parentConfig);
+                    mCarrierPublicConfig.putAll(parentConfig);
+                }
+            }
+
             tempConfig = readCarrierConfig(subId, id, false);
+            CarrierConfig.overrideNestedBundles(mCarrierPublicConfig, tempConfig);
             mCarrierPublicConfig.putAll(tempConfig);
+            tempConfig = mCarrierPublicConfig.deepCopy();
             CarrierConfig.overrideNestedBundles(config, tempConfig);
             config.putAll(tempConfig);
         }

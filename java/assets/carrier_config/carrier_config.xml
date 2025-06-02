@@ -15,7 +15,11 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="0">
+    </int-array>
+
     <!-- Ims General -->
     <boolean name="ims.sip_compact_form_enabled_bool" value="false"/>
     <boolean name="ims.allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool" value="false"/>

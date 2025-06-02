@@ -45,6 +45,9 @@ public class CarrierConfig {
     // Non-Assets file
     public static final String TEST_CARRIER_CONFIG_FILE =
             "test_carrier_config.xml";
+    // The key specifies a list of parent carrier ids from which to inherit configuration values.
+    public static final String KEY_IMS_PARENT_CARRIER_IDS_INT_ARRAY =
+            "ims.parent_carrier_ids_int_array";
     // This key is a special carrier config value used to avoid overriding the public carrier
     // config within Assets.
     // The default value is true.
@@ -154,6 +157,7 @@ public class CarrierConfig {
         CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY,
         CarrierConfigManager.Ims.KEY_NR_SA_DISABLE_POLICY_INT,
         CarrierConfigManager.Ims.KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL,
+        KEY_IMS_PARENT_CARRIER_IDS_INT_ARRAY,
         KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL
     };
 

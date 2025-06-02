@@ -56,7 +56,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -163,28 +165,6 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
-    public void testUpdateCarrierConfigWithCarrierIdAndSpecificCarrierId() throws IOException {
-        AssetManager am = mTestAppContext.getContext().getAssets();
-        mConfigAgent.init(mTestAppContext.getContext());
-
-        when(am.list(eq(CarrierConfig.CARRIER_CONFIG))).thenReturn(new String[0]);
-        when(am.list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG))).thenReturn(new String[0]);
-        SimCarrierId scid = new SimCarrierId.Builder()
-                .setCarrierId(1)
-                .setSpecificCarrierId(2)
-                .build();
-        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
-
-        CarrierConfigManagerProxy ccmp =
-                mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        // 1st: public carrier configs, 2nd: internal carrier configs
-        verify(ccmp, times(2)).getConfigForSubId(eq(SUB_ID_1), any());
-        verify(am, times(2)).list(eq(CarrierConfig.CARRIER_CONFIG));
-        verify(am).list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG));
-    }
-
-    @Test
-    @SmallTest
     public void testOverrideHiddenBundleWhenHiddenKeyExists() {
         // CarrierConfigManager bundle contains the AP IMS hidden key
         PersistableBundle configBundle = buildLoadedConfigBundle();
@@ -255,6 +235,77 @@ public class ConfigAgentTest {
         // updateCarrierConfig() should override private keys by a content of the hidden key
         verifyHiddenConfigIsUpdated(resultConfig);
         verifyHiddenConfigIsNotExist(resultConfig);
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateCarrierConfigWithParentChildRelationship() throws IOException {
+        AssetManager am = mTestAppContext.getContext().getAssets();
+        mConfigAgent.init(mTestAppContext.getContext());
+
+        final String[] testConfigFiles = new String[] {
+                "carrier_config_carrierid_20000_Test1.xml",
+                "carrier_config_carrierid_20001_Test2.xml" };
+        final String keyInt = "ims.ims_test_int";
+        final String keyBool = "ims.ims_test_bool";
+        final String keyString = "ims.ims_test_string";
+        final int valueInt = 200;
+        final boolean valueBool = false;
+        final String valueString = "ua-string";
+        final String xml1 =
+                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n"
+                + "<carrier_config>\n"
+                + "<int-array name=\"" + CarrierConfig.KEY_IMS_PARENT_CARRIER_IDS_INT_ARRAY
+                        + "\" num=\"0\">\n"
+                + "</int-array>\n"
+                + "<int name=\"" + keyInt + "\" value=\"100\"/>\n"
+                + "<boolean name=\"" + keyBool + "\" value=\"true\"/>\n"
+                + "<string name=\"" + keyString + "\">" + valueString + "</string>\n"
+                + "</carrier_config>";
+        final String xml2 =
+                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n"
+                + "<carrier_config>\n"
+                + "<int-array name=\"" + CarrierConfig.KEY_IMS_PARENT_CARRIER_IDS_INT_ARRAY
+                        + "\" num=\"1\">\n"
+                + "<item value=\"20000\"/>\n"
+                + "</int-array>\n"
+                + "<int name=\"" + keyInt + "\" value=\"" + valueInt + "\"/>\n"
+                + "<boolean name=\"" + keyBool + "\" value=\"" + valueBool + "\"/>\n"
+                + "</carrier_config>";
+        when(am.list(eq(CarrierConfig.CARRIER_CONFIG))).thenReturn(testConfigFiles);
+        when(am.list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG))).thenReturn(new String[0]);
+        ByteArrayInputStream configXml1 =
+                new ByteArrayInputStream(xml1.getBytes(StandardCharsets.UTF_8));
+        ByteArrayInputStream configXml2 =
+                new ByteArrayInputStream(xml2.getBytes(StandardCharsets.UTF_8));
+        when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + testConfigFiles[0])))
+                .thenReturn(configXml1);
+        when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + testConfigFiles[1])))
+                .thenReturn(configXml2);
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setCarrierId(20001)
+                .build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        // 1st: parent carrier configs, 2nd: current carrier configs
+        verify(am, times(2)).list(eq(CarrierConfig.CARRIER_CONFIG));
+
+        CarrierConfig cc = mConfigAgent.getCarrierConfig();
+        assertEquals(valueInt, cc.getInt(keyInt));
+        assertEquals(valueBool, cc.getBoolean(keyBool));
+        assertEquals(valueString, cc.getString(keyString));
+    }
+
+    private void injectCarrierConfigBundlesToSystem(PersistableBundle bundleWithImsKeys) {
+        CarrierConfigManagerProxy ccmp =
+                mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        doReturn(bundleWithImsKeys).when(ccmp).getConfigForSubId(anyInt(), any());
+    }
+
+    private void processAllMessages() {
+        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
+            mTestableLooper.processAllMessages();
+        }
     }
 
     private static PersistableBundle buildLoadedConfigBundle() {
@@ -354,17 +405,5 @@ public class ConfigAgentTest {
 
     private static void verifyHiddenConfigIsNotExist(PersistableBundle configBundle) {
         assertFalse(configBundle.containsKey(CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE));
-    }
-
-    private void injectCarrierConfigBundlesToSystem(PersistableBundle bundleWithImsKeys) {
-        CarrierConfigManagerProxy ccmp =
-                mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        doReturn(bundleWithImsKeys).when(ccmp).getConfigForSubId(anyInt(), any());
-    }
-
-    private void processAllMessages() {
-        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
-            mTestableLooper.processAllMessages();
-        }
     }
 }
