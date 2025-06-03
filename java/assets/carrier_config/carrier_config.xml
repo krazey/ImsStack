@@ -538,7 +538,7 @@
     <int name="imsvoice.conference_drop_refer_to_uri_source_type_int" value="0"/>
     <boolean name="imswfc.enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
     <int name="imsvoice.media_type_for_offerless_invite_int" value="0"/>
-    <int name="imsvoice.media_type_for_offerless_reinvite_int" value="0"/>
+    <int name="imsvoice.media_type_for_offerless_reinvite_int" value="2"/>
     <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
     <int name="imsvoice.oip_type_for_unavailable_int" value="2"/>
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
