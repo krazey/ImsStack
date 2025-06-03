@@ -367,10 +367,11 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
     ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(nullptr));
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason)).Times(1);
+    IMS_SINT32 nDataFailureReason = 0;
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, nDataFailureReason)).Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Disconnected(nReason);
+    pNormalMtcService->ImsAos_Disconnected(nReason, nDataFailureReason);
     EXPECT_EQ(pNormalMtcService->IsActive(), IMS_FALSE);
 }
 
@@ -554,9 +555,10 @@ TEST_F(MtcServiceTest, ImsAosConnectedEmergencyServiceInvokesSetReady)
 TEST_F(MtcServiceTest, ImsAosConnectedUpdatesCrossSimConnected)
 {
     ON_CALL(*pMockAosConnector, IsCrossSimConnected).WillByDefault(Return(IMS_TRUE));
+    IMS_SINT32 nDataFailureReason = 0;
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
 
     EXPECT_TRUE(pNormalMtcService->IsCrossSimConnected());
 }
@@ -636,14 +638,18 @@ TEST_F(MtcServiceTest, ImsAosConnectedNotifiesNetworkWatcher)
 
 TEST_F(MtcServiceTest, ImsAosDisconnectedNotifiesNetworkWatcher)
 {
+    IMS_SINT32 nDataFailureReason = 0;
+
     EXPECT_CALL(*pNetworkWatcher, OnDisconnected);
-    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::POWER_OFF);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::POWER_OFF, nDataFailureReason);
 }
 
 TEST_F(MtcServiceTest, GetOldStatusReturnsOldStatus)
 {
+    IMS_SINT32 nDataFailureReason = 0;
+
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
     EXPECT_EQ(pNormalMtcService->GetOldStatus(), ServiceStatus::SERVICE_ACTIVE);
 }
 
@@ -662,8 +668,10 @@ TEST_F(MtcServiceTest, GetStatusReturnsSuspendedAfterAosSuspended)
 
 TEST_F(MtcServiceTest, GetStatusReturnsIdleAfterAosDisconnected)
 {
+    IMS_SINT32 nDataFailureReason = 0;
+
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
     EXPECT_EQ(pNormalMtcService->GetStatus(), ServiceStatus::SERVICE_IDLE);
 }
 
@@ -717,8 +725,10 @@ TEST_F(MtcServiceTest, ProcessTestCommandChangesInternalAosState)
             0 /* TestCommand::AOS_CONNECTED */, nFeature, IIpcan::CATEGORY_MOBILE);
 
     const IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason)).Times(1);
-    pNormalMtcService->ProcessTestCommand(1 /* TestCommand::AOS_DISCONNECTED */, nReason, 0);
+    const IMS_SINT32 nDataFailureReason = 1;
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, nDataFailureReason)).Times(1);
+    pNormalMtcService->ProcessTestCommand(
+            1 /* TestCommand::AOS_DISCONNECTED */, nReason, nDataFailureReason);
 }
 
 TEST_F(MtcServiceTest, ProcessTestCommandChangesRatType)

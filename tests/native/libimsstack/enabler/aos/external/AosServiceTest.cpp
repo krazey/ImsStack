@@ -576,6 +576,23 @@ TEST_F(AosServiceTest, ControlRegistration)
     m_pAosService->ControlRegistration(1, 1, 1);
 }
 
+TEST_F(AosServiceTest, UpdateDataFailureReason)
+{
+    MockIAosRegistrationControlListener objMockListener1;
+    MockIAosRegistrationControlListener objMockListener2;
+    MockIAosRegistrationControlListener objMockListener3;
+
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
+
+    EXPECT_CALL(objMockListener1, RegistrationControl_UpdateDataFailureReason(_));
+    EXPECT_CALL(objMockListener2, RegistrationControl_UpdateDataFailureReason(_));
+    EXPECT_CALL(objMockListener3, RegistrationControl_UpdateDataFailureReason(_));
+
+    m_pAosService->UpdateDataFailureReason(1);
+}
+
 TEST_F(AosServiceTest, NotifyAirplaneSetting)
 {
     MockIAosServiceSettingListener objMockListener1;

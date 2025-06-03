@@ -53,7 +53,7 @@ public:
     PullingDialogInfo GetDialogInfo(IN IMS_UINT32 nId) const override;
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
-            IN IMS_UINT32 eAosReason) override;
+            IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
 
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 

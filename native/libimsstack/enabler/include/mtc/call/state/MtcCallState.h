@@ -149,7 +149,8 @@ public:
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName OnSrvccStateUpdated(IN SrvccState eState) override;
-    CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) override;
+    CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason,
+            IN IMS_SINT32 nDataFailureReason) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
     CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) override;
     CallStateName OnConnectionFailed(
@@ -179,8 +180,10 @@ protected:
     inline virtual CallStateName HandleSrvccStarted() { return GetStateName(); }
     virtual CallStateName SendUpdateBySrvcc(IN UpdateType eType);
     virtual CallStateName HandleAosConnected();
-    virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
-    virtual IMS_SINT32 GetCallReasonByAosDisconnection(IN IMS_UINT32 nAosReason) const;
+    virtual CallStateName HandleAosDisconnected(
+            IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason);
+    virtual const CallReasonInfo GetCallReasonInfoByAosDisconnection(
+            IN IMS_UINT32 nAosReason, IN IMS_SINT32 nDataFailureReason) const;
     inline virtual CallStateName HandleAosDisconnectedByAllPcscfFailed() { return GetStateName(); }
 
     void HandleTerminate(IN const CallReasonInfo& objReason) const;

@@ -42,7 +42,7 @@ public:
 
     virtual void OnConnected(IN IMS_UINT32 nFeatures);
     virtual void OnDisconnecting(IN IMS_UINT32 nReason);
-    virtual void OnDisconnected(IN IMS_UINT32 nReason);
+    virtual void OnDisconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason);
     virtual void OnSuspended(IN IMS_UINT32 nReason);
     virtual void OnResumed();
 
@@ -50,7 +50,8 @@ public:
     virtual void OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
 private:
-    void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const;
+    void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason,
+            IN IMS_SINT32 nDataFailureReason = 0) const;
     IuMtcService::ServiceState ConvertAosFeatureToServiceState(IMS_UINT32 nFeatures) const;
 
     IMtcService& m_objService;

@@ -938,7 +938,7 @@ TEST_F(EstablishedStateTest,
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pEstablishedState->OnAosStateChanged(
-                    MtcAosState::DISCONNECTED, ImsAosReason::REG_TERMINATING));
+                    MtcAosState::DISCONNECTED, ImsAosReason::REG_TERMINATING, 0));
 }
 
 TEST_F(EstablishedStateTest,
@@ -955,7 +955,7 @@ TEST_F(EstablishedStateTest,
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pEstablishedState->OnAosStateChanged(
-                    MtcAosState::DISCONNECTED, ImsAosReason::WIFI_OFF));
+                    MtcAosState::DISCONNECTED, ImsAosReason::WIFI_OFF, 0));
 }
 
 TEST_F(EstablishedStateTest,
@@ -972,7 +972,7 @@ TEST_F(EstablishedStateTest,
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pEstablishedState->OnAosStateChanged(
-                    MtcAosState::DISCONNECTED, ImsAosReason::AIRPLANE_MODE));
+                    MtcAosState::DISCONNECTED, ImsAosReason::AIRPLANE_MODE, 0));
 }
 
 TEST_F(EstablishedStateTest,
@@ -988,7 +988,7 @@ TEST_F(EstablishedStateTest,
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pEstablishedState->OnAosStateChanged(
-                    MtcAosState::DISCONNECTED, ImsAosReason::AIRPLANE_MODE));
+                    MtcAosState::DISCONNECTED, ImsAosReason::AIRPLANE_MODE, 0));
 }
 
 TEST_F(EstablishedStateTest, HandleAosDisconnectedWithWifiOffInvokesTerminateWithWifiLost)
@@ -1002,7 +1002,22 @@ TEST_F(EstablishedStateTest, HandleAosDisconnectedWithWifiOffInvokesTerminateWit
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pEstablishedState->OnAosStateChanged(
-                    MtcAosState::DISCONNECTED, ImsAosReason::WIFI_OFF));
+                    MtcAosState::DISCONNECTED, ImsAosReason::WIFI_OFF, 0));
+}
+
+TEST_F(EstablishedStateTest, HandleAosDisconnectedWithDataFailCauseReason)
+{
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallback).WillByDefault(Return(IMS_FALSE));
+
+    IMS_SINT32 nDataFailureReason = 1;
+    EXPECT_CALL(objMockMtcSession,
+            Terminate(IMS_TRUE, CallReasonInfo(CODE_NETWORK_DETACH, nDataFailureReason)));
+    EXPECT_CALL(
+            objUiNotifier, SendTerminated(CallReasonInfo(CODE_NETWORK_DETACH, nDataFailureReason)));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnAosStateChanged(MtcAosState::DISCONNECTED,
+                    ImsAosReason::DATA_DISCONNECTED, nDataFailureReason));
 }
 
 TEST_F(EstablishedStateTest, HoldPushesPendingOperation)

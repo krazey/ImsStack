@@ -2387,12 +2387,13 @@ TEST_F(MtcCallTest, OnAosStateChangedCallsState)
 {
     MtcAosState eAnyState = MtcAosState::CONNECTED;
     IMS_UINT32 eAnyReason = 0;
+    IMS_SINT32 nDataFailureReason = 0;
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, OnAosStateChanged(eAnyState, eAnyReason)).Times(1);
+    EXPECT_CALL(*pState, OnAosStateChanged(eAnyState, eAnyReason, nDataFailureReason)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(pState));
 
-    objCall.OnAosStateChanged(objService, eAnyState, eAnyReason);
+    objCall.OnAosStateChanged(objService, eAnyState, eAnyReason, nDataFailureReason);
 }
 
 TEST_F(MtcCallTest, OnRatChangedCallsState)

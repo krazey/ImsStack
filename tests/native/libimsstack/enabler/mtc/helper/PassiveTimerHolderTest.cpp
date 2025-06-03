@@ -115,7 +115,7 @@ TEST_F(PassiveTimerHolderTest, RemoveTimerDoesNothingIfNoMatchingTimer)
 TEST_F(PassiveTimerHolderTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
     pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
-    pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0);
+    pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0, 0);
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
@@ -124,7 +124,7 @@ TEST_F(PassiveTimerHolderTest, NotNotifyingListenerAfterAosDisconnected)
     pPassiveTimerHolder->AddTimer(
             IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
     pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
-    pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0);
+    pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0, 0);
 
     EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(0);
     pPassiveTimerHolder->Timer_TimerExpired(&objTimer);

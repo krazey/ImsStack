@@ -1329,6 +1329,8 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_ACCESS_CLASS_BLOCKED,
                 ImsReasonInfo.CODE_ACCESS_CLASS_BLOCKED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_DETACH,
+                ImsReasonInfo.CODE_NETWORK_DETACH);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL,
                 ImsReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNKNOWN,

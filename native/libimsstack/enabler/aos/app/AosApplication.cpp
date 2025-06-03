@@ -126,6 +126,7 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_nLteExtraInfo(IMS_LTE_INFO_EXTRA_NONE),
         m_nVoiceServiceState(IMS_VOICE_SERVICE_OUT_OF_SERVICE),
         m_nSlotId(piAppContext->GetSlotId()),
+        m_nDataFailureReason(0),
         m_bConnected(IMS_FALSE),
         m_bRegRecoveryHeld(IMS_FALSE),
         m_bIsImsCall(IMS_FALSE),
@@ -377,6 +378,12 @@ void AosApplication::ClearWifiRegBlock()
 }
 
 PROTECTED
+void AosApplication::ClearDataFailureReason()
+{
+    m_nDataFailureReason = 0;
+}
+
+PROTECTED
 AosNetworkType AosApplication::GetNetworkTypeForImsRegState() const
 {
     if (m_pUtil->IsWifiTest())
@@ -425,6 +432,11 @@ void AosApplication::SetRegRecoveryHeld(IN IMS_BOOL bHeld)
     m_bRegRecoveryHeld = bHeld;
 }
 
+PROTECTED
+void AosApplication::SetDataFailureReason(IN IMS_SINT32 nDataFailureReason)
+{
+    m_nDataFailureReason = nDataFailureReason;
+}
 PROTECTED
 void AosApplication::ResetBlock(IN BLOCK_REASON nReason)
 {
@@ -1001,6 +1013,7 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
     {
         ProcessPdnDisconnect();
         ClearOffReason();
+        ClearDataFailureReason();
     }
 
     if (IsPdnDeactivationRequired())
@@ -1052,6 +1065,11 @@ PROTECTED VIRTUAL IMS_UINT32 AosApplication::GetReportState()
     }
 
     return nReportState;
+}
+
+PROTECTED VIRTUAL IMS_SINT32 AosApplication::GetDataFailureReason() const
+{
+    return m_nDataFailureReason;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosApplication::OnMessage(IN IMSMSG& objMsg)
@@ -2100,6 +2118,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegSucceeded(IN IMS_UINT32 /* nRea
 {
     StopTimer(TIMER_IMS_ESTABLISHMENT);
     ClearOffReason();
+    ClearDataFailureReason();
     SetAppState(STATE_CONNECTED);
     UpdateRegisteredRat(m_piContext->GetNetTracker()->GetNetworkType());
     PerformRatBlockActions(IMS_FALSE);
@@ -3538,7 +3557,17 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
             }
         }
 
-        ProcessDisconnectingState(GetOffReason());
+        IMS_UINT32 nOffReason = GetOffReason();
+        if (eCause == AosControlCause::DATA && nOffReason != AosReason::WIFI_OFF &&
+                nOffReason != AosReason::AIRPLANE_MODE)
+        {
+            ProcessDisconnectingState(AosReason::DATA_DISCONNECTED);
+        }
+        else
+        {
+            ProcessDisconnectingState(nOffReason);
+        }
+
         PostMessage(MSG_REG_STOP, 0, 0);
         return;
     }
@@ -3552,6 +3581,17 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
         return;
     }
+}
+
+PROTECTED VIRTUAL void AosApplication::RegistrationControl_UpdateDataFailureReason(
+        IN IMS_SINT32 nReason)
+{
+    if (m_eRegType != AosRegistrationType::NORMAL)
+    {
+        return;
+    }
+
+    SetDataFailureReason(nReason);
 }
 
 PROTECTED VIRTUAL void AosApplication::ServicePhone_LocationInfoChanged(IN LocationInfo eState)

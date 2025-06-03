@@ -68,7 +68,8 @@ protected:
     virtual void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
     virtual void ImsAos_Connecting() override;
     virtual void ImsAos_Disconnecting(IN IMS_UINT32 nReason) override;
-    virtual void ImsAos_Disconnected(IN IMS_UINT32 nReason) override;
+    virtual void ImsAos_Disconnected(
+            IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason) override;
     virtual void ImsAos_Suspended(IN IMS_UINT32 nReason) override;
     virtual void ImsAos_Resumed() override;
 

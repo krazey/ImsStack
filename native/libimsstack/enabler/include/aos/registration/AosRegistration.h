@@ -416,7 +416,7 @@ protected:
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
 
     // AosRegistrationControlListener
-    void RegistrationControl_UpdateDataFailureReason(IN AosReasonCode eReason) override;
+    void RegistrationControl_UpdateDataFailureReason(IN IMS_SINT32 nReason) override;
 
 private:
     void ControlPrivateHeader();

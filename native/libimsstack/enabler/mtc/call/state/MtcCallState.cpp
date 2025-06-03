@@ -474,7 +474,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnAosStateChanged(
-        IN MtcAosState eState, IN IMS_UINT32 eAosReason)
+        IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason)
 {
     switch (eState)
     {
@@ -482,7 +482,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnAosStateChanged(
             return HandleAosConnected();
         case MtcAosState::DISCONNECTED:
         case MtcAosState::DISCONNECTING:
-            return HandleAosDisconnected(eAosReason);
+            return HandleAosDisconnected(eAosReason, nDataFailureReason);
         default:  // case MtcAosState::SUSPENDED:
             return GetStateName();
     }
@@ -524,7 +524,8 @@ CallStateName MtcCallState::HandleAosConnected()
 }
 
 PROTECTED
-CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
+CallStateName MtcCallState::HandleAosDisconnected(
+        IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason)
 {
     if (eAosReason == ImsAosReason::REG_ALL_PCSCF_FAILED)
     {
@@ -549,45 +550,47 @@ CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
         return GetStateName();
     }
 
-    return Terminate(CallReasonInfo(GetCallReasonByAosDisconnection(eAosReason)));
+    return Terminate(GetCallReasonInfoByAosDisconnection(eAosReason, nDataFailureReason));
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::GetCallReasonByAosDisconnection(IN IMS_UINT32 nAosReason) const
+const CallReasonInfo MtcCallState::GetCallReasonInfoByAosDisconnection(
+        IN IMS_UINT32 nAosReason, IN IMS_SINT32 nDataFailureReason) const
 {
     switch (nAosReason)
     {
         case ImsAosReason::POWER_OFF:
-            return CODE_LOCAL_POWER_OFF;
+            return CallReasonInfo(CODE_LOCAL_POWER_OFF);
         case ImsAosReason::AIRPLANE_MODE:
             if (m_objContext.GetService().IsCrossSimConnected())
             {
-                return CODE_OEM_CAUSE_3;
+                return CallReasonInfo(CODE_OEM_CAUSE_3);
             }
             return m_objContext.GetService().GetLastConnectedRatType() ==
                             INetworkWatcher::RADIOTECH_TYPE_IWLAN
-                    ? CODE_WIFI_LOST
-                    : CODE_RADIO_OFF;
+                    ? CallReasonInfo(CODE_WIFI_LOST)
+                    : CallReasonInfo(CODE_RADIO_OFF);
         case ImsAosReason::WIFI_OFF:
-            return CODE_WIFI_LOST;
+            return CallReasonInfo(CODE_WIFI_LOST);
         case ImsAosReason::SERVICE_POLICY:
         case ImsAosReason::REG_TERMINATING:
-            return CODE_LOCAL_SERVICE_UNAVAILABLE;
+            return CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE);
         case ImsAosReason::DATA_DISCONNECTED:
+            return CallReasonInfo(CODE_NETWORK_DETACH, nDataFailureReason);
         case ImsAosReason::DATA_PERMANENTLY_FAILED:
         case ImsAosReason::NETWORK_ATTACH_REJECTED:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
+            return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
         case ImsAosReason::REG_TERMINATED:
         case ImsAosReason::REG_NEW_REQUIRED:
-            return CODE_LOCAL_NOT_REGISTERED;
+            return CallReasonInfo(CODE_LOCAL_NOT_REGISTERED);
         case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
+            return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
         case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
-            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
+            return CallReasonInfo(CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
         case ImsAosReason::IP_CHANGED:
-            return CODE_LOCAL_NETWORK_IP_CHANGED;
+            return CallReasonInfo(CODE_LOCAL_NETWORK_IP_CHANGED);
         default:  // NOT_SPECIFIED
-            return CODE_LOCAL_NOT_REGISTERED;
+            return CallReasonInfo(CODE_LOCAL_NOT_REGISTERED);
     }
 }
 

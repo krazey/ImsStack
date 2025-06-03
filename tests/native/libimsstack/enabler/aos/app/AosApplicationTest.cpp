@@ -166,127 +166,131 @@ enum
     PENDING_REG_UPDATE_HELD = 0x40
 };
 
-#define DECLARE_USING(Base)                              \
-    using Base::GetState;                                \
-    using Base::IsCrossSimConnected;                     \
-    using Base::ClearOffReason;                          \
-    using Base::ClearPending;                            \
-    using Base::ClearWifiRegBlock;                       \
-    using Base::GetNetworkTypeForImsRegState;            \
-    using Base::SetOffReason;                            \
-    using Base::SetImsCall;                              \
-    using Base::SetPublishState;                         \
-    using Base::SetRegRecoveryHeld;                      \
-    using Base::ResetBlock;                              \
-    using Base::NotifyDeregistered;                      \
-    using Base::AddRatBlock;                             \
-    using Base::ClearRatBlocks;                          \
-    using Base::PerformRatBlockActions;                  \
-    using Base::IsEmergency;                             \
-    using Base::IsStateMessage;                          \
-    using Base::IsNotReady;                              \
-    using Base::IsEqualOrLessState;                      \
-    using Base::IsRegRecoveryHeld;                       \
-    using Base::IsImsCall;                               \
-    using Base::IsPublished;                             \
-    using Base::IsAllDetached;                           \
-    using Base::IsTimerRunning;                          \
-    using Base::IsRegTypeNormal;                         \
-    using Base::IsRegStateUpdatedByNrLteRatChange;       \
-    using Base::IsPdnDisconnectRequired;                 \
-    using Base::IsPdnDeactivationRequired;               \
-    using Base::IsPlmnBlockRequired;                     \
-    using Base::IsBlockRat;                              \
-    using Base::CreateAosCondition;                      \
-    using Base::CreateAosConnector;                      \
-    using Base::CreateAosLocationStarter;                \
-    using Base::AddEventListener;                        \
-    using Base::RemoveEventListener;                     \
-    using Base::SetNetTrackerListener;                   \
-    using Base::SetAppType;                              \
-    using Base::SetAppState;                             \
-    using Base::SetCleanState;                           \
-    using Base::IsUpdateAvailable;                       \
-    using Base::IsReconfigHandleChanged;                 \
-    using Base::IsRequestCmdHeldByCondition;             \
-    using Base::IsAllHandleDetached;                     \
-    using Base::IsConditionTimerSkippedDueToTimer;       \
-    using Base::IsRegUpdatedByNrLteRatChange;            \
-    using Base::CleanAll;                                \
-    using Base::ClearConnection;                         \
-    using Base::ClearConnector;                          \
-    using Base::GetReportState;                          \
-    using Base::OnMessage;                               \
-    using Base::ProcessMessage;                          \
-    using Base::PreprocessStateMessage;                  \
-    using Base::PreprocessStateMessage_Connection;       \
-    using Base::StateNotReady_Condition;                 \
-    using Base::StateReady_Connection;                   \
-    using Base::StateNotReady_Connection;                \
-    using Base::StateReady_Condition;                    \
-    using Base::StateConnecting_Condition;               \
-    using Base::StateConnecting_Connection;              \
-    using Base::StateConnecting_Registration;            \
-    using Base::StateConnected_Condition;                \
-    using Base::StateConnected_Registration;             \
-    using Base::StateConnected_Connection;               \
-    using Base::StateUpdating_Condition;                 \
-    using Base::StateUpdating_Connection;                \
-    using Base::ProcessConnectionUpdated;                \
-    using Base::StateUpdating_Registration;              \
-    using Base::StateDisconnecting_Condition;            \
-    using Base::StateDisconnecting_Registration;         \
-    using Base::ProcessConnectionDeactivated;            \
-    using Base::ProcessDisconnectingState;               \
-    using Base::ProcessNetworkEvent;                     \
-    using Base::ProcessRegControlEvent;                  \
-    using Base::ProcessRegTerminated;                    \
-    using Base::ProcessRegFailed_Terminated;             \
-    using Base::StateDisconnecting_Connection;           \
-    using Base::ProcessRegInternalFailed;                \
-    using Base::ProcessPingCommand;                      \
-    using Base::ProcessPdnDisconnect;                    \
-    using Base::ProcessAppActivatedTimerExpired;         \
-    using Base::ProcessAppConnectedTimerExpired;         \
-    using Base::ProcessAppTerminatedTimerExpired;        \
-    using Base::ProcessReconfigTimerExpired;             \
-    using Base::ProcessRoamingState;                     \
-    using Base::ProcessRegBlockedTimerExpired;           \
-    using Base::ProcessRegFailed_StateConnected;         \
-    using Base::ProcessRegStopTimerExpired;              \
-    using Base::ProcessPdnBlockedTimerExpired;           \
-    using Base::ProcessImsEstablishmentTimerExpired;     \
-    using Base::ProcessPdnBlockWithTime;                 \
-    using Base::ProcessImsEstablishmentControl;          \
-    using Base::ProcessImsEstablishmentStart;            \
-    using Base::ProcessPlmnBlock;                        \
-    using Base::Report_Request;                          \
-    using Base::UpdateRegRecoveryHeld;                   \
-    using Base::UpdateRegStopHeld;                       \
-    using Base::StartTimer;                              \
-    using Base::StopTimer;                               \
-    using Base::ClearTimers;                             \
-    using Base::UpdateConnectedServices;                 \
-    using Base::UpdateRegisteredRat;                     \
-    using Base::UpdateMonitorNotify;                     \
-    using Base::Init;                                    \
-    using Base::CleanUp;                                 \
-    using Base::Condition_Changed;                       \
-    using Base::Condition_RequestCommand;                \
-    using Base::Connector_Activated;                     \
-    using Base::Connector_Deactivated;                   \
-    using Base::Connector_Updated;                       \
-    using Base::Registration_StateChanged;               \
-    using Base::CallTracker_StateChanged;                \
-    using Base::NetTracker_StatusChanged;                \
-    using Base::NConfiguration_NotifyConfigChanged;      \
-    using Base::Event_NotifyEvent;                       \
-    using Base::Timer_TimerExpired;                      \
-    using Base::RegistrationControl_ControlRegistration; \
-    using Base::ServicePhone_LocationInfoChanged;        \
-    using Base::ProcessRegTerminating;                   \
-    using Base::ProcessScscfRestoration;                 \
-    using Base::GetImsEstablishmentTime;
+#define DECLARE_USING(Base)                                  \
+    using Base::GetState;                                    \
+    using Base::IsCrossSimConnected;                         \
+    using Base::ClearOffReason;                              \
+    using Base::ClearPending;                                \
+    using Base::ClearWifiRegBlock;                           \
+    using Base::GetNetworkTypeForImsRegState;                \
+    using Base::SetOffReason;                                \
+    using Base::SetImsCall;                                  \
+    using Base::SetPublishState;                             \
+    using Base::SetRegRecoveryHeld;                          \
+    using Base::ResetBlock;                                  \
+    using Base::NotifyDeregistered;                          \
+    using Base::AddRatBlock;                                 \
+    using Base::ClearRatBlocks;                              \
+    using Base::PerformRatBlockActions;                      \
+    using Base::IsEmergency;                                 \
+    using Base::IsStateMessage;                              \
+    using Base::IsNotReady;                                  \
+    using Base::IsEqualOrLessState;                          \
+    using Base::IsRegRecoveryHeld;                           \
+    using Base::IsImsCall;                                   \
+    using Base::IsPublished;                                 \
+    using Base::IsAllDetached;                               \
+    using Base::IsTimerRunning;                              \
+    using Base::IsRegTypeNormal;                             \
+    using Base::IsRegStateUpdatedByNrLteRatChange;           \
+    using Base::IsPdnDisconnectRequired;                     \
+    using Base::IsPdnDeactivationRequired;                   \
+    using Base::IsPlmnBlockRequired;                         \
+    using Base::IsBlockRat;                                  \
+    using Base::CreateAosCondition;                          \
+    using Base::CreateAosConnector;                          \
+    using Base::CreateAosLocationStarter;                    \
+    using Base::AddEventListener;                            \
+    using Base::RemoveEventListener;                         \
+    using Base::SetNetTrackerListener;                       \
+    using Base::SetAppType;                                  \
+    using Base::SetAppState;                                 \
+    using Base::SetCleanState;                               \
+    using Base::IsUpdateAvailable;                           \
+    using Base::IsReconfigHandleChanged;                     \
+    using Base::IsRequestCmdHeldByCondition;                 \
+    using Base::IsAllHandleDetached;                         \
+    using Base::IsConditionTimerSkippedDueToTimer;           \
+    using Base::IsRegUpdatedByNrLteRatChange;                \
+    using Base::CleanAll;                                    \
+    using Base::ClearConnection;                             \
+    using Base::ClearConnector;                              \
+    using Base::GetReportState;                              \
+    using Base::OnMessage;                                   \
+    using Base::ProcessMessage;                              \
+    using Base::PreprocessStateMessage;                      \
+    using Base::PreprocessStateMessage_Connection;           \
+    using Base::StateNotReady_Condition;                     \
+    using Base::StateReady_Connection;                       \
+    using Base::StateNotReady_Connection;                    \
+    using Base::StateReady_Condition;                        \
+    using Base::StateConnecting_Condition;                   \
+    using Base::StateConnecting_Connection;                  \
+    using Base::StateConnecting_Registration;                \
+    using Base::StateConnected_Condition;                    \
+    using Base::StateConnected_Registration;                 \
+    using Base::StateConnected_Connection;                   \
+    using Base::StateUpdating_Condition;                     \
+    using Base::StateUpdating_Connection;                    \
+    using Base::ProcessConnectionUpdated;                    \
+    using Base::StateUpdating_Registration;                  \
+    using Base::StateDisconnecting_Condition;                \
+    using Base::StateDisconnecting_Registration;             \
+    using Base::ProcessConnectionDeactivated;                \
+    using Base::ProcessDisconnectingState;                   \
+    using Base::ProcessNetworkEvent;                         \
+    using Base::ProcessRegControlEvent;                      \
+    using Base::ProcessRegTerminated;                        \
+    using Base::ProcessRegFailed_Terminated;                 \
+    using Base::StateDisconnecting_Connection;               \
+    using Base::ProcessRegInternalFailed;                    \
+    using Base::ProcessPingCommand;                          \
+    using Base::ProcessPdnDisconnect;                        \
+    using Base::ProcessAppActivatedTimerExpired;             \
+    using Base::ProcessAppConnectedTimerExpired;             \
+    using Base::ProcessAppTerminatedTimerExpired;            \
+    using Base::ProcessReconfigTimerExpired;                 \
+    using Base::ProcessRoamingState;                         \
+    using Base::ProcessRegBlockedTimerExpired;               \
+    using Base::ProcessRegFailed_StateConnected;             \
+    using Base::ProcessRegStopTimerExpired;                  \
+    using Base::ProcessPdnBlockedTimerExpired;               \
+    using Base::ProcessImsEstablishmentTimerExpired;         \
+    using Base::ProcessPdnBlockWithTime;                     \
+    using Base::ProcessImsEstablishmentControl;              \
+    using Base::ProcessImsEstablishmentStart;                \
+    using Base::ProcessPlmnBlock;                            \
+    using Base::Report_Request;                              \
+    using Base::UpdateRegRecoveryHeld;                       \
+    using Base::UpdateRegStopHeld;                           \
+    using Base::StartTimer;                                  \
+    using Base::StopTimer;                                   \
+    using Base::ClearTimers;                                 \
+    using Base::UpdateConnectedServices;                     \
+    using Base::UpdateRegisteredRat;                         \
+    using Base::UpdateMonitorNotify;                         \
+    using Base::Init;                                        \
+    using Base::CleanUp;                                     \
+    using Base::Condition_Changed;                           \
+    using Base::Condition_RequestCommand;                    \
+    using Base::Connector_Activated;                         \
+    using Base::Connector_Deactivated;                       \
+    using Base::Connector_Updated;                           \
+    using Base::Registration_StateChanged;                   \
+    using Base::CallTracker_StateChanged;                    \
+    using Base::NetTracker_StatusChanged;                    \
+    using Base::NConfiguration_NotifyConfigChanged;          \
+    using Base::Event_NotifyEvent;                           \
+    using Base::Timer_TimerExpired;                          \
+    using Base::RegistrationControl_ControlRegistration;     \
+    using Base::ServicePhone_LocationInfoChanged;            \
+    using Base::ProcessRegTerminating;                       \
+    using Base::ProcessScscfRestoration;                     \
+    using Base::GetImsEstablishmentTime;                     \
+    using Base::RegistrationControl_UpdateDataFailureReason; \
+    using Base::GetDataFailureReason;                        \
+    using Base::SetDataFailureReason;                        \
+    using Base::ClearDataFailureReason;
 
 class TestAosApplication : public AosApplication
 {
@@ -1180,6 +1184,15 @@ TEST_F(AosApplicationTest, GetAndSet)
 
     // TEST_F : IsRegReconfigAvailable
     EXPECT_TRUE(m_pAosApplication->IsRegReconfigAvailable());
+}
+
+TEST_F(AosApplicationTest, GetSetClearDataFailureReason)
+{
+    int anyDataFailureReason = 1;
+    m_pAosApplication->SetDataFailureReason(anyDataFailureReason);
+    EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), anyDataFailureReason);
+    m_pAosApplication->ClearDataFailureReason();
+    EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), 0);
 }
 
 TEST_F(AosApplicationTest, ResetWifiRegForbiddenWhenClearWifiRegBlockCalled)
@@ -3866,4 +3879,32 @@ TEST_F(AosApplicationTest,
 
     // THEN : GIVEN conditions should be met.
     EXPECT_FALSE(m_pAosApplication->IsPdnDeactivationRequired());
+}
+
+TEST_F(AosApplicationTest, SetDataFailureReasonWhenUpdateDataFailureReason)
+{
+    int anyDataFailureReason = 1;
+    m_pAosApplication->RegistrationControl_UpdateDataFailureReason(anyDataFailureReason);
+    EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), anyDataFailureReason);
+}
+
+TEST_F(AosApplicationTest, ReportDataFailureReasonWhenControlRegistrationCalledWithStop)
+{
+    int anyDataFailureReason = 1;
+    m_pAosApplication->RegistrationControl_UpdateDataFailureReason(anyDataFailureReason);
+    m_pAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
+
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), anyDataFailureReason);
+}
+
+TEST_F(AosApplicationTest, ReportDataFailureReasonWhenConnectionDeactiviated)
+{
+    int anyDataFailureReason = 1;
+    m_pAosApplication->RegistrationControl_UpdateDataFailureReason(anyDataFailureReason);
+    m_pAosApplication->ProcessConnectionDeactivated(AosConnector::REASON_DISCONNECTED);
+
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(m_pAosApplication->GetDataFailureReason(), anyDataFailureReason);
 }

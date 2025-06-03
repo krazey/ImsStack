@@ -197,9 +197,10 @@ TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosConnecting)
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
+    IMS_SINT32 nDataFailureReason = 0;
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
-    pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pMtsService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
     pMtsService->ImsAos_Connecting();
     EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_NOTREADY);
 }
@@ -209,9 +210,10 @@ TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosDisconnected)
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
+    IMS_SINT32 nDataFailureReason = 0;
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
-    pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pMtsService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
     EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_NOTREADY);
 }
 

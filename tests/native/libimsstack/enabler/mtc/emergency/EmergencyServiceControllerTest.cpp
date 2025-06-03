@@ -165,8 +165,8 @@ TEST_F(EmergencyServiceControllerTest, AosStateChangeNotifiesNothingInitially)
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
 
     const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, nAosReason);
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, nAosReason, 0);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, CallStateChangeDoesNothingInitially)
@@ -219,7 +219,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedNotifiesUnavailabl
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest,
@@ -236,7 +236,7 @@ TEST_F(EmergencyServiceControllerTest,
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedDoesNothingIfNormalServiceIsNull)
@@ -255,7 +255,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedDoesNothingIfNorma
             .Times(0);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest,
@@ -274,7 +274,7 @@ TEST_F(EmergencyServiceControllerTest,
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest,
@@ -294,7 +294,7 @@ TEST_F(EmergencyServiceControllerTest,
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesUnavailable)
@@ -314,7 +314,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesU
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedWithDataPermanentlyFailed)
@@ -335,7 +335,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedWithDataPermanentl
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedWithNetworkAttachRejected)
@@ -356,7 +356,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedWithNetworkAttachR
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedRetriesOverImsPdnWhenConfigSet)
@@ -371,7 +371,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedRetriesOverImsPdnW
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
     // EXPECT_CALL(objEsm, StartOpen(ServiceType::NORMAL)).Times(1); - By AsyncRunner
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartAndAosConnectedNotifiesOpened)
@@ -382,13 +382,15 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosConnectedNotifiesOpened)
             OnEmergencyServiceChanged(EmergencyServiceState::OPENED, _, ServiceType::EMERGENCY))
             .Times(1);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndStartNotifiesOpened)
 {
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     EXPECT_CALL(objJniMtcServiceThread,
             OnEmergencyServiceChanged(EmergencyServiceState::OPENED, _, ServiceType::EMERGENCY))
@@ -400,17 +402,20 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndStartNotifiesOpened)
 TEST_F(EmergencyServiceControllerTest, OpenedAndAosConnectedNotifiesNothing)
 {
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndAosDisconnectedNotifiesIdle)
 {
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
     EXPECT_CALL(objJniMtcServiceThread,
@@ -418,13 +423,14 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndAosDisconnectedNotifiesIdle)
                     EmergencyServiceUnavailableReason::UNKNOWN, ServiceType::EMERGENCY))
             .Times(1);
 
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndCallNormallyEndsDoesNothing)
 {
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
 
@@ -438,7 +444,8 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallNormallyEndsDoesNothing)
 TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailDoesNothingByConfig)
 {
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
     ON_CALL(*pConfigurationProxy,
@@ -455,7 +462,8 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailDoesNothingByConfig
 TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailWithout100DoesNothing)
 {
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
     ON_CALL(*pConfigurationProxy,
@@ -473,7 +481,8 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailWithout100DoesNothi
 TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailRegisterStop)
 {
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
     ON_CALL(*pConfigurationProxy,
@@ -530,7 +539,8 @@ TEST_F(EmergencyServiceControllerTest, CallStateChangedToTerminatingStopsRegTo18
             .WillByDefault(Return(nTimer));
 
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
     pController->OnCallStateChanged(
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
 
@@ -570,7 +580,7 @@ TEST_F(EmergencyServiceControllerTest, AosDisconnectedStopsRegTo18xTimer)
     EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
 
     pController->OnAosStateChanged(
-            objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::NONE);
+            objEmergencyService, MtcAosState::DISCONNECTED, ImsAosReason::NONE, 0);
 }
 
 TEST_F(EmergencyServiceControllerTest, RegTo18xTimerExpiresBeforeCallSetupStopsAos)
@@ -599,7 +609,8 @@ TEST_F(EmergencyServiceControllerTest, RegTo18xTimerExpiresAfterCallSetupTermina
             .WillByDefault(Return(nTimer));
 
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
 
     const IMS_SINT32 nCallKey = 1;
     pController->OnCallStateChanged(
@@ -624,7 +635,8 @@ TEST_F(EmergencyServiceControllerTest,
             .WillByDefault(Return(nTimer));
 
     pController->Start();
-    pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
     pController->OnCallStateChanged(
             1, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
     pController->OnCallStateChanged(

@@ -6527,16 +6527,15 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
 }
 
 PROTECTED VIRTUAL void AosRegistration::RegistrationControl_UpdateDataFailureReason(
-        IN AosReasonCode eReason)
+        IN IMS_SINT32 /* nReason */)
 {
-    if (m_eRegType != AosRegistrationType::NORMAL ||
-            m_eImsReasonCode != AosReasonCode::UNSPECIFIED ||
-            !AosReasonCodeWrapper(eReason).IsInBase(AosReasonCodeBase::BASE_DATA))
+    if (m_eRegType != AosRegistrationType::NORMAL)
     {
         return;
     }
 
-    m_eImsReasonCode = eReason;
+    // TODO(b/383031808): Report dataFailCause as mExtraCode directly when deregistered due to PDN
+    // disconnection
 }
 
 PRIVATE

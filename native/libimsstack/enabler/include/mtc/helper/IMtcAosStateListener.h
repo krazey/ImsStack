@@ -40,9 +40,11 @@ public:
      * @param objMtcService
      * @param eState
      * @param eAosReason
+     * @param nDataFailureReason Indicate the reason that results that the data is disconnected.
+     *                (@link android.telephony.DataFailCause)
      */
-    virtual void OnAosStateChanged(
-            IN IMtcService& objMtcService, IN MtcAosState eState, IN IMS_UINT32 eAosReason) = 0;
+    virtual void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
+            IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) = 0;
 };
 
 #endif

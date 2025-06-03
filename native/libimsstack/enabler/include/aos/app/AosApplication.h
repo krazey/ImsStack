@@ -95,6 +95,7 @@ protected:
     void ClearOffReason();
     void ClearPending();
     void ClearWifiRegBlock();
+    void ClearDataFailureReason();
 
     AosNetworkType GetNetworkTypeForImsRegState() const;
 
@@ -102,6 +103,7 @@ protected:
     void SetImsCall(IN IMS_BOOL bActive);
     void SetPublishState(IN IMS_BOOL bActive);
     void SetRegRecoveryHeld(IN IMS_BOOL bHeld);
+    void SetDataFailureReason(IN IMS_SINT32 nReason);
 
     void ResetBlock(IN BLOCK_REASON nReason);
     void NotifyDeregistered(IN AosReasonCode eReason);
@@ -156,6 +158,7 @@ protected:
     virtual void ClearConnector();
 
     virtual IMS_UINT32 GetReportState();
+    virtual IMS_SINT32 GetDataFailureReason() const;
 
     // ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
@@ -300,6 +303,7 @@ protected:
     // AosRegistrationControlListener
     void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
             IN AosPcscfOrder eOrder, IN AosControlCause eCause) override;
+    void RegistrationControl_UpdateDataFailureReason(IN IMS_SINT32 nReason) override;
 
     // AosServicePhoneListener
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
@@ -447,6 +451,7 @@ protected:
     IMS_UINT32 m_nLteExtraInfo;
     IMS_UINT32 m_nVoiceServiceState;
     IMS_SINT32 m_nSlotId;
+    IMS_SINT32 m_nDataFailureReason;
 
     IMS_BOOL m_bConnected;
     IMS_BOOL m_bRegRecoveryHeld;

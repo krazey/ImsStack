@@ -345,7 +345,8 @@ PROTECTED void RcsRegistrationService::ImsAos_Disconnecting(IN IMS_UINT32 nReaso
     piJniThread->OnRegistrationUpdated(reinterpret_cast<IMS_UINTP>(pParam));
 }
 
-PROTECTED void RcsRegistrationService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
+PROTECTED void RcsRegistrationService::ImsAos_Disconnected(
+        IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDataFailureReason */)
 {
     IMS_TRACE_I("ImsAos_Connecting()", 0, 0, 0);
     IUSncFeatureTagsParam* pParam = new IUSncFeatureTagsParam();

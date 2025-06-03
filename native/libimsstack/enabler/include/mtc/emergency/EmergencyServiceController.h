@@ -49,7 +49,7 @@ public:
     inline ServiceType GetServiceType() const override { return ServiceType::EMERGENCY; }
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
-            IN IMS_UINT32 eAosReason) override;
+            IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
 
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;

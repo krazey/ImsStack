@@ -128,8 +128,10 @@ VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::Ge
     return objInfo;
 }
 
-VIRTUAL PUBLIC void MultiEndpointManager::OnAosStateChanged(
-        IN IMtcService& /*objMtcService*/, IN MtcAosState /*eState*/, IN IMS_UINT32 /*eAosReason*/)
+VIRTUAL PUBLIC void MultiEndpointManager::OnAosStateChanged(IN
+        [[maybe_unused]] IMtcService& objMtcService,
+        IN [[maybe_unused]] MtcAosState eState, IN [[maybe_unused]] IMS_UINT32 eAosReason,
+        IN [[maybe_unused]] IMS_SINT32 nDataFailureReason)
 {
     HandleConditionChanged();
 }

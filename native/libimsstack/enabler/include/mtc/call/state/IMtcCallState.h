@@ -635,9 +635,11 @@ public:
      *
      * @param eState
      * @param eAosReason
+     * @param nDataFailureReason
      * @return
      */
-    virtual CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) = 0;
+    virtual CallStateName OnAosStateChanged(
+            IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) = 0;
 
     /**
      * @brief Notifies

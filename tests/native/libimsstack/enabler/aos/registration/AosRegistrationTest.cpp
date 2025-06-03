@@ -6068,44 +6068,6 @@ TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfPidfFormingPolicy
     GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
 }
 
-TEST_F(AosRegistrationTest, UpdatedReasonCodeWhenDataFailureReasonIsUpdated)
-{
-    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
-
-    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(
-            AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
-
-    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
-}
-
-TEST_F(AosRegistrationTest, NoUpdatedReasonCodeWhenDataFailureReasonIsUpdatedWithEmergencyType)
-{
-    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
-
-    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(
-            AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
-
-    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::DATA_LOCAL_NETWORK_NO_SERVICE);
-}
-
-TEST_F(AosRegistrationTest, NoUpdatedReasonCodeWhenDataFailureReasonIsUpdatedWithModemReason)
-{
-    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
-
-    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(AosReasonCode::RAT_BLOCK);
-
-    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::RAT_BLOCK);
-}
-
-TEST_F(AosRegistrationTest, NoUpdatedReasonCodeWhenDataFailureReasonIsUpdatedWithOtherReasons)
-{
-    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
-
-    m_pAosRegistration->RegistrationControl_UpdateDataFailureReason(AosReasonCode::REG_RESP_403);
-
-    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_403);
-}
-
 TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecoverTimer)
 {
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);

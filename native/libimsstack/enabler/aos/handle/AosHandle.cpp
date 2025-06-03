@@ -320,10 +320,12 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
     switch (GetState())
     {
         case STATE_DISCONNECTED:
-            m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
+            m_piListener->ImsAos_Disconnected(
+                    GetImsAosReason(m_nReason), m_piAppContext->GetApp()->GetDataFailureReason());
             break;
         case STATE_CONNECTING:
-            m_piListener->ImsAos_Disconnected(GetImsAosReasonForConnecting(m_nReason));
+            m_piListener->ImsAos_Disconnected(GetImsAosReasonForConnecting(m_nReason),
+                    m_piAppContext->GetApp()->GetDataFailureReason());
             break;
         case STATE_CONNECTED:
             m_piListener->ImsAos_Connected(

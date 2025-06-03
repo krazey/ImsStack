@@ -356,7 +356,7 @@ void UceApp::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
     }
 }
 
-void UceApp::ImsAos_Disconnected(IN IMS_UINT32 nReason)
+void UceApp::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDataFailureReason */)
 {
     (void)nReason;
     if (m_eAoSStatus == AOS_DISCONNECTED)

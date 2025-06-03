@@ -113,6 +113,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_RADIO_INTERNAL_ERROR = 1502;
     public static final int CODE_NETWORK_RESP_TIMEOUT = 1503;
     public static final int CODE_ACCESS_CLASS_BLOCKED = 1512;
+    public static final int CODE_NETWORK_DETACH = 1513;
     public static final int CODE_SIP_ALTERNATE_EMERGENCY_CALL = 1514;
     public static final int CODE_REJECT_UNKNOWN = 1600;
     public static final int CODE_REJECT_ONGOING_CALL_WAITING_DISABLED = 1601;

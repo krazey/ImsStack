@@ -323,8 +323,7 @@ PUBLIC VIRTUAL void AosService::UpdateDataFailureReason(IN IMS_SINT32 nReason)
 
         if (piListener != IMS_NULL)
         {
-            piListener->RegistrationControl_UpdateDataFailureReason(
-                    static_cast<AosReasonCode>(nReason));
+            piListener->RegistrationControl_UpdateDataFailureReason(nReason);
         }
     }
 }

@@ -38,7 +38,7 @@ public:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
     virtual void RegistrationControl_ControlRegistration(
             IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause) = 0;
-    virtual void RegistrationControl_UpdateDataFailureReason(IN AosReasonCode eReason) = 0;
+    virtual void RegistrationControl_UpdateDataFailureReason(IN IMS_SINT32 nReason) = 0;
 };
 
 class AosRegistrationControlListener : public IAosRegistrationControlListener
@@ -52,8 +52,7 @@ public:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override{};
     inline void RegistrationControl_ControlRegistration(IN AosRegRequestType /*eType*/,
             IN AosPcscfOrder /*eOrder*/, IN AosControlCause /*eCause*/) override{};
-    inline void RegistrationControl_UpdateDataFailureReason(
-            IN AosReasonCode /*eReason*/) override {};
+    inline void RegistrationControl_UpdateDataFailureReason(IN IMS_SINT32 /*nReason*/) override {};
 };
 
 /**

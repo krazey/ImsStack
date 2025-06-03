@@ -45,7 +45,7 @@ public:
     void Connecting() { ImsAos_Connecting(); }
     void Connected() { ImsAos_Connected(0, 0); }
     void DisConnecting() { ImsAos_Disconnecting(0); }
-    void DisConnected() { ImsAos_Disconnected(0); }
+    void DisConnected() { ImsAos_Disconnected(0, 0); }
 };
 
 class RcsRegistrationServiceTest : public ::testing::Test

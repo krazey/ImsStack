@@ -95,7 +95,8 @@ PUBLIC VIRTUAL void EmergencyServiceController::Close()
 }
 
 PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
-        IN IMtcService& /* objMtcService */, IN MtcAosState eState, IN IMS_UINT32 eAosReason)
+        IN [[maybe_unused]] IMtcService& objMtcService, IN MtcAosState eState,
+        IN IMS_UINT32 eAosReason, IN [[maybe_unused]] IMS_SINT32 nDataFailureReason)
 {
     IMS_TRACE_I("OnAosStateChanged :: AosState[%s] Reason[%s]",
             MtcCallStringUtils::ConvertAosState(eState),
