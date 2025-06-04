@@ -381,8 +381,50 @@ TEST_F(MtcPreconditionManagerTest, IsDedicatedBearerAllocatedReturnsFalseIfQosSt
 }
 
 TEST_F(MtcPreconditionManagerTest,
+        IsCheckingResourcesRequiredToAlertUserIfLocalPreconditionIsSupported)
+{
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsCheckingResourcesRequiredToAlertUserIfLocalPreconditionIsNotSupported)
+{
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_FALSE);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+}
+
+TEST_F(MtcPreconditionManagerTest,
         IsCheckingResourcesRequiredToAlertUserReturnsFalseIfSupportsAudioDefaultBearer)
 {
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -392,6 +434,10 @@ TEST_F(MtcPreconditionManagerTest,
 TEST_F(MtcPreconditionManagerTest,
         IsCheckingResourcesRequiredToAlertUserReturnsTrueIfSupportsAudioDefaultBearerButRoaming)
 {
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_TRUE));
@@ -402,6 +448,10 @@ TEST_F(MtcPreconditionManagerTest,
 TEST_F(MtcPreconditionManagerTest,
         IsCheckingResourcesRequiredToAlertUserReturnsTrueIfNotSupportsAudioDefaultBearer)
 {
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
             GetBoolean(ConfigVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL))
             .WillByDefault(Return(IMS_FALSE));
@@ -1047,6 +1097,32 @@ TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnSdpReceived)
             .WillByDefault(Return(20000));
 
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::WAIT_AUDIO_DEDICATED_BEARER, 20000)).Times(1);
+    pPreconditionManager->OnSdpReceived(&objISession);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        StartsOrNotStartsQosTimerByWaitQosWhenLocalPreconditionNotSupportConfig)
+{
+    SetUpMockQosInfo();
+    pPreconditionManager->SetCurrentRatTypeForPrerequisite(INetworkWatcher::RADIOTECH_TYPE_LTE);
+    ON_CALL(objMediaManager, GetNegotiationState(&objISession))
+            .WillByDefault(Return(NEGO_STATE::STATE_NEGOTIATED));
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    SetUpNothingOnDefaultBearerSupported();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_FALSE);
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT))
+            .WillByDefault(Return(20000));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objTimer, StartQosTimer(_, _)).Times(0);
+    pPreconditionManager->OnSdpReceived(&objISession);
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objTimer, StartQosTimer(_, _)).Times(1);
     pPreconditionManager->OnSdpReceived(&objISession);
 }
 

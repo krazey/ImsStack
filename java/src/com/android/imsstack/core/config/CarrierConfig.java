@@ -1111,6 +1111,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_403_response_for_invite_int";
         public static final String KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT =
                 KEY_PREFIX + "policy_for_checking_qos_while_call_upgrading_int";
+        public static final String KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL =
+                KEY_PREFIX + "wait_qos_when_local_precondition_not_supported_bool";
         public static final String KEY_REJECT_OFFERLESS_INVITE_BOOL =
                 KEY_PREFIX + "reject_offerless_invite_bool";
         public static final String KEY_CALL_MAX_COUNT_INT = KEY_PREFIX + "call_max_count_int";

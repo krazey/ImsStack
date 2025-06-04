@@ -147,6 +147,7 @@
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="1"/>
     <boolean name="imsvt.support_early_session_bool" value="false"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="0"/>
+    <boolean name="imsvoice.wait_qos_when_local_precondition_not_supported_bool" value="false"/>
     <int name="imsvt.policy_for_text_with_video_int" value="1"/>
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
     <int name="imsvt.minimum_battery_level_for_limit_video_call_int" value="0"/>
