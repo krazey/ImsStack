@@ -36,6 +36,7 @@
     <pbundle_as_map name="ims.extra_reg_err_bundle">
         <int name="ims.extra_reg_err_final_type_int" value="2"/>
     </pbundle_as_map>
+    <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="true"/>
 
     <!-- MTC -->
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="18">

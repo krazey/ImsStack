@@ -32,6 +32,7 @@
     <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="true"/>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->

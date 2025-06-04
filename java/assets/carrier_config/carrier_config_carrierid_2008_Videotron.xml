@@ -19,6 +19,7 @@
     <int name="ims.reg_retry_305_policy_int" value="3"/>
     <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
+    <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="true"/>
 
     <!-- MTC -->
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">

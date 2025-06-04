@@ -519,6 +519,7 @@
     <boolean name="imswfc.rereg_with_changed_country_on_wifi_bool" value="false"/>
     <boolean name="imswfc.required_wfc_block_by_airplane_mode_bool" value="false"/>
     <boolean name="imswfc.support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
+    <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="false"/>
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="false"/>
     <boolean name="imswfc.video_over_wifi_supported_without_voice_bool" value="false"/>
     <int name ="imswfc.sub_consecutive_retry_cnt_for_reg_forbidden_in_wifi_int" value="0"/>
