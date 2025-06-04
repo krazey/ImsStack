@@ -1323,3 +1323,69 @@ TEST_F(MtcMediaManagerTest, RestoreSdpDoesNotInvokeISessionRestoreIfNotEstablish
 
     pMediaManager->RestoreSdp(&objISession);
 }
+
+TEST_F(MtcMediaManagerTest, UpdatePemType_CallsSetMediaPemTypeOnSession_WithSendRecvHeader)
+{
+    const IMS_UINTP nNegoId = 123;
+    AString strPemHeader = "sendrecv";
+    PemType eExpectedProfileManagerPemType = PemType::SENDRECV;
+    MEDIA_PEM_TYPE eExpectedMediaSessionPemType = MEDIA_PEM_TYPE::SENDRECV;
+
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(*pMediaProfileManager,
+            CreateMediaProfile(
+                    &objISession, IMS_FALSE, IMS_TRUE, MEDIA_TYPE_AUDIO, &objMediaSession));
+
+    pMediaManager->CreateMediaProfile(&objISession, IMS_FALSE, IMS_TRUE);
+
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(strPemHeader));
+
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(nNegoId));
+
+    // Expect calls made by MtcMediaManager::UpdatePemType
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, eExpectedProfileManagerPemType));
+    EXPECT_CALL(objMediaSession, SetMediaPemType(nNegoId, eExpectedMediaSessionPemType));
+
+    // Act
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
+
+    ON_CALL(objMediaSession, DestroyProfile(nNegoId)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(*pMediaProfileManager, DestroyMediaProfile(&objISession, &objMediaSession));
+    pMediaManager->DestroyMediaProfile(&objISession);
+}
+
+TEST_F(MtcMediaManagerTest, UpdatePemType_NoHeader_AndConfigToInitialize)
+{
+    const IMS_UINTP nNegoId = 123;
+    AString strPemHeader = "";  // No P-Early-Media header
+    PemType eExpectedProfileManagerPemType = PemType::NONE;
+    MEDIA_PEM_TYPE eExpectedMediaSessionPemType = MEDIA_PEM_TYPE::NONE;
+
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(*pMediaProfileManager,
+            CreateMediaProfile(
+                    &objISession, IMS_FALSE, IMS_TRUE, MEDIA_TYPE_AUDIO, &objMediaSession));
+
+    pMediaManager->CreateMediaProfile(&objISession, IMS_FALSE, IMS_TRUE);
+
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(strPemHeader));
+
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(nNegoId));
+
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL))
+            .WillOnce(Return(IMS_TRUE));
+    // Expect calls made by MtcMediaManager::UpdatePemType
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, eExpectedProfileManagerPemType));
+    EXPECT_CALL(objMediaSession, SetMediaPemType(nNegoId, eExpectedMediaSessionPemType));
+
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
+
+    ON_CALL(objMediaSession, DestroyProfile(nNegoId)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(*pMediaProfileManager, DestroyMediaProfile(&objISession, &objMediaSession));
+    pMediaManager->DestroyMediaProfile(&objISession);
+}
