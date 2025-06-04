@@ -23,7 +23,4 @@
         <item value="1"/>
     </int-array>
     <int name="imswfc.registration_private_header_int" value="2"/>
-
-    <!-- Media -->
-    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
 </carrier_config>
