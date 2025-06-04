@@ -557,6 +557,18 @@ public:
     virtual IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const = 0;
 
     /**
+     * @brief Indicates whether to update ongoing reg retry timer when ims establishment timer is
+     *        expired and the data is maintained.
+     *
+     *        When PLMN block is requested due to ims establishment timer expiry.
+     *        If the value is true, the UE updates ongoing reg retry timer.
+     *        If the value is false, the UE follows ongoing reg retry timer.
+     *
+     * @return IMS_BOOL Return whether to be applied or not
+     */
+    virtual IMS_BOOL IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry() const = 0;
+
+    /**
      * @brief Flag specifying if g.gsma.rcs.telephony feature tag is used
      *        to indicate available voice call type ("cs", "volte" or "cs,volte").
      *        Example) g.gsma.rcs.telephony = "cs,volte"

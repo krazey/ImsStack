@@ -413,6 +413,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsGeolocationPidfSupported(
     return IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry() const
+{
+    return m_objAsset.bUpdateOngoingRegRetryTimerOnImsEstTimerExpiry;
+}
+
 PUBLIC VIRTUAL IMS_BOOL
 AosNConfiguration::IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const
 {
@@ -1551,10 +1556,12 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
     m_objAsset.bSupportVideoForEmergencyReg =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL);
-    m_objAsset.bUseRegInfoContactWithoutUriCheck =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL);
+    m_objAsset.bUpdateOngoingRegRetryTimerOnImsEstTimerExpiry = piCc->GetBoolean(
+            CarrierConfig::Ims::KEY_UPDATE_ONGOING_REG_RETRY_TIMER_ON_IMS_EST_TIMER_EXPIRY_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Ims::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
+    m_objAsset.bUseRegInfoContactWithoutUriCheck =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL);
     m_objAsset.bUseRetryRuleForEReg =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL);
     m_objAsset.bUseSecurityServerPortInInitReg =

@@ -87,6 +87,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfSupported, (IN IMS_SINT32 nGeolocationPidfType),
             (const, override));
+    MOCK_METHOD(IMS_BOOL, IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType, (),
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsCdmalessFeatureTagRequired, (), (const, override));

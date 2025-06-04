@@ -709,14 +709,19 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(
-                    CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::Ims::
+                               KEY_UPDATE_ONGOING_REG_RETRY_TIMER_ON_IMS_EST_TIMER_EXPIRY_BOOL,
+                    IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::
                                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(
+                    CarrierConfig::Ims::KEY_USE_REGINFO_CONTACT_WITHOUT_URI_CHECK_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(
                     CarrierConfig::Ims::KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL, IMS_FALSE))
@@ -982,6 +987,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatSupportedBasedOnNetworkForReg());
+    EXPECT_TRUE(m_pAosNConfiguration->IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry());
     EXPECT_FALSE(m_pAosNConfiguration->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInInitRegUsed());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegRetryRuleForERegUsed());
