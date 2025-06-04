@@ -807,6 +807,12 @@ public class SscXmlGovTest {
                 + "<ss:terminating-identity-presentation-restriction>"
                 + "<ss:default-behaviour>presentation-not-restricted</ss:default-behaviour>"
                 + "</ss:terminating-identity-presentation-restriction>"
+                // Etc
+                + "<mmt-serv:user-common-data xmlns:mmt-serv=\"http://schemas.ericsson.com/mmtel/services\">"
+                + "<mmt-serv:target-list fixed-targets=\"true\">"
+                + "<mmt-serv:target id=\"tel:+61482880000\" name=\"Secondary Device 1\"/>"
+                + "</mmt-serv:target-list>"
+                + "</mmt-serv:user-common-data>"
                 + "</ss:simservs>";
 
         Document document;
