@@ -29,14 +29,14 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "ICoreService.h"
-#include "IJniMtsServiceThread.h"
+#include "IJniMtsAppThread.h"
 #include "IMessage.h"
 #include "ISipMessage.h"
 #include "ISipHeader.h"
 #include "IPageMessage.h"
 #include "IMtsContext.h"
 #include "IMessageBodyPart.h"
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include "MtsDef.h"
 #include "MtsStringDef.h"
 #include "MtsService.h"
@@ -142,8 +142,10 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
     }
 
     IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
-    IMS_SINT32 nResult = m_piMtsErrorHandler->Handle(
-            m_objContext.GetService(), m_objContext.GetDynamicLoader(), piMessage);
+    // Should it control the emergency registration when it needs to?
+    IMS_SINT32 nResult =
+            m_piMtsErrorHandler->Handle(m_objContext.GetService(MtsServiceType::NORMAL),
+                    m_objContext.GetDynamicLoader(), piMessage);
     if (nResult == MO_ERROR_BY_RETRY_AFTER)
     {
         StartRetryAfterTimer(m_piMtsErrorHandler->GetRetryAfterValue());
@@ -192,21 +194,24 @@ PUBLIC VIRTUAL IMS_BOOL MtsMessageController::HasPendingMoSms() const
 }
 
 PUBLIC void MtsMessageController::ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency)
+        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+        IN MtsServiceType eServiceType)
 {
     IMS_TRACE_I("ProcessMoSms", 0, 0, 0);
 
-    if (SendMtsMessage(eSmsFormat, pContent, strAddress, nSeqId, bEmergency) == IMS_FAILURE)
+    if (SendMtsMessage(eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType) ==
+            IMS_FAILURE)
     {
         delete pContent;
     }
 }
 
-PUBLIC void MtsMessageController::ProcessMtSms(IN IPageMessage* piPageMessage)
+PUBLIC void MtsMessageController::ProcessMtSms(
+        IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType)
 {
     IMS_TRACE_I("ProcessMtSms", 0, 0, 0);
 
-    ReceiveMtsMessage(piPageMessage, IMS_FALSE);
+    ReceiveMtsMessage(piPageMessage, eServiceType);
 }
 
 PUBLIC void MtsMessageController::ClearAllMessages()
@@ -420,11 +425,11 @@ PRIVATE IMtsMessage* MtsMessageController::Search(IN IMS_SINT32 nMessageReferenc
 }
 
 PRIVATE void MtsMessageController::ReceiveMtsMessage(
-        IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency)
+        IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType)
 {
-    IMS_TRACE_I("ReceiveMtsMessage : bEmergency[%s]", _TRACE_B_(bEmergency), 0, 0);
+    IMS_TRACE_I("ReceiveMtsMessage : eServiceType[%s]", PS_ServiceType(eServiceType), 0, 0);
 
-    if (m_objContext.GetService().GetIMtsServiceState()->IsMtServiceBlocked())
+    if (m_objContext.GetService(eServiceType).GetIMtsServiceState()->IsMtServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts is NOTREADY STATE", 0, 0, 0);
 
@@ -434,7 +439,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         return;
     }
 
-    ICoreService* pMtsICoreService = m_objContext.GetService().GetICoreService(bEmergency);
+    ICoreService* pMtsICoreService = m_objContext.GetService(eServiceType).GetICoreService();
 
     if (pMtsICoreService == IMS_NULL)
     {
@@ -483,10 +488,10 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
 
 PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
         IN ByteArray* pContent, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
-        IN IMS_BOOL bEmergency)
+        IN IMS_BOOL bEmergency, IN MtsServiceType eServiceType)
 {
-    IMS_TRACE_I("SendMtsMessage : eSmsFormat[%s], nSeqId[%d], bEmergency[%s]",
-            PS_SmsFormatType(eSmsFormat), nSeqId, _TRACE_B_(bEmergency));
+    IMS_TRACE_I("SendMtsMessage : eSmsFormat[%s], nSeqId[%d], eServiceType[%s]",
+            PS_SmsFormatType(eSmsFormat), nSeqId, PS_ServiceType(eServiceType));
 
     if (strAddress.GetLength() == 0 || pContent->IsNull())
     {
@@ -495,7 +500,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
         return IMS_FAILURE;
     }
 
-    if (m_objContext.GetService().GetIMtsServiceState()->IsMoServiceBlocked())
+    if (m_objContext.GetService(eServiceType).GetIMtsServiceState()->IsMoServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts is not READY STATE ", 0, 0, 0);
         ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
@@ -511,7 +516,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
         return IMS_FAILURE;
     }
 
-    ICoreService* pMtsICoreService = GetICoreService(bEmergency);
+    ICoreService* pMtsICoreService = m_objContext.GetService(eServiceType).GetICoreService();
     if (pMtsICoreService == IMS_NULL)
     {
         IMS_TRACE_E(0, "Fail to get MtsICoreService instance ", 0, 0, 0);
@@ -598,7 +603,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     m_pRetryContent = pContent;
     m_objRetryFunction = [=, this]()
     {
-        ProcessMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
+        ProcessMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType);
     };
 
     SetMessageInfo(piPageMessage, *pContent, eSmsFormat, strDestination,
@@ -629,10 +634,10 @@ PRIVATE void MtsMessageController::ReportMoStatus(
             PS_MoStatus(nReason), nReason, PS_SmsFormatType(eSmsFormat), nSeqId);
     IMS_TRACE_I("ReportMoStatus :  %s", acLog, 0, 0);
 
-    IJniMtsServiceThread* piServiceThread = m_objContext.GetService().GetJniServiceThread();
-    if (piServiceThread)
+    IJniMtsAppThread* piAppThread = m_objContext.GetJniAppThread();
+    if (piAppThread)
     {
-        piServiceThread->ReportMoStatus(nReason, eSmsFormat, nSeqId, m_objContext.GetSlotId());
+        piAppThread->ReportMoStatus(nReason, eSmsFormat, nSeqId, m_objContext.GetSlotId());
     }
 }
 
@@ -647,10 +652,10 @@ PRIVATE void MtsMessageController::ReportMtSms(
             reinterpret_cast<const IMS_CHAR*>(objContent.GetData()), objContent.GetLength());
     ByteArray objBase64Content = strContent.ToBase64();
 
-    IJniMtsServiceThread* piServiceThread = m_objContext.GetService().GetJniServiceThread();
-    if (piServiceThread)
+    IJniMtsAppThread* piAppThread = m_objContext.GetJniAppThread();
+    if (piAppThread)
     {
-        piServiceThread->ReportMtSms(eSmsFormat, objBase64Content, m_objContext.GetSlotId());
+        piAppThread->ReportMtSms(eSmsFormat, objBase64Content, m_objContext.GetSlotId());
     }
 }
 
@@ -1134,22 +1139,6 @@ PRIVATE void MtsMessageController::SetLocationToMessage(IN IMessage* piMessage)
 
     // Set Geolocation-Routing header
     piMessage->AddHeader(SipHeaderName::GEOLOCATION_ROUTING, GEOLOCATION_ROUTING_YES);
-}
-
-PRIVATE
-ICoreService* MtsMessageController::GetICoreService(IN IMS_BOOL bEmergency) const
-{
-    if (bEmergency &&
-            ConfigService::GetConfigService()
-                    ->GetCarrierConfig(m_objContext.GetSlotId())
-                    ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
-    {
-        return m_objContext.GetService().GetICoreService(IMS_TRUE);
-    }
-    else
-    {
-        return m_objContext.GetService().GetICoreService(IMS_FALSE);
-    }
 }
 
 PRIVATE

@@ -16,10 +16,10 @@
 
 #define IMS_STL_USE
 
-#include "JniMtsServiceThread.h"
+#include "JniMtsAppThread.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include <utils/String8.h>
 
 using namespace android;
@@ -27,25 +27,25 @@ using namespace android;
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTS");
 
 PUBLIC
-JniMtsServiceThread::JniMtsServiceThread() :
+JniMtsAppThread::JniMtsAppThread() :
         BaseServiceThread()
 {
-    IMS_TRACE_I("JniMtsServiceThread : ", 0, 0, 0);
+    IMS_TRACE_I("JniMtsAppThread : ", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL JniMtsServiceThread::~JniMtsServiceThread()
+PUBLIC VIRTUAL JniMtsAppThread::~JniMtsAppThread()
 {
-    IMS_TRACE_I("~JniMtsServiceThread : ", 0, 0, 0);
+    IMS_TRACE_I("~JniMtsAppThread : ", 0, 0, 0);
 }
 
 PUBLIC
-void JniMtsServiceThread::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
+void JniMtsAppThread::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
         IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("ReportMoStatus", 0, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IuMtsService::REPORT_MTS_MO_STATUS);
+    objParcel.writeInt32(IuMtsApp::REPORT_MTS_MO_STATUS);
     objParcel.writeInt32(nReason);
     objParcel.writeInt32(ConvertSmsFormatToInt(eSmsFormat));
     objParcel.writeInt32(nSeqId);
@@ -55,13 +55,13 @@ void JniMtsServiceThread::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType
 }
 
 PUBLIC
-void JniMtsServiceThread::ReportMtSms(
+void JniMtsAppThread::ReportMtSms(
         IN SmsFormatType eSmsFormat, IN const ByteArray& objContent, IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("ReportMtSms", 0, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IuMtsService::REPORT_MTS_MT_SMS);
+    objParcel.writeInt32(IuMtsApp::REPORT_MTS_MT_SMS);
     objParcel.writeInt32(ConvertSmsFormatToInt(eSmsFormat));
     objParcel.writeString16(android::String16(objContent.ToString().GetStr()));
     objParcel.writeInt32(nSlotId);
@@ -69,7 +69,7 @@ void JniMtsServiceThread::ReportMtSms(
     SendData2Java(objParcel);
 }
 
-PRIVATE IMS_UINT32 JniMtsServiceThread::ConvertSmsFormatToInt(IN SmsFormatType eSmsFormat)
+PRIVATE IMS_UINT32 JniMtsAppThread::ConvertSmsFormatToInt(IN SmsFormatType eSmsFormat)
 {
     switch (eSmsFormat)
     {

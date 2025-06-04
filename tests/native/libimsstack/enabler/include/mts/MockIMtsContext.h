@@ -18,8 +18,10 @@
 #define MOCK_I_MTS_CONTEXT_H_
 
 #include "IMtsContext.h"
+#include "MtsDef.h"
 #include <gmock/gmock.h>
 
+class IJniMtsAppThread;
 class IMtsDynamicLoader;
 class IMtsMessageController;
 class IMtsService;
@@ -30,9 +32,11 @@ public:
     virtual ~MockIMtsContext() {}
 
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
-    MOCK_METHOD(IMtsService&, GetService, (), (override));
+    MOCK_METHOD(
+            const IMtsService&, GetService, (IN MtsServiceType eServiceType), (const, override));
     MOCK_METHOD(IMtsMessageController&, GetMessageController, (), (override));
     MOCK_METHOD(const IMtsDynamicLoader&, GetDynamicLoader, (), (const, override));
+    MOCK_METHOD(IJniMtsAppThread*, GetJniAppThread, (), (const, override));
 };
 
 #endif

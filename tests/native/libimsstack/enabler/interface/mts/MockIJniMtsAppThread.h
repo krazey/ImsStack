@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_I_JNI_MTS_SERVICE_THREAD_H_
-#define MOCK_I_JNI_MTS_SERVICE_THREAD_H_
+#ifndef MOCK_I_JNI_MTS_APP_THREAD_H_
+#define MOCK_I_JNI_MTS_APP_THREAD_H_
 
 #include <gmock/gmock.h>
 
 #include "ByteArray.h"
-#include "IJniMtsServiceThread.h"
+#include "IJniMtsAppThread.h"
 #include "MtsDef.h"
 
-class MockIJniMtsServiceThread : public IJniMtsServiceThread
+class MockIJniMtsAppThread : public IJniMtsAppThread
 {
 public:
-    inline virtual ~MockIJniMtsServiceThread() {}
+    inline virtual ~MockIJniMtsAppThread() {}
 
     MOCK_METHOD(void, ReportMoStatus,
             (IN IMS_SINT32, IN SmsFormatType, IN IMS_SINT32, IN IMS_SINT32), (override));

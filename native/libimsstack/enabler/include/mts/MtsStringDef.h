@@ -21,7 +21,7 @@
 #include "INetworkWatcher.h"
 #include "IIpcan.h"
 #include "ImsTypeDef.h"
-#include "IuMtsService.h"
+#include "IuMtsApp.h"
 #include "MtsDef.h"
 
 class MtsStringDef
@@ -182,6 +182,17 @@ public:
         }
     }
 
+    inline static const IMS_CHAR* PS_ServiceType(IN MtsServiceType eServiceType)
+    {
+        switch (eServiceType)
+        {
+            case MtsServiceType::NORMAL:
+                return "NORMAL";
+            case MtsServiceType::EMERGENCY:
+                return "EMERGENCY";
+        }
+    }
+
     inline static const IMS_CHAR* PS_SmsFormatType(IN SmsFormatType eSmsFormat)
     {
         switch (eSmsFormat)
@@ -259,6 +270,10 @@ public:
 
 #ifndef PS_ServiceState
 #define PS_ServiceState(A) MtsStringDef::PS_ServiceState(A)
+#endif
+
+#ifndef PS_ServiceType
+#define PS_ServiceType(A) MtsStringDef::PS_ServiceType(A)
 #endif
 
 #ifndef PS_SmsFormatType

@@ -40,7 +40,7 @@ public:
      *
      * @return A status code indicating the outcome of the error handling process.
      */
-    virtual IMS_SINT32 Handle(IN IMtsService& objMtsService,
+    virtual IMS_SINT32 Handle(IN const IMtsService& objMtsService,
             IN const IMtsDynamicLoader& objMtsDynamicLoader,
             IN const IMessage* piMessage = IMS_NULL) = 0;
 

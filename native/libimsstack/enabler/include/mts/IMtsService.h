@@ -18,15 +18,13 @@
 #define INTERFACE_MTS_SERVICE_H_
 
 #include "ByteArray.h"
-#include "INativeEnabler.h"
 #include "ImsTypeDef.h"
 #include "MtsDef.h"
 
 class ICoreService;
-class IJniMtsServiceThread;
 class IMtsServiceState;
 
-class IMtsService : public INativeEnabler
+class IMtsService
 {
 public:
     virtual ~IMtsService() {}
@@ -34,40 +32,30 @@ public:
     /**
      * @brief Gets the ICoreService object.
      *
-     * @param bEmergency {@code IMS_TRUE} if the dialed number is an emergency number,
-     *                   {@code IMS_FALSE} otherwise
-     *
      * @return The ICoreService object.
      */
-    virtual ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const = 0;
+    virtual ICoreService* GetICoreService() const = 0;
 
     /**
      * @brief Gets the IMtsServiceState object.
      *
      * @return The IMtsServiceState object.
      */
-    virtual IMtsServiceState* GetIMtsServiceState() = 0;
-
-    /**
-     * @brief Gets the IJniMtsServiceThread object.
-     *
-     * @return The IJniMtsServiceThread object.
-     */
-    virtual IJniMtsServiceThread* GetJniServiceThread() const = 0;
+    virtual IMtsServiceState* GetIMtsServiceState() const = 0;
 
     /**
      * @brief Requests the IMS registration recovery procedure.
      *
      * @param nRecoveryType Indicate the control type for registration. (@see ImsAosControl)
      */
-    virtual void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) = 0;
+    virtual void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) const = 0;
 
     /**
      * @brief Calls the AoS to register with next P-CSCF.
      *
      * @param nRetryAfterValue The value of the Retry-After header received.
      */
-    virtual void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) = 0;
+    virtual void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) const = 0;
 
     /**
      * @brief Sends a request for a mobile originated SMS, checking IMS traffic.

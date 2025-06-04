@@ -18,7 +18,9 @@
 #define INTERFACE_MTS_CONTEXT_H_
 
 #include "ImsTypeDef.h"
+#include "MtsDef.h"
 
+class IJniMtsAppThread;
 class IMtsDynamicLoader;
 class IMtsMessageController;
 class IMtsService;
@@ -38,9 +40,11 @@ public:
     /**
      * @brief Gets the IMtsService instance associated with this context.
      *
+     * @param eServiceType The target of the IMtsService instance.
+     *
      * @return Reference to the IMtsService instance.
      */
-    virtual IMtsService& GetService() = 0;
+    virtual const IMtsService& GetService(IN MtsServiceType eServiceType) const = 0;
 
     /**
      * @brief Gets the IMtsMessageController instance associated with this context.
@@ -55,6 +59,13 @@ public:
      * @return Reference to the IMtsDynamicLoader instance.
      */
     virtual const IMtsDynamicLoader& GetDynamicLoader() const = 0;
+
+    /**
+     * @brief Gets the IJniMtsAppThread object.
+     *
+     * @return The IJniMtsAppThread object.
+     */
+    virtual IJniMtsAppThread* GetJniAppThread() const = 0;
 };
 
 #endif

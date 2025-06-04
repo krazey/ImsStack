@@ -43,16 +43,19 @@ public:
      *               callbacks for this specific message.
      * @param bEmergency {@code IMS_TRUE} If the dialed number is an emergency number,
      *                   {@code IMS_FALSE} otherwise.
+     * @param eServiceType The service type of the MO SMS message.
      */
     virtual void ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN MtsServiceType eServiceType) = 0;
 
     /**
      * @brief Processes an MT SMS request.
      *
      * @param piMessage A pointer to the IPageMessage object representing the MT SMS message.
+     * @param eServiceType The service type of the MT SMS message.
      */
-    virtual void ProcessMtSms(IN IPageMessage* piMessage) = 0;
+    virtual void ProcessMtSms(IN IPageMessage* piMessage, IN MtsServiceType eServiceType) = 0;
 
     /**
      * @brief Clears all SMS messages managed by the controller.

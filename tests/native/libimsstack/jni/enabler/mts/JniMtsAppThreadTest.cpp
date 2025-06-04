@@ -15,8 +15,8 @@
  */
 
 #include "ImsTypeDef.h"
-#include "IuMtsService.h"
-#include "JniMtsServiceThread.h"
+#include "IuMtsApp.h"
+#include "JniMtsAppThread.h"
 #include "MockIThread.h"
 #include "MtsDef.h"
 #include "PlatformContext.h"
@@ -38,53 +38,53 @@ MATCHER_P(IsSameMessageType, type, "")
     return type == eType;
 }
 
-class JniMtsServiceThreadTest : public ::testing::Test
+class JniMtsAppThreadTest : public ::testing::Test
 {
 public:
-    inline JniMtsServiceThreadTest() :
-            pJniServiceThread(IMS_NULL),
+    inline JniMtsAppThreadTest() :
+            pJniAppThread(IMS_NULL),
             pThreadService(new TestThreadService())
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
         pThreadService->SetThread(&objMockThread);
-        CreateJniMtsServiceThread();
+        CreateJniMtsAppThread();
     }
-    inline virtual ~JniMtsServiceThreadTest()
+    inline virtual ~JniMtsAppThreadTest()
     {
-        delete pJniServiceThread;
+        delete pJniAppThread;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
     }
 
 public:
     Parcel objParcel;
-    JniMtsServiceThread* pJniServiceThread;
+    JniMtsAppThread* pJniAppThread;
     TestThreadService* pThreadService;
     MockIThread objMockThread;
 
 protected:
-    void CreateJniMtsServiceThread()
+    void CreateJniMtsAppThread()
     {
-        pJniServiceThread = new JniMtsServiceThread();
-        pJniServiceThread->Start("", IMS_SLOT_0);
+        pJniAppThread = new JniMtsAppThread();
+        pJniAppThread->Start("", IMS_SLOT_0);
         Jni_SendDataToJava pfnSendDataToJava = reinterpret_cast<Jni_SendDataToJava>(0x01);
-        pJniServiceThread->SetCallback(0x02, pfnSendDataToJava);
+        pJniAppThread->SetCallback(0x02, pfnSendDataToJava);
     }
 };
 
-TEST_F(JniMtsServiceThreadTest, ReportMoStatus)
+TEST_F(JniMtsAppThreadTest, ReportMoStatus)
 {
-    IMS_UINT32 eType = IuMtsService::REPORT_MTS_MO_STATUS;
+    IMS_UINT32 eType = IuMtsApp::REPORT_MTS_MO_STATUS;
 
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniServiceThread->ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, 1, IMS_SLOT_0);
+    pJniAppThread->ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, 1, IMS_SLOT_0);
 }
 
-TEST_F(JniMtsServiceThreadTest, ReportMtSms)
+TEST_F(JniMtsAppThreadTest, ReportMtSms)
 {
-    IMS_UINT32 eType = IuMtsService::REPORT_MTS_MT_SMS;
+    IMS_UINT32 eType = IuMtsApp::REPORT_MTS_MT_SMS;
     ByteArray objRpData((IMS_BYTE)0x01);  // message type indicator(RP-MT-DATA)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
@@ -92,7 +92,7 @@ TEST_F(JniMtsServiceThreadTest, ReportMtSms)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniServiceThread->ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, IMS_SLOT_0);
+    pJniAppThread->ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, IMS_SLOT_0);
 }
 
 }  // namespace android

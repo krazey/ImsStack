@@ -52,8 +52,9 @@ public:
     // IMtsMessageController
     IMS_BOOL HasPendingMoSms() const override;
     void ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
-    void ProcessMtSms(IN IPageMessage* piPageMessage) override;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN MtsServiceType eServiceType) override;
+    void ProcessMtSms(IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType) override;
     void ClearAllMessages() override;
 
     // ITimerListener
@@ -71,9 +72,10 @@ private:
     IMtsMessage* Search(IN IMS_SINT32 nMessageReference,
             IN MtsTransactionType eMessageType = MtsTransactionType::MESSAGE_TYPE_RECEIVE);
 
-    void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
+    void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType);
     IMS_RESULT SendMtsMessage(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN MtsServiceType eServiceType);
     void ReportMoStatus(
             IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent);
@@ -101,7 +103,6 @@ private:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
     void SetLocationToMessage(IN IMessage* piMessage);
 
-    ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const;
     AString GetPreviousCallId(IN const IMtsMessage* piMtsMessage) const;
     static IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);

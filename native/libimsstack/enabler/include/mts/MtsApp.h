@@ -19,16 +19,19 @@
 
 #include "IMtsApp.h"
 #include "IMtsContext.h"
+#include "IMtsJni.h"
 #include "ImsApp.h"
+#include "MtsDef.h"
 #include "MtsService.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
 
+class IJniMtsAppThread;
 class IMtsDynamicLoader;
 class IMtsMessageController;
 class IMtsService;
 
-class MtsApp final : public IMtsApp, public ImsApp, public IMtsContext
+class MtsApp final : public IMtsApp, public ImsApp, public IMtsContext, public IMtsJni
 {
 public:
     explicit MtsApp(IN IMS_SINT32 nSlotId);
@@ -42,7 +45,7 @@ public:
 
     // IMtsContext
     inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
-    inline IMtsService& GetService() override { return m_objMtsService; }
+    const IMtsService& GetService(IN MtsServiceType eServiceType) const override;
     inline IMtsMessageController& GetMessageController() override
     {
         return m_objMtsMessageController;
@@ -51,10 +54,20 @@ public:
     {
         return m_objMtsDynamicLoader;
     }
+    IJniMtsAppThread* GetJniAppThread() const override;
+
+    // IMtsJni
+    inline void NotifyJniEnablerSet() override {}
+    void SendMoSmsByServiceType(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
 
 private:
+    void AttachJni();
+    IMS_BOOL IsEmergencySmsOverImsSupported() const;
+
     IMS_SINT32 m_nSlotId;
-    MtsService m_objMtsService;
+    MtsService m_objNormalService;
+    MtsService m_objEmergencyService;
     MtsMessageController m_objMtsMessageController;
     MtsDynamicLoader m_objMtsDynamicLoader;
 };
