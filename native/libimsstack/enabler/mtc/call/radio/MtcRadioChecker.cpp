@@ -454,11 +454,13 @@ PRIVATE IMS_BOOL MtcRadioChecker::IsInEpsfbSilentRedial(ImsList<CallKey>& objCal
 {
     for (IMS_UINT32 nIndex = 0; nIndex < objCallKeys.GetSize(); nIndex++)
     {
+        IMtcCall* pCall = m_objContext.GetCallManager().GetCallByCallKey(objCallKeys.GetAt(nIndex));
+        if(pCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
+        {
+            continue;
+        }
         EpsFallbackTrigger& objEpsFallbackTrigger =
-                m_objContext.GetCallManager()
-                        .GetCallByCallKey(objCallKeys.GetAt(nIndex))
-                        ->GetCallContext()
-                        .GetEpsFallbackTrigger();
+                pCall->GetCallContext().GetEpsFallbackTrigger();
 
         if (objEpsFallbackTrigger.IsWaitingEpsFallback() ||
                 objEpsFallbackTrigger.IsWaitingRegistration())
