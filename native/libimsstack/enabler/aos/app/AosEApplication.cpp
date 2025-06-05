@@ -83,17 +83,11 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
             break;
 
         case ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF:
-            if (m_piContext->GetConnection()->GetState() == IAosConnection::STATE_ACTIVE)
-            {
-                A_IMS_TRACE_D(APPID, "PDN is connected, do fake registration", 0, 0, 0);
-                m_piRegistration->RequestCmd(IAosRegistration::CMD_FAKE_MODE,
-                        IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
-            }
-            else
-            {
-                A_IMS_TRACE_D(APPID, "PDN is not connected", 0, 0, 0);
-                ProcessCleanAll(AosReason::DATA_DISCONNECTED);
-            }
+            ProcessFakeRegRequest(IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
+            break;
+
+        case ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF:
+            ProcessFakeRegRequest(IAosRegistration::REASON_FAKE_MODE_SAME_PCSCF);
             break;
 
         case ImsAosControl::RETRY_COUNT_INCREASE:  // FALL-THROUGH
@@ -134,6 +128,20 @@ PROTECTED void AosEApplication::SetKeepEPdnWhenNoPcscf(IN IMS_BOOL bEnable)
 PROTECTED void AosEApplication::SetRegBlockInCbm(IN IMS_BOOL bBlock)
 {
     m_bRegBlockInCbm = bBlock;
+}
+
+PROTECTED void AosEApplication::ProcessFakeRegRequest(IN IMS_UINT32 nReason)
+{
+    if (m_piContext->GetConnection()->GetState() == IAosConnection::STATE_ACTIVE)
+    {
+        A_IMS_TRACE_D(APPID, "PDN is connected, do fake registration", 0, 0, 0);
+        m_piRegistration->RequestCmd(IAosRegistration::CMD_FAKE_MODE, nReason);
+    }
+    else
+    {
+        A_IMS_TRACE_D(APPID, "PDN is not connected", 0, 0, 0);
+        ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    }
 }
 
 PROTECTED IMS_BOOL AosEApplication::IsKeepEPdnWhenNoPcscf() const

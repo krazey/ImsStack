@@ -414,6 +414,30 @@ TEST_F(AosEApplicationTest, RequestCmd)
     EXPECT_FALSE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_REFRESH, 0));
 }
 
+TEST_F(AosEApplicationTest, ShouldRequestFakeModeWithSamePcscfWhenPdnActive)
+{
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_FAKE_MODE,
+                    IAosRegistration::REASON_FAKE_MODE_SAME_PCSCF));
+
+    m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF, 0);
+}
+
+TEST_F(AosEApplicationTest, ShouldNotRequestFakeModeWithSamePcscfWhenPdnNotActive)
+{
+    ON_CALL(m_objMockIAosConnection, GetState()).WillByDefault(Return(IAosConnection::STATE_IDLE));
+
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(
+                    IAosRegistration::CMD_FAKE_MODE, IAosRegistration::REASON_FAKE_MODE_SAME_PCSCF))
+            .Times(0);
+
+    m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF, 0);
+}
+
 TEST_F(AosEApplicationTest, RegisterStartCmdShouldRegStopWhenNwAttachRejected)
 {
     IMS_SINT32 nRejectCause = 3;
