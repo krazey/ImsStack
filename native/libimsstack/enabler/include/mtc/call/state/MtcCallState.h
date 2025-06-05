@@ -214,7 +214,9 @@ protected:
     static void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
             IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
 
-    CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
+    const CallReasonInfo GetAudioInactivityReasonOnTermination(
+            IN const CallReasonInfo& objReason) const;
+    const CallReasonInfo GetAudioInactivityReasonOnMediaDataFailed() const;
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
     static IMS_SINT32 GetCallReasonByNegotiationResult(IN NegotiationResult eNegoResult);

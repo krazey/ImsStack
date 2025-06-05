@@ -1007,8 +1007,8 @@ void MtcCallState::SendTransactionResponse(IN ISipServerConnection* piSipServerC
 }
 
 PROTECTED
-CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
-        IN const CallReasonInfo& objReason)
+const CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
+        IN const CallReasonInfo& objReason) const
 {
     if (objReason.nCode != CODE_USER_TERMINATED)
     {
@@ -1023,6 +1023,18 @@ CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
     IMS_TRACE_D("GetAudioInactivityReasonOnTermination", 0, 0, 0);
 
     return CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT);
+}
+
+PROTECTED
+const CallReasonInfo MtcCallState::GetAudioInactivityReasonOnMediaDataFailed() const
+{
+    if (m_objContext.GetService().IsWlanIpCanType() &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL))
+    {
+        return CallReasonInfo(CODE_WIFI_LOST);
+    }
+    return CallReasonInfo(CODE_MEDIA_NO_DATA);
 }
 
 PROTECTED

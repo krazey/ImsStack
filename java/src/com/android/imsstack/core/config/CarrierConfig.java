@@ -1472,6 +1472,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_tcall_timer_expiry_of_vowifi_call_int";
         public static final String KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL =
                 KEY_PREFIX + "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
+        public static final String KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL =
+                KEY_PREFIX + "override_media_inactivity_to_wifi_lost_bool";
 
         private ImsWfc() {}
     }

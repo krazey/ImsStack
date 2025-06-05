@@ -508,9 +508,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(
 {
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        IMS_SINT32 nReasonCode =
-                m_objContext.GetService().IsWlanIpCanType() ? CODE_WIFI_LOST : CODE_MEDIA_NO_DATA;
-        CallReasonInfo objReason(nReasonCode);
+        const CallReasonInfo objReason = GetAudioInactivityReasonOnMediaDataFailed();
         HandleTerminate(objReason);
         m_objContext.GetUiNotifier().SendTerminated(objReason);
         return CallStateName::TERMINATING;

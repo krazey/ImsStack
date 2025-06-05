@@ -297,11 +297,31 @@ TEST_F(EstablishedStateTest, RefreshNotifyCompletedRunsPendingOperationAsynchron
 
 TEST_F(EstablishedStateTest, OnReceivingMediaDataFailedWithAudioTerminatesCall)
 {
-    EXPECT_CALL(objService, IsWlanIpCanType)
-            .Times(2)
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, _)).Times(2);
+    EXPECT_CALL(objService, IsWlanIpCanType).WillOnce(Return(IMS_TRUE)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockMtcSession,
+            Terminate(IMS_TRUE, IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))))
+            .Times(2);
+    EXPECT_CALL(
+            objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))))
+            .Times(2);
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTP));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTP));
+}
+
+TEST_F(EstablishedStateTest, OnReceivingMediaDataFailedWithAudioOverridesReasonHeader)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objService, IsWlanIpCanType).WillOnce(Return(IMS_TRUE)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockMtcSession,
+            Terminate(IMS_TRUE, IsEqualCallReason(CallReasonInfo(CODE_WIFI_LOST))));
+    EXPECT_CALL(objMockMtcSession,
+            Terminate(IMS_TRUE, IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))));
     EXPECT_CALL(objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_WIFI_LOST))));
     EXPECT_CALL(
             objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))));

@@ -447,21 +447,45 @@ TEST_F(UpdatingStateTest, SessionTerminatedTerminatesCall)
     EXPECT_EQ(CallStateName::TERMINATING, pUpdatingState->SessionTerminated(&objSession));
 }
 
-TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedInvokesSendTerminated)
+TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedWithAudioTerminatesCall)
 {
     EXPECT_CALL(objMtcService, IsWlanIpCanType)
-            .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, _)).Times(2);
+    EXPECT_CALL(objMtcSession,
+            Terminate(IMS_TRUE, IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))))
+            .Times(2);
+    EXPECT_CALL(
+            objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))))
+            .Times(2);
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTP));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTP));
+}
+
+TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedWithAudioOverridesReasonHeader)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcService, IsWlanIpCanType)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(
+            objMtcSession, Terminate(IMS_TRUE, IsEqualCallReason(CallReasonInfo(CODE_WIFI_LOST))));
+    EXPECT_CALL(objMtcSession,
+            Terminate(IMS_TRUE, IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))));
     EXPECT_CALL(objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_WIFI_LOST))));
     EXPECT_CALL(
             objUiNotifier, SendTerminated(IsEqualCallReason(CallReasonInfo(CODE_MEDIA_NO_DATA))));
 
     EXPECT_EQ(CallStateName::TERMINATING,
-            pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTCP));
+            pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTP));
     EXPECT_EQ(CallStateName::TERMINATING,
-            pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTCP));
+            pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_AUDIO, MEDIA_PROTOCOL_RTP));
 }
 
 TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedWithVideoPushesPendingOperation)

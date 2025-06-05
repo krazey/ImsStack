@@ -258,6 +258,7 @@
     <string-array name="imsemergency.reject_code_and_reason_require_immediate_termination_string_array" num="1">
         <item value="503:Emergency calls over WiFi not allowed in this location:1622"/>
     </string-array>
+    <boolean name="imswfc.override_media_inactivity_to_wifi_lost_bool" value="true"/>
 
     <int name="imsvoice.audio_maxred_int" value="0"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>

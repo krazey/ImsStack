@@ -1413,6 +1413,7 @@ public:
         static const IMS_CHAR KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[];
         static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[];
         static const IMS_CHAR KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[];
+        static const IMS_CHAR KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[];
 
         // registration private header
         enum

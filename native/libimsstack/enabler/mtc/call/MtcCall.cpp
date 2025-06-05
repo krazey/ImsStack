@@ -1218,8 +1218,8 @@ PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
 PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataStarted(
         IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {
-    IMS_TRACE_I("%s - OnReceivingMediaDataStarted : type[%s]", ToString().GetStr(),
-            MtcMediaStringUtils::ConvertProtocolType(eProtocolType), 0);
+    IMS_TRACE_I("%s - OnReceivingMediaDataStarted : media[%d] protocol[%s]", ToString().GetStr(),
+            eMediaType, MtcMediaStringUtils::ConvertProtocolType(eProtocolType));
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
@@ -1231,8 +1231,8 @@ PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataStarted(
 PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataFailed(
         IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {
-    IMS_TRACE_I("%s - OnReceivingMediaDataFailed : type[%s]", ToString().GetStr(),
-            MtcMediaStringUtils::ConvertProtocolType(eProtocolType), 0);
+    IMS_TRACE_I("%s - OnReceivingMediaDataFailed : media[%d] type[%s]", ToString().GetStr(),
+            eMediaType, MtcMediaStringUtils::ConvertProtocolType(eProtocolType));
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)

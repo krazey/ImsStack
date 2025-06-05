@@ -674,6 +674,7 @@
         <item value="si,,113"/>
         <item value="ba,,122,123,124"/>
     </string-array>
+    <boolean name="imswfc.override_media_inactivity_to_wifi_lost_bool" value="false"/>
 
     <!-- Media -->
     <boolean name="imsvoice.support_multi_config_in_early_session_bool" value="false"/>
