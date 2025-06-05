@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.PersistableBundle;
+import android.telephony.DataFailCause;
 import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -535,6 +536,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     public void onHandoverStateChanged(int handoverState, int networkType, int failCause) {
         ImsLog.d(mSlotId, "AosService: onHandoverStateChanged");
         if (handoverState == IApn.HANDOVER_FAILURE) {
+            if (failCause == DataFailCause.IWLAN_IKEV2_AUTH_FAILURE
+                    && isIkeAuthFailureNotificationRequired()) {
+                mHandler.post(() -> onTechnologyChangeFailed(RegistrationType.NORMAL,
+                        getRegistrationNetworkType(networkType),
+                        ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE));
+            }
             int targetNetwork = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN)
                     ? IApn.IPCAN_CATEGORY_MOBILE : IApn.IPCAN_CATEGORY_WLAN;
 
@@ -582,6 +589,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 }
             }
             case TelephonyManager.DATA_DISCONNECTED -> {
+                if (failCause == DataFailCause.IWLAN_IKEV2_AUTH_FAILURE
+                        && isIkeAuthFailureNotificationRequired()) {
+                    mHandler.post(() -> onDeregistered(
+                            getRegistrationNetworkType(networkType),
+                            ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE));
+                }
                 updateDataFailureReason(failCause);
             }
             default -> { }
@@ -957,6 +970,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         String key = convertReasonToKey(reason);
         return (key == null) ? null :
                 getStringFromBundle(CarrierConfig.ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE, key);
+    }
+
+    private boolean isIkeAuthFailureNotificationRequired() {
+        ConfigInterface configInterface =
+                AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
+        CarrierConfig carrierConfig =
+                (configInterface == null) ? null : configInterface.getCarrierConfig();
+        return (carrierConfig == null) ? false : carrierConfig.getBoolean(
+                CarrierConfig.ImsWfc.KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL);
     }
 
     private static NetworkType getRegistrationNetworkType(int telephonyNetworkType) {

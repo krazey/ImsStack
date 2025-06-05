@@ -805,6 +805,31 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void onHandoverStateChanged_notifyIkeAuthFailureForWfcActivation() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        // Do not notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL
+        // is false.
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN,
+                android.telephony.DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+        processAllMessages();
+        verify(mMockAosRegistrationListener, never()).notifyTechnologyChangeFailed(
+                RegistrationType.NORMAL, NetworkType.IWLAN,
+                ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null);
+
+        // Notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL is true.
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsWfc.KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL))
+                .thenReturn(true);
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN,
+                android.telephony.DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+        processAllMessages();
+        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(RegistrationType.NORMAL,
+                NetworkType.IWLAN, ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null);
+    }
+
+    @Test
     public void onCrossSimStatusChanged_doNotUpdateRegisteredNetworkTypeForCellular() {
         mAosService.addListener(mMockAosRegistrationListener);
         mAosService.setConnectedOverCrossSim(false);
@@ -918,6 +943,33 @@ public class AosServiceTest extends ImsStackTest {
                 TelephonyManager.NETWORK_TYPE_LTE);
 
         verify(mMockJniIms).sendData(mNativeObject, updateData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_notifyIkeAuthFailureForWfcActivation() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        // Do not notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL
+        // is false.
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
+                TelephonyManager.DATA_DISCONNECTED,
+                android.telephony.DataFailCause.IWLAN_IKEV2_AUTH_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN);
+        processAllMessages();
+        verify(mMockAosRegistrationListener, never()).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.IWLAN, ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null);
+
+        // Notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL is true.
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsWfc.KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL))
+                .thenReturn(true);
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
+                TelephonyManager.DATA_DISCONNECTED,
+                android.telephony.DataFailCause.IWLAN_IKEV2_AUTH_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN);
+        processAllMessages();
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.IWLAN, ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null);
     }
 
     @Test

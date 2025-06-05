@@ -406,6 +406,7 @@ public interface IAosRegistrationListener {
         DATA_RADIO_RELEASE_ABNORMAL(ReasonCode.BASE_DATA, 11),
         DATA_NETWORK_DETACH(ReasonCode.BASE_DATA, 12),
         DATA_OEM_CAUSE_4(ReasonCode.BASE_DATA, 13),
+        DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE(ReasonCode.BASE_DATA, 14),
 
         /**
          * BASE_RESP_4XX : 14000 (Errors due to registration response 4XX.)
@@ -626,7 +627,10 @@ public interface IAosRegistrationListener {
                         ImsReasonInfo.CODE_NO_VALID_SIM)),
                 Map.entry(ReasonCode.WFC_REG_RESP_500, Pair.create(
                         ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                        ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE))
+                        ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE)),
+                Map.entry(ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, Pair.create(
+                        ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE,
+                        ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE))
         );
 
         /**
