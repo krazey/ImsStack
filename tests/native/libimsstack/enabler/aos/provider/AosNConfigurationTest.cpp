@@ -608,6 +608,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     CarrierConfig::Ims::KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::KEY_KEEP_REG_RETRY_TIMER_ON_ALL_ENABLERS_DETACHED_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_TIMEOUT_AS_FAILURE_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
@@ -966,6 +970,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsKeepEPdnUponPcscfUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsKeepERegRetryOnWlanRequired());
     EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryCntUponPdnReconnect());
+    EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryTimerOnAllEnablersDetached());
     EXPECT_TRUE(m_pAosNConfiguration->IsRegTimerForECallTimeoutAsFailure());
     EXPECT_TRUE(m_pAosNConfiguration->IsRegTimerForECallWithRatCheckEnabled());
     EXPECT_FALSE(m_pAosNConfiguration->IsStopERegTimerOnEpdnConnected());

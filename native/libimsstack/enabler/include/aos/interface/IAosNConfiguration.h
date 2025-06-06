@@ -494,6 +494,16 @@ public:
     virtual IMS_BOOL IsKeepRegRetryCntUponPdnReconnect() const = 0;
 
     /**
+     * @brief Returns a flag indicating whether Aos will keep the registration retry timer running
+     *        even if all enablers are detached.
+     *
+     * @return IMS_TRUE if need to keep the registration retry timer on all enablers detached,
+     *         else IMS_FALSE
+     * @see {@code ims.keep_reg_retry_timer_on_all_enablers_detached_bool}
+     */
+    virtual IMS_BOOL IsKeepRegRetryTimerOnAllEnablersDetached() const = 0;
+
+    /**
      * @brief Indicates how to handle the emergency call as failure or to proceed it without
      *        completing the normal registration after the timer as CarrierConfig::IMSEMERGENCY::
      *        KEY_REG_TIMER_FOR_ECALL_MILLIS_INT setting value is expired.

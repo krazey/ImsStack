@@ -43,6 +43,7 @@ public:
             bKeepEPdnUponPcscfUnavailable(IMS_FALSE),
             bKeepERegRetryOnWlan(IMS_FALSE),
             bKeepRegRetryCntUponPdnReconnect(IMS_FALSE),
+            bKeepRegRetryTimerOnAllEnablersDetached(IMS_FALSE),
             bRegTimerForECallTimeoutAsFailure(IMS_TRUE),
             bRegTimerForECallWithRatCheckEnabled(IMS_FALSE),
             bStopERegTimerOnEpdnConnected(IMS_FALSE),
@@ -150,6 +151,7 @@ public:
     IMS_BOOL bKeepEPdnUponPcscfUnavailable;
     IMS_BOOL bKeepERegRetryOnWlan;
     IMS_BOOL bKeepRegRetryCntUponPdnReconnect;
+    IMS_BOOL bKeepRegRetryTimerOnAllEnablersDetached;
     IMS_BOOL bRegTimerForECallTimeoutAsFailure;
     IMS_BOOL bRegTimerForECallWithRatCheckEnabled;
     IMS_BOOL bStopERegTimerOnEpdnConnected;

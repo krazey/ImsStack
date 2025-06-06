@@ -371,6 +371,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepRegRetryCntUponPdnReconnect() c
     return m_objAsset.bKeepRegRetryCntUponPdnReconnect;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepRegRetryTimerOnAllEnablersDetached() const
+{
+    return m_objAsset.bKeepRegRetryTimerOnAllEnablersDetached;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegTimerForECallTimeoutAsFailure() const
 {
     return m_objAsset.bRegTimerForECallTimeoutAsFailure;
@@ -1502,6 +1507,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
     m_objAsset.bKeepRegRetryCntUponPdnReconnect =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_KEEP_REG_RETRY_CNT_UPON_PDN_RECONNECT_BOOL);
+    m_objAsset.bKeepRegRetryTimerOnAllEnablersDetached = piCc->GetBoolean(
+            CarrierConfig::Ims::KEY_KEEP_REG_RETRY_TIMER_ON_ALL_ENABLERS_DETACHED_BOOL);
     m_objAsset.bRegTimerForECallTimeoutAsFailure = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_REG_TIMER_FOR_ECALL_TIMEOUT_AS_FAILURE_BOOL);
     m_objAsset.bRegTimerForECallWithRatCheckEnabled = piCc->GetBoolean(
