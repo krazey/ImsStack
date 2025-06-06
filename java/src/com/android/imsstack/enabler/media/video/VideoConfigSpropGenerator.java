@@ -218,6 +218,12 @@ public class VideoConfigSpropGenerator {
                     PersistableBundle hevcPayloadDesc = hevcPayloadDescriptions
                             .getPersistableBundle("" + payloadType);
 
+                    if (hevcPayloadDesc == null) {
+                        ImsLog.e(mSlotId, "hevcPayloadDescription is null for hevcPayloadType-Idx:"
+                                + payloadTypeIdx + ". This is a CarrierConfig issue!");
+                        continue;
+                    }
+
                     // Check if SPROP already exists.
                     String sprop = hevcPayloadDesc.getString(
                             CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING, null);
@@ -271,6 +277,12 @@ public class VideoConfigSpropGenerator {
                     int payloadType = h264PayloadTypes[payloadTypeIdx];
                     PersistableBundle avcPayloadDesc = h264PayloadDescriptions
                             .getPersistableBundle("" + payloadType);
+
+                    if (avcPayloadDesc == null) {
+                        ImsLog.e(mSlotId, "avcPayloadDesc is null for h264PayloadType-Idx:"
+                                + payloadTypeIdx + ". This is a CarrierConfig issue!");
+                        continue;
+                    }
 
                     // Check if SPROP already exists.
                     String sprop = avcPayloadDesc.getString(
