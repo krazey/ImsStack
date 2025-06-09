@@ -497,7 +497,7 @@ IMS_BOOL VideoSdpParser::ParsePacketizationMode(
     if (objSplitEqual.GetAt(0).Equals("packetization-mode"))
     {
         pFmtp->SetPacketizationMode((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowPacketizationMode(IMS_TRUE);
+        pFmtp->SetVisiblePacketizationMode(IMS_TRUE);
 
         IMS_TRACE_I("ParsePacketizationMode(): Packetization mode[%d], Visible[%d]",
                 pFmtp->GetPacketizationMode(), pFmtp->IsPacketizationModeVisible(), 0);
@@ -525,7 +525,7 @@ IMS_BOOL VideoSdpParser::ParseProfileLevelId(
                 VideoProfileUtil::GetAvcProfileFromProfileLevelId(pFmtp->GetProfileLevelId()));
         pFmtp->SetLevel(
                 VideoProfileUtil::GetAvcLevelFromProfileLevelId(pFmtp->GetProfileLevelId()));
-        pFmtp->SetShowProfileLevelId(IMS_TRUE);
+        pFmtp->SetVisibleProfileLevelId(IMS_TRUE);
 
         IMS_TRACE_I("ParseProfileLevelId(): profile-level-id[%s], Visible[%d]",
                 pFmtp->GetProfileLevelId().GetStr(), pFmtp->IsProfileLevelIdVisible(), 0);
@@ -565,7 +565,7 @@ IMS_BOOL VideoSdpParser::ParseSpropParameterSets(IN const ImsList<AString>& objS
         }
 
         pFmtp->SetSpropParam(strSpropParam);
-        pFmtp->SetShowSpropParam(IMS_TRUE);
+        pFmtp->SetVisibleSpropParam(IMS_TRUE);
 
         IMS_TRACE_I("ParseSpropParameterSets(): Sprop Params[%s], Visible[%d]",
                 pFmtp->GetSpropParam().GetStr(), pFmtp->IsSpropParamVisible(), 0);
@@ -589,7 +589,7 @@ IMS_BOOL VideoSdpParser::ParseProfileId(
     if (objSplitEqual.GetAt(0).Equals("profile-id"))
     {
         pFmtp->SetProfile((VIDEO_PROFILE_HEVC)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowProfile(IMS_TRUE);
+        pFmtp->SetVisibleProfile(IMS_TRUE);
 
         IMS_TRACE_I("ParseProfileId(): Profile Id[%d], Visible[%d]", pFmtp->GetProfile(),
                 pFmtp->IsProfileVisible(), 0);
@@ -613,7 +613,7 @@ IMS_BOOL VideoSdpParser::ParseLevelId(
     if (objSplitEqual.GetAt(0).Equals("level-id"))
     {
         pFmtp->SetLevel((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowLevel(IMS_TRUE);
+        pFmtp->SetVisibleLevel(IMS_TRUE);
 
         IMS_TRACE_I("ParseLevelId(): Level Id[%d], Visible[%d]", pFmtp->GetLevel(),
                 pFmtp->IsLevelVisible(), 0);
@@ -689,7 +689,7 @@ void VideoSdpParser::ParseSpropParam(IN const AString& strVps, IN const AString&
         strTemp.Append(strPps);
 
         pFmtp->SetSpropParam(strTemp);
-        pFmtp->SetShowSpropParam(IMS_TRUE);
+        pFmtp->SetVisibleSpropParam(IMS_TRUE);
 
         IMS_TRACE_I("ParseSpropParam(): Sprop Param[%s], Visible[%d]",
                 pFmtp->GetSpropParam().GetStr(), pFmtp->IsSpropParamVisible(), 0);

@@ -58,10 +58,14 @@ public:
      * @return IMS_SINT32 Return hevc level
      */
     IMS_SINT32 GetHevcLevel() const;
+    /**
+     * @brief Generate default Hevc codec when Hevc bundle description is missing
+     */
+    virtual void CreateDefaultHevcCodec();
 
 public:
-    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_WIDTH = 720;
-    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_HEIGHT = 1280;
+    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_WIDTH = 480;
+    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_HEIGHT = 640;
     static const IMS_SINT32 DEFAULT_HEVC_FRAMERATE = 30;
     static const IMS_SINT32 DEFAULT_HEVC_BITRATE = 512;
     static const IMS_SINT32 DEFAULT_HEVC_PROFILE = 1;

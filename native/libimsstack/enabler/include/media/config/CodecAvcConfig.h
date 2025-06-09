@@ -59,6 +59,10 @@ public:
      * @return const AString& Return profile level-id
      */
     const AString& GetProfileLevelId() const;
+    /**
+     * @brief Generate default AVC codec when AVC bundle description is missing
+     */
+    virtual void CreateDefaultAvcCodec();
 
 public:
     static const IMS_SINT32 DEFAULT_AVC_RESOLUTION_WIDTH = 240;
