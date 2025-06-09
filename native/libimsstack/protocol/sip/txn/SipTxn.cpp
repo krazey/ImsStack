@@ -21,6 +21,7 @@
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsm.h"
+#include "txn/SipTxnUtil.h"
 
 SipTxn::SipTxn() :
         m_eTxnType(SipTxn::INVALID),
@@ -193,6 +194,8 @@ SIP_BOOL SipTxn::AbortTxn()
             delete pTimeoutData;
         }
     }
+
+    SipTxnUtil::DeleteTxnKey(m_pTxnKey, SIP_TRUE);
 
     return SIP_TRUE;
 }
