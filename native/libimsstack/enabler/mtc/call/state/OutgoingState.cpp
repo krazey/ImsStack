@@ -78,6 +78,9 @@ PUBLIC VIRTUAL void OutgoingState::OnExit()
     {
         m_pUdpKeepAliveSender->Stop();
     }
+
+    m_objContext.GetPassiveTimerHolder().RemoveTimer(
+            IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
 }
 
 PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const CallReasonInfo& objReason)

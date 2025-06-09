@@ -288,6 +288,12 @@ TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
     pOutgoingState->OnExit();
 }
 
+TEST_F(OutgoingStateTest, OnExitRemovesRegistrationTo18xPassiveTimer)
+{
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(IPassiveTimerHolder::Type::REGISTRATION_TO_18X));
+    pOutgoingState->OnExit();
+}
+
 TEST_F(OutgoingStateTest, ResponseWaitTimeoutForReasonExpirationUpdatesReason)
 {
     const CallReasonInfo objReasonNone(CODE_NONE);
