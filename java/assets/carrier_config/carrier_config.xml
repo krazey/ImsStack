@@ -642,6 +642,7 @@
     <int name="imsemergency.call_periodic_location_discovery_method_int" value="0"/>
     <int name="imsemergency.call_periodic_location_discovery_timer_millis_int" value="0"/>
     <boolean name="imsemergency.silent_redial_with_voip_by_rtt_rejection_bool" value="false"/>
+    <boolean name="imsemergency.silent_redial_with_anonymous_by_network_rejection_bool" value="false"/>
     <int name="imsvoice.qos_acquisition_after_w2l_handover_wait_timer_millis_int" value="1000"/>
     <int name="imsvoice.wait_video_text_qos_after_audio_qos_acquisition_timer_millis_int" value="1000"/>
     <int name="imsvoice.qos_lost_guard_timer_millis_int" value="5000"/>

@@ -15,6 +15,7 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IImsAosInfo.h"
 #include "ISipHeader.h"
 #include "ImsAosParameter.h"
 #include "MockIMessage.h"
@@ -165,6 +166,38 @@ TEST_F(EmergencyStartErrorHandlerTest, HandleRedialEmergencyWithNextPcscf)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(0);
     EXPECT_TRUE(
             CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+}
+
+TEST_F(EmergencyStartErrorHandlerTest, HandleRedialWithAnonymousByNetworkRejection)
+{
+    SetNotRequireImmediateTerminationCode(SipStatusCode::SC_INVALID);
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_INTERNAL));
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF)).Times(0);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+
+    SetNotRequireImmediateTerminationCode(SipStatusCode::SC_403);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF)).Times(0);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF)).Times(0);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF)).Times(1);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_ANONYMOUS));
 }
 
 TEST_F(EmergencyStartErrorHandlerTest, GetCallReasonInfoTimeout)

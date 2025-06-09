@@ -67,6 +67,8 @@ private:
     void ControlAos(IN IMS_UINT32 nCommand) const;
     IMS_BOOL IsRedialWithVoipByRttEmergencyRejectionRequired() const;
     CallReasonInfo HandleRedialWithVoipByRttEmergencyRejection() const;
+    IMS_BOOL IsRedialWithAnonymousByNetworkRejectionRequired(IN IMS_SINT32 nStatusCode) const;
+    CallReasonInfo HandleRedialWithAnonymousByNetworkRejection() const;
 
     IMtcCallContext& m_objContext;
     ISession& m_objSession;

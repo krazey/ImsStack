@@ -81,6 +81,11 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
     IMS_SINT32 nStatusCode =
             (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
 
+    if (IsRedialWithAnonymousByNetworkRejectionRequired(nStatusCode))
+    {
+        return HandleRedialWithAnonymousByNetworkRejection();
+    }
+
     IMS_SINT32 nCallReasonInfoCode = GetCrossSimRedialingReasonCode(nStatusCode);
     if (nCallReasonInfoCode != CODE_NONE)
     {
@@ -239,4 +244,33 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleRedialWithVoipByRttEmergencyRejection() const
 {
     return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION);
+}
+
+PRIVATE
+IMS_BOOL EmergencyStartErrorHandler::IsRedialWithAnonymousByNetworkRejectionRequired(
+        IN IMS_SINT32 nStatusCode) const
+{
+    if (nStatusCode == SipStatusCode::SC_INVALID)
+    {
+        return IMS_FALSE;
+    }
+
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    const IMS_UINT32 nAosRegistrationMode =
+            pAosConnector ? pAosConnector->GetRegistrationMode() : IImsAosInfo::REG_MODE_INTERNAL;
+    if (nAosRegistrationMode == IImsAosInfo::REG_MODE_INTERNAL ||
+            nAosRegistrationMode == IImsAosInfo::REG_MODE_NOUICC)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_objContext.GetConfigurationProxy().GetBoolean(CarrierConfig::ImsEmergency::
+                    KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL);
+}
+
+PRIVATE
+CallReasonInfo EmergencyStartErrorHandler::HandleRedialWithAnonymousByNetworkRejection() const
+{
+    ControlAos(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF);
+    return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_ANONYMOUS);
 }
