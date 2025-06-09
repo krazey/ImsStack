@@ -802,6 +802,22 @@ TEST_F(AosRegistrationTest, SetRegisteringStateIfSendingRegisterSuccessfullyDuri
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
+TEST_F(AosRegistrationTest, KeepStopRetryTimerIfStopRetryTimerIsRunningWhenStart)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 10000);
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepRegRetryTimerOnAllEnablersDetached())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosRegistration->Start();
+
+    // THEN
+    EXPECT_TRUE(m_pAosRegistration->IsRetryTimer());
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
+
 TEST_F(AosRegistrationTest, ReportImmediateSuccessIfNotRegisteredOnStop)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
