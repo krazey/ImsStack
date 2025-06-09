@@ -781,6 +781,16 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
+    public void testUpdateConferenceUserIdWithEmptyValue() {
+        int anonymousId = 100;
+        ConferenceInfoHelper.setAnonymousId(anonymousId);
+        mTestMtcCall.updateConferenceUserId("");
+
+        assertEquals(mTestMtcCall.getCallExtra(mTestMtcCall.EXTRA_CONFERENCE_USER_ID, ""),
+                Call.ANONYMOUS + anonymousId + "@anonymous.invalid");
+    }
+
+    @Test
     public void testGetMediaSession() {
         assertEquals(mMtcMediaSession, mTestMtcCall.getMediaSession());
     }

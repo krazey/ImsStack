@@ -53,6 +53,9 @@ public class MtcCall extends Call implements ConferenceTracker {
     // For RTT call
     public static final int FLAG_RTT = 0x00000020;
 
+    // @ delimiter and host part for anonymous URI
+    private static final String ANONYMOUS_HOST = "@anonymous.invalid";
+
     /**
      * Listener interface for call operations via proxy
      */
@@ -1251,7 +1254,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         if (TextUtils.isEmpty(confUid)) {
             anonymousId = ConferenceInfoHelper.getAnonymousId();
-            confUid = ANONYMOUS + anonymousId;
+            confUid = ANONYMOUS + anonymousId + ANONYMOUS_HOST;
         } else {
             // Do percent-encoding if remote end's number contains '#'
             confUid = confUid.replace("#", "%23");
