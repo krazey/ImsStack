@@ -191,6 +191,18 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
                 ProcessBlock(BLOCK_SSAC, IMS_TRUE);
             }
         }
+
+        if (Is3G(m_nNetworkType))
+        {
+            if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+            {
+                ReevaluateUnavailableFeature();
+            }
+            else
+            {
+                ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
+            }
+        }
     }
 
     if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() &&
@@ -613,13 +625,18 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
     {
         if (Is3G(m_nNetworkType))
         {
-            if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+            const IAosCallTracker* piCallTracker =
+                    AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+            if (piCallTracker == IMS_NULL || !piCallTracker->IsNormalCallActive())
             {
-                ReevaluateUnavailableFeature();
-            }
-            else
-            {
-                ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
+                if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+                {
+                    ReevaluateUnavailableFeature();
+                }
+                else
+                {
+                    ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
+                }
             }
         }
         else

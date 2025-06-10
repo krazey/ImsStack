@@ -774,6 +774,32 @@ TEST_F(AosHandleMtcTest, CsFeatureTagIfWiFiCallingFinishedWhenWfcDisabledAndVide
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListIdle));
 }
 
+TEST_F(AosHandleMtcTest, SetBlockNetworkIfNetworkIs3gWhenCallTerminated)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
+
+    // WHEN
+    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+}
+
+TEST_F(AosHandleMtcTest, SetMmtelAsUnavailableFeatureIfNetworkIs3gWhenCallTerminated)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
+    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+}
+
 TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_WifiTest)
 {
     IMS_BOOL bIsWifiTest = AosUtil::GetInstance()->IsWifiTest();
@@ -4281,6 +4307,34 @@ TEST_F(AosHandleMtcTest, VoiceAvailableWhenEpdgEnabledToWlanEvenIfVopsNotSupport
     m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WLAN);
     m_pAosHandleMtc->SetEpdgEnabled(IMS_TRUE);
     m_pAosHandleMtc->GetFeatureTagList().AddUnavailableFeature(ImsAosFeature::MMTEL);
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasUnavailableFeature(ImsAosFeature::MMTEL));
+}
+
+TEST_F(AosHandleMtcTest, NotSetBlockNetworkIfCallExistsWhenNetworkChangedTo3g)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosHandleMtc->ProcessNetworkChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+}
+
+TEST_F(AosHandleMtcTest, NotSetMmtelAsUnavailableFeatureIfCallExistsWhenNetworkChangedTo3g)
+{
+    // GIVEN
+    m_pAosHandleMtc->SetNetworkType(NW_REPORT_RADIO_WCDMA);
+    ON_CALL(m_objMockIAosCallTracker, IsNormalCallActive()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .WillByDefault(Return(IMS_TRUE));
 
     // WHEN
     m_pAosHandleMtc->ProcessNetworkChanged();
