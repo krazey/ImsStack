@@ -43,6 +43,7 @@ public:
     MOCK_METHOD(void, UpdateFeature, (IN IMS_UINT32), (override));
     MOCK_METHOD(void, UpdateFeature, (IN ImsList<ImsAosFeatureTag*>&), (override));
     MOCK_METHOD(void, RegisterWithNextPcscf, (IN IMS_UINT32), (override));
+    MOCK_METHOD(void, ReinitiateRegistration, (IN IMS_UINT32), (override));
 };
 
 #endif  // MOCK_I_IMS_AOS_H_

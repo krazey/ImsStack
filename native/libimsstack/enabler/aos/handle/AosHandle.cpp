@@ -471,6 +471,8 @@ PUBLIC VIRTUAL void AosHandle::RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableT
             ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY, nUnavailableTimeForCurrentPcscf);
 }
 
+PUBLIC VIRTUAL void AosHandle::ReinitiateRegistration(IN IMS_UINT32 /*nAfterSec*/) {}
+
 PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
     A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType,

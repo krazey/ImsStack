@@ -147,6 +147,14 @@ public:
      *        The duration(sec) of marking current PCSCF as unavailable.
      */
     virtual void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) = 0;
+
+    /**
+     * @brief The registration is destroyed and the initial registration is tried with current PCSCF
+     *        after a given time.
+     *
+     * @param nAfterSec Indicates that initial registration is attempted after a set time.
+     */
+    virtual void ReinitiateRegistration(IN IMS_UINT32 nAfterSec) = 0;
 };
 
 #endif  // INTERFACE_IMS_AOS_H_
