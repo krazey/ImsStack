@@ -391,6 +391,7 @@
         <item value="5"/>
         <item value="2"/>
     </int-array>
+    <boolean name="imsvoice.media_recvonly_early_session_bool" value="false"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
     <boolean name="imsvt.video_avpf_enable_bool" value="true"/>

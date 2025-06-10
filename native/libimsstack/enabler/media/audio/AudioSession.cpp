@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -212,7 +212,9 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             break;
         case MEDIA_DIRECTION_SEND_RECEIVE:
             nAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
-            if (!bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
+            if ((GetConfiguration() != IMS_NULL &&
+                        GetConfiguration()->IsRecvOnlyEarlySessionEnabled()) &&
+                    !bConfirmedSession && m_ePemType != MEDIA_PEM_TYPE::SENDRECV &&
                     m_ePemType != MEDIA_PEM_TYPE::SENDONLY)
             {
                 nAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;

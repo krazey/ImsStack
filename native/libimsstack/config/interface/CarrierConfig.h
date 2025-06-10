@@ -1005,6 +1005,7 @@ public:
         static const IMS_CHAR KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[];
         static const IMS_CHAR KEY_SESSION_REFRESH_SDP_SESSION_VERSION_INCREMENT_INT[];
         static const IMS_CHAR KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[];
+        static const IMS_CHAR KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL[];
 
         // Session refresher types
         enum

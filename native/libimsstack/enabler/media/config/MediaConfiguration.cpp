@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,8 @@ MediaConfiguration::MediaConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nRsBandwidthBps(DEFAULT_RS),
         m_nRrBandwidthBps(DEFAULT_RR),
         m_nRtpInactivityTimerMillis(DEFAULT_RTP_INACTIVITY),
-        m_nRtcpInactivityTimerMillis(DEFAULT_RTCP_INACTIVITY)
+        m_nRtcpInactivityTimerMillis(DEFAULT_RTCP_INACTIVITY),
+        m_bRecvOnlyEarlySessionEnabled(IMS_TRUE)
 {
     IMS_TRACE_I("+MediaConfiguration - SessionType[%d]", eSessionType, 0, 0);
 }
@@ -385,4 +386,10 @@ PUBLIC
 IMS_SINT32 MediaConfiguration::GetRtcpInactivityTimerMillis() const
 {
     return m_nRtcpInactivityTimerMillis;
+}
+
+PUBLIC
+IMS_BOOL MediaConfiguration::IsRecvOnlyEarlySessionEnabled() const
+{
+    return m_bRecvOnlyEarlySessionEnabled;
 }
