@@ -380,6 +380,8 @@ TEST_F(SilentRedialHelperTest, RedialReturnsFailureIfCountExceedsMaxRedialCount)
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
     pRedialHelper->Redial();
+    pRedialHelper->Redial();
+    EXPECT_EQ(CallReasonInfo(CODE_NONE), pRedialHelper->Redial());
     EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488),
             pRedialHelper->Redial());
 }

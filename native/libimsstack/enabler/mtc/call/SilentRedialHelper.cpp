@@ -191,12 +191,12 @@ void SilentRedialHelper::SetRedialDetail()
         case EXTRA_CODE_REDIAL_FOR_SDP_CHANGE:
         case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK:
         case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG:
-        case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF:
         case EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION:
             m_nInterval = 0;
-            m_nMaxCount = 1;
+            m_nMaxCount = 3;
             return;
         case EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF:
+        case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF:
             m_nInterval = 0;
             m_nMaxCount = NO_LIMIT;
             return;
