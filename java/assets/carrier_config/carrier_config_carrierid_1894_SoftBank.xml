@@ -44,7 +44,6 @@
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="true"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
-    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="8000"/>
     <int name="imsemergency.roaming_preferred_ereg_int" value="2"/>
     <int name="imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int" value="3000"/>
     <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
