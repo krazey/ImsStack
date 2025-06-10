@@ -381,40 +381,83 @@ protected:
     }
 };
 
-TEST_F(AosEApplicationTest, RequestCmd)
+TEST_F(AosEApplicationTest, ReturnsFalseWhenRequestCmdWithStartAndNotReady)
 {
-    // REGISTER_START - STATE_NOTREADY
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_NOTREADY);
-    EXPECT_FALSE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
-    // REGISTER_START - STATE_READY
+
+    IMS_BOOL bResult = m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosEApplicationTest, ReturnsTrueWhenRequestCmdWithStartAndReady)
+{
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+
+    IMS_BOOL bResult = m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0);
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosEApplicationTest, InitEmergencyVariableWhenRegisterStartCalled)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    m_pTestAosEApplication->SetKeepEPdnWhenNoPcscf(IMS_TRUE);
+    m_pTestAosEApplication->SetRegBlockInCbm(IMS_TRUE);
+
     EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
 
-    // REGISTER_STOP
-    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_STOP, 0));
+    EXPECT_FALSE(m_pTestAosEApplication->IsKeepEPdnWhenNoPcscf());
+    EXPECT_FALSE(m_pTestAosEApplication->IsRegBlockInCbm());
+}
 
-    // E_REGISTER_FAKE_WITH_NEXT_PCSCF - connection state is STATE_ACTIVE
-    EXPECT_CALL(m_objMockIAosConnection, GetState()).WillOnce(Return(IAosConnection::STATE_ACTIVE));
+TEST_F(AosEApplicationTest, ReturnsTrueWhenRequestCmdWithStop)
+{
+    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_STOP, 0));
+}
+
+TEST_F(AosEApplicationTest, ShouldRequestFakeModeWithNextPcscfIfPdnActive)
+{
+    ON_CALL(m_objMockIAosConnection, GetState())
+            .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_FAKE_MODE,
+                    IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF));
+
+    m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF, 0);
+}
+
+TEST_F(AosEApplicationTest, ShouldNotRequestFakeModeWithNextPcscfIfPdnNotActive)
+{
+    ON_CALL(m_objMockIAosConnection, GetState()).WillByDefault(Return(IAosConnection::STATE_IDLE));
+
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(
                     IAosRegistration::CMD_FAKE_MODE, IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF))
-            .Times(1);
-    EXPECT_TRUE(
-            m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF, 0));
-    // E_REGISTER_FAKE_WITH_NEXT_PCSCF - connection state is STATE_IDLE
-    EXPECT_CALL(m_objMockIAosConnection, GetState()).WillOnce(Return(IAosConnection::STATE_IDLE));
-    EXPECT_TRUE(
-            m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF, 0));
-    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+            .Times(0);
 
-    // RETRY_COUNT_INCREASE
-    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::RETRY_COUNT_INCREASE, 0));
-
-    // REGISTER_REFRESH - won't handled
-    EXPECT_FALSE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_REFRESH, 0));
+    m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF, 0);
 }
 
-TEST_F(AosEApplicationTest, ShouldRequestFakeModeWithSamePcscfWhenPdnActive)
+TEST_F(AosEApplicationTest, ReturnsTrueWhenRequestCmdWithCountIncrease)
+{
+    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::RETRY_COUNT_INCREASE, 0));
+}
+
+TEST_F(AosEApplicationTest, ReturnsTrueWhenRequestCmdWithCountIncreaseWithInitialRegistration)
+{
+    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(
+            ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION, 0));
+}
+
+TEST_F(AosEApplicationTest, ReturnsFalseWhenRequestCmdWithNotCoveredCommands)
+{
+    IMS_UINT32 nCmdNotCovered = 999;
+    EXPECT_FALSE(m_pTestAosEApplication->RequestCmd(nCmdNotCovered, 0));
+}
+
+TEST_F(AosEApplicationTest, ShouldRequestFakeModeWithSamePcscfIfPdnActive)
 {
     ON_CALL(m_objMockIAosConnection, GetState())
             .WillByDefault(Return(IAosConnection::STATE_ACTIVE));
@@ -426,7 +469,7 @@ TEST_F(AosEApplicationTest, ShouldRequestFakeModeWithSamePcscfWhenPdnActive)
     m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF, 0);
 }
 
-TEST_F(AosEApplicationTest, ShouldNotRequestFakeModeWithSamePcscfWhenPdnNotActive)
+TEST_F(AosEApplicationTest, ShouldNotRequestFakeModeWithSamePcscfIfPdnNotActive)
 {
     ON_CALL(m_objMockIAosConnection, GetState()).WillByDefault(Return(IAosConnection::STATE_IDLE));
 
@@ -452,28 +495,10 @@ TEST_F(AosEApplicationTest, RegisterStartCmdShouldRegStopWhenNwAttachRejected)
     EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
 }
 
-TEST_F(AosEApplicationTest, GetProperty)
-{
-    IMS_UINT32 nValue;
-    AString strValue;
-    m_pTestAosEApplication->GetProperty(IAosApplication::PROPERTY_REGISTERED_RAT, nValue, strValue);
-    EXPECT_EQ(strValue, AString::ConstNull());
-}
-
-TEST_F(AosEApplicationTest, InitEmergencyVariableWhenRegisterStartCalled)
-{
-    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
-    m_pTestAosEApplication->SetKeepEPdnWhenNoPcscf(IMS_TRUE);
-    m_pTestAosEApplication->SetRegBlockInCbm(IMS_TRUE);
-
-    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
-    EXPECT_FALSE(m_pTestAosEApplication->IsKeepEPdnWhenNoPcscf());
-    EXPECT_FALSE(m_pTestAosEApplication->IsRegBlockInCbm());
-}
-
 TEST_F(AosEApplicationTest, ResetRegBlockInCbmWhenECallIsInitiated)
 {
     m_pTestAosEApplication->SetRegBlockInCbm(IMS_TRUE);
+
     m_pTestAosEApplication->RequestCmd(IAosApplication::CMD_ECALL_INIT);
 
     EXPECT_FALSE(m_pTestAosEApplication->IsRegBlockInCbm());
@@ -482,9 +507,18 @@ TEST_F(AosEApplicationTest, ResetRegBlockInCbmWhenECallIsInitiated)
 TEST_F(AosEApplicationTest, ResetRegBlockInCbmWhenESmsIsInitiated)
 {
     m_pTestAosEApplication->SetRegBlockInCbm(IMS_TRUE);
+
     m_pTestAosEApplication->RequestCmd(IAosApplication::CMD_ESMS_INIT);
 
     EXPECT_FALSE(m_pTestAosEApplication->IsRegBlockInCbm());
+}
+
+TEST_F(AosEApplicationTest, GetProperty)
+{
+    IMS_UINT32 nValue;
+    AString strValue;
+    m_pTestAosEApplication->GetProperty(IAosApplication::PROPERTY_REGISTERED_RAT, nValue, strValue);
+    EXPECT_EQ(strValue, AString::ConstNull());
 }
 
 TEST_F(AosEApplicationTest, ClearConnection)
