@@ -185,10 +185,6 @@ void AosServiceAvailable::HandleEvent(
             HandleRoamingChanged(nState);
             break;
 
-        case EVENT_VOPS:
-            HandleVopsChanged(nState);
-            break;
-
         case EVENT_LOCATION:
             HandleLocationInfoChanged();
             break;
@@ -250,11 +246,6 @@ PROTECTED VIRTUAL void AosServiceAvailable::HandleAirplaneModeChanged(IN IMS_UIN
     A_IMS_TRACE_I(AOSTAG, "HandleAirplaneModeChanged :: nState(%d)", nState, 0, 0);
 
     m_bAirplaneMode = (nState > 0) ? IMS_TRUE : IMS_FALSE;
-}
-
-PROTECTED VIRTUAL void AosServiceAvailable::HandleVopsChanged(IN IMS_UINT32 nState)
-{
-    A_IMS_TRACE_I(AOSTAG, "HandleVopsChanged :: nState(%d)", nState, 0, 0);
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleWifiConnectionChanged()
@@ -341,9 +332,6 @@ PROTECTED GLOBAL const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT3
 
         case EVENT_ROAMING:
             return "EVENT_ROAMING";
-
-        case EVENT_VOPS:
-            return "EVENT_VOPS";
 
         case EVENT_LOCATION:
             return "EVENT_LOCATION";

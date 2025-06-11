@@ -183,7 +183,6 @@ protected:
     void ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 nServiceBits);
     void ProcessTtyEvent(IN IMS_BOOL bIsOn);
     void ProcessWifiSettingEvent(IN IMS_BOOL bIsOn);
-    void ProcessImsVopsEvent(IN IMS_UINT32 nState);
     void ProcessLocationInfo(IN LocationInfo eState);
     void ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
 

@@ -75,10 +75,8 @@ typedef enum
     BLOCK_CELLULAR_RAT_BLOCK,
     /// a roming network. volte may be not allowed in roaming area.
     BLOCK_CELLULAR_ROAMING,
-    /// IMS voice over PS Session Supported Indication is not configured during N/W attach.
-    BLOCK_CELLULAR_VOPS_OFF,
     /// End cellular Block reason
-    BLOCK_CELLULAR_END = BLOCK_CELLULAR_VOPS_OFF,
+    BLOCK_CELLULAR_END = BLOCK_CELLULAR_ROAMING,
 
     /// Start wifi Block reason
     BLOCK_WIFI_START,

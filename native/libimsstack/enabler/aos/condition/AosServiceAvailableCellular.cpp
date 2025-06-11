@@ -31,7 +31,6 @@ __IMS_TRACE_TAG_AOS__;
 PUBLIC
 AosServiceAvailableCellular::AosServiceAvailableCellular() :
         AosServiceAvailable("AosServiceAvailableCellular"),
-        m_bVopsState(IMS_FALSE),
         m_bNetworkServiceIn(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailableCellular = %" PFLS_u "/%" PFLS_x,
@@ -42,11 +41,6 @@ PUBLIC VIRTUAL AosServiceAvailableCellular::~AosServiceAvailableCellular()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosServiceAvailableCellular = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailableCellular), this, 0);
-}
-
-PUBLIC IMS_BOOL AosServiceAvailableCellular::IsVopsSupported()
-{
-    return m_bVopsState;
 }
 
 PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
@@ -118,28 +112,6 @@ PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN
         if (m_piBlock != IMS_NULL)
         {
             m_piBlock->ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-        }
-    }
-}
-
-PROTECTED
-void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
-{
-    m_bVopsState = (nState == IMS_VOICE_OVER_PS_SUPPORTED) ? IMS_TRUE : IMS_FALSE;
-
-    if (m_bVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
-    {
-        RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
-        if (m_piBlock != IMS_NULL)
-        {
-            m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
-        }
-    }
-    else
-    {
-        if (m_piBlock != IMS_NULL)
-        {
-            m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
         }
     }
 }

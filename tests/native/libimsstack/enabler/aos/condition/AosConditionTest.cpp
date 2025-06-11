@@ -111,8 +111,6 @@ public:
 
     inline IMS_BOOL IsRoaming() { return m_pAvailableCellular->IsRoaming(); }
 
-    inline IMS_BOOL IsVopsSupported() { return m_pAvailableCellular->IsVopsSupported(); }
-
     inline void SetTestLocation(IN ILocationProperties* piTestLocation)
     {
         m_pAvailableWifi->SetLocation(piTestLocation);
@@ -705,32 +703,6 @@ TEST_F(AosConditionTest, ShouldSetRoamingOnWhenNotifyEventRoamingWithCsRoamingOn
 
     // THEN
     EXPECT_TRUE(m_pAosCondition->IsRoaming());
-}
-
-TEST_F(AosConditionTest, ShouldSetVopsOnWhenNotifyEventWithVopsSupported)
-{
-    // GIVEN
-    m_pAosCondition->Start();
-
-    // WHEN
-    m_pAosCondition->Event_NotifyEvent(
-            IMS_EVENT_IMS_VOICE_OVER_PS_STATE, IMS_VOICE_OVER_PS_SUPPORTED, 0);
-
-    // THEN
-    EXPECT_TRUE(m_pAosCondition->IsVopsSupported());
-}
-
-TEST_F(AosConditionTest, ShouldSetVopsOffWhenNotifyEventWithVopsNotSupported)
-{
-    // GIVEN
-    m_pAosCondition->Start();
-
-    // WHEN
-    m_pAosCondition->Event_NotifyEvent(
-            IMS_EVENT_IMS_VOICE_OVER_PS_STATE, IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
-
-    // WHEN
-    EXPECT_FALSE(m_pAosCondition->IsVopsSupported());
 }
 
 TEST_F(AosConditionTest, ShouldResetCombinedAttachWhenNotifyEventWithoutCombinedAttached)

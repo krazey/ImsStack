@@ -24,17 +24,13 @@ public:
     AosServiceAvailableCellular();
     ~AosServiceAvailableCellular() override;
 
-    IMS_BOOL IsVopsSupported();
-
 protected:
     void HandleNetworkStateChanged() final;
     void HandleRoamingChanged(IN IMS_UINT32 nState) override;
     void HandleAirplaneModeChanged(IN IMS_UINT32 nState) override;
-    void HandleVopsChanged(IN IMS_UINT32 nState) override;
     IMS_BOOL CheckServiceAvailable() final;
 
 private:
-    IMS_BOOL m_bVopsState;
     IMS_BOOL m_bNetworkServiceIn;
 };
 
