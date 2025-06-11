@@ -1406,30 +1406,6 @@ TEST_F(AosApplicationTest, ProcessMessage)
     m_pAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
 
-    // MSG_REG_STOP
-    // TEST_F : ProcessRegStop - ProcessStateStart
-    objMessage.nMSG = MSG_REG_STOP;
-    m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
-    EXPECT_CALL(m_objMockIAosRegistration, GetState())
-            .Times(AnyNumber())
-            .WillOnce(Return(IAosRegistration::STATE_DEREGISTERING))
-            .WillRepeatedly(Return(IAosRegistration::STATE_REGISTERED));
-    EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
-    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_REG_STOP));
-
-    m_pAosApplication->SetPublishState(IMS_TRUE);
-    EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
-    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_REG_STOP));
-    m_pAosApplication->ClearTimers();
-
-    EXPECT_CALL(m_objMockIAosRegistration, Stop()).Times(1);
-    m_pAosApplication->SetPublishState(IMS_FALSE);
-    EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
-
-    m_pAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
-    EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
-    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_REG_STOP));
-
     // MSG_REG_RECONFIG
     // TEST_F : ProcessRegReconfig, ResetBlock
     objMessage.nMSG = MSG_REG_RECONFIG;
@@ -1573,7 +1549,61 @@ TEST_F(AosApplicationTest, ProcessMessage)
     EXPECT_TRUE(m_pAosApplication->ProcessMessage(objMessage));
 }
 
-TEST_F(AosApplicationTest, NotifyDeregisteringWhenHandlesRegStopMsg)
+TEST_F(AosApplicationTest, IgnoreRegStopMsgIfAlreadyInDeregisteringState)
+{
+    m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_DEREGISTERING));
+
+    EXPECT_CALL(m_objMockIAosRegistration, Stop()).Times(0);
+
+    ImsMessage objMessage(MSG_REG_STOP, 0, 0);
+    m_pAosApplication->ProcessMessage(objMessage);
+
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_REG_STOP));
+}
+
+TEST_F(AosApplicationTest, StopRegistrationWhenReceiveRegStopMsg)
+{
+    m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_REGISTERED));
+
+    EXPECT_CALL(m_objMockIAosRegistration, Stop());
+
+    ImsMessage objMessage(MSG_REG_STOP, 0, 0);
+    m_pAosApplication->ProcessMessage(objMessage);
+
+    EXPECT_FALSE(m_pAosApplication->IsTimerRunning(TIMER_REG_STOP));
+}
+
+TEST_F(AosApplicationTest, StartRegStopTimerIfPublishedWhenReceiveRegStopMsg)
+{
+    m_pAosApplication->SetPublishState(IMS_TRUE);
+    m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_REGISTERED));
+
+    EXPECT_CALL(m_objMockIAosRegistration, Stop()).Times(0);
+
+    ImsMessage objMessage(MSG_REG_STOP, 0, 0);
+    m_pAosApplication->ProcessMessage(objMessage);
+
+    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_REG_STOP));
+}
+
+TEST_F(AosApplicationTest, CleanAndStartIfNotInDisconnectingStateWhenReceiveRegStopMsg)
+{
+    m_pAosApplication->SetAppState(IAosApplication::STATE_READY);
+
+    ImsMessage objMessage(MSG_REG_STOP, 0, 0);
+    m_pAosApplication->ProcessMessage(objMessage);
+
+    EXPECT_EQ(m_pAosApplication->GetAppState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_MSG_CONDITION));
+}
+
+TEST_F(AosApplicationTest, NotifyDeregisteringWhenReceiveRegStopMsg)
 {
     m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
     ON_CALL(m_objMockIAosRegistration, GetState())
@@ -1585,7 +1615,7 @@ TEST_F(AosApplicationTest, NotifyDeregisteringWhenHandlesRegStopMsg)
     m_pAosApplication->ProcessMessage(objMessage);
 }
 
-TEST_F(AosApplicationTest, ShouldNotNotifyDeregisteringWhenHandlesRegStopMsgForEmergencyType)
+TEST_F(AosApplicationTest, ShouldNotNotifyDeregisteringWhenReceiveRegStopMsgForEmergencyType)
 {
     m_pAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
     m_pAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
