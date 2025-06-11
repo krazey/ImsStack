@@ -138,3 +138,16 @@ TEST_F(MtcEmergencyServiceManagerTest, StartOpenMakesNewInstanceForServiceType)
     pEsm->StartOpen(ServiceType::NORMAL);
     ASSERT_NE(pPreviousController, pEsm->GetController());
 }
+
+TEST_F(MtcEmergencyServiceManagerTest, GetStateReturnsIdleInitially)
+{
+    EXPECT_EQ(pEsm->GetState(), IEmergencyServiceController::State::IDLE);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, GetStateReturnsControllerState)
+{
+    ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
+    pEsm->StartOpen(ServiceType::NORMAL);
+
+    EXPECT_EQ(pEsm->GetState(), IEmergencyServiceController::State::OPENED);
+}

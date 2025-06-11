@@ -16,6 +16,7 @@
 
 #include "IJniMtcServiceThread.h"
 #include "IMtcContext.h"
+#include "IuMtcService.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -43,17 +44,27 @@ PUBLIC VIRTUAL NormalServiceController::~NormalServiceController()
 
 PUBLIC VIRTUAL void NormalServiceController::Start()
 {
-    IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
-    if (pNormalService && pNormalService->GetStatus() == ServiceStatus::SERVICE_ACTIVE)
+    if (GetState() == IEmergencyServiceController::State::OPENED)
     {
         AddListeners();
-        Notify(EmergencyServiceState::OPENED);
+        Notify(IuMtcService::EmergencyServiceState::OPENED);
     }
     else
     {
-        Notify(EmergencyServiceState::UNAVAILABLE, EmergencyServiceUnavailableReason::NONE);
+        Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                IuMtcService::EmergencyServiceUnavailableReason::NONE);
         Finish();
     }
+}
+
+IEmergencyServiceController::State NormalServiceController::GetState() const
+{
+    IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    if (pNormalService && pNormalService->GetStatus() == ServiceStatus::SERVICE_ACTIVE)
+    {
+        return IEmergencyServiceController::State::OPENED;
+    }
+    return IEmergencyServiceController::State::IDLE;
 }
 
 PUBLIC VIRTUAL void NormalServiceController::OnCallStateChanged(IN CallKey nCallKey,
@@ -66,9 +77,9 @@ PUBLIC VIRTUAL void NormalServiceController::OnCallStateChanged(IN CallKey nCall
         return;
     }
 
-    if (eState == State::TERMINATING)
+    if (eState == IMtcCall::State::TERMINATING)
     {
-        Notify(EmergencyServiceState::IDLE);
+        Notify(IuMtcService::EmergencyServiceState::IDLE);
         Finish();
     }
 }
@@ -84,8 +95,8 @@ PRIVATE void NormalServiceController::RemoveListeners()
 }
 
 PRIVATE
-void NormalServiceController::Notify(
-        IN EmergencyServiceState eState, IN EmergencyServiceUnavailableReason eReason) const
+void NormalServiceController::Notify(IN IuMtcService::EmergencyServiceState eState,
+        IN IuMtcService::EmergencyServiceUnavailableReason eReason) const
 {
     IMS_TRACE_D("Notify :: state=%d, reason=%d", eState, eReason, 0);
 

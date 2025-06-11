@@ -18,6 +18,7 @@
 #define MTC_EMERGENCY_SERVICE_MANAGER_H_
 
 #include "ImsTypeDef.h"
+#include "IuMtcService.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include <memory>
 
@@ -33,6 +34,11 @@ public:
 
     void StartOpen(IN ServiceType eServiceType) override;
     void StopOpen(IN IMS_BOOL bClose) override;
+
+    inline IEmergencyServiceController::State GetState() const override
+    {
+        return m_pController ? m_pController->GetState() : IEmergencyServiceController::State::IDLE;
+    }
 
 protected:
     // Visible for test

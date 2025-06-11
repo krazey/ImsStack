@@ -28,7 +28,6 @@
 
 class IMtcContext;
 
-using EmergencyServiceState = IuMtcService::EmergencyServiceState;
 using EmergencyServiceUnavailableReason = IuMtcService::EmergencyServiceUnavailableReason;
 
 class EmergencyServiceController final :
@@ -47,30 +46,24 @@ public:
     void Start() override;
     void Close() override;
     inline ServiceType GetServiceType() const override { return ServiceType::EMERGENCY; }
+    inline IEmergencyServiceController::State GetState() const override { return m_eState; }
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
 
     void OnCallStateChanged(IN CallKey nCallKey, IN IMtcCall::State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
-    inline void OnTotalCallStateChanged(IN State) override {}
+    inline void OnTotalCallStateChanged(IN IMtcCall::State) override {}
     void OnCallSessionReleased(
             IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) override;
     void OnPassiveTimerExpired(IN IPassiveTimerHolder::Type eType) override;
 
 private:
-    enum class State
-    {
-        IDLE,
-        OPENING,
-        OPENED,
-    };
-
     LOCAL const IMS_SINT32 REASON_UNSPECIFIED = -1;
 
     IMtcEmergencyServiceManager& m_objServiceManager;
     IMtcContext& m_objContext;
-    State m_eState;
+    IEmergencyServiceController::State m_eState;
 
     IMtcCall::State m_eEmergencyCallState;
     CallKey m_nEmergencyCallKey;
@@ -81,13 +74,13 @@ private:
     void AddListeners();
     void RemoveListeners();
 
-    void Notify(IN EmergencyServiceState eState,
+    void Notify(IN IuMtcService::EmergencyServiceState eState,
             IN EmergencyServiceUnavailableReason eReason =
                     EmergencyServiceUnavailableReason::UNKNOWN) const;
     void ControlAos(IN IMS_UINT32 nType) const;
     void Finish();
     void FinishAndRetryOverImsPdn();
-    void SetState(IN State eState);
+    void SetState(IN IEmergencyServiceController::State eState);
     void Start18xWaitingTimer();
     void Stop18xWaitingTimer();
 
