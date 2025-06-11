@@ -170,7 +170,6 @@ public:
                 {MEDIA_PROTOCOL_RTP,       "rtp"      },
                 {MEDIA_PROTOCOL_RTCP,      "rtcp"     },
                 {MEDIA_PROTOCOL_NO_CHANGE, "no change"},
-                {MEDIA_PROTOCOL_BOTH,      "both"     },
         };
 
         auto it = objProtocolTypeStrings.find(eProtocolType);

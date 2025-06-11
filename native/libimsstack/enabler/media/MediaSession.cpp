@@ -978,10 +978,12 @@ IMS_BOOL MediaSession::HandleNotifyMediaInactivity(IN IMS_UINTP nParam)
                     m_pAudioController->GetInactivityTimer(RTP_INACTIVITY, UNDEFINED_NEGO_ID);
             IMS_SINT32 nLocalRtcpTimer =
                     m_pAudioController->GetInactivityTimer(RTCP_INACTIVITY, UNDEFINED_NEGO_ID);
-            IMS_TRACE_I("OnNotify() - LocalNetworkToneTimer[%d], LocalRtpTimer[%d], "
-                        "LocalRtcpTimer[%d]",
+            IMS_TRACE_I(
+                    "HandleNotifyMediaInactivity() - LocalNetworkToneTimer[%d], LocalRtpTimer[%d], "
+                    "LocalRtcpTimer[%d]",
                     nLocalNetworkToneTimer, nLocalRtpTimer, nLocalRtcpTimer);
-            IMS_TRACE_I("OnNotify() - Notified rtp inactivity[%d], rtcp inactivity[%d]",
+            IMS_TRACE_I("HandleNotifyMediaInactivity() - rtp inactivity[%d], rtcp "
+                        "inactivity[%d]",
                     pParam->m_nRtpInactivityTimerMillis, pParam->m_nRtcpInactivityTimerMillis, 0);
 
             if (nLocalNetworkToneTimer > 0)
@@ -989,51 +991,47 @@ IMS_BOOL MediaSession::HandleNotifyMediaInactivity(IN IMS_UINTP nParam)
                 if (IsInactivityTimerExpired(
                             pParam->m_nRtpInactivityTimerMillis, nLocalNetworkToneTimer))
                 {
-                    IMS_TRACE_I("HandleNotifyMediaInactivity() - Notified netwok tone timeout", 0,
-                            0, 0);
+                    IMS_TRACE_I(
+                            "HandleNotifyMediaInactivity() - Notify netwok tone timeout", 0, 0, 0);
                     m_pAudioController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
                     m_pClientListener->MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_FAILED,
                             pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
+                    return IMS_TRUE;
                 }
             }
             else
             {
-                if (nLocalRtpTimer > 0 && nLocalRtcpTimer > 0)
-                {
-                    if (IsInactivityTimerExpired(
-                                pParam->m_nRtpInactivityTimerMillis, nLocalRtpTimer) &&
-                            IsInactivityTimerExpired(
-                                    pParam->m_nRtcpInactivityTimerMillis, nLocalRtcpTimer))
-                    {
-                        IMS_TRACE_I(
-                                "OnNotify() - Notified rtp and rtcp inactivity timeout", 0, 0, 0);
-                        m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
-                                pParam->m_eMediaType, MEDIA_PROTOCOL_BOTH);
-                    }
-                }
-                else if (nLocalRtpTimer > 0)
+                if (nLocalRtpTimer > 0)
                 {
                     if (IsInactivityTimerExpired(
                                 pParam->m_nRtpInactivityTimerMillis, nLocalRtpTimer))
                     {
-                        IMS_TRACE_I("OnNotify() - Notified rtp inactivity timeout", 0, 0, 0);
+                        IMS_TRACE_I("HandleNotifyMediaInactivity() - Notify rtp inactivity timeout",
+                                0, 0, 0);
                         m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
                                 pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
+                        return IMS_TRUE;
                     }
                 }
-                else if (nLocalRtcpTimer > 0)
+
+                if (nLocalRtcpTimer > 0)
                 {
                     if (IsInactivityTimerExpired(
                                 pParam->m_nRtcpInactivityTimerMillis, nLocalRtcpTimer))
                     {
-                        IMS_TRACE_I("OnNotify() - Notified rtcp inactivity timeout", 0, 0, 0);
+                        IMS_TRACE_I(
+                                "HandleNotifyMediaInactivity() - Notify rtcp inactivity timeout", 0,
+                                0, 0);
                         m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
                                 pParam->m_eMediaType, MEDIA_PROTOCOL_RTCP);
+                        return IMS_TRUE;
                     }
                 }
                 else
                 {
-                    IMS_TRACE_I("OnNotify() - No inactivity timer", 0, 0, 0);
+                    IMS_TRACE_I("HandleNotifyMediaInactivity() - No notifications for rtp/rtcp "
+                                "inactivity timer",
+                            0, 0, 0);
                 }
             }
         }
@@ -1043,9 +1041,8 @@ IMS_BOOL MediaSession::HandleNotifyMediaInactivity(IN IMS_UINTP nParam)
                     reinterpret_cast<ImsMediaNotifyInactivityParam*>(nParam);
             m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED, pParam->m_eMediaType,
                     pParam->m_eMediaProtocolType == RTP ? MEDIA_PROTOCOL_RTP : MEDIA_PROTOCOL_RTCP);
+            return IMS_TRUE;
         }
-
-        return IMS_TRUE;
     }
 
     return IMS_FALSE;

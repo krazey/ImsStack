@@ -268,13 +268,10 @@ TEST_F(MtcMediaStringUtilsTest, ConvertProtocolType)
     eProtocolType = MEDIA_PROTOCOL_NO_CHANGE;
     EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "no change");
 
-    eProtocolType = MEDIA_PROTOCOL_BOTH;
-    EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "both");
-
     eProtocolType = MEDIA_PROTOCOL_NONE - 1;
     EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "OUT_OF_RANGE");
 
-    eProtocolType = MEDIA_PROTOCOL_BOTH + 1;
+    eProtocolType = MEDIA_PROTOCOL_NO_CHANGE + 1;
     EXPECT_EQ(MtcMediaStringUtils::ConvertProtocolType(eProtocolType), "OUT_OF_RANGE");
 }
 
