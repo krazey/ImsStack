@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,7 @@ using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecEvsConfig::DEFAULT_CHANNEL;
+static const IMS_BOOL DEFAULT_DTX = CodecAudioConfig::DEFAULT_DTX;
 static const IMS_BOOL DEFAULT_DTX_RECV = CodecEvsConfig::DEFAULT_DTX_RECV;
 static const IMS_SINT32 DEFAULT_HF_ONLY = CodecEvsConfig::DEFAULT_HF_ONLY;
 static const IMS_SINT32 DEFAULT_EVS_MODESWITCH = CodecEvsConfig::DEFAULT_EVS_MODESWITCH;
@@ -41,7 +42,6 @@ static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
         CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY;
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD;
 static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR;
-static const IMS_BOOL DEFAULT_DTX = CodecAudioConfig::DEFAULT_DTX;
 
 MATCHER_P(IsSameKey, key, "")
 {
@@ -174,42 +174,37 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
             GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
             .WillOnce(::testing::Return(m_pMockEvsSubBundle.get()));
     EXPECT_CALL(*m_pMockEvsSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT,
-                    CodecEvsConfig::DEFAULT_CHANNEL))
+            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL))
             .WillOnce(Return(nChannel));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE))
             .WillOnce(Return(bShowDtx));
     EXPECT_CALL(*m_pMockEvsSubBundle,
-            GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL,
-                    CodecAudioConfig::DEFAULT_DTX))
+            GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX))
             .WillOnce(Return(bDtx));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL,
-                    CodecEvsConfig::DEFAULT_DTX_RECV))
+                    DEFAULT_DTX_RECV))
             .WillOnce(Return(bDtxRecv));
     EXPECT_CALL(*m_pMockEvsSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT,
-                    CodecEvsConfig::DEFAULT_HF_ONLY))
+            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT, DEFAULT_HF_ONLY))
             .WillOnce(Return(nHfOnly));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT,
-                    CodecEvsConfig::DEFAULT_EVS_MODESWITCH))
+                    DEFAULT_EVS_MODESWITCH))
             .WillOnce(Return(nEvsModeSwitch));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY, _))
             .WillOnce(Return(objBitrateListArray));
     EXPECT_CALL(*m_pMockEvsSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT,
-                    CodecEvsConfig::DEFAULT_BW_LIST))
+            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT, DEFAULT_BW_LIST))
             .WillOnce(Return(nBwList));
     EXPECT_CALL(*m_pMockEvsSubBundle,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT,
-                    CodecEvsConfig::DEFAULT_CMR))
+            GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT, DEFAULT_CMR))
             .WillOnce(Return(nCmr));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
-                    CodecEvsConfig::DEFAULT_CH_AW_RECV))
+                    DEFAULT_CH_AW_RECV))
             .WillOnce(Return(nChAwRecv));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,

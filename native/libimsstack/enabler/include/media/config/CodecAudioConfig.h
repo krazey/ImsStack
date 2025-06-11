@@ -77,13 +77,7 @@ public:
      * IMS_FALSE Not include modeset attribute to sdp
      */
     IMS_BOOL GetShowAmrModeSet() const;
-    /**
-     * @brief Get the dtx
-     *
-     * @return IMS_BOOL Return true if the dtx is supported
-     * Return false if drx is not supported
-     */
-    IMS_BOOL GetDtx() const;
+
     /**
      * @brief Get mode-change-capability
      *
@@ -102,6 +96,12 @@ public:
      * @return IMS_SINT32 Return the mode-change-neighbor
      */
     IMS_SINT32 GetModeChangeNeighbor() const;
+    /**
+     * @brief Get the dtx (scr) enabled
+     *
+     * @return IMS_SINT32 Return the Audio codec (AMR/EVS) dtx enabled
+     */
+    IMS_BOOL GetDtx() const;
 
 public:
     static const IMS_SINT32 DEFAULT_CHANNEL;
@@ -114,11 +114,11 @@ public:
     static const IMS_BOOL DEFAULT_DTX;
 
 protected:
-    IMS_SINT32 m_nChannel;
+    IMS_BOOL m_bDtx;
     IMS_BOOL m_bShowAmrModeSet;
+    IMS_SINT32 m_nChannel;
     IMS_UINT32 m_nAmrModeSetList;
     IMS_UINT32 m_nDefaultAmrModeSetList;
-    IMS_BOOL m_bDtx;
     IMS_SINT32 m_nModeChangeCapability;
     IMS_SINT32 m_nModeChangePeriod;
     IMS_SINT32 m_nModeChangeNeighbor;

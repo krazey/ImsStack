@@ -1339,6 +1339,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "audio_hold_with_direction_inactive_bool";
         public static final String KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL =
                 KEY_PREFIX + "media_recvonly_early_session_bool";
+        public static final String KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL =
+                KEY_PREFIX + "amr_codec_attribute_dtx_bool";
 
         private ImsVoice() {}
     }

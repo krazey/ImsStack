@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,6 +60,9 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMRWB;
         m_nDefaultAmrModeSetList = (1 << DEFAULT_MODESET_AMR_WB);
     }
+
+    m_bDtx = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX);
 
     if (piCcBundle == IMS_NULL)
     {

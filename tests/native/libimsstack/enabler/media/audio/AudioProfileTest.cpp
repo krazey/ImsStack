@@ -256,7 +256,6 @@ TEST_F(AudioProfileTest, testAudioFmtpCreation)
     pFmtp1->SetShowModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
     pFmtp1->SetShowModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
     pFmtp1->SetShowMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
-
     pFmtp1->SetShowDtx(AUDIO_FMTP_SHOW_DTX);
 
     AudioProfile::AudioFmtp* pFmtp2 = new AudioProfile::AudioFmtp(*pFmtp1);

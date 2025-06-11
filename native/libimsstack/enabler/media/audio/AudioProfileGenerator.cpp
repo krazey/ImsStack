@@ -165,8 +165,6 @@ PROTECTED void AudioProfileGenerator::SetAudioCodecFmtp(IN CodecAudioConfig* pCo
         pFmtp->SetMaxRed(AudioConfiguration::DEFAULT_MAX_RED);
         pFmtp->SetShowMaxRed(IMS_FALSE);
     }
-
-    pFmtp->SetDtx(pCodecConfig->GetDtx());
 }
 
 PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
@@ -203,6 +201,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
         pAmrFmtp->SetOctetAlign(CodecAmrConfig::DEFAULT_OCTET_ALIGN);
     }
 
+    pAmrFmtp->SetDtx(pAmrConfig->GetDtx());
     strCodecName.Sprintf("%s", (pAmrConfig->GetSamplingRate() == 8000) ? "AMR" : "AMR-WB");
 
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
@@ -213,6 +212,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
     IMS_TRACE_D("CreateAmrPayload(): Codec[%s], Payload[%d], SamplingRate[%d]",
             ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetPayloadType(),
             pAmrConfig->GetSamplingRate());
+    IMS_TRACE_D("CreateAmrPayload(): amrDtx[%d]", pAmrConfig->GetDtx(), 0, 0);
 
     return pAmrPayload;
 }
@@ -265,6 +265,7 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
     }
 
     pEvsFmtp->SetShowDtx(pEvsConfig->GetShowDtx());
+    pEvsFmtp->SetDtx(pEvsConfig->GetDtx());
 
     if (pEvsConfig->GetHfOnly() == -1)  // Not Present
     {

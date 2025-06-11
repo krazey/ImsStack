@@ -83,10 +83,19 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL);
     m_bShowDtx = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE);
-    m_bDtx = piCcSubBundle->GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL,
-            CodecAudioConfig::DEFAULT_DTX);
+    m_bDtx = piCcSubBundle->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX);
     m_bDtxRecv = piCcSubBundle->GetBoolean(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL, DEFAULT_DTX_RECV);
+
+    if (!m_bDtx)
+    {
+        m_bShowDtx = IMS_TRUE;
+        IMS_TRACE_D("Create - DTX is disabled, update showDtx to TRUE", 0, 0, 0);
+    }
+
+    IMS_TRACE_D("ShowDtx[%d], Dtx[%d], DtxRecv[%d], ", m_bShowDtx, m_bDtx, m_bDtxRecv);
+
     m_nHfOnly = piCcSubBundle->GetInt(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT, DEFAULT_HF_ONLY);
     m_nEvsModeSwitch =
@@ -152,10 +161,10 @@ PUBLIC VIRTUAL void CodecEvsConfig::ToDebugString() const
 {
     CodecAudioConfig::ToDebugString();
 
-    IMS_TRACE_D("ShowDtx[%d], DtxRecv[%d], HfOnly[%d]", m_bShowDtx, m_bDtxRecv, m_nHfOnly);
-    IMS_TRACE_D("EvsModeSwitch[%d], BitrateList[0x%04x], BandwidthList[%d]", m_nEvsModeSwitch,
-            m_nBrList, m_nBwList);
-    IMS_TRACE_D("Cmr[%d], ChAwRecv[%d]", m_nCmr, m_nChAwRecv, 0);
+    IMS_TRACE_D("ShowDtx[%d], Dtx[%d], DtxRecv[%d], ", m_bShowDtx, m_bDtx, m_bDtxRecv);
+    IMS_TRACE_D("HfOnly[%d], EvsModeSwitch[%d], BitrateList[0x%04x]", m_nHfOnly, m_nEvsModeSwitch,
+            m_nBrList);
+    IMS_TRACE_D("BandwidthList[%d], Cmr[%d], ChAwRecv[%d]", m_nBwList, m_nCmr, m_nChAwRecv);
 }
 
 PRIVATE

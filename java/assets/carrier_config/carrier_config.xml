@@ -224,6 +224,7 @@
         <item value="5"/>
     </int-array>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <boolean name="imsvoice.amr_codec_attribute_dtx_bool" value="true"/>
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="false"/>
     <boolean name="imsvoice.media_recvonly_early_session_bool" value="true"/>
     <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>

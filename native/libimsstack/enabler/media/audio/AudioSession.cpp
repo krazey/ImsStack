@@ -278,6 +278,20 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             objRtcpConfig.getTransmitPort(), objRtcpConfig.getIntervalSec(),
             objRtcpConfig.getRtcpXrBlockTypes());
 
+    IMS_BOOL bLocalDtx = IMS_FALSE;
+    if (pLocalProfile->GetNegotiatedPayloadIndex() >= 0)
+    {
+        AudioProfile::Payload* pLocalPayload =
+                pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
+
+        if (pLocalPayload != IMS_NULL && pLocalPayload->GetFmtp() != IMS_NULL)
+        {
+            bLocalDtx = (IMS_BOOL)(((AudioProfile::AudioFmtp*)pLocalPayload->GetFmtp())
+                            ->IsDtxEnabled());
+            IMS_TRACE_D("UpdateRtpConfig() - local Dtx[%d]", bLocalDtx, 0, 0);
+        }
+    }
+
     if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
             pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
     {
@@ -289,6 +303,7 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         }
 
         if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+
         {
             pAudioConfig->setCodecType((int32_t)AudioConfig::CODEC_AMR_WB);
         }
@@ -301,20 +316,10 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
         pAudioConfig->setPTimeMillis((int8_t)pNegoProfile->GetPtime());
         pAudioConfig->setMaxPTimeMillis((int32_t)pNegoProfile->GetMaxPtime());
-        pAudioConfig->setDtxEnabled(IMS_FALSE);
+        pAudioConfig->setDtxEnabled(bLocalDtx);
 
-        if (pLocalProfile->GetNegotiatedPayloadIndex() >= 0)
-        {
-            AudioProfile::Payload* pLocalPayload =
-                    pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
-
-            if (pLocalPayload != IMS_NULL && pLocalPayload->GetFmtp() != IMS_NULL)
-            {
-                pAudioConfig->setDtxEnabled(
-                        (REINTERPRET_CAST(AudioProfile::AmrFmtp*, pLocalPayload->GetFmtp())
-                                        ->IsDtxEnabled()));
-            }
-        }
+        IMS_TRACE_D(
+                "UpdateRtpConfig() - DtxEnabled for AMR[%d]", pAudioConfig->getDtxEnabled(), 0, 0);
 
         AmrParams* pAmrParams = new AmrParams();
         pAmrParams->setAmrMode((int32_t)AudioProfileUtil::GetModesetList(
@@ -346,7 +351,18 @@ AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
         pAudioConfig->setPTimeMillis((int8_t)pNegoProfile->GetPtime());
         pAudioConfig->setMaxPTimeMillis((int32_t)pNegoProfile->GetMaxPtime());
-        pAudioConfig->setDtxEnabled(pFmtp->IsDtxEnabled());
+
+        if (!bLocalDtx)
+        {
+            pAudioConfig->setDtxEnabled(bLocalDtx);
+        }
+        else
+        {
+            pAudioConfig->setDtxEnabled(pFmtp->IsDtxEnabled());
+        }
+
+        IMS_TRACE_D(
+                "UpdateRtpConfig() - DtxEnabled for EVS[%d]", pAudioConfig->getDtxEnabled(), 0, 0);
 
         EvsParams* pEvsParams = new EvsParams();
         pEvsParams->setChannelAwareMode((int8_t)pFmtp->GetChAwRecv());

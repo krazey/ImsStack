@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,14 +33,14 @@ const IMS_BOOL CodecAudioConfig::DEFAULT_DTX = IMS_TRUE;
 PUBLIC
 CodecAudioConfig::CodecAudioConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
         CodecConfig(nType, nPayloadTypeNum),
-        m_nChannel(DEFAULT_CHANNEL),
+        m_bDtx(DEFAULT_DTX),
         m_bShowAmrModeSet(IMS_FALSE),
-        m_nAmrModeSetList(CodecAudioConfig::DEFAULT_MODESET_AMR_WB),
-        m_nDefaultAmrModeSetList(CodecAudioConfig::DEFAULT_MODESET_AMR_WB),
-        m_bDtx(CodecAudioConfig::DEFAULT_DTX),
-        m_nModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY),
-        m_nModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD),
-        m_nModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR)
+        m_nChannel(DEFAULT_CHANNEL),
+        m_nAmrModeSetList(DEFAULT_MODESET_AMR_WB),
+        m_nDefaultAmrModeSetList(DEFAULT_MODESET_AMR_WB),
+        m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
+        m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
+        m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
 {
     IMS_TRACE_I("+CodecAudioConfig - Type[%d]", nType, 0, 0);
 }
@@ -71,7 +71,7 @@ PUBLIC VIRTUAL void CodecAudioConfig::ToDebugString() const
     CodecConfig::ToDebugString();
     IMS_TRACE_D("ChannelCount[%d], AmrModeSetList[0x%04x], default AmrModeSetList[0x%04x]",
             m_nChannel, m_nAmrModeSetList, m_nDefaultAmrModeSetList);
-    IMS_TRACE_D("show AmrModeSet[%d], Dtx[%d]", m_bShowAmrModeSet, m_bDtx, 0);
+    IMS_TRACE_D("show AmrModeSet[%d]", m_bShowAmrModeSet, 0, 0);
     IMS_TRACE_D("ModeChangeCapability[%d], ModeChangePeriod[%d], ModeChangeNeighbor[%d]",
             m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 }
@@ -121,12 +121,6 @@ IMS_UINT32 CodecAudioConfig::GetDefaultAmrModeSetList() const
 }
 
 PUBLIC
-IMS_BOOL CodecAudioConfig::GetDtx() const
-{
-    return m_bDtx;
-}
-
-PUBLIC
 IMS_SINT32 CodecAudioConfig::GetModeChangeCapability() const
 {
     return m_nModeChangeCapability;
@@ -142,4 +136,10 @@ PUBLIC
 IMS_SINT32 CodecAudioConfig::GetModeChangeNeighbor() const
 {
     return m_nModeChangeNeighbor;
+}
+
+PUBLIC
+IMS_BOOL CodecAudioConfig::GetDtx() const
+{
+    return m_bDtx;
 }

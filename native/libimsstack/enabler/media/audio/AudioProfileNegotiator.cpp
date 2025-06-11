@@ -376,8 +376,6 @@ AudioProfile::EvsFmtp* AudioProfileNegotiator::NegotiateEvsFmtp(IN AudioProfile*
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("NegotiateEvsFmtp(): payload index[%d]", nLocalPayloadIndex, 0, 0);
-
     nLocalPayloadIndex = FindPayloadIndexFromProfile(
             pPeerPayload->GetRtpMap().GetPayloadType(), pLocalProfile, pPeerPayload);
     AudioProfile::EvsFmtp* pLocalFmtp =
@@ -387,6 +385,9 @@ AudioProfile::EvsFmtp* AudioProfileNegotiator::NegotiateEvsFmtp(IN AudioProfile*
     pEvsFmtp->SetBwList(nBandwidthNegoList);
     pEvsFmtp->SetBrList(nBitrateNegoList);
     pEvsFmtp->SetModeSetList(nModeSetNegoList);
+
+    IMS_TRACE_D("NegotiateEvsFmtp(): payload index[%d], peer DTX[%d], local DTX[%d]",
+            nLocalPayloadIndex, pEvsFmtp->IsDtxEnabled(), pLocalFmtp->IsDtxEnabled());
 
     if (pEvsFmtp->IsDtxEnabled() != pLocalFmtp->IsDtxEnabled())
     {
