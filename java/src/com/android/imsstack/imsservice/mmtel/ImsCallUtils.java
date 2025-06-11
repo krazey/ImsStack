@@ -46,6 +46,7 @@ import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.imsphone.ImsExternalCallTracker;
 
 import java.util.Arrays;
@@ -397,7 +398,7 @@ public class ImsCallUtils {
                         int[] policies = cc != null ? cc.getIntArray(
                             CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
                         urn = getSosUrnFromECallServiceCategory(
-                                profile.getEmergencyServiceCategories(), policies);
+                                profile.getEmergencyServiceCategories(), policies, context);
                     }
                 } else {
                     // The first item has priority ??
@@ -458,18 +459,15 @@ public class ImsCallUtils {
     }
 
     public static String getSosUrnFromECallServiceCategory(
-            @EmergencyServiceCategories int category, int[] policies) {
-        if (containsPolicy(policies, CarrierConfig.ImsEmergency.NOT_USE_SERVICE_CATEGORY)) {
+            @EmergencyServiceCategories int category, int[] policies,
+            ICallContext context) {
+        if (shouldUseGenericUrn(category, policies, context)) {
             return SOS_SERVICE_URN_GENERIC;
         }
         if ((category == EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED)
                 && containsPolicy(
                 policies, CarrierConfig.ImsEmergency.USE_POLICE_FOR_UNSPECIFIED)) {
             return SOS_SERVICE_URN_POLICE;
-        }
-        if (isMultipleCategories(category) && containsPolicy(policies,
-                CarrierConfig.ImsEmergency.USE_GENERIC_FOR_MULTIPLE_CATEGORIES)) {
-            return SOS_SERVICE_URN_GENERIC;
         }
 
         if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE) != 0) {
@@ -1165,8 +1163,36 @@ public class ImsCallUtils {
         return Arrays.stream(policies).anyMatch(value -> value == policy);
     }
 
-    private static boolean isMultipleCategories(int categories) {
-        return Integer.bitCount(categories) > 1;
+    @VisibleForTesting
+    protected static boolean containsCategory(int[] source, int categories) {
+        if (source == null) {
+            return false;
+        }
+
+        return Arrays.stream(source).anyMatch(value -> value == categories);
+    }
+
+    @VisibleForTesting
+    protected static boolean shouldUseGenericUrn(int categories,
+            int[] policies, ICallContext context) {
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, context.getSlotId());
+        CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
+        int[] list = cc != null ? cc.getIntArray(
+                CarrierConfig.ImsEmergency.KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY) : null;
+
+        if (containsPolicy(policies, CarrierConfig.ImsEmergency.NOT_USE_SERVICE_CATEGORY)) {
+            return true;
+        } else if ((Integer.bitCount(categories) > 1)
+                && containsPolicy(policies,
+                        CarrierConfig.ImsEmergency.USE_GENERIC_FOR_MULTIPLE_CATEGORIES)) {
+            return true;
+        } else if (containsCategory(list, categories)
+                && containsPolicy(policies,
+                        CarrierConfig.ImsEmergency.USE_GENERIC_FOR_SPECIAL_CATEGORIES)) {
+            return true;
+        }
+        return false;
     }
 
     static {

@@ -425,50 +425,69 @@ public class ImsCallUtilsTest {
 
     @Test
     public void testGetSosUrnFromECallServiceCategory() {
-        int[] policies = {CarrierConfig.ImsEmergency.NOT_USE_SERVICE_CATEGORY};
+        int[] policies = new int[] {CarrierConfig.ImsEmergency.USE_POLICE_FOR_UNSPECIFIED};
         String ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE, policies);
-        assertEquals(ret, SOS_SERVICE_URN_GENERIC);
-
-        policies = new int[] {CarrierConfig.ImsEmergency.USE_POLICE_FOR_UNSPECIFIED};
-        ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED, policies);
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED, policies, mContext);
         assertEquals(ret, SOS_SERVICE_URN_POLICE);
 
         ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED, null);
-        assertEquals(ret, SOS_SERVICE_URN_GENERIC);
-
-        policies = new int[] {CarrierConfig.ImsEmergency.USE_GENERIC_FOR_MULTIPLE_CATEGORIES};
-        ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE
-                | EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE, policies);
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED, null, mContext);
         assertEquals(ret, SOS_SERVICE_URN_GENERIC);
 
         ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
                 EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE
-                | EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE, null);
+                | EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE, null, mContext);
+        assertEquals(ret, SOS_SERVICE_URN_POLICE);
+
+        policies = new int[] {CarrierConfig.ImsEmergency.USE_POLICE_FOR_UNSPECIFIED,
+                CarrierConfig.ImsEmergency.USE_GENERIC_FOR_MULTIPLE_CATEGORIES,
+                CarrierConfig.ImsEmergency.USE_GENERIC_FOR_SPECIAL_CATEGORIES};
+        ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE, policies, mContext);
         assertEquals(ret, SOS_SERVICE_URN_POLICE);
 
         ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE, policies);
-        assertEquals(ret, SOS_SERVICE_URN_POLICE);
-
-        ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE, policies);
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE, policies, mContext);
         assertEquals(ret, SOS_SERVICE_URN_AMBULANCE);
 
         ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE, policies);
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE, policies, mContext);
         assertEquals(ret, SOS_SERVICE_URN_FIRE);
 
         ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD, policies);
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD, policies, mContext);
         assertEquals(ret, SOS_SERVICE_URN_MARINE);
 
         ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
-                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE, policies);
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE, policies, mContext);
         assertEquals(ret, SOS_SERVICE_URN_MOUNTAIN);
+    }
+
+    @Test
+    public void testShouldUseGenericUrn() {
+        int[] policies = {CarrierConfig.ImsEmergency.NOT_USE_SERVICE_CATEGORY};
+        boolean value = ImsCallUtils.shouldUseGenericUrn(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE, policies, mContext);
+        assertEquals(value, true);
+
+        policies = new int[] {CarrierConfig.ImsEmergency.USE_GENERIC_FOR_MULTIPLE_CATEGORIES};
+        value = ImsCallUtils.shouldUseGenericUrn(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE
+                | EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE, policies, mContext);
+        assertEquals(value, true);
+    }
+
+    @Test
+    public void testContainsCategory() {
+        int[] list = {31, 255};
+        boolean value = ImsCallUtils.containsCategory(list, 0x1F);
+        assertEquals(value, true);
+
+        value = ImsCallUtils.containsCategory(list, 0x80);
+        assertEquals(value, false);
+
+        value = ImsCallUtils.containsCategory(list, 0xFF);
+        assertEquals(value, true);
     }
 
     @Test

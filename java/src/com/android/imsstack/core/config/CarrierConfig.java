@@ -813,6 +813,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reject_code_require_perm_failure_int_array";
         public static final String KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY =
                 KEY_PREFIX + "policy_for_emergency_urn_int_array";
+        public static final String KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY =
+                KEY_PREFIX + "category_for_generic_urn_int_array";
         public static final String KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL =
                 KEY_PREFIX + "silent_redial_with_voip_by_rtt_rejection_bool";
         public static final String KEY_SILENT_REDIAL_WITH_ANONYMOUS_BY_NETWORK_REJECTION_BOOL =
@@ -828,10 +830,12 @@ public class CarrierConfig {
         public static final String KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY =
                 KEY_PREFIX + "dynamic_routing_number_per_plmn_string_array";
 
-        // Emergency URN policy
+        /** Emergency URN policy **/
         public static final int NOT_USE_SERVICE_CATEGORY = 1;
         public static final int USE_POLICE_FOR_UNSPECIFIED = 2;
         public static final int USE_GENERIC_FOR_MULTIPLE_CATEGORIES = 3;
+        // Category = 0x1F, 0x3F, 0xFF, .etc
+        public static final int USE_GENERIC_FOR_SPECIAL_CATEGORIES = 4;
 
         private ImsEmergency() {}
     }

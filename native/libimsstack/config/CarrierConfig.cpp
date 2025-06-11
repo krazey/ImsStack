@@ -1292,6 +1292,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REJECT_CODE_REQUIRE_PERM_FAILURE
         KEY_IMS_EMERGENCY_PREFIX "reject_code_require_perm_failure_int_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "policy_for_emergency_urn_int_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "category_for_generic_urn_int_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SILENT_REDIAL_WITH_VOIP_BY_RTT_REJECTION_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "silent_redial_with_voip_by_rtt_rejection_bool";
 const IMS_CHAR
