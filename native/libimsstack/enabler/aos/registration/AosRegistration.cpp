@@ -1006,7 +1006,7 @@ IMS_BOOL AosRegistration::IsConnectionFailureForOfflineRecovery(
     }
 
     if (nFailureReason == IImsRadio::REASON_RACH_FAILURE &&
-            nCauseCode == SR_LLF_TIMER_START_CAUSE_CODE)
+            nCauseCode == IImsRadioConnectionListener::CAUSE_CODE_SR_LLF_TIMER_START)
     {
         return IMS_TRUE;
     }

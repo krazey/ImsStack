@@ -5901,10 +5901,9 @@ TEST_F(AosRegistrationTest,
 TEST_F(AosRegistrationTest,
         ShouldBeConnectionFailureForOfflineRecoveryIfRachFailureAndLlfTimerCause)
 {
-    const IMS_UINT32 SR_LLF_TIMER_START_CAUSE_CODE = 1000;
-
     EXPECT_TRUE(m_pAosRegistration->IsConnectionFailureForOfflineRecovery(
-            IImsRadio::REASON_RACH_FAILURE, SR_LLF_TIMER_START_CAUSE_CODE));
+            IImsRadio::REASON_RACH_FAILURE,
+            IImsRadioConnectionListener::CAUSE_CODE_SR_LLF_TIMER_START));
 }
 
 TEST_F(AosRegistrationTest,
