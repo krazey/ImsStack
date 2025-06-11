@@ -81,6 +81,20 @@ public final class ImsRegistrationWrapper {
         }
 
         /**
+         * Notifies when the IMS Provider is unregistered from the IMS network.
+         *
+         * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+         * @param suggestedAction the expected behavior of radio protocol stack.
+         * @param imsRadioTech the network type on which IMS registration has failed.
+         * @param throttlingTimeSec The registration throttling time in seconds.
+         */
+        default void onDeregistered(@NonNull ImsReasonInfo info,
+                @RegistrationManager.SuggestedAction int suggestedAction,
+                @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech,
+                int throttlingTimeSec) {
+        }
+
+        /**
          * A failure has occurred when trying to handover registration to another technology type.
          *
          * @param imsTransportType The transport type that has failed to handover registration to.
@@ -263,6 +277,24 @@ public final class ImsRegistrationWrapper {
         });
     }
 
+    private void invokeOnDeregistered(@NonNull ImsReasonInfo info,
+            @RegistrationManager.SuggestedAction int suggestedAction,
+            @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech,
+            int throttlingTimeSec) {
+        mHandler.post(() -> {
+            boolean registered = mRegistered;
+            mRegistered = false;
+            if (mRegistrationListener != null) {
+                mRegistrationListener.onDeregistered(info, suggestedAction, imsRadioTech,
+                        throttlingTimeSec);
+            }
+            if (registered) {
+                mDeregisteredLatch.countDown();
+                mRegisteredLatch.init();
+            }
+        });
+    }
+
     private void invokeOnTechnologyChangeFailed(
             @AccessNetworkConstants.TransportType int imsTransportType,
             @NonNull ImsReasonInfo info) {
@@ -305,6 +337,14 @@ public final class ImsRegistrationWrapper {
                 @RegistrationManager.SuggestedAction int suggestedAction,
                 @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
             invokeOnDeregistered(info, suggestedAction, imsRadioTech);
+        }
+
+        @Override
+        public void onDeregisteredWithTime(ImsReasonInfo info,
+                @RegistrationManager.SuggestedAction int suggestedAction,
+                @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech,
+                int throttlingTimeSec) {
+            invokeOnDeregistered(info, suggestedAction, imsRadioTech, throttlingTimeSec);
         }
 
         @Override
