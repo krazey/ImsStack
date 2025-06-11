@@ -1172,6 +1172,22 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void jniImsListenerProxy_notifyDeregistering() {
+        mAosService.setRegisteredNetworkType(NetworkType.LTE);
+        mAosService.addListener(mMockAosRegistrationListener);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERING);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        verify(mMockAosRegistrationListener).notifyDeregistering(RegistrationType.NORMAL);
+    }
+
+    @Test
     public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetwork() {
         mAosService.setRegisteredNetworkType(NetworkType.LTE);
         mAosService.addListener(mMockAosRegistrationListener);

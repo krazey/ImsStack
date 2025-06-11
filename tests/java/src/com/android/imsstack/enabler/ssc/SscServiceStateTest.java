@@ -1041,6 +1041,19 @@ public class SscServiceStateTest {
     }
 
     @Test
+    public void testRegistrationListener_notifyDeregistering() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
+        when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
+        createAndInitSscServiceState();
+
+        mSscServiceState.mRegiStateListener.notifyDeregistering(0);
+        processAllMessages();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+    }
+
+    @Test
     public void testRegistrationListener_notifyTechnologyChangeFailed() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);

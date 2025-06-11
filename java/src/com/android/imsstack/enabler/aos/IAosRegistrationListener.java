@@ -63,6 +63,13 @@ public interface IAosRegistrationListener {
             int regType, NetworkType networkType, ReasonCode reason, String message);
 
     /**
+     * Notify the application that the device is disconnecting from the IMS network.
+     *
+     * @param regType Type of the registration. See {@link RegistrationType}.
+     */
+    void notifyDeregistering(int regType);
+
+    /**
      * Notify the framework that the handover from the current radio technology to the other
      * technology has failed.
      *

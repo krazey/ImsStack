@@ -89,6 +89,7 @@ public:
     MOCK_METHOD(IMS_BOOL, NotifyDeregistered,
             (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason),
             (override));
+    MOCK_METHOD(IMS_BOOL, NotifyDeregistering, (IN IMS_SINT32 nRegType), (override));
     MOCK_METHOD(IMS_BOOL, NotifyTechnologyChangeFailed,
             (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason),
             (override));

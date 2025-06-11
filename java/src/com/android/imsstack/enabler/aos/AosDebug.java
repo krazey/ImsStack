@@ -1160,6 +1160,11 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
+        public void notifyDeregistering(int regType) {
+            // Do nothing.
+        }
+
+        @Override
         public void notifyTechnologyChangeFailed(
                 int regType, NetworkType networkType, ReasonCode reason, String message) {
             // Do nothing.
