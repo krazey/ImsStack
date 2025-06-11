@@ -16,6 +16,10 @@
 -->
 <carrier_config>
     <!-- Carrier configurations -->
+    <!-- Mtc Assets -->
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
+    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="8"/>
+
     <!-- Media -->
     <int name="imsvoice.audio_maxred_int" value="0"/>
     <boolean name="imsvoice.audio_evs_support_bool" value="true"/>

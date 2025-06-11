@@ -272,6 +272,15 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL);
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT));
+
+    SetTcallTimerConfig(ConfigVoice::
+                    MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL_WITH_INITIAL_REGISTER_PCSCF_DISCOVERY);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
@@ -310,6 +319,15 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL);
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT));
+
+    SetTcallTimerConfig(ConfigVoice::
+                    MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL_WITH_INITIAL_REGISTER_PCSCF_DISCOVERY);
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext)

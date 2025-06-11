@@ -16,6 +16,9 @@
 -->
 <carrier_config>
     <!-- Carrier configurations -->
+    <!-- MTC -->
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="3000"/>
+
     <!-- Media -->
     <pbundle_as_map name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">

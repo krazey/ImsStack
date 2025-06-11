@@ -238,9 +238,14 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
                 ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
             }
             break;
-        default:  // ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
             nReason = CODE_INTERNAL_REDIAL;
             nExtraCode = EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT;
+            break;
+        default:  // ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL_WITH_INITIAL_REGISTER_PCSCF_DISCOVERY:
+            ControlAos(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+            nReason = CODE_INTERNAL_REDIAL;
+            nExtraCode = EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF;
             break;
     }
 
