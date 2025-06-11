@@ -44,7 +44,8 @@ public:
      *                   {@code IMS_FALSE} otherwise.
      */
     virtual void SendMoSmsByServiceType(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN IMS_UINT32 nRetryCount) = 0;
 };
 
 #endif

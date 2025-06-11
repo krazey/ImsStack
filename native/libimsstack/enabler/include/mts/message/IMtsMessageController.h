@@ -44,10 +44,11 @@ public:
      * @param bEmergency {@code IMS_TRUE} If the dialed number is an emergency number,
      *                   {@code IMS_FALSE} otherwise.
      * @param eServiceType The service type of the MO SMS message.
+     * @param nRetryCount The SMS retry count, controlled by the upper layer.
      */
     virtual void ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
-            IN MtsServiceType eServiceType) = 0;
+            IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount) = 0;
 
     /**
      * @brief Processes an MT SMS request.

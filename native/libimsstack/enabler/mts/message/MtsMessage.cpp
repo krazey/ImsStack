@@ -28,6 +28,7 @@ MtsMessage::MtsMessage(IN IMS_SINT32 nSlotId) :
         m_strImpu(AString::ConstNull()),
         m_nMrOfRp(-1),
         m_nMti(SMS_MTI_NONE),
+        m_nRetryCount(0),
         m_nSeqId(-1),
         m_nSlotId(nSlotId),
         m_nSmSize(0),

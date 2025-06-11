@@ -53,6 +53,7 @@ namespace android
 const IMS_SINT32 SLOT_ID = 0;
 const IMS_SINT32 SEQ_ID_1 = 1;
 const IMS_SINT32 SEQ_ID_2 = 2;
+const IMS_UINT32 RETRY_COUNT = 0;
 const IMS_UINTP FAKE_ADDRESS = 1;
 
 class MtsServiceTest : public ::testing::Test
@@ -280,7 +281,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(0);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
@@ -288,7 +289,8 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
             objJniMtsAppThread, ReportMoStatus(MO_ERROR_RETRY, eSmsFormat, SEQ_ID_1, SLOT_ID))
             .Times(1);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
 }
 
 TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
@@ -303,7 +305,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -311,7 +313,8 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
@@ -328,7 +331,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(0);
     EXPECT_CALL(objMessageController, ClearAllMessages()).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
@@ -337,7 +340,8 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
             IImsRadio::REASON_ACCESS_DENIED, 400, 2000);
 }
@@ -354,7 +358,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndInvalidTrafficTypeIsAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(0);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -362,7 +366,8 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndInvalidTrafficTypeIsAllowed)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
     // Invalid traffic type
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO);
@@ -380,7 +385,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(2);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -388,11 +393,13 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
 }
 
 TEST_F(MtsServiceTest, InvalidGuardTimerExpired)
@@ -414,7 +421,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -424,7 +431,8 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
     EXPECT_CALL(objMockIImsEmergencyAos, Control(ImsAosControl::REGISTER_START)).Times(1);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MO);
@@ -442,7 +450,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowedButDoNotUseEPDN)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -451,7 +459,8 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowedButDoNotUseEPDN)
             .Times(1);
     EXPECT_CALL(objMockIImsEmergencyAos, Control(ImsAosControl::REGISTER_START)).Times(0);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
@@ -468,7 +477,7 @@ TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _)).Times(2);
+    EXPECT_CALL(objMessageController, ProcessMoSms(_, _, _, _, _, _)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -478,12 +487,14 @@ TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
     EXPECT_CALL(objMockIImsEmergencyAos, Control(ImsAosControl::REGISTER_START)).Times(2);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_1, bEmergency, RETRY_COUNT);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MO);
 
-    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+    pMtsService->SendMoSms(
+            eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency, RETRY_COUNT);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
 }
 

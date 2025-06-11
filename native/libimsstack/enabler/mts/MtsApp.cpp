@@ -100,15 +100,17 @@ PUBLIC VIRTUAL IJniMtsAppThread* MtsApp::GetJniAppThread() const
 
 PUBLIC VIRTUAL void MtsApp::SendMoSmsByServiceType(IN SmsFormatType eSmsFormat,
         IN ByteArray* pContent, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
-        IN IMS_BOOL bEmergency)
+        IN IMS_BOOL bEmergency, IN IMS_UINT32 nRetryCount)
 {
     if (bEmergency && IsEmergencySmsOverImsSupported())
     {
-        m_objEmergencyService.SendMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
+        m_objEmergencyService.SendMoSms(
+                eSmsFormat, pContent, strAddress, nSeqId, bEmergency, nRetryCount);
     }
     else
     {
-        m_objNormalService.SendMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
+        m_objNormalService.SendMoSms(
+                eSmsFormat, pContent, strAddress, nSeqId, bEmergency, nRetryCount);
     }
 }
 

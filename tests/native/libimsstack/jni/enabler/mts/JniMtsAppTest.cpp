@@ -80,7 +80,7 @@ TEST_F(JniMtsAppTest, SendDataMoSms3gpp)
     objParcel.writeInt32(SMSFORMAT_3GPP);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockMtsJni, SendMoSmsByServiceType(SmsFormatType::SMSFORMAT_3GPP, _, _, _, _))
+    EXPECT_CALL(objMockMtsJni, SendMoSmsByServiceType(SmsFormatType::SMSFORMAT_3GPP, _, _, _, _, _))
             .Times(1);
 
     pJniApp->SendData(objParcel);
@@ -92,7 +92,8 @@ TEST_F(JniMtsAppTest, SendDataMoSms3gpp2)
     objParcel.writeInt32(SMSFORMAT_3GPP2);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockMtsJni, SendMoSmsByServiceType(SmsFormatType::SMSFORMAT_3GPP2, _, _, _, _))
+    EXPECT_CALL(
+            objMockMtsJni, SendMoSmsByServiceType(SmsFormatType::SMSFORMAT_3GPP2, _, _, _, _, _))
             .Times(1);
 
     pJniApp->SendData(objParcel);

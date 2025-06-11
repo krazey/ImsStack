@@ -97,6 +97,7 @@ public class MtsController {
     private Listener mListener = null;
     private MtsJni mMtsJni;
     private boolean mUseDialedNumber = false;
+    private int mRetryCount = 0;
 
     public MtsController(IBaseContext context) {
         ImsLog.d(context.getSlotId(), "");
@@ -193,7 +194,13 @@ public class MtsController {
         ImsLog.d(mSlotId, "smsFormat : " + smsFormat + ", smsDataLength = " + smsData.length
                 + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
                 + ", seqId = " + seqId + ", isRetry = " + isRetry);
-        // TODO(b/388163941): Need to send this flag to MTS enabler.
+
+        if (isRetry) {
+            mRetryCount++;
+        } else {
+            mRetryCount = 0;
+        }
+
         String encodedPdu = Base64.encodeToString(smsData, Base64.DEFAULT);
         if (encodedPdu == null || psiSmsc == null) {
             processNotifySendMoSmsError(smsFormat, seqId);
@@ -227,6 +234,7 @@ public class MtsController {
         parcel.writeInt(seqId);
         parcel.writeBoolean((telephony != null)
                 ? telephony.isEmergencyNumber(dialedNumber) : false);
+        parcel.writeInt(mRetryCount);
         mMtsJni.sendMessage(parcel, mSlotId);
         return true;
     }

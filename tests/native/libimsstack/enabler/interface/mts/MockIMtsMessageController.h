@@ -29,7 +29,8 @@ public:
     MOCK_METHOD(IMS_BOOL, HasPendingMoSms, (), (const, override));
     MOCK_METHOD(void, ProcessMoSms,
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
-                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency, IN MtsServiceType eServiceType),
+                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency, IN MtsServiceType eServiceType,
+                    IN IMS_UINT32 nRetryCount),
             (override));
     MOCK_METHOD(void, ProcessMtSms, (IN IPageMessage * piMessage, IN MtsServiceType eServiceType),
             (override));

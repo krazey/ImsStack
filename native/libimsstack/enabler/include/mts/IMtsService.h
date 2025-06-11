@@ -71,9 +71,11 @@ public:
      *               callbacks for this specific message.
      * @param bEmergency {@code IMS_TRUE} If the dialed number is an emergency number,
      *                   {@code IMS_FALSE} otherwise.
+     * @param nRetryCount The SMS retry count, controlled by the upper layer.
      */
     virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN IMS_UINT32 nRetryCount) = 0;
 };
 
 #endif

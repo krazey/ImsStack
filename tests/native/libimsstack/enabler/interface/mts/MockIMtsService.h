@@ -37,7 +37,7 @@ public:
             (const, override));
     MOCK_METHOD(void, SendMoSms,
             (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
-                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),
+                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency, IN IMS_UINT32 nRetryCount),
             (override));
 };
 

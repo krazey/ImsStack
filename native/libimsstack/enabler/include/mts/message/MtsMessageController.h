@@ -53,7 +53,7 @@ public:
     IMS_BOOL HasPendingMoSms() const override;
     void ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
-            IN MtsServiceType eServiceType) override;
+            IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount) override;
     void ProcessMtSms(IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType) override;
     void ClearAllMessages() override;
 
@@ -75,7 +75,7 @@ private:
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN MtsServiceType eServiceType);
     IMS_RESULT SendMtsMessage(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
-            IN MtsServiceType eServiceType);
+            IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount);
     void ReportMoStatus(
             IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent);

@@ -42,6 +42,8 @@ public:
     {
         m_piPageMessage = piPageMessage;
     }
+    inline IMS_UINT32 GetRetryCount() const override { return m_nRetryCount; }
+    inline void SetRetryCount(IN IMS_UINT32 nRetryCount) override { m_nRetryCount = nRetryCount; }
     inline IMS_SINT32 GetSeqId() override { return m_nSeqId; }
     inline void SetSeqId(IN IMS_SINT32 nSeqId) override { m_nSeqId = nSeqId; }
     inline IMS_SINT32 GetSlotId() override { return m_nSlotId; }
@@ -64,6 +66,7 @@ private:
     AString m_strImpu;
     IMS_SINT32 m_nMrOfRp;
     IMS_SINT32 m_nMti;
+    IMS_UINT32 m_nRetryCount;
     IMS_SINT32 m_nSeqId;
     IMS_SINT32 m_nSlotId;
     IMS_SINT32 m_nSmSize;

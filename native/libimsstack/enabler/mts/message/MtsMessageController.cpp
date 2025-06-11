@@ -195,12 +195,12 @@ PUBLIC VIRTUAL IMS_BOOL MtsMessageController::HasPendingMoSms() const
 
 PUBLIC void MtsMessageController::ProcessMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
         IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
-        IN MtsServiceType eServiceType)
+        IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount)
 {
     IMS_TRACE_I("ProcessMoSms", 0, 0, 0);
 
-    if (SendMtsMessage(eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType) ==
-            IMS_FAILURE)
+    if (SendMtsMessage(eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType,
+                nRetryCount) == IMS_FAILURE)
     {
         delete pContent;
     }
@@ -488,7 +488,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
 
 PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
         IN ByteArray* pContent, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
-        IN IMS_BOOL bEmergency, IN MtsServiceType eServiceType)
+        IN IMS_BOOL bEmergency, IN MtsServiceType eServiceType, IN IMS_UINT32 nRetryCount)
 {
     IMS_TRACE_I("SendMtsMessage : eSmsFormat[%s], nSeqId[%d], eServiceType[%s]",
             PS_SmsFormatType(eSmsFormat), nSeqId, PS_ServiceType(eServiceType));
@@ -563,6 +563,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
 
     piMtsMessage = new MtsMessage(m_objContext.GetSlotId());
     piMtsMessage->SetSeqId(nSeqId);
+    piMtsMessage->SetRetryCount(nRetryCount);
     IMessage* piMessage = piPageMessage->GetNextRequest();
     if (ConstructSendMessage(piMessage, *pContent, eSmsFormat, bEmergency) == IMS_FALSE)
     {
@@ -603,7 +604,8 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     m_pRetryContent = pContent;
     m_objRetryFunction = [=, this]()
     {
-        ProcessMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType);
+        ProcessMoSms(
+                eSmsFormat, pContent, strAddress, nSeqId, bEmergency, eServiceType, nRetryCount);
     };
 
     SetMessageInfo(piPageMessage, *pContent, eSmsFormat, strDestination,

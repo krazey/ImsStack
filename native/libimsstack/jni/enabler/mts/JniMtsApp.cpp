@@ -146,6 +146,7 @@ void JniMtsApp::TriggerSendMoSms(IN const Parcel& objParcel)
     android::String8 strAddress_(objParcel.readString16());
     IMS_SINT32 nSeqId = objParcel.readInt32();
     IMS_BOOL bEmergency = objParcel.readBool();
+    IMS_UINT32 nRetryCount = objParcel.readInt32();
     AString strContent = AString::FromBase64(strEncodedPdu.c_str());
     // This object will be deleted by MtsMessageController after being used.
     ByteArray* pContent = new ByteArray(reinterpret_cast<const IMS_BYTE*>(strContent.GetStr()),
@@ -174,5 +175,6 @@ void JniMtsApp::TriggerSendMoSms(IN const Parcel& objParcel)
         return;
     }
 
-    piMtsJni->SendMoSmsByServiceType(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
+    piMtsJni->SendMoSmsByServiceType(
+            eSmsFormat, pContent, strAddress, nSeqId, bEmergency, nRetryCount);
 }

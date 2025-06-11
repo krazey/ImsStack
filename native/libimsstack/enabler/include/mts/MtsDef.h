@@ -26,13 +26,14 @@ class SmsSendRequestInfo
 {
 public:
     SmsSendRequestInfo(IN SmsFormatType eInitSmsFormat, IN ByteArray* pInitContent,
-            IN const AString& strInitAddress, IN IMS_SINT32 nInitSeqId,
-            IN IMS_BOOL bInitEmergency) :
+            IN const AString& strInitAddress, IN IMS_SINT32 nInitSeqId, IN IMS_BOOL bInitEmergency,
+            IN IMS_UINT32 nInitRetryCount) :
             eSmsFormat(eInitSmsFormat),
             pContent(pInitContent),
             strAddress(strInitAddress),
             nSeqId(nInitSeqId),
-            bEmergency(bInitEmergency)
+            bEmergency(bInitEmergency),
+            nRetryCount(nInitRetryCount)
     {
     }
 
@@ -41,6 +42,7 @@ public:
     AString strAddress;
     IMS_SINT32 nSeqId;
     IMS_BOOL bEmergency;
+    IMS_UINT32 nRetryCount;
 };
 
 enum class MtsTimerType
