@@ -1331,7 +1331,12 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pL
     }
     else  // Primary Mode
     {
-        if (!IsValidEvsBwList(pPeerFmtp->GetBwList()))
+        IMS_UINT32 nVerifyPeerBwList = (pPeerFmtp->GetBwList() > 0)
+                ? pPeerFmtp->GetBwList()
+                : pPeerFmtp->GetBwRecv() & pPeerFmtp->GetBwSend();
+        IMS_TRACE_D("CompareEvsBwBrMode(): peer Bw:[0x%04x]", nVerifyPeerBwList, 0, 0);
+
+        if (!IsValidEvsBwList(nVerifyPeerBwList))
         {
             IMS_TRACE_D("CompareEvsBwBrMode(): Primary Mode - invalid received BW", 0, 0, 0);
             return IMS_FALSE;
@@ -1410,9 +1415,9 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pL
                 pPeerFmtp->SetBwSend(0x0f);
             }
 
-            IMS_UINT32 nPeerBWList = pPeerFmtp->GetBwRecv() & pPeerFmtp->GetBwSend();
+            IMS_UINT32 nPeerBwList = pPeerFmtp->GetBwRecv() & pPeerFmtp->GetBwSend();
 
-            *nNegoBwList = pLocalFmtp->GetBwList() & nPeerBWList;
+            *nNegoBwList = pLocalFmtp->GetBwList() & nPeerBwList;
             if (*nNegoBwList == 0)
             {
                 IMS_TRACE_D(
@@ -1530,7 +1535,12 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
     }
     else  // Primary Mode
     {
-        if (!IsValidEvsBwList(pPeerFmtp->GetBwList()))
+        IMS_UINT32 nVerifyPeerBwList = (pPeerFmtp->GetBwList() > 0)
+                ? pPeerFmtp->GetBwList()
+                : pPeerFmtp->GetBwRecv() & pPeerFmtp->GetBwSend();
+        IMS_TRACE_D("CompareEvsBwBrMode(): peer Bw:[0x%04x]", nVerifyPeerBwList, 0, 0);
+
+        if (!IsValidEvsBwList(nVerifyPeerBwList))
         {
             IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Primary Mode - invalid received BW", 0, 0, 0);
             return IMS_FALSE;
@@ -1564,9 +1574,9 @@ IMS_BOOL AudioProfileNegotiator::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFm
                 pPeerFmtp->SetBwSend(0x0f);
             }
 
-            IMS_UINT32 nPeerBWList = pPeerFmtp->GetBwRecv() & pPeerFmtp->GetBwSend();
+            IMS_UINT32 nPeerBwList = pPeerFmtp->GetBwRecv() & pPeerFmtp->GetBwSend();
 
-            *nNegoBwList = pLocalFmtp->GetBwList() & nPeerBWList;
+            *nNegoBwList = pLocalFmtp->GetBwList() & nPeerBwList;
             if (*nNegoBwList == 0)
             {
                 IMS_TRACE_D("CompareEvsBwBrModeLegacy(): Primary Mode - Bandwidth Not Matched...",
