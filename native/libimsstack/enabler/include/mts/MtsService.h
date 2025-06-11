@@ -20,11 +20,12 @@
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IMtsService.h"
-#include "ImsService.h"
 #include "IMtsTrafficListener.h"
+#include "ImsService.h"
 #include "MtsDef.h"
 #include <memory>
 
+class ICoreService;
 class IImsAos;
 class IImsRadio;
 class IMtsContext;
@@ -70,6 +71,7 @@ public:
 
     // IMtsService
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }
+    inline IImsAos* GetIImsAos() const override { return m_piImsAos; }
     inline IMtsServiceState* GetIMtsServiceState() const override { return m_piMtsServiceState; }
     void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) const override;
     void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) const override;
