@@ -364,6 +364,11 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     @Override
+    public void clearNetworkRegistrationRejectCause() {
+        mNetworkRegistrationRejectCause = REGISTRATION_REJECT_CAUSE_NONE;
+    }
+
+    @Override
     public boolean isAirplaneMode() {
         return mAirplaneMode;
     }

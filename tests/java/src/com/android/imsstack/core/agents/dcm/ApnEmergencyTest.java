@@ -17,6 +17,7 @@
 package com.android.imsstack.core.agents.dcm;
 
 import static android.telephony.DataFailCause.ERROR_UNSPECIFIED;
+import static android.telephony.DataFailCause.SERVICE_OPTION_NOT_SUBSCRIBED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -118,6 +119,7 @@ public class ApnEmergencyTest {
         assertTrue(mApnEmergency.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnEmergency.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnEmergency.getDataState());
+        verify(mMockIDcNetWatcher).clearNetworkRegistrationRejectCause();
         verify(mConnectivityManager).requestNetwork(
                 any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class),
                 any(Handler.class));
@@ -250,16 +252,17 @@ public class ApnEmergencyTest {
     }
 
     @Test
-    public void testHandleDataConnectionFailed_crossStackRedialCause() throws Exception {
-        int failureCause = 33;
-        when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, failureCause))
+    public void testHandleDataConnectionFailed_crossStackRedialCauseWithEsmCause()
+            throws Exception {
+        int esmFailureCause = SERVICE_OPTION_NOT_SUBSCRIBED;
+        when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, esmFailureCause))
                 .thenReturn(true);
         // only when the apn has been requested before, notify data connection state change
         mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         Message msg1 = Message.obtain();
         msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg1.obj = failureCause;
+        msg1.obj = esmFailureCause;
         mApnEmergency.sendMessage(msg1);
         mTestableLooper.processAllMessages();
 
@@ -269,20 +272,40 @@ public class ApnEmergencyTest {
     @Test
     public void testHandleDataConnectionFailed_crossStackRedialCauseWithEmmCause()
             throws Exception {
-        int failureCause = 5; // EMM cause IMEI not accepted.
-        when(mMockIDcNetWatcher.getNetworkRegistrationRejectCause()).thenReturn(failureCause);
-        when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, failureCause))
+        int emmFailureCause = 5; // EMM cause IMEI not accepted.
+        when(mMockIDcNetWatcher.getNetworkRegistrationRejectCause()).thenReturn(emmFailureCause);
+        when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, emmFailureCause))
                 .thenReturn(true);
         // only when the apn has been requested before, notify data connection state change
         mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         Message msg1 = Message.obtain();
         msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg1.obj = ERROR_UNSPECIFIED;
+        msg1.obj = ERROR_UNSPECIFIED; // Set UNSPECIFIED since it's failed by EMM.
         mApnEmergency.sendMessage(msg1);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem).notifyDataConnectionFailed(EApnType.EMERGENCY.getType());
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_crossStackRedialCauseWithEmmCauseButEsmCauseSpecified()
+            throws Exception {
+        int emmFailureCause = 5; // EMM cause IMEI not accepted.
+        when(mMockIDcNetWatcher.getNetworkRegistrationRejectCause()).thenReturn(emmFailureCause);
+        when(mMockIDcSettings.isCrossStackRedialCause(EApnType.EMERGENCY, emmFailureCause))
+                .thenReturn(true);
+        // only when the apn has been requested before, notify data connection state change
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        Message msg1 = Message.obtain();
+        msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg1.obj = SERVICE_OPTION_NOT_SUBSCRIBED; // Set NOT_SUBSCRIBED since it's failed by ESM.
+        mApnEmergency.sendMessage(msg1);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem).notifyDataConnectionStateChanged(
+                EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
     }
 
     @Test

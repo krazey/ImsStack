@@ -60,6 +60,11 @@ public interface IDcNetWatcher extends IDc {
     int getNetworkRegistrationRejectCause();
 
     /**
+     * Clear network registration reject cause stored in DcNetWatcher object.
+     */
+    void clearNetworkRegistrationRejectCause();
+
+    /**
      * Return operator info (numeric type) stored in DcNetWatcher object
      */
     String getOperatorNumeric();

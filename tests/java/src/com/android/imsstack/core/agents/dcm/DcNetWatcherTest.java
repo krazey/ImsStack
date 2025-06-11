@@ -868,6 +868,29 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnServiceStateChanged_clearNetworkRegistrationRejectCause()
+            throws Exception {
+        int rejectCause = 3;
+        NetworkRegistrationInfo wwanInfo1 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_DENIED,
+                TelephonyManager.NETWORK_TYPE_LTE, false, rejectCause);
+
+        // Update reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo1);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(rejectCause, mDcNetWatcher.getNetworkRegistrationRejectCause());
+
+        // Clear reject cause.
+        mDcNetWatcher.clearNetworkRegistrationRejectCause();
+
+        assertEquals(REGISTRATION_REJECT_CAUSE_NONE,
+                mDcNetWatcher.getNetworkRegistrationRejectCause());
+    }
+
+    @Test
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenOn() throws Exception {
         when(mSettingsProxy.getInt(AIRPLANE_MODE_ON, -1)).thenReturn(1);
 

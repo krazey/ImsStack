@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
 import android.os.Message;
+import android.telephony.DataFailCause;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.MsgProcInterface;
@@ -56,6 +57,10 @@ public final class ApnEmergency extends Apn {
         if (mAPNState == EApnReqState.APN_REQUEST_DONE) {
             ImsLog.w(mSlotId, "request is already done");
             return true;
+        }
+
+        if (mDcNetWatcher != null) {
+            mDcNetWatcher.clearNetworkRegistrationRejectCause();
         }
 
         setApnReqState(EApnReqState.APN_REQUEST_DONE);
@@ -179,8 +184,8 @@ public final class ApnEmergency extends Apn {
                     return;
                 }
 
-                if (mDcNetWatcher != null) {
-                    // If EPDN connection is failed by EMM rejection, it needs to check the reject
+                if (causeCode == DataFailCause.ERROR_UNSPECIFIED && mDcNetWatcher != null) {
+                    // If E-PDN connection is failed by EMM rejection, it needs to check the reject
                     // cause in the network registration info.
                     int nwRejectCause = mDcNetWatcher.getNetworkRegistrationRejectCause();
                     if (mDcSettings.isCrossStackRedialCause(mType, nwRejectCause)) {
