@@ -469,6 +469,11 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
+    if (pNewOaModel->pPeerProfile != IMS_NULL)
+    {
+        delete pNewOaModel->pPeerProfile;
+    }
+
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
@@ -478,6 +483,11 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
+    }
+
+    if (pNewOaModel->pNegotiatedProfile != IMS_NULL)
+    {
+        delete pNewOaModel->pNegotiatedProfile;
     }
 
     // Make a negotiated profile from Local & Peer profile
