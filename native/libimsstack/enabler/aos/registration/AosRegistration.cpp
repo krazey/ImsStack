@@ -6169,6 +6169,7 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
     {
         case AosSubscription::CMD_REG_REQUIRED:
         {
+            m_eImsReasonCode = AosReasonCode::NETWORK_TRIGGERED_DEREGISTER;
             IMS_SINT32 nTime = nRetryAfter;
             if (bAwt)
             {
@@ -6179,9 +6180,11 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
             break;
         }
         case AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF:
+            m_eImsReasonCode = AosReasonCode::NETWORK_TRIGGERED_DEREGISTER;
             PostMessage(MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
             break;
         case AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION:
+            m_eImsReasonCode = AosReasonCode::NETWORK_TRIGGERED_DEREGISTER;
             PostMessage(MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION,
                     static_cast<IMS_UINT32>(nRetryAfter), 0);
             break;
@@ -6222,6 +6225,7 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
             break;
         }
         case AosSubscription::CMD_REG_TERMINATED:
+            m_eImsReasonCode = AosReasonCode::NETWORK_TRIGGERED_DEREGISTER;
             PostMessage(MSG_REG_TERMINATED_BY_NOTIFY, 0, 0);
             break;
         case AosSubscription::CMD_SUB_REQUIRED:

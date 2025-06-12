@@ -138,6 +138,7 @@ using ::testing::SetArgReferee;
     using Base::ProcessRegEventChange;                            \
     using Base::ProcessRegRequiredWithNextPcscf;                  \
     using Base::ProcessRegRequiredWithWaitTime;                   \
+    using Base::ProcessRegTerminatedByNotify;                     \
     using Base::ProcessRequiredWfcErrMessage;                     \
     using Base::ProcessReregister;                                \
     using Base::ProcessRetryInRegStopped;                         \
@@ -6866,6 +6867,79 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForUnpredictableFailure)
 
     // WHEN
     m_pAosRegistration->ProcessUnpredictableFailure();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegRequired)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    IMS_SINT32 nWaitTime = 30;
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+
+    // WHEN
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED, nWaitTime, IMS_FALSE);
+    ImsMessage objMsg(AosRegistration::MSG_REG_REQUIRED_WITH_WAIT_TIME, nWaitTime, 0);
+    m_pAosRegistration->OnMessage(objMsg);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegRequiredWithNextPcscf)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+
+    // WHEN
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE);
+    ImsMessage objMsg(AosRegistration::MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
+    m_pAosRegistration->OnMessage(objMsg);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegRequiredWithScscfRestoration)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    IMS_SINT32 nWaitTime = 30;
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+
+    // WHEN
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, nWaitTime, IMS_FALSE);
+    ImsMessage objMsg(AosRegistration::MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION, nWaitTime, 0);
+    m_pAosRegistration->OnMessage(objMsg);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForCmdRegTerminated)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, _,
+                    AosReasonCode::NETWORK_TRIGGERED_DEREGISTER));
+
+    // WHEN
+    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE);
+    ImsMessage objMsg(AosRegistration::MSG_REG_TERMINATED_BY_NOTIFY, 0, 0);
+    m_pAosRegistration->OnMessage(objMsg);
 
     // THEN: The GIVEN condition should be met.
 }
