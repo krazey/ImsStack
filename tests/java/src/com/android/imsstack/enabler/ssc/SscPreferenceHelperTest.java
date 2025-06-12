@@ -19,6 +19,7 @@ package com.android.imsstack.enabler.ssc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 
@@ -27,23 +28,44 @@ import androidx.test.filters.SmallTest;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class SscPreferenceHelperTest {
     private static final int SLOT_0 = 0;
+    private static final int SUB_ID_0 = 100;
+    @Mock
+    private SystemServiceProxy mMockSystemServiceProxy;
+    @Mock
+    private SystemServiceProxy.SubscriptionManagerProxy mMockSubscriptionManagerProxy;
 
     private SscPreferenceHelper mSscPreferenceHelper;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
+        MockitoAnnotations.openMocks(this).close();
+
         Context context = new ContextFixture().getTestDouble();
         AppContext.init(context);
+        AppContext.getInstance().setSystemServiceProxy(mMockSystemServiceProxy);
+
+        when(mMockSystemServiceProxy
+                .getSystemService(SystemServiceProxy.SubscriptionManagerProxy.class))
+                .thenReturn(mMockSubscriptionManagerProxy);
+        when(mMockSubscriptionManagerProxy.getSubscriptionId(MSimUtils.INVALID_SLOT_ID))
+                .thenReturn(MSimUtils.INVALID_SUB_ID);
+        when(mMockSubscriptionManagerProxy.getSubscriptionId(SLOT_0)).thenReturn(SUB_ID_0);
+        when(mMockSubscriptionManagerProxy.isValidSubscriptionId(SUB_ID_0)).thenReturn(true);
+        when(mMockSubscriptionManagerProxy.isValidSubscriptionId(MSimUtils.INVALID_SLOT_ID))
+                .thenReturn(false);
     }
 
     @After
