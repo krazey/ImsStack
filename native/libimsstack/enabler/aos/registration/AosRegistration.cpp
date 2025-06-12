@@ -187,6 +187,13 @@ PUBLIC VIRTUAL void AosRegistration::Start()
     A_IMS_TRACE_I(
             REGID, "Start :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
 
+    if (m_piStopRetryTimer != IMS_NULL &&
+            GET_N_CONFIG(m_nSlotId)->IsKeepRegRetryTimerOnAllEnablersDetached())
+    {
+        A_IMS_TRACE_D(REGID, "Start :: Stop Retry timer is running. Wait for expiration", 0, 0, 0);
+        return;
+    }
+
     // ONLY start in OFFLINE
     if (m_nState != STATE_OFFLINE)
     {

@@ -3965,6 +3965,57 @@ TEST_F(AosApplicationTest,
     EXPECT_FALSE(m_pAosApplication->IsPdnDeactivationRequired());
 }
 
+TEST_F(AosApplicationTest, KeepRegistrationIfStopRetryTimerIsRunningWhenCleanAllWithServicePolicy)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepRegRetryTimerOnAllEnablersDetached())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_REGSTOP));
+    ON_CALL(m_objMockIAosRegistration, IsRetryTimer()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistration, Destroy()).Times(0);
+
+    // WHEN
+    m_pAosApplication->CleanAll(AosReason::SERVICE_POLICY);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosApplicationTest, DestroyRegistrationIfNotRegStopStateWhenCleanAllWithServicePolicy)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepRegRetryTimerOnAllEnablersDetached())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_REGISTERED));
+
+    EXPECT_CALL(m_objMockIAosRegistration, Destroy());
+
+    // WHEN
+    m_pAosApplication->CleanAll(AosReason::SERVICE_POLICY);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosApplicationTest,
+        DestroyRegistrationIfStopRetryTimerIsNotRunningWhenCleanAllWithServicePolicy)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsKeepRegRetryTimerOnAllEnablersDetached())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRegistration, GetState())
+            .WillByDefault(Return(IAosRegistration::STATE_REGSTOP));
+    ON_CALL(m_objMockIAosRegistration, IsRetryTimer()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistration, Destroy());
+
+    // WHEN
+    m_pAosApplication->CleanAll(AosReason::SERVICE_POLICY);
+
+    // THEN: The GIVEN condition should be met.
+}
+
 TEST_F(AosApplicationTest, SetDataFailureReasonWhenUpdateDataFailureReason)
 {
     int anyDataFailureReason = 1;

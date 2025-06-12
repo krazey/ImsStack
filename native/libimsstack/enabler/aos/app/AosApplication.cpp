@@ -1022,7 +1022,18 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
 
     if (m_piRegistration)
     {
-        m_piRegistration->Destroy();
+        if (nOffReason == AosReason::SERVICE_POLICY &&
+                GET_N_CONFIG(m_nSlotId)->IsKeepRegRetryTimerOnAllEnablersDetached() &&
+                m_piRegistration->GetState() == IAosRegistration::STATE_REGSTOP &&
+                m_piRegistration->IsRetryTimer())
+        {
+            A_IMS_TRACE_D(APPID, "CleanAll :: Keep registration while stop retry timer is running",
+                    0, 0, 0);
+        }
+        else
+        {
+            m_piRegistration->Destroy();
+        }
     }
 
     if (IsPdnDisconnectRequired())
