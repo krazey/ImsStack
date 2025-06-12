@@ -32,7 +32,7 @@ using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecAmrConfig::DEFAULT_CHANNEL;
 static const IMS_BOOL DEFAULT_DTX = CodecAudioConfig::DEFAULT_DTX;
-static const IMS_SINT32 DEFAULT_OCTET_ALIGN = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
+static const IMS_SINT32 DEFAULT_PAYLOAD_FORMAT = CodecAmrConfig::DEFAULT_PAYLOAD_FORMAT;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMRWB;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMR;
 static const IMS_SINT32 DEFAULT_MODESET_AMRNB = CodecAudioConfig::DEFAULT_MODESET_AMRNB;
@@ -104,7 +104,7 @@ TEST_F(CodecAmrConfigTest, Create_AmrCodec)
             .WillOnce(::testing::Return(m_pMockSubBundle.get()));
     EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
-                    DEFAULT_OCTET_ALIGN))
+                    DEFAULT_PAYLOAD_FORMAT))
             .WillOnce(::testing::Return(nOctetAlign));
     EXPECT_CALL(*m_pMockSubBundle,
             GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
@@ -169,7 +169,7 @@ TEST_F(CodecAmrConfigTest, Create_AmrWbCodec)
             .WillOnce(::testing::Return(m_pMockSubBundle.get()));
     EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
-                    DEFAULT_OCTET_ALIGN))
+                    DEFAULT_PAYLOAD_FORMAT))
             .WillOnce(::testing::Return(nOctetAlign));
     EXPECT_CALL(*m_pMockSubBundle,
             GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
@@ -255,7 +255,7 @@ TEST_F(CodecAmrConfigTest, Create_ModesetArrayProcessing)
         EXPECT_CALL(*m_pMockSubBundle,
                 GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
                         ::testing::_))
-                .WillOnce(::testing::Return(DEFAULT_OCTET_ALIGN));
+                .WillOnce(::testing::Return(DEFAULT_PAYLOAD_FORMAT));
         EXPECT_CALL(*m_pMockSubBundle,
                 GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
                 .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objEmptyModesetArray)));
@@ -292,7 +292,7 @@ TEST_F(CodecAmrConfigTest, Create_ModesetArrayProcessing)
         EXPECT_CALL(*m_pMockSubBundle,
                 GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
                         ::testing::_))
-                .WillOnce(::testing::Return(DEFAULT_OCTET_ALIGN));
+                .WillOnce(::testing::Return(DEFAULT_PAYLOAD_FORMAT));
         EXPECT_CALL(*m_pMockSubBundle,
                 GetIntArray(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY, _))
                 .WillOnce(::testing::Return(ImsVector<IMS_SINT32>(objModesetArrayWithNegative)));

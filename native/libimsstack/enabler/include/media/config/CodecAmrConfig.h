@@ -59,6 +59,12 @@ public:
      * @return IMS_SINT32 Return the audio codec sampling rate
      */
     IMS_SINT32 GetSamplingRate() const;
+    /**
+     * @brief Create the amr codec with the default values
+     *
+     * @return IMS_SINT32 Return the AMR codec
+     */
+    virtual void CreateDefaultAmrCodec();
 
 public:
     enum
@@ -69,9 +75,10 @@ public:
         OCTET_ALIGN = 1
     };
 
-    static const IMS_SINT32 DEFAULT_OCTET_ALIGN = BANDWIDTH_EFFICIENT;
-    static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = 8000;
-    static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = 16000;
+    static const IMS_SINT32 DEFAULT_PAYLOAD_FORMAT;
+    static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR;
+    static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB;
+    static const IMS_SINT32 NO_ITEM;
 
 private:
     IMS_SINT32 m_nOctetAlign;
