@@ -720,6 +720,7 @@
     <boolean name="imsvoice.audio_rtcpxr_packet_loss_rle_bool" value="false"/>
     <boolean name="imsvoice.audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
     <boolean name="imsvt.dynamic_video_quality_supported_bool" value="false"/>
+    <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="false"/>
     <!-- Media additional for CallFeature-->
     <boolean name="imsvoice.audio_hold_with_direction_inactive_bool" value="false"/>
     <boolean name="imsvt.video_hold_with_direction_inactive_bool" value="false"/>
