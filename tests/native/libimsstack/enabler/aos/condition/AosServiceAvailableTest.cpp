@@ -108,12 +108,6 @@ public:
         AosServiceAvailable::HandleAirplaneModeChanged(nState);
     }
 
-    void HandleVopsChanged(IN IMS_UINT32 nState) override
-    {
-        m_pCounter->AddCount(__IMS_FUNC__);
-        AosServiceAvailable::HandleVopsChanged(nState);
-    }
-
     void HandleWifiConnectionChanged() override
     {
         m_pCounter->AddCount(__IMS_FUNC__);
@@ -339,7 +333,6 @@ TEST_F(AosServiceAvailableTest, SucceedsInvokeValidFunctionWhenHandleEvent)
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_BLOCK_SILENT, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 1, 1);
-    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_LOCATION, 1, 1);
     m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_WIFI_STATE, 1, 1);
 
@@ -349,7 +342,6 @@ TEST_F(AosServiceAvailableTest, SucceedsInvokeValidFunctionWhenHandleEvent)
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 2);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleAirplaneModeChanged"), 1);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleVopsChanged"), 1);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleLocationInfoChanged"), 1);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 1);
 }
@@ -368,7 +360,6 @@ TEST_F(AosServiceAvailableTest, FailsInvokeFunctionWhenHandleEventWithInvalid)
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 0);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleAirplaneModeChanged"), 0);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 0);
-    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleVopsChanged"), 0);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleLocationInfoChanged"), 0);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 0);
 }

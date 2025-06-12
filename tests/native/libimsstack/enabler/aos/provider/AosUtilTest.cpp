@@ -681,7 +681,7 @@ TEST_F(AosUtilTest, ExpectFalseWhenLeftListIsNotExistInRightList)
 {
     ImsList<IMS_UINT32> objReasons;
     m_pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, objReasons);
-    m_pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, objReasons);
+    m_pAosUtil->AddElementToList(BLOCK_CELLULAR_ROAMING, objReasons);
 
     ImsList<IMS_UINT32> objCompareReasons;
     m_pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, objCompareReasons);

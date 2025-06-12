@@ -364,10 +364,6 @@ PROTECTED VIRTUAL void AosCondition::Event_NotifyEvent(
             ProcessRoamingEvent(nWParam, nLParam);
             break;
 
-        case IMS_EVENT_IMS_VOICE_OVER_PS_STATE:
-            ProcessImsVopsEvent(nWParam);
-            break;
-
         case IMS_EVENT_LTE_INFO:
             ProcessLteInfoEvent(nWParam, nLParam);
             break;
@@ -839,14 +835,6 @@ void AosCondition::ProcessWifiSettingEvent(IN IMS_BOOL bIsOn)
     {
         RequestCommand(REQUEST_REASON_UPDATE, AosReason::WIFI_OFF);
     }
-}
-
-PROTECTED
-void AosCondition::ProcessImsVopsEvent(IN IMS_UINT32 nState)
-{
-    A_IMS_TRACE_I(APPPROFILE, "ProcessImsVopsEvent(), nState(%d)", nState, 0, 0);
-
-    SendConditionEvent(AosServiceAvailable::EVENT_VOPS, nState, SERVICE_CELLULAR);
 }
 
 PROTECTED

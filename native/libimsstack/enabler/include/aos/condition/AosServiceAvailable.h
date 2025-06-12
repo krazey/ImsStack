@@ -56,7 +56,6 @@ protected:
     virtual void HandleBlockChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
     virtual void HandleRoamingChanged(IN IMS_UINT32 nState);
     virtual void HandleAirplaneModeChanged(IN IMS_UINT32 nState);
-    virtual void HandleVopsChanged(IN IMS_UINT32 nState);
     virtual void HandleWifiConnectionChanged();
     virtual void HandleLocationInfoChanged();
     virtual IMS_BOOL CheckServiceAvailable();
@@ -73,7 +72,6 @@ public:
     {
         EVENT_AIRPLANE = 0,
         EVENT_ROAMING,
-        EVENT_VOPS,
         EVENT_LOCATION,
         EVENT_CALL,
         EVENT_NETWORK,

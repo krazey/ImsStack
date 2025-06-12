@@ -30,11 +30,10 @@ using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 
-#define DECLARE_USING(Base)                \
-    using Base::SetBlock;                  \
-    using Base::HandleRoamingChanged;      \
-    using Base::HandleAirplaneModeChanged; \
-    using Base::HandleVopsChanged;
+#define DECLARE_USING(Base)           \
+    using Base::SetBlock;             \
+    using Base::HandleRoamingChanged; \
+    using Base::HandleAirplaneModeChanged;
 
 class TestAosServiceAvailableCellular : public AosServiceAvailableCellular
 {
@@ -158,30 +157,6 @@ TEST_F(AosServiceAvailableCellularTest, ShouldResetBlockReasonWhenAirplaneModeOf
 
     // WHEN
     m_pServiceAvailableCellular->HandleAirplaneModeChanged(0);
-
-    // THEN: The GIVEN condition should be met.
-}
-
-TEST_F(AosServiceAvailableCellularTest, ShouldResetBlockReasonWhenVopsOn)
-{
-    // GIVEN
-    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
-
-    // WHEN
-    m_pServiceAvailableCellular->HandleVopsChanged(1);
-
-    // THEN: The GIVEN condition should be met.
-}
-
-TEST_F(AosServiceAvailableCellularTest, ShouldSetBlockReasonWhenVopsOff)
-{
-    // GIVEN
-    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(1);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    // WHEN
-    m_pServiceAvailableCellular->HandleVopsChanged(0);
 
     // THEN: The GIVEN condition should be met.
 }
