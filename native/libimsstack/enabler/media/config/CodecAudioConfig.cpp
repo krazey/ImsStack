@@ -22,9 +22,11 @@ __IMS_TRACE_TAG_MEDIA__;
 
 // Define static const members
 const IMS_SINT32 CodecAudioConfig::DEFAULT_CHANNEL = 1;
-const IMS_SINT32 CodecAudioConfig::DEFAULT_MODESET_AMR = 7;
-const IMS_SINT32 CodecAudioConfig::DEFAULT_MODESET_AMR_WB = 8;
-const IMS_SINT32 CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY = 2;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODESET_AMRNB = 7;
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODESET_AMRWB = 8;
+const IMS_SINT32 CodecAudioConfig::FULL_MODESET_AMRNB = 255;  // 0xFF
+const IMS_SINT32 CodecAudioConfig::FULL_MODESET_AMRWB = 511;  // 0x1FF
+const IMS_SINT32 CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY = 1;
 const IMS_SINT32 CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD = 1;
 const IMS_SINT32 CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR = 0;
 const IMS_SINT32 CodecAudioConfig::DEFAULT_MAXRED = 0;
@@ -34,10 +36,13 @@ PUBLIC
 CodecAudioConfig::CodecAudioConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
         CodecConfig(nType, nPayloadTypeNum),
         m_bDtx(DEFAULT_DTX),
-        m_bShowAmrModeSet(IMS_FALSE),
+        m_bVisibleModeSet(IMS_FALSE),
+        m_bVisibleModeChangeCapability(IMS_FALSE),
+        m_bVisibleModeChangePeriod(IMS_FALSE),
+        m_bVisibleModeChangeNeighbor(IMS_FALSE),
         m_nChannel(DEFAULT_CHANNEL),
-        m_nAmrModeSetList(DEFAULT_MODESET_AMR_WB),
-        m_nDefaultAmrModeSetList(DEFAULT_MODESET_AMR_WB),
+        m_nModeSetList(DEFAULT_MODESET_AMRWB),
+        m_nDefaultModeSetList(DEFAULT_MODESET_AMRWB),
         m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
         m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
         m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
@@ -60,7 +65,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAudioConfig::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    m_bShowAmrModeSet = piCc->GetBoolean(
+    m_bVisibleModeSet = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL, IMS_FALSE);
 
     return IMS_TRUE;
@@ -69,32 +74,27 @@ PUBLIC VIRTUAL IMS_BOOL CodecAudioConfig::Create(IN ICarrierConfig* piCc)
 PUBLIC VIRTUAL void CodecAudioConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
-    IMS_TRACE_D("ChannelCount[%d], AmrModeSetList[0x%04x], default AmrModeSetList[0x%04x]",
-            m_nChannel, m_nAmrModeSetList, m_nDefaultAmrModeSetList);
-    IMS_TRACE_D("show AmrModeSet[%d]", m_bShowAmrModeSet, 0, 0);
+    IMS_TRACE_D("ChannelCount[%d], ModeSetList[0x%04x], Default ModeSetList[0x%04x]", m_nChannel,
+            m_nModeSetList, m_nDefaultModeSetList);
+    IMS_TRACE_D("Visible ModeSet[%d]", m_bVisibleModeSet, 0, 0);
     IMS_TRACE_D("ModeChangeCapability[%d], ModeChangePeriod[%d], ModeChangeNeighbor[%d]",
             m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 }
 
 PUBLIC
-IMS_SINT32 CodecAudioConfig::GetChannel() const
-{
-    return m_nChannel;
-}
-
-PUBLIC
-IMS_SINT32 CodecAudioConfig::GetAmrModeSet() const
+IMS_SINT32 CodecAudioConfig::GetModeSet() const
 {
     IMS_SINT32 nModeSet;
 
-    if (m_nAmrModeSetList == 0)
+    if (m_nModeSetList == 0)
     {
-        return (GetCodec() == ImsCodec::AUDIO_AMR) ? DEFAULT_MODESET_AMR : DEFAULT_MODESET_AMR_WB;
+        return (GetCodec() == ImsCodec::AUDIO_AMR) ? DEFAULT_MODESET_AMRNB : DEFAULT_MODESET_AMRWB;
     }
 
-    for (nModeSet = DEFAULT_MODESET_AMR_WB; nModeSet >= 0; nModeSet--)
+    // Find the highest mode set in the list
+    for (nModeSet = DEFAULT_MODESET_AMRWB; nModeSet >= 0; nModeSet--)
     {
-        if (m_nAmrModeSetList & (1 << nModeSet))
+        if (m_nModeSetList & (1 << nModeSet))
         {
             return nModeSet;
         }
@@ -103,43 +103,90 @@ IMS_SINT32 CodecAudioConfig::GetAmrModeSet() const
 }
 
 PUBLIC
-IMS_BOOL CodecAudioConfig::GetShowAmrModeSet() const
+IMS_SINT32 CodecAudioConfig::ConvertModeSetList(ImsVector<IMS_SINT32> objCodecModeset)
 {
-    return m_bShowAmrModeSet;
+    IMS_SINT32 nModeSetList = 0;
+    IMS_SINT32 nModeSetNum = objCodecModeset.GetSize();
+
+    for (IMS_SINT32 i = 0; i < nModeSetNum; i++)
+    {
+        IMS_SINT32 nModeSet = objCodecModeset.GetAt(i);
+        if (nModeSet < 0)
+        {
+            IMS_TRACE_D("ConvertModeSetList - Invalid ModeSet value", 0, 0, 0);
+            break;
+        }
+        nModeSetList = (nModeSetList | (1 << nModeSet));
+    }
+
+    IMS_TRACE_D("ConvertModeSetList - ModeSetList size[%d] ListValue[%d]", nModeSetNum,
+            nModeSetList, 0);
+
+    return nModeSetList;
 }
 
 PUBLIC
-IMS_UINT32 CodecAudioConfig::GetAmrModeSetList() const
+void CodecAudioConfig::SetVisibleModeChangeCapability(IMS_BOOL bVisibleModeChangeCapability)
 {
-    return m_nAmrModeSetList;
+    m_bVisibleModeChangeCapability = bVisibleModeChangeCapability;
 }
 
 PUBLIC
-IMS_UINT32 CodecAudioConfig::GetDefaultAmrModeSetList() const
+void CodecAudioConfig::SetVisibleModeChangePeriod(IMS_BOOL bVisibleModeChangePeriod)
 {
-    return m_nDefaultAmrModeSetList;
+    m_bVisibleModeChangePeriod = bVisibleModeChangePeriod;
 }
 
 PUBLIC
-IMS_SINT32 CodecAudioConfig::GetModeChangeCapability() const
+void CodecAudioConfig::SetVisibleModeChangeNeighbor(IMS_BOOL bVisibleModeChangeNeighbor)
 {
-    return m_nModeChangeCapability;
+    m_bVisibleModeChangeNeighbor = bVisibleModeChangeNeighbor;
 }
 
 PUBLIC
-IMS_SINT32 CodecAudioConfig::GetModeChangePeriod() const
+void CodecAudioConfig::SetVisibleModeSet(IMS_BOOL bVisibleModeSet)
 {
-    return m_nModeChangePeriod;
+    m_bVisibleModeSet = bVisibleModeSet;
 }
 
 PUBLIC
-IMS_SINT32 CodecAudioConfig::GetModeChangeNeighbor() const
+void CodecAudioConfig::SetModeSetList(IMS_UINT32 nModeSetList)
 {
-    return m_nModeChangeNeighbor;
+    m_nModeSetList = nModeSetList;
 }
 
 PUBLIC
-IMS_BOOL CodecAudioConfig::GetDtx() const
+void CodecAudioConfig::SetModeChangeCapability(IMS_SINT32 nModeChangeCapability)
 {
-    return m_bDtx;
+    m_nModeChangeCapability = nModeChangeCapability;
+}
+
+PUBLIC
+void CodecAudioConfig::SetModeChangePeriod(IMS_SINT32 nModeChangePeriod)
+{
+    m_nModeChangePeriod = nModeChangePeriod;
+}
+
+PUBLIC
+void CodecAudioConfig::SetModeChangeNeighbor(IMS_SINT32 nModeChangeNeighbor)
+{
+    m_nModeChangeNeighbor = nModeChangeNeighbor;
+}
+
+PUBLIC
+void CodecAudioConfig::SetDefaultModeSetList(IMS_UINT32 nDefaultModeSetList)
+{
+    m_nDefaultModeSetList = nDefaultModeSetList;
+}
+
+PUBLIC
+void CodecAudioConfig::SetChannel(IMS_SINT32 nChannel)
+{
+    m_nChannel = nChannel;
+}
+
+PUBLIC
+void CodecAudioConfig::SetDtx(IMS_BOOL bDtx)
+{
+    m_bDtx = bDtx;
 }

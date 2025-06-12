@@ -35,8 +35,8 @@ static const IMS_BOOL DEFAULT_DTX = CodecAudioConfig::DEFAULT_DTX;
 static const IMS_SINT32 DEFAULT_OCTET_ALIGN = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMRWB;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMR;
-static const IMS_SINT32 DEFAULT_MODESET_AMR = CodecAudioConfig::DEFAULT_MODESET_AMR;
-static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecAudioConfig::DEFAULT_MODESET_AMR_WB;
+static const IMS_SINT32 DEFAULT_MODESET_AMRNB = CodecAudioConfig::DEFAULT_MODESET_AMRNB;
+static const IMS_SINT32 DEFAULT_MODESET_AMRWB = CodecAudioConfig::DEFAULT_MODESET_AMRWB;
 static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
         CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY;
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD;
@@ -128,9 +128,9 @@ TEST_F(CodecAmrConfigTest, Create_AmrCodec)
     ASSERT_EQ(codecConfig.GetCodec(), nCodecType);
     ASSERT_EQ(codecConfig.GetPayloadType(), nPayloadType);
     ASSERT_EQ(codecConfig.GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMR);
-    ASSERT_EQ(codecConfig.GetDefaultAmrModeSetList(), (1 << DEFAULT_MODESET_AMR));
+    ASSERT_EQ(codecConfig.GetDefaultModeSetList(), (1 << DEFAULT_MODESET_AMRNB));
     ASSERT_EQ(codecConfig.GetOctetAlign(), nOctetAlign);
-    ASSERT_EQ(codecConfig.GetAmrModeSetList(), nModeSetList);
+    ASSERT_EQ(codecConfig.GetModeSetList(), nModeSetList);
     ASSERT_EQ(codecConfig.GetModeChangeCapability(), nModeChangeCapability);
     ASSERT_EQ(codecConfig.GetModeChangePeriod(), nModeChangePeriod);
     ASSERT_EQ(codecConfig.GetModeChangeNeighbor(), nModeChangeNeighbor);
@@ -193,9 +193,9 @@ TEST_F(CodecAmrConfigTest, Create_AmrWbCodec)
     ASSERT_EQ(codecConfig.GetCodec(), nCodecType);
     ASSERT_EQ(codecConfig.GetPayloadType(), nPayloadType);
     ASSERT_EQ(codecConfig.GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
-    ASSERT_EQ(codecConfig.GetDefaultAmrModeSetList(), (1 << DEFAULT_MODESET_AMR_WB));
+    ASSERT_EQ(codecConfig.GetDefaultModeSetList(), (1 << DEFAULT_MODESET_AMRWB));
     ASSERT_EQ(codecConfig.GetOctetAlign(), nOctetAlign);
-    ASSERT_EQ(codecConfig.GetAmrModeSetList(), nModeSetList);
+    ASSERT_EQ(codecConfig.GetModeSetList(), nModeSetList);
     ASSERT_EQ(codecConfig.GetModeChangeCapability(), nModeChangeCapability);
     ASSERT_EQ(codecConfig.GetModeChangePeriod(), nModeChangePeriod);
     ASSERT_EQ(codecConfig.GetModeChangeNeighbor(), nModeChangeNeighbor);
@@ -274,7 +274,7 @@ TEST_F(CodecAmrConfigTest, Create_ModesetArrayProcessing)
 
         IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
         ASSERT_EQ(bResult, IMS_TRUE);
-        ASSERT_EQ(codecConfig.GetAmrModeSetList(), 0);
+        ASSERT_EQ(codecConfig.GetModeSetList(), 0);
     }
 
     {
@@ -311,6 +311,6 @@ TEST_F(CodecAmrConfigTest, Create_ModesetArrayProcessing)
 
         IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
         ASSERT_EQ(bResult, IMS_TRUE);
-        ASSERT_EQ(codecConfig.GetAmrModeSetList(), (1 << 0) | (1 << 1));
+        ASSERT_EQ(codecConfig.GetModeSetList(), (1 << 0) | (1 << 1));
     }
 }

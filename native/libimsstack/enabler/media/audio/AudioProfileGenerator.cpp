@@ -183,9 +183,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateAmrPayload(
 
     SetAudioCodecFmtp(pAmrConfig, pAudioConfig, pAmrFmtp);
 
-    pAmrFmtp->SetModeSetList(pAmrConfig->GetAmrModeSetList());
-    pAmrFmtp->SetDefaultRtpModeSet(pAmrConfig->GetDefaultAmrModeSetList());
-    pAmrFmtp->SetShowModeSet(pAmrConfig->GetShowAmrModeSet());
+    pAmrFmtp->SetModeSetList(pAmrConfig->GetModeSetList());
+    pAmrFmtp->SetDefaultRtpModeSet(pAmrConfig->GetDefaultModeSetList());
+    pAmrFmtp->SetShowModeSet(pAmrConfig->GetShowModeSet());
 
     pAmrFmtp->SetShowOctetAlign(IMS_FALSE);
     if (pAmrConfig->GetOctetAlign() != -1)
@@ -236,9 +236,9 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
     SetAudioCodecFmtp(pEvsConfig, pAudioConfig, pEvsFmtp);
 
     // Mode set list
-    pEvsFmtp->SetModeSetList(pEvsConfig->GetAmrModeSetList());
-    pEvsFmtp->SetDefaultRtpModeSet(pEvsConfig->GetDefaultAmrModeSetList());
-    pEvsFmtp->SetShowModeSet(pEvsConfig->GetShowAmrModeSet());
+    pEvsFmtp->SetModeSetList(pEvsConfig->GetModeSetList());
+    pEvsFmtp->SetDefaultRtpModeSet(pEvsConfig->GetDefaultModeSetList());
+    pEvsFmtp->SetShowModeSet(pEvsConfig->GetShowModeSet());
     pEvsFmtp->SetBrList(pEvsConfig->GetBrList());
     pEvsFmtp->SetBwList(pEvsConfig->GetBwList());
 
@@ -318,9 +318,8 @@ PROTECTED AudioProfile::Payload* AudioProfileGenerator::CreateEvsPayload(
             pEvsConfig->GetPayloadType(), strCodecName, 16000, pEvsConfig->GetChannel());
     pEvsPayload->SetFmtp(pEvsFmtp);
 
-    IMS_TRACE_D("CreateEvsPayload(): Payload[%d], ShowDtx[%d], ShowAmrModeSet[%d]",
-            pEvsConfig->GetPayloadType(), pEvsConfig->GetShowDtx(),
-            pEvsConfig->GetShowAmrModeSet());
+    IMS_TRACE_D("CreateEvsPayload(): Payload[%d], ShowDtx[%d], ShowModeSet[%d]",
+            pEvsConfig->GetPayloadType(), pEvsConfig->GetShowDtx(), pEvsConfig->GetShowModeSet());
 
     return pEvsPayload;
 }

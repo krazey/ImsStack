@@ -52,13 +52,13 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
     {
         piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE);
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMR;
-        m_nDefaultAmrModeSetList = (1 << DEFAULT_MODESET_AMR);
+        m_nDefaultModeSetList = (1 << DEFAULT_MODESET_AMRNB);
     }
     else  // (m_nCodec == ImsCodec::AUDIO_AMR_WB)
     {
         piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMRWB;
-        m_nDefaultAmrModeSetList = (1 << DEFAULT_MODESET_AMR_WB);
+        m_nDefaultModeSetList = (1 << DEFAULT_MODESET_AMRWB);
     }
 
     m_bDtx = piCc->GetBoolean(
@@ -88,9 +88,9 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
     ImsVector<IMS_SINT32> objCodecAttributeModeset = piCcSubBundle->GetIntArray(
             CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
 
-    m_nAmrModeSetList = 0;
+    m_nModeSetList = 0;
     IMS_SINT32 nModeSetNum = objCodecAttributeModeset.GetSize();
-    IMS_TRACE_D("Create - AmrModeSetList size[%d]", nModeSetNum, 0, 0);
+    IMS_TRACE_D("Create - ModeSetList size[%d]", nModeSetNum, 0, 0);
 
     for (IMS_SINT32 i = 0; i < nModeSetNum; i++)
     {
@@ -100,7 +100,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             IMS_TRACE_D("Create - Invalid ModeSet value", 0, 0, 0);
             break;
         }
-        m_nAmrModeSetList = (m_nAmrModeSetList | (1 << nModeSet));
+        m_nModeSetList = (m_nModeSetList | (1 << nModeSet));
     }
 
     m_nModeChangeCapability = piCcSubBundle->GetInt(

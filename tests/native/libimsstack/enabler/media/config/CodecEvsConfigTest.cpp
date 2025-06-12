@@ -37,7 +37,7 @@ static const IMS_SINT32 DEFAULT_BR_LIST = CodecEvsConfig::DEFAULT_BR_LIST;
 static const IMS_SINT32 DEFAULT_BW_LIST = CodecEvsConfig::DEFAULT_BW_LIST;
 static const IMS_SINT32 DEFAULT_CMR = CodecEvsConfig::DEFAULT_CMR;
 static const IMS_SINT32 DEFAULT_CH_AW_RECV = CodecEvsConfig::DEFAULT_CH_AW_RECV;
-static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecAudioConfig::DEFAULT_MODESET_AMR_WB;
+static const IMS_SINT32 DEFAULT_MODESET_AMRWB = CodecAudioConfig::DEFAULT_MODESET_AMRWB;
 static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
         CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY;
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD;
@@ -77,9 +77,9 @@ protected:
         // Values from CodecAudioConfig constructor
         EXPECT_EQ(config.GetChannel(), DEFAULT_CHANNEL);
         EXPECT_EQ(config.GetDtx(), DEFAULT_DTX);
-        EXPECT_EQ(config.GetAmrModeSetList(), DEFAULT_MODESET_AMR_WB);
-        EXPECT_EQ(config.GetDefaultAmrModeSetList(), DEFAULT_MODESET_AMR_WB);
-        EXPECT_EQ(config.GetShowAmrModeSet(), IMS_FALSE);
+        EXPECT_EQ(config.GetModeSetList(), DEFAULT_MODESET_AMRWB);
+        EXPECT_EQ(config.GetDefaultModeSetList(), DEFAULT_MODESET_AMRWB);
+        EXPECT_EQ(config.GetShowModeSet(), IMS_FALSE);
         EXPECT_EQ(config.GetModeChangeCapability(), DEFAULT_MODECHANGE_CAPABILITY);
         EXPECT_EQ(config.GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
         EXPECT_EQ(config.GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
@@ -156,9 +156,9 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
     IMS_UINT32 nExpectedBwList = (1 << CodecEvsConfig::EVS_BANDWIDTH_WB);  // (1 << 1) = 2
     IMS_SINT32 nCmr = 1;
     IMS_SINT32 nChAwRecv = 2;
-    IMS_BOOL bShowAmrModeSet = IMS_TRUE;
-    IMS_UINT32 nAmrModeSetList = 5;  // Example mode for AMR-WB IO
-    IMS_UINT32 nDefaultAmrModeSetList = 6;
+    IMS_BOOL bShowModeSet = IMS_TRUE;
+    IMS_UINT32 nModeSetList = 5;  // Example mode for AMR-WB IO
+    IMS_UINT32 nDefaultModeSetList = 6;
     IMS_SINT32 nModeChangeCapability = 1;
     IMS_SINT32 nModeChangePeriod = 0;
     IMS_SINT32 nModeChangeNeighbor = 1;
@@ -209,16 +209,16 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
                     IMS_FALSE))
-            .WillOnce(Return(bShowAmrModeSet));
+            .WillOnce(Return(bShowModeSet));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                    CodecAudioConfig::DEFAULT_MODESET_AMR_WB))
-            .WillOnce(Return(nAmrModeSetList));
+                    CodecAudioConfig::DEFAULT_MODESET_AMRWB))
+            .WillOnce(Return(nModeSetList));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetInt(CarrierConfig::ImsVoice::
                             KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
-                    CodecAudioConfig::DEFAULT_MODESET_AMR_WB))
-            .WillOnce(Return(nDefaultAmrModeSetList));
+                    CodecAudioConfig::DEFAULT_MODESET_AMRWB))
+            .WillOnce(Return(nDefaultModeSetList));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
                     CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY))
@@ -247,9 +247,9 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
     EXPECT_EQ(m_pCodecEvsConfig->GetBwList(), nExpectedBwList);
     EXPECT_EQ(m_pCodecEvsConfig->GetCmr(), nCmr);
     EXPECT_EQ(m_pCodecEvsConfig->GetChAwareRecv(), nChAwRecv);
-    EXPECT_EQ(m_pCodecEvsConfig->GetShowAmrModeSet(), bShowAmrModeSet);
-    EXPECT_EQ(m_pCodecEvsConfig->GetAmrModeSetList(), nAmrModeSetList);
-    EXPECT_EQ(m_pCodecEvsConfig->GetDefaultAmrModeSetList(), nDefaultAmrModeSetList);
+    EXPECT_EQ(m_pCodecEvsConfig->GetShowModeSet(), bShowModeSet);
+    EXPECT_EQ(m_pCodecEvsConfig->GetModeSetList(), nModeSetList);
+    EXPECT_EQ(m_pCodecEvsConfig->GetDefaultModeSetList(), nDefaultModeSetList);
     EXPECT_EQ(m_pCodecEvsConfig->GetModeChangeCapability(), nModeChangeCapability);
     EXPECT_EQ(m_pCodecEvsConfig->GetModeChangePeriod(), nModeChangePeriod);
     EXPECT_EQ(m_pCodecEvsConfig->GetModeChangeNeighbor(), nModeChangeNeighbor);
