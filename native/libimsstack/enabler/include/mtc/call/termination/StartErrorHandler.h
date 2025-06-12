@@ -83,6 +83,7 @@ private:
 
     void ControlAos(IN IMS_UINT32 nCommand) const;
     IMS_BOOL RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
+    void ReinitiateRegistrationWithStoredWaitTime() const;
     IMS_BOOL IsRegisterWithNextPcscfAndRedialRequiredFor503(IN IMS_SINT32 nRetryAfter) const;
     IMS_BOOL HasActiveCalls() const;
     AString GetPathHeader() const;

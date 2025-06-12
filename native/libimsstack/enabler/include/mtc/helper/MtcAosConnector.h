@@ -115,6 +115,11 @@ public:
         return m_objImsAos.RegisterWithNextPcscf(nUnavailableTimeForCurrentPcscf);
     }
 
+    inline void ReinitiateRegistration(IN IMS_UINT32 nAfterSec) const override
+    {
+        return m_objImsAos.ReinitiateRegistration(nAfterSec);
+    }
+
 private:
     IImsAos& m_objImsAos;
     IImsAosInfo& m_objImsAosInfo;

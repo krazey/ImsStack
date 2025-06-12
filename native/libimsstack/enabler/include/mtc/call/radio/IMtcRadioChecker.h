@@ -66,6 +66,15 @@ public:
      */
     virtual CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey) = 0;
+
+    /**
+     * @brief Gets the stored registration throttling time in milliseconds.
+     *
+     * The stored time is reset when {@code Check()} is invoked.
+     *
+     * @return The registration throttling time in milliseconds.
+     */
+    virtual IMS_UINT32 GetRegistrationThrottlingTimeMillis() const = 0;
 };
 
 class IMtcRadioCheckerListener

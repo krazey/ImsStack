@@ -37,6 +37,7 @@ public:
             (IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
                     IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey),
             (override));
+    MOCK_METHOD(IMS_UINT32, GetRegistrationThrottlingTimeMillis, (), (const, override));
 };
 
 class MockIMtcRadioCheckerListener : public IMtcRadioCheckerListener

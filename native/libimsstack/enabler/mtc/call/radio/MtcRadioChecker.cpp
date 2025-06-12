@@ -39,7 +39,8 @@ MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext) :
         m_objContext(objContext),
         m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
         m_objMtcRadioCheckerListeners(ImsList<IMtcRadioCheckerListener*>()),
-        m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>())
+        m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>()),
+        m_nRegistrationThrottlingTimeMillis(0)
 {
     IMS_TRACE_D("+MtcRadioChecker", 0, 0, 0);
 }
@@ -100,6 +101,8 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnTerminatedBeforeCreatingSession(IN CallKe
 PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_BOOL bEmergency,
         IN PeerType ePeerType, IN IMS_SINT32 eRatType, IN IMS_BOOL bUssi, IN CallKey nCallKey)
 {
+    m_nRegistrationThrottlingTimeMillis = 0;
+
     if (bUssi)
     {
         IMS_TRACE_D("Check : unblocked - USSI MO DATA(Best Effort).", 0, 0, 0);
@@ -140,11 +143,13 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnSessionInterfaceReleased(IN CallKey nKey)
 }
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficType,
-        IN CallDirection eCallDirection, IN IMS_UINT32 nFailureReason,
-        IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 nWaitTimeMillis)
+        IN CallDirection eCallDirection, IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+        IN IMS_UINT32 nWaitTimeMillis)
 {
     IMS_TRACE_D("OnConnectionFailed TrafficType[%d] direction[%d] FailureReason[%d]", eTrafficType,
             eCallDirection, nFailureReason);
+
+    MaybeStoreRegistrationThrottlingTime(nFailureReason, nCauseCode, nWaitTimeMillis);
 
     if (IsReasonToIgnore(nFailureReason))
     {
@@ -352,6 +357,17 @@ PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN Cal
                 return;
             }
         }
+    }
+}
+
+PRIVATE void MtcRadioChecker::MaybeStoreRegistrationThrottlingTime(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
+{
+    if (nFailureReason == IImsRadio::REASON_RACH_FAILURE &&
+            nCauseCode == IImsRadioConnectionListener::CAUSE_CODE_SR_LLF_TIMER_START)
+    {
+        IMS_TRACE_D("MaybeStoreRegistrationThrottlingTime : time[%u]", nWaitTimeMillis, 0, 0);
+        m_nRegistrationThrottlingTimeMillis = nWaitTimeMillis;
     }
 }
 

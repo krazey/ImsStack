@@ -215,6 +215,16 @@ public:
      *        unavailable.
      */
     virtual void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) const = 0;
+
+    /**
+     * @brief Requests the AoS to trigger an initial registration with current P-CSCF after a given
+     *        time.
+     *
+     * It's behavior is same as {@code Control(REGISTER_REINITIATE)} if {@code nAfterSec} is 0.
+     *
+     * @param nAfterSec The duration(sec) to wait before starting a new registration.
+     */
+    virtual void ReinitiateRegistration(IN IMS_UINT32 nAfterSec) const = 0;
 };
 
 #endif

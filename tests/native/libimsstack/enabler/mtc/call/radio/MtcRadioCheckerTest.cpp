@@ -486,6 +486,31 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedTemporarilyInvokesOnConnectionSetu
             IImsRadio::REASON_RF_BUSY, 0, 0);
 }
 
+TEST_F(MtcRadioCheckerTest, OnConnectionFailedStoresRegistrationThrottlingTime)
+{
+    EXPECT_EQ(0, m_pMtcRadioChecker->GetRegistrationThrottlingTimeMillis());
+
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
+            IImsRadio::REASON_RACH_FAILURE, 0, 1000);
+    EXPECT_EQ(0, m_pMtcRadioChecker->GetRegistrationThrottlingTimeMillis());
+
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
+            IImsRadio::REASON_RACH_FAILURE,
+            IImsRadioConnectionListener::CAUSE_CODE_SR_LLF_TIMER_START, 1000);
+    EXPECT_EQ(1000, m_pMtcRadioChecker->GetRegistrationThrottlingTimeMillis());
+}
+
+TEST_F(MtcRadioCheckerTest, CheckResetsRegistrationThrottlingTime)
+{
+    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
+            IImsRadio::REASON_RACH_FAILURE,
+            IImsRadioConnectionListener::CAUSE_CODE_SR_LLF_TIMER_START, 1000);
+    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+            INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1);
+
+    EXPECT_EQ(0, m_pMtcRadioChecker->GetRegistrationThrottlingTimeMillis());
+}
+
 TEST_F(MtcRadioCheckerTest, OnConnectionSetupPreparedNotifiesListener)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,

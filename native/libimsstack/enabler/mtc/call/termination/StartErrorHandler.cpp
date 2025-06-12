@@ -36,6 +36,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCallManager.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
 #include "call/termination/EmergencyStartErrorHandler.h"
 #include "call/termination/StartErrorHandler.h"
@@ -224,7 +225,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE:
             return RegisterAfterMayPerformCsfb();
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
-            ControlAos(ImsAosControl::REGISTER_REINITIATE);
+            ReinitiateRegistrationWithStoredWaitTime();
             break;
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF:
             ControlAos(ImsAosControl::PCSCF_NEXT);
@@ -593,7 +594,7 @@ CallReasonInfo StartErrorHandler::RegisterAfterMayPerformCsfb() const
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
-    ControlAos(ImsAosControl::REGISTER_REINITIATE);
+    ReinitiateRegistrationWithStoredWaitTime();
     return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
 }
 
@@ -671,6 +672,17 @@ IMS_BOOL StartErrorHandler::RegisterFor503(IN IMS_SINT32 nRetryAfter) const
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+void StartErrorHandler::ReinitiateRegistrationWithStoredWaitTime() const
+{
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (pAosConnector)
+    {
+        pAosConnector->ReinitiateRegistration(
+                m_objContext.GetRadioChecker().GetRegistrationThrottlingTimeMillis() / 1000);
+    }
 }
 
 PRIVATE

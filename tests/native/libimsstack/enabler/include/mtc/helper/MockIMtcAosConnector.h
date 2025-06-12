@@ -52,6 +52,7 @@ public:
     MOCK_METHOD(void, NotifyEpsfbCallState, (IN IMS_UINT32 nState), (const, override));
     MOCK_METHOD(void, RegisterWithNextPcscf, (IN IMS_UINT32 nUnavailableTimeForCurrentPcscf),
             (const, override));
+    MOCK_METHOD(void, ReinitiateRegistration, (IN IMS_UINT32 nAfterSec), (const, override));
 };
 
 #endif

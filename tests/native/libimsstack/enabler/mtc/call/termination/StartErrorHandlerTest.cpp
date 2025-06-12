@@ -39,6 +39,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
+#include "call/radio/MockIMtcRadioChecker.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -53,6 +54,9 @@
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+static const IMS_UINT32 REGISTRATION_THROTTLING_TIME_MILLIS = 5000;
+static const IMS_UINT32 REGISTRATION_THROTTLING_TIME_SECONDS = 5;
 
 namespace android
 {
@@ -90,6 +94,7 @@ public:
     MockIMtcSession objMtcSession;
     MockISession objSession;
     MockIMtcImsEventReceiver objImsEventReceiver;
+    MockIMtcRadioChecker objRadioChecker;
     Ims3gppData objIms3gppData;
     TestConfigService* m_pConfigService;
     MockIMtcCallManager objCallManager;
@@ -120,6 +125,9 @@ protected:
         ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
                 .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
+        ON_CALL(objCallContext, GetRadioChecker).WillByDefault(ReturnRef(objRadioChecker));
+        ON_CALL(objRadioChecker, GetRegistrationThrottlingTimeMillis)
+                .WillByDefault(Return(REGISTRATION_THROTTLING_TIME_MILLIS));
         ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
 
         ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
@@ -260,7 +268,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_CALL(objAosConnector, ReinitiateRegistration(REGISTRATION_THROTTLING_TIME_SECONDS));
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF);
@@ -307,7 +315,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF);
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_CALL(objAosConnector, ReinitiateRegistration(REGISTRATION_THROTTLING_TIME_SECONDS));
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     SetTcallTimerConfig(ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF);
@@ -343,7 +351,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
             ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE);
 
     ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_CALL(objAosConnector, ReinitiateRegistration(REGISTRATION_THROTTLING_TIME_SECONDS));
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
