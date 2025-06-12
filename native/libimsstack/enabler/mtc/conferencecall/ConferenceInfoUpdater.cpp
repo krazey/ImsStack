@@ -209,7 +209,8 @@ IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
 
     SetParticipantsMatchingStarted();
 
-    std::vector<MatchingPolicy> objPolicies{ MatchingPolicy::USERENTITY, MatchingPolicy::REFER_TO_URI, MatchingPolicy::ORDER};
+    std::vector<MatchingPolicy> objPolicies{
+            MatchingPolicy::USERENTITY, MatchingPolicy::REFER_TO_URI, MatchingPolicy::ORDER};
 
     IMS_BOOL bFound = std::any_of(objPolicies.begin(), objPolicies.end(),
             [&](MatchingPolicy ePolicy)
@@ -436,6 +437,11 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrder(
             continue;
         }
 
+        if (m_pParticipantList->GetAt(i)->GetUserEntity().GetLength() > 0)
+        {
+            continue;
+        }
+
         if (m_pParticipantList->GetAt(i)->IsInfoUpdated() == IMS_FALSE)
         {
             return i;
@@ -478,6 +484,11 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByReferToUri(IN const Conferenc
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
     {
         if (m_pParticipantList->GetAt(i)->IsMatchingCompleted() == IMS_TRUE)
+        {
+            continue;
+        }
+
+        if (m_pParticipantList->GetAt(i)->GetUserEntity().GetLength() > 0)
         {
             continue;
         }

@@ -325,10 +325,10 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatching)
     AddUserToInfo(LOCAL_URI, STATUS_CONNECTED);
 
     AddUserToInfo(ANONYMOUS1_URI, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    ConfUser* pUser1 = AddParticipant("", USER_ENTITY1, eStatusBefore1);
 
     AddUserToInfo(ANONYMOUS2_URI, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    ConfUser* pUser2 = AddParticipant("", USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -338,6 +338,31 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatching)
     EXPECT_STREQ(pUser1->strUserEntity.GetStr(), ANONYMOUS1_URI.GetStr());
     EXPECT_EQ(pUser2->eStatus, eStatusAfter2);
     EXPECT_STREQ(pUser2->strUserEntity.GetStr(), ANONYMOUS2_URI.GetStr());
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatchingDoesNotUpdateIfAlreadyHaveUserEntity)
+{
+    IMS_UINT32 eStatusBefore1 = STATUS_IDLE;
+    IMS_UINT32 eStatusBefore2 = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+    IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
+
+    AddUserToInfo(LOCAL_URI, STATUS_CONNECTED);
+
+    AddUserToInfo(ANONYMOUS1_URI, eStatusAfter1);
+    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+
+    AddUserToInfo(ANONYMOUS2_URI, eStatusAfter2);
+    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+    EXPECT_EQ(pUser1->eStatus, eStatusBefore1);
+    EXPECT_STREQ(pUser1->strUserEntity.GetStr(), USER_ENTITY1.GetStr());
+    EXPECT_EQ(pUser2->eStatus, eStatusBefore2);
+    EXPECT_STREQ(pUser2->strUserEntity.GetStr(), USER_ENTITY2.GetStr());
 }
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatchingOnParticipant)
@@ -374,10 +399,10 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatching)
     IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
 
     AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(ANONYMOUS1_URI, USER_ENTITY1, eStatusBefore1);
+    ConfUser* pUser1 = AddParticipant("", USER_ENTITY1, eStatusBefore1);
 
     AddUserToInfo(USER_ENTITY2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(ANONYMOUS2_URI, USER_ENTITY2, eStatusBefore2);
+    ConfUser* pUser2 = AddParticipant("", USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -387,6 +412,29 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatching)
     EXPECT_STREQ(pUser1->strUserEntity.GetStr(), USER_ENTITY1.GetStr());
     EXPECT_EQ(pUser2->eStatus, eStatusAfter2);
     EXPECT_STREQ(pUser2->strUserEntity.GetStr(), USER_ENTITY2.GetStr());
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatchingDoesNotUpdateIfAlreadyHaveUserEntity)
+{
+    IMS_UINT32 eStatusBefore1 = STATUS_IDLE;
+    IMS_UINT32 eStatusBefore2 = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+    IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
+
+    AddUserToInfo(USER_ENTITY1, eStatusAfter1);
+    ConfUser* pUser1 = AddParticipant(ANONYMOUS1_URI, USER_ENTITY1, eStatusBefore1);
+
+    AddUserToInfo(USER_ENTITY2, eStatusAfter2);
+    ConfUser* pUser2 = AddParticipant(ANONYMOUS2_URI, USER_ENTITY2, eStatusBefore2);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+    EXPECT_EQ(pUser1->eStatus, eStatusBefore1);
+    EXPECT_STREQ(pUser1->strUserEntity.GetStr(), ANONYMOUS1_URI.GetStr());
+    EXPECT_EQ(pUser2->eStatus, eStatusBefore2);
+    EXPECT_STREQ(pUser2->strUserEntity.GetStr(), ANONYMOUS2_URI.GetStr());
 }
 
 TEST_F(ConferenceInfoUpdaterTest, UpdatebyUserEntityWithPrefix)
