@@ -264,7 +264,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
 
 PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode)
 {
-    if (m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsECall())
+    if (IsERegRequestedByOnlySms())
     {
         ProcessUnpredictableFailure();
         return;
@@ -572,8 +572,9 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
     }
     else
     {
-        if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
-                CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
+        if (!IsERegRequestedByOnlySms() &&
+                GetPreferredRegScheme() ==
+                        CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
         {
             A_IMS_TRACE_I(REGID, "ProcessTransactionTimerExpired :: try the fake E-REG", 0, 0, 0);
 
@@ -875,6 +876,12 @@ PROTECTED void AosERegistration::HandleFakeMode(IN IMS_UINT32 nReason)
 {
     A_IMS_TRACE_I(REGID, "HandleFakeMode :: try the fake E-REG with nReason[%d]", nReason, 0, 0);
 
+    if (IsERegRequestedByOnlySms())
+    {
+        ProcessUnpredictableFailure();
+        return;
+    }
+
     if (nReason == IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF)
     {
         m_piContext->GetPcscf()->RemoveCurrentPcscf();
@@ -954,6 +961,12 @@ PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
     }
 
     return IMS_FALSE;
+}
+
+PROTECTED IMS_BOOL AosERegistration::IsERegRequestedByOnlySms() const
+{
+    return !IsImsCall() && m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsECall() &&
+            m_pEModeInfo->IsESms();
 }
 
 PROTECTED IMS_BOOL AosERegistration::IsReinitiationRequested() const

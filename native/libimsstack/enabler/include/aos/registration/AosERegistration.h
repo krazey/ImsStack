@@ -148,6 +148,7 @@ protected:
 
     IMS_BOOL IsRefreshRequiredByCbm();
     IMS_BOOL IsFakeModeCondition();
+    IMS_BOOL IsERegRequestedByOnlySms() const;
     IMS_BOOL IsReinitiationRequested() const;
     IMS_BOOL IsRetryAllowed() const;
     IMS_BOOL IsAnonymousECallActionPresent(IN IMS_SINT32 nStatusCode) const;
