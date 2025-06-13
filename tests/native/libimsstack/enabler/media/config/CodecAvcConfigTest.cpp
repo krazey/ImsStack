@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,8 +30,8 @@ using ::testing::Return;
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecAvcConfig::DEFAULT_CHANNEL;
 static const IMS_SINT32 DEFAULT_RESOLUTION_WIDTH = CodecAvcConfig::DEFAULT_AVC_RESOLUTION_WIDTH;
 static const IMS_SINT32 DEFAULT_RESOLUTION_HEIGHT = CodecAvcConfig::DEFAULT_AVC_RESOLUTION_HEIGHT;
-static const IMS_SINT32 DEFAULT_FRAMERATE = CodecAvcConfig::DEFAULT_AVC_FRAMERATE;
-static const IMS_SINT32 DEFAULT_BITRATE = CodecAvcConfig::DEFAULT_AVC_BITRATE;
+static const IMS_SINT32 DEFAULT_AVC_FRAMERATE = CodecAvcConfig::DEFAULT_AVC_FRAMERATE;
+static const IMS_SINT32 DEFAULT_AVC_BITRATE = CodecAvcConfig::DEFAULT_AVC_BITRATE;
 static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = CodecAvcConfig::DEFAULT_PACKETIZATION_MODE;
 static const IMS_BOOL DEFAULT_INCLUDE_SPROP = CodecAvcConfig::DEFAULT_INCLUDE_SPROP;
 
@@ -39,6 +39,7 @@ static const IMS_BOOL DEFAULT_INCLUDE_SPROP = CodecAvcConfig::DEFAULT_INCLUDE_SP
 #define DEFAULT_IMAGE_ATTR \
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
 #define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
+#define DEFAULT_SPROP_PARAMS "Z0LAFtoHgUZA,aM4G8g=="
 
 using ::testing::Return;
 
@@ -95,8 +96,8 @@ TEST_F(CodecAvcConfigTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
     EXPECT_EQ(m_pConfig->GetResolutionWidth(), DEFAULT_RESOLUTION_WIDTH);
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), DEFAULT_RESOLUTION_HEIGHT);
-    EXPECT_EQ(m_pConfig->GetFramerate(), DEFAULT_FRAMERATE);
-    EXPECT_EQ(m_pConfig->GetBitrate(), DEFAULT_BITRATE);
+    EXPECT_EQ(m_pConfig->GetFramerate(), DEFAULT_AVC_FRAMERATE);
+    EXPECT_EQ(m_pConfig->GetBitrate(), DEFAULT_AVC_BITRATE);
     EXPECT_EQ(m_pConfig->GetPacketizationMode(), DEFAULT_PACKETIZATION_MODE);
     EXPECT_EQ(m_pConfig->GetIncludeSpropParameterSets(), DEFAULT_INCLUDE_SPROP);
     EXPECT_EQ(m_pConfig->GetSpropParameterSets(), AString::ConstNull());
@@ -138,7 +139,7 @@ TEST_F(CodecAvcConfigTest, GetFramerate)
 
     ON_CALL(*m_pVideoSubBundle,
             GetInt(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
-                    DEFAULT_FRAMERATE))
+                    DEFAULT_AVC_FRAMERATE))
             .WillByDefault(Return(nFramerate));
 
     GetReadyToCreate();
@@ -205,7 +206,7 @@ TEST_F(CodecAvcConfigTest, GetProfileLevelId)
     AString strProfileLevelId("42E00C");
     ON_CALL(*m_pVideoSubBundle,
             GetString(CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING,
-                    AString::ConstNull()))
+                    AString(DEFAULT_PROFILE_ID)))
             .WillByDefault(Return(strProfileLevelId));
 
     GetReadyToCreate();
@@ -227,4 +228,114 @@ TEST_F(CodecAvcConfigTest, GetVideoImageAttr)
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetImageAttr(), objImageAttr.GetAt(0));
+}
+
+TEST_F(CodecAvcConfigTest, Create_NullH264Bundle_UsesDefaults)
+{
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBundle(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE))
+            .WillByDefault(Return(nullptr));
+
+    // Base CodecVideoConfig::Create expectations
+    ImsVector<IMS_SINT32> objVideoBitrate;
+    ON_CALL(*m_pMockICarrierConfig,
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY, _))
+            .WillByDefault(Return(objVideoBitrate));
+    ImsVector<AString> objImageAttr;  // Empty
+    ON_CALL(*m_pMockICarrierConfig,
+            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY, _))
+            .WillByDefault(Return(objImageAttr));
+    ImsVector<AString> objFrameSize;  // Empty
+    ON_CALL(*m_pMockICarrierConfig,
+            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_FRAME_SIZE_STRING_ARRAY, _))
+            .WillByDefault(Return(objFrameSize));
+
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    // Verify default AVC values set by CreateDefaultAvcCodec
+    EXPECT_EQ(m_pConfig->GetResolutionWidth(), DEFAULT_RESOLUTION_WIDTH);
+    EXPECT_EQ(m_pConfig->GetResolutionHeight(), DEFAULT_RESOLUTION_HEIGHT);
+    EXPECT_EQ(m_pConfig->GetFramerate(), DEFAULT_AVC_FRAMERATE);
+    EXPECT_EQ(m_pConfig->GetPacketizationMode(), DEFAULT_PACKETIZATION_MODE);
+    EXPECT_EQ(m_pConfig->GetIncludeSpropParameterSets(), IMS_FALSE);
+    EXPECT_EQ(m_pConfig->GetSpropParameterSets(), DEFAULT_SPROP_PARAMS);
+    EXPECT_EQ(m_pConfig->GetProfileLevelId(), DEFAULT_PROFILE_ID);
+    EXPECT_EQ(m_pConfig->GetBitrate(), DEFAULT_AVC_BITRATE);
+    EXPECT_EQ(m_pConfig->GetImageAttr(), AString::ConstNull());
+    EXPECT_EQ(m_pConfig->GetFrameSize(), AString::ConstNull());
+}
+
+TEST_F(CodecAvcConfigTest, Create_NullH264SubBundle_UsesDefaults)
+{
+    m_strPayloadTypeNumber.SetNumber(m_nAvcPayloadTypeNumber);
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBundle(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE))
+            .WillByDefault(Return(m_pVideoBundle));
+    ON_CALL(*m_pVideoBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
+            .WillByDefault(Return(nullptr));
+
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    // Verify default AVC values set by CreateDefaultAvcCodec
+    EXPECT_EQ(m_pConfig->GetResolutionWidth(), DEFAULT_RESOLUTION_WIDTH);
+    EXPECT_EQ(m_pConfig->GetResolutionHeight(), DEFAULT_RESOLUTION_HEIGHT);
+    EXPECT_EQ(m_pConfig->GetFramerate(), DEFAULT_AVC_FRAMERATE);
+    EXPECT_EQ(m_pConfig->GetPacketizationMode(), DEFAULT_PACKETIZATION_MODE);
+    EXPECT_EQ(m_pConfig->GetIncludeSpropParameterSets(), IMS_FALSE);
+    EXPECT_EQ(m_pConfig->GetSpropParameterSets(), DEFAULT_SPROP_PARAMS);
+    EXPECT_EQ(m_pConfig->GetProfileLevelId(), DEFAULT_PROFILE_ID);
+}
+
+TEST_F(CodecAvcConfigTest, Create_EmptyH264SubBundle_UsesSubBundleDefaults)
+{
+    m_strPayloadTypeNumber.SetNumber(m_nAvcPayloadTypeNumber);
+    GetReadyToCreate();  // Sets up m_pVideoBundle and m_pVideoSubBundle mocks
+
+    ImsVector<IMS_SINT32> objEmptyResolution;
+    ON_CALL(*m_pVideoSubBundle,
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY, _))
+            .WillByDefault(Return(objEmptyResolution));
+    ON_CALL(*m_pVideoSubBundle,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
+                    DEFAULT_AVC_FRAMERATE))
+            .WillByDefault(Return(DEFAULT_AVC_FRAMERATE));
+    ON_CALL(*m_pVideoSubBundle,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
+                    DEFAULT_PACKETIZATION_MODE))
+            .WillByDefault(Return(DEFAULT_PACKETIZATION_MODE));
+    ON_CALL(*m_pVideoSubBundle,
+            GetString(CarrierConfig::ImsVt::KEY_AVC_SPROP_PARAMETER_SETS_STRING,
+                    AString::ConstNull()))
+            .WillByDefault(Return(AString::ConstNull()));
+    ON_CALL(*m_pVideoSubBundle,
+            GetString(CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING,
+                    AString(DEFAULT_PROFILE_ID)))
+            .WillByDefault(Return(AString(DEFAULT_PROFILE_ID)));
+
+    ImsVector<IMS_SINT32> objVideoBitrate;  // Empty
+    ON_CALL(*m_pMockICarrierConfig,
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY, _))
+            .WillByDefault(Return(objVideoBitrate));
+    ImsVector<AString> objImageAttr;  // Empty
+    ON_CALL(*m_pMockICarrierConfig,
+            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY, _))
+            .WillByDefault(Return(objImageAttr));
+    ImsVector<AString> objFrameSize;  // Empty
+    ON_CALL(*m_pMockICarrierConfig,
+            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_FRAME_SIZE_STRING_ARRAY, _))
+            .WillByDefault(Return(objFrameSize));
+
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    // Verify default AVC values (as if CreateDefaultAvcCodec was effectively called by fallbacks)
+    EXPECT_EQ(m_pConfig->GetResolutionWidth(), DEFAULT_RESOLUTION_WIDTH);
+    EXPECT_EQ(m_pConfig->GetResolutionHeight(), DEFAULT_RESOLUTION_HEIGHT);
+    EXPECT_EQ(m_pConfig->GetFramerate(), DEFAULT_AVC_FRAMERATE);
+    EXPECT_EQ(m_pConfig->GetPacketizationMode(), DEFAULT_PACKETIZATION_MODE);
+    EXPECT_EQ(m_pConfig->GetIncludeSpropParameterSets(), IMS_FALSE);
+    EXPECT_EQ(m_pConfig->GetSpropParameterSets(), DEFAULT_SPROP_PARAMS);
+    EXPECT_EQ(m_pConfig->GetProfileLevelId(), DEFAULT_PROFILE_ID);
+    EXPECT_EQ(m_pConfig->GetBitrate(), DEFAULT_AVC_BITRATE);
+    EXPECT_EQ(m_pConfig->GetImageAttr(), AString::ConstNull());
+    EXPECT_EQ(m_pConfig->GetFrameSize(), AString::ConstNull());
 }

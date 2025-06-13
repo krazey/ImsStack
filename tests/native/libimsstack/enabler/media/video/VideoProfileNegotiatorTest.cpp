@@ -107,8 +107,8 @@ protected:
         pFmtp->SetProfile(VideoProfileUtil::GetAvcProfileFromProfileLevelId(strProfileLevelId));
         // Set other pFmtp properties as needed (bitrate, framerate, packetization, sprop)
         pFmtp->SetPacketizationMode(1);
-        pFmtp->SetShowPacketizationMode(IMS_TRUE);
-        pFmtp->SetShowProfileLevelId(IMS_TRUE);
+        pFmtp->SetVisiblePacketizationMode(IMS_TRUE);
+        pFmtp->SetVisibleProfileLevelId(IMS_TRUE);
 
         pPayload->SetFmtp(pFmtp);
         pProfile->GetPayloadList().Append(pPayload);
@@ -133,9 +133,9 @@ protected:
         pFmtp->SetProfile(eHevcProfile);
         // Set other pFmtp properties as needed (bitrate, framerate, packetization, sprop)
         pFmtp->SetPacketizationMode(1);
-        pFmtp->SetShowPacketizationMode(IMS_TRUE);
-        pFmtp->SetShowProfile(IMS_TRUE);
-        pFmtp->SetShowLevel(IMS_TRUE);
+        pFmtp->SetVisiblePacketizationMode(IMS_TRUE);
+        pFmtp->SetVisibleProfile(IMS_TRUE);
+        pFmtp->SetVisibleLevel(IMS_TRUE);
 
         pPayload->SetFmtp(pFmtp);
         pProfile->GetPayloadList().Append(pPayload);

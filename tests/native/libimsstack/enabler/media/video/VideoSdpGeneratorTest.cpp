@@ -53,9 +53,9 @@ protected:
         m_pAvcFmtpFull->SetPacketizationMode(PACKETIZATION_MODE);
         m_pAvcFmtpFull->SetSpropParam(SPROP_PRAMSET);
 
-        m_pAvcFmtpFull->SetShowProfileLevelId(IMS_TRUE);
-        m_pAvcFmtpFull->SetShowPacketizationMode(IMS_TRUE);
-        m_pAvcFmtpFull->SetShowSpropParam(IMS_TRUE);
+        m_pAvcFmtpFull->SetVisibleProfileLevelId(IMS_TRUE);
+        m_pAvcFmtpFull->SetVisiblePacketizationMode(IMS_TRUE);
+        m_pAvcFmtpFull->SetVisibleSpropParam(IMS_TRUE);
     }
 
     virtual void TearDown() override
@@ -137,10 +137,10 @@ protected:
         m_pHevcFmtpFull->SetPacketizationMode(PACKETIZATION_MODE);
         m_pHevcFmtpFull->SetSpropParam(SPROP_PARAMSET);
 
-        m_pHevcFmtpFull->SetShowProfile(IMS_TRUE);
-        m_pHevcFmtpFull->SetShowLevel(IMS_TRUE);
-        m_pHevcFmtpFull->SetShowPacketizationMode(IMS_TRUE);
-        m_pHevcFmtpFull->SetShowSpropParam(IMS_TRUE);
+        m_pHevcFmtpFull->SetVisibleProfile(IMS_TRUE);
+        m_pHevcFmtpFull->SetVisibleLevel(IMS_TRUE);
+        m_pHevcFmtpFull->SetVisiblePacketizationMode(IMS_TRUE);
+        m_pHevcFmtpFull->SetVisibleSpropParam(IMS_TRUE);
     }
 
     virtual void TearDown() override
