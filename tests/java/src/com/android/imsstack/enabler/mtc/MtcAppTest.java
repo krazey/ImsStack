@@ -322,8 +322,9 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.openEmergencyService(
                 mMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
 
+        verify(mEmergencyServiceManager, times(1)).setCall(any(MtcCall.class));
         verify(mEmergencyServiceManager, times(1)).openEmergencyService(
-                mMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
     }
 
     @Test

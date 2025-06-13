@@ -23,9 +23,9 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
@@ -53,6 +53,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -114,6 +117,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
                 ).when(mMockMtcJniProxy).sendDataToNative(anyLong(), any(Parcel.class));
 
         mTestMtcEmergencyServiceManager.init();
+        mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
     }
 
     @After
@@ -127,8 +131,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     public void testOpenEmergencyService() {
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         processAllMessages();
         verifyOpenEmergencyService(1, IUMtcCall.SERVICETYPE_EMERGENCY);
     }
@@ -144,8 +147,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
                 .thenReturn(true);
 
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         processAllMessages();
         verifyOpenEmergencyService(1, IUMtcCall.SERVICETYPE_EMERGENCY);
 
@@ -154,8 +156,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
                 .thenReturn(false);
 
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         processAllMessages();
         verifyOpenEmergencyService(1, IUMtcCall.SERVICETYPE_NORMAL);
     }
@@ -164,8 +165,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     public void testStopEmergencyService() {
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
 
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
@@ -180,32 +180,32 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
     @Test
     public void testOnEmergencyServiceStateChanged() {
-        mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
-
         mTestMtcEmergencyServiceManager.onEmergencyServiceStateChanged(IUMtcService.ES_IDLE, 0, 0);
-        verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verifyNoMoreInteractions(mMockMtcCall);
 
+        mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.onEmergencyServiceStateChanged(
                 IUMtcService.ES_OPENING, 0, 0);
-        verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verifyNoMoreInteractions(mMockMtcCall);
 
+        mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.onEmergencyServiceStateChanged(
                 IUMtcService.ES_UNAVAILABLE, 0, 0);
-        verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verifyNoMoreInteractions(mMockMtcCall);
 
+        mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.onEmergencyServiceStateChanged(
                 IUMtcService.ES_OPENED, 0, 0);
+        verify(mMockMtcCall, times(1)).createNativeCallObject();
         verify(mMockMtcCall, times(1)).open(anyInt(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Test
     public void testOnCallDestroyedWithWrongMtcCall() {
+        mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
                 mECallStateListenerCaptor.getValue();
@@ -216,10 +216,10 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
     @Test
     public void testOnCallDestroyedInUnavailableState() {
+        mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
                 mECallStateListenerCaptor.getValue();
@@ -238,10 +238,10 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
     @Test
     public void testOnCallDestroyedWithoutStateChange() {
+        mTestMtcEmergencyServiceManager.setCall(mMockMtcCall);
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY,
-                mServiceStateTracker);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
         MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
                 mECallStateListenerCaptor.getValue();

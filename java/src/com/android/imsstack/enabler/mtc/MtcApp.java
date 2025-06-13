@@ -185,8 +185,9 @@ public class MtcApp implements Closeable {
      * @param emergencyRouting The emergency call routing value.
      */
     public void openEmergencyService(MtcCall call, @EmergencyCallRouting int emergencyRouting) {
+        mEmergencyServiceManager.setCall(call);
         mEmergencyServiceManager.openEmergencyService(
-                call, emergencyRouting, mContext.getServiceStateTracker());
+                emergencyRouting, mContext.getServiceStateTracker());
     }
 
     /**
@@ -232,8 +233,8 @@ public class MtcApp implements Closeable {
      * @return The created {@link MtcCall}.
      */
     public MtcCall createMtcCall(int callAttributes) {
-        return new MtcCall(mContext, mCM.getCallTracker(), MtcJniProxy.getInstance(),
-                callAttributes, mCM.getVacantCallIndex(), "");
+        return new MtcCall(mContext, mCM.getCallTracker(), callAttributes,
+                mCM.getVacantCallIndex(), "");
     }
 
     /**
