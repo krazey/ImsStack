@@ -237,6 +237,7 @@ private:
     SIP_UINT32 m_nDurationExpired;
     /* Current Value of Timer Duration */
     SIP_UINT32 m_nCurrentDuration;
+    SIP_BOOL m_bRprTxnTerminated;
 
     SipTxnTimerValues m_objTxnTimerValues;
 
@@ -303,6 +304,9 @@ public:
     SIP_VOID InitRetransmissionInfo();
 
     SIP_VOID SetResponseCode(SIP_UINT16 nRespCode);
+
+    inline SIP_BOOL IsRprTxnTerminated() const { return m_bRprTxnTerminated; }
+    inline void SetRprTxnTerminated(IN SIP_BOOL bTerminated) { m_bRprTxnTerminated = bTerminated; }
 
 private:
     virtual ~SipTxn();
