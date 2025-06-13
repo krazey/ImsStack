@@ -212,16 +212,18 @@ public class SscTransaction {
                 return;
             }
 
-            String requestUri = getRequestUri(xui);
-            if (TextUtils.isEmpty(requestUri)) {
-                ImsLog.e(mSlotId, "Invalid requestUri");
+            String body = getXmlBody();
+            if (body == null) {
+                ImsLog.e(mSlotId, "Invalid body");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
             }
 
-            String body = getXmlBody();
-            if (body == null) {
-                ImsLog.e(mSlotId, "Invalid body");
+            // Request URI shall be created after XML body creation since URI is generated based on
+            // the XML body.
+            String requestUri = getRequestUri(xui);
+            if (TextUtils.isEmpty(requestUri)) {
+                ImsLog.e(mSlotId, "Invalid requestUri");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
             }

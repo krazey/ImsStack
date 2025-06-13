@@ -487,7 +487,8 @@ public class SscXmlCreator {
             String noReplyTimerTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER);
             if (getElementByTagName(rootElement, noReplyTimerTag) != null) {
                 ImsLog.d("noReplyTimer is already inserted. Don't create it again");
-                return null;
+                SscXmlFormat.setIsNoReplyTimerOmitted(slotId, false);
+                return updateNoReplyTimer(doc, data);
             }
 
             Element noReplyTimerElement = doc.createElement(noReplyTimerTag);

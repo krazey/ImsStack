@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.ssc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
@@ -365,6 +366,42 @@ public class SscXmlCreatorTest {
         assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
                 xml.getTagName());
         assertEquals("25", xml.getTextContent());
+    }
+
+    @Test
+    public void createXml_updateCfnrTimerWhenNoReplyTimerInXmlButOmittedFlagTrue() {
+        String xmlData = "<ss:simservs>"
+                + "<ss:communication-diversion active=\"true\">"
+                + "<ss:NoReplyTimer>10</ss:NoReplyTimer>"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>"
+                + "</ss:simservs>";
+
+        SscServiceData updateData = getCfUpdateData(ESsType.CF, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR_TIMER, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 25);
+
+        SscXmlFormat.setIsNoReplyTimerOmitted(SLOT_0, true);
+
+        Element xml = mSscXmlCreator.createXml(getDocumentFromString(xmlData), updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
+                xml.getTagName());
+        assertEquals("25", xml.getTextContent());
+
+        assertFalse(SscXmlFormat.getIsNoReplyTimerOmitted(SLOT_0));
     }
 
     @Test
