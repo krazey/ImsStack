@@ -47,6 +47,7 @@ public:
 
 private:
     void StartRttGuardTimer();
+    void StopRttGuardTimer();
     void DetermineIfRttUpgradeIsNeeded(IN CallKey nCallKey);
     void UpgradeToRttIfNeeded(IN CallKey nCallKey);
 

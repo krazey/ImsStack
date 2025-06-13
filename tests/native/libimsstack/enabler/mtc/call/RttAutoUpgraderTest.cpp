@@ -286,3 +286,14 @@ TEST_F(RttAutoUpgraderTest, DestroyRttAutoUpgraderWhenOnPassiveTimerExpired)
     EXPECT_CALL(objContext, DestroyRttAutoUpgrader).Times(1);
     pRttAutoUpgrader->OnPassiveTimerExpired(IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD);
 }
+
+TEST_F(RttAutoUpgraderTest, RemoveRttGuardTimerWhenRttEmergencyCallIsEstablished)
+{
+    EXPECT_CALL(objPassiveTimer, RemoveListener(_, _)).Times(1);
+    EXPECT_CALL(objPassiveTimer, RemoveTimer(_)).Times(1);
+
+    pRttAutoUpgrader->OnCallStateChanged(
+            CALL_KEY, IMtcCall::State::ESTABLISHED, CallType::RTT, IMS_TRUE, 0);
+
+    EXPECT_CALL(objPassiveTimer, RemoveListener(_, _)).Times(1);  // destructor RttAutoUpgrader
+}

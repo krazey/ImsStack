@@ -69,6 +69,7 @@ PUBLIC VIRTUAL void RttAutoUpgrader::OnCallStateChanged(IN CallKey nCallKey,
             case IMtcCall::State::ESTABLISHED:
                 if (eType >= CallType::RTT)
                 {
+                    StopRttGuardTimer();
                     m_bRttEmergencyCallEstablished = IMS_TRUE;
                 }
                 break;
@@ -120,6 +121,16 @@ PRIVATE void RttAutoUpgrader::StartRttGuardTimer()
             IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD, nRttGuardTime, IMS_TRUE);
     m_objContext.GetPassiveTimerHolder().AddListener(
             IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD, this);
+}
+
+PRIVATE void RttAutoUpgrader::StopRttGuardTimer()
+{
+    IMS_TRACE_D("StopRttGuardTimer", 0, 0, 0);
+
+    m_objContext.GetPassiveTimerHolder().RemoveListener(
+            IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD, this);
+    m_objContext.GetPassiveTimerHolder().RemoveTimer(
+            IPassiveTimerHolder::Type::RTT_AUTO_UPGRADE_GUARD);
 }
 
 PRIVATE void RttAutoUpgrader::DetermineIfRttUpgradeIsNeeded(IN CallKey nCallKey)
