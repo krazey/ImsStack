@@ -19,6 +19,7 @@
 #include "MockIMessage.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
+#include "MockIPhoneInfoLocation.h"
 #include "MockISession.h"
 #include "MtcDef.h"
 #include "SipMethod.h"
@@ -46,6 +47,7 @@
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
+#include "helper/MtcLocationRefresher.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MediaDef.h"
 #include "media/MockIMtcMediaManager.h"
@@ -95,6 +97,8 @@ public:
     MockIMessageUtils objMessageUtils;
     MockIPassiveTimerHolder objPassiveTimerHolder;
     MockILastComeFirstServedHelper objLastComeFirstServedHelper;
+    MockILocationInfo objLocationInfo;
+    MtcLocationRefresher* pLocationRefresher;
 
     MediaInfo objInputMediaInfo;
     MediaInfo objOutputMediaInfo;
@@ -147,6 +151,9 @@ protected:
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
 
+        pLocationRefresher = new MtcLocationRefresher(objLocationInfo);
+        ON_CALL(objCallContext, GetLocationRefresher).WillByDefault(ReturnRef(*pLocationRefresher));
+
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objOutputMediaInfo));
@@ -162,6 +169,7 @@ protected:
         delete pParticipantInfo;
         delete pUssiController;
         delete pEpsfbTrigger;
+        delete pLocationRefresher;
     }
 
     MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag)

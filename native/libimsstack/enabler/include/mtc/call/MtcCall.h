@@ -75,6 +75,7 @@ class ISession;
 class MessageSender;
 class MessageUtils;
 class MtcConfigurationProxy;
+class MtcLocationRefresher;
 class OperationAsyncRunner;
 class UdpKeepAliveSender;
 class UssiController;
@@ -257,6 +258,10 @@ public:
     inline CallConnectionIdManager& GetCallConnectionIdManager() override
     {
         return m_objContext.GetCallConnectionIdManager();
+    }
+    inline MtcLocationRefresher& GetLocationRefresher() override
+    {
+        return m_objContext.GetLocationRefresher();
     }
     inline void CreateRttAutoUpgrader() override { m_objContext.CreateRttAutoUpgrader(); }
     inline void DestroyRttAutoUpgrader() override { m_objContext.DestroyRttAutoUpgrader(); }

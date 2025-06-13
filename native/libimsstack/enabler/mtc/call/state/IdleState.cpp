@@ -58,7 +58,6 @@
 #include "dialogevent/IMultiEndpointManager.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/LastComeFirstServedHelper.h"
-#include "helper/MtcLocationRefresher.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
@@ -75,11 +74,8 @@ IdleState::IdleState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::IDLE, objContext),
         m_pBlockChecker(nullptr),
         m_objOperationAfterBlockCheck(nullptr),
-        m_objLocationRefresher(MtcLocationRefresher(
-                *PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(objContext.GetSlotId()))),
         m_pConfUsers(ImsList<std::shared_ptr<ConfUser>>())
 {
-    RequestLocationUpdateIfRequired();
 }
 
 PUBLIC VIRTUAL IdleState::~IdleState() {}
@@ -573,7 +569,7 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new SsacBlockRule(m_objContext, eCallType));
     lstRules.Append(new RetryAfterBlockRule(m_objContext));
     lstRules.Append(new RadioBlockRule(m_objContext, eCallType));
-    lstRules.Append(new LocationBlockRule(m_objLocationRefresher));
+    lstRules.Append(new LocationBlockRule(m_objContext));
     return lstRules;
 }
 
@@ -669,21 +665,6 @@ AString IdleState::RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AStrin
     }
 
     return strTarget;
-}
-
-PRIVATE void IdleState::RequestLocationUpdateIfRequired()
-{
-    if (m_objContext.GetCallInfo().eEmergencyType == EmergencyType::NONE)
-    {
-        return;
-    }
-
-    IMS_SINT32 nWaitTime = m_objContext.GetConfigurationProxy().GetInt(
-            ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT);
-    if (nWaitTime > 0)
-    {
-        m_objLocationRefresher.RequestUpdate(nWaitTime);
-    }
 }
 
 PRIVATE

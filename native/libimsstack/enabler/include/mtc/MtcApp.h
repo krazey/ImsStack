@@ -34,6 +34,7 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialogevent/MultiEndpointManager.h"
 #include "helper/CallStateProxy.h"
+#include "helper/MtcLocationRefresher.h"
 #include "helper/OperationAsyncRunnerManager.h"
 #include "helper/PassiveTimerHolder.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
@@ -116,6 +117,7 @@ public:
     {
         return m_objCallConnectionIdManager;
     }
+    inline MtcLocationRefresher& GetLocationRefresher() override { return m_objLocationRefresher; }
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
     void CreateRttAutoUpgrader() override;
     void DestroyRttAutoUpgrader() override;
@@ -145,6 +147,7 @@ protected:
     MtcRadioChecker m_objMtcRadioChecker;
     std::unique_ptr<LastComeFirstServedHelper> m_pLastComeFirstServedHelper;
     CallConnectionIdManager m_objCallConnectionIdManager;
+    MtcLocationRefresher m_objLocationRefresher;
     std::unique_ptr<RttAutoUpgrader> m_pRttAutoUpgrader;
 
     IMS_BOOL m_bWifiTestMode;

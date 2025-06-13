@@ -74,6 +74,8 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objMtcRadioChecker(*this),
         m_pLastComeFirstServedHelper(nullptr),
         m_objCallConnectionIdManager(CallConnectionIdManager(*this)),
+        m_objLocationRefresher(MtcLocationRefresher(
+                *PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId))),
         m_pRttAutoUpgrader(nullptr),
         m_bWifiTestMode(IMS_FALSE)
 {

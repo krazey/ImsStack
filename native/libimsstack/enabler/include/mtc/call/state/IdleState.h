@@ -23,7 +23,6 @@
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/MtcCallState.h"
 #include "conferencecall/ConferenceDef.h"
-#include "helper/MtcLocationRefresher.h"
 #include "precondition/QosDef.h"
 #include <functional>
 #include <memory>
@@ -81,12 +80,10 @@ private:
     IMS_RESULT HandleCallPull();
     void CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*> objUsers);
     AString RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget);
-    void RequestLocationUpdateIfRequired();
     const CallReasonInfo GetInternalErrorReason() const;
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;
-    MtcLocationRefresher m_objLocationRefresher;
     ImsList<std::shared_ptr<ConfUser>> m_pConfUsers;
 };
 

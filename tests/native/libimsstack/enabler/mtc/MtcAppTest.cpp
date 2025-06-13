@@ -31,6 +31,7 @@
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/ILastComeFirstServedHelper.h"
+#include "helper/MtcLocationRefresher.h"
 #include "helper/OperationAsyncRunner.h"
 #include "utility/IMessageUtils.h"
 #include <gtest/gtest.h>
@@ -246,6 +247,12 @@ TEST_F(MtcAppTest, GetSipInterfaceFactoryAfterConstructor)
 {
     IMtcSipInterfaceFactory* piSipInterfaceFactory = &pMtcApp->GetSipInterfaceFactory();
     ASSERT_NE(piSipInterfaceFactory, nullptr);
+}
+
+TEST_F(MtcAppTest, GetLocationRefresherAfterConstructor)
+{
+    MtcLocationRefresher* pLocationRefresher = &pMtcApp->GetLocationRefresher();
+    ASSERT_NE(pLocationRefresher, nullptr);
 }
 
 TEST_F(MtcAppTest, GetConferenceManagerAfterConstructor)

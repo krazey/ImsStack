@@ -21,12 +21,12 @@
 #include "ImsTypeDef.h"
 #include "call/block/IMtcBlockRule.h"
 
-class MtcLocationRefresher;
+class IMtcCallContext;
 
 class LocationBlockRule final : public IMtcBlockRule, public ILocationUpdateListener
 {
 public:
-    explicit LocationBlockRule(IN MtcLocationRefresher& objLocationRefresher);
+    explicit LocationBlockRule(IN IMtcCallContext& objContext);
     virtual ~LocationBlockRule();
     LocationBlockRule(IN const LocationBlockRule&) = delete;
     LocationBlockRule& operator=(IN const LocationBlockRule&) = delete;
@@ -36,8 +36,12 @@ public:
     void LocationUpdate_OnCompleted() override;
 
 private:
+    IMtcCallContext& m_objContext;
     MtcLocationRefresher& m_objLocationRefresher;
     IMtcBlockRuleCheckListener* m_pListener;
+
+    IMS_BOOL IsLocationUpdateRequired() const;
+    IMS_BOOL IsLocationUpdateCompleted() const;
 };
 
 #endif

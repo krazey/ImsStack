@@ -72,6 +72,7 @@ public:
     MOCK_METHOD(IMultiEndpointManager*, GetMultiEndpointManager, (), (override));
     MOCK_METHOD(ILastComeFirstServedHelper&, GetLastComeFirstServedHelper, (), (override));
     MOCK_METHOD(CallConnectionIdManager&, GetCallConnectionIdManager, (), (override));
+    MOCK_METHOD(MtcLocationRefresher&, GetLocationRefresher, (), (override));
     MOCK_METHOD(void, CreateRttAutoUpgrader, (), (override));
     MOCK_METHOD(void, DestroyRttAutoUpgrader, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));

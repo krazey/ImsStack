@@ -20,12 +20,14 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockIPhoneInfoLocation.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIPassiveTimerHolder.h"
+#include "helper/MtcLocationRefresher.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -53,6 +55,8 @@ protected:
     MockIMtcAosConnector objAosConnector;
     MockIJniMtcServiceThread objJniMtcServiceThread;
     MockMtcConfigurationProxy objConfigurationProxy;
+    MockILocationInfo objLocationInfo;
+    MtcLocationRefresher* pLocationRefresher;
 
     TestEmergencyServiceManager* pEsm;
 
@@ -65,11 +69,17 @@ protected:
                 .WillByDefault(Return(&objAosConnector));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objJniMtcServiceThread));
+        pLocationRefresher = new MtcLocationRefresher(objLocationInfo);
+        ON_CALL(objContext, GetLocationRefresher).WillByDefault(ReturnRef(*pLocationRefresher));
 
         pEsm = new TestEmergencyServiceManager(objContext);
     }
 
-    virtual void TearDown() override { delete pEsm; }
+    virtual void TearDown() override
+    {
+        delete pEsm;
+        delete pLocationRefresher;
+    }
 };
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormalService)
@@ -150,4 +160,26 @@ TEST_F(MtcEmergencyServiceManagerTest, GetStateReturnsControllerState)
     pEsm->StartOpen(ServiceType::NORMAL);
 
     EXPECT_EQ(pEsm->GetState(), IEmergencyServiceController::State::OPENED);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenDoesNotRequestsLocationUpdateIfTimerIsNotSet)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(0));
+
+    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(_, _)).Times(0);
+
+    pEsm->StartOpen(ServiceType::EMERGENCY);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenRequestsLocationUpdateIfTimerIsSet)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(1000));
+
+    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(1000, _));
+
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 }
