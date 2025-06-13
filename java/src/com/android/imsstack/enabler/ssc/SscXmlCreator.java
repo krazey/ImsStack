@@ -491,7 +491,7 @@ public class SscXmlCreator {
             }
 
             Element noReplyTimerElement = doc.createElement(noReplyTimerTag);
-            cfServiceElement.appendChild(noReplyTimerElement);
+            cfServiceElement.insertBefore(noReplyTimerElement, cfServiceElement.getFirstChild());
 
             CfServiceUpdateData cfData = (CfServiceUpdateData) data;
             noReplyTimerElement.setTextContent(Integer.toString(cfData.getReplyTimer()));

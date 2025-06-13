@@ -391,13 +391,13 @@ public class SscXmlCreatorTest {
         NodeList nodeList = xml.getChildNodes();
         assertEquals(2, nodeList.getLength());
 
-        Element ruleSet = (Element) nodeList.item(0);
-        assertEquals(SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULESET), ruleSet.getTagName());
-
-        Element noReplyTimer = (Element) nodeList.item(1);
+        Element noReplyTimer = (Element) nodeList.item(0);
         assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.NOREPLYTIMER),
                 noReplyTimer.getTagName());
         assertEquals("25", noReplyTimer.getTextContent());
+
+        Element ruleSet = (Element) nodeList.item(1);
+        assertEquals(SscXmlFormat.getCpElement(SLOT_0, SscXmlFormat.RULESET), ruleSet.getTagName());
     }
 
     @Test
