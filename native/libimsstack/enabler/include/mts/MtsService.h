@@ -74,7 +74,7 @@ public:
     void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) const override;
     void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) const override;
     void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
             IN IMS_UINT32 nRetryCount) override;
 
     // IMtsTrafficListener

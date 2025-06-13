@@ -145,7 +145,7 @@ void JniMtsApp::TriggerSendMoSms(IN const Parcel& objParcel)
     android::String8 strEncodedPdu(objParcel.readString16());
     android::String8 strAddress_(objParcel.readString16());
     IMS_SINT32 nSeqId = objParcel.readInt32();
-    IMS_BOOL bEmergency = objParcel.readBool();
+    IMS_BOOL bEmergencyNumber = objParcel.readBool();
     IMS_UINT32 nRetryCount = objParcel.readInt32();
     AString strContent = AString::FromBase64(strEncodedPdu.c_str());
     // This object will be deleted by MtsMessageController after being used.
@@ -176,5 +176,5 @@ void JniMtsApp::TriggerSendMoSms(IN const Parcel& objParcel)
     }
 
     piMtsJni->SendMoSmsByServiceType(
-            eSmsFormat, pContent, strAddress, nSeqId, bEmergency, nRetryCount);
+            eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, nRetryCount);
 }

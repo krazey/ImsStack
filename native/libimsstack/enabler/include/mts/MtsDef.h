@@ -26,13 +26,13 @@ class SmsSendRequestInfo
 {
 public:
     SmsSendRequestInfo(IN SmsFormatType eInitSmsFormat, IN ByteArray* pInitContent,
-            IN const AString& strInitAddress, IN IMS_SINT32 nInitSeqId, IN IMS_BOOL bInitEmergency,
-            IN IMS_UINT32 nInitRetryCount) :
+            IN const AString& strInitAddress, IN IMS_SINT32 nInitSeqId,
+            IN IMS_BOOL bInitEmergencyNumber, IN IMS_UINT32 nInitRetryCount) :
             eSmsFormat(eInitSmsFormat),
             pContent(pInitContent),
             strAddress(strInitAddress),
             nSeqId(nInitSeqId),
-            bEmergency(bInitEmergency),
+            bEmergencyNumber(bInitEmergencyNumber),
             nRetryCount(nInitRetryCount)
     {
     }
@@ -41,7 +41,7 @@ public:
     ByteArray* pContent;
     AString strAddress;
     IMS_SINT32 nSeqId;
-    IMS_BOOL bEmergency;
+    IMS_BOOL bEmergencyNumber;
     IMS_UINT32 nRetryCount;
 };
 
