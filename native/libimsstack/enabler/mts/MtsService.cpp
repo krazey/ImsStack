@@ -211,7 +211,8 @@ void MtsService::CoreService_CapabilityQueryReceived(
 PUBLIC
 void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
-    IMS_TRACE_I("ImsAos_Connected : slot_[%d]", m_objContext.GetSlotId(), 0, 0);
+    IMS_TRACE_I("ImsAos_Connected : slot_[%d], ServiceType[%s]", m_objContext.GetSlotId(),
+            PS_ServiceType(m_eServiceType), 0);
     (void)nFeatures;
     (void)nIpcan;
 
@@ -254,7 +255,8 @@ void MtsService::ImsAos_Connecting() {}
 PUBLIC
 void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDataFailureReason */)
 {
-    IMS_TRACE_I("ImsAos_Disconnected : Reason[%d]", nReason, 0, 0);
+    IMS_TRACE_I("ImsAos_Disconnected : Reason[%d], ServiceType[%s]", nReason,
+            PS_ServiceType(m_eServiceType), 0);
 
     m_piMtsServiceState->OnImsDisconnected(nReason);
 
@@ -268,7 +270,8 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDa
 PUBLIC
 void MtsService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("ImsAos_Disconnecting : Reason[%d]", nReason, 0, 0);
+    IMS_TRACE_I("ImsAos_Disconnecting : Reason[%d], ServiceType[%s]", nReason,
+            PS_ServiceType(m_eServiceType), 0);
 
     m_piMtsServiceState->OnImsDisconnecting(nReason);
 }
@@ -276,7 +279,8 @@ void MtsService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 PUBLIC
 void MtsService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("ImsAos_Suspended : Reason[%d]", nReason, 0, 0);
+    IMS_TRACE_I("ImsAos_Suspended : Reason[%d], ServiceType[%s]", nReason,
+            PS_ServiceType(m_eServiceType), 0);
 
     m_piMtsServiceState->OnImsSuspended(nReason);
 
@@ -290,7 +294,7 @@ void MtsService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 PUBLIC
 void MtsService::ImsAos_Resumed()
 {
-    IMS_TRACE_I("ImsAos_Resumed", 0, 0, 0);
+    IMS_TRACE_I("ImsAos_Resumed : ServiceType[%s]", PS_ServiceType(m_eServiceType), 0, 0);
 
     m_piMtsServiceState->OnImsResumed();
 }
