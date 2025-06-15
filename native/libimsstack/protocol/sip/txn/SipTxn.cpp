@@ -35,7 +35,8 @@ SipTxn::SipTxn() :
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
         m_nDurationExpired(SIP_ZERO),
-        m_nCurrentDuration(SIP_ZERO)
+        m_nCurrentDuration(SIP_ZERO),
+        m_bRprTxnTerminated(SIP_FALSE)
 {
 }
 
@@ -52,7 +53,8 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
         m_nDurationExpired(SIP_ZERO),
-        m_nCurrentDuration(SIP_ZERO)
+        m_nCurrentDuration(SIP_ZERO),
+        m_bRprTxnTerminated(SIP_FALSE)
 {
     m_eTxnType = eTxnType;
     m_pTxnKey = new SipTxnKey(pTxnKey, pnError);
@@ -825,20 +827,25 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
     }
 
     /*No need to notify txntimeout to listener if the txn is already terminated*/
-    if (pTxn->IsTxnTerminated() == SIP_TRUE)
+    SIP_BOOL bTxnTerminated = pTxn->IsTxnTerminated();
+
+    if (bTxnTerminated == SIP_TRUE || pTxn->IsRprTxnTerminated() == SIP_TRUE)
     {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "***CbkTxnTimeout: %s***",
+                (bTxnTerminated == SIP_TRUE) ? "TxnTerminated" : "RprTxnTerminated", SIP_ZERO);
+
         if (pTxnListener != SIP_NULL)
         {
             pTxnListener->TxnTimeout(pUserData, (SIP_INT32)eTimerType);
         }
 
-        SipTxn_RemoveFromTxnPool(pTxnKey);
+        if (bTxnTerminated == SIP_TRUE)
+        {
+            SipTxn_RemoveFromTxnPool(pTxnKey);
+            pTxn->SipDelete();
+        }
 
         delete pTimeoutData;
-        pTxn->SipDelete();
-
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODTXN, "***CbkTxnTimeout --> TxnTerminated***\n", SIP_ZERO, SIP_ZERO);
         return;
     }
 

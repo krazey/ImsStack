@@ -166,7 +166,6 @@ static SIP_BOOL ProceedingState_SendNon100ProvisionalResponse(
 
         const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
         SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
-        SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_H);
 
         /*RFC 3262 mentions to start retransmission timer irrespective of transport being used*/
         /*Start retransmission timer*/
@@ -177,7 +176,7 @@ static SIP_BOOL ProceedingState_SendNon100ProvisionalResponse(
                     SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pTxn->SetMaxDuration(nDurationTH);
+        pTxn->SetMaxDuration(nDurationT1 * 64);
     }
 
     pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
@@ -311,7 +310,7 @@ static SIP_BOOL ProceedingState_Timer_G_H_Timeout(
            time has crossed the Max duration limit or not */
         if (nDurationExpired >= nMaxDuration)
         {
-            pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
+            pTxn->SetRprTxnTerminated(SIP_TRUE);
             return SIP_TRUE;
         }
         else
