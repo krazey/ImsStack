@@ -149,7 +149,7 @@
     <int name="imsvt.video_rs_bandwidth_bps_int" value="9600"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="28800"/>
     <int name="imsvt.video_rtp_inactivity_timer_millis_int" value="20000"/>
-    <int name="imsvt.video_rtcp_inactivity_timer_millis_int" value="20000"/>
+    <int name="imsvt.video_rtcp_inactivity_timer_millis_int" value="0"/>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="38"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="800"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2400"/>
