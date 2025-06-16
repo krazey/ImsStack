@@ -331,9 +331,16 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
     {
         OaModel* pLatestOaModel = GetNegotiatedOaModel();
 
-        if (pLatestOaModel == IMS_NULL || !pLatestOaModel->IsAllProfileExist())
+        if (pLatestOaModel == IMS_NULL)
         {
-            IMS_TRACE_E(0, "GetNegotiatedPayload(): type[%d], invalid OA model", m_eType, 0, 0);
+            IMS_TRACE_I("GetNegotiatedPayload(): type[%d], no negotiated OA model", m_eType, 0, 0);
+            return IMS_NULL;
+        }
+
+        if (!pLatestOaModel->IsAllProfileExist())
+        {
+            IMS_TRACE_I(
+                    "GetNegotiatedPayload(): type[%d], OA model is not fulfilled", m_eType, 0, 0);
             return IMS_NULL;
         }
 
