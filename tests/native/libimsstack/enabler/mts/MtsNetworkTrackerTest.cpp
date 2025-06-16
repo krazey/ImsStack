@@ -14,25 +14,49 @@
  * limitations under the License.
  */
 
+#include "IMtsContext.h"
+#include "INetworkWatcher.h"
 #include "ImsEventDef.h"
 #include "ImsTypeDef.h"
 #include "MtsNetworkTracker.h"
 #include "MockIMtsContext.h"
+#include "MockINetworkWatcher.h"
 #include <gtest/gtest.h>
+
+using ::testing::Return;
 
 namespace android
 {
 
+const IMS_SINT32 SLOT_ID = 0;
 const IMS_SINT32 INVALID_EVENT = -1;
+
+class TestMtsNetworkTracker : public MtsNetworkTracker
+{
+public:
+    TestMtsNetworkTracker(IN IMtsContext& objContext) :
+            MtsNetworkTracker(objContext)
+    {
+    }
+    virtual ~TestMtsNetworkTracker() {}
+
+    inline void SetNetworkWatcher(IN INetworkWatcher* piNw) { m_piNetWatcherInfo = piNw; }
+};
 
 class MtsNetworkTrackerTest : public ::testing::Test
 {
 public:
     MockIMtsContext objContext;
-    MtsNetworkTracker* pNetworkTracker;
+    MockINetworkWatcher objMockNetworkWatcher;
+    TestMtsNetworkTracker* pNetworkTracker;
 
 protected:
-    virtual void SetUp() override { pNetworkTracker = new MtsNetworkTracker(objContext); }
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+        pNetworkTracker = new TestMtsNetworkTracker(objContext);
+        pNetworkTracker->SetNetworkWatcher(&objMockNetworkWatcher);
+    }
 
     virtual void TearDown() override { delete pNetworkTracker; }
 };
@@ -48,6 +72,29 @@ TEST_F(MtsNetworkTrackerTest, GetNetworkStatusAfterInvalidEventReturnsInitialVal
 
     EXPECT_EQ(IMS_LTE_INFO_UNKNOWN, pNetworkTracker->GetLteAttachState());
     EXPECT_EQ(IMS_FALSE, pNetworkTracker->IsInRoamingState());
+}
+
+TEST_F(MtsNetworkTrackerTest, GetNetworkTypeWhenNetworkWatcherIsNull)
+{
+    pNetworkTracker->SetNetworkWatcher(IMS_NULL);
+
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_INVALID, pNetworkTracker->GetNetworkType());
+}
+
+TEST_F(MtsNetworkTrackerTest, GetNetworkTypeInVarietyOfNetwork)
+{
+    pNetworkTracker->SetNetworkWatcher(&objMockNetworkWatcher);
+    EXPECT_CALL(objMockNetworkWatcher, GetNetworkType())
+            .Times(4)
+            .WillOnce(Return(INetworkWatcher::RADIOTECH_TYPE_NR))
+            .WillOnce(Return(INetworkWatcher::RADIOTECH_TYPE_LTE_CA))
+            .WillOnce(Return(INetworkWatcher::RADIOTECH_TYPE_IWLAN))
+            .WillOnce(Return(INetworkWatcher::RADIOTECH_TYPE_UMTS));
+
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_NR, pNetworkTracker->GetNetworkType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_LTE_CA, pNetworkTracker->GetNetworkType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_IWLAN, pNetworkTracker->GetNetworkType());
+    EXPECT_EQ(INetworkWatcher::RADIOTECH_TYPE_UMTS, pNetworkTracker->GetNetworkType());
 }
 
 TEST_F(MtsNetworkTrackerTest, Event_NotifyEventAndRoamingStateChanged)

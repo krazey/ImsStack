@@ -35,6 +35,15 @@ public:
     virtual IMS_UINT32 GetLteAttachState() const = 0;
 
     /**
+     * @brief Gets the current data network type.
+     *
+     * @return The current data network type directly from TelephonyManager.
+     *         {@code INetworkWatcher::RADIOTECH_TYPE_INVALID} If the network watcher service is
+     *         unavailable.
+     */
+    virtual IMS_SINT32 GetNetworkType() const = 0;
+
+    /**
      * @brief Checks if the device is currently connected to a roaming network.
      *
      * @return IMS_TRUE if device is in roaming state, IMS_FALSE otherwise.

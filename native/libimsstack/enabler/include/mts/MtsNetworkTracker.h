@@ -23,8 +23,9 @@
 #include "MtsDef.h"
 
 class IMtsContext;
+class INetworkWatcher;
 
-class MtsNetworkTracker final : public IEventListener, public IMtsNetworkTracker
+class MtsNetworkTracker : public IEventListener, public IMtsNetworkTracker
 {
 public:
     explicit MtsNetworkTracker(IN IMtsContext& objContext);
@@ -38,7 +39,11 @@ public:
 
     // IMtsNetworkTracker
     inline IMS_UINT32 GetLteAttachState() const override { return m_nLteAttachState; }
+    IMS_SINT32 GetNetworkType() const override;
     inline IMS_BOOL IsInRoamingState() const override { return m_bDataRoaming; }
+
+protected:
+    INetworkWatcher* m_piNetWatcherInfo;
 
 private:
     IMtsContext& m_objContext;

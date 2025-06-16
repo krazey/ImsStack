@@ -30,7 +30,6 @@ class IImsAos;
 class IImsRadio;
 class IMtsContext;
 class IMtsTraffic;
-class INetworkWatcher;
 
 class MtsService final :
         public ICoreServiceListener,
@@ -106,7 +105,6 @@ private:
     IMtsContext& m_objContext;
     MtsServiceType m_eServiceType;
     IImsAos* m_piImsAos;
-    INetworkWatcher* m_piNetWatcherInfo;
     AString m_strAppId;
     ICoreService* m_piCoreService;
     IMtsServiceState* m_piMtsServiceState;

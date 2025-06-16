@@ -22,11 +22,14 @@
 #include "MtsDef.h"
 #include "MtsNetworkTracker.h"
 #include "ServiceEvent.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
 MtsNetworkTracker::MtsNetworkTracker(IN IMtsContext& objContext) :
+        m_piNetWatcherInfo(
+                PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(objContext.GetSlotId())),
         m_objContext(objContext),
         m_bDataRoaming(IMS_FALSE),
         m_nLteAttachState(IMS_LTE_INFO_UNKNOWN)
@@ -67,4 +70,14 @@ PUBLIC VIRTUAL void MtsNetworkTracker::Event_NotifyEvent(
         default:
             break;
     }
+}
+
+PUBLIC VIRTUAL IMS_SINT32 MtsNetworkTracker::GetNetworkType() const
+{
+    if (m_piNetWatcherInfo != IMS_NULL)
+    {
+        return m_piNetWatcherInfo->GetNetworkType();
+    }
+
+    return INetworkWatcher::RADIOTECH_TYPE_INVALID;
 }
