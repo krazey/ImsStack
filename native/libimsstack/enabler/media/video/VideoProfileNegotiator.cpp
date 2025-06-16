@@ -48,29 +48,23 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
 
     IMS_TRACE_I("Negotiate(): IsOfferReceived[%d]", m_bIsOfferReceived, 0, 0);
 
-    IMS_BOOL ret = IMS_FALSE;
-
     if (!NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile))
     {
-        ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
+        // reset using the local profile
+        ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
         return IMS_TRUE;
     }
 
     NegotiateAvpf(pLocalProfile, pPeerProfile, pNegotiatedProfile);
     NegotiateTransportType(pNegotiatedProfile);
 
-    VideoProfile::Payload* pNegotiatedPayload = IMS_NULL;
     IMS_SINT32 nNegotiatedMaxFrameRate = 0;
     IMS_SINT32 nNegotiatedMaxAs = 0;
 
-    if (!NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile, &pNegotiatedPayload,
-                &nNegotiatedMaxFrameRate, &nNegotiatedMaxAs))
-    {
-        IMS_TRACE_I("Negotiate(): NegotiatePayload failed", 0, 0, 0);
-        return IMS_FALSE;
-    }
+    IMS_BOOL bNegotiatedPayload = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile,
+            &nNegotiatedMaxFrameRate, &nNegotiatedMaxAs);
 
-    if (pNegotiatedPayload != IMS_NULL)
+    if (bNegotiatedPayload)
     {
         if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0 ||
                 pNegotiatedProfile->GetPayloadList().GetSize() == 0)
@@ -87,69 +81,62 @@ PUBLIC IMS_BOOL VideoProfileNegotiator::Negotiate(IN VideoProfile* pLocalProfile
         pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
         pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
 
-        if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
-        {
-            pNegotiatedProfile->SetRtcpInterval(0);
-            IMS_TRACE_D("Negotiate(): negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
-        }
-        else
-        {
-            pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnHold());
-
-            if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE &&
-                    pConfig->GetRtcpIntervalOnActive() > 0)
-            {
-                pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnActive());
-            }
-        }
-
         // Setting bandwidth AS/RS/RR
         MakeNegotiatedBandwidth(static_cast<VideoConfiguration*>(pConfig), pLocalProfile,
                 pPeerProfile, m_bIsOfferReceived, nNegotiatedMaxAs, pNegotiatedProfile);
 
         // Setting framerate
         pNegotiatedProfile->SetFrameRate(nNegotiatedMaxFrameRate);
-
         NegotiateCvo(pLocalProfile, pPeerProfile, pNegotiatedProfile);
-
-        ret = IMS_TRUE;
     }
     else
     {
-        if (pLocalProfile->GetPayloadList().GetSize() > 0)
-        {
-            IMS_TRACE_D("Negotiate(): No negotiated payload. copy LocalProfile and make port 0", 0,
-                    0, 0);
+        // reset using the peer profile
+        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
+    }
 
-            ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
-            ret = IMS_TRUE;
-        }
-        else
+    // RTCP interval
+    if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
+    {
+        pNegotiatedProfile->SetRtcpInterval(0);
+    }
+    else
+    {
+        pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnHold());
+
+        if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE &&
+                pConfig->GetRtcpIntervalOnActive() > 0)
         {
-            IMS_TRACE_E(0, "Negotiate(): No Payload in Src Profile", 0, 0, 0);
+            pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpIntervalOnActive());
         }
     }
 
-    IMS_TRACE_D("Negotiate() Ended - Negotiated srcIndex[%d], destIndex[%d]",
-            pLocalProfile->GetNegotiatedPayloadIndex(), pPeerProfile->GetNegotiatedPayloadIndex(),
-            0);
-
-    return ret;
+    return IMS_TRUE;
 }
 
 PRIVATE
-void VideoProfileNegotiator::ResetNegotiatedProfile(
-        IN const VideoProfile* pLocalProfile, OUT VideoProfile** pNegotiatedProfile)
+void VideoProfileNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
+        IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
+        OUT VideoProfile** pNegotiatedProfile)
 {
-    if (pLocalProfile == IMS_NULL)
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "ResetNegotiatedProfile(): invalid argument", 0, 0, 0);
         return;
     }
 
-    **pNegotiatedProfile = *pLocalProfile;
+    if (bPeerPreferred)
+    {
+        **pNegotiatedProfile = *pPeerProfile;
+        (*pNegotiatedProfile)->SetIpAddress(pLocalProfile->GetIpAddress());
+    }
+    else
+    {
+        **pNegotiatedProfile = *pLocalProfile;
+    }
 
     (*pNegotiatedProfile)->SetDataPort(0);
-    (*pNegotiatedProfile)->SetNegotiatedPayloadIndex(MEDIA_DIRECTION_INVALID);
+    (*pNegotiatedProfile)->SetNegotiatedPayloadIndex(-1);
 }
 
 PRIVATE
@@ -226,8 +213,7 @@ void VideoProfileNegotiator::NegotiateTransportType(OUT VideoProfile* pNegotiate
 PRIVATE
 IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile,
         IN VideoProfile* pPeerProfile, OUT VideoProfile* pNegotiatedProfile,
-        OUT VideoProfile::Payload** pNegotiatedPayload, OUT IMS_SINT32* nNegotiatedMaxFrameRate,
-        OUT IMS_SINT32* nNegotiatedMaxAs)
+        OUT IMS_SINT32* nNegotiatedMaxFrameRate, OUT IMS_SINT32* nNegotiatedMaxAs)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -314,25 +300,27 @@ IMS_BOOL VideoProfileNegotiator::NegotiatePayload(IN VideoProfile* pLocalProfile
     IMS_TRACE_D(
             "NegotiatePayload(): size[%d]", pNegotiatedProfile->GetPayloadList().GetSize(), 0, 0);
 
+    VideoProfile::Payload* pNegotiatedPayload = IMS_NULL;
+
     if (pNegotiatedProfile->GetPayloadList().GetSize() > 0)
     {
-        *pNegotiatedPayload = pNegotiatedProfile->GetPayloadAt(0);
+        pNegotiatedPayload = pNegotiatedProfile->GetPayloadAt(0);
     }
     else  // negotiated payload is not exist, use temporary payload
     {
-        *pNegotiatedPayload = SetClosestPayload(
+        pNegotiatedPayload = SetClosestPayload(
                 pLocalProfile, pNegotiatedProfile, pTempPayload, pMatchedPeerPayload);
-
-        nLocalIndex = FindPayloadIndexFromProfile(pLocalProfile, pTempPayload);
-        nPeerIndex = FindPayloadIndexFromProfile(pPeerProfile, pMatchedPeerPayload);
     }
 
-    if (*pNegotiatedPayload == IMS_NULL)
+    if (pNegotiatedPayload == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    NegotiateRtcpFb(pNegotiatedProfile, pLocalPayload, pPeerPayload, *pNegotiatedPayload);
+    nLocalIndex = FindPayloadIndexFromProfile(pLocalProfile, pTempPayload);
+    nPeerIndex = FindPayloadIndexFromProfile(pPeerProfile, pMatchedPeerPayload);
+
+    NegotiateRtcpFb(pNegotiatedProfile, pLocalPayload, pPeerPayload, pNegotiatedPayload);
 
     if (SetNegotiatedPayloadIndex(pLocalProfile, pPeerProfile, nLocalIndex, nPeerIndex))
     {

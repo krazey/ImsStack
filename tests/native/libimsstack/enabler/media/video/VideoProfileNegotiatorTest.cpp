@@ -197,9 +197,30 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateNoCommonCodec)
             IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
 
     // Assert
-    EXPECT_FALSE(bResult);  // Negotiation itself might succeed but bResult in an unusable pProfile
-    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 0);  // No common pPayload found
-    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 1);  // Peer payload
+    EXPECT_EQ(m_pNegotiatedProfile->GetIpAddress(), m_pLocalProfile->GetIpAddress());
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), m_pPeerProfile->GetDirection());
+    EXPECT_NE(m_pNegotiatedProfile->GetRtcpInterval(), 0);
+}
+
+TEST_F(VideoProfileNegotiatorTest, NegotiateNoPeerPayloads)
+{
+    // Arrange: Add incompatible payloads
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadList().GetSize(), 0);  // No payloads
+    EXPECT_EQ(m_pNegotiatedProfile->GetIpAddress(), m_pLocalProfile->GetIpAddress());
+    EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), m_pPeerProfile->GetDirection());
+    EXPECT_NE(m_pNegotiatedProfile->GetRtcpInterval(), 0);
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiatePeerPortZero)

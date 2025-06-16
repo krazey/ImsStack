@@ -66,14 +66,14 @@ public:
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
 
 private:
-    void ResetNegotiatedProfile(
-            IN const VideoProfile* pLocalProfile, OUT VideoProfile** pNegotiatedProfile);
+    void ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred, IN VideoProfile* pLocalProfile,
+            IN VideoProfile* pPeerProfile, OUT VideoProfile** pNegotiatedProfile);
     void NegotiateAvpf(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             OUT VideoProfile* pNegotiatedProfile);
     void NegotiateTransportType(OUT VideoProfile* pNegotiatedProfile);
     IMS_BOOL NegotiatePayload(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
-            OUT VideoProfile* pNegotiatedProfile, OUT VideoProfile::Payload** pNegotiatedPayload,
-            OUT IMS_SINT32* nNegotiatedMaxFrameRate, OUT IMS_SINT32* nNegotiatedMaxAs);
+            OUT VideoProfile* pNegotiatedProfile, OUT IMS_SINT32* nNegotiatedMaxFrameRate,
+            OUT IMS_SINT32* nNegotiatedMaxAs);
     IMS_BOOL NegotiateAvc(IN VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload,
             IN IMS_UINT32 nLocalIndex, IN VideoProfile* pLocalProfile,
