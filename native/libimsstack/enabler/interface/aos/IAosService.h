@@ -97,6 +97,7 @@ public:
     virtual void NotifyPreciseCallState(IN IMS_SINT32 nState) = 0;
     virtual void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) = 0;
     virtual void NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected) = 0;
+    virtual void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo) = 0;
 
     /**
      * Notify an emergency callback mode changed information by AosService (Java)
@@ -256,6 +257,13 @@ public:
      */
     virtual IMS_BOOL IsSupportCapabilitiesForNetwork(
             AosNetworkType eNetworkType, AosCapability eCapability) = 0;
+
+    /**
+     * Returns the NAS null security algorithm.
+     *
+     * @return Returns whether the NAL security algorithm is null or not.
+     */
+    virtual IMS_BOOL IsNasSecurityAlgorithmNull() = 0;
 };
 
 /**

@@ -80,6 +80,7 @@ public:
     void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
     void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
     void NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected) override;
+    void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo);
 
     // Native -> Java
     IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
@@ -103,6 +104,7 @@ public:
     IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;
     IMS_BOOL IsSupportCapabilitiesForNetwork(
             AosNetworkType eNetworkType, AosCapability eCapability) override;
+    IMS_BOOL IsNasSecurityAlgorithmNull() override;
 
     inline void NotifyJniEnablerSet() override {}
 
@@ -125,6 +127,7 @@ private:
 private:
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
+    IMS_BOOL m_bNullNasSecAlgo;
 
     // <AosNetworkType, AosCapability>
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;

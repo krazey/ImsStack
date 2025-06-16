@@ -945,7 +945,15 @@ PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
             m_piContext->GetNetTracker()->IsEmergencyAttach())
     {
         A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: emergency attach", 0, 0, 0);
-        if (!GET_N_CONFIG(m_nSlotId)->IsSupportERegWhenEAttachWithValidSim())
+        if (GET_N_CONFIG(m_nSlotId)->IsSupportERegWhenEAttachWithValidSim())
+        {
+            IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+            if (piService == IMS_NULL || piService->IsNasSecurityAlgorithmNull())
+            {
+                return IMS_TRUE;
+            }
+        }
+        else
         {
             return IMS_TRUE;
         }
@@ -959,6 +967,8 @@ PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
             return IMS_TRUE;
         }
     }
+
+    A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: it's not fake condition", 0, 0, 0);
 
     return IMS_FALSE;
 }

@@ -1762,6 +1762,18 @@ TEST_F(AosERegistrationTest, FakeModeConditionIfEmergencyLteAttach)
     EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
 }
 
+TEST_F(AosERegistrationTest, FakeModeConditionIfEmergencyLteAttachWithNullSecuAlgoAndSupportEReg)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportERegWhenEAttachWithValidSim())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosService, IsNasSecurityAlgorithmNull()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosERegistration->IsFakeModeCondition());
+}
+
 TEST_F(AosERegistrationTest, NotFakeModeConditionIfEmergencyLteAttachAndEpdgConnected)
 {
     // GIVEN
@@ -1782,6 +1794,7 @@ TEST_F(AosERegistrationTest, NotFakeModeConditionIfEmergencyLteAttachAndSupportE
     ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportERegWhenEAttachWithValidSim())
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosService, IsNasSecurityAlgorithmNull()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_FALSE));
 

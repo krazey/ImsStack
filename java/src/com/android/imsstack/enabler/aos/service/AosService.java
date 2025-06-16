@@ -447,6 +447,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
+    public void notifyNasSecurityAlgorithmChanged(boolean isNullAlgo) {
+        ImsLog.d(mSlotId, "AosService: notifyNasSecurityAlgorithmChanged - null=" + isNullAlgo);
+        sendRequest(IIAosService.J2N_NOTIFY_NAS_ALGORITHM_CHANGED, isNullAlgo);
+    }
+
+    @Override
     public void onSimStateChanged() {
         ImsLog.d(mSlotId, "AosService: onSimStateChanged");
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);

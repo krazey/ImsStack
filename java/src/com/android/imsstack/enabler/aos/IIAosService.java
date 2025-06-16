@@ -65,6 +65,7 @@ public interface IIAosService {
     int J2N_NOTIFY_WIFI_SETTING = EVENT_J2N_INFO + 23;
     /// IAosInfo(Java) -> IAosServicePhoneListener(Native)
     int J2N_NOTIFY_VOPS_STATE_CHANGED = EVENT_J2N_INFO + 24;
+    int J2N_NOTIFY_NAS_ALGORITHM_CHANGED = EVENT_J2N_INFO + 25;
 
     /**
      * Messages from native layer to java layer

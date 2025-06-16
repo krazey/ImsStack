@@ -231,6 +231,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyEmergencyCallbackModeChanged(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_NAS_ALGORITHM_CHANGED:
+            NotifyNasSecurityAlgorithmChanged(objParcel);
+            break;
+
         default:
             break;
     }
@@ -567,6 +571,16 @@ void JniAosService::NotifyEmergencyCallbackModeChanged(IN const android::Parcel&
     {
         piAosService->NotifyEmergencyCallbackModeChanged(
                 objParcel.readInt32(), objParcel.readInt32(), objParcel.readInt64());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyNasSecurityAlgorithmChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyNasSecurityAlgorithmChanged(objParcel.readInt32());
     }
 }
 

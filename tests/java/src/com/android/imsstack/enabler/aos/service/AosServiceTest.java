@@ -577,6 +577,16 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void notifyNasSecurityAlgorithmChanged() {
+        byte[] nasSecurityAlgoData = createBytes(IIAosService.J2N_NOTIFY_NAS_ALGORITHM_CHANGED,
+                false);
+
+        mAosService.notifyNasSecurityAlgorithmChanged(false);
+
+        verify(mMockJniIms).sendData(mNativeObject, nasSecurityAlgoData);
+    }
+
+    @Test
     public void onSimStateChanged_simLoaded() {
         byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED.getValue());

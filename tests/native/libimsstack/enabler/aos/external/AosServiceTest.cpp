@@ -1009,6 +1009,20 @@ TEST_F(AosServiceTest, NotifyCarrierSignalPcoValueChanged)
     m_pAosService->NotifyCarrierSignalPcoValueChanged(5);
 }
 
+TEST_F(AosServiceTest, ShouldReturnTrueWhenWhenNasSecurityAlgorithmChanged)
+{
+    m_pAosService->NotifyNasSecurityAlgorithmChanged(1);
+
+    EXPECT_TRUE(m_pAosService->IsNasSecurityAlgorithmNull());
+}
+
+TEST_F(AosServiceTest, ShouldReturnFalseWhenWhenNasSecurityAlgorithmChanged)
+{
+    m_pAosService->NotifyNasSecurityAlgorithmChanged(0);
+
+    EXPECT_FALSE(m_pAosService->IsNasSecurityAlgorithmNull());
+}
+
 TEST_F(AosServiceTest, NotifyRegistered)
 {
     const ImsList<AString> objFeatureTags;

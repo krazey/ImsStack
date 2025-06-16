@@ -46,6 +46,8 @@ public class AosFactory {
             new ConcurrentHashMap<>(DeviceConfig.getSupportedSimCount());
     private final Map<Integer, AosDebug> mAosDebugs =  new ConcurrentHashMap<>(
             DeviceConfig.getSupportedSimCount());
+    private final Map<Integer, AosTelephonyCallbackTracker> mAosTelephonyCallbackTrackers =
+            new ConcurrentHashMap<>(DeviceConfig.getSupportedSimCount());
 
     private AosFactory() { }
 
@@ -91,6 +93,11 @@ public class AosFactory {
             aosDebug.init();
             mAosDebugs.put(slotId, aosDebug);
         }
+
+        AosTelephonyCallbackTracker aosTelephonyCallbackTracker =
+                new AosTelephonyCallbackTracker(slotId);
+        aosTelephonyCallbackTracker.init();
+        mAosTelephonyCallbackTrackers.put(slotId, aosTelephonyCallbackTracker);
     }
 
     /**
@@ -100,6 +107,12 @@ public class AosFactory {
      */
     public void cleanup(int slotId) {
         ImsLog.d(slotId, "");
+
+        AosTelephonyCallbackTracker aosTelephonyCallbackTracker =
+                mAosTelephonyCallbackTrackers.remove(slotId);
+        if (aosTelephonyCallbackTracker != null) {
+            aosTelephonyCallbackTracker.cleanup();
+        }
 
         AosDebug aosDebug = mAosDebugs.remove(slotId);
         if (aosDebug != null) {

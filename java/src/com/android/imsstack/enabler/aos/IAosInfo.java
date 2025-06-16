@@ -187,6 +187,14 @@ public interface IAosInfo {
             EmergencyCallbackModeType type, EmergencyCallbackModeState state, long duration);
 
     /**
+     * Called to notify the change of NAS security algorithm.
+     *
+     * @param isNullAlgo {@code isNullAlgo} {@code true} if NAS security algorithm is null,
+     * {@code false} if it's not null.
+     */
+    void notifyNasSecurityAlgorithmChanged(boolean isNullAlgo);
+
+    /**
      * Represents the preferred voice network for roaming.
      */
     enum RoamingPreferredVoiceNetwork {

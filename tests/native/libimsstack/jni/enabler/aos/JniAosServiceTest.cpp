@@ -471,6 +471,21 @@ TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyCrossSimStatus)
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyNasSecurityAlgorithmChanged)
+{
+    // GIVEN
+    m_objParcel.writeInt32(IIAosService::J2N_NOTIFY_NAS_ALGORITHM_CHANGED);
+    m_objParcel.writeInt32(1);
+    m_objParcel.setDataPosition(0);
+
+    EXPECT_CALL(m_objMockIAosService, NotifyNasSecurityAlgorithmChanged(_));
+
+    // WHEN
+    m_pJniAosService->SendData(m_objParcel);
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyEmergencyCallbackModeChanged)
 {
     // GIVEN

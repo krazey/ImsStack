@@ -36,6 +36,7 @@ AosService::AosService(IN IMS_SINT32 nSlotId) :
         m_objAosServiceSettingListeners(ImsList<IAosServiceSettingListener*>()),
         m_objAosServicePhoneListeners(ImsList<IAosServicePhoneListener*>()),
         m_nSlotId(nSlotId),
+        m_bNullNasSecAlgo(IMS_FALSE),
         m_objCapabilities(ImsMap<IMS_UINT32, IMS_UINT32>())
 {
     m_strTag.Sprintf("%d", m_nSlotId);
@@ -659,6 +660,14 @@ PUBLIC VIRTUAL void AosService::NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected)
     }
 }
 
+PUBLIC VIRTUAL void AosService::NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo)
+{
+    A_IMS_TRACE_I(
+            AOSTAG, "NotifyNasSecurityAlgorithmChanged :: nIsNullAlgo(%d)", nIsNullAlgo, 0, 0);
+
+    m_bNullNasSecAlgo = TO_BOOLEAN(nIsNullAlgo);
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN IMS_SINT32 nRegType,
         IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
         IN const ImsList<AString>& objFeatureTags)
@@ -828,6 +837,11 @@ PUBLIC VIRTUAL IMS_BOOL AosService::IsSupportCapabilitiesForNetwork(
     return (GetCapabilitiesForNetwork(eNetworkType) & static_cast<IMS_UINT32>(eCapability)) > 0
             ? IMS_TRUE
             : IMS_FALSE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosService::IsNasSecurityAlgorithmNull()
+{
+    return m_bNullNasSecAlgo;
 }
 
 PUBLIC GLOBAL AString AosService::PrintCapabilities(
