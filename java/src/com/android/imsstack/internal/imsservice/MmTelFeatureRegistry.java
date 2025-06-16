@@ -56,6 +56,10 @@ public class MmTelFeatureRegistry {
         return ImsService.CAPABILITY_TERMINAL_BASED_CALL_WAITING;
     }
 
+    public static @ImsServiceCapability long getSimultaneousCallingCapabilities() {
+        return ImsService.CAPABILITY_SUPPORTS_SIMULTANEOUS_CALLING;
+    }
+
     /**
      * Notifies the components who monitor this class that any states have changed.
      */

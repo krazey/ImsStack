@@ -100,11 +100,8 @@ public class ImsService extends android.telephony.ims.ImsService {
         //return CAPABILITY_SIP_DELEGATE_CREATION;
         logi(this, "getImsServiceCapabilities");
         return (super.getImsServiceCapabilities()
-                | MmTelFeatureRegistry.getTerminalBasedServiceCapabilities());
-
-        // TODO: Replace above return statement with below for Simultaneous calling support.
-        // return (super.getImsServiceCapabilities() |
-        //         ImsService.CAPABILITY_SUPPORTS_SIMULTANEOUS_CALLING);
+                | MmTelFeatureRegistry.getTerminalBasedServiceCapabilities()
+                | MmTelFeatureRegistry.getSimultaneousCallingCapabilities());
     }
 
     @Override
