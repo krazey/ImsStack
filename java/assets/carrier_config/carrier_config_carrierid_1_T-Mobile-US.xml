@@ -31,6 +31,8 @@
     <int name="ims.location_gps_searching_duration_sec_int" value="20"/>
     <int name="ims.location_geodetic_shape_int" value="1"/>
 
+    <boolean name="imsvoice.ignore_subsequent_sdp_answer_in_preview_mode_bool" value="false"/>
+
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
     <boolean name="ims.required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>

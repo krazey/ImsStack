@@ -350,6 +350,7 @@
     <int name="ims.location_geodetic_shape_int" value="0"/>
     <boolean name="ims.cellular_network_info_utc_offset_enabled_bool" value="false"/>
     <string name="ims.retransmission_allowed_of_geolocation_pidf_string">no</string>
+    <boolean name="imsvoice.ignore_subsequent_sdp_answer_in_preview_mode_bool" value="true"/>
 
     <!-- Aos -->
     <boolean name="ims.b2c_call_composer_feature_tag_in_reg_contact_bool" value="true"/>

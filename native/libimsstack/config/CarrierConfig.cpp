@@ -806,6 +806,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR
 // }
 // Public carrier-config - ends
 
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "ignore_subsequent_sdp_answer_in_preview_mode_bool";
+
 // Aos
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "ignore_vops_for_volte_enable_bool";
