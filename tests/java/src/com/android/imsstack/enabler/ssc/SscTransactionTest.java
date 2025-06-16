@@ -799,6 +799,30 @@ public class SscTransactionTest {
     }
 
     @Test
+    public void startPutTransaction_httpErrorResponsePreconditionFailure() {
+        int httpErrorResponse = SscConstant.HTTP_PRECONDITION_FAILURE;
+        String xmlBody = createXmlStream();
+        SscServiceData updateData = getUpdateData(SscConstant.CONDITION_CFU,
+                SscConstant.ACTION_ACTIVATION, "+1234567890", 0);
+
+        when(mMockSscXmlGov.createXmlStream(eq(updateData))).thenReturn(xmlBody);
+        when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_PUT,
+                mDefaultRequestUri, mDefaultXui, xmlBody, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS))
+                .thenReturn(httpErrorResponse);
+
+        mSscTransaction.startPutTransaction(updateData);
+        sleepToWaitThreadRun();
+        waitThreadWorkFinished();
+
+        verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_PUT,
+                mDefaultRequestUri, mDefaultXui, xmlBody, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
+        verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
+        verify(mMockSscAuthAgent).setETag("");
+
+        verifyTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CF, true, false);
+    }
+
+    @Test
     public void startPutTransaction_success() {
         int httpSuccessResponse = SscConstant.HTTP_OK;
         String xmlBody = createXmlStream();
