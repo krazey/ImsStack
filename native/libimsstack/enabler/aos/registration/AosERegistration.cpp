@@ -535,6 +535,17 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStopRetryTimerExpired()
     }
 }
 
+PROTECTED VIRTUAL void AosERegistration::ProcessModeTimerExpired()
+{
+    StopTimer(TIMER_MODE);
+
+    if (IsInCallbackMode())
+    {
+        ProcessUnpredictableFailure();
+        ClearCbm();
+    }
+}
+
 PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
 {
     StopTimer(TIMER_TRANSACTION);
@@ -791,6 +802,8 @@ PROTECTED VIRTUAL void AosERegistration::ClearCbm()
         return;
     }
 
+    StopTimer(TIMER_MODE);
+
     m_pEModeInfo->SetEcbm(IMS_FALSE);
     m_pEModeInfo->SetScbm(IMS_FALSE);
     m_pEModeInfo->SetCbmBeginTime(0);
@@ -829,6 +842,7 @@ PROTECTED void AosERegistration::CallbackModeChanged(
 
         m_pEModeInfo->SetCbmDuration(nDuration);
         m_pEModeInfo->SetCbmBeginTime(IMS_SYS_GetTimeInSeconds());
+        StartTimer(TIMER_MODE, nDuration * 1000);
 
         if (GetState() != STATE_OFFLINE)
         {

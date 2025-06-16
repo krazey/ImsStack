@@ -87,6 +87,7 @@ using ::testing::ReturnRef;
     using Base::ProcessDefaultFlowRecovery_Start;                            \
     using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
     using Base::ProcessDefaultFlowRecovery_Update;                           \
+    using Base::ProcessModeTimerExpired;                                     \
     using Base::ProcessNormalDefaultFlowRecovery_Start;                      \
     using Base::ProcessRearrangePcscf;                                       \
     using Base::ProcessReinitiateWithRegState;                               \
@@ -150,6 +151,8 @@ public:
     inline void SetConsecutiveFailure(IN IMS_UINT32 nValue) { m_nConsecutiveFailure = nValue; }
 
     inline ITimer* GetTransactionTimer() { return m_piTransactionTimer; }
+
+    inline ITimer* GetModeTimer() { return m_piModeTimer; }
 
     inline void SetRegistration(IN IRegistration* piRegistration)
     {
@@ -1196,6 +1199,20 @@ TEST_F(AosERegistrationTest, UpdateFailedWithOthers)
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
 }
 
+TEST_F(AosERegistrationTest, ClearCbmWhenModeTimerExpired)
+{
+    m_pAosERegistration->StartTimer(TestAosERegistration::TIMER_MODE, 3000);
+    m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
+    m_pAosERegistration->GetEModeInfo()->SetScbm(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessModeTimerExpired();
+
+    EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
+    EXPECT_EQ(m_pAosERegistration->GetModeTimer(), nullptr);
+}
+
 TEST_F(AosERegistrationTest, TransactionTimerExpiredWhenNotRegisteringState)
 {
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGSTOP);
@@ -1619,7 +1636,7 @@ TEST_F(AosERegistrationTest, CallbackModeChangedWhenEmergencyCallbackModeNotSupp
     EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
 }
 
-TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForCallType)
+TEST_F(AosERegistrationTest, EcbmIsTrueAndTimerIsStartedWhenCallbackModeChangedAsStartForCallType)
 {
     m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     ON_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
@@ -1630,9 +1647,10 @@ TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForCallType)
 
     EXPECT_TRUE(m_pAosERegistration->GetEModeInfo()->IsEcbm());
     EXPECT_FALSE(m_pAosERegistration->GetEModeInfo()->IsScbm());
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("StartTimer"), 1);
 }
 
-TEST_F(AosERegistrationTest, CallbackModeChangedAsStartForSmsTypeDuringRegisteredState)
+TEST_F(AosERegistrationTest, ScbmIsTrueCallbackModeChangedAsStartForSmsTypeDuringRegisteredState)
 {
     m_pAosERegistration->SetEModeInfo(new EmergencyModeInfo());
     m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
