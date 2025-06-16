@@ -403,6 +403,10 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             UpdateStopRetryTimer(RETRY_DEFAULT_WAIT_TIME);
             break;
 
+        case CMD_REINITIATE_REG_WITH_RETRY_AFTER:
+            ReinitiateRegistration(nReason);
+            break;
+
         default:
             break;
     }
@@ -1392,6 +1396,21 @@ void AosRegistration::UpdateStopRetryTimer(IN IMS_UINT32 nRetryTime)
     ClearRetryCount(IMS_TRUE);
 
     StartTimer(TIMER_STOP_RETRY, nRetryTime * 1000);
+}
+
+PROTECTED
+void AosRegistration::ReinitiateRegistration(IN IMS_UINT32 nRetryAfterSec)
+{
+    A_IMS_TRACE_D(REGID, "ReinitiateRegistration :: RA = (%d)s", nRetryAfterSec, 0, 0);
+
+    if (GetImsRegType() != IMS_REG_TYPE_NORMAL)
+    {
+        return;
+    }
+
+    DestroyEx();
+    ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+    StartTimer(TIMER_OFFLINE_RECOVER, nRetryAfterSec * 1000);
 }
 
 PROTECTED

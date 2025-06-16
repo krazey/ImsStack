@@ -4632,6 +4632,31 @@ TEST_F(AosHandleTest, ShouldSetRegToNexePcscfRequestedToTrueIfMtcService)
     EXPECT_TRUE(m_pAosHandle->IsRegToNextPcscfRequested());
 }
 
+TEST_F(AosHandleTest, RequestToAppWithRegReInitiateWhenReinitiateRegWithoutAfterSec)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::REGISTER_REINITIATE, _))
+            .Times(1);
+
+    // WHEN
+    m_pAosHandle->ReinitiateRegistration(0);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosHandleTest, RequestToRegWithReInitiateRegWithRetryAfterWhenReinitiateRegWithAfterSec)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_REINITIATE_REG_WITH_RETRY_AFTER, _))
+            .Times(1);
+
+    // WHEN
+    m_pAosHandle->ReinitiateRegistration(30);
+
+    // THEN: The GIVEN condition should be met.
+}
+
 TEST_F(AosHandleTest, CallTracker_StateChanged_Test)
 {
     m_pAosHandle->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);

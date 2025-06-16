@@ -128,6 +128,7 @@ using ::testing::SetArgReferee;
     using Base::NConfiguration_NotifyConfigChanged;               \
     using Base::NetTracker_StatusChanged;                         \
     using Base::NotifyFailureWithImsReason;                       \
+    using Base::ReinitiateRegistration;                           \
     using Base::SetRetryTimeToProperty;                           \
     using Base::OnMessage;                                        \
     using Base::ProcessForbiddenFailed;                           \
@@ -1783,6 +1784,30 @@ TEST_F(AosRegistrationTest, DoNotSetRetryTimeToPropIfNotCdmalessConfigured)
     EXPECT_CALL(m_objUtilService.GetMockSystemProperty(), Set(_, _)).Times(0);
 
     m_pAosRegistration->SetRetryTimeToProperty(60);
+}
+
+TEST_F(AosRegistrationTest, DestroyAndStartOfflineRecoveryTimerWhenReinitiateRegistration)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->ReinitiateRegistration(30);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest,
+        DoNotStartOfflineRecoveryTimerWhenReinitiateRegistrationIfNotNormalRegType)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    m_pAosRegistration->ReinitiateRegistration(30);
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
 TEST_F(AosRegistrationTest, DoNotSetRetryTimeToPropIfNotNormalRegType)

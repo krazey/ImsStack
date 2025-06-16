@@ -472,7 +472,18 @@ PUBLIC VIRTUAL void AosHandle::RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableT
             ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY, nUnavailableTimeForCurrentPcscf);
 }
 
-PUBLIC VIRTUAL void AosHandle::ReinitiateRegistration(IN IMS_UINT32 /*nAfterSec*/) {}
+PUBLIC VIRTUAL void AosHandle::ReinitiateRegistration(IN IMS_UINT32 nAfterSec)
+{
+    if (nAfterSec > 0)
+    {
+        m_piAppContext->GetRegistration()->RequestCmd(
+                IAosRegistration::CMD_REINITIATE_REG_WITH_RETRY_AFTER, nAfterSec);
+    }
+    else
+    {
+        m_piAppContext->GetApp()->RequestCmd(ImsAosControl::REGISTER_REINITIATE);
+    }
+}
 
 PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
