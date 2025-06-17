@@ -998,6 +998,18 @@ TEST_F(AosHandleTest, ShouldNotifyECallInitiationWhenMtcRequestedEmergencyRegist
     EXPECT_TRUE(m_pAosHandle->IsEmergencyInitiated());
 }
 
+TEST_F(AosHandleTest, ShouldSetRegToNextPcscfRequestedIfMtcSendsControlRegToNextPcscfWithDiscovery)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::MTC);
+
+    // WHEN
+    m_pAosHandle->Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+
+    // THEN
+    EXPECT_TRUE(m_pAosHandle->IsRegToNextPcscfRequested());
+}
+
 TEST_F(AosHandleTest, ShouldNotifyESmsInitiationWhenMtsRequestedEmergencyRegisterStartWithWlan)
 {
     // GIVEN

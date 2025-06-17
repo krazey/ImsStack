@@ -355,17 +355,30 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
 {
     A_IMS_TRACE_I(APPPROFILE, "Control :: Type[%d]", nType, 0, 0);
 
-    if (nType == ImsAosControl::REGISTER_START || nType == ImsAosControl::REGISTER_START_WITH_WLAN)
+    switch (nType)
     {
-        if (IsEmergencyService())
-        {
-            InitializeServiceFeature();
-
-            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+        case ImsAosControl::REGISTER_START:  // FALL-THROUGH
+        case ImsAosControl::REGISTER_START_WITH_WLAN:
+            if (IsEmergencyService())
             {
-                NotifyEmergencyInitiated();
+                InitializeServiceFeature();
+
+                if (GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+                {
+                    NotifyEmergencyInitiated();
+                }
             }
-        }
+            break;
+
+        case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
+            if (m_nServiceType == ImsAosService::MTC)
+            {
+                m_bRegToNextPcscfRequested = IMS_TRUE;
+            }
+            break;
+
+        default:
+            break;
     }
 
     return m_piAppContext->GetApp()->RequestCmd(nType);
