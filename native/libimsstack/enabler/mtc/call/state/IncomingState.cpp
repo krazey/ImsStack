@@ -87,8 +87,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
         }
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
@@ -136,8 +135,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
         }
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* piSession)
@@ -161,6 +159,13 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
+    if (m_objContext.GetMessageUtils().IsResponseExist(
+                &pSession->GetISession(), SipStatusCode::SC_180))
+    {
+        m_objContext.GetUiNotifier().SendIncomingCallReceived();
+        return CallStateName::ALERTING;
+    }
+
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
     {
@@ -170,8 +175,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
         }
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionRprDeliveryFailed(IN ISession* /* piSession*/)
@@ -233,8 +237,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
         return GetStateName();
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
@@ -274,8 +277,7 @@ PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
             !m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        m_objContext.GetUiNotifier().SendIncomingCallReceived();
-        return CallStateName::ALERTING;
+        return OnReadyToAlert();
     }
 
     return GetStateName();

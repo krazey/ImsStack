@@ -206,8 +206,10 @@ TEST_F(AlertingStateTest, OnExitStopsKeepAlive)
 }
 
 TEST_F(AlertingStateTest,
-        HandleUserAlertSendsProvisonalResponseReliablyAndStartAlertingTimerIf100relIsOnlyInSupprtedHeader)
+        HandleUserAlertSendsProvisonalResponseReliablyAndStartAlertingTimerIf100relIsOnlyInSupportedHeader)
 {
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_FALSE));
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
             .WillByDefault(Return(nAnyTime));
@@ -227,6 +229,8 @@ TEST_F(AlertingStateTest,
 
 TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFails)
 {
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_FALSE));
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
             .WillByDefault(Return(nAnyTime));
@@ -246,6 +250,8 @@ TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFail
 TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseReliablyIf100relIsInSupprtedAndRequireHeader)
 {
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_FALSE));
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
             .WillByDefault(Return(nAnyTime));
@@ -266,6 +272,8 @@ TEST_F(AlertingStateTest,
 TEST_F(AlertingStateTest,
         HandleUserAlertSendsProvisonalResponseWithReliableParamAsTrueIfConfigurationOn)
 {
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_FALSE));
     IMS_SINT32 nAnyTime = 60;
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT))
             .WillByDefault(Return(nAnyTime));
@@ -281,6 +289,19 @@ TEST_F(AlertingStateTest,
             GetBoolean(ConfigVoice::KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
+}
+
+TEST_F(AlertingStateTest, HandleUserAlertDoesNotSendProvisonalResponseIf180IsAlreadySent)
+{
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(_, _)).Times(0);
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
 }

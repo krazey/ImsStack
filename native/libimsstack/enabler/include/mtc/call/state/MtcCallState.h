@@ -177,6 +177,7 @@ public:
     };
 
 protected:
+    CallStateName OnReadyToAlert();
     inline virtual CallStateName HandleSrvccStarted() { return GetStateName(); }
     virtual CallStateName SendUpdateBySrvcc(IN UpdateType eType);
     virtual CallStateName HandleAosConnected();

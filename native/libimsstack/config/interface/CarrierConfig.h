@@ -853,6 +853,7 @@ public:
         static const IMS_CHAR KEY_VOLTE_HYS_TIME_SEC_INT[];
         // Mtc
         static const IMS_CHAR KEY_18X_TIMER_MILLIS_INT[];
+        static const IMS_CHAR KEY_REQUIRE_PRACK_FOR_ALERT_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL[];
         static const IMS_CHAR KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[];
         static const IMS_CHAR KEY_CONFERENCE_SIP_FLOW_ORDER_INT[];

@@ -1273,6 +1273,8 @@ TEST_F(IdleStateTest, TerminateInvokesSendStartFailed)
 
 TEST_F(IdleStateTest, OnAttachedRejectsIfSdpOaFailed)
 {
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));
@@ -1292,6 +1294,8 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSdpOaFailed)
 
 TEST_F(IdleStateTest, OnAttachedRejectsIfNoCodecMatched)
 {
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));
@@ -1313,6 +1317,8 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfNoCodecMatched)
 
 TEST_F(IdleStateTest, OnAttachedRejectsIfInvalidDescriptor)
 {
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));
@@ -1334,6 +1340,8 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfInvalidDescriptor)
 
 TEST_F(IdleStateTest, OnAttachedRejectsIfSendProvisionalResponseFailed)
 {
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));
@@ -1358,6 +1366,8 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSendProvisionalResponseFailed)
 
 TEST_F(IdleStateTest, OnAttachedTransitsIncomingState)
 {
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));
@@ -1385,6 +1395,50 @@ TEST_F(IdleStateTest, OnAttachedTransitsIncomingState)
 
 TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRprNotSupported)
 {
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_IDLE));
+    EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("no100rel")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
+
+    EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
+}
+
+TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRequirePrackAndRprNotSupported)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
+    EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("no100rel")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
+
+    EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
+}
+
+TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceived)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
             .WillByDefault(Return(&objMessage));

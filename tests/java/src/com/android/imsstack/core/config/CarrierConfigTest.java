@@ -87,7 +87,7 @@ public class CarrierConfigTest {
         assertFalse(mCarrierConfig.getBoolean(CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
         assertNull(mCarrierConfig.getBooleanArray(KEY_TEST_BOOL_ARRAY));
         assertEquals(-1, mCarrierConfig.getInt(
-                CarrierConfig.ImsVoice.KEY_SIP_18X_TIMER_MILLIS_INT));
+                CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT));
         assertNull(mCarrierConfig.getIntArray(
                 CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY));
         assertNull(mCarrierConfig.getString(
@@ -111,7 +111,7 @@ public class CarrierConfigTest {
         assertTrue(Arrays.equals(TEST_BOOL_LIST,
                 mCarrierConfig.getBooleanArray(KEY_TEST_BOOL_ARRAY)));
         assertEquals(SIP_18X_TIMER_MILLIS, mCarrierConfig.getInt(
-                CarrierConfig.ImsVoice.KEY_SIP_18X_TIMER_MILLIS_INT));
+                CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT));
         assertTrue(Arrays.equals(PCSCF_DISCOVERY_METHOD_LIST, mCarrierConfig.getIntArray(
                 CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY)));
         assertEquals(CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING, mCarrierConfig.getString(
@@ -247,7 +247,7 @@ public class CarrierConfigTest {
                 CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
         assertEquals("null", CarrierConfig.getValue(config, KEY_TEST_BOOL_ARRAY));
         assertEquals("-1", CarrierConfig.getValue(config,
-                CarrierConfig.ImsVoice.KEY_SIP_18X_TIMER_MILLIS_INT));
+                CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT));
         assertEquals("null", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY));
         assertEquals(null, CarrierConfig.getValue(config,
@@ -267,7 +267,7 @@ public class CarrierConfigTest {
                 CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
         assertNotEquals("null", CarrierConfig.getValue(config, KEY_TEST_BOOL_ARRAY));
         assertNotEquals("-1", CarrierConfig.getValue(config,
-                CarrierConfig.ImsVoice.KEY_SIP_18X_TIMER_MILLIS_INT));
+                CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT));
         assertNotEquals("null", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY));
         assertNotEquals(null, CarrierConfig.getValue(config,
@@ -436,7 +436,7 @@ public class CarrierConfigTest {
         b.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, true);
         b.putBoolean(CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL, true);
         b.putBooleanArray(KEY_TEST_BOOL_ARRAY, TEST_BOOL_LIST);
-        b.putInt(CarrierConfig.ImsVoice.KEY_SIP_18X_TIMER_MILLIS_INT, SIP_18X_TIMER_MILLIS);
+        b.putInt(CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT, SIP_18X_TIMER_MILLIS);
         b.putIntArray(CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY,
                 PCSCF_DISCOVERY_METHOD_LIST);
         b.putString(CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING,

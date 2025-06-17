@@ -506,6 +506,29 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnConnectionFailed(IN
     return GetStateName();
 }
 
+PROTECTED
+CallStateName MtcCallState::OnReadyToAlert()
+{
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+    {
+        m_objContext.GetUiNotifier().SendIncomingCallReceived();
+        return CallStateName::ALERTING;
+    }
+
+    if (!IsRprRequired())
+    {
+        m_objContext.GetUiNotifier().SendIncomingCallReceived();
+        return CallStateName::ALERTING;
+    }
+
+    if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE, IMS_TRUE) == IMS_FAILURE)
+    {
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
+    }
+    return CallStateName::INCOMING;
+}
+
 PROTECTED VIRTUAL CallStateName MtcCallState::SendUpdateBySrvcc(IN UpdateType eType)
 {
     // Not checking the state because EstablishedState overrides this and UpdatingState will put

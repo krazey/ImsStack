@@ -300,8 +300,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     }
     else
     {
-        m_objContext.GetUiNotifier().SendIncomingCallReceived();
-        return CallStateName::ALERTING;
+        return OnReadyToAlert();
     }
 
     StartEpsFallbackWatchdogIfNeeded(*piSession->GetPreviousResponse(IMessage::SESSION_START));
@@ -408,8 +407,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
         return RejectIncomingAndToTerminating(CallReasonInfo(eCallReason));
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PRIVATE

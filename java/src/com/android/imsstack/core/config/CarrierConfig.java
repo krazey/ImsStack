@@ -1041,8 +1041,10 @@ public class CarrierConfig {
         public static final String KEY_VOLTE_HYS_TIME_SEC_INT =
                 KEY_PREFIX + "volte_hys_time_sec_int";
         // Mtc
-        public static final String KEY_SIP_18X_TIMER_MILLIS_INT =
+        public static final String KEY_18X_TIMER_MILLIS_INT =
                 KEY_PREFIX + "18x_timer_millis_int";
+        public static final String KEY_REQUIRE_PRACK_FOR_ALERT_BOOL =
+                KEY_PREFIX + "require_prack_for_alert_bool";
         public static final String KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL =
                 KEY_PREFIX + "support_conference_refer_subscribe_bool";
         public static final String KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL =

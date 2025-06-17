@@ -818,6 +818,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_VOLTE_HYS_TIME_SEC_INT[] =
 // Mtc
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_18X_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "18x_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "require_prack_for_alert_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "support_conference_refer_subscribe_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[] =

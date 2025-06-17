@@ -27,6 +27,8 @@
 #include "call/MockIMtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/TestMtcPendingOperationHolder.h"
+#include "call/extension/MockIMtcExtension.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/state/IncomingState.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -128,6 +130,19 @@ protected:
                 .WillByDefault(ReturnRef(*pSupplementaryService));
         pParticipantInfo = new ParticipantInfo(objCallContext);
         ON_CALL(objCallContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
+    }
+
+    MtcExtensionSet GetTestExtensionSet(IN const AString& strOptionTag,
+            IN const IMS_BOOL& bIsAvailableOnRemote, IN const IMS_BOOL& bIsRequiredOnRemote)
+    {
+        ImsList<IMtcExtension*> objExtensions;
+        MockIMtcExtension* pExtension = new MockIMtcExtension();
+        ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
+        ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(bIsAvailableOnRemote));
+        ON_CALL(*pExtension, IsRequiredOnRemote).WillByDefault(Return(bIsRequiredOnRemote));
+        objExtensions.Append(pExtension);
+        MtcExtensionSet objMtcExtensionSet(objCallContext, objExtensions);
+        return objMtcExtensionSet;
     }
 
     void SetActionConfigs(IN IMS_SINT32 nStatusCode, std::initializer_list<IMS_SINT32> objActions)
@@ -276,6 +291,9 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     SetParamsForIncomingCallReceived();
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
 }
@@ -337,6 +355,9 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedSendsIncomingCallReceiv
             .WillByDefault(Return(IMS_TRUE));
 
     SetParamsForIncomingCallReceived();
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(
             CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdateReceived(&objISession));
@@ -407,6 +428,8 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRespondToPrackAndSendsIncom
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_FALSE));
 
     MockIMtcService objService;
     ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
@@ -417,6 +440,10 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRespondToPrackAndSendsIncom
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     SetParamsForIncomingCallReceived();
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived());
 
     EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionPrackReceived(&objISession));
 
@@ -429,6 +456,30 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRespondToPrackAndSendsIncom
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionPrackReceived(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionPrackReceivedSendsIncomingCallReceivedIf180Exists)
+{
+    ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    ON_CALL(objMessageUtils, IsResponseExist(&objISession, SipStatusCode::SC_180))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived());
+
+    EXPECT_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser()).Times(0);
+    EXPECT_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession)).Times(0);
+    SetParamsForIncomingCallReceived();
+
+    EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionPrackReceived(&objISession));
 }
 
 TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRejectIncomingIfOfferAnswerFails)
@@ -573,9 +624,36 @@ TEST_F(IncomingStateTest, QosReservedInvokesSendIncomingCallReceived)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived()).Times(1);
 
     EXPECT_EQ(CallStateName::ALERTING, pIncomingState->QosReserved(&objISession, 0));
+}
+
+TEST_F(IncomingStateTest, QosReservedInvokesRejectsIfSendProvisionalResponseFailed)
+{
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objPreconditionManager, IsCheckingResourcesRequiredToAlertUser())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_TRUE));
+
+    MtcExtensionSet objMtcExtensionSet(
+            GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE, IMS_TRUE))
+            .Times(1)
+            .WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objMtcSession, Reject(_)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(_)).Times(1);
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->QosReserved(&objISession, 0));
 }
 
 TEST_F(IncomingStateTest, QosReserveFailedDoesNothing)
@@ -667,6 +745,8 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
     ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
     SetParamsForIncomingCallReceived();
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);

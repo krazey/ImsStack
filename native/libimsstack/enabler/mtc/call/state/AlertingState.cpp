@@ -72,10 +72,14 @@ PUBLIC VIRTUAL void AlertingState::OnExit()
 
 PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
-    if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE, IsRprRequired()) ==
-            IMS_FAILURE)
+    if (!m_objContext.GetMessageUtils().IsResponseExist(
+                &m_objContext.GetSession()->GetISession(), SipStatusCode::SC_180))
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
+        if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE, IsRprRequired()) ==
+                IMS_FAILURE)
+        {
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
+        }
     }
 
     if (m_objContext.GetConfigurationProxy().GetBoolean(
