@@ -110,6 +110,7 @@ protected:
     void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason) final;
 
     void ProcessStopRetryTimerExpired() final;
+    void ProcessModeTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
 
     void SetRefreshPolicy() final;
