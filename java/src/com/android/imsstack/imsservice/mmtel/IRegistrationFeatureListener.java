@@ -23,4 +23,12 @@ public interface IRegistrationFeatureListener {
      * This is invoked when IMS Registration state changed.
      */
     void onRegistrationFeatureChanged();
+
+    /**
+     * This is invoked when available IMS capabilities changed.
+     *
+     * @param enabledFeatures Features that have been enabled as capability has changed.
+     * @param disabledFeatures Features that have been disabled as capability has changed.
+     */
+    void onAvailableFeatureChanged(int enabledFeatures, int disabledFeatures);
 }

@@ -192,6 +192,21 @@ IMS_BOOL JniAosServiceThread::NotifyAosIsimState(IN IMS_UINT32 nState)
 }
 
 PUBLIC
+IMS_BOOL JniAosServiceThread::NotifyImsFeatureChanged(
+        IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits)
+{
+    IMS_TRACE_D("NotifyImsFeatureChanged", 0, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IIAosService::N2J_NOTIFY_IMS_FEATURE_CHANGED);
+    objParcel.writeInt32(nRegType);
+    objParcel.writeInt32(nNetworkType);
+    objParcel.writeInt32(nFeatureTagBits);
+
+    return SendData2Java(objParcel);
+}
+
+PUBLIC
 IMS_BOOL JniAosServiceThread::RequestPhoneNumberRetry(IN IMS_UINT32 nState)
 {
     IMS_TRACE_D("RequestPhoneNumberRetry", 0, 0, 0);

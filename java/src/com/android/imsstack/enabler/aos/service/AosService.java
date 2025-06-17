@@ -881,6 +881,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
+    private void onImsFeatureChanged(int regType, NetworkType networkType, int featureTagBits) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
+            l.notifyImsFeatureChanged(regType, networkType, featureTagBits);
+        }
+    }
+
     @SuppressWarnings("unused")
     private void onPhoneNumberRetryRequest(int command) {
         // TODO : FIX
@@ -971,6 +977,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         ImsLog.d(mSlotId, "notifyRegEventStateChanged :: statusCode(" + statusCode + "), IMPU: "
                 + impus.toString());
         mHandler.post(() -> onRegEventStateChanged(statusCode, impus));
+    }
+
+    private void updateImsFeatureChanged(int regType, NetworkType networkType, int featureTagBits) {
+        ImsLog.d(mSlotId, "updateImsFeatureChanged :: regType(" + regType + "), networkType("
+                + networkType.toString() + "), featureTagBits (" + featureTagBits + ")");
+
+        mHandler.post(() -> onImsFeatureChanged(regType, networkType, featureTagBits));
     }
 
     private void requestPhoneNumberRetry(int command) {
@@ -1171,6 +1184,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 case IIAosService.N2J_NOTIFY_AOS_ISIM_STATE -> {
                     int state = parcel.readInt();
                     notifyAosIsimStateChanged(state);
+                }
+                case IIAosService.N2J_NOTIFY_IMS_FEATURE_CHANGED -> {
+                    int regType = parcel.readInt();
+                    int networkType = parcel.readInt();
+                    int featureTagBits = parcel.readInt();
+
+                    updateImsFeatureChanged(regType, NetworkType.of(networkType), featureTagBits);
                 }
                 case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY -> {
                     int command = parcel.readInt();

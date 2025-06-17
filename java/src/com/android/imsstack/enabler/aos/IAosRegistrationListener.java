@@ -122,6 +122,15 @@ public interface IAosRegistrationListener {
     void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus);
 
     /**
+     * Notify the application that the supported IMS feature is changed.
+     *
+     * @param regType Type of the registration. See {@link RegistrationType}.
+     * @param networkType The radio access technology. See {@link NetworkType}.
+     * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
+     */
+    void notifyImsFeatureChanged(int regType, NetworkType networkType, int featureTagBits);
+
+    /**
      * Represents the registration state. This enum defines the possible states of registration,
      * including deregistered, registering, and registered.
      * Each state is associated with an integer value for easier identification and comparison.

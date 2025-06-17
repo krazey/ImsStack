@@ -51,6 +51,11 @@ public class ImsFeatureManager {
         public void onRegistrationFeatureChanged() {
             updateAndNotifyFeatureCapabilitiesIfChanged();
         }
+
+        @Override
+        public void onAvailableFeatureChanged(int enabledFeatures, int disabledFeatures) {
+            updateAvailableFeatures(enabledFeatures, disabledFeatures);
+        }
     };
 
     public ImsFeatureManager(IBaseContext context,
@@ -146,6 +151,20 @@ public class ImsFeatureManager {
         }
 
         updateAndNotifyFeatureCapabilitiesIfChanged();
+    }
+
+    /**
+     * Update available features early before registered IMS feature tag is updated.
+     *
+     * @param enabledFeatures Features that will be updated to enable.
+     * @param disabledFeatures Features that will be updated to disable.
+     */
+    public void updateAvailableFeatures(int enabledFeatures, int disabledFeatures) {
+        enableFeature(enabledFeatures);
+        disableFeature(disabledFeatures);
+        log("updateAvailableFeatures: " + mMmTelCapabilities);
+
+        mFeatureCapabilityListener.onFeatureCapabilityChanged(mMmTelCapabilities);
     }
 
     private void disableFeature(int feature) {

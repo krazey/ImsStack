@@ -49,6 +49,9 @@ public:
     IMS_BOOL NotifyRegEventState(
             IN IMS_UINT32 nStatusCode, IN const ImsList<AString>& objImpus) override;
 
+    IMS_BOOL NotifyImsFeatureChanged(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_UINT32 nFeatureTagBits) override;
+
     IMS_BOOL RequestPhoneNumberRetry(IN IMS_UINT32 nCommand) override;
 
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;

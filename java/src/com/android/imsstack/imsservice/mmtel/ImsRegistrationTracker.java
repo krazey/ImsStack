@@ -62,6 +62,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -201,6 +202,46 @@ public class ImsRegistrationTracker {
         synchronized (this) {
             if (mFeatureListener != null) {
                 mFeatureListener.onRegistrationFeatureChanged();
+            }
+        }
+    }
+
+    private void updateAvailableCapabilities(int featureTagBits) {
+        int enabledFeatures = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
+        int disabledFeatures = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
+
+        if (isCallVoiceRegistered()) {
+            if ((featureTagBits & FeatureTagMask.MMTEL) != 0) {
+                enabledFeatures |= MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
+            } else {
+                disabledFeatures |= MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
+            }
+        }
+
+        if (isCallVideoRegistered()) {
+            if ((featureTagBits & FeatureTagMask.VIDEO) != 0) {
+                enabledFeatures |= MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
+            } else {
+                disabledFeatures |= MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
+            }
+        }
+
+        if (isSmsRegistered()) {
+            if ((featureTagBits & FeatureTagMask.SMSIP) != 0) {
+                enabledFeatures |= MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+            } else {
+                disabledFeatures |= MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+            }
+        }
+
+        if (enabledFeatures == MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE
+                && disabledFeatures == MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE) {
+            return;
+        }
+
+        synchronized (this) {
+            if (mFeatureListener != null) {
+                mFeatureListener.onAvailableFeatureChanged(enabledFeatures, disabledFeatures);
             }
         }
     }
@@ -792,6 +833,19 @@ public class ImsRegistrationTracker {
                 mListener.onCapabilitiesUpdateFailed(capability, radioTech,
                         ImsFeature.CAPABILITY_ERROR_GENERIC);
             }
+        }
+
+        @Override
+        public void notifyImsFeatureChanged(
+                int regType, NetworkType networkType, int featureTagBits) {
+            logi("notifyImsFeatureChanged: type=" + regType
+                    + ", network=" + networkType.toString() + ", features=" + featureTagBits);
+
+            if (regType != RegistrationType.NORMAL || mFeatures == featureTagBits
+                    || !Objects.equals(networkType, mNetworkType)) {
+                return;
+            }
+            updateAvailableCapabilities(featureTagBits);
         }
 
         @Override

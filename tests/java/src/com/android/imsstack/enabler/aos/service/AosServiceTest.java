@@ -1349,6 +1349,24 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void jniImsListenerProxy_updateImsFeatureChanged() {
+        mAosService.addListener(mMockAosRegistrationListener);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_IMS_FEATURE_CHANGED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(FeatureTagMask.MMTEL);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        verify(mMockAosRegistrationListener).notifyImsFeatureChanged(RegistrationType.NORMAL,
+                NetworkType.LTE, FeatureTagMask.MMTEL);
+    }
+
+    @Test
     public void jniImsListenerProxy_requestPhoneNumberRetry() {
         mAosService.addListener(mMockAosRegistrationListener);
 

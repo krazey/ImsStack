@@ -202,6 +202,27 @@ public class ImsFeatureManagerTest {
     }
 
     @Test
+    public void testUpdateAvailableFeatures() {
+        // Initial capabilities are set with registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
+                features, new ArraySet<String>());
+
+        // VIDEO capability is disabled
+        int addedCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
+        int removedCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
+        mFeatureManager.updateAvailableFeatures(addedCapabilities, removedCapabilities);
+
+        // Verify that capability changes is notified
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
+        verify(mMockFeatureCapabilityListener, times(2)).onFeatureCapabilityChanged(
+                eq(expectedCapabilities));
+    }
+
+    @Test
     public void testNetWatcherListenerOnDataNetworkTypeChanged_updateFeatureCapabilities() {
         int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
