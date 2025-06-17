@@ -90,9 +90,9 @@ public:
     }
 
 protected:
-    AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
-    AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;
-    AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    AudioProfile* GetLocalProfile(IN const OaModel& objOaModel) override;
+    AudioProfile* GetPeerProfile(IN const OaModel& objOaModel) override;
+    AudioProfile* GetNegotiatedProfile(IN const OaModel& objOaModel) override;
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable) override;
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,

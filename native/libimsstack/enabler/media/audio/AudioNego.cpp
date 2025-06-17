@@ -94,7 +94,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
     // Make a destination profile from SDP
     objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)))
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(objOaModel)))
     {
         IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to parse SDP", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
@@ -103,8 +103,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
     // Make a negotiated profile from the local and peer profile
     objOaModel.pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel),
-                IMS_TRUE, GetNegotiatedProfile(&objOaModel), m_pConfig))
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(objOaModel), GetPeerProfile(objOaModel),
+                IMS_TRUE, GetNegotiatedProfile(objOaModel), m_pConfig))
     {
         IMS_TRACE_E(0, "IsMediaCodecFromSdpSupported(): failed to negotiate profile", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
@@ -252,7 +252,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
 {
     if (m_listOaModel.GetSize() > 0)
     {
-        OaModel* pLatestOaModel = IMS_NULL;
+        std::shared_ptr<OaModel> pLatestOaModel = IMS_NULL;
         pLatestOaModel = GetNegotiatedOaModel();
         if (pLatestOaModel == IMS_NULL)
         {
@@ -269,7 +269,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
         for (IMS_UINT32 i = 0; i < pLatestOaModel->pNegotiatedProfile->GetPayloadList().GetSize();
                 i++)
         {
-            AudioProfile::Payload* pPayload = GetNegotiatedProfile(pLatestOaModel)->GetPayloadAt(i);
+            AudioProfile::Payload* pPayload =
+                    GetNegotiatedProfile(*pLatestOaModel)->GetPayloadAt(i);
 
             if (pPayload == IMS_NULL)
             {
@@ -301,19 +302,19 @@ PUBLIC AudioProfile::Payload* AudioNego::PayloadCasting(IN MediaBaseProfile::Bas
     return (pPayload != IMS_NULL) ? static_cast<AudioProfile::Payload*>(pPayload) : IMS_NULL;
 }
 
-PROTECTED AudioProfile* AudioNego::GetLocalProfile(IN OaModel* pOaModel)
+PROTECTED AudioProfile* AudioNego::GetLocalProfile(IN const OaModel& objOaModel)
 {
-    return ProfileCasting(BaseNego::GetLocalProfile(pOaModel));
+    return ProfileCasting(BaseNego::GetLocalProfile(objOaModel));
 }
 
-PROTECTED AudioProfile* AudioNego::GetPeerProfile(IN OaModel* pOaModel)
+PROTECTED AudioProfile* AudioNego::GetPeerProfile(IN const OaModel& objOaModel)
 {
-    return ProfileCasting(BaseNego::GetPeerProfile(pOaModel));
+    return ProfileCasting(BaseNego::GetPeerProfile(objOaModel));
 }
 
-PROTECTED AudioProfile* AudioNego::GetNegotiatedProfile(IN OaModel* pOaModel)
+PROTECTED AudioProfile* AudioNego::GetNegotiatedProfile(IN const OaModel& objOaModel)
 {
-    return ProfileCasting(BaseNego::GetNegotiatedProfile(pOaModel));
+    return ProfileCasting(BaseNego::GetNegotiatedProfile(objOaModel));
 }
 
 PROTECTED
@@ -324,7 +325,7 @@ IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     {
         // Make the SDP from profile
         IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
-                GetLocalProfile(CreateOaModel(eDirection, bDisable)));
+                GetLocalProfile(*CreateOaModel(eDirection, bDisable)));
 
         // Remove the session level direction
         pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
@@ -351,7 +352,7 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Getting OaModel from list
-    OaModel* pNewOaModel = GetNegotiatedOaModel();
+    std::shared_ptr<OaModel> pNewOaModel = GetNegotiatedOaModel();
 
     if (pNewOaModel == IMS_NULL || !pNewOaModel->IsAllProfileExist())
     {
@@ -375,7 +376,7 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
 
     // Make the SDP from profile
     IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
+            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(*pNewOaModel));
 
     // Remove the session level direction
     pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
@@ -403,7 +404,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             m_listOaModel.GetSize(), bEnforceReofferMode);
 
     // Make new Offer/Answer model, and copy source profile from previous negotiated profile
-    OaModel* pNewOaModel = new OaModel();
+    std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
 
     if (m_listOaModel.IsEmpty())
     {
@@ -412,15 +413,10 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
     else
     {
-        OaModel* pPrevOaModel = GetNegotiatedOaModel();
+        std::shared_ptr<OaModel> pPrevOaModel = GetNegotiatedOaModel();
 
         if (pPrevOaModel == IMS_NULL)
         {
-            if (pNewOaModel != IMS_NULL)
-            {
-                delete pNewOaModel;
-            }
-
             return IMS_FALSE;
         }
 
@@ -438,7 +434,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
                     pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0))
         {
             pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                    m_eType, GetNegotiatedProfile(pPrevOaModel));
+                    m_eType, GetNegotiatedProfile(*pPrevOaModel));
         }
         else
         {
@@ -460,7 +456,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
                 else if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
                 {
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-                            m_eType, GetNegotiatedProfile(pPrevOaModel));
+                            m_eType, GetNegotiatedProfile(*pPrevOaModel));
                 }
             }
         }
@@ -469,7 +465,6 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     if (pNewOaModel->pLocalProfile == IMS_NULL)
     {
         IMS_TRACE_E(0, "create LocalProfile has failed", 0, 0, 0);
-        delete pNewOaModel;
         return IMS_FALSE;
     }
 
@@ -488,7 +483,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel),
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(*pNewOaModel),
             MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType),
             MEDIA_DIRECTION_IS_AUDIO_HOLD(eDirection));
 
@@ -507,9 +502,9 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     if (ProfileCasting(m_pBaseProfile)->IsRtcpXrSupported() &&
             pNewOaModel->pLocalProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
-        GetLocalProfile(pNewOaModel)
+        GetLocalProfile(*pNewOaModel)
                 ->SetSupportRtcpXr(ProfileCasting(m_pBaseProfile)->IsRtcpXrSupported());
-        GetLocalProfile(pNewOaModel)
+        GetLocalProfile(*pNewOaModel)
                 ->SetRtcpXrAttr(ProfileCasting(m_pBaseProfile)->GetRtcpXrAttr());
     }
 
@@ -517,7 +512,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     // Make the SDP from profile
     IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
+            pSessionDescriptor, pDescriptor, GetLocalProfile(*pNewOaModel));
 
     // Delete Session Level Direction Attribute
     pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
@@ -539,28 +534,27 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
     IMS_TRACE_I("NegotiateOffer(): local port[%d]", m_pBaseProfile->GetDataPort(), 0, 0);
 
     // Make new Offer/Answer model, and copy source profile
-    OaModel* pNewOaModel = new OaModel();
+    std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
     pNewOaModel->pLocalProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
 
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)))
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(*pNewOaModel)))
     {
         IMS_TRACE_E(0, "NegotiateOffer(): failed to parse SDP", 0, 0, 0);
-        delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
     }
 
     // Make a negotiated profile from the local and peer profile
     pNewOaModel->pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
-                IMS_TRUE, GetNegotiatedProfile(pNewOaModel), m_pConfig))
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(*pNewOaModel),
+                GetPeerProfile(*pNewOaModel), IMS_TRUE, GetNegotiatedProfile(*pNewOaModel),
+                m_pConfig))
     {
         IMS_TRACE_E(0, "NegotiateOffer(): failed to negotiate SDP", 0, 0, 0);
-        delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
     }
 
@@ -589,7 +583,7 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     }
 
     // Get the latest OAmodel from list
-    OaModel* pNewOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
+    std::shared_ptr<OaModel> pNewOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
 
     if (pNewOaModel == IMS_NULL)
     {
@@ -604,10 +598,9 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)))
+    if (!m_pSdpParser->Parse(pSessionDescriptor, pDescriptor, GetPeerProfile(*pNewOaModel)))
     {
         IMS_TRACE_E(0, "NegotiateAnswer(): failed to parse SDP", 0, 0, 0);
-        delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
     }
@@ -620,11 +613,11 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     // Make a negotiated profile with the local, peer profile
     pNewOaModel->pNegotiatedProfile = MediaProfileFactory::GetInstance()->CreateProfile(m_eType);
 
-    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
-                IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig))
+    if (!m_pProfileNegotiator->Negotiate(GetLocalProfile(*pNewOaModel),
+                GetPeerProfile(*pNewOaModel), IMS_FALSE, GetNegotiatedProfile(*pNewOaModel),
+                m_pConfig))
     {
         IMS_TRACE_E(0, "NegotiateAnswer(): failed to negotiate SDP", 0, 0, 0);
-        delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         return MEDIA_DIRECTION_INVALID;
     }

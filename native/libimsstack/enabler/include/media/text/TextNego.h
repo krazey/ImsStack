@@ -80,9 +80,9 @@ public:
     }
 
 protected:
-    TextProfile* GetLocalProfile(IN OaModel* pOaModel) override;
-    TextProfile* GetPeerProfile(IN OaModel* pOaModel) override;
-    TextProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    TextProfile* GetLocalProfile(IN const OaModel& objOaModel) override;
+    TextProfile* GetPeerProfile(IN const OaModel& objOaModel) override;
+    TextProfile* GetNegotiatedProfile(IN const OaModel& objOaModel) override;
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable) override;
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
