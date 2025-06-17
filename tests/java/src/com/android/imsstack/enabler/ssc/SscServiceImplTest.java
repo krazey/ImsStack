@@ -374,6 +374,40 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testBasicOperation_preconditionFailure() {
+        mHttpErrorResponse = SscConstant.HTTP_PRECONDITION_FAILURE;
+        int tId = 1;
+
+        mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFB, null, 0, 20);
+
+        // Entire Doc. query.
+        processEntireXmlDocQueryAsSuccess();
+        assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
+
+        // Handle HTTP_PRECONDITION_FAILURE for PUT. Triggering the entire Doc. query again.
+        processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFB);
+        mLooper.processAllMessages();
+        assertFalse(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
+
+        // 2nd entire Doc. query because of 412.
+        processEntireXmlDocQueryAsSuccess();
+        mLooper.processAllMessages();
+        assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
+
+        // 2nd handling HTTP_PRECONDITION_FAILURE for PUT. Considering it as a final failure.
+        processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFB);
+        mLooper.processAllMessages();
+        assertFalse(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
+
+        verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
     public void testBasicOperation_errorReasonCsfb() {
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL)))

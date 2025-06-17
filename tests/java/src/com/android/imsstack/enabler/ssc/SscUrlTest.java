@@ -121,8 +121,10 @@ public class SscUrlTest {
     }
 
     @Test
-    public void getQueryUri_entireXml() {
+    public void getQueryUri_entireXml_doNotIncludeNamespace() {
         String expectedUri = "/simservs.ngn.etsi.org/users/" + mXui + "/simservs.xml";
+        SscXmlFormat.setTag(SLOT_0, SscXmlFormat.SIMSERVS, "ss");
+        SscXmlFormat.setTag(SLOT_0, SscXmlFormat.RULESET, "cp");
 
         SscServiceQueryData queryData = getQueryData(ESsType.NONE);
         String queryUri = mSscUrl.getQueryUri(queryData, mXui);

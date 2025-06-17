@@ -280,6 +280,9 @@ public class SscTransaction {
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED // 401 again
                     || responseCode == SscConstant.HTTP_FORBIDDEN) {
                 getSscAuthAgent().setIsCredentialInfoUpdated(false);
+            } else if (responseCode == SscConstant.HTTP_PRECONDITION_FAILURE) {
+                // Clear the previous ETag.
+                getSscAuthAgent().setETag("");
             }
 
             processResponse(httpConnection, responseCode);

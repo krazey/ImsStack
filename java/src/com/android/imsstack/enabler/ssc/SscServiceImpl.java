@@ -1310,6 +1310,9 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         private boolean handlePreconditionFailure(SscRequestData requestData) {
+            SscXmlGov.getInstance(mSlotId).clear();
+            SscXmlGov.getInstance(mSlotId).init();
+
             if (requestData.getPreconditionFailedCount() > 0) {
                 return false;
             }
